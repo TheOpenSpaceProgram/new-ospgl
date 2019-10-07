@@ -83,8 +83,16 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\Programming\glfw-3.2.1\include;D:\Programming\fmt-6.0.0\include;C:\Users\Usuario\Source\Repos\NewOSP\dep;D:\Programming\LuaJIT-2.0.5\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>D:\Programming\glfw-3.2.1\glfw-3.2.1.bin.WIN64\lib-vc2015;D:\Programming\fmt-6.0.0\build\Debug;D:\Programming\LuaJIT-2.0.5\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;fmtd.lib;lua51.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -107,14 +115,69 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\Programming\glfw-3.2.1\include;D:\Programming\fmt-6.0.0\include;C:\Users\Usuario\Source\Repos\NewOSP\dep;D:\Programming\LuaJIT-2.0.5\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>D:\Programming\glfw-3.2.1\glfw-3.2.1.bin.WIN64\lib-vc2015;D:\Programming\fmt-6.0.0\build\Release;D:\Programming\LuaJIT-2.0.5\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;fmt.lib;lua51.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include=".gitattributes" />
+    <None Include=".gitignore" />
+    <None Include="lua51.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dep\glad\glad.c">
+      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</TreatWarningAsError>
+      <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</TreatWarningAsError>
+    </ClCompile>
+    <ClCompile Include="dep\imgui\imgui.cpp" />
+    <ClCompile Include="dep\imgui\imgui_draw.cpp" />
+    <ClCompile Include="dep\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="dep\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\planet_mesher\mesher\PlanetTile.cpp" />
+    <ClCompile Include="src\planet_mesher\mesher\PlanetTilePath.cpp" />
+    <ClCompile Include="src\planet_mesher\mesher\PlanetTileServer.cpp" />
+    <ClCompile Include="src\util\MathUtil.cpp" />
+    <ClCompile Include="src\planet_mesher\quadtree\QuadTreePlanet.cpp" />
+    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\planet_mesher\quadtree\QuadTreeNode.cpp" />
+    <ClCompile Include="src\util\Logger.cpp" />
+    <ClCompile Include="src\universe\Universe.cpp" />
+    <ClCompile Include="src\util\Timer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dep\glad\glad.h" />
+    <ClInclude Include="dep\glad\KHR.h" />
+    <ClInclude Include="dep\imgui\imconfig.h" />
+    <ClInclude Include="dep\imgui\imgui.h" />
+    <ClInclude Include="dep\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="dep\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="dep\imgui\imgui_internal.h" />
+    <ClInclude Include="dep\imgui\stb_rect_pack.h" />
+    <ClInclude Include="dep\imgui\stb_textedit.h" />
+    <ClInclude Include="dep\imgui\stb_truetype.h" />
+    <ClInclude Include="dep\rang.hpp" />
+    <ClInclude Include="dep\sol.hpp" />
+    <ClInclude Include="src\planet_mesher\mesher\PlanetTile.h" />
+    <ClInclude Include="src\planet_mesher\mesher\PlanetTilePath.h" />
+    <ClInclude Include="src\planet_mesher\mesher\PlanetTileServer.h" />
+    <ClInclude Include="src\util\defines.h" />
+    <ClInclude Include="src\util\MathUtil.h" />
+    <ClInclude Include="src\planet_mesher\quadtree\QuadTreeDefines.h" />
+    <ClInclude Include="src\planet_mesher\quadtree\QuadTreePlanet.h" />
+    <ClInclude Include="src\planet_mesher\quadtree\QuadTreeNode.h" />
+    <ClInclude Include="src\util\Logger.h" />
+    <ClInclude Include="src\universe\Universe.h" />
+    <ClInclude Include="src\util\ThreadUtil.h" />
+    <ClInclude Include="src\util\Timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
