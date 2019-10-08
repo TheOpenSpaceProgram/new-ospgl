@@ -136,7 +136,14 @@ void QuadTreePlanet::set_wanted_subdivide(glm::dvec2 offset, PlanetSide side, si
 
 	if (current_depth > depth)
 	{
-		current_depth = depth;
+		if (depth >= 1)
+		{
+			current_depth = depth;
+		}
+		else
+		{
+			current_depth = 0;
+		}
 	}
 
 	wanted_pos = offset;
@@ -147,16 +154,18 @@ void QuadTreePlanet::set_wanted_subdivide(glm::dvec2 offset, PlanetSide side, si
 
 void QuadTreePlanet::update(PlanetTileServer& server)
 {
-	if (current_depth < wanted_depth)
+	if (current_depth <= wanted_depth)
 	{
 		if (server.is_built())
 		{
 			flatten();
 
-			// Go for next step
-			current_depth++;
 
 			sides[wanted_side].get_recursive(wanted_pos, current_depth);
+
+
+			// Go for next step
+			current_depth++;
 
 			dirty = true;
 		}
@@ -167,7 +176,7 @@ void QuadTreePlanet::update(PlanetTileServer& server)
 		render_sides[i].merge();
 	}
 
-	render_sides[wanted_side].get_recursive(wanted_pos, current_depth);
+	render_sides[wanted_side].get_recursive(wanted_pos, current_depth - 1);
 
 	// render_sides merges every parent of ANY NON LOADED CHILDREN
 	for (size_t i = 0; i < 6; i++)
