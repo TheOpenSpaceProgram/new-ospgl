@@ -142,6 +142,7 @@
     <ClCompile Include="dep\imgui\imgui_draw.cpp" />
     <ClCompile Include="dep\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="dep\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\planet_mesher\renderer\PlanetRenderer.cpp" />
     <ClCompile Include="src\planet_mesher\mesher\PlanetTile.cpp" />
     <ClCompile Include="src\planet_mesher\mesher\PlanetTilePath.cpp" />
     <ClCompile Include="src\planet_mesher\mesher\PlanetTileServer.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="dep\imgui\stb_truetype.h" />
     <ClInclude Include="dep\rang.hpp" />
     <ClInclude Include="dep\sol.hpp" />
+    <ClInclude Include="src\planet_mesher\renderer\PlanetRenderer.h" />
     <ClInclude Include="src\planet_mesher\mesher\PlanetTile.h" />
     <ClInclude Include="src\planet_mesher\mesher\PlanetTilePath.h" />
     <ClInclude Include="src\planet_mesher\mesher\PlanetTileServer.h" />

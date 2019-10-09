@@ -65,6 +65,9 @@
     <ClCompile Include="src\util\Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\planet_mesher\renderer\PlanetRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\sol.hpp">
@@ -137,6 +140,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\Timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\planet_mesher\renderer\PlanetRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

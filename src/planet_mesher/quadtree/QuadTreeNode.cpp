@@ -57,6 +57,42 @@ bool QuadTreeNode::has_children() const
 	return children[0] != NULL;
 }
 
+bool QuadTreeNode::is_children_of(const QuadTreeNode* b) const
+{
+	if (b->depth >= depth || b->planetside != planetside)
+	{
+		return false;
+	}
+
+
+	std::vector<const QuadTreeNode*> open;
+
+	open.push_back(b);
+
+	while (open.size() > 0)
+	{
+		const QuadTreeNode* closing = open[open.size() - 1];
+		open.pop_back();
+
+		if (closing == this)
+		{
+			return true;
+		}
+
+		if (closing->has_children())
+		{
+			open.push_back(closing->children[0]);
+			open.push_back(closing->children[1]);
+			open.push_back(closing->children[2]);
+			open.push_back(closing->children[3]);
+		}
+
+
+	}
+
+	return false;
+}
+
 QuadTreeNode* QuadTreeNode::get_recursive(glm::dvec2 coord, size_t maxDepth)
 {
 	if (depth >= 1)

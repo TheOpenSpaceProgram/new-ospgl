@@ -19,14 +19,18 @@ class PlanetTileServer
 {
 private:
 
-	static const size_t PLANET_TILE_SIZE = 64;
-	static const size_t WORKER_THREAD_COUNT = 1;
+
+	bool dirty;
+
+	static const size_t WORKER_THREAD_COUNT = 2;
 
 	int depth_for_unload;
 
 	std::array<std::thread*, WORKER_THREAD_COUNT> threads;
 
 	static void thread_func(PlanetTileServer* server);
+
+
 
 public:
 
@@ -61,6 +65,8 @@ public:
 		return work_list.get_unsafe()->size() == 0;
 	}
 
+	// Make sure you call once a OpenGL context is available
+	// as we will create the index buffer here
 	PlanetTileServer();
 	~PlanetTileServer();
 };

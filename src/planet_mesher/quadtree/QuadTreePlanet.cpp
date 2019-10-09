@@ -2,6 +2,7 @@
 #include "imgui/imgui.h"
 
 #include "../mesher/PlanetTileServer.h"
+#include "../../util/Logger.h"
 
 void QuadTreePlanet::flatten()
 {
@@ -9,6 +10,31 @@ void QuadTreePlanet::flatten()
 	{
 		sides[i].merge();
 	}
+}
+
+std::vector<PlanetTilePath> QuadTreePlanet::get_all_render_leaf_paths(bool ignore_cache)
+{
+	if (iteration == old_render_leafs_it && !ignore_cache)
+	{
+		return old_render_leafs;
+	}
+
+	std::vector<PlanetTilePath> out;
+
+
+	for (size_t i = 0; i < 6; i++)
+	{
+		std::vector<std::vector<QuadTreeQuadrant>> from_side = render_sides[i].get_all_paths();
+		for (size_t j = 0; j < from_side.size(); j++)
+		{
+			out.push_back(PlanetTilePath(from_side[j], PlanetSide(i)));
+		}
+	}
+
+	old_render_leafs = out;
+	old_render_leafs_it = iteration;
+
+	return out;
 }
 
 std::vector<QuadTreeNode*> QuadTreePlanet::get_all_leafs()
@@ -125,25 +151,9 @@ void QuadTreePlanet::set_wanted_subdivide(glm::dvec2 offset, PlanetSide side, si
 
 	dirty = true;
 
-	if (previous_depth == 0)
-	{
-		current_depth = 0;
-	}
-	else
-	{
-		current_depth = previous_depth - 1;
-	}
-
 	if (current_depth > depth)
 	{
-		if (depth >= 1)
-		{
-			current_depth = depth;
-		}
-		else
-		{
-			current_depth = 0;
-		}
+		current_depth = depth;
 	}
 
 	wanted_pos = offset;
@@ -166,6 +176,7 @@ void QuadTreePlanet::update(PlanetTileServer& server)
 
 			// Go for next step
 			current_depth++;
+			iteration++;
 
 			dirty = true;
 		}
@@ -191,7 +202,8 @@ void QuadTreePlanet::update(PlanetTileServer& server)
 			bool found = true;
 			{
 				auto tiles_m = server.tiles.get();
-				if (tiles_m->find(path) == tiles_m->end())
+				auto it = tiles_m->find(path);
+				if (it == tiles_m->end())
 				{
 					found = false;
 				}
@@ -225,15 +237,44 @@ void QuadTreePlanet::update(PlanetTileServer& server)
 			}
 		}
 
+		// Make sure we only have parents in the list
+		// otherwise we will try to merge nodes which
+		// have been deleted (This can happen on very fast movement)
+		// This ends up being quite fast, not only is to_merge
+		// generally a small vector, but the is_children_of function
+		// returns very early on most cases.
+		// Don't bother removing this, it's the easy solution
+		std::vector<int> to_ignore;
+		to_ignore.resize(to_merge.size(), false);
+
 		for (size_t i = 0; i < to_merge.size(); i++)
 		{
-			to_merge[i]->merge();
+			for (size_t j = 0; j < to_merge.size(); j++)
+			{
+				if (i != j)
+				{
+					if (to_merge[i]->is_children_of(to_merge[j]))
+					{
+						to_ignore[i] = true;
+					}
+				}
+			}
+		}
+
+		for (size_t i = 0; i < to_merge.size(); i++)
+		{
+			if (to_ignore[i] == false)
+			{
+				to_merge[i]->merge();
+			}
 		}
 	}
 }
 
 QuadTreePlanet::QuadTreePlanet()
 {
+	iteration = 0;
+
 	for (size_t i = 0; i < 6; i++)
 	{
 		sides[i] = QuadTreeNode();

@@ -52,6 +52,8 @@ public:
 	// A leaf node has no children
 	bool has_children() const;
 
+	bool is_children_of(const QuadTreeNode* b) const;
+
 	// Recursively splits until we get a node with depth equal to maxDepth
 	// It will automatically merge not-neccesary nodes, this is
 	// the central function of the planet rendering system

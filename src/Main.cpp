@@ -10,7 +10,7 @@
 
 #include "planet_mesher/quadtree/QuadTreePlanet.h"
 #include "planet_mesher/mesher/PlanetTileServer.h"
-
+#include "planet_mesher/renderer/PlanetRenderer.h"
 
 int main(void)
 {
@@ -21,9 +21,13 @@ int main(void)
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	GLFWwindow* window = glfwCreateWindow(1500, 900, "New OSP", NULL, NULL);
 	glfwMakeContextCurrent(window);
-	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		logger->fatal("Could not initialize glad");
+	}
 
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -38,7 +42,10 @@ int main(void)
 	planet.set_wanted_subdivide(glm::dvec2(x, 0.5), PX, depth);
 	PlanetTileServer server;
 
+	PlanetRenderer renderer;
 
+	Timer dtt = Timer();
+	float dt;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -46,8 +53,6 @@ int main(void)
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-
-
 
 		server.update(planet);
 		planet.dirty = false;
@@ -103,15 +108,22 @@ int main(void)
 				planet.set_wanted_subdivide(glm::dvec2(x, 0.5), PX, depth);
 			}
 
-			ImGui::End();
-		}
 
+		}
+		ImGui::End();
+
+		glm::mat4 projView;
+
+
+		renderer.render(server, planet, projView);
 		
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
+		dt = (float)dtt.restart();
 	}
 
 	logger->info("Ending OSP");

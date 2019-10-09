@@ -4,6 +4,21 @@
 
 void PlanetTileServer::update(const QuadTreePlanet& planet)
 {
+	if (dirty)
+	{
+		auto tiles_w = tiles.get();
+
+		for (auto it = tiles_w->begin(); it != tiles_w->end(); it++)
+		{
+			if (!it->second->is_uploaded())
+			{
+				it->second->upload();
+			}
+		}
+
+		dirty = false;
+	}
+
 	if (!planet.dirty)
 	{
 		return;
@@ -45,6 +60,8 @@ void PlanetTileServer::update(const QuadTreePlanet& planet)
 			}
 			else
 			{
+
+
 				it++;
 			}
 		}
@@ -101,6 +118,7 @@ PlanetTileServer::~PlanetTileServer()
 		threads[i]->join();
 		delete threads[i];
 	}
+
 }
 
 void PlanetTileServer::do_imgui()
@@ -109,19 +127,14 @@ void PlanetTileServer::do_imgui()
 	size_t tiles_size = tiles.get_unsafe()->size();
 	ImGui::Text("Loaded tiles: %i (%.2fMB)", tiles_size, (float)(tiles_size * sizeof(PlanetTile)) / 1000000.0f);
 	ImGui::Text("Work List: %i", work_list.get_unsafe()->size());
-	ImGui::Text("Loaded tiles (kB): %i", tiles.get_unsafe()->size() * sizeof(PlanetTile));
 }
 
 void PlanetTileServer::thread_func(PlanetTileServer* server)
 {
 	while (server->threads_run)
 	{
-		printf("Thread SLEEP");
-
 		std::unique_lock<std::mutex> lock(server->condition_mtx);
 		server->condition_var.wait(lock);
-
-		printf("Thread RUN");
 
 		while (server->work_list.get_unsafe()->size() != 0)
 		{
@@ -132,22 +145,18 @@ void PlanetTileServer::thread_func(PlanetTileServer* server)
 
 				if (work_list_w->size() == 0)
 				{
-					// This can happen, but is very unlikely
+					// This can happen, very unlikely, tough
 					break;
 				}
 
 				target = *work_list_w->begin();
 				work_list_w->erase(work_list_w->begin());
+				
 			}
 
 			// Work on the target
-
-			for (size_t i = 0; i < 1000; i++)
-			{
-				printf("F");
-			}
-			
 			PlanetTile* ntile = new PlanetTile();
+			ntile->generate(target);
 
 			{
 				// Send it to the tiles
@@ -156,6 +165,9 @@ void PlanetTileServer::thread_func(PlanetTileServer* server)
 				(*tiles_w)[target] = ntile;
 
 			}
+
+			server->dirty = true;
 		}
 	}
 }
+

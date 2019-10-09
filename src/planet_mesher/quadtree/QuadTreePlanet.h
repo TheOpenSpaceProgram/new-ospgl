@@ -26,7 +26,14 @@ private:
 
 	QuadTreeNode render_sides[6];
 
+	uint64_t old_render_leafs_it;
+	std::vector<PlanetTilePath> old_render_leafs;
+
 public:
+
+	// Used as an optimization so that get_leafs functions
+	// store the previous result, if nothing changed
+	uint64_t iteration;
 
 	// TODO: Automatically set dirty flag
 	bool dirty;
@@ -35,6 +42,8 @@ public:
 
 	QuadTreeNode sides[6];
 	
+	std::vector<PlanetTilePath> get_all_render_leaf_paths(bool ignore_cache = false);
+
 	// Recursively obtains all leafs from all sides, don't hold the
 	// pointers for too long
 	std::vector<QuadTreeNode*> get_all_leafs();
