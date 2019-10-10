@@ -2,10 +2,11 @@
 #include <imgui/imgui.h>
 
 
-void PlanetTileServer::update(const QuadTreePlanet& planet)
+void PlanetTileServer::update(QuadTreePlanet& planet)
 {
 	if (dirty)
 	{
+		planet.iteration++;
 		auto tiles_w = tiles.get();
 
 		for (auto it = tiles_w->begin(); it != tiles_w->end(); it++)

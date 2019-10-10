@@ -1,5 +1,6 @@
 #include "PlanetRenderer.h"
 #include "../../util/Logger.h"
+#include "../../assets/AssetManager.h"
 
 void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::mat4 projView)
 {
@@ -16,20 +17,63 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 		auto tiles_w = server.tiles.get();
 
+		shader->use();
+
 		for (size_t i = 0; i < render_tiles.size(); i++)
 		{
-			auto tile = tiles_w->find(render_tiles[i])->second;
-
-			// This warning is not so important, tiles are not uploaded
-			// at most for 1 frame, which is barely noticeable
-			/*if (!tile->is_uploaded())
+			auto it = tiles_w->find(render_tiles[i]);
+			if (it == tiles_w->end())
 			{
-				logger->warn("Tile was not uploaded, there is a hole!");
-			}*/
-			
+				// Really should not happen on normal
+				// gameplay, but it can happen when a 
+				// very sharp LOD change happens
+				// For example, teleporting to a surface
+				// Visually, it probably is a small flicker
+				continue; 
+			}
+			auto tile = it->second;
+			auto path = it->first;
+
+			glm::mat4 model = path.get_model_spheric_matrix();
+
+			bool cw_mode = false;
+			glFrontFace(GL_CCW);
+
+			if (tile->is_uploaded())
+			{
+				if (tile->clockwise && !cw_mode)
+				{
+					glFrontFace(GL_CW);
+					cw_mode = true;
+				}
+				
+				if(!tile->clockwise && cw_mode)
+				{
+					glFrontFace(GL_CCW);
+					cw_mode = false;
+				}
+
+				shader->setMat4("tform", projView * model);
+
+
+				glBindVertexArray(vao);
+				glBindVertexBuffer(0, tile->vbo, 0, sizeof(PlanetTileVertex));
+				glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_SHORT, (void*)0);
+				glBindVertexArray(0);
+				glBindBuffer(GL_VERTEX_ARRAY, 0);
+			}
+			else
+			{
+				//logger->warn("Tile was not uploaded, there is a hole!");
+			}
+
+
 		}
 	}
+
+	glFrontFace(GL_CCW);
 }
+
 
 void PlanetRenderer::generate_and_upload_index_buffer()
 {
@@ -39,22 +83,23 @@ void PlanetRenderer::generate_and_upload_index_buffer()
 		for (size_t x = 0; x < PlanetTile::TILE_SIZE - 1; x++)
 		{
 			uint16_t vi = (uint16_t)(y * PlanetTile::TILE_SIZE + x);
-			size_t i = (y * PlanetTile::TILE_SIZE + x) * 3;
-
-			// Center
-			indices[i + 0] = vi;
-			// Bottom
-			indices[i + 2] = vi + PlanetTile::TILE_SIZE;
-			// Right
-			indices[i + 1] = vi + 1;
-
+			size_t i = (y * PlanetTile::TILE_SIZE + x) * 6;
 
 			// Right
 			indices[i + 0] = vi + 1;
+			// Center
+			indices[i + 1] = vi;
 			// Bottom
 			indices[i + 2] = vi + PlanetTile::TILE_SIZE;
+
+
 			// Bottom Right
-			indices[i + 1] = vi + 1 + PlanetTile::TILE_SIZE;
+			indices[i + 0 + 3] = vi + 1 + PlanetTile::TILE_SIZE;
+			// Right
+			indices[i + 1 + 3] = vi + 1;
+			// Bottom
+			indices[i + 2 + 3] = vi + PlanetTile::TILE_SIZE;
+
 		}
 	}
 
@@ -151,30 +196,38 @@ void PlanetRenderer::generate_and_upload_index_buffer()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
 	// position
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, offsetof(PlanetTileVertex, pos));
+	glVertexAttribBinding(0, 0);
 	// normal
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+	glVertexAttribFormat(1, 3, GL_FLOAT, GL_FALSE, offsetof(PlanetTileVertex, nrm));
+	glVertexAttribBinding(1, 0);
 	// color
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
+	glVertexAttribFormat(2, 3, GL_FLOAT, GL_FALSE, offsetof(PlanetTileVertex, col));
+	glVertexAttribBinding(2, 0);
 	// tex
-	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(9 * sizeof(float)));
 	glEnableVertexAttribArray(3);
+	glVertexAttribFormat(3, 2, GL_FLOAT, GL_FALSE, offsetof(PlanetTileVertex, uv));
+	glVertexAttribBinding(3, 0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 }
 
 
 PlanetRenderer::PlanetRenderer()
 {
 	generate_and_upload_index_buffer();
+	shader = assets->get<Shader>("planet/tile");
+
 }
 
 
 PlanetRenderer::~PlanetRenderer()
 {
 	glDeleteBuffers(1, &ebo);
+	glDeleteVertexArrays(1, &vao);
 }

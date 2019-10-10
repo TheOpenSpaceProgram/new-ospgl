@@ -132,6 +132,8 @@
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
     <None Include="lua51.dll" />
+    <None Include="res\shaders\planet\tile.fs" />
+    <None Include="res\shaders\planet\tile.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dep\glad\glad.c">
@@ -142,6 +144,8 @@
     <ClCompile Include="dep\imgui\imgui_draw.cpp" />
     <ClCompile Include="dep\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="dep\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\assets\AssetManager.cpp" />
+    <ClCompile Include="src\assets\Shader.cpp" />
     <ClCompile Include="src\planet_mesher\renderer\PlanetRenderer.cpp" />
     <ClCompile Include="src\planet_mesher\mesher\PlanetTile.cpp" />
     <ClCompile Include="src\planet_mesher\mesher\PlanetTilePath.cpp" />
@@ -167,6 +171,8 @@
     <ClInclude Include="dep\imgui\stb_truetype.h" />
     <ClInclude Include="dep\rang.hpp" />
     <ClInclude Include="dep\sol.hpp" />
+    <ClInclude Include="src\assets\AssetManager.h" />
+    <ClInclude Include="src\assets\Shader.h" />
     <ClInclude Include="src\planet_mesher\renderer\PlanetRenderer.h" />
     <ClInclude Include="src\planet_mesher\mesher\PlanetTile.h" />
     <ClInclude Include="src\planet_mesher\mesher\PlanetTilePath.h" />

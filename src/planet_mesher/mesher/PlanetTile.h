@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include "PlanetTilePath.h"
 #include <glad/glad.h>
+#include <glm/gtx/normal.hpp>
 
 // TODO: Tile vertex structure
 // We may not even use colors
@@ -19,11 +20,15 @@ struct PlanetTileVertex
 // generation (for the physics engine)
 struct PlanetTile
 {
+	bool clockwise;
+
 	GLuint vbo;
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
-	static const size_t TILE_SIZE = 64;
-	static const size_t VERTEX_COUNT = TILE_SIZE * TILE_SIZE + TILE_SIZE * 4;
+	static const int TILE_SIZE = 64;
+	static const int VERTEX_COUNT = TILE_SIZE * TILE_SIZE + TILE_SIZE * 4;
+
+
 
 	std::array<PlanetTileVertex, VERTEX_COUNT> vertices;
 
@@ -36,4 +41,6 @@ struct PlanetTile
 	PlanetTile();
 	~PlanetTile();
 };
+
+
 

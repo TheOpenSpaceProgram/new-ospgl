@@ -8,9 +8,13 @@
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
+#include "assets/AssetManager.h"
 #include "planet_mesher/quadtree/QuadTreePlanet.h"
 #include "planet_mesher/mesher/PlanetTileServer.h"
 #include "planet_mesher/renderer/PlanetRenderer.h"
+
+#define WIDTH 1500
+#define HEIGHT 900
 
 int main(void)
 {
@@ -19,15 +23,18 @@ int main(void)
 	logger->info("Starting OSP");
 
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	GLFWwindow* window = glfwCreateWindow(1500, 900, "New OSP", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "New OSP", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		logger->fatal("Could not initialize glad");
 	}
+
+	createGlobalAssetManager();
+
 
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -36,7 +43,7 @@ int main(void)
 
 	float x = 0.2f;
 
-	size_t depth = 3;
+	size_t depth = 0;
 
 	QuadTreePlanet planet;
 	planet.set_wanted_subdivide(glm::dvec2(x, 0.5), PX, depth);
@@ -45,11 +52,20 @@ int main(void)
 	PlanetRenderer renderer;
 
 	Timer dtt = Timer();
-	float dt;
+	float dt = 0.0f;
+	float t = 0.0f;
+
+	glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
+
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	while (!glfwWindowShouldClose(window))
 	{
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -112,7 +128,11 @@ int main(void)
 		}
 		ImGui::End();
 
-		glm::mat4 projView;
+		glm::mat4 proj = glm::perspective(glm::radians(80.0f), (float)WIDTH / (float)HEIGHT, 0.01f, 800.0f);
+		glm::mat4 view = glm::lookAt(glm::vec3(sin(t * 0.4f) * 2.5f, 0.0f, cos(t * 0.4f) * 2.5f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+		view = glm::lookAt(glm::vec3(3.0f, 0.0f, 0.0f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+
+		glm::mat4 projView = proj * view;
 
 
 		renderer.render(server, planet, projView);
@@ -124,6 +144,7 @@ int main(void)
 		glfwPollEvents();
 
 		dt = (float)dtt.restart();
+		t += dt;
 	}
 
 	logger->info("Ending OSP");
@@ -131,6 +152,7 @@ int main(void)
 	glfwDestroyWindow(window);
 	glfwTerminate();
 
+	destroyGlobalAssetManager();
 	destroyGlobalLogger();
 
 }

@@ -50,7 +50,7 @@ public:
 
 	// Tells threads to start loading some new tiles, if neccesary
 	// or unloads unused, small enough tiles.
-	void update(const QuadTreePlanet& planet);
+	void update(QuadTreePlanet& planet);
 
 	// Any tile deeper than, or equal to this will be unloaded
 	// **when unused**
