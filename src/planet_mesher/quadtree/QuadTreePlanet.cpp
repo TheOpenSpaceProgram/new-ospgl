@@ -24,7 +24,7 @@ std::vector<PlanetTilePath> QuadTreePlanet::get_all_render_leaf_paths(bool ignor
 
 	for (size_t i = 0; i < 6; i++)
 	{
-		std::vector<std::vector<QuadTreeQuadrant>> from_side = render_sides[i].get_all_paths();
+		std::vector<std::vector<QuadTreeQuadrant>> from_side = render_sides[i].get_all_leaf_paths();
 		for (size_t j = 0; j < from_side.size(); j++)
 		{
 			out.push_back(PlanetTilePath(from_side[j], PlanetSide(i)));
@@ -50,7 +50,7 @@ std::vector<QuadTreeNode*> QuadTreePlanet::get_all_leafs()
 	return out;
 }
 
-std::vector<PlanetTilePath> QuadTreePlanet::get_all_leaf_paths() const
+std::vector<PlanetTilePath> QuadTreePlanet::get_all_paths() const
 {
 	std::vector<PlanetTilePath> out;
 

@@ -4,6 +4,7 @@
 #include "PlanetTilePath.h"
 #include <glad/glad.h>
 #include <glm/gtx/normal.hpp>
+#include <sol.hpp>
 
 // TODO: Tile vertex structure
 // We may not even use colors
@@ -25,14 +26,15 @@ struct PlanetTile
 	GLuint vbo;
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
-	static const int TILE_SIZE = 64;
+	static const int TILE_SIZE = 32;
 	static const int VERTEX_COUNT = TILE_SIZE * TILE_SIZE + TILE_SIZE * 4;
 
 
 
 	std::array<PlanetTileVertex, VERTEX_COUNT> vertices;
 
-	void generate(PlanetTilePath path);
+	// Return true if errors happened
+	bool generate(PlanetTilePath path, sol::state& lua_state);
 
 	void upload();
 

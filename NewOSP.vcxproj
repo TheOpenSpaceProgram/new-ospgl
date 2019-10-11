@@ -134,6 +134,7 @@
     <None Include="lua51.dll" />
     <None Include="res\shaders\planet\tile.fs" />
     <None Include="res\shaders\planet\tile.vs" />
+    <None Include="res\test.lua" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dep\glad\glad.c">

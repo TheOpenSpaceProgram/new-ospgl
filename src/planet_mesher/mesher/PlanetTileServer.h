@@ -9,7 +9,13 @@
 #include <set>
 #include <array>
 #include <thread>
+#include <sol.hpp>
 
+struct PlanetTileThread
+{
+	sol::state lua_state;
+	std::thread* thread;
+};
 
 // The tile server handles storage, creation and removal
 // of tiles via a simple interface.
@@ -26,13 +32,16 @@ private:
 
 	int depth_for_unload;
 
-	std::array<std::thread*, WORKER_THREAD_COUNT> threads;
+	std::array<PlanetTileThread, WORKER_THREAD_COUNT> threads;
 
-	static void thread_func(PlanetTileServer* server);
+	static void thread_func(PlanetTileServer* server, PlanetTileThread* thread);
 
 
 
 public:
+
+
+	bool has_errors;
 
 	bool threads_run;
 
@@ -67,7 +76,7 @@ public:
 
 	// Make sure you call once a OpenGL context is available
 	// as we will create the index buffer here
-	PlanetTileServer();
+	PlanetTileServer(const std::string& script);
 	~PlanetTileServer();
 };
 

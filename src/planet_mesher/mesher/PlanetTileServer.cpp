@@ -1,6 +1,6 @@
 #include "PlanetTileServer.h"
 #include <imgui/imgui.h>
-
+#include "../../util/Logger.h"
 
 void PlanetTileServer::update(QuadTreePlanet& planet)
 {
@@ -25,7 +25,7 @@ void PlanetTileServer::update(QuadTreePlanet& planet)
 		return;
 	}
 
-	std::vector<PlanetTilePath> paths = planet.get_all_leaf_paths();
+	std::vector<PlanetTilePath> paths = planet.get_all_paths();
 
 	std::vector<PlanetTilePath> new_paths;
 	{
@@ -95,14 +95,34 @@ void PlanetTileServer::set_depth_for_unload(int depth)
 }
 
 
-PlanetTileServer::PlanetTileServer()
+PlanetTileServer::PlanetTileServer(const std::string& script)
 {
+	has_errors = false;
 	threads_run = true;
 	depth_for_unload = 0;
 
+	bool wrote_error = false;
+
 	for (size_t i = 0; i < threads.size(); i++)
 	{
-		threads[i] = new std::thread(thread_func, this);
+		threads[i].thread = new std::thread(thread_func, this, &threads[i]);
+		threads[i].lua_state.safe_script(script, [&wrote_error](lua_State*, sol::protected_function_result pfr)
+		{
+
+			if (!wrote_error)
+			{
+				sol::error err = pfr;
+				logger->error("Lua Error:\n{}", err.what());
+				wrote_error = true;
+			}
+
+			return pfr;
+		});
+
+		if (wrote_error)
+		{
+			has_errors = true;
+		}
 	}
 }
 
@@ -116,8 +136,8 @@ PlanetTileServer::~PlanetTileServer()
 		// We must work hard to get those threads to wake up!
 		condition_var.notify_all();
 
-		threads[i]->join();
-		delete threads[i];
+		threads[i].thread->join();
+		delete threads[i].thread;
 	}
 
 }
@@ -130,7 +150,7 @@ void PlanetTileServer::do_imgui()
 	ImGui::Text("Work List: %i", work_list.get_unsafe()->size());
 }
 
-void PlanetTileServer::thread_func(PlanetTileServer* server)
+void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* thread)
 {
 	while (server->threads_run)
 	{
@@ -157,7 +177,12 @@ void PlanetTileServer::thread_func(PlanetTileServer* server)
 
 			// Work on the target
 			PlanetTile* ntile = new PlanetTile();
-			ntile->generate(target);
+			bool has_errors = ntile->generate(target, thread->lua_state);
+
+			if (has_errors)
+			{
+				server->has_errors = true;
+			}
 
 			{
 				// Send it to the tiles

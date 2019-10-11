@@ -49,7 +49,8 @@ public:
 	std::vector<QuadTreeNode*> get_all_leafs();
 
 	// Converts the pointers to paths
-	std::vector<PlanetTilePath> get_all_leaf_paths() const;
+	std::vector<PlanetTilePath> get_all_paths() const;
+
 
 	// Gets the planet side a point is on from its normalized,
 	// relative to the planet center, coordinates

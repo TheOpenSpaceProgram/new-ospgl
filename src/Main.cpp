@@ -45,9 +45,11 @@ int main(void)
 
 	size_t depth = 0;
 
+	std::string script = assets->loadString("res/test.lua");
+
 	QuadTreePlanet planet;
 	planet.set_wanted_subdivide(glm::dvec2(x, 0.5), PX, depth);
-	PlanetTileServer server;
+	PlanetTileServer server(script);
 
 	PlanetRenderer renderer;
 
@@ -55,7 +57,7 @@ int main(void)
 	float dt = 0.0f;
 	float t = 0.0f;
 
-	glClearColor(0.4f, 0.4f, 0.4f, 1.0f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
@@ -130,7 +132,7 @@ int main(void)
 
 		glm::mat4 proj = glm::perspective(glm::radians(80.0f), (float)WIDTH / (float)HEIGHT, 0.01f, 800.0f);
 		glm::mat4 view = glm::lookAt(glm::vec3(sin(t * 0.4f) * 2.5f, 0.0f, cos(t * 0.4f) * 2.5f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-		view = glm::lookAt(glm::vec3(3.0f, 0.0f, 0.0f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+		//view = glm::lookAt(glm::vec3(3.0f, 0.0f, 0.0f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 		glm::mat4 projView = proj * view;
 
