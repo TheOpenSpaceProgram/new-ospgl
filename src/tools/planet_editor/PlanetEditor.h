@@ -42,6 +42,7 @@ private:
 	FileWatcher config_watch;
 
 	bool show_script_editor, show_config_editor, show_planet_info;
+	bool wireframe;
 
 	void do_editor_window(ImFont* code_font, TextEditor* editor, const std::string& name, bool* close);
 	void do_planet_window();
@@ -51,6 +52,8 @@ private:
 	bool last_frame_save;
 
 	EditorCamera camera;
+
+	double altitude;
 
 public:
 

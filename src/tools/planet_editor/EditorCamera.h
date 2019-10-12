@@ -24,7 +24,7 @@ public:
 		pos = glm::dvec3(radius * 2.0, 0.0, 0.0);
 		up = glm::dvec3(0.0, 1.0, 0.0);
 		forward = glm::dvec3(-1.0, 0.0, 0.0);
-
+		speed = radius / 4.0;
 	}
 
 	void forwards(float dt)

@@ -182,6 +182,7 @@
     <ClInclude Include="dep\imgui\stb_rect_pack.h" />
     <ClInclude Include="dep\imgui\stb_textedit.h" />
     <ClInclude Include="dep\imgui\stb_truetype.h" />
+    <ClInclude Include="dep\perlin.h" />
     <ClInclude Include="dep\rang.hpp" />
     <ClInclude Include="dep\sol.hpp" />
     <ClInclude Include="dep\TextEditor\TextEditor.h" />

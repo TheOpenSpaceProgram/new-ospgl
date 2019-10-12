@@ -1,6 +1,7 @@
 #include "PlanetTileServer.h"
 #include <imgui/imgui.h>
 #include "../../util/Logger.h"
+#include <perlin.h>
 
 void PlanetTileServer::update(QuadTreePlanet& planet)
 {
@@ -94,6 +95,43 @@ void PlanetTileServer::set_depth_for_unload(int depth)
 	depth_for_unload = depth;
 }
 
+void safe_lua(sol::state& state, const std::string& script, bool& wrote_error)
+{
+	state.safe_script(script, [&wrote_error](lua_State*, sol::protected_function_result pfr)
+	{
+
+		if (!wrote_error)
+		{
+			sol::error err = pfr;
+			logger->error("Lua Error:\n{}", err.what());
+			wrote_error = true;
+		}
+
+		return pfr;
+	});
+}
+
+double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
+{
+	pos_3d = glm::normalize(pos_3d);
+	glm::dvec2 projected = MathUtil::euclidean_to_spherical_r1(pos_3d);
+
+	lua_state["coord_3d"] = lua_state.create_table_with("x", pos_3d.x, "y", pos_3d.y, "z", pos_3d.z);
+	lua_state["coord_2d"] = lua_state.create_table_with("x", projected.x, "y", projected.y);
+
+	sol::protected_function func = lua_state["generate"];
+	auto result = func();
+
+	// We ignore errors here
+	if (result.valid())
+	{
+		return result.get<double>();
+	}
+	else
+	{
+		return 0.0f;
+	}
+}
 
 PlanetTileServer::PlanetTileServer(const std::string& script, PlanetMesherInfo* mesher_info)
 {
@@ -104,22 +142,15 @@ PlanetTileServer::PlanetTileServer(const std::string& script, PlanetMesherInfo* 
 
 	bool wrote_error = false;
 
+	prepare_lua(lua_state);
+	safe_lua(lua_state, script, wrote_error);
+
 	for (size_t i = 0; i < threads.size(); i++)
 	{
 		threads[i].thread = new std::thread(thread_func, this, &threads[i]);
 		prepare_lua(threads[i].lua_state);
-		threads[i].lua_state.safe_script(script, [&wrote_error](lua_State*, sol::protected_function_result pfr)
-		{
-
-			if (!wrote_error)
-			{
-				sol::error err = pfr;
-				logger->error("Lua Error:\n{}", err.what());
-				wrote_error = true;
-			}
-
-			return pfr;
-		});
+		
+		safe_lua(threads[i].lua_state, script, wrote_error);
 
 		if (wrote_error)
 		{
@@ -202,5 +233,10 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 void PlanetTileServer::prepare_lua(sol::state& lua_state)
 {
 	lua_state.open_libraries(sol::lib::math, sol::lib::table, sol::lib::base);
+
+	lua_state["perlin3d"] = [this](double x, double y, double z, int octaves) 
+	{
+		return this->noise.octaveNoise(x, y, z, octaves);
+	};
 }
 

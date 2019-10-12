@@ -20,7 +20,7 @@ private:
 
 public:
 
-	void render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view_model);
+	void render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view_model, float far_plane);
 
 	PlanetRenderer();
 	~PlanetRenderer();

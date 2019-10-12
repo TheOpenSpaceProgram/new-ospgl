@@ -11,6 +11,7 @@
 #include <thread>
 #include <sol.hpp>
 #include "../PlanetMesherInfo.h"
+#include <perlin.h>
 
 struct PlanetTileThread
 {
@@ -39,8 +40,13 @@ private:
 
 	void prepare_lua(sol::state& lua_state);
 
+	// We keep a little state to find height and so 
+	// everybody can query to find stuff about the script
+	sol::state lua_state;
 
 public:
+
+	siv::PerlinNoise noise;
 
 	PlanetMesherInfo* mesher_info;
 
@@ -76,6 +82,8 @@ public:
 	{
 		return work_list.get_unsafe()->size() == 0;
 	}
+	
+	double get_height(glm::dvec3 pos_3d, size_t depth = 1);
 
 	// Make sure you call once a OpenGL context is available
 	// as we will create the index buffer here

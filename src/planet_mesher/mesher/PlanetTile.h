@@ -26,7 +26,7 @@ struct PlanetTile
 	GLuint vbo;
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
-	static const int TILE_SIZE = 32;
+	static const int TILE_SIZE = 80;
 	static const int VERTEX_COUNT = TILE_SIZE * TILE_SIZE + TILE_SIZE * 4;
 
 

@@ -47,11 +47,18 @@ void PlanetEditor::update(float dt, ImFont* code_font)
 				camera.reset(mesher_info.radius);
 			}
 
+			if (ImGui::MenuItem("Wireframe"))
+			{
+				wireframe = !wireframe;
+			}
+
 			ImGui::EndMenu();
 		}
 
 		std::string str = "Speed: " + std::to_string(camera.speed) + " m/s";
 		ImGui::MenuItem(str.c_str());
+		std::string alt = "Altitude: " + std::to_string(altitude) + " m";
+		ImGui::MenuItem(alt.c_str());
 
 
 		ImGui::EndMainMenuBar();
@@ -183,9 +190,19 @@ void PlanetEditor::update(float dt, ImFont* code_font)
 
 void PlanetEditor::render(int width, int height)
 {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+	if (wireframe)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+	else
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 
-	glm::mat4 proj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, 0.1f, 900000.0f);
+	// ~1 light year
+	float far_plane = 10e16f;
+
+	glm::mat4 proj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, 0.1f, far_plane);
 	glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), (glm::vec3)camera.forward, (glm::vec3)camera.up);
 
 	// We apply the view position to the world so floating point errors happen
@@ -197,7 +214,7 @@ void PlanetEditor::render(int width, int height)
 	glm::dmat4 proj_view_model = (glm::dmat4)proj * (glm::dmat4)view * model;
 
 
-	renderer.render(*server, planet, proj_view_model);
+	renderer.render(*server, planet, proj_view_model, far_plane);
 }
 
 void PlanetEditor::on_script_file_change()
@@ -385,32 +402,6 @@ void PlanetEditor::do_planet_window()
 			server->do_imgui();
 		}
 
-		bool move = false;
-
-		ImGui::SameLine();
-		if (ImGui::Button("Go Deep"))
-		{
-			depth++;
-
-			move = true;
-		}
-
-		ImGui::SameLine();
-		if (ImGui::Button("Go Shallow"))
-		{
-			if (depth >= 1)
-			{
-				depth--;
-			}
-
-			move = true;
-		}
-
-		if (move)
-		{
-			on_move();
-		}
-
 	}
 	ImGui::End();
 }
@@ -421,5 +412,15 @@ void PlanetEditor::on_move()
 	PlanetSide side = planet.get_planet_side(pos_nrm);
 	glm::dvec2 offset = planet.get_planet_side_offset(pos_nrm, side);
 
+	double height = max(glm::length(camera.pos) - mesher_info.radius - server->get_height(pos_nrm, 1), 1.0);
+	altitude = height;
+	height /= mesher_info.radius;
+	double coef = 2.0;
+	double coefb = 3.0;
+	double depthf = (coef - (coef * glm::log(height) / ((glm::pow(height, 0.15) * coefb))) - 0.3 * height) * 0.4;
+
+	depth = (size_t)round(max(min(depthf, 20), -1) + 1);
+
 	planet.set_wanted_subdivide(offset, side, depth);
+
 }

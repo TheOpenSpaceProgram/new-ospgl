@@ -2,7 +2,7 @@
 #include "../../util/Logger.h"
 #include "../../assets/AssetManager.h"
 
-void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view_model)
+void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view_model, float far_plane)
 {
 	auto render_tiles = planet.get_all_render_leaf_paths();
 
@@ -18,6 +18,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 		auto tiles_w = server.tiles.get();
 
 		shader->use();
+		shader->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
 
 		for (size_t i = 0; i < render_tiles.size(); i++)
 		{

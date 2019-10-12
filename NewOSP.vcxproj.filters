@@ -213,6 +213,9 @@
     <ClInclude Include="src\util\InputUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dep\perlin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="output.log" />
