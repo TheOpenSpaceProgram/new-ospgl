@@ -4,17 +4,27 @@
 #include "util/Timer.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "util/InputUtil.h"
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
-#include "assets/AssetManager.h"
-#include "planet_mesher/quadtree/QuadTreePlanet.h"
-#include "planet_mesher/mesher/PlanetTileServer.h"
-#include "planet_mesher/renderer/PlanetRenderer.h"
+#include "tools/planet_editor/PlanetEditor.h"
+
 
 #define WIDTH 1500
 #define HEIGHT 900
+
+InputUtil* input;
+
+/*
+void character_callback(GLFWwindow* window, unsigned int codepoint)
+{
+	ImGuiIO& io = ImGui::GetIO();
+	//io.InputQueueCharacters.push_back(codepoint);
+	io.AddInputCharacter(codepoint);
+}
+*/
 
 int main(void)
 {
@@ -39,19 +49,12 @@ int main(void)
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 130");
 	ImGui::StyleColorsDark();
 
-	float x = 0.2f;
-
-	size_t depth = 0;
-
-	std::string script = assets->loadString("res/test.lua");
-
-	QuadTreePlanet planet;
-	planet.set_wanted_subdivide(glm::dvec2(x, 0.5), PX, depth);
-	PlanetTileServer server(script);
-
-	PlanetRenderer renderer;
+	// Font for the code editor
+	ImFont* font_default = io.Fonts->AddFontDefault();
+	ImFont* font_code = io.Fonts->AddFontFromFileTTF("./res/FiraCode-Regular.ttf", 16.0f);
 
 	Timer dtt = Timer();
 	float dt = 0.0f;
@@ -64,92 +67,45 @@ int main(void)
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+	PlanetEditor editor = PlanetEditor(window, "test");
+
+	input = new InputUtil();
+	input->setup(window);
+
 	while (!glfwWindowShouldClose(window))
 	{
-		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+		input->update(window);
+
+		glfwPollEvents();
+
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		server.update(planet);
-		planet.dirty = false;
 
-		planet.update(server);
-
-		if (ImGui::Begin("Planet"))
-		{
-
-			if (ImGui::CollapsingHeader("Quadtree", ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				planet.do_imgui(server);
-			}
-
-			if (ImGui::CollapsingHeader("Tile Server"))
-			{
-				server.do_imgui();
-			}
-
-			bool move = false;
-			if (ImGui::Button("Move"))
-			{
-				x += 0.2f;
-				move = true;
-			}
-
-			ImGui::SameLine();
-			if (ImGui::Button("Back"))
-			{
-				x -= 0.2f;
-				move = true;
-			}
-
-			ImGui::SameLine();
-			if (ImGui::Button("Go Deep"))
-			{
-				depth++;
-				move = true;
-			}
-
-			ImGui::SameLine();
-			if (ImGui::Button("Go Shallow"))
-			{
-				if (depth >= 1)
-				{
-					depth--;
-					move = true;
-				}
-			}
-
-			if (move)
-			{
-				planet.set_wanted_subdivide(glm::dvec2(x, 0.5), PX, depth);
-			}
+		editor.update(dt, font_code);
 
 
-		}
-		ImGui::End();
 
-		glm::mat4 proj = glm::perspective(glm::radians(80.0f), (float)WIDTH / (float)HEIGHT, 0.01f, 800.0f);
-		glm::mat4 view = glm::lookAt(glm::vec3(sin(t * 0.4f) * 2.5f, 0.0f, cos(t * 0.4f) * 2.5f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-		//view = glm::lookAt(glm::vec3(3.0f, 0.0f, 0.0f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-
-		glm::mat4 projView = proj * view;
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 
-		renderer.render(server, planet, projView);
+		editor.render(WIDTH, HEIGHT);
 		
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
+	
 		glfwSwapBuffers(window);
-		glfwPollEvents();
+
 
 		dt = (float)dtt.restart();
 		t += dt;
 	}
 
 	logger->info("Ending OSP");
+
+	delete input;
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

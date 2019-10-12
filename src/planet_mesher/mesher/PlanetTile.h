@@ -34,7 +34,7 @@ struct PlanetTile
 	std::array<PlanetTileVertex, VERTEX_COUNT> vertices;
 
 	// Return true if errors happened
-	bool generate(PlanetTilePath path, sol::state& lua_state);
+	bool generate(PlanetTilePath path, double planet_radius, sol::state& lua_state);
 
 	void upload();
 

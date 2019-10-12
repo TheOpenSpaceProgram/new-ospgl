@@ -131,10 +131,12 @@
   <ItemGroup>
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
+    <None Include="imgui.ini" />
     <None Include="lua51.dll" />
+    <None Include="res\default_planet.toml" />
     <None Include="res\shaders\planet\tile.fs" />
     <None Include="res\shaders\planet\tile.vs" />
-    <None Include="res\test.lua" />
+    <None Include="res\default_planet.lua" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dep\glad\glad.c">
@@ -142,9 +144,15 @@
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</TreatWarningAsError>
     </ClCompile>
     <ClCompile Include="dep\imgui\imgui.cpp" />
+    <ClCompile Include="dep\imgui\imgui_demo.cpp" />
     <ClCompile Include="dep\imgui\imgui_draw.cpp" />
     <ClCompile Include="dep\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="dep\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="dep\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="dep\TextEditor\TextEditor.cpp" />
+    <ClCompile Include="src\tools\planet_editor\EditorCamera.h" />
+    <ClCompile Include="src\planet_mesher\PlanetMesherInfo.cpp" />
+    <ClCompile Include="src\tools\planet_editor\PlanetEditor.cpp" />
     <ClCompile Include="src\assets\AssetManager.cpp" />
     <ClCompile Include="src\assets\Shader.cpp" />
     <ClCompile Include="src\planet_mesher\renderer\PlanetRenderer.cpp" />
@@ -160,6 +168,7 @@
     <ClCompile Include="src\util\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="dep\cpptoml.h" />
     <ClInclude Include="dep\glad\glad.h" />
     <ClInclude Include="dep\glad\KHR.h" />
     <ClInclude Include="dep\imgui\imconfig.h" />
@@ -167,11 +176,21 @@
     <ClInclude Include="dep\imgui\imgui_impl_glfw.h" />
     <ClInclude Include="dep\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="dep\imgui\imgui_internal.h" />
+    <ClInclude Include="dep\imgui\imstb_rectpack.h" />
+    <ClInclude Include="dep\imgui\imstb_textedit.h" />
+    <ClInclude Include="dep\imgui\imstb_truetype.h" />
     <ClInclude Include="dep\imgui\stb_rect_pack.h" />
     <ClInclude Include="dep\imgui\stb_textedit.h" />
     <ClInclude Include="dep\imgui\stb_truetype.h" />
     <ClInclude Include="dep\rang.hpp" />
     <ClInclude Include="dep\sol.hpp" />
+    <ClInclude Include="dep\TextEditor\TextEditor.h" />
+    <ClInclude Include="src\util\InputUtil.h" />
+    <ClInclude Include="src\util\FileWatcher.h" />
+    <ClInclude Include="src\util\serializers\glm.h" />
+    <ClInclude Include="src\util\SerializeUtil.h" />
+    <ClInclude Include="src\planet_mesher\PlanetMesherInfo.h" />
+    <ClInclude Include="src\tools\planet_editor\PlanetEditor.h" />
     <ClInclude Include="src\assets\AssetManager.h" />
     <ClInclude Include="src\assets\Shader.h" />
     <ClInclude Include="src\planet_mesher\renderer\PlanetRenderer.h" />
@@ -187,6 +206,9 @@
     <ClInclude Include="src\universe\Universe.h" />
     <ClInclude Include="src\util\ThreadUtil.h" />
     <ClInclude Include="src\util\Timer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="output.log" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

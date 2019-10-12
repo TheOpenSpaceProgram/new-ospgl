@@ -20,7 +20,7 @@ private:
 
 public:
 
-	void render(PlanetTileServer& server, QuadTreePlanet& planet, glm::mat4 projView);
+	void render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view_model);
 
 	PlanetRenderer();
 	~PlanetRenderer();

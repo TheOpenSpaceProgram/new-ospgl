@@ -2,7 +2,7 @@
 #include "../../util/Logger.h"
 #include "../../assets/AssetManager.h"
 
-void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::mat4 projView)
+void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view_model)
 {
 	auto render_tiles = planet.get_all_render_leaf_paths();
 
@@ -34,7 +34,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 			auto tile = it->second;
 			auto path = it->first;
 
-			glm::mat4 model = path.get_model_spheric_matrix();
+			glm::dmat4 model = path.get_model_spheric_matrix();
 
 			bool cw_mode = false;
 			glFrontFace(GL_CCW);
@@ -53,7 +53,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 					cw_mode = false;
 				}
 
-				shader->setMat4("tform", projView * model);
+				shader->setMat4("tform", (glm::mat4)(proj_view_model * model));
 
 
 				glBindVertexArray(vao);

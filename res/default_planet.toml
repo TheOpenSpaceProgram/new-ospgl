@@ -1,0 +1,3 @@
+[mesher_info]
+radius = 10000.0
+script_path = "$$NEW_SCRIPT$$"

@@ -16,15 +16,15 @@ struct PlanetTilePath
 	glm::dvec2 get_min() const;
 	double get_size() const;
 
-	glm::vec3 get_tile_postrotation() const;
-	glm::vec3 get_tile_origin() const;
-	glm::vec3 get_tile_rotation() const;
-	glm::vec3 get_tile_translation(bool spheric = false) const;
-	glm::vec3 get_tile_scale() const;
-	glm::vec3 get_tile_postscale() const;
+	glm::dvec3 get_tile_postrotation() const;
+	glm::dvec3 get_tile_origin() const;
+	glm::dvec3 get_tile_rotation() const;
+	glm::dvec3 get_tile_translation(bool spheric = false) const;
+	glm::dvec3 get_tile_scale() const;
+	glm::dvec3 get_tile_postscale() const;
 
-	glm::mat4 get_model_matrix() const;
-	glm::mat4 get_model_spheric_matrix() const;
+	glm::dmat4 get_model_matrix() const;
+	glm::dmat4 get_model_spheric_matrix() const;
 
 
 

@@ -10,6 +10,7 @@
 #include <array>
 #include <thread>
 #include <sol.hpp>
+#include "../PlanetMesherInfo.h"
 
 struct PlanetTileThread
 {
@@ -36,10 +37,12 @@ private:
 
 	static void thread_func(PlanetTileServer* server, PlanetTileThread* thread);
 
+	void prepare_lua(sol::state& lua_state);
 
 
 public:
 
+	PlanetMesherInfo* mesher_info;
 
 	bool has_errors;
 
@@ -76,7 +79,7 @@ public:
 
 	// Make sure you call once a OpenGL context is available
 	// as we will create the index buffer here
-	PlanetTileServer(const std::string& script);
+	PlanetTileServer(const std::string& script, PlanetMesherInfo* mesher_info);
 	~PlanetTileServer();
 };
 

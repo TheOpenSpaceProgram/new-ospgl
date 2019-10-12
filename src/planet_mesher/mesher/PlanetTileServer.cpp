@@ -95,8 +95,9 @@ void PlanetTileServer::set_depth_for_unload(int depth)
 }
 
 
-PlanetTileServer::PlanetTileServer(const std::string& script)
+PlanetTileServer::PlanetTileServer(const std::string& script, PlanetMesherInfo* mesher_info)
 {
+	this->mesher_info = mesher_info;
 	has_errors = false;
 	threads_run = true;
 	depth_for_unload = 0;
@@ -106,6 +107,7 @@ PlanetTileServer::PlanetTileServer(const std::string& script)
 	for (size_t i = 0; i < threads.size(); i++)
 	{
 		threads[i].thread = new std::thread(thread_func, this, &threads[i]);
+		prepare_lua(threads[i].lua_state);
 		threads[i].lua_state.safe_script(script, [&wrote_error](lua_State*, sol::protected_function_result pfr)
 		{
 
@@ -177,7 +179,7 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 
 			// Work on the target
 			PlanetTile* ntile = new PlanetTile();
-			bool has_errors = ntile->generate(target, thread->lua_state);
+			bool has_errors = ntile->generate(target, server->mesher_info->radius, thread->lua_state);
 
 			if (has_errors)
 			{
@@ -195,5 +197,10 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 			server->dirty = true;
 		}
 	}
+}
+
+void PlanetTileServer::prepare_lua(sol::state& lua_state)
+{
+	lua_state.open_libraries(sol::lib::math, sol::lib::table, sol::lib::base);
 }
 
