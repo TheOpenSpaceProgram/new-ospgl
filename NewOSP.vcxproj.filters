@@ -23,6 +23,8 @@
     <None Include="res\default_planet.lua" />
     <None Include="imgui.ini" />
     <None Include="res\default_planet.toml" />
+    <None Include="res\shaders\planet\water.fs" />
+    <None Include="res\shaders\planet\water.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -95,6 +97,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\tools\planet_editor\EditorCamera.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\planet_mesher\renderer\WaterRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -214,6 +219,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dep\perlin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\planet_mesher\renderer\WaterRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

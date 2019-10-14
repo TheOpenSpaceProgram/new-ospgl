@@ -70,9 +70,7 @@ void PlanetTileServer::update(QuadTreePlanet& planet)
 
 	}
 
-
 	{
-		// Push new paths to the work list, tiles is now unlocked, and we block work list
 		auto work_list_w = work_list.get();
 
 		work_list_w->clear();
@@ -173,6 +171,13 @@ PlanetTileServer::~PlanetTileServer()
 		delete threads[i].thread;
 	}
 
+	// Tiles are now only managed by us
+	for (auto it = tiles.get_unsafe()->begin(); it != tiles.get_unsafe()->end(); it++)
+	{
+		delete it->second;
+	}
+
+
 }
 
 void PlanetTileServer::do_imgui()
@@ -185,6 +190,7 @@ void PlanetTileServer::do_imgui()
 
 void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* thread)
 {
+	PlanetTile::VertexArray<PlanetTileVertex>* work_array = new PlanetTile::VertexArray<PlanetTileVertex>();
 	while (server->threads_run)
 	{
 		std::unique_lock<std::mutex> lock(server->condition_mtx);
@@ -202,32 +208,48 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 					// This can happen, very unlikely, tough
 					break;
 				}
-
+			
+				
+				// Simpler method, starts from smallest tile
 				target = *work_list_w->begin();
 				work_list_w->erase(work_list_w->begin());
+				
 				
 			}
 
 			// Work on the target
 			PlanetTile* ntile = new PlanetTile();
-			bool has_errors = ntile->generate(target, server->mesher_info->radius, thread->lua_state);
+			bool has_errors = ntile->generate(target, server->mesher_info->radius, thread->lua_state, false,
+				work_array);
 
 			if (has_errors)
 			{
 				server->has_errors = true;
 			}
 
+
 			{
 				// Send it to the tiles
 				auto tiles_w = server->tiles.get();
-
-				(*tiles_w)[target] = ntile;
+				if (tiles_w->find(target) == tiles_w->end())
+				{
+					(*tiles_w)[target] = ntile;
+				}
+				else
+				{
+					// Weird, but can happen, thread will have wasted some precious CPU
+					// time. TODO: Try to reduce the frequency of this
+					delete ntile;
+				}
+				
 
 			}
 
 			server->dirty = true;
 		}
 	}
+
+	delete work_array;
 }
 
 void PlanetTileServer::prepare_lua(sol::state& lua_state)
@@ -238,5 +260,9 @@ void PlanetTileServer::prepare_lua(sol::state& lua_state)
 	{
 		return this->noise.octaveNoise(x, y, z, octaves);
 	};
+
+
+	lua_state["coord_3d"] = lua_state.create_table_with("x", 0.0, "y", 0.0, "z", 0.0);
+	lua_state["coord_2d"] = lua_state.create_table_with("x", 0.0, "y", 0.0);
 }
 

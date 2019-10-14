@@ -18,26 +18,40 @@ end
 -- You should return height at said point in meters, can be negative
 
 function generate()
-	local factor = perlin3d(
-	coord_3d.x * 10.0,
-	coord_3d.y * 10.0,
-	coord_3d.z * 10.0,
-	16);
+	local continents = perlin3d(
+	coord_3d.x * 16.0, 
+	coord_3d.y * 16.0,
+	coord_3d.z * 16.0, 
+	18);
 
-	local a = 100.0;
-	local b = 50.0;
-
-	local scale = a * factor + b * (1.0 - factor);
-	local scale_y = a * (1.0 - factor) + b * factor;
-	local scale_z = scale - scale_y;
-	local dunes = perlin3d(
-	coord_3d.x * scale,
-	coord_3d.y * scale_y,
-	coord_3d.z * scale_z,
-	14);
-
-	return dunes * 1000.0;
+	return continents * 15000.0;
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

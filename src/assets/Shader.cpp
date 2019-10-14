@@ -55,12 +55,12 @@ Shader::Shader(const std::string& v, const std::string& f)
 	glGetProgramiv(id, GL_LINK_STATUS, &success);
 	if (!success)
 	{
-		glGetShaderInfoLog(fs, 1024, NULL, infoLog);
+		glGetProgramInfoLog(id, 1024, NULL, infoLog);
 		logger->error("Error linking shaders:\n{}", std::string(infoLog));
 	};
 
 	glDeleteShader(vs);
-	glDeleteShader(vs);
+	glDeleteShader(fs);
 
 }
 

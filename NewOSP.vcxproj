@@ -137,6 +137,8 @@
     <None Include="res\shaders\planet\tile.fs" />
     <None Include="res\shaders\planet\tile.vs" />
     <None Include="res\default_planet.lua" />
+    <None Include="res\shaders\planet\water.fs" />
+    <None Include="res\shaders\planet\water.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dep\glad\glad.c">
@@ -166,6 +168,7 @@
     <ClCompile Include="src\util\Logger.cpp" />
     <ClCompile Include="src\universe\Universe.cpp" />
     <ClCompile Include="src\util\Timer.cpp" />
+    <ClCompile Include="src\planet_mesher\renderer\WaterRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\cpptoml.h" />
@@ -207,6 +210,7 @@
     <ClInclude Include="src\universe\Universe.h" />
     <ClInclude Include="src\util\ThreadUtil.h" />
     <ClInclude Include="src\util\Timer.h" />
+    <ClInclude Include="src\planet_mesher\renderer\WaterRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="output.log" />

@@ -9,6 +9,7 @@ in vec3 vPos;
 in float flogz;
 
 uniform float f_coef;
+uniform vec3 camera_pos;
 
 
 void main()
@@ -17,9 +18,15 @@ void main()
     vec3 lightDir = normalize(vec3(-0.4, -1.0, -0.4));
     float diff = max(dot(-lightDir, vNormal), 0.1);
 
-    vec3 col = vec3(0.6, 0.8, 0.8);
+    vec3 viewDir = normalize(camera_pos - vPos);
+    vec3 reflectDir = reflect(lightDir, vNormal); 
 
-    FragColor = vec4(diff * col, 1.0);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    float specular = 1.0 * spec; 
+
+    vec3 col = vec3(0.5, 0.5, 0.9);
+
+    FragColor = vec4(col * (diff + specular), 1.0);
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets

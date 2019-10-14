@@ -412,14 +412,14 @@ void PlanetEditor::on_move()
 	PlanetSide side = planet.get_planet_side(pos_nrm);
 	glm::dvec2 offset = planet.get_planet_side_offset(pos_nrm, side);
 
-	double height = max(glm::length(camera.pos) - mesher_info.radius - server->get_height(pos_nrm, 1), 1.0);
+	double height = std::max(glm::length(camera.pos) - mesher_info.radius - server->get_height(pos_nrm, 1), 1.0);
 	altitude = height;
 	height /= mesher_info.radius;
 	double coef = 2.0;
 	double coefb = 3.0;
 	double depthf = (coef - (coef * glm::log(height) / ((glm::pow(height, 0.15) * coefb))) - 0.3 * height) * 0.4;
 
-	depth = (size_t)round(max(min(depthf, 20), -1) + 1);
+	depth = (size_t)round(std::max(std::min(depthf, 18.0), -1.0) + 1.0);
 
 	planet.set_wanted_subdivide(offset, side, depth);
 

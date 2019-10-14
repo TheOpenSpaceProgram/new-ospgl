@@ -35,8 +35,101 @@ constexpr std::array<uint16_t, (PlanetTile::TILE_SIZE + 2) * (PlanetTile::TILE_S
 	return out;
 }
 
-bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state& lua_state)
+// Warning: Some template magic ahead, 
+// T must have a pos and nrm member!
+
+template<typename T>
+void generate_normals(T* verts, size_t verts_size, glm::dmat4 model_spheric, bool clockwise)
 {
+	auto nrm_indices = get_nrm_indices();
+
+	for (size_t i = 0; i < nrm_indices.size(); i += 3)
+	{
+		T* v0 = &verts[nrm_indices[i + 0]];
+		T* v1 = &verts[nrm_indices[i + 1]];
+		T* v2 = &verts[nrm_indices[i + 2]];
+
+		glm::dvec3 p0 = model_spheric * glm::dvec4(v0->pos, 1.0);
+		glm::dvec3 p1 = model_spheric * glm::dvec4(v1->pos, 1.0);
+		glm::dvec3 p2 = model_spheric * glm::dvec4(v2->pos, 1.0);
+
+
+		glm::vec3 face_normal;
+
+		if (clockwise)
+		{
+			face_normal = glm::triangleNormal(p1, p0, p2);
+		}
+		else
+		{
+			face_normal = glm::triangleNormal(p0, p1, p2);
+		}
+
+		v0->nrm += face_normal;
+		v1->nrm += face_normal;
+		v2->nrm += face_normal;
+	}
+
+
+	for (size_t i = 0; i < verts_size; i++)
+	{
+		T* v = &verts[i];
+		v->nrm = glm::normalize(v->nrm);
+	}
+}
+
+template<typename T>
+void generate_vertices(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_spheric, double* heights)
+{
+	for (int y = -1; y < PlanetTile::TILE_SIZE + 1; y++)
+	{
+		for (int x = -1; x < PlanetTile::TILE_SIZE + 1; x++)
+		{
+			size_t r_index = (y + 1) * (PlanetTile::TILE_SIZE + 2) + (x + 1);
+
+			double tx = (double)x / ((double)PlanetTile::TILE_SIZE - 1.0);
+			double ty = (double)y / ((double)PlanetTile::TILE_SIZE - 1.0);
+
+			T vert;
+			glm::dvec3 in_tile = glm::dvec3(tx, ty, 0.0);
+
+			glm::dvec3 world_pos_cubic = model * glm::vec4(in_tile, 1.0);
+			glm::dvec3 world_pos_spheric = MathUtil::cube_to_sphere(world_pos_cubic);
+
+			if (heights != nullptr)
+			{
+				double height = heights[r_index];
+				world_pos_spheric += glm::normalize(world_pos_spheric) * height;
+			}
+
+			vert.pos = (glm::vec3)(inverse_model_spheric * glm::dvec4(world_pos_spheric, 1.0));
+			vert.nrm = glm::vec3(0.0f, 0.0f, 0.0f);
+
+			verts[r_index] = vert;
+		}
+	}
+}
+
+template<typename T>
+void copy_vertices(T* origin, T* destination)
+{
+	for (int y = 0; y < PlanetTile::TILE_SIZE; y++)
+	{
+		for (int x = 0; x < PlanetTile::TILE_SIZE; x++)
+		{
+			size_t o_index = (y + 1) * (PlanetTile::TILE_SIZE + 2) + (x + 1);
+			size_t f_index = y * PlanetTile::TILE_SIZE + x;
+
+			destination[f_index] = origin[o_index];
+		}
+	}
+}
+
+
+bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state& lua_state, bool has_water,
+	VertexArray<PlanetTileVertex>* work_array)
+{
+	
 	bool errors = false;
 
 	clockwise = false;
@@ -47,14 +140,6 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	{
 		clockwise = true;
 	}
-
-
-	// We actually generate some more vertices than we need, so that
-	// normals can smoothly interpolate between tiles
-
-	// Note: This array does not include the skirts, but does include
-	// the extra rows and columns
-	std::array<PlanetTileVertex, (TILE_SIZE + 2) * (TILE_SIZE + 2)> surface_verts;
 
 	glm::dmat4 model = path.get_model_matrix();
 	glm::dmat4 model_spheric = path.get_model_spheric_matrix();
@@ -67,6 +152,9 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 
 	lua_state["depth"] = depth;
 	lua_state["radius"] = planet_radius;
+
+	// We only need water if there is a tile over the water level (height = 0)
+	bool needs_water = false;
 
 	for (int x = -1; x < TILE_SIZE + 1; x++)
 	{
@@ -84,9 +172,12 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 			glm::dvec3 sphere = world_pos_spheric;
 			glm::dvec2 projected = MathUtil::euclidean_to_spherical_r1(sphere);
 
-			lua_state["coord_3d"] = lua_state.create_table_with("x", sphere.x, "y", sphere.y, "z", sphere.z);
-			lua_state["coord_2d"] = lua_state.create_table_with("x", projected.x, "y", projected.y);
-	
+			lua_state["coord_3d"]["x"] = sphere.x;
+			lua_state["coord_3d"]["y"] = sphere.y;
+			lua_state["coord_3d"]["z"] = sphere.z;
+			lua_state["coord_2d"]["x"] = projected.x;
+			lua_state["coord_2d"]["y"] = projected.y;
+
 			size_t i = (y + 1) * (TILE_SIZE + 2) + (x + 1);
 			
 			sol::protected_function func = lua_state["generate"];
@@ -113,88 +204,28 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 				else
 				{
 					heights[i] = result.get<double>() / planet_radius;
+					if (!needs_water)
+					{
+						if (heights[i] > 0.0)
+						{
+							needs_water = true;
+						}
+					}
 				}
 			}
 		}
 	}
 
-
-	for (int y = -1; y < TILE_SIZE + 1; y++)
-	{
-		for (int x = -1; x < TILE_SIZE + 1; x++)
-		{
-			size_t r_index = (y + 1) * (TILE_SIZE + 2) + (x + 1);
-
-			double tx = (double)x / ((double)TILE_SIZE - 1.0);
-			double ty = (double)y / ((double)TILE_SIZE - 1.0);
-
-			PlanetTileVertex vert;
-			glm::dvec3 in_tile = glm::dvec3(tx, ty, 0.0);
-
-			glm::dvec3 world_pos_cubic = model * glm::vec4(in_tile, 1.0);
-			glm::dvec3 world_pos_spheric = MathUtil::cube_to_sphere(world_pos_cubic);
-
-			double height = heights[r_index];
-
-			world_pos_spheric += glm::normalize(world_pos_spheric) * height;
-
-			vert.pos = (glm::vec3)(inverse_model_spheric * glm::dvec4(world_pos_spheric, 1.0));
-			vert.nrm = glm::vec3(0.0f, 0.0f, 0.0f);
-
-			surface_verts[r_index] = vert;
-		}
-	}
-	
-	// Generate normals (TODO)
-	auto nrm_indices = get_nrm_indices();
-	for (size_t i = 0; i < nrm_indices.size(); i += 3)
-	{
-		PlanetTileVertex* v0 = &surface_verts[nrm_indices[i + 0]];
-		PlanetTileVertex* v1 = &surface_verts[nrm_indices[i + 1]];
-		PlanetTileVertex* v2 = &surface_verts[nrm_indices[i + 2]];
-
-		glm::dvec3 p0 = model_spheric * glm::dvec4(v0->pos, 1.0);
-		glm::dvec3 p1 = model_spheric * glm::dvec4(v1->pos, 1.0);
-		glm::dvec3 p2 = model_spheric * glm::dvec4(v2->pos, 1.0);
-
-		
-		glm::vec3 face_normal;
-
-		if (clockwise)
-		{
-			face_normal = glm::triangleNormal(p1, p0, p2);
-		}
-		else
-		{
-			face_normal = glm::triangleNormal(p0, p1, p2);
-		}
-
-		v0->nrm += face_normal;
-		v1->nrm += face_normal;
-		v2->nrm += face_normal;
-	}
+	lua_state.collect_garbage();
 
 
-	for (size_t i = 0; i < surface_verts.size(); i++)
-	{
-		PlanetTileVertex* v = &surface_verts[i];
-		v->nrm = glm::normalize(v->nrm);
-	}
+	generate_vertices(work_array->data(), model, inverse_model_spheric, &heights[0]);
+	generate_normals(work_array->data(), work_array->size(), model_spheric, clockwise);
+	copy_vertices(work_array->data(), vertices.data());
 
 	// Generate skirt vertices (TODO)
 	std::array<PlanetTileVertex, TILE_SIZE * 4> skirts;
 
-	// Copy actual vertices
-	for (int y = 0; y < TILE_SIZE; y++)
-	{
-		for (int x = 0; x < TILE_SIZE; x++)
-		{
-			size_t o_index = (y + 1) * (TILE_SIZE + 2) + (x + 1);
-			size_t f_index = y * TILE_SIZE + x;
-
-			vertices[f_index] = surface_verts[o_index];
-		}
-	}
 
 	// Copy skirts
 	for (size_t i = 0; i < skirts.size(); i++)
@@ -202,6 +233,7 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 		vertices[i + TILE_SIZE * TILE_SIZE] = skirts[i];
 	}
 
+	
 	return errors;
 
 }
@@ -214,15 +246,31 @@ void PlanetTile::upload()
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
 
+	if (water_vertices != nullptr)
+	{
+		glGenBuffers(1, &water_vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, water_vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof((*water_vertices)[0]) * (*water_vertices).size(), (*water_vertices).data(), GL_STATIC_DRAW);
+	}
 }
+
 
 PlanetTile::PlanetTile()
 {
 	vbo = 0;
+	water_vertices = nullptr;
 }
 
 PlanetTile::~PlanetTile()
 {
+
+	if (water_vertices != nullptr)
+	{
+		delete water_vertices;
+		glDeleteBuffers(1, &water_vbo);
+		water_vbo = 0;
+	}
+
 	if (is_uploaded())
 	{
 		glDeleteBuffers(1, &vbo);

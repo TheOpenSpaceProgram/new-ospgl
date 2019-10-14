@@ -3,6 +3,7 @@
 #include "../../planet_mesher/quadtree/QuadTreePlanet.h"
 #include "../../planet_mesher/mesher/PlanetTileServer.h"
 #include "../../planet_mesher/renderer/PlanetRenderer.h"
+#include "../../planet_mesher/renderer/WaterRenderer.h"
 #include "../../planet_mesher/PlanetMesherInfo.h"
 #include <imgui/imgui.h>
 #include <TextEditor/TextEditor.h>
@@ -10,6 +11,7 @@
 #include <GLFW/glfw3.h>
 #include "EditorCamera.h"
 #include "../../util/InputUtil.h"
+
 
 // Allows editing of planet, featuring hot-reloading
 // of lua code, and many cool features

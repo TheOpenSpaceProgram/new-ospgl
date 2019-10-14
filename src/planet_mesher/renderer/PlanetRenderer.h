@@ -16,6 +16,9 @@ private:
 	std::array<uint16_t, PlanetTile::VERTEX_COUNT * 6> indices;
 	GLuint ebo, vao;
 
+	// We also have a vbo for water rendering at every depth
+	GLuint vbo;
+
 	void generate_and_upload_index_buffer();
 
 public:
