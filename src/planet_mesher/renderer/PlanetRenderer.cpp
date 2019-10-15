@@ -2,7 +2,8 @@
 #include "../../util/Logger.h"
 #include "../../assets/AssetManager.h"
 
-void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view_model, float far_plane)
+void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, glm::dmat4 wmodel, 
+	float far_plane, glm::dvec3 camera_pos)
 {
 	auto render_tiles = planet.get_all_render_leaf_paths();
 
@@ -20,6 +21,8 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 		shader->use();
 		shader->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
 
+		bool cw_mode = false;
+		glFrontFace(GL_CCW);
 		for (size_t i = 0; i < render_tiles.size(); i++)
 		{
 			auto it = tiles_w->find(render_tiles[i]);
@@ -37,36 +40,82 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 			glm::dmat4 model = path.get_model_spheric_matrix();
 
-			bool cw_mode = false;
-			glFrontFace(GL_CCW);
 
-			if (tile->is_uploaded())
+
+			if (!tile->is_uploaded())
 			{
-				if (tile->clockwise && !cw_mode)
-				{
-					glFrontFace(GL_CW);
-					cw_mode = true;
-				}
+				continue;
+			}
+
+			if (tile->clockwise && !cw_mode)
+			{
+				glFrontFace(GL_CW);
+				cw_mode = true;
+			}
 				
-				if(!tile->clockwise && cw_mode)
-				{
-					glFrontFace(GL_CCW);
-					cw_mode = false;
-				}
-
-				shader->setMat4("tform", (glm::mat4)(proj_view_model * model));
-
-
-				glBindVertexArray(vao);
-				glBindVertexBuffer(0, tile->vbo, 0, sizeof(PlanetTileVertex));
-				glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_SHORT, (void*)0);
-				glBindVertexArray(0);
-				glBindBuffer(GL_VERTEX_ARRAY, 0);
-			}
-			else
+			if(!tile->clockwise && cw_mode)
 			{
-				//logger->warn("Tile was not uploaded, there is a hole!");
+				glFrontFace(GL_CCW);
+				cw_mode = false;
 			}
+
+			shader->setMat4("tform", (glm::mat4)(proj_view * wmodel * model));
+
+
+			glBindVertexArray(vao);
+			glBindVertexBuffer(0, tile->vbo, 0, sizeof(PlanetTileVertex));
+			glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_SHORT, (void*)0);
+			glBindVertexArray(0);
+			glBindBuffer(GL_VERTEX_ARRAY, 0);
+
+
+
+		}
+
+		// Draw water, another pass to only switch shaders once
+		water_shader->use();
+		water_shader->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
+		water_shader->setVec3("camera_pos", camera_pos);
+
+		cw_mode = false;
+		glFrontFace(GL_CCW);
+		for (size_t i = 0; i < render_tiles.size(); i++)
+		{
+			auto it = tiles_w->find(render_tiles[i]);
+			if (it == tiles_w->end())
+			{
+				continue;
+			}
+			auto tile = it->second;
+			auto path = it->first;
+
+			glm::dmat4 model = path.get_model_spheric_matrix();
+
+			if (tile->water_vbo == 0)
+			{
+				continue;
+			}
+
+			if (tile->clockwise && !cw_mode)
+			{
+				glFrontFace(GL_CW);
+				cw_mode = true;
+			}
+
+			if (!tile->clockwise && cw_mode)
+			{
+				glFrontFace(GL_CCW);
+				cw_mode = false;
+			}
+
+			water_shader->setMat4("tform", (glm::mat4)(proj_view * wmodel * model));
+
+			glBindVertexArray(water_vao);
+			glBindVertexBuffer(0, tile->water_vbo, 0, sizeof(PlanetTileWaterVertex));
+			glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_SHORT, (void*)0);
+			glBindVertexArray(0);
+			glBindBuffer(GL_VERTEX_ARRAY, 0);
+
 
 
 		}
@@ -189,6 +238,7 @@ void PlanetRenderer::generate_and_upload_index_buffer()
 	*/
 
 	glGenVertexArrays(1, &vao);
+	glGenVertexArrays(1, &water_vao);
 	glGenBuffers(1, &ebo);
 
 	glBindVertexArray(vao);
@@ -216,6 +266,26 @@ void PlanetRenderer::generate_and_upload_index_buffer()
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+	// Water
+	glBindVertexArray(water_vao);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+	// position
+	glEnableVertexAttribArray(0);
+	glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, offsetof(PlanetTileWaterVertex, pos));
+	glVertexAttribBinding(0, 0);
+	// normal
+	glEnableVertexAttribArray(1);
+	glVertexAttribFormat(1, 3, GL_FLOAT, GL_FALSE, offsetof(PlanetTileWaterVertex, nrm));
+	glVertexAttribBinding(1, 0);
+	// depth
+	glEnableVertexAttribArray(2);
+	glVertexAttribFormat(2, 1, GL_FLOAT, GL_FALSE, offsetof(PlanetTileWaterVertex, depth));
+	glVertexAttribBinding(2, 0);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 
@@ -223,7 +293,7 @@ PlanetRenderer::PlanetRenderer()
 {
 	generate_and_upload_index_buffer();
 	shader = assets->get<Shader>("planet/tile");
-
+	water_shader = assets->get<Shader>("planet/water");
 }
 
 

@@ -108,6 +108,15 @@ std::string TextEditor::GetText(const Coordinates & aStart, const Coordinates & 
 		}
 	}
 
+	// Quick fix for eternally increasing endlines
+
+	while (result[result.size() - 1] == '\n')
+	{
+		result.erase(result.begin() + result.size() - 1);
+	}
+
+	result.push_back('\n');
+
 	return result;
 }
 

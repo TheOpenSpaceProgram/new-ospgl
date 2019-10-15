@@ -211,10 +211,10 @@ void PlanetEditor::render(int width, int height)
 
 	model = glm::scale(model, glm::dvec3(mesher_info.radius, mesher_info.radius, mesher_info.radius));
 
-	glm::dmat4 proj_view_model = (glm::dmat4)proj * (glm::dmat4)view * model;
+	glm::dmat4 proj_view = (glm::dmat4)proj * (glm::dmat4)view;
 
 
-	renderer.render(*server, planet, proj_view_model, far_plane);
+	renderer.render(*server, planet, proj_view, model, far_plane, camera.pos);
 }
 
 void PlanetEditor::on_script_file_change()
@@ -243,7 +243,8 @@ void PlanetEditor::on_script_file_change()
 
 	}
 	script_loaded = assets->loadString(path);
-	server = new PlanetTileServer(script_loaded, &mesher_info);
+	server = new PlanetTileServer(script_loaded, &mesher_info, mesher_info.seed, mesher_info.interp);
+
 
 	planet.dirty = true;
 
@@ -311,7 +312,7 @@ PlanetEditor::PlanetEditor(GLFWwindow* window, const std::string& planet_name)
 
 
 	script_loaded = assets->loadString(path);
-	server = new PlanetTileServer(script_loaded, &mesher_info);
+	server = new PlanetTileServer(script_loaded, &mesher_info, 0, 0);
 
 	
 
@@ -415,11 +416,10 @@ void PlanetEditor::on_move()
 	double height = std::max(glm::length(camera.pos) - mesher_info.radius - server->get_height(pos_nrm, 1), 1.0);
 	altitude = height;
 	height /= mesher_info.radius;
-	double coef = 2.0;
-	double coefb = 3.0;
-	double depthf = (coef - (coef * glm::log(height) / ((glm::pow(height, 0.15) * coefb))) - 0.3 * height) * 0.4;
+	double depthf = (mesher_info.coef_a - (mesher_info.coef_a * glm::log(height) 
+		/ ((glm::pow(height, 0.15) * mesher_info.coef_b))) - 0.3 * height) * 0.4;
 
-	depth = (size_t)round(std::max(std::min(depthf, 18.0), -1.0) + 1.0);
+	depth = (size_t)round(std::max(std::min(depthf, (double)mesher_info.max_depth - 1.0), -1.0) + 1.0);
 
 	planet.set_wanted_subdivide(offset, side, depth);
 

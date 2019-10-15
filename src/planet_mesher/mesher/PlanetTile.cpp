@@ -78,7 +78,7 @@ void generate_normals(T* verts, size_t verts_size, glm::dmat4 model_spheric, boo
 	}
 }
 
-template<typename T>
+template<typename T, bool water>
 void generate_vertices(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_spheric, double* heights)
 {
 	for (int y = -1; y < PlanetTile::TILE_SIZE + 1; y++)
@@ -96,9 +96,14 @@ void generate_vertices(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_sphe
 			glm::dvec3 world_pos_cubic = model * glm::vec4(in_tile, 1.0);
 			glm::dvec3 world_pos_spheric = MathUtil::cube_to_sphere(world_pos_cubic);
 
-			if (heights != nullptr)
+			double height = heights[r_index];
+
+			if constexpr (water)
 			{
-				double height = heights[r_index];
+				vert.col.x = -(float)height;
+			}
+			else
+			{
 				world_pos_spheric += glm::normalize(world_pos_spheric) * height;
 			}
 
@@ -110,8 +115,8 @@ void generate_vertices(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_sphe
 	}
 }
 
-template<typename T>
-void copy_vertices(T* origin, T* destination)
+template<typename T, typename Q>
+void copy_vertices(T* origin, Q* destination)
 {
 	for (int y = 0; y < PlanetTile::TILE_SIZE; y++)
 	{
@@ -120,7 +125,12 @@ void copy_vertices(T* origin, T* destination)
 			size_t o_index = (y + 1) * (PlanetTile::TILE_SIZE + 2) + (x + 1);
 			size_t f_index = y * PlanetTile::TILE_SIZE + x;
 
-			destination[f_index] = origin[o_index];
+			destination[f_index].pos = origin[o_index].pos;
+			destination[f_index].nrm = origin[o_index].nrm;
+			if constexpr (std::is_same<Q, PlanetTileWaterVertex>::value)
+			{
+				destination[f_index].depth = origin[o_index].col.x;
+			}
 		}
 	}
 }
@@ -219,9 +229,17 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	lua_state.collect_garbage();
 
 
-	generate_vertices(work_array->data(), model, inverse_model_spheric, &heights[0]);
+	generate_vertices<PlanetTileVertex, false>(work_array->data(), model, inverse_model_spheric, &heights[0]);
 	generate_normals(work_array->data(), work_array->size(), model_spheric, clockwise);
 	copy_vertices(work_array->data(), vertices.data());
+
+	if (has_water && needs_water || true)
+	{
+		generate_vertices<PlanetTileVertex, true>(work_array->data(), model, inverse_model_spheric, &heights[0]);
+		generate_normals(work_array->data(), work_array->size(), model_spheric, clockwise);
+		water_vertices = new std::array<PlanetTileWaterVertex, VERTEX_COUNT>();
+		copy_vertices(work_array->data(), water_vertices->data());
+	}
 
 	// Generate skirt vertices (TODO)
 	std::array<PlanetTileVertex, TILE_SIZE * 4> skirts;
@@ -244,13 +262,15 @@ void PlanetTile::upload()
 
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(PlanetTileVertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	if (water_vertices != nullptr)
 	{
 		glGenBuffers(1, &water_vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, water_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof((*water_vertices)[0]) * (*water_vertices).size(), (*water_vertices).data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(PlanetTileWaterVertex) * (*water_vertices).size(), (*water_vertices).data(), GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }
 
@@ -258,7 +278,9 @@ void PlanetTile::upload()
 PlanetTile::PlanetTile()
 {
 	vbo = 0;
+	water_vbo = 0;
 	water_vertices = nullptr;
+
 }
 
 PlanetTile::~PlanetTile()
@@ -267,13 +289,17 @@ PlanetTile::~PlanetTile()
 	if (water_vertices != nullptr)
 	{
 		delete water_vertices;
-		glDeleteBuffers(1, &water_vbo);
-		water_vbo = 0;
 	}
 
-	if (is_uploaded())
+	if (vbo != 0)
 	{
 		glDeleteBuffers(1, &vbo);
 		vbo = 0;
+	}
+
+	if (water_vbo != 0)
+	{
+		glDeleteBuffers(1, &water_vbo);
+		water_vbo = 0;
 	}
 }

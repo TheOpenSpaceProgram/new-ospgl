@@ -11,12 +11,13 @@
 #include <thread>
 #include <sol.hpp>
 #include "../PlanetMesherInfo.h"
-#include <perlin.h>
+#include <FastNoise/FastNoise.h>
 
 struct PlanetTileThread
 {
 	sol::state lua_state;
 	std::thread* thread;
+	FastNoise noise;
 };
 
 // The tile server handles storage, creation and removal
@@ -27,6 +28,7 @@ class PlanetTileServer
 {
 private:
 
+	FastNoise noise;
 
 	bool dirty;
 
@@ -38,15 +40,19 @@ private:
 
 	static void thread_func(PlanetTileServer* server, PlanetTileThread* thread);
 
-	void prepare_lua(sol::state& lua_state);
+	void prepare_lua(sol::state& lua_state, FastNoise* noise);
+
+	// Loads default values for the different libraries
+	void default_lua(sol::state& lua_state);
 
 	// We keep a little state to find height and so 
 	// everybody can query to find stuff about the script
 	sol::state lua_state;
 
-public:
+	int noise_seed;
+	FastNoise::Interp noise_interp;
 
-	siv::PerlinNoise noise;
+public:
 
 	PlanetMesherInfo* mesher_info;
 
@@ -87,7 +93,7 @@ public:
 
 	// Make sure you call once a OpenGL context is available
 	// as we will create the index buffer here
-	PlanetTileServer(const std::string& script, PlanetMesherInfo* mesher_info);
+	PlanetTileServer(const std::string& script, PlanetMesherInfo* mesher_info, int seed, int noise_interp);
 	~PlanetTileServer();
 };
 

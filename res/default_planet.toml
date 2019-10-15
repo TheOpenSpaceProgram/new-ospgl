@@ -1,3 +1,13 @@
 [mesher_info]
-radius = 10000.0
-script_path = "$$NEW_SCRIPT$$"
+
+	radius = 6360_0000.000000000000 # meters
+	script_path = "$$NEW_SCRIPT$$"	# Will automatically be created for you
+
+	[mesher_info.noise]
+		seed = 0					
+		interp = 2		# 	0 = Linear < 1 = Hermite < 2 = Quintic
+
+	[mesher_info.lod]
+		max_depth = 19				# Max LOD depth allowed
+		coef_a = 2.0				# LOD coefficient A
+		coef_b = 3.0				# LOD coefficient B (See LOD Formula)

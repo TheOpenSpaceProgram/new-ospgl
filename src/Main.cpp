@@ -72,6 +72,9 @@ int main(void)
 	input = new InputUtil();
 	input->setup(window);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		input->update(window);

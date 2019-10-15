@@ -20,6 +20,7 @@ struct PlanetTileWaterVertex
 {
 	glm::vec3 pos;
 	glm::vec3 nrm;
+	float depth;
 };
 
 
@@ -53,6 +54,9 @@ struct PlanetTile
 	void upload();
 
 	bool is_uploaded() { return vbo != 0; }
+
+	bool has_water() { return water_vbo != 0; }
+
 
 	PlanetTile();
 	~PlanetTile();

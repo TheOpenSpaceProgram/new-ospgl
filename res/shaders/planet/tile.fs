@@ -17,7 +17,7 @@ void main()
     vec3 lightDir = normalize(vec3(-0.4, -1.0, -0.4));
     float diff = max(dot(-lightDir, vNormal), 0.1);
 
-    vec3 col = vec3(0.6, 0.8, 0.8);
+    vec3 col = vec3(0.9, 0.9, 0.8);
 
     FragColor = vec4(diff * col, 1.0);
 

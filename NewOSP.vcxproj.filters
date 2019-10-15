@@ -102,6 +102,9 @@
     <ClCompile Include="src\planet_mesher\renderer\WaterRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dep\FastNoise\FastNoise.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\sol.hpp">
@@ -218,10 +221,13 @@
     <ClInclude Include="src\util\InputUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dep\perlin.h">
+    <ClInclude Include="src\planet_mesher\renderer\WaterRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\planet_mesher\renderer\WaterRenderer.h">
+    <ClInclude Include="dep\FastNoise\FastNoise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\lua\LuaNoiseLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

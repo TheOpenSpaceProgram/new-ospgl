@@ -10,20 +10,22 @@ class PlanetRenderer
 private:
 
 	Shader* shader;
+	Shader* water_shader;
 
 	// The index buffer is common to all tiles
 	// The VAO is also shaded
 	std::array<uint16_t, PlanetTile::VERTEX_COUNT * 6> indices;
 	GLuint ebo, vao;
 
-	// We also have a vbo for water rendering at every depth
-	GLuint vbo;
+	// Water only uses a different vao, same index buffer
+	GLuint water_vao;
 
 	void generate_and_upload_index_buffer();
 
 public:
 
-	void render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view_model, float far_plane);
+	void render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, glm::dmat4 model, float far_plane,
+		glm::dvec3 camera_pos);
 
 	PlanetRenderer();
 	~PlanetRenderer();

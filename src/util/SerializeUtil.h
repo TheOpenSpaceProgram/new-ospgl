@@ -4,8 +4,8 @@
 #include "Logger.h"
 
 #define SAFE_TOML_GET(target, name, type) \
-	logger->check(from.get_as<type>(name).operator bool(), "Data " name " was malformed"); \
-	target = *from.get_as<type>(name);
+	logger->check(from.get_qualified_as<type>(name).operator bool(), "Data " name " was malformed"); \
+	target = *from.get_qualified_as<type>(name);
 
 template<typename T>
 class GenericSerializer

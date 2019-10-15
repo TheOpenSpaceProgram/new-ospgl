@@ -11,6 +11,7 @@ uniform float f_coef;
 
 out vec3 vColor;
 out vec3 vNormal;
+
 out float flogz;
 void main()
 {

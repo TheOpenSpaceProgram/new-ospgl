@@ -1,7 +1,6 @@
 #include "PlanetTileServer.h"
 #include <imgui/imgui.h>
 #include "../../util/Logger.h"
-#include <perlin.h>
 
 void PlanetTileServer::update(QuadTreePlanet& planet)
 {
@@ -114,8 +113,15 @@ double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
 	pos_3d = glm::normalize(pos_3d);
 	glm::dvec2 projected = MathUtil::euclidean_to_spherical_r1(pos_3d);
 
-	lua_state["coord_3d"] = lua_state.create_table_with("x", pos_3d.x, "y", pos_3d.y, "z", pos_3d.z);
-	lua_state["coord_2d"] = lua_state.create_table_with("x", projected.x, "y", projected.y);
+
+	default_lua(lua_state);
+
+	lua_state["coord_3d"]["x"] = pos_3d.x;
+	lua_state["coord_3d"]["y"] = pos_3d.y;
+	lua_state["coord_3d"]["z"] = pos_3d.z;
+
+	lua_state["coord_2d"]["x"] = projected.x;
+	lua_state["coord_2d"]["y"] = projected.y;
 
 	sol::protected_function func = lua_state["generate"];
 	auto result = func();
@@ -131,8 +137,25 @@ double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
 	}
 }
 
-PlanetTileServer::PlanetTileServer(const std::string& script, PlanetMesherInfo* mesher_info)
+PlanetTileServer::PlanetTileServer(const std::string& script, PlanetMesherInfo* mesher_info, int seed, int interp)
 {
+	noise_seed = seed;
+	if (interp == 0)
+	{
+		noise_interp = FastNoise::Interp::Linear;
+	}
+	else if (interp == 1)
+	{
+		noise_interp = FastNoise::Interp::Hermite;
+	}
+	else
+	{
+		noise_interp = FastNoise::Interp::Quintic;
+	}
+
+	noise.SetSeed(seed);
+	noise.SetInterp(noise_interp);
+
 	this->mesher_info = mesher_info;
 	has_errors = false;
 	threads_run = true;
@@ -140,13 +163,16 @@ PlanetTileServer::PlanetTileServer(const std::string& script, PlanetMesherInfo* 
 
 	bool wrote_error = false;
 
-	prepare_lua(lua_state);
+	prepare_lua(lua_state, &noise);
 	safe_lua(lua_state, script, wrote_error);
 
 	for (size_t i = 0; i < threads.size(); i++)
 	{
+		threads[i].noise.SetSeed(seed);
+		threads[i].noise.SetInterp(noise_interp);
+
 		threads[i].thread = new std::thread(thread_func, this, &threads[i]);
-		prepare_lua(threads[i].lua_state);
+		prepare_lua(threads[i].lua_state, &threads[i].noise);
 		
 		safe_lua(threads[i].lua_state, script, wrote_error);
 
@@ -217,9 +243,11 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 				
 			}
 
+			server->default_lua(thread->lua_state);
+
 			// Work on the target
 			PlanetTile* ntile = new PlanetTile();
-			bool has_errors = ntile->generate(target, server->mesher_info->radius, thread->lua_state, false,
+			bool has_errors = ntile->generate(target, server->mesher_info->radius, thread->lua_state, true,
 				work_array);
 
 			if (has_errors)
@@ -252,17 +280,25 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 	delete work_array;
 }
 
-void PlanetTileServer::prepare_lua(sol::state& lua_state)
+#include "../../util/lua/LuaNoiseLib.h"
+
+void PlanetTileServer::prepare_lua(sol::state& lua_state, FastNoise* noise)
 {
 	lua_state.open_libraries(sol::lib::math, sol::lib::table, sol::lib::base);
 
-	lua_state["perlin3d"] = [this](double x, double y, double z, int octaves) 
-	{
-		return this->noise.octaveNoise(x, y, z, octaves);
-	};
-
-
 	lua_state["coord_3d"] = lua_state.create_table_with("x", 0.0, "y", 0.0, "z", 0.0);
 	lua_state["coord_2d"] = lua_state.create_table_with("x", 0.0, "y", 0.0);
+
+	LuaNoiseLib::load_lib(lua_state, noise);
+}
+
+void PlanetTileServer::default_lua(sol::state & lua_state)
+{
+	lua_state["noise"]["set_frequency"](0.01);
+	lua_state["noise"]["set_fractal_octaves"](3);
+	lua_state["noise"]["set_fractal_lacunarity"](2.0);
+	lua_state["noise"]["set_fractal_gain"](0.5);
+	lua_state["noise"]["set_fractal_fbm"]();
+	lua_state["noise"]["set_cellular_value"]();
 }
 

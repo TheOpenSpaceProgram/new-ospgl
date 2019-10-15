@@ -141,6 +141,7 @@
     <None Include="res\shaders\planet\water.vs" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="dep\FastNoise\FastNoise.cpp" />
     <ClCompile Include="dep\glad\glad.c">
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</TreatWarningAsError>
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</TreatWarningAsError>
@@ -172,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\cpptoml.h" />
+    <ClInclude Include="dep\FastNoise\FastNoise.h" />
     <ClInclude Include="dep\glad\glad.h" />
     <ClInclude Include="dep\glad\KHR.h" />
     <ClInclude Include="dep\imgui\imconfig.h" />
@@ -185,12 +187,12 @@
     <ClInclude Include="dep\imgui\stb_rect_pack.h" />
     <ClInclude Include="dep\imgui\stb_textedit.h" />
     <ClInclude Include="dep\imgui\stb_truetype.h" />
-    <ClInclude Include="dep\perlin.h" />
     <ClInclude Include="dep\rang.hpp" />
     <ClInclude Include="dep\sol.hpp" />
     <ClInclude Include="dep\TextEditor\TextEditor.h" />
     <ClInclude Include="src\util\InputUtil.h" />
     <ClInclude Include="src\util\FileWatcher.h" />
+    <ClInclude Include="src\util\lua\LuaNoiseLib.h" />
     <ClInclude Include="src\util\serializers\glm.h" />
     <ClInclude Include="src\util\SerializeUtil.h" />
     <ClInclude Include="src\planet_mesher\PlanetMesherInfo.h" />

@@ -2,15 +2,16 @@
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
+layout (location = 2) in float aDepth;
 
 uniform mat4 tform;
-uniform mat4 model;
 
 uniform float f_coef;
 
 out vec3 vNormal;
 out vec3 vPos;
 out float flogz;
+out float vDepth;
 
 void main()
 {
@@ -20,5 +21,7 @@ void main()
 
 	vPos = gl_Position.xyz;
 
-	vNormal = mat3(transpose(inverse(model))) * aNormal;
+	vNormal = aNormal;
+	vDepth = aDepth;
+
 } 
