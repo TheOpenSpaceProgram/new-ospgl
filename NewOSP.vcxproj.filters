@@ -25,6 +25,10 @@
     <None Include="res\default_planet.toml" />
     <None Include="res\shaders\planet\water.fs" />
     <None Include="res\shaders\planet\water.vs" />
+    <None Include="res\shaders\atmosphere\fullscreen.vs" />
+    <None Include="res\shaders\atmosphere\fullscreen.fs" />
+    <None Include="res\shaders\atmosphere\atmo.fs" />
+    <None Include="res\shaders\atmosphere\atmo.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -99,10 +103,10 @@
     <ClCompile Include="src\tools\planet_editor\EditorCamera.h">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\planet_mesher\renderer\WaterRenderer.cpp">
+    <ClCompile Include="dep\FastNoise\FastNoise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dep\FastNoise\FastNoise.cpp">
+    <ClCompile Include="src\atmosphere\AtmosphereRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -221,13 +225,16 @@
     <ClInclude Include="src\util\InputUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\planet_mesher\renderer\WaterRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dep\FastNoise\FastNoise.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\lua\LuaNoiseLib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\atmosphere\AtmosphereRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\geometry\SphereGeometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

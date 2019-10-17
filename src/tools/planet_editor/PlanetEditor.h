@@ -3,7 +3,8 @@
 #include "../../planet_mesher/quadtree/QuadTreePlanet.h"
 #include "../../planet_mesher/mesher/PlanetTileServer.h"
 #include "../../planet_mesher/renderer/PlanetRenderer.h"
-#include "../../planet_mesher/renderer/WaterRenderer.h"
+#include "../../atmosphere/AtmosphereRenderer.h"
+
 #include "../../planet_mesher/PlanetMesherInfo.h"
 #include <imgui/imgui.h>
 #include <TextEditor/TextEditor.h>
@@ -36,6 +37,7 @@ private:
 	PlanetTileServer* server;
 	PlanetRenderer renderer;
 	PlanetMesherInfo mesher_info;
+	AtmosphereRenderer atmo_renderer;
 
 	TextEditor script_editor;
 	TextEditor toml_editor;

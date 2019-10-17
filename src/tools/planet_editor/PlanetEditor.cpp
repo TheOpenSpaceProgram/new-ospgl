@@ -208,13 +208,30 @@ void PlanetEditor::render(int width, int height)
 	// We apply the view position to the world so floating point errors happen
 	// far away, and not near the camera
 	glm::dmat4 model = glm::translate(glm::dmat4(1.0f), -camera.pos);
-
 	model = glm::scale(model, glm::dvec3(mesher_info.radius, mesher_info.radius, mesher_info.radius));
 
 	glm::dmat4 proj_view = (glm::dmat4)proj * (glm::dmat4)view;
 
+	glm::vec3 cam_pos_relative = (glm::vec3)(camera.pos / mesher_info.atmo_radius);
 
-	renderer.render(*server, planet, proj_view, model, far_plane, camera.pos);
+	glm::dmat4 amodel = glm::translate(glm::dmat4(1.0f), -camera.pos);
+	amodel = glm::scale(amodel, glm::dvec3(mesher_info.atmo_radius, mesher_info.atmo_radius, mesher_info.atmo_radius));
+	float rel_radius = (float)(mesher_info.radius / mesher_info.atmo_radius);
+
+	if (mesher_info.atmo_radius > 0 && glm::length(cam_pos_relative) <= 1.0f)
+	{
+		atmo_renderer.do_pass(proj_view, amodel, far_plane, rel_radius, cam_pos_relative);
+	}
+
+	renderer.render(*server, planet, proj_view, model, far_plane, camera.pos, mesher_info.has_water, mesher_info.radius,
+		glfwGetTime());
+
+	if (mesher_info.atmo_radius > 0 && glm::length(cam_pos_relative) > 1.0f)
+	{
+		atmo_renderer.do_pass(proj_view, amodel, far_plane, rel_radius, cam_pos_relative);
+	}
+
+
 }
 
 void PlanetEditor::on_script_file_change()
@@ -243,7 +260,8 @@ void PlanetEditor::on_script_file_change()
 
 	}
 	script_loaded = assets->loadString(path);
-	server = new PlanetTileServer(script_loaded, &mesher_info, mesher_info.seed, mesher_info.interp);
+	server = new PlanetTileServer(script_loaded, &mesher_info, mesher_info.seed, mesher_info.interp, 
+		mesher_info.has_water);
 
 
 	planet.dirty = true;
@@ -312,7 +330,7 @@ PlanetEditor::PlanetEditor(GLFWwindow* window, const std::string& planet_name)
 
 
 	script_loaded = assets->loadString(path);
-	server = new PlanetTileServer(script_loaded, &mesher_info, 0, 0);
+	server = new PlanetTileServer(script_loaded, &mesher_info, 0, 0, mesher_info.has_water);
 
 	
 

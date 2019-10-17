@@ -25,10 +25,10 @@ end
 function mountains(x, y, z)
 	noise.set_fractal_fbm();
 	noise.set_frequency(3.0);
-	noise.set_fractal_octaves(6);
+	noise.set_fractal_octaves(8);
 	noise.set_fractal_lacunarity(2.9232);
 	local n1 = noise.simplex3_fractal(x, y, z);
-	noise.set_fractal_billow();
+	noise.set_fractal_rigidmulti();
 	local n2 = noise.perlin3_fractal(x, y, z);
 
 	return math.abs(ease_curve(n1 + n2) * n1 + math.abs(n2));
@@ -48,7 +48,7 @@ end
 
 function detail(x, y, z)
 
-	local s = 5000.0;
+	local s = 15000.0;
 
 	noise.set_fractal_fbm();
 	noise.set_frequency(1.0);
@@ -75,5 +75,5 @@ function generate()
 	local d = detail(coord_3d.x, coord_3d.y, coord_3d.z);
 
 	return (m * (1.0 - m_pow)) * 30000.0 * (1.0 - math.abs(c)) - 
-	math.abs(c) * 5000.0 - math.abs(d) * 50.0 - 40000.0;
+	math.abs(c) * 5000.0 - math.abs(d) * 50.0 - 8000.0;
 end

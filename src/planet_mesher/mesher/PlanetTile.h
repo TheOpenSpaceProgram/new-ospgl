@@ -13,7 +13,6 @@ struct PlanetTileVertex
 	glm::vec3 pos;
 	glm::vec3 nrm;
 	glm::vec3 col;
-	glm::vec2 uv;
 };
 
 struct PlanetTileWaterVertex
@@ -35,7 +34,7 @@ struct PlanetTile
 	GLuint vbo, water_vbo;
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
-	static const int TILE_SIZE = 80;
+	static const int TILE_SIZE = 30;
 	static const int VERTEX_COUNT = TILE_SIZE * TILE_SIZE + TILE_SIZE * 4;
 
 	template <typename T>

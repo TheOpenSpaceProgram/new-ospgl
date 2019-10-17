@@ -134,6 +134,10 @@
     <None Include="imgui.ini" />
     <None Include="lua51.dll" />
     <None Include="res\default_planet.toml" />
+    <None Include="res\shaders\atmosphere\atmo.fs" />
+    <None Include="res\shaders\atmosphere\atmo.vs" />
+    <None Include="res\shaders\atmosphere\fullscreen.fs" />
+    <None Include="res\shaders\atmosphere\fullscreen.vs" />
     <None Include="res\shaders\planet\tile.fs" />
     <None Include="res\shaders\planet\tile.vs" />
     <None Include="res\default_planet.lua" />
@@ -141,6 +145,7 @@
     <None Include="res\shaders\planet\water.vs" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\atmosphere\AtmosphereRenderer.cpp" />
     <ClCompile Include="dep\FastNoise\FastNoise.cpp" />
     <ClCompile Include="dep\glad\glad.c">
       <TreatWarningAsError Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</TreatWarningAsError>
@@ -169,9 +174,10 @@
     <ClCompile Include="src\util\Logger.cpp" />
     <ClCompile Include="src\universe\Universe.cpp" />
     <ClCompile Include="src\util\Timer.cpp" />
-    <ClCompile Include="src\planet_mesher\renderer\WaterRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\util\geometry\SphereGeometry.h" />
+    <ClInclude Include="src\atmosphere\AtmosphereRenderer.h" />
     <ClInclude Include="dep\cpptoml.h" />
     <ClInclude Include="dep\FastNoise\FastNoise.h" />
     <ClInclude Include="dep\glad\glad.h" />
@@ -212,7 +218,6 @@
     <ClInclude Include="src\universe\Universe.h" />
     <ClInclude Include="src\util\ThreadUtil.h" />
     <ClInclude Include="src\util\Timer.h" />
-    <ClInclude Include="src\planet_mesher\renderer\WaterRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="output.log" />

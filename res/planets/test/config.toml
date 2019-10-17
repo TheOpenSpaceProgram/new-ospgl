@@ -1,11 +1,13 @@
 [mesher_info]
+	has_water = true
 	radius = 6370_000.000000000
+	atmo_radius = 6500_000.0
 	script_path = "./res/planets/test/surface.lua"
 	seed = 0
 	[mesher_info.lod]
-		max_depth = 16
+		max_depth = 19
 		coef_a = 2.0000000000000000
 		coef_b = 3.0000000000000000
 	[mesher_info.noise]
-		seed = 10540
-		interp = 0
+		seed = 0
+		interp = 2

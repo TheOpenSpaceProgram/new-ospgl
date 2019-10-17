@@ -60,7 +60,7 @@ int main(void)
 	float dt = 0.0f;
 	float t = 0.0f;
 
-	glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);

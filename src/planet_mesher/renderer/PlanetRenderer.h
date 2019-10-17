@@ -15,7 +15,7 @@ private:
 	// The index buffer is common to all tiles
 	// The VAO is also shaded
 	std::array<uint16_t, PlanetTile::VERTEX_COUNT * 6> indices;
-	GLuint ebo, vao;
+	GLuint ebo, vao, uv_bo;
 
 	// Water only uses a different vao, same index buffer
 	GLuint water_vao;
@@ -25,7 +25,7 @@ private:
 public:
 
 	void render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, glm::dmat4 model, float far_plane,
-		glm::dvec3 camera_pos);
+		glm::dvec3 camera_pos, bool has_water, double planet_radius, double time);
 
 	PlanetRenderer();
 	~PlanetRenderer();

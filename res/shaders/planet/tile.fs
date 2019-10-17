@@ -3,6 +3,7 @@
 out vec4 FragColor;
   
 in vec3 vColor;
+in vec2 vTexture;
 in vec3 vNormal;
 in vec3 vPos;
 
@@ -15,9 +16,9 @@ void main()
 {
 
     vec3 lightDir = normalize(vec3(-0.4, -1.0, -0.4));
-    float diff = max(dot(-lightDir, vNormal), 0.1);
+    float diff = max(dot(-lightDir, vNormal), 0.0);
 
-    vec3 col = vec3(0.9, 0.9, 0.8);
+    vec3 col = vec3(0.8, 0.6, 0.6);
 
     FragColor = vec4(diff * col, 1.0);
 

@@ -137,8 +137,11 @@ double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
 	}
 }
 
-PlanetTileServer::PlanetTileServer(const std::string& script, PlanetMesherInfo* mesher_info, int seed, int interp)
+PlanetTileServer::PlanetTileServer(const std::string& script, PlanetMesherInfo* mesher_info, 
+	int seed, int interp, bool has_water)
 {
+	this->has_water = has_water;
+
 	noise_seed = seed;
 	if (interp == 0)
 	{
@@ -247,7 +250,7 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 
 			// Work on the target
 			PlanetTile* ntile = new PlanetTile();
-			bool has_errors = ntile->generate(target, server->mesher_info->radius, thread->lua_state, true,
+			bool has_errors = ntile->generate(target, server->mesher_info->radius, thread->lua_state, server->has_water,
 				work_array);
 
 			if (has_errors)

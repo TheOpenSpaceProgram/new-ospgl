@@ -1,7 +1,9 @@
 [mesher_info]
 
 	radius = 6360_0000.000000000000 # meters
+	atmo_radius = 6470_000.0		# meters, 0 for no atmosphere
 	script_path = "$$NEW_SCRIPT$$"	# Will automatically be created for you
+	has_water = true				# Does the planet have water
 
 	[mesher_info.noise]
 		seed = 0					
