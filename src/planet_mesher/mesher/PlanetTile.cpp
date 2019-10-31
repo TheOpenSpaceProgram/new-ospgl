@@ -267,19 +267,15 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	std::array<PlanetTileVertex, 4> skirts;
 	// Up
 	generate_skirt(&skirts[0], model, inverse_model_spheric, vertices[0 * TILE_SIZE + 0]);
-	//generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[0 * TILE_SIZE + (TILE_SIZE - 1)]);
 
 	// Down
 	generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[(TILE_SIZE - 1) * TILE_SIZE + 0]);
-	//generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[(TILE_SIZE - 1) * TILE_SIZE + (TILE_SIZE - 1)]);
 
 	// Left
 	generate_skirt(&skirts[2], model, inverse_model_spheric, vertices[0 * TILE_SIZE + 0]);
-	//generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[(TILE_SIZE - 1) * TILE_SIZE + 0]);
 
 	// Right
 	generate_skirt(&skirts[3], model, inverse_model_spheric, vertices[0 * TILE_SIZE + (TILE_SIZE - 1)]);
-	//generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[(TILE_SIZE - 1) * TILE_SIZE + (TILE_SIZE - 1)]);
 
 	// Copy skirts
 	for (size_t i = 0; i < skirts.size(); i++)

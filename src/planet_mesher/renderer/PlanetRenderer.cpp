@@ -3,7 +3,8 @@
 #include "../../assets/AssetManager.h"
 
 void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, glm::dmat4 wmodel, 
-	float far_plane, glm::dvec3 camera_pos, bool has_water, double planet_radius, double atmo_radius, double time)
+	float far_plane, glm::dvec3 camera_pos, bool has_water, double planet_radius, double atmo_radius, double time,
+	glm::vec3 atmo_main_color, glm::vec3 atmo_sunset_color)
 {
 	auto render_tiles = planet.get_all_render_leaf_paths();
 
@@ -22,6 +23,9 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 		shader->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
 		shader->setVec3("camera_pos", (glm::vec3)(camera_pos / planet_radius));
 		shader->setFloat("atmo_radius", (float)(atmo_radius / planet_radius));
+		shader->setVec3("atmo_main_color", atmo_main_color);
+		shader->setVec3("atmo_sunset_color", atmo_sunset_color);
+
 		bool cw_mode = false;
 		glFrontFace(GL_CCW);
 		for (size_t i = 0; i < render_tiles.size(); i++)
@@ -84,6 +88,9 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 			water_shader->setVec3("camera_pos", (glm::vec3)(camera_pos / planet_radius));
 			water_shader->setFloat("time", (float)time);
 			water_shader->setFloat("atmo_radius", (float)(atmo_radius / planet_radius));
+			water_shader->setVec3("atmo_main_color", atmo_main_color);
+			water_shader->setVec3("atmo_sunset_color", atmo_sunset_color);
+
 
 			cw_mode = false;
 			glFrontFace(GL_CCW);

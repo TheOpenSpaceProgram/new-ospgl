@@ -3,9 +3,24 @@
 #include <glm/glm.hpp>
 #include "Logger.h"
 
+// REMEMBER TO INCLUDE ANY SERIALIZE YOU USE, OTHERWISE THE AUTOMATIC
+// SERIALIZATION FUNCTIONS WON'T SEE THE APPROPIATE TEMPLATE CLASSES
+
+#define DO_TOML_CHECK_ON_RELEASE
+
+#ifdef DO_TOML_CHECK_ON_RELEASE
+#define TOML_CHECK_FUNC logger->check_important
+#elif
+#define TOML_CHECK_FUNC logger->check
+#endif
+
 #define SAFE_TOML_GET(target, name, type) \
-	logger->check(from.get_qualified_as<type>(name).operator bool(), "Data " name " was malformed"); \
+	TOML_CHECK_FUNC(from.get_qualified_as<type>(name).operator bool(), "Data " name " of type " #type " was malformed"); \
 	target = *from.get_qualified_as<type>(name);
+
+#define SAFE_TOML_GET_TABLE(target, name, type) \
+	TOML_CHECK_FUNC(from.get_table_qualified(name).operator bool(), "Table " name " of type" #type " was malformed"); \
+	{auto table = from.get_table_qualified(name); ::deserialize<type>(target, *table);}
 
 template<typename T>
 class GenericSerializer
@@ -14,12 +29,12 @@ public:
 
 	static void serialize(const T& what, cpptoml::table& target)
 	{
-
+		logger->fatal("Default serializer called. Remember to include the serializers you use!");
 	}
 
-	static void deserialize(T& to, cpptoml::table& from)
+	static void deserialize(T& to, const cpptoml::table& from)
 	{
-		
+		logger->fatal("Default deserializer called. Remember to include the serializers you use!");
 	}
 };
 
@@ -33,6 +48,14 @@ template<typename T>
 void deserialize(T& to, const cpptoml::table& from)
 {
 	GenericSerializer<T>::deserialize(to, from);
+}
+
+template<typename T>
+void serialize_to_table(const T& what, cpptoml::table& root, const std::string& table_name)
+{
+	auto table = cpptoml::make_table();
+	serialize(what, *table);
+	root.insert(table_name, table);
 }
 
 class SerializeUtil

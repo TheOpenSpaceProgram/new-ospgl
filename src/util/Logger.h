@@ -51,6 +51,9 @@ public:
 	// Condition MUST be true
 	void check(bool condition, const char* text = "", bool fatal = true);
 
+	// Checks even on Release mode
+	void check_important(bool condition, const char* text = "", bool fatal = true);
+
 	void onLog();
 
 	Logger();

@@ -3,7 +3,7 @@
 
 
 void AtmosphereRenderer::do_pass(glm::dmat4 proj_view, glm::dmat4 model, float far_plane, 
-	float planet_radius_relative, glm::vec3 cam_pos_relative)
+	float planet_radius_relative, glm::vec3 cam_pos_relative, glm::vec3 main_color, glm::vec3 sunset_color)
 {
 	
 		float l = glm::length(cam_pos_relative);
@@ -32,6 +32,8 @@ void AtmosphereRenderer::do_pass(glm::dmat4 proj_view, glm::dmat4 model, float f
 		atmo->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
 		atmo->setVec3("camera_pos", cam_pos_relative);
 		atmo->setFloat("planet_radius", planet_radius_relative);
+		atmo->setVec3("atmo_main_color", main_color);
+		atmo->setVec3("atmo_sunset_color", sunset_color);
 
 		glBindVertexArray(atmo_vao);
 		glDrawElements(GL_TRIANGLES, (GLsizei)index_count, GL_UNSIGNED_INT, 0);

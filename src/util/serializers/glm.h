@@ -15,8 +15,20 @@ public:
 
 	static void deserialize(glm::tvec2<T>& target, const cpptoml::table& from)
 	{
-		SAFE_TOML_GET(target.x, "x", T);
-		SAFE_TOML_GET(target.y, "y", T);
+		if constexpr (std::is_same<T, float>::value)
+		{
+			double x, y
+				SAFE_TOML_GET(x, "x", double);
+			SAFE_TOML_GET(y, "y", double);
+
+			to.x = (float)x;
+			to.y = (float)y;
+		}
+		else
+		{
+			SAFE_TOML_GET(to.x, "x", double);
+			SAFE_TOML_GET(to.y, "y", double);
+		}
 	}
 };
 
@@ -35,8 +47,23 @@ public:
 
 	static void deserialize(glm::tvec3<T>& to, const cpptoml::table& from)
 	{
-		SAFE_TOML_GET(to.x, "x", T);
-		SAFE_TOML_GET(to.y, "y", T);
-		SAFE_TOML_GET(to.z, "z", T);
+		if constexpr (std::is_same<T, float>::value)
+		{
+			double x, y, z;
+			SAFE_TOML_GET(x, "x", double);
+			SAFE_TOML_GET(y, "y", double);
+			SAFE_TOML_GET(z, "z", double);
+
+			to.x = (float)x;
+			to.y = (float)y;
+			to.z = (float)z;
+		}
+		else
+		{
+			SAFE_TOML_GET(to.x, "x", double);
+			SAFE_TOML_GET(to.y, "y", double);
+			SAFE_TOML_GET(to.z, "z", double);
+		}
+
 	}
 };

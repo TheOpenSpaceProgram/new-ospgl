@@ -1,13 +1,25 @@
 [mesher_info]
-	has_water = true
-	radius = 6370_000.000000000
-	atmo_radius = 6470_000.0
-	script_path = "./res/planets/test/surface.lua"
-	seed = 0
-	[mesher_info.lod]
-		max_depth = 13
-		coef_a = 2.0000000000000000
-		coef_b = 3.0000000000000000
+
+	radius = 6360_000.000000000000 # meters
+	script_path = "./res/planets/test/surface.lua"	# Will automatically be created for you
+	has_water = true				# Does the planet have water
+
+	[mesher_info.atmo]
+		radius = 6470_000.000000000000 # meters, 0 for no atmosphere
+		[mesher_info.atmo.main_color]
+			x = 0.5
+			y = 0.7
+			z = 1.5
+		[mesher_info.atmo.sunset_color]
+			x = 1.5
+			y = 0.4
+			z = 0.6
+
 	[mesher_info.noise]
-		seed = 0
-		interp = 2
+		seed = 0					
+		interp = 2		# 	0 = Linear < 1 = Hermite < 2 = Quintic
+
+	[mesher_info.lod]
+		max_depth = 19				# Max LOD depth allowed
+		coef_a = 2.0				# LOD coefficient A
+		coef_b = 3

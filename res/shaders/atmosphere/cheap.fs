@@ -13,6 +13,9 @@ uniform float planet_radius;
 const int STEPS = 2;
 const float STEP_INVERSE = 1.0 / float(STEPS);
 
+uniform vec3 atmo_main_color;
+uniform vec3 atmo_sunset_color;
+
 vec2 raySphereIntersect(vec3 r0, vec3 rd, float sr)
 {
 	float a = dot(rd, rd);
@@ -133,7 +136,7 @@ void main()
 	float fade = max( min( dot(ipos, -lDir), fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
 	d = sqrt(d) * 1.5;
 
-	vec3 col = d * vec3(0.6, 0.7, 1.5);
+	vec3 col = d * atmo_main_color;
 
 	float mie = max(dot(ray, -lDir), 0.0);
 	mie = pow(mie, 128.0);
@@ -141,7 +144,7 @@ void main()
 	float r_factor = dot(start, lDir);
 	r_factor = 1.0 - (pow(r_factor, 64.0));
 
-	vec3 mieColor = vec3(1.0, 1.0, 1.0) * (1.0 - r_factor) + vec3(1.0, 0.5, 0.3) * r_factor;
+	vec3 mieColor = vec3(1.0, 1.0, 1.0) * (1.0 - r_factor) + atmo_sunset_color * r_factor;
 
 	FragColor = vec4(col + mie * mieColor * d, d);
 

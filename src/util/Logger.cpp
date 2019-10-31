@@ -62,6 +62,12 @@ void Logger::log(int level, const char* format, fmt::format_args args)
 void Logger::check(bool condition, const char* text, bool ftal)
 {
 #ifdef _DEBUG
+	return check_important(condition, text, ftal);
+#endif
+}
+
+void Logger::check_important(bool condition, const char * text, bool ftal)
+{
 	if (!condition)
 	{
 		if (ftal)
@@ -73,7 +79,6 @@ void Logger::check(bool condition, const char* text, bool ftal)
 			error("Condition '{}' failed", text);
 		}
 	}
-#endif
 }
 
 void Logger::onLog()

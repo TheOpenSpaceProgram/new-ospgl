@@ -234,11 +234,12 @@ void PlanetEditor::render(int width, int height)
 
 	if (mesher_info.atmo_radius > 0 )//&& glm::length(cam_pos_relative) <= 1.0f)
 	{
-		atmo_renderer.do_pass(proj_view, amodel, far_plane, rel_radius, cam_pos_relative);
+		atmo_renderer.do_pass(proj_view, amodel, far_plane, rel_radius, cam_pos_relative, 
+			mesher_info.atmo_main_color, mesher_info.atmo_sunset_color);
 	}
 
 	renderer.render(*server, planet, proj_view, model, far_plane, camera.pos, mesher_info.has_water, mesher_info.radius,
-		mesher_info.atmo_radius, glfwGetTime());
+		mesher_info.atmo_radius, glfwGetTime(), mesher_info.atmo_main_color, mesher_info.atmo_sunset_color);
 
 	/*if (mesher_info.atmo_radius > 0 && glm::length(cam_pos_relative) > 1.0f)
 	{

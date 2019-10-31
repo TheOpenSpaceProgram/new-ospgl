@@ -52,6 +52,8 @@ float snoise(vec2 v){
 }
 
 uniform float atmo_radius;
+uniform vec3 atmo_main_color;
+uniform vec3 atmo_sunset_color;
 
 float height(vec3 p)
 {
@@ -97,7 +99,7 @@ vec4 atmo(vec3 lightDir)
 
     float fade = max( min( dot(vPos, -lightDir) + 0.1, fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
     d = min(pow(d, 0.23) * min(fade, 1.0) * 1.6, 0.7);
-    vec3 col = vec3(0.6, 0.7, 1.5);
+    vec3 col = atmo_main_color;
 
     return vec4(col, d);
 }
