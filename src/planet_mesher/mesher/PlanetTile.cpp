@@ -135,6 +135,26 @@ void copy_vertices(T* origin, Q* destination)
 	}
 }
 
+void generate_skirt(PlanetTileVertex* target, glm::dmat4 model, glm::dmat4 inverse_model_spheric, PlanetTileVertex& copy_vert)
+{
+	PlanetTileVertex vert;
+
+	double tx = (double)0 / ((double)PlanetTile::TILE_SIZE - 1.0);
+	double ty = (double)0 / ((double)PlanetTile::TILE_SIZE - 1.0);
+
+	glm::dvec3 in_tile = glm::dvec3(tx, ty, 0.0);
+
+	glm::dvec3 world_pos_cubic = model * glm::vec4(in_tile, 1.0);
+	glm::dvec3 world_pos_spheric = MathUtil::cube_to_sphere(world_pos_cubic);
+
+	world_pos_spheric *= 0.98;
+
+	vert = copy_vert;
+	vert.pos = (glm::vec3)(inverse_model_spheric * glm::dvec4(world_pos_spheric, 1.0));
+
+	*target = vert;
+}
+
 
 bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state& lua_state, bool has_water,
 	VertexArray<PlanetTileVertex>* work_array)
@@ -244,8 +264,22 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	}
 
 	// Generate skirt vertices (TODO)
-	std::array<PlanetTileVertex, TILE_SIZE * 4> skirts;
+	std::array<PlanetTileVertex, 4> skirts;
+	// Up
+	generate_skirt(&skirts[0], model, inverse_model_spheric, vertices[0 * TILE_SIZE + 0]);
+	//generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[0 * TILE_SIZE + (TILE_SIZE - 1)]);
 
+	// Down
+	generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[(TILE_SIZE - 1) * TILE_SIZE + 0]);
+	//generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[(TILE_SIZE - 1) * TILE_SIZE + (TILE_SIZE - 1)]);
+
+	// Left
+	generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[0 * TILE_SIZE + 0]);
+	//generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[(TILE_SIZE - 1) * TILE_SIZE + 0]);
+
+	// Right
+	generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[0 * TILE_SIZE + (TILE_SIZE - 1)]);
+	//generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[(TILE_SIZE - 1) * TILE_SIZE + (TILE_SIZE - 1)]);
 
 	// Copy skirts
 	for (size_t i = 0; i < skirts.size(); i++)

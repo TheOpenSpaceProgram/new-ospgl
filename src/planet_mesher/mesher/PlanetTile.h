@@ -35,7 +35,8 @@ struct PlanetTile
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
 	static const int TILE_SIZE = 64;
-	static const int VERTEX_COUNT = TILE_SIZE * TILE_SIZE + TILE_SIZE * 4;
+	static const int VERTEX_COUNT = TILE_SIZE * TILE_SIZE + 4;
+	static const int INDEX_COUNT = TILE_SIZE * TILE_SIZE * 6 + TILE_SIZE * 4 * 6;
 
 	template <typename T>
 	using VertexArray = std::array<T, (PlanetTile::TILE_SIZE + 2) * (PlanetTile::TILE_SIZE + 2)>;

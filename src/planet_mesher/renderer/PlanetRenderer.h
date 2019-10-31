@@ -14,7 +14,8 @@ private:
 
 	// The index buffer is common to all tiles
 	// The VAO is also shaded
-	std::array<uint16_t, PlanetTile::VERTEX_COUNT * 6> indices;
+	std::array<uint16_t, PlanetTile::INDEX_COUNT> indices;
+	size_t bulk_index_count;
 	GLuint ebo, vao, uv_bo;
 
 	// Water only uses a different vao, same index buffer

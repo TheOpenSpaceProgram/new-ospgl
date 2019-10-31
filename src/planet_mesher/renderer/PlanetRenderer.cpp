@@ -133,7 +133,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 				glBindVertexArray(water_vao);
 				glBindVertexBuffer(0, tile->water_vbo, 0, sizeof(PlanetTileWaterVertex));
 				glBindVertexBuffer(1, uv_bo, 0, sizeof(glm::vec2));
-				glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_SHORT, (void*)0);
+				glDrawElements(GL_TRIANGLES, (GLsizei)bulk_index_count, GL_UNSIGNED_SHORT, (void*)0);
 				glBindVertexArray(0);
 				glBindBuffer(GL_VERTEX_ARRAY, 0);
 
@@ -175,6 +175,8 @@ void PlanetRenderer::generate_and_upload_index_buffer()
 		}
 	}
 
+	bulk_index_count = PlanetTile::TILE_SIZE * PlanetTile::TILE_SIZE * 6;
+
 	std::array<glm::vec2, PlanetTile::TILE_SIZE * PlanetTile::TILE_SIZE> uvs;
 
 	// Bulk UVs
@@ -192,88 +194,39 @@ void PlanetRenderer::generate_and_upload_index_buffer()
 	}
 
 	// Now skirt indices
-	// Y skirts
-	/*for (size_t x = 0; x < PlanetTile::TILE_SIZE; x++)
+	size_t skirt_ptr = PlanetTile::TILE_SIZE * PlanetTile::TILE_SIZE;
+	size_t skirt_offset = PlanetTile::TILE_SIZE * 3;
+	// Up skirt
+	for (size_t x = 0; x < PlanetTile::TILE_SIZE - 1; x++)
 	{
-		int16_t vi_0 = (int16_t)x;
-		int16_t vi_1 = (int16_t)((PlanetTile::TILE_SIZE - 1) * PlanetTile::TILE_SIZE + x);
-		int16_t skirt_0_vi = (int16_t)PlanetTile::VERTEX_COUNT;
-		int16_t skirt_1_vi = (int16_t)(PlanetTile::VERTEX_COUNT + PlanetTile::TILE_SIZE);
-		// 0 Skirt
-
-		// Left
-		indices[vi_0 * 3 + 0] = vi_0;
-		// Right
-		indices[vi_0 * 3 + 1] = vi_0 + 1;
-		// Skirt Left
-		indices[vi_0 * 3 + 1] = skirt_0_vi + vi_0;
-
-
-		// Right
-		indices[vi_0 * 3 + 0] = vi_0 + 1;
-		// Skirt Right
-		indices[vi_0 * 3 + 1] = skirt_0_vi + vi_0 + 1;
-		// Skirt Left
-		indices[vi_0 * 3 + 1] = skirt_0_vi + vi_0;
-
-		// +Y Skirt
-
-		// Left
-		indices[vi_0 * 3 + 0] = vi_1;
-		// Skirt Left
-		indices[vi_0 * 3 + 1] = skirt_1_vi + vi_0;
-		// Right
-		indices[vi_0 * 3 + 1] = vi_1 + 1;
-
-		// Right
-		indices[vi_0 * 3 + 0] = vi_1 + 1;
-		// Skirt Right
-		indices[vi_0 * 3 + 1] = skirt_1_vi + vi_0 + 1;
-		// Skirt Left
-		indices[vi_0 * 3 + 1] = skirt_1_vi + vi_0;
+		indices[skirt_ptr * 6 + 0 + x * 3 + skirt_offset * 0] = (uint16_t)(0 * PlanetTile::TILE_SIZE + x);
+		indices[skirt_ptr * 6 + 1 + x * 3 + skirt_offset * 0] = (uint16_t)(0 * PlanetTile::TILE_SIZE + x + 1);
+		indices[skirt_ptr * 6 + 2 + x * 3 + skirt_offset * 0] = (uint16_t)(skirt_ptr);
 	}
 
-	// X skirts
-	for (size_t y = 0; y < PlanetTile::TILE_SIZE; y++)
+	// Down skirt
+	for (size_t x = 0; x < PlanetTile::TILE_SIZE - 1; x++)
 	{
-		int16_t vi_0 = (int16_t)(y * PlanetTile::TILE_SIZE);
-		int16_t vi_1 = (int16_t)(y * PlanetTile::TILE_SIZE + PlanetTile::TILE_SIZE - 1);
-		int16_t skirt_0_vi = (int16_t)(PlanetTile::VERTEX_COUNT + PlanetTile::TILE_SIZE * 2);
-		int16_t skirt_1_vi = (int16_t)(PlanetTile::VERTEX_COUNT + PlanetTile::TILE_SIZE * 3);
-		// 0 Skirt
-
-		// Top
-		indices[vi_0 * 3 + 0] = vi_0;
-		// Skirt Top
-		indices[vi_0 * 3 + 1] = skirt_0_vi + vi_0;
-		// Bottom
-		indices[vi_0 * 3 + 1] = vi_0 + PlanetTile::TILE_SIZE;
-
-
-		// Bottom
-		indices[vi_0 * 3 + 0] = vi_0 + PlanetTile::TILE_SIZE;
-		// Skirt Top
-		indices[vi_0 * 3 + 1] = skirt_0_vi + vi_0;
-		// Skirt Bottom
-		indices[vi_0 * 3 + 1] = skirt_0_vi + vi_0 + 1;
-
-		// +X Skirt
-
-		// Top
-		indices[vi_0 * 3 + 0] = vi_1 + 1;
-		// Skirt Top
-		indices[vi_0 * 3 + 1] = skirt_1_vi + vi_0;
-		// Bottom
-		indices[vi_0 * 3 + 1] = vi_1 + PlanetTile::TILE_SIZE;
-
-		// Bottom
-		indices[vi_0 * 3 + 0] = vi_1 + PlanetTile::TILE_SIZE;
-		// Skirt Top
-		indices[vi_0 * 3 + 1] = skirt_1_vi + vi_0;
-		// Skirt Bottom
-		indices[vi_0 * 3 + 1] = skirt_1_vi + vi_0 + 1;
+		indices[skirt_ptr * 6 + 0 + x * 3 + skirt_offset * 1] = (uint16_t)((PlanetTile::TILE_SIZE - 1) * PlanetTile::TILE_SIZE + x + 1);
+		indices[skirt_ptr * 6 + 1 + x * 3 + skirt_offset * 1] = (uint16_t)((PlanetTile::TILE_SIZE - 1) * PlanetTile::TILE_SIZE + x);
+		indices[skirt_ptr * 6 + 2 + x * 3 + skirt_offset * 1] = (uint16_t)(skirt_ptr + 1);
 	}
-	*/
+
+	// Left skirt
+	for (size_t y = 0; y < PlanetTile::TILE_SIZE - 1; y++)
+	{
+		indices[skirt_ptr * 6 + 0 + y * 3 + skirt_offset * 2] = (uint16_t)((y + 1) * PlanetTile::TILE_SIZE + 0);
+		indices[skirt_ptr * 6 + 1 + y * 3 + skirt_offset * 2] = (uint16_t)(y * PlanetTile::TILE_SIZE + 0);
+		indices[skirt_ptr * 6 + 2 + y * 3 + skirt_offset * 2] = (uint16_t)(skirt_ptr + 2);
+	}
+
+	// Right skirt
+	for (size_t y = 0; y < PlanetTile::TILE_SIZE - 1; y++)
+	{
+		indices[skirt_ptr * 6 + 0 + y * 3 + skirt_offset * 3] = (uint16_t)(y * PlanetTile::TILE_SIZE + (PlanetTile::TILE_SIZE - 1));
+		indices[skirt_ptr * 6 + 1 + y * 3 + skirt_offset * 3] = (uint16_t)((y + 1) * PlanetTile::TILE_SIZE + (PlanetTile::TILE_SIZE - 1));
+		indices[skirt_ptr * 6 + 2 + y * 3 + skirt_offset * 3] = (uint16_t)(skirt_ptr + 3);
+	}
 
 	glGenVertexArrays(1, &vao);
 	glGenVertexArrays(1, &water_vao);
