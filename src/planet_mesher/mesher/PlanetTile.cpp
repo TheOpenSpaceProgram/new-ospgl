@@ -139,15 +139,15 @@ void generate_skirt(PlanetTileVertex* target, glm::dmat4 model, glm::dmat4 inver
 {
 	PlanetTileVertex vert;
 
-	double tx = (double)0 / ((double)PlanetTile::TILE_SIZE - 1.0);
-	double ty = (double)0 / ((double)PlanetTile::TILE_SIZE - 1.0);
+	double tx = 0.5;
+	double ty = 0.5;
 
 	glm::dvec3 in_tile = glm::dvec3(tx, ty, 0.0);
 
 	glm::dvec3 world_pos_cubic = model * glm::vec4(in_tile, 1.0);
 	glm::dvec3 world_pos_spheric = MathUtil::cube_to_sphere(world_pos_cubic);
 
-	world_pos_spheric *= 0.98;
+	world_pos_spheric *= 0.95;
 
 	vert = copy_vert;
 	vert.pos = (glm::vec3)(inverse_model_spheric * glm::dvec4(world_pos_spheric, 1.0));
@@ -274,11 +274,11 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	//generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[(TILE_SIZE - 1) * TILE_SIZE + (TILE_SIZE - 1)]);
 
 	// Left
-	generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[0 * TILE_SIZE + 0]);
+	generate_skirt(&skirts[2], model, inverse_model_spheric, vertices[0 * TILE_SIZE + 0]);
 	//generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[(TILE_SIZE - 1) * TILE_SIZE + 0]);
 
 	// Right
-	generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[0 * TILE_SIZE + (TILE_SIZE - 1)]);
+	generate_skirt(&skirts[3], model, inverse_model_spheric, vertices[0 * TILE_SIZE + (TILE_SIZE - 1)]);
 	//generate_skirt(&skirts[1], model, inverse_model_spheric, vertices[(TILE_SIZE - 1) * TILE_SIZE + (TILE_SIZE - 1)]);
 
 	// Copy skirts
