@@ -23,7 +23,7 @@ uniform float time;
 
 vec2 get_real_uv()
 {
-	return (aTexture / pow(2, tile.z) + tile.xy);
+	return (aTexture / pow(2, tile.z) + tile.xy * 1000.0) * 0.001;
 }
 
 void main()

@@ -24,6 +24,7 @@ void AtmosphereRenderer::do_pass(glm::dmat4 proj_view, glm::dmat4 model, float f
 		} 
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		glDepthMask(GL_FALSE);
 
 		atmo->use();
 
@@ -37,7 +38,7 @@ void AtmosphereRenderer::do_pass(glm::dmat4 proj_view, glm::dmat4 model, float f
 		glBindVertexArray(0);
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+		glDepthMask(GL_TRUE);
 		glCullFace(GL_BACK);
 	//}
 	
@@ -74,8 +75,7 @@ AtmosphereRenderer::AtmosphereRenderer()
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	fullscreen = assets->get<Shader>("atmosphere/fullscreen");
-	atmo = assets->get<Shader>("atmosphere/atmo");
+	atmo = assets->get<Shader>("atmosphere/cheap");
 
 	SphereGeometry::generate_and_upload(&atmo_vao, &atmo_vbo, &atmo_ebo, &index_count, 64);
 }

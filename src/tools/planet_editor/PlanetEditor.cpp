@@ -60,6 +60,8 @@ void PlanetEditor::update(float dt, ImFont* code_font)
 		std::string alt = "Altitude: " + std::to_string(altitude) + " m";
 		ImGui::MenuItem(alt.c_str());
 
+		std::string salt = "Sea Altitude: " + std::to_string(glm::length(camera.pos) - mesher_info.radius) + " m";
+		ImGui::MenuItem(salt.c_str());
 
 		ImGui::EndMainMenuBar();
 	}
@@ -147,6 +149,18 @@ void PlanetEditor::update(float dt, ImFont* code_font)
 			moved = true;
 		}
 
+		if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+		{
+			camera.upwards(dt);
+			moved = true;
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+		{
+			camera.downwards(dt);
+			moved = true;
+		}
+
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 		{
 			camera.tilt(dt, -1.0f);
@@ -218,18 +232,18 @@ void PlanetEditor::render(int width, int height)
 	amodel = glm::scale(amodel, glm::dvec3(mesher_info.atmo_radius, mesher_info.atmo_radius, mesher_info.atmo_radius));
 	float rel_radius = (float)(mesher_info.radius / mesher_info.atmo_radius);
 
-	if (mesher_info.atmo_radius > 0 && glm::length(cam_pos_relative) <= 1.0f)
+	if (mesher_info.atmo_radius > 0 )//&& glm::length(cam_pos_relative) <= 1.0f)
 	{
 		atmo_renderer.do_pass(proj_view, amodel, far_plane, rel_radius, cam_pos_relative);
 	}
 
 	renderer.render(*server, planet, proj_view, model, far_plane, camera.pos, mesher_info.has_water, mesher_info.radius,
-		glfwGetTime());
+		mesher_info.atmo_radius, glfwGetTime());
 
-	if (mesher_info.atmo_radius > 0 && glm::length(cam_pos_relative) > 1.0f)
+	/*if (mesher_info.atmo_radius > 0 && glm::length(cam_pos_relative) > 1.0f)
 	{
 		atmo_renderer.do_pass(proj_view, amodel, far_plane, rel_radius, cam_pos_relative);
-	}
+	}*/
 
 
 }

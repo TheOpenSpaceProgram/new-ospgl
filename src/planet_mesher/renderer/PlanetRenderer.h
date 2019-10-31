@@ -25,7 +25,7 @@ private:
 public:
 
 	void render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, glm::dmat4 model, float far_plane,
-		glm::dvec3 camera_pos, bool has_water, double planet_radius, double time);
+		glm::dvec3 camera_pos, bool has_water, double planet_radius, double atmo_radius, double time);
 
 	PlanetRenderer();
 	~PlanetRenderer();

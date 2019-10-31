@@ -24,7 +24,7 @@ end
 
 function mountains(x, y, z)
 	noise.set_fractal_fbm();
-	noise.set_frequency(3.0);
+	noise.set_frequency(1.0);
 	noise.set_fractal_octaves(8);
 	noise.set_fractal_lacunarity(2.9232);
 	local n1 = noise.simplex3_fractal(x, y, z);
@@ -74,6 +74,6 @@ function generate()
 
 	local d = detail(coord_3d.x, coord_3d.y, coord_3d.z);
 
-	return (m * (1.0 - m_pow)) * 30000.0 * (1.0 - math.abs(c)) - 
-	math.abs(c) * 5000.0 - math.abs(d) * 50.0 - 8000.0;
+	return ((m * (1.0 - m_pow)) * 100000.0 * (1.0 - math.abs(c)) - 
+	math.abs(c) * 5000.0 - math.abs(d) * 50.0 - 8000.0) * 0.55;
 end

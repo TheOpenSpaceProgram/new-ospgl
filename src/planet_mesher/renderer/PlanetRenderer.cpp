@@ -3,7 +3,7 @@
 #include "../../assets/AssetManager.h"
 
 void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, glm::dmat4 wmodel, 
-	float far_plane, glm::dvec3 camera_pos, bool has_water, double planet_radius, double time)
+	float far_plane, glm::dvec3 camera_pos, bool has_water, double planet_radius, double atmo_radius, double time)
 {
 	auto render_tiles = planet.get_all_render_leaf_paths();
 
@@ -20,7 +20,8 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 		shader->use();
 		shader->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
-
+		shader->setVec3("camera_pos", (glm::vec3)(camera_pos / planet_radius));
+		shader->setFloat("atmo_radius", (float)(atmo_radius / planet_radius));
 		bool cw_mode = false;
 		glFrontFace(GL_CCW);
 		for (size_t i = 0; i < render_tiles.size(); i++)
@@ -59,8 +60,10 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 				cw_mode = false;
 			}
 
-			shader->setMat4("tform", (glm::mat4)(proj_view * wmodel * model));
 
+
+			shader->setMat4("tform", (glm::mat4)(proj_view * wmodel * model));
+			shader->setMat4("m_tform", (glm::mat4)(model));
 
 			glBindVertexArray(vao);
 			glBindVertexBuffer(0, tile->vbo, 0, sizeof(PlanetTileVertex));
@@ -80,6 +83,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 			water_shader->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
 			water_shader->setVec3("camera_pos", (glm::vec3)(camera_pos / planet_radius));
 			water_shader->setFloat("time", (float)time);
+			water_shader->setFloat("atmo_radius", (float)(atmo_radius / planet_radius));
 
 			cw_mode = false;
 			glFrontFace(GL_CCW);
@@ -181,8 +185,8 @@ void PlanetRenderer::generate_and_upload_index_buffer()
 			uint16_t vi = (uint16_t)(y * PlanetTile::TILE_SIZE + x);
 
 			uvs[vi] = glm::vec2(
-				(float)x / (float)PlanetTile::TILE_SIZE, 
-				(float)y / (float)PlanetTile::TILE_SIZE);
+				((double)x / (double)PlanetTile::TILE_SIZE) * 1000.0,
+				((double)y / (double)PlanetTile::TILE_SIZE) * 1000.0);
 
 		}
 	}

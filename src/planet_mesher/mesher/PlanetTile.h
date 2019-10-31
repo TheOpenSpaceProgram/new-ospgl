@@ -34,7 +34,7 @@ struct PlanetTile
 	GLuint vbo, water_vbo;
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
-	static const int TILE_SIZE = 30;
+	static const int TILE_SIZE = 64;
 	static const int VERTEX_COUNT = TILE_SIZE * TILE_SIZE + TILE_SIZE * 4;
 
 	template <typename T>

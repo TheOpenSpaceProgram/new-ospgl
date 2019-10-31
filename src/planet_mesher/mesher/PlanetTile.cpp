@@ -216,7 +216,7 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 					heights[i] = result.get<double>() / planet_radius;
 					if (!needs_water)
 					{
-						if (heights[i] > 0.0)
+						if (heights[i] < 0.0)
 						{
 							needs_water = true;
 						}
@@ -233,7 +233,9 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	generate_normals(work_array->data(), work_array->size(), model_spheric, clockwise);
 	copy_vertices(work_array->data(), vertices.data());
 
-	if (has_water && needs_water || true)
+	water_vertices = nullptr;
+	water_vbo = 0;
+	if (has_water && needs_water)
 	{
 		generate_vertices<PlanetTileVertex, true>(work_array->data(), model, inverse_model_spheric, &heights[0]);
 		generate_normals(work_array->data(), work_array->size(), model_spheric, clockwise);

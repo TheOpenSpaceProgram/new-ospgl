@@ -13,7 +13,6 @@ private:
 
 public:
 
-	Shader* fullscreen;
 	Shader* atmo;
 
 	// Atmospheres are rendered in z-sorted passes

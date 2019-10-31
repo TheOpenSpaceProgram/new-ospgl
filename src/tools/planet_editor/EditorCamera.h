@@ -53,6 +53,16 @@ public:
 		up = f * glm::dvec4(up, 1.0);
 	}
 
+	void upwards(float dt)
+	{
+		pos += speed * glm::normalize(up) * (double)dt;
+	}
+
+	void downwards(float dt)
+	{
+		pos -= speed * glm::normalize(up) * (double)dt;
+	}
+
 	void mouse(glm::dvec2 deltas, float dt)
 	{
 		glm::dvec3 or_forward = forward; 

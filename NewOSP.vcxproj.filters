@@ -25,10 +25,10 @@
     <None Include="res\default_planet.toml" />
     <None Include="res\shaders\planet\water.fs" />
     <None Include="res\shaders\planet\water.vs" />
-    <None Include="res\shaders\atmosphere\fullscreen.vs" />
-    <None Include="res\shaders\atmosphere\fullscreen.fs" />
     <None Include="res\shaders\atmosphere\atmo.fs" />
     <None Include="res\shaders\atmosphere\atmo.vs" />
+    <None Include="res\shaders\atmosphere\cheap.fs" />
+    <None Include="res\shaders\atmosphere\cheap.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
