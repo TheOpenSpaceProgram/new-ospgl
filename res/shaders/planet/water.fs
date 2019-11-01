@@ -54,6 +54,8 @@ float snoise(vec2 v){
 uniform float atmo_radius;
 uniform vec3 atmo_main_color;
 uniform vec3 atmo_sunset_color;
+uniform float atmo_exponent;
+uniform float sunset_exponent;
 
 float height(vec3 p)
 {
@@ -62,8 +64,13 @@ float height(vec3 p)
 
 float density(float h)
 {
-   float SCALE_H = 8.0 / (1.0);
-   return min(exp2(-h * SCALE_H), 1.0);
+   float SCALE_H = 8.0;
+   return min(exp(-pow(h, atmo_exponent) * SCALE_H), 1.0);
+}
+
+float atmo_curve(float d)
+{
+    return 1.1 * (pow(20, d) - 1) / (pow(20, d) + 1);
 }
 
 
@@ -90,18 +97,22 @@ vec4 atmo(vec3 lightDir)
 
       float h = height(ipos);
 
-      d += density(h) * ATMO_STEPS_INVERSE * step_size;
+      d += density(h) * ATMO_STEPS_INVERSE * step_size * 2.0;
     }
 
 
     float fade_factor = 0.25;
     float fade_factor_add = 0.0;
 
-    float fade = max( min( dot(vPos, -lightDir) + 0.1, fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
-    d = min(pow(d, 0.23) * min(fade, 1.0) * 1.6, 0.7);
-    vec3 col = atmo_main_color;
+	  float fade = max( min( dot(vPos, -lightDir) + 0.1, fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
+	  d = min(pow(d, 0.47) * min(fade, 0.5) * 4.0, 0.8);
 
-    return vec4(col, d);
+    float r_color = exp(-sunset_exponent * fade);
+
+    vec3 col = atmo_main_color * (1.0 - r_color) + atmo_sunset_color * r_color;
+
+
+    return vec4(col, atmo_curve(d));
 }
 
 void main()
@@ -134,7 +145,7 @@ void main()
 
     vec3 veryshallowcol = vec3(0.95, 0.95, 1.0);
     vec3 shallowcol = vec3(0.7, 0.7, 1.0);
-    vec3 deepcol = vec3(0.6, 0.6, 0.9);
+    vec3 deepcol = vec3(0.5, 0.5, 0.8) * 0.7;
     vec3 speccol = vec3(1.0, 0.3, 0.3);
     vec3 speccolb = vec3(1.0, 0.9, 0.88);
 
@@ -145,7 +156,7 @@ void main()
 
     vec4 atmoc = atmo(lightDir);
 
-    FragColor = vec4(col * diff + speccol * specular * (1.0 - spec_red) + speccolb * specular * spec_red + atmoc.xyz * atmoc.w, min(deepfactor + 0.9, 1.0));
+    FragColor = vec4((col * diff + speccol * specular * (1.0 - spec_red) + speccolb * specular * spec_red + atmoc.xyz * atmoc.w * 0.77) * 0.6, min(deepfactor + 0.9, 1.0));
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets

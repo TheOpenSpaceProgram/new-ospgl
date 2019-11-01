@@ -1,0 +1,51 @@
+[star]
+	mass = 1.98847e30
+
+# Units are ALWAYS: meters, degrees, kilograms
+# Variation parameters are per century
+# Equinox is January 2000, relative to the mean ecliptic
+# Data stays valid until around the year 3000, so plenty of time!
+# https://ssd.jpl.nasa.gov/txt/p_elem_t2.txt
+# If parent is not present, or is equal to "", the planet will orbit the central star
+#
+
+
+
+[[planet]]
+	name = "Earth"
+	config = "res/planets/test/config.toml"
+
+	is_nasa_data = true
+	smajor_axis = 149598290450.51898
+	smajor_axis_var = -0.00000003
+	eccentricity = 0.01671123
+	eccentricity_var = -0.00003661
+	inclination = 0.0
+	inclination_var = -0.01337178
+	mean_longitude = 100.46457166
+	mean_longitude_var = 35999.37306329
+	periapsis_longitude = 102.93768193
+	periapsis_longitude_var = 0.31795260
+	asc_node_longitude = 0.0
+	asc_node_longitude_var = -0.24123856
+
+
+[[planet]]
+	name = "Mars"
+	config = "res/planets/test_gas/config.toml"
+
+	is_nasa_data = true
+	smajor_axis = 227944179731.897
+	smajor_axis_var = -0.00000097
+	eccentricity = 0.09336511
+	eccentricity_var = 0.00009149
+	inclination = 1.85181869
+	inclination_var = -0.00724757
+	mean_longitude = -4.56813164
+	mean_longitude_var = 19140.29934243
+	periapsis_longitude = -23.91744784
+	periapsis_longitude_var = 0.45223625
+	asc_node_longitude = 49.71320984
+	asc_node_longitude_var = -0.26852431
+
+

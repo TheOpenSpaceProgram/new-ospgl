@@ -14,9 +14,15 @@
 #define TOML_CHECK_FUNC logger->check
 #endif
 
+// IMPORTANT:
+// You must have a cpptoml table named "from" to use these functions
+
 #define SAFE_TOML_GET(target, name, type) \
 	TOML_CHECK_FUNC(from.get_qualified_as<type>(name).operator bool(), "Data " name " of type " #type " was malformed"); \
 	target = *from.get_qualified_as<type>(name);
+
+#define SAFE_TOML_GET_OR(target, name, type, def) \
+	target = from.get_qualified_as<type>(name).value_or(def);
 
 #define SAFE_TOML_GET_TABLE(target, name, type) \
 	TOML_CHECK_FUNC(from.get_table_qualified(name).operator bool(), "Table " name " of type" #type " was malformed"); \
@@ -103,7 +109,7 @@ public:
 	static void read_file_to(const std::string& path, T& target, const std::string& sub_path = "")
 	{
 		auto root = load_file(path);
-		
+
 		std::shared_ptr<cpptoml::table> from;
 
 		if (sub_path != "")

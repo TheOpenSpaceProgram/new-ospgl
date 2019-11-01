@@ -97,9 +97,6 @@
     <ClCompile Include="dep\TextEditor\TextEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\planet_mesher\PlanetMesherInfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\tools\planet_editor\EditorCamera.h">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -107,6 +104,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\atmosphere\AtmosphereRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\PlanetarySystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\body\PlanetaryBody.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\kepler\KeplerElements.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\PlanetaryBodyRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -207,9 +216,6 @@
     <ClInclude Include="dep\TextEditor\TextEditor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\planet_mesher\PlanetMesherInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dep\cpptoml.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -235,6 +241,33 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\geometry\SphereGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\PlanetarySystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\body\PlanetaryBody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\kepler\KeplerElements.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\PlanetarySystemSerializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\PlanetaryBodyRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\body\config\PlanetConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\body\config\AtmoConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\body\config\SurfaceConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\body\config\GasConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

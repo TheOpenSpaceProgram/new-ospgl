@@ -263,7 +263,6 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 		copy_vertices(work_array->data(), water_vertices->data());
 	}
 
-	// Generate skirt vertices (TODO)
 	std::array<PlanetTileVertex, 4> skirts;
 	// Up
 	generate_skirt(&skirts[0], model, inverse_model_spheric, vertices[0 * TILE_SIZE + 0]);

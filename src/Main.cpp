@@ -10,10 +10,7 @@
 #include <imgui/imgui_impl_opengl3.h>
 
 #include "tools/planet_editor/PlanetEditor.h"
-
-
-#define WIDTH 1500
-#define HEIGHT 900
+#include "universe/PlanetarySystem.h"
 
 InputUtil* input;
 
@@ -28,6 +25,9 @@ void character_callback(GLFWwindow* window, unsigned int codepoint)
 
 int main(void)
 {
+	int width = 1366;
+	int height = 768;
+
 	createGlobalLogger();
 
 	logger->info("Starting OSP");
@@ -36,7 +36,7 @@ int main(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "New OSP", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, "New OSP", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -75,9 +75,19 @@ int main(void)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	/*PlanetarySystem system;
+	SerializeUtil::read_file_to("res/systems/test_system.toml", system);
+
+	std::vector<glm::dvec3> stt;
+	stt.resize(system.bodies.size());
+	*/
+
 	while (!glfwWindowShouldClose(window))
 	{
 		input->update(window);
+
+		glfwGetWindowSize(window, &width, &height);
+		glViewport(0, 0, width, height);
 
 		glfwPollEvents();
 
@@ -94,7 +104,7 @@ int main(void)
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 
-		editor.render(WIDTH, HEIGHT);
+		editor.render(width, height);
 		
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

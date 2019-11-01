@@ -3,8 +3,7 @@
 #include "../../assets/AssetManager.h"
 
 void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, glm::dmat4 wmodel, 
-	float far_plane, glm::dvec3 camera_pos, bool has_water, double planet_radius, double atmo_radius, double time,
-	glm::vec3 atmo_main_color, glm::vec3 atmo_sunset_color)
+	float far_plane, glm::dvec3 camera_pos, PlanetConfig& config, double time)
 {
 	auto render_tiles = planet.get_all_render_leaf_paths();
 
@@ -21,10 +20,12 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 		shader->use();
 		shader->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
-		shader->setVec3("camera_pos", (glm::vec3)(camera_pos / planet_radius));
-		shader->setFloat("atmo_radius", (float)(atmo_radius / planet_radius));
-		shader->setVec3("atmo_main_color", atmo_main_color);
-		shader->setVec3("atmo_sunset_color", atmo_sunset_color);
+		shader->setVec3("camera_pos", (glm::vec3)(camera_pos / config.radius));
+		shader->setFloat("atmo_radius", (float)(config.atmo.radius / config.radius));
+		shader->setVec3("atmo_main_color", config.atmo.main_color);
+		shader->setVec3("atmo_sunset_color", config.atmo.sunset_color);
+		shader->setFloat("atmo_exponent", (float)config.atmo.exponent);
+		shader->setFloat("sunset_exponent", (float)config.atmo.sunset_exponent);
 
 		bool cw_mode = false;
 		glFrontFace(GL_CCW);
@@ -69,6 +70,10 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 			shader->setMat4("tform", (glm::mat4)(proj_view * wmodel * model));
 			shader->setMat4("m_tform", (glm::mat4)(model));
 
+			glm::vec3 tile_i = glm::vec3(path.get_min(), (float)path.get_depth());
+
+			shader->setVec3("tile", tile_i);
+
 			glBindVertexArray(vao);
 			glBindVertexBuffer(0, tile->vbo, 0, sizeof(PlanetTileVertex));
 			glBindVertexBuffer(1, uv_bo, 0, sizeof(glm::vec2));
@@ -80,17 +85,18 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 		}
 
-		if (has_water)
+		if (config.surface.has_water)
 		{
 			// Draw water, another pass to only switch shaders once
 			water_shader->use();
 			water_shader->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
-			water_shader->setVec3("camera_pos", (glm::vec3)(camera_pos / planet_radius));
+			water_shader->setVec3("camera_pos", (glm::vec3)(camera_pos / config.radius));
 			water_shader->setFloat("time", (float)time);
-			water_shader->setFloat("atmo_radius", (float)(atmo_radius / planet_radius));
-			water_shader->setVec3("atmo_main_color", atmo_main_color);
-			water_shader->setVec3("atmo_sunset_color", atmo_sunset_color);
-
+			water_shader->setFloat("atmo_radius", (float)(config.atmo.radius / config.radius));
+			water_shader->setVec3("atmo_main_color", config.atmo.main_color);
+			water_shader->setVec3("atmo_sunset_color", config.atmo.sunset_color);
+			water_shader->setFloat("atmo_exponent", (float)config.atmo.exponent);
+			water_shader->setFloat("sunset_exponent", (float)config.atmo.sunset_exponent);
 
 			cw_mode = false;
 			glFrontFace(GL_CCW);

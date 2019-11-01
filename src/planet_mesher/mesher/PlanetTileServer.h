@@ -10,7 +10,7 @@
 #include <array>
 #include <thread>
 #include <sol.hpp>
-#include "../PlanetMesherInfo.h"
+#include "../../universe/body/config/PlanetConfig.h"
 #include <FastNoise/FastNoise.h>
 
 struct PlanetTileThread
@@ -56,7 +56,7 @@ public:
 
 	bool has_water;
 
-	PlanetMesherInfo* mesher_info;
+	PlanetConfig* config;
 
 	bool has_errors;
 
@@ -95,7 +95,7 @@ public:
 
 	// Make sure you call once a OpenGL context is available
 	// as we will create the index buffer here
-	PlanetTileServer(const std::string& script, PlanetMesherInfo* mesher_info, int seed, int noise_interp, bool has_water);
+	PlanetTileServer(const std::string& script, PlanetConfig* config, int seed, int noise_interp, bool has_water);
 	~PlanetTileServer();
 };
 

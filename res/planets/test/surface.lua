@@ -1,5 +1,5 @@
 
--- Returns named items modificable by the user here 
+-- Returns named items modificable by the user here
 -- Types can be:
 -- num, vec2, vec3, color
 function get_data_items()
@@ -8,7 +8,7 @@ end
 
 -- Data set by caller:
 --
---	coord_3d	-> {x, y, z}	-> Spherical 3D coordinates 
+--	coord_3d	-> {x, y, z}	-> Spherical 3D coordinates
 --	coord_2d	-> {x, y}		-> Equirrectangular 2D coordinates (azimuth, elevation)
 --	depth		-> int			-> Tile depth
 --	radius		-> float		-> Radius of the planet
@@ -63,17 +63,17 @@ end
 
 
 function generate()
-	
+
 	local c = continents(coord_3d.x, coord_3d.y, coord_3d.z);
 	local m = mountains(
-	coord_3d.x + c * 0.005, 
-	coord_3d.y + c * 0.005, 
+	coord_3d.x + c * 0.005,
+	coord_3d.y + c * 0.005,
 	coord_3d.z + c * 0.005);
-	
+
 	local m_pow = m * c * c;
 
 	local d = detail(coord_3d.x, coord_3d.y, coord_3d.z);
 
-	return ((m * (1.0 - m_pow)) * 100000.0 * (1.0 - math.abs(c)) - 
-	math.abs(c) * 5000.0 - math.abs(d) * 50.0 - 16000.0) * 0.35;
+	return ((m * (1.0 - m_pow)) * 100000.0 * (1.0 - math.abs(c)) -
+	math.abs(c) * 5000.0 - math.abs(d) * 50.0 - 16000.0) * 0.45;
 end

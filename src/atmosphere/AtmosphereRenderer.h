@@ -18,7 +18,7 @@ public:
 	// Atmospheres are rendered in z-sorted passes
 	void do_pass(glm::dmat4 proj_view, glm::dmat4 model, float far_plane, 
 		float planet_radius_relative, glm::vec3 cam_pos_relative, 
-		glm::vec3 main_color, glm::vec3 sunset_color);
+		glm::vec3 main_color, glm::vec3 sunset_color, float exponent, float sunset_exponent);
 
 	AtmosphereRenderer();
 	~AtmosphereRenderer();

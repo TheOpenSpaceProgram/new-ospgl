@@ -1,0 +1,22 @@
+radius = 6360_000.000000000000
+mass = 5.9722e24
+
+
+[far_color]
+	x = 1.5
+	y = 0.4
+	z = 0.2
+
+[atmo]
+	exponent = 1.5
+	radius = 6470_000.000000000000 # meters
+	[atmo.main_color]
+		x = 0.6
+		y = 0.7
+		z = 1.5
+	[atmo.sunset_color]
+		x = 1.5
+		y = 0.7
+		z = 0.6
+
+[gas]

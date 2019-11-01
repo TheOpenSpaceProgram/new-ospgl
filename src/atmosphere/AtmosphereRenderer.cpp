@@ -3,49 +3,52 @@
 
 
 void AtmosphereRenderer::do_pass(glm::dmat4 proj_view, glm::dmat4 model, float far_plane, 
-	float planet_radius_relative, glm::vec3 cam_pos_relative, glm::vec3 main_color, glm::vec3 sunset_color)
+	float planet_radius_relative, glm::vec3 cam_pos_relative, glm::vec3 main_color, glm::vec3 sunset_color,
+	float exponent, float sunset_exponent)
 {
 	
-		float l = glm::length(cam_pos_relative);
-		if (l <= 1.05f)
-		{
-			glCullFace(GL_FRONT);
-		}
-		else
-		{
-			glCullFace(GL_BACK);
-		}
-
-		glm::dmat4 extra_model = glm::dmat4(1.0);
-
-		if (l > 1.0 && l <= 1.05f)
-		{
-			extra_model = glm::scale(extra_model, glm::dvec3(1.05, 1.05, 1.05));
-		} 
-
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		glDepthMask(GL_FALSE);
-
-		atmo->use();
-
-		atmo->setMat4("tform", proj_view * extra_model * model);
-		atmo->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
-		atmo->setVec3("camera_pos", cam_pos_relative);
-		atmo->setFloat("planet_radius", planet_radius_relative);
-		atmo->setVec3("atmo_main_color", main_color);
-		atmo->setVec3("atmo_sunset_color", sunset_color);
-
-		glBindVertexArray(atmo_vao);
-		glDrawElements(GL_TRIANGLES, (GLsizei)index_count, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
-
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glDepthMask(GL_TRUE);
+	float l = glm::length(cam_pos_relative);
+	if (l <= 1.05f)
+	{
+		glCullFace(GL_FRONT);
+	}
+	else
+	{
 		glCullFace(GL_BACK);
-	//}
+	}
+
+	glm::dmat4 extra_model = glm::dmat4(1.0);
+
+	// Avoids the imprecision seen when very near the atmosphere
+	if (l > 1.0 && l <= 1.05f)
+	{
+		extra_model = glm::scale(extra_model, glm::dvec3(1.05, 1.05, 1.05));
+	} 
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	glDepthMask(GL_FALSE);
+
+	atmo->use();
+
+	atmo->setMat4("tform", proj_view * extra_model * model);
+	atmo->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
+	atmo->setVec3("camera_pos", cam_pos_relative);
+	atmo->setFloat("planet_radius", planet_radius_relative);
+	atmo->setVec3("atmo_main_color", main_color);
+	atmo->setVec3("atmo_sunset_color", sunset_color);
+	atmo->setFloat("atmo_exponent", exponent);
+	atmo->setFloat("sunset_exponent", sunset_exponent);
+
+	glBindVertexArray(atmo_vao);
+	glDrawElements(GL_TRIANGLES, (GLsizei)index_count, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+	glDepthMask(GL_TRUE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glCullFace(GL_BACK);
 	
 
-	
+
 }
 
 AtmosphereRenderer::AtmosphereRenderer()

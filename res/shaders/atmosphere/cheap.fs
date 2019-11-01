@@ -15,6 +15,8 @@ const float STEP_INVERSE = 1.0 / float(STEPS);
 
 uniform vec3 atmo_main_color;
 uniform vec3 atmo_sunset_color;
+uniform float atmo_exponent;
+uniform float sunset_exponent;
 
 vec2 raySphereIntersect(vec3 r0, vec3 rd, float sr)
 {
@@ -45,13 +47,13 @@ float rayPointDistance(vec3 r0, vec3 rd, vec3 p)
 
 float height(vec3 p)
 {
-    return max((length(p) - planet_radius) / (planet_radius), 0.0);
+    return max((length(p) - planet_radius) / (1.0 - planet_radius), 0.0);
 }
 
 float density(float h)
 {
-   float SCALE_H = 8.0 / (1.0 - planet_radius);
-   return min(exp2(-h * SCALE_H), 1.0);
+   float SCALE_H = (8.0);
+   return min(exp(-pow(h, atmo_exponent) * SCALE_H), 1.0);
 }
 
 
@@ -104,6 +106,8 @@ void main()
 	vec3 start = camera_pos + intersect.x * ray;
 	vec3 ipos = start;
 
+	float ds = 0.0;
+
 	for(int i = 0; i < STEPS; i++)
 	{
         float step = float(i) / float(STEPS);
@@ -117,7 +121,7 @@ void main()
 		float dist = rayPointDistance(ipos, -lDir, vec3(0.0, 0.0, 0.0));
 
 		float dotp = dot(ipos, -lDir);
-		float dfac = exp(50.0 * dotp) / (exp(50.0 * dotp) + 1.0);
+		float dfac = exp(20.0 * dotp) / (exp(20.0 * dotp) + 1.0);
 
 		dist = dfac + (1.0 - dfac) * dist;
 
@@ -126,7 +130,7 @@ void main()
 
 
 		d += density(h) * STEP_INVERSE * min(max(shfac, 0.0), 1.0);
-
+		ds = d;
 
 	}
 
@@ -136,13 +140,20 @@ void main()
 	float fade = max( min( dot(ipos, -lDir), fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
 	d = sqrt(d) * 1.5;
 
-	vec3 col = d * atmo_main_color;
 
-	float mie = max(dot(ray, -lDir), 0.0);
-	mie = pow(mie, 128.0);
+	// TODO: Clean this mess up, it works but damn is it horrible code
+	float miew = max(dot(ray, -lDir), 0.0);
+	float mie2 = pow(miew, 32.0 * 1.0);
+	float mie = pow(miew, 128.0 * 1.0 / ds);
+
+	float fade_mie = ((1.0 - mie2) * miew + mie * (1.0 - miew)) * (1.0 - fade * fade);
+
+    float r_color = max(exp(-(sunset_exponent) * (1.0 - (fade_mie + mie2))) * sqrt(ds) * (1.0 - ds), 0.0);
+	vec3 col = d * (atmo_main_color * (1.0 - r_color) + atmo_sunset_color * r_color);
+
 
 	float r_factor = dot(start, lDir);
-	r_factor = 1.0 - (pow(r_factor, 64.0));
+	r_factor = 1.0 - (pow(r_factor, 1.0 * 1.0 / (ds)));
 
 	vec3 mieColor = vec3(1.0, 1.0, 1.0) * (1.0 - r_factor) + atmo_sunset_color * r_factor;
 

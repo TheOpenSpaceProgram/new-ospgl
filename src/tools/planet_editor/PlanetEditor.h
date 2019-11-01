@@ -1,11 +1,8 @@
 #pragma once
 #include "../../assets/AssetManager.h"
-#include "../../planet_mesher/quadtree/QuadTreePlanet.h"
-#include "../../planet_mesher/mesher/PlanetTileServer.h"
-#include "../../planet_mesher/renderer/PlanetRenderer.h"
-#include "../../atmosphere/AtmosphereRenderer.h"
+#include "../../renderer/PlanetaryBodyRenderer.h"
 
-#include "../../planet_mesher/PlanetMesherInfo.h"
+#include "../../universe/body/config/PlanetConfig.h"
 #include <imgui/imgui.h>
 #include <TextEditor/TextEditor.h>
 #include "../../util/FileWatcher.h"
@@ -27,20 +24,8 @@ private:
 	std::string path;
 	std::string config_path;
 
-	// We watch for file changes, and allow
-	// in-editor text editor usage, so we need
-	// to keep the file loaded
-	std::string script_loaded;
-	std::string config_loaded;
-
-	QuadTreePlanet planet;
-	PlanetTileServer* server;
-	PlanetRenderer renderer;
-	PlanetMesherInfo mesher_info;
-	AtmosphereRenderer atmo_renderer;
-
-	TextEditor script_editor;
-	TextEditor toml_editor;
+	PlanetConfig config;
+	PlanetaryBodyRenderer renderer;
 
 	FileWatcher script_watch;
 	FileWatcher config_watch;

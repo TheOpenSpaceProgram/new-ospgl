@@ -22,6 +22,9 @@ uniform float atmo_radius;
 
 uniform vec3 atmo_main_color;
 uniform vec3 atmo_sunset_color;
+uniform float atmo_exponent;
+uniform float sunset_exponent;
+
 
 float height(vec3 p)
 {
@@ -30,10 +33,14 @@ float height(vec3 p)
 
 float density(float h)
 {
-   float SCALE_H = 16.0;
-   return min(exp2(-h * SCALE_H), 1.0);
+   float SCALE_H = 8.0;
+   return min(exp(-pow(h, atmo_exponent) * SCALE_H), 1.0);
 }
 
+float atmo_curve(float d)
+{
+    return 1.1 * (pow(20, d) - 1) / (pow(20, d) + 1);
+}
 
 vec4 atmo(vec3 lightDir)
 {
@@ -49,7 +56,7 @@ vec4 atmo(vec3 lightDir)
     vec3 ipos = start;
     float d = 0.0;
 
-    float step_size = length(ray) / float(ATMO_STEPS);
+    float step_size = length(ray) / float(ATMO_STEPS - 1);
     float last_d = 0.0;
     for(int i = 0; i < ATMO_STEPS; i++)
     {
@@ -58,7 +65,7 @@ vec4 atmo(vec3 lightDir)
 
 		float h = height(ipos);
 
-		d += density(h) * ATMO_STEPS_INVERSE * step_size;
+		d += density(h) * ATMO_STEPS_INVERSE * step_size * 2.0;
     }
 
 
@@ -66,10 +73,13 @@ vec4 atmo(vec3 lightDir)
 	float fade_factor_add = 0.0;
 
 	float fade = max( min( dot(vPos, -lightDir) + 0.1, fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
-	d = min(pow(d, 0.23) * min(fade, 1.0) * 1.6, 0.6);
-    vec3 col = atmo_main_color;
+	d = min(pow(d, 0.47) * min(fade, 0.5) * 4.0, 0.8);
 
-    return vec4(col, d);
+    float r_color = exp(-sunset_exponent * fade);
+
+    vec3 col = atmo_main_color * (1.0 - r_color) + atmo_sunset_color * r_color;
+
+    return vec4(col, atmo_curve(d));
 }
 
 void main()
@@ -78,11 +88,11 @@ void main()
     vec3 lightDir = normalize(vec3(-0.4, -1.0, -0.4));
     float diff = max(dot(-lightDir, vNormal), 0.0);
 
-    vec3 col = vec3(0.8, 0.6, 0.6);
+    vec3 col = vec3(0.8, 0.6, 0.3);
 
     vec4 atmoc = atmo(lightDir);
 
-    FragColor = vec4(diff * col + atmoc.xyz * atmoc.w, 1.0);
+    FragColor = vec4((diff * col + atmoc.xyz * atmoc.w * 0.6) * 0.77, 1.0);
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets

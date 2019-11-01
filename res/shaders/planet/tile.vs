@@ -16,9 +16,15 @@ out vec2 vTexture;
 
 // In planet coordinates, 0->1 origin centered
 out vec3 vPos;
-
-
 out float flogz;
+
+uniform vec3 tile;
+
+vec2 get_real_uv()
+{
+	return (aTexture / pow(2, tile.z) + tile.xy * 1000.0) * 0.001;
+}
+
 void main()
 {
     gl_Position = tform * vec4(aPos, 1.0);
@@ -27,6 +33,6 @@ void main()
 
 	vColor = aColor;
 	vNormal = aNormal;
-	vTexture = aTexture;
+	vTexture = get_real_uv();
 	vPos = vec3(m_tform * vec4(aPos, 1.0));
 }

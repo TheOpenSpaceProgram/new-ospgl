@@ -145,6 +145,9 @@
     <None Include="res\shaders\planet\water.vs" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\renderer\PlanetaryBodyRenderer.cpp" />
+    <ClCompile Include="src\universe\kepler\KeplerElements.cpp" />
+    <ClCompile Include="src\universe\body\PlanetaryBody.cpp" />
     <ClCompile Include="src\atmosphere\AtmosphereRenderer.cpp" />
     <ClCompile Include="dep\FastNoise\FastNoise.cpp" />
     <ClCompile Include="dep\glad\glad.c">
@@ -159,7 +162,6 @@
     <ClCompile Include="dep\imgui\imgui_widgets.cpp" />
     <ClCompile Include="dep\TextEditor\TextEditor.cpp" />
     <ClCompile Include="src\tools\planet_editor\EditorCamera.h" />
-    <ClCompile Include="src\planet_mesher\PlanetMesherInfo.cpp" />
     <ClCompile Include="src\tools\planet_editor\PlanetEditor.cpp" />
     <ClCompile Include="src\assets\AssetManager.cpp" />
     <ClCompile Include="src\assets\Shader.cpp" />
@@ -174,8 +176,17 @@
     <ClCompile Include="src\util\Logger.cpp" />
     <ClCompile Include="src\universe\Universe.cpp" />
     <ClCompile Include="src\util\Timer.cpp" />
+    <ClCompile Include="src\universe\PlanetarySystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\renderer\PlanetaryBodyRenderer.h" />
+    <ClInclude Include="src\universe\body\config\AtmoConfig.h" />
+    <ClInclude Include="src\universe\body\config\GasConfig.h" />
+    <ClInclude Include="src\universe\body\config\SurfaceConfig.h" />
+    <ClInclude Include="src\universe\body\config\PlanetConfig.h" />
+    <ClInclude Include="src\universe\kepler\KeplerElements.h" />
+    <ClInclude Include="src\universe\body\PlanetaryBody.h" />
+    <ClInclude Include="src\universe\PlanetarySystemSerializer.h" />
     <ClInclude Include="src\util\geometry\SphereGeometry.h" />
     <ClInclude Include="src\atmosphere\AtmosphereRenderer.h" />
     <ClInclude Include="dep\cpptoml.h" />
@@ -201,7 +212,6 @@
     <ClInclude Include="src\util\lua\LuaNoiseLib.h" />
     <ClInclude Include="src\util\serializers\glm.h" />
     <ClInclude Include="src\util\SerializeUtil.h" />
-    <ClInclude Include="src\planet_mesher\PlanetMesherInfo.h" />
     <ClInclude Include="src\tools\planet_editor\PlanetEditor.h" />
     <ClInclude Include="src\assets\AssetManager.h" />
     <ClInclude Include="src\assets\Shader.h" />
@@ -218,6 +228,7 @@
     <ClInclude Include="src\universe\Universe.h" />
     <ClInclude Include="src\util\ThreadUtil.h" />
     <ClInclude Include="src\util\Timer.h" />
+    <ClInclude Include="src\universe\PlanetarySystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="output.log" />
