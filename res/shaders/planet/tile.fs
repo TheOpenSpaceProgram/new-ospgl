@@ -6,6 +6,8 @@ in vec3 vColor;
 in vec2 vTexture;
 in vec3 vNormal;
 in vec3 vPos;
+in vec3 vPosNrm;
+in vec3 vPosSphereNrm;
 
 in float flogz;
 
@@ -24,6 +26,8 @@ uniform vec3 atmo_main_color;
 uniform vec3 atmo_sunset_color;
 uniform float atmo_exponent;
 uniform float sunset_exponent;
+
+uniform vec3 light_dir;
 
 
 float height(vec3 p)
@@ -51,7 +55,7 @@ vec4 atmo(vec3 lightDir)
         start = normalize(camera_pos) * atmo_radius * 10.0;
     }
 
-    vec3 ray = vPos - start;
+    vec3 ray = vPosNrm - start;
 
     vec3 ipos = start;
     float d = 0.0;
@@ -72,7 +76,7 @@ vec4 atmo(vec3 lightDir)
 	float fade_factor = 0.25;
 	float fade_factor_add = 0.0;
 
-	float fade = max( min( dot(vPos, -lightDir) + 0.1, fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
+	float fade = max( min( dot(normalize(vPosNrm), -lightDir) + 0.1, fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
 	d = min(pow(d, 0.47) * min(fade, 0.5) * 4.0, 0.8);
 
     float r_color = exp(-sunset_exponent * fade);
@@ -85,14 +89,13 @@ vec4 atmo(vec3 lightDir)
 void main()
 {
 
-    vec3 lightDir = normalize(vec3(-0.4, -1.0, -0.4));
-    float diff = max(dot(-lightDir, vNormal), 0.0);
+    float diff = max(dot(-light_dir, vNormal), 0.0);
 
     vec3 col = vec3(0.8, 0.6, 0.3);
 
-    vec4 atmoc = atmo(lightDir);
+    vec4 atmoc = atmo(light_dir);
 
-    FragColor = vec4((diff * col + atmoc.xyz * atmoc.w * 0.6) * 0.77, 1.0);
+    FragColor = vec4((diff * col + atmoc.xyz * atmoc.w * 0.77) * 0.77, 1.0);
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets

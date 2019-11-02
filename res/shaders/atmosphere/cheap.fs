@@ -17,6 +17,7 @@ uniform vec3 atmo_main_color;
 uniform vec3 atmo_sunset_color;
 uniform float atmo_exponent;
 uniform float sunset_exponent;
+uniform vec3 light_dir;
 
 vec2 raySphereIntersect(vec3 r0, vec3 rd, float sr)
 {
@@ -59,7 +60,7 @@ float density(float h)
 
 void main()
 {
-	vec3 lDir = normalize(vec3(-0.4, -1.0, -0.4));
+
 	vec3 vPosNrm = normalize(vPos);
 
 	vec3 ray = -normalize(camera_pos - vPosNrm);
@@ -118,9 +119,9 @@ void main()
 		float h = height(ipos);
 		float shfac = 1.0;
 
-		float dist = rayPointDistance(ipos, -lDir, vec3(0.0, 0.0, 0.0));
+		float dist = rayPointDistance(ipos, -light_dir, vec3(0.0, 0.0, 0.0));
 
-		float dotp = dot(ipos, -lDir);
+		float dotp = dot(ipos, -light_dir);
 		float dfac = exp(20.0 * dotp) / (exp(20.0 * dotp) + 1.0);
 
 		dist = dfac + (1.0 - dfac) * dist;
@@ -137,12 +138,12 @@ void main()
 	float fade_factor = 0.05;
 	float fade_factor_add = 0.0;
 
-	float fade = max( min( dot(ipos, -lDir), fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
+	float fade = max( min( dot(ipos, -light_dir), fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
 	d = sqrt(d) * 1.5;
 
 
 	// TODO: Clean this mess up, it works but damn is it horrible code
-	float miew = max(dot(ray, -lDir), 0.0);
+	float miew = max(dot(ray, -light_dir), 0.0);
 	float mie2 = pow(miew, 32.0 * 1.0);
 	float mie = pow(miew, 128.0 * 1.0 / ds);
 
@@ -152,7 +153,7 @@ void main()
 	vec3 col = d * (atmo_main_color * (1.0 - r_color) + atmo_sunset_color * r_color);
 
 
-	float r_factor = dot(start, lDir);
+	float r_factor = dot(start, light_dir);
 	r_factor = 1.0 - (pow(r_factor, 1.0 * 1.0 / (ds)));
 
 	vec3 mieColor = vec3(1.0, 1.0, 1.0) * (1.0 - r_factor) + atmo_sunset_color * r_factor;

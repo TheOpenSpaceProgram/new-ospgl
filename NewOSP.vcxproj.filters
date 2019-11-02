@@ -118,6 +118,15 @@
     <ClCompile Include="src\renderer\PlanetaryBodyRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\camera\MapCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\DebugDrawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\Date.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\sol.hpp">
@@ -268,6 +277,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\universe\body\config\GasConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\camera\MapCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\DebugDrawer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\Date.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,8 +2,10 @@
 #include "../../util/Logger.h"
 #include "../../assets/AssetManager.h"
 
-void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, glm::dmat4 wmodel, 
-	float far_plane, glm::dvec3 camera_pos, PlanetConfig& config, double time)
+void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, 
+	glm::dmat4 wmodel, glm::dmat4 normal_matrix, glm::dmat4 rot_tform,
+	float far_plane, glm::dvec3 camera_pos,
+	PlanetConfig& config, double time, glm::vec3 light_dir)
 {
 	auto render_tiles = planet.get_all_render_leaf_paths();
 
@@ -26,6 +28,8 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 		shader->setVec3("atmo_sunset_color", config.atmo.sunset_color);
 		shader->setFloat("atmo_exponent", (float)config.atmo.exponent);
 		shader->setFloat("sunset_exponent", (float)config.atmo.sunset_exponent);
+		shader->setVec3("light_dir", light_dir);
+		shader->setMat4("normal_tform", normal_matrix);
 
 		bool cw_mode = false;
 		glFrontFace(GL_CCW);
@@ -69,6 +73,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 			shader->setMat4("tform", (glm::mat4)(proj_view * wmodel * model));
 			shader->setMat4("m_tform", (glm::mat4)(model));
+			shader->setMat4("rotm_tform", (glm::mat4)(rot_tform * model));
 
 			glm::vec3 tile_i = glm::vec3(path.get_min(), (float)path.get_depth());
 
@@ -97,6 +102,8 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 			water_shader->setVec3("atmo_sunset_color", config.atmo.sunset_color);
 			water_shader->setFloat("atmo_exponent", (float)config.atmo.exponent);
 			water_shader->setFloat("sunset_exponent", (float)config.atmo.sunset_exponent);
+			water_shader->setVec3("light_dir", light_dir);
+			water_shader->setMat4("normal_tform", normal_matrix);
 
 			cw_mode = false;
 			glFrontFace(GL_CCW);
@@ -137,6 +144,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 				water_shader->setMat4("tform", (glm::mat4)(proj_view * wmodel * t_model * model));
 				water_shader->setMat4("tform_scaled", (glm::mat4)(model));
+				water_shader->setMat4("rotm_tform", (glm::mat4)(rot_tform * model));
 				water_shader->setInt("clockwise", tile->clockwise ? 1 : 0);
 			
 				glm::vec3 tile_i = glm::vec3(path.get_min(), (float)path.get_depth());

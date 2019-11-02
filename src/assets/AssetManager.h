@@ -128,7 +128,7 @@ extern AssetManager* assets;
 
 // Creates the default asset manager, with all 
 // asset types loaded
-void createGlobalAssetManager();
+void create_global_asset_manager();
 
-void destroyGlobalAssetManager();
+void destroy_global_asset_manager();
 

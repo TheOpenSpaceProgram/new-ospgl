@@ -2,6 +2,7 @@
 #include <iostream>
 #include "util/Logger.h"
 #include "util/Timer.h"
+#include "util/DebugDrawer.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "util/InputUtil.h"
@@ -11,7 +12,7 @@
 
 #include "tools/planet_editor/PlanetEditor.h"
 #include "universe/PlanetarySystem.h"
-
+#include "universe/Date.h"
 InputUtil* input;
 
 /*
@@ -28,7 +29,7 @@ int main(void)
 	int width = 1366;
 	int height = 768;
 
-	createGlobalLogger();
+	create_global_logger();
 
 	logger->info("Starting OSP");
 
@@ -43,8 +44,8 @@ int main(void)
 		logger->fatal("Could not initialize glad");
 	}
 
-	createGlobalAssetManager();
-
+	create_global_asset_manager();
+	create_global_debug_drawer();
 
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -57,8 +58,8 @@ int main(void)
 	ImFont* font_code = io.Fonts->AddFontFromFileTTF("./res/FiraCode-Regular.ttf", 16.0f);
 
 	Timer dtt = Timer();
-	float dt = 0.0f;
-	float t = 0.0f;
+	double dt = 0.0;
+	double t = 0.0;
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -75,13 +76,16 @@ int main(void)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	/*PlanetarySystem system;
+	PlanetarySystem system;
 	SerializeUtil::read_file_to("res/systems/test_system.toml", system);
 
-	std::vector<glm::dvec3> stt;
-	stt.resize(system.bodies.size());
-	*/
+	system.compute_sois(0.0);
+	system.draw_debug = true;
 
+	Date start_date = Date(2000, Date::DECEMBER, 21);
+
+	t = start_date.to_seconds();
+	
 	while (!glfwWindowShouldClose(window))
 	{
 		input->update(window);
@@ -97,23 +101,26 @@ int main(void)
 		ImGui::NewFrame();
 
 
-		editor.update(dt, font_code);
+		//editor.update(dt, font_code);
 
 
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-
-		editor.render(width, height);
 		
+		system.render(t, width, height);
+		//editor.render(width, height);
+
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	
 		glfwSwapBuffers(window);
 
+		Date now = Date(t);
+		logger->info("Now is: {}", now.to_string());
 
-		dt = (float)dtt.restart();
-		t += dt;
+		dt = dtt.restart();
+		t += dt * 1000.0;
 	}
 
 	logger->info("Ending OSP");
@@ -123,7 +130,7 @@ int main(void)
 	glfwDestroyWindow(window);
 	glfwTerminate();
 
-	destroyGlobalAssetManager();
-	destroyGlobalLogger();
+	destroy_global_asset_manager();
+	destroy_global_logger();
 
 }

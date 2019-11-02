@@ -4,6 +4,7 @@
 #include "GasConfig.h"
 #include <glm/glm.hpp>
 
+
 struct PlanetConfig
 {
 	double mass;
@@ -19,6 +20,7 @@ struct PlanetConfig
 	bool has_surface;
 	SurfaceConfig surface;
 	GasConfig gas;
+
 };
 
 
@@ -26,6 +28,8 @@ template<>
 class GenericSerializer<PlanetConfig>
 {
 public:
+
+
 
 	static void serialize(const PlanetConfig& what, cpptoml::table& target)
 	{
@@ -51,7 +55,6 @@ public:
 
 		target.insert("radius", what.radius);
 		target.insert("mass", what.mass);
-	
 		serialize_to_table(what.far_color, target, "far_color");
 	}
 
@@ -60,6 +63,7 @@ public:
 		SAFE_TOML_GET(to.radius, "radius", double);
 		SAFE_TOML_GET(to.mass, "mass", double);
 		SAFE_TOML_GET_TABLE(to.far_color, "far_color", glm::vec3);
+
 
 		if (from.get_table_qualified("atmo"))
 		{

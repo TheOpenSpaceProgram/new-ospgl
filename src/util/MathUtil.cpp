@@ -57,11 +57,14 @@ glm::dvec3 MathUtil::sphere_to_cube(glm::dvec3 spheric)
 	}
 }
 
-glm::mat4 MathUtil::rotate_from_to(glm::vec3 from, glm::vec3 to)
+glm::dmat4 MathUtil::rotate_from_to(glm::dvec3 from, glm::dvec3 to)
 {
-	glm::vec3 axis = glm::normalize(glm::cross(from, to));
-	float dot = glm::dot(from, to);
-	float angle = glm::acos(dot / (from.length() * to.length()));
+	glm::dvec3 from_nrm = glm::normalize(from);
+	glm::dvec3 to_nrm = glm::normalize(to);
+
+	glm::dvec3 axis = glm::normalize(glm::cross(from_nrm, to_nrm));
+	double dot = glm::dot(from_nrm, to_nrm);
+	double angle = glm::acos(dot);
 
 	return glm::rotate(angle, axis);
 }

@@ -62,5 +62,5 @@ public:
 
 extern Logger* logger;
 
-void createGlobalLogger();
-void destroyGlobalLogger();
+void create_global_logger();
+void destroy_global_logger();

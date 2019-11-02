@@ -7,12 +7,15 @@ layout (location = 3) in vec2 aTexture;
 
 uniform mat4 tform;
 uniform mat4 tform_scaled;
+uniform mat4 normal_tform;
+uniform mat4 rotm_tform;
 
 uniform int clockwise;
 uniform float f_coef;
 
 out vec3 vNormal;
 out vec3 vPos;
+out vec3 vPosNrm;
 out vec2 vTexture;
 out float flogz;
 out float vDepth;
@@ -39,7 +42,8 @@ void main()
 
 	vPos = wPos.xyz;
 
-	vNormal = aNormal;
+	vNormal = vec3(normal_tform * vec4(aNormal, 1.0));
+	vPosNrm = vec3(rotm_tform * vec4(aPos, 1.0));
 	vDepth = aDepth;
 
-} 
+}

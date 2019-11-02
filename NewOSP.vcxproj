@@ -145,6 +145,9 @@
     <None Include="res\shaders\planet\water.vs" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\universe\Date.cpp" />
+    <ClCompile Include="src\util\DebugDrawer.cpp" />
+    <ClCompile Include="src\renderer\camera\MapCamera.cpp" />
     <ClCompile Include="src\renderer\PlanetaryBodyRenderer.cpp" />
     <ClCompile Include="src\universe\kepler\KeplerElements.cpp" />
     <ClCompile Include="src\universe\body\PlanetaryBody.cpp" />
@@ -179,6 +182,9 @@
     <ClCompile Include="src\universe\PlanetarySystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\universe\Date.h" />
+    <ClInclude Include="src\util\DebugDrawer.h" />
+    <ClInclude Include="src\renderer\camera\MapCamera.h" />
     <ClInclude Include="src\renderer\PlanetaryBodyRenderer.h" />
     <ClInclude Include="src\universe\body\config\AtmoConfig.h" />
     <ClInclude Include="src\universe\body\config\GasConfig.h" />

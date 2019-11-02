@@ -7,6 +7,8 @@ layout (location = 3) in vec2 aTexture;
 
 uniform mat4 tform;
 uniform mat4 m_tform;
+uniform mat4 normal_tform;
+uniform mat4 rotm_tform;
 
 uniform float f_coef;
 
@@ -16,6 +18,8 @@ out vec2 vTexture;
 
 // In planet coordinates, 0->1 origin centered
 out vec3 vPos;
+out vec3 vPosNrm;
+
 out float flogz;
 
 uniform vec3 tile;
@@ -32,7 +36,8 @@ void main()
 	flogz = 1.0 + gl_Position.w;
 
 	vColor = aColor;
-	vNormal = aNormal;
+	vNormal = vec3(normal_tform * vec4(aNormal, 1.0));
+	vPosNrm = vec3(rotm_tform * vec4(aPos, 1.0));
 	vTexture = get_real_uv();
 	vPos = vec3(m_tform * vec4(aPos, 1.0));
 }

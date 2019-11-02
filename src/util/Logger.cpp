@@ -129,12 +129,12 @@ Logger::~Logger()
 
 Logger* logger;
 
-void createGlobalLogger()
+void create_global_logger()
 {
 	logger = new Logger();
 }
 
-void destroyGlobalLogger()
+void destroy_global_logger()
 {
 	delete logger;
 }

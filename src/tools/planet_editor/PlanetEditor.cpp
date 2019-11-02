@@ -182,9 +182,9 @@ void PlanetEditor::render(int width, int height)
 	}
 
 	// ~1 light year
-	float far_plane = 10e16f;
+	float far_plane = 1e16f;
 
-	glm::mat4 proj = glm::perspective(glm::radians(60.0f), (float)width / (float)height, 0.1f, far_plane);
+	glm::mat4 proj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, 0.1f, far_plane);
 	glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), (glm::vec3)camera.forward, (glm::vec3)camera.up);
 
 	// We apply the view position to the world so floating point errors happen
@@ -194,7 +194,8 @@ void PlanetEditor::render(int width, int height)
 
 	glm::dmat4 proj_view = (glm::dmat4)proj * (glm::dmat4)view;
 
-	renderer.render(proj_view, model, far_plane, camera.pos, config, glfwGetTime());
+	renderer.render(proj_view, model, glm::dmat4(1.0), far_plane, camera.pos, config, glfwGetTime(), 
+		-glm::normalize(glm::vec3(1.0, 1.0, 0.0)), 0.0f);
 
 
 }
@@ -291,51 +292,8 @@ PlanetEditor::PlanetEditor(GLFWwindow* window, const std::string& planet_name)
 
 
 	std::string script = assets->loadString(path);
-	renderer.rocky->server = new PlanetTileServer(script, &config, 0, 0, config.surface.has_water);
-
+	renderer.rocky->load(script, config);
 	
-
-	// Load custom theme
-	/*const static TextEditor::Palette pallete = 
-	{ {
-			0xffcbcbcb,	// Default
-			0xff756cd4,	// Keyword	
-			0xffdd78c6,	// Number
-			0xff56b4e5,	// String
-			0xff56b4e5, // Char literal
-			0xffcbcbcb, // Punctuation
-			0xff408080,	// Preprocessor
-			0xff79c398, // Identifier
-			0xff79c398, // Known identifier
-			0xff79c398, // Preproc identifier
-			0xff79685f, // Comment (single line)
-			0xff79685f, // Comment (multi line)
-			0xff342c28, // Background
-			0xffe0e0e0, // Cursor
-			0x80a06020, // Selection
-			0x800020ff, // ErrorMarker
-			0x40f08000, // Breakpoint
-			0xff79685f, // Line number
-			0x10ffffff, // Current line fill
-			0x10808080, // Current line fill (inactive)
-			0x10a0a0a0, // Current line edge
-	} };
-
-	// Setup editors
-	auto script_lang = TextEditor::LanguageDefinition::Lua();
-	script_editor.SetLanguageDefinition(script_lang);
-
-	script_editor.SetText(script_loaded);
-	script_editor.SetShowWhitespaces(false);
-	script_editor.SetPalette(pallete); 
-
-	auto config_lang = TextEditor::LanguageDefinition::TOML();
-	toml_editor.SetLanguageDefinition(config_lang);
-
-	toml_editor.SetText(config_loaded);
-	toml_editor.SetShowWhitespaces(false);
-	toml_editor.SetPalette(pallete);
-	*/
 
 	script_watch = FileWatcher(path);
 	config_watch = FileWatcher(config_path);

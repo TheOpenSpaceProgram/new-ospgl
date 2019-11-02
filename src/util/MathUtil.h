@@ -13,7 +13,7 @@ public:
 	// Takes and outputs normalized coordinates
 	static glm::dvec3 sphere_to_cube(glm::dvec3 spheric);
 
-	static glm::mat4 rotate_from_to(glm::vec3 from, glm::vec3 to);
+	static glm::dmat4 rotate_from_to(glm::dvec3 from, glm::dvec3 to);
 
 	// x = azimuth, y = inclination, z = radius
 	static glm::dvec3 spherical_to_euclidean(glm::dvec3 spherical);

@@ -8,7 +8,9 @@
 # https://ssd.jpl.nasa.gov/txt/p_elem_t2.txt
 # If parent is not present, or is equal to "", the planet will orbit the central star
 #
-
+# Rotation period is given in hours, it should be the sidereal day
+# Rotation at epoch is in degrees
+# https://en.wikipedia.org/wiki/Axial_tilt <- J2000 used for tilt
 
 
 [[planet]]
@@ -28,11 +30,14 @@
 	periapsis_longitude_var = 0.31795260
 	asc_node_longitude = 0.0
 	asc_node_longitude_var = -0.24123856
-
+	rotation_period = 23.9344696
+	rotation_at_epoch = 0.0
+	north_pole_declination = 90.0
+	north_pole_right_ascension = 0.0
 
 [[planet]]
 	name = "Mars"
-	config = "res/planets/test_gas/config.toml"
+	config = "res/planets/test/config.toml"
 
 	is_nasa_data = true
 	smajor_axis = 227944179731.897
@@ -47,5 +52,7 @@
 	periapsis_longitude_var = 0.45223625
 	asc_node_longitude = 49.71320984
 	asc_node_longitude_var = -0.26852431
-
-
+	rotation_period = 24.62277778
+	rotation_at_epoch = 0.0
+	north_pole_declination = 52.89
+	north_pole_right_ascension = 317.68

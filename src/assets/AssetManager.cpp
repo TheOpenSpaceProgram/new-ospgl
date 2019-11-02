@@ -6,7 +6,7 @@
 AssetManager* assets;
 
 
-void createGlobalAssetManager()
+void create_global_asset_manager()
 {
 	assets = new AssetManager();
 
@@ -14,7 +14,7 @@ void createGlobalAssetManager()
 	//assets->createAssetType<Texture>(loadTexture, "./res/tex/", "png", true);
 }
 
-void destroyGlobalAssetManager()
+void destroy_global_asset_manager()
 {
 	delete assets;
 }

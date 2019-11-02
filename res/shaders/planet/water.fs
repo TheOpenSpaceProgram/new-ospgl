@@ -6,6 +6,7 @@ in vec3 vNormal;
 in vec3 vPos;
 in float vDepth;
 in vec2 vTexture;
+in vec3 vPosNrm;
 
 in float flogz;
 
@@ -57,6 +58,8 @@ uniform vec3 atmo_sunset_color;
 uniform float atmo_exponent;
 uniform float sunset_exponent;
 
+uniform vec3 light_dir;
+
 float height(vec3 p)
 {
     return max((length(p) - 1.0) / (atmo_radius - 1.0), 0.0);
@@ -74,6 +77,7 @@ float atmo_curve(float d)
 }
 
 
+
 vec4 atmo(vec3 lightDir)
 {
     vec3 start = camera_pos;
@@ -83,34 +87,33 @@ vec4 atmo(vec3 lightDir)
         start = normalize(camera_pos) * atmo_radius * 10.0;
     }
 
-    vec3 ray = vPos - start;
+    vec3 ray = vPosNrm - start;
 
     vec3 ipos = start;
     float d = 0.0;
 
-    float step_size = length(ray) / float(ATMO_STEPS);
+    float step_size = length(ray) / float(ATMO_STEPS - 1);
     float last_d = 0.0;
     for(int i = 0; i < ATMO_STEPS; i++)
     {
       float step = float(i) / float(ATMO_STEPS - 1);
       ipos = start + ray * step;
 
-      float h = height(ipos);
+		  float h = height(ipos);
 
-      d += density(h) * ATMO_STEPS_INVERSE * step_size * 2.0;
+		  d += density(h) * ATMO_STEPS_INVERSE * step_size * 2.0;
     }
 
 
-    float fade_factor = 0.25;
-    float fade_factor_add = 0.0;
+	  float fade_factor = 0.25;
+	  float fade_factor_add = 0.0;
 
-	  float fade = max( min( dot(vPos, -lightDir) + 0.1, fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
+	  float fade = max( min( dot(vPosNrm, -lightDir) + 0.1, fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
 	  d = min(pow(d, 0.47) * min(fade, 0.5) * 4.0, 0.8);
 
     float r_color = exp(-sunset_exponent * fade);
 
     vec3 col = atmo_main_color * (1.0 - r_color) + atmo_sunset_color * r_color;
-
 
     return vec4(col, atmo_curve(d));
 }
@@ -132,11 +135,10 @@ void main()
     vec3 nrm = normalize(vNormal + offset);
 
 
-    vec3 lightDir = normalize(vec3(-0.4, -1.0, -0.4));
-    float diff = max(dot(-lightDir, vNormal + offset * 0.5), 0.0);
+    float diff = max(dot(-light_dir, vNormal + offset * 0.5), 0.0);
 
     vec3 viewDir = normalize(camera_pos - vPos);
-    vec3 reflectDir = reflect(lightDir, nrm);
+    vec3 reflectDir = reflect(light_dir, nrm);
 
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256);
     float specular = 1.0 * spec;
@@ -145,7 +147,7 @@ void main()
 
     vec3 veryshallowcol = vec3(0.95, 0.95, 1.0);
     vec3 shallowcol = vec3(0.7, 0.7, 1.0);
-    vec3 deepcol = vec3(0.5, 0.5, 0.8) * 0.7;
+    vec3 deepcol = vec3(0.5, 0.5, 0.8) * 0.5;
     vec3 speccol = vec3(1.0, 0.3, 0.3);
     vec3 speccolb = vec3(1.0, 0.9, 0.88);
 
@@ -154,9 +156,9 @@ void main()
 
     vec3 col = shallowcol * (1.0 - deepfactor) + deepcol * deepfactor + veryshallowcol * (1.0 - veryshallow);
 
-    vec4 atmoc = atmo(lightDir);
+    vec4 atmoc = atmo(light_dir);
 
-    FragColor = vec4((col * diff + speccol * specular * (1.0 - spec_red) + speccolb * specular * spec_red + atmoc.xyz * atmoc.w * 0.77) * 0.6, min(deepfactor + 0.9, 1.0));
+    FragColor = vec4((col * diff + speccol * specular * (1.0 - spec_red) + speccolb * specular * spec_red + atmoc.xyz * atmoc.w * 0.77) * 0.77, min(deepfactor + 0.9, 1.0));
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets

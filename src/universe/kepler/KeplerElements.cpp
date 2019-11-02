@@ -30,7 +30,7 @@ KeplerOrbit NASAKeplerOrbit::to_kepler_at(double time, double& mean_anomaly_out)
 
 	// Contain mean anomaly in [-180, +180]
 	// TODO: Is this correct
-	mean_anomaly_now = fmod(mean_anomaly_now, 180.0);
+	//mean_anomaly_now = fmod(mean_anomaly_now, 180.0);
 
 
 	KeplerOrbit out;

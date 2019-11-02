@@ -2,9 +2,8 @@
 
 
 
-void AtmosphereRenderer::do_pass(glm::dmat4 proj_view, glm::dmat4 model, float far_plane, 
-	float planet_radius_relative, glm::vec3 cam_pos_relative, glm::vec3 main_color, glm::vec3 sunset_color,
-	float exponent, float sunset_exponent)
+void AtmosphereRenderer::do_pass(glm::dmat4 proj_view, glm::dmat4 model, float far_plane, glm::vec3 cam_pos_relative,
+	PlanetConfig& config, glm::vec3 light_dir)
 {
 	
 	float l = glm::length(cam_pos_relative);
@@ -33,11 +32,12 @@ void AtmosphereRenderer::do_pass(glm::dmat4 proj_view, glm::dmat4 model, float f
 	atmo->setMat4("tform", proj_view * extra_model * model);
 	atmo->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
 	atmo->setVec3("camera_pos", cam_pos_relative);
-	atmo->setFloat("planet_radius", planet_radius_relative);
-	atmo->setVec3("atmo_main_color", main_color);
-	atmo->setVec3("atmo_sunset_color", sunset_color);
-	atmo->setFloat("atmo_exponent", exponent);
-	atmo->setFloat("sunset_exponent", sunset_exponent);
+	atmo->setFloat("planet_radius", (float)(config.radius / config.atmo.radius));
+	atmo->setVec3("atmo_main_color", config.atmo.main_color);
+	atmo->setVec3("atmo_sunset_color", config.atmo.sunset_color);
+	atmo->setFloat("atmo_exponent", (float)config.atmo.exponent);
+	atmo->setFloat("sunset_exponent", (float)config.atmo.sunset_exponent);
+	atmo->setVec3("light_dir", light_dir);
 
 	glBindVertexArray(atmo_vao);
 	glDrawElements(GL_TRIANGLES, (GLsizei)index_count, GL_UNSIGNED_INT, 0);

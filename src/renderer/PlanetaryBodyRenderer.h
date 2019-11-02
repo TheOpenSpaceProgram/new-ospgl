@@ -9,7 +9,16 @@ struct RockyPlanetRenderer
 	QuadTreePlanet qtree;
 	PlanetTileServer* server;
 	PlanetRenderer renderer;
+
+	void load(std::string script, PlanetConfig& config);
+
+	RockyPlanetRenderer()
+	{
+		server = nullptr;
+	}
 };
+
+class PlanetaryBody;
 
 // A planetary body can either be a gaseous planet
 // or a rocky body, both types only differ when seen from
@@ -21,9 +30,13 @@ public:
 	RockyPlanetRenderer* rocky;
 	AtmosphereRenderer* atmo;
 
-	void render(glm::dmat4 proj_view, glm::dmat4 model, float far_plane,
-		glm::dvec3 camera_pos, PlanetConfig& config, double time);
 
+	void render(glm::dmat4 proj_view, glm::dmat4 model, 
+		glm::dmat4 rotation_matrix, double far_plane,
+		glm::dvec3 camera_pos, PlanetConfig& config, double time, glm::vec3 light_dir,
+		float dot_factor);
+
+	void draw_debug(glm::dvec3 pos, PlanetaryBody* body, float dot_factor);
 
 	PlanetaryBodyRenderer();
 	~PlanetaryBodyRenderer();
