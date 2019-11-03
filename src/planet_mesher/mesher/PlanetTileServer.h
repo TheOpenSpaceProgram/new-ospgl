@@ -43,7 +43,7 @@ private:
 	void prepare_lua(sol::state& lua_state, FastNoise* noise);
 
 	// Loads default values for the different libraries
-	void default_lua(sol::state& lua_state);
+	void default_lua(sol::state& lua_state, FastNoise* noise);
 
 	// We keep a little state to find height and so 
 	// everybody can query to find stuff about the script

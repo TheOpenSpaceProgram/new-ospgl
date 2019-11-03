@@ -121,7 +121,7 @@ double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
 	glm::dvec2 projected = MathUtil::euclidean_to_spherical_r1(pos_3d);
 
 
-	default_lua(lua_state);
+	default_lua(lua_state, &noise);
 
 	lua_state["coord_3d"]["x"] = pos_3d.x;
 	lua_state["coord_3d"]["y"] = pos_3d.y;
@@ -131,6 +131,7 @@ double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
 	lua_state["coord_2d"]["y"] = projected.y;
 
 	lua_state["radius"] = config->radius;
+	lua_state["depth"] = depth;
 
 	sol::protected_function func = lua_state["generate"];
 	auto result = func();
@@ -165,8 +166,6 @@ PlanetTileServer::PlanetTileServer(const std::string& script, PlanetConfig* conf
 		noise_interp = FastNoise::Interp::Quintic;
 	}
 
-	noise.SetSeed(seed);
-	noise.SetInterp(noise_interp);
 
 	this->config = config;
 	has_errors = false;
@@ -177,10 +176,15 @@ PlanetTileServer::PlanetTileServer(const std::string& script, PlanetConfig* conf
 
 	prepare_lua(lua_state, &noise);
 	safe_lua(lua_state, script, wrote_error);
+	noise = FastNoise();
+	noise.SetSeed(seed);
+	noise.SetInterp(noise_interp);
 
 	for (size_t i = 0; i < threads.size(); i++)
 	{
+		threads[i].noise = FastNoise();
 		threads[i].noise.SetInterp(noise_interp);
+		threads[i].noise.SetSeed(seed);
 
 		threads[i].thread = new std::thread(thread_func, this, &threads[i]);
 		prepare_lua(threads[i].lua_state, &threads[i].noise);
@@ -254,12 +258,12 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 				
 			}
 
-			server->default_lua(thread->lua_state);
-
 			// Work on the target
 			PlanetTile* ntile = new PlanetTile();
 			bool has_errors = ntile->generate(target, server->config->radius, thread->lua_state, server->has_water,
-				work_array);
+				work_array, [&server, &thread]() {
+				server->default_lua(thread->lua_state, &thread->noise);
+			});
 
 			if (has_errors)
 			{
@@ -306,16 +310,15 @@ void PlanetTileServer::prepare_lua(sol::state& lua_state, FastNoise* noise)
 	LuaNoiseLib::load_lib(lua_state, noise);
 	LuaUtilLib::load_lib(lua_state);
 
-	noise->SetSeed(noise_seed);
 }
 
-void PlanetTileServer::default_lua(sol::state & lua_state)
+void PlanetTileServer::default_lua(sol::state & lua_state, FastNoise* noise)
 {
-	lua_state["noise"]["set_frequency"](0.01);
-	lua_state["noise"]["set_fractal_octaves"](3);
-	lua_state["noise"]["set_fractal_lacunarity"](2.0);
-	lua_state["noise"]["set_fractal_gain"](0.5);
-	lua_state["noise"]["set_fractal_fbm"]();
-	lua_state["noise"]["set_cellular_value"]();
+	noise->SetFrequency(0.01);
+	noise->SetFractalOctaves(3);
+	noise->SetFractalLacunarity(2.0);
+	noise->SetFractalGain(0.5);
+	noise->SetFractalType(FastNoise::FBM);
+	noise->SetCellularReturnType(FastNoise::CellValue);
 }
 

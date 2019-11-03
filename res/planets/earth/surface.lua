@@ -1,11 +1,4 @@
 
--- Returns named items modificable by the user here
--- Types can be:
--- num, vec2, vec3, color
-function get_data_items()
-	return {}
-end
-
 -- Data set by caller:
 --
 --	coord_3d	-> {x, y, z}	-> Spherical 3D coordinates
@@ -78,20 +71,21 @@ function generate()
 	local pole_factor = polesfun(math.abs(coord_3d.y));
 	local desert_factor = 1.0 - math.abs(coord_3d.y);
 
-	local cf = continents(coord_3d.x, coord_3d.y, coord_3d.z) + pole_factor;
+	local cf = continents(coord_3d.x, coord_3d.y, coord_3d.z);
 
 	local lf = life(coord_3d.x, coord_3d.y, coord_3d.z) * (math.pow(math.abs(coord_3d.y), 2.0) + 0.5);
 	lf = math.abs(lf);
 
 	local df = desert(coord_3d.x, coord_3d.y, coord_3d.z) * desert_factor;
 
-	local mtf = clamp(mountainf(coord_3d.x, coord_3d.y, coord_3d.z), 0, 1) * clamp(cf - pole_factor, 0.0, 1.0);
-	local mt = mountains(coord_3d.x, coord_3d.y, coord_3d.z) * mtf;
+	--local mtf = clamp(mountainf(coord_3d.x, coord_3d.y, coord_3d.z), 0, 1) * clamp(cf - pole_factor, 0.0, 1.0);
+	--local mt = mountains(coord_3d.x, coord_3d.y, coord_3d.z) * mtf;
 
-	local sur_color = mix_color(life_color, dirt, lf);
-	sur_color = mix_color(sur_color, sand, clamp(df, 0.0, 1.0));
+	--local sur_color = mix_color(life_color, dirt, lf);
+	--sur_color = mix_color(sur_color, sand, clamp(df, 0.0, 1.0));
 
-	height = cf * radius * 0.01 + mt * radius * 0.015;
-	color = mix_color(sur_color, poles, pole_factor + mt * 2.0);
+	height = cf * radius * 0.01;
+	--color = mix_color(sur_color, poles, pole_factor + mt * 2.0);
+	color = life_color;
 end
 

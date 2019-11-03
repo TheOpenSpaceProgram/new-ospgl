@@ -1,5 +1,6 @@
 #include "PlanetEditor.h"
 #include <fstream>
+#include "../../util/DebugDrawer.h"
 
 void PlanetEditor::update(float dt, ImFont* code_font)
 {
@@ -198,6 +199,8 @@ void PlanetEditor::render(int width, int height)
 		-glm::normalize(glm::vec3(1.0, 0.0, 0.0)), 0.0f);
 
 
+	debug_drawer->render(proj_view, glm::translate(glm::dmat4(1.0f), -camera.pos), far_plane);
+
 }
 
 void PlanetEditor::on_script_file_change()
@@ -350,9 +353,10 @@ void PlanetEditor::on_move()
 	glm::vec3 pos_nrm = (glm::vec3)glm::normalize(camera.pos);
 	PlanetSide side = renderer.rocky->qtree.get_planet_side(pos_nrm);
 	glm::dvec2 offset = renderer.rocky->qtree.get_planet_side_offset(pos_nrm, side);
-
-	double height = std::max(glm::length(camera.pos) - config.radius - renderer.rocky->server->get_height(pos_nrm, 1), 1.0);
-	altitude = height;
+	
+	double h = renderer.rocky->server->get_height(pos_nrm, 1);
+	altitude = glm::length(camera.pos) - config.radius - h;
+	double height = std::max(glm::length(camera.pos) - config.radius - h, 1.0);
 	height /= config.radius;
 	double depthf = (config.surface.coef_a - (config.surface.coef_a * glm::log(height) 
 		/ ((glm::pow(height, 0.15) * config.surface.coef_b))) - 0.3 * height) * 0.4;

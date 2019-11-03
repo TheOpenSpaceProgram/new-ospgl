@@ -5,6 +5,7 @@
 #include <glad/glad.h>
 #include <glm/gtx/normal.hpp>
 #include <sol.hpp>
+#include <functional>
 
 // TODO: Tile vertex structure
 // We may not even use colors
@@ -49,7 +50,7 @@ struct PlanetTile
 
 	// Return true if errors happened
 	bool generate(PlanetTilePath path, double planet_radius, sol::state& lua_state, bool has_water,
-		VertexArray<PlanetTileVertex>* work_array);
+		VertexArray<PlanetTileVertex>* work_array, std::function<void(void)> clear);
 
 	void upload();
 

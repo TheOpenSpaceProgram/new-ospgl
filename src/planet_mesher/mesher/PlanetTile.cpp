@@ -162,7 +162,7 @@ void generate_skirt(PlanetTileVertex* target, glm::dmat4 model, glm::dmat4 inver
 
 
 bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state& lua_state, bool has_water,
-	VertexArray<PlanetTileVertex>* work_array)
+	VertexArray<PlanetTileVertex>* work_array, std::function<void(void)> clear)
 {
 	
 	bool errors = false;
@@ -213,6 +213,8 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 			lua_state["coord_3d"]["z"] = sphere.z;
 			lua_state["coord_2d"]["x"] = projected.x;
 			lua_state["coord_2d"]["y"] = projected.y;
+
+			clear();
 
 			size_t i = (y + 1) * (TILE_SIZE + 2) + (x + 1);
 			
