@@ -46,9 +46,46 @@ void PlanetarySystem::compute_sois(double t)
 	}
 }
 
+static glm::dmat4 build_body_rotation_matrix(PlanetaryBody* body, double t)
+{
+	glm::dmat4 rot_matrix = glm::mat4(1.0);
+
+	double rot_angle = glm::radians(body->rotation_at_epoch + t * body->rotation_speed);
+	rot_matrix = glm::rotate(rot_matrix, rot_angle, body->rotation_axis);
+	// Align pole to rotation axis
+	rot_matrix = rot_matrix * MathUtil::rotate_from_to(glm::dvec3(0.0, 1.0, 0.0), body->rotation_axis);
+
+
+	return rot_matrix;
+}
+
+void PlanetarySystem::render_body(glm::dvec3 pos, PlanetaryBody* body, glm::dvec3 camera_pos, double t, 
+	glm::dmat4 proj_view, float far_plane)
+{
+	glm::dmat4 model = glm::translate(glm::dmat4(1.0), -camera_pos + pos);
+	model = glm::scale(model, glm::dvec3(body->config.radius));
+
+	glm::dmat4 rot_matrix = build_body_rotation_matrix(body, t);
+	
+	model = model;
+
+	glm::dvec3 camera_pos_relative = camera_pos - pos;
+	glm::dvec3 light_dir = glm::normalize(pos);
+
+	body->renderer.render(proj_view, model * rot_matrix, rot_matrix, far_plane, camera_pos_relative,
+		body->config, t, light_dir, body->dot_factor);
+
+	if (draw_debug)
+	{
+		body->renderer.draw_debug(pos, body, body->dot_factor);
+	}
+}
+
+
+
 void PlanetarySystem::render(double t, int width, int height)
 {
-	double rt = t * 0.0;
+	double rt = t * 0.0 + 10.0;
 
 	if (render_positions.size() == 0)
 	{
@@ -61,9 +98,9 @@ void PlanetarySystem::render(double t, int width, int height)
 
 	double dist = bodies[0].config.radius * 2.0f + t * bodies[0].config.radius * 0.0;
 
-	glm::dvec3 camera_pos = render_positions[0] - glm::dvec3(cos(rt) * dist, 0.0, sin(rt) * dist);
+	glm::dvec3 camera_pos = render_positions[1] - glm::dvec3(cos(rt) * dist, 0.0, sin(rt) * dist);
 
-	update_render(camera_pos, fov);
+	update_render(camera_pos, fov, t);
 
 
 	// ~1 light year
@@ -91,28 +128,7 @@ void PlanetarySystem::render(double t, int width, int height)
 
 	for (size_t i = 0; i < sorted.size(); i++)
 	{
-		glm::dmat4 model = glm::translate(glm::dmat4(1.0), -camera_pos + sorted[i].second);
-		model = glm::scale(model, glm::dvec3(sorted[i].first->config.radius));
-
-		glm::dmat4 rot_matrix = glm::mat4(1.0);
-
-		double rot_angle = glm::radians(sorted[i].first->rotation_at_epoch + t * sorted[i].first->rotation_speed);
-		rot_matrix = glm::rotate(rot_matrix, rot_angle, sorted[i].first->rotation_axis);
-		// Align pole to rotation axis
-		rot_matrix = rot_matrix * MathUtil::rotate_from_to(glm::dvec3(0.0, 1.0, 0.0), sorted[i].first->rotation_axis);
-
-		model = model;
-
-		glm::dvec3 camera_pos_relative = camera_pos - sorted[i].second;
-		glm::dvec3 light_dir = glm::normalize(sorted[i].second);
-
-		sorted[i].first->renderer.render(proj_view, model * rot_matrix, rot_matrix, far_plane, camera_pos_relative, 
-			sorted[i].first->config, t, light_dir, sorted[i].first->dot_factor);
-
-		if(draw_debug)
-		{
-			sorted[i].first->renderer.draw_debug(sorted[i].second, sorted[i].first, sorted[i].first->dot_factor);
-		}
+		render_body(sorted[i].second, sorted[i].first, camera_pos, t, proj_view, far_plane);
 	}
 
 	if (draw_debug)
@@ -164,9 +180,54 @@ static void unload_body(PlanetaryBody* body)
 	}
 }
 
-void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov)
+void PlanetarySystem::update_render_body_rocky(PlanetaryBody* body, glm::dvec3 body_pos, glm::dvec3 camera_pos, double t)
 {
 	bool moved = true;
+
+	body->renderer.rocky->server->update(body->renderer.rocky->qtree);
+	body->renderer.rocky->qtree.dirty = false;
+	body->renderer.rocky->qtree.update(*body->renderer.rocky->server);
+
+	if (moved)
+	{
+		// Build camera transform matrix, to get the relative camera pos
+		glm::dmat4 rel_matrix = glm::dmat4(1.0);
+		rel_matrix = rel_matrix * glm::inverse(build_body_rotation_matrix(body, t));
+		rel_matrix = glm::translate(rel_matrix, -body_pos);
+
+		glm::dvec3 rel_camera_pos = rel_matrix * glm::dvec4(camera_pos, 1.0);
+	
+
+
+		glm::vec3 pos_nrm = (glm::vec3)glm::normalize(rel_camera_pos);
+		PlanetSide side = body->renderer.rocky->qtree.get_planet_side(pos_nrm);
+		glm::dvec2 offset = body->renderer.rocky->qtree.get_planet_side_offset(pos_nrm, side);
+
+		double height = std::max(glm::length(rel_camera_pos) - body->config.radius -
+			body->renderer.rocky->server->get_height(pos_nrm, 1), 1.0);
+
+		height /= body->config.radius;
+		double depthf = (body->config.surface.coef_a - (body->config.surface.coef_a * glm::log(height)
+			/ ((glm::pow(height, 0.15) * body->config.surface.coef_b))) - 0.3 * height) * 0.4;
+
+		size_t depth = (size_t)round(std::max(std::min(depthf, (double)body->config.surface.max_depth - 1.0), -1.0) + 1.0);
+
+
+		body->renderer.rocky->qtree.set_wanted_subdivide(offset, side, depth);
+		body->renderer.rocky->qtree.dirty = true;
+
+		if (draw_debug)
+		{
+			// Add debug point at surface we are over
+			debug_drawer->add_point(
+				glm::inverse(rel_matrix) * glm::dvec4(glm::normalize(rel_camera_pos) * height * 1.01 * body->config.radius, 1.0),
+				glm::vec3(1.0, 1.0, 1.0));
+		}
+	}
+}
+
+void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
+{
 
 	for (size_t i = 0; i < bodies.size(); i++)
 	{
@@ -189,30 +250,7 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov)
 
 		if (bodies[i].renderer.rocky != nullptr)
 		{
-			bodies[i].renderer.rocky->server->update(bodies[i].renderer.rocky->qtree);
-			bodies[i].renderer.rocky->qtree.dirty = false;
-			bodies[i].renderer.rocky->qtree.update(*bodies[i].renderer.rocky->server);
-
-			if (moved)
-			{
-				glm::dvec3 rel_camera_pos = camera_pos - render_positions[i];
-				glm::vec3 pos_nrm = (glm::vec3)glm::normalize(rel_camera_pos);
-				PlanetSide side = bodies[i].renderer.rocky->qtree.get_planet_side(pos_nrm);
-				glm::dvec2 offset = bodies[i].renderer.rocky->qtree.get_planet_side_offset(pos_nrm, side);
-
-				double height = std::max(glm::length(rel_camera_pos) - bodies[i].config.radius -
-					bodies[i].renderer.rocky->server->get_height(pos_nrm, 1), 1.0);
-
-				height /= bodies[i].config.radius;
-				double depthf = (bodies[i].config.surface.coef_a - (bodies[i].config.surface.coef_a * glm::log(height)
-					/ ((glm::pow(height, 0.15) * bodies[i].config.surface.coef_b))) - 0.3 * height) * 0.4;
-
-				size_t depth = (size_t)round(std::max(std::min(depthf, (double)bodies[i].config.surface.max_depth - 1.0), -1.0) + 1.0);
-
-
-				bodies[i].renderer.rocky->qtree.set_wanted_subdivide(offset, side, depth);
-				bodies[i].renderer.rocky->qtree.dirty = true;
-			}
+			update_render_body_rocky(&bodies[i], render_positions[i], camera_pos, t);
 		}
 	}
 }

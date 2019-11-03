@@ -11,6 +11,11 @@ private:
 
 	std::vector<glm::dvec3> render_positions;
 
+	void render_body(glm::dvec3 pos, PlanetaryBody* body, glm::dvec3 camera_pos, double t,
+		glm::dmat4 proj_view, float far_plane);
+
+	void update_render_body_rocky(PlanetaryBody* body, glm::dvec3 body_pos, glm::dvec3 camera_pos, double t);
+
 public:
 	
 	bool draw_debug;
@@ -44,7 +49,7 @@ public:
 
 	// Updates LOD and similar
 	// FOV in radians
-	void update_render(glm::dvec3 camera_pos, float fov);
+	void update_render(glm::dvec3 camera_pos, float fov, double t);
 
 
 	PlanetarySystem();

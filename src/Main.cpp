@@ -85,7 +85,9 @@ int main(void)
 	Date start_date = Date(2000, Date::DECEMBER, 21);
 
 	t = start_date.to_seconds();
-	
+
+	logger->info("Starting at: {}", start_date.to_string());
+
 	while (!glfwWindowShouldClose(window))
 	{
 		input->update(window);
@@ -116,11 +118,9 @@ int main(void)
 	
 		glfwSwapBuffers(window);
 
-		Date now = Date(t);
-		logger->info("Now is: {}", now.to_string());
 
 		dt = dtt.restart();
-		t += dt * 1000.0;
+		t += dt * 1.0;
 	}
 
 	logger->info("Ending OSP");
