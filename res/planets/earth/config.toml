@@ -8,7 +8,7 @@ mass = 5.9722e24
 
 [atmo]
 	exponent = 1.5
-	sunset_exponent = 4.0
+	sunset_exponent = 2.5
 	radius = 6500_000.000000000000 # meters, 0 for no atmosphere
 	[atmo.main_color]
 		x = 0.7

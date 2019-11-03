@@ -195,7 +195,7 @@ void PlanetEditor::render(int width, int height)
 	glm::dmat4 proj_view = (glm::dmat4)proj * (glm::dmat4)view;
 
 	renderer.render(proj_view, model, glm::dmat4(1.0), far_plane, camera.pos, config, glfwGetTime(), 
-		-glm::normalize(glm::vec3(1.0, 1.0, 0.0)), 0.0f);
+		-glm::normalize(glm::vec3(1.0, 0.0, 0.0)), 0.0f);
 
 
 }

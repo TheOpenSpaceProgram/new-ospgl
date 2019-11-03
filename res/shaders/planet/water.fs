@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 
 out vec4 FragColor;
 
@@ -15,7 +15,7 @@ uniform float time;
 uniform float f_coef;
 uniform vec3 camera_pos;
 
-const int ATMO_STEPS = 3;
+const int ATMO_STEPS = 4;
 const float ATMO_STEPS_INVERSE = 1.0 / float(ATMO_STEPS);
 
 uniform bool do_atmo;
@@ -120,6 +120,9 @@ vec4 atmo(vec3 lightDir)
 
     float step_size = length(ray) / float(ATMO_STEPS - 1);
     float last_d = 0.0;
+
+    float dotp = exp(8.0 * dot(ray, vPosNrm)) * 4.0;
+
     for(int i = 0; i < ATMO_STEPS; i++)
     {
         float step = float(i) / float(ATMO_STEPS - 1);
@@ -127,7 +130,7 @@ vec4 atmo(vec3 lightDir)
 
 		float h = height(ipos);
 
-		d += density(h) * step_size * 6.0;
+		d += density(h) * step_size * (0.25 + dotp);
     }
 
 

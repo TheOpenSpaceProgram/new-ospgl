@@ -7,17 +7,17 @@ mass = 6.4171e23
 	z = 0.2
 
 [atmo]
-	exponent = 1.8
-	sunset_exponent = 4.0
-	radius = 3460_000.000000000000 # meters, 0 for no atmosphere
+	exponent = 1.3
+	sunset_exponent = 2.0
+	radius = 3469_000.000000000000 # meters, 0 for no atmosphere
 	[atmo.main_color]
-		x = 1.0
-		y = 0.3
-		z = 0.3
+		x = 0.4
+		y = 0.35
+		z = 0.35
 	[atmo.sunset_color]
-		x = 0.1
-		y = 0.3
-		z = 1.0
+		x = 0.15
+		y = 0.2
+		z = 0.3
 
 [surface]
 

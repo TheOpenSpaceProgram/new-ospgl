@@ -3,6 +3,7 @@
 #include "../planet_mesher/mesher/PlanetTileServer.h"
 #include "../planet_mesher/renderer/PlanetRenderer.h"
 #include "../atmosphere/AtmosphereRenderer.h"
+#include "../universe/kepler/KeplerElements.h"
 
 struct RockyPlanetRenderer
 {
@@ -36,7 +37,7 @@ public:
 		glm::dvec3 camera_pos, PlanetConfig& config, double time, glm::vec3 light_dir,
 		float dot_factor);
 
-	void draw_debug(glm::dvec3 pos, PlanetaryBody* body, float dot_factor);
+	void draw_debug(double t, CartesianState state, PlanetaryBody* body, float dot_factor);
 
 	PlanetaryBodyRenderer();
 	~PlanetaryBodyRenderer();

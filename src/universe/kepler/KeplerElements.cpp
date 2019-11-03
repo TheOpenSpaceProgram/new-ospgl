@@ -172,6 +172,22 @@ double KeplerOrbit::get_period(double our_mass, double parent_mass) const
 	return 2.0 * glm::pi<double>() * sqrt(numerator / denominator);
 }
 
+#include <glm/gtx/normal.hpp>
+
+glm::dvec3 KeplerOrbit::get_plane_normal()
+{
+	// TODO: Make this method better, this is a disaster
+	// and it's probably slow too
+	KeplerElements a = KeplerElements();  a.orbit = *this;
+	a.eccentric_anomaly = 0.0;
+	KeplerElements b = KeplerElements();  b.orbit = *this;
+	b.eccentric_anomaly = 1.0;
+	KeplerElements c = KeplerElements();  c.orbit = *this;
+	c.eccentric_anomaly = 2.0;
+
+	return -glm::triangleNormal(a.get_position(), b.get_position(), c.get_position());
+}
+
 KeplerElements ArbitraryKeplerOrbit::to_elements_at(double time, double our_mass, double center_mass, double tol) const
 {
 	if (is_nasa_data)
@@ -238,26 +254,53 @@ glm::dvec3 KeplerElements::get_position()
 	return out;
 }
 
-glm::dvec3 KeplerElements::get_velocity_vector()
+CartesianState KeplerElements::get_cartesian(double parent_mass, double our_mass)
 {
-	// This is not called often so not much optimization is required,
-	// we "brute force" it
-	glm::dvec3 pos_now = get_position();
+	glm::dvec3 pos;
+	glm::dvec3 vel;
 
-	constexpr double SMALL_NUMBER = 1e-6;
 
-	double mean_then = mean_anomaly + SMALL_NUMBER;
-	double ecc_then = orbit.mean_to_eccentric(mean_then, 1e-6);
-	double true_then = orbit.eccentric_to_true(ecc_then);
+	glm::dvec2 flat;
+	double sinE = ORBIT_SIN(eccentric_anomaly);
+	double cosE = ORBIT_COS(eccentric_anomaly);
+	double E2 = orbit.eccentricity * orbit.eccentricity;
+	double sqrt1mE2 = sqrt(1 - E2);
+	flat.x = orbit.smajor_axis * (cosE - orbit.eccentricity);
+	flat.y = orbit.smajor_axis * sqrt1mE2 * sinE;
 
-	KeplerElements then = *this;
-	then.true_anomaly = true_then;
-	then.mean_anomaly = mean_then;
-	then.eccentric_anomaly = ecc_then;
+	double w = glm::radians(orbit.periapsis_argument);
+	double O = glm::radians(orbit.asc_node_longitude);
+	double I = glm::radians(orbit.inclination);
 
-	glm::dvec3 pos_then = then.get_position();
 
-	glm::dvec3 vec = glm::normalize(pos_then - pos_now);
+	// Note: The coordinates in the JPL file change y for z
+	double xx = ORBIT_COS(w) * ORBIT_COS(O) - ORBIT_SIN(w) * ORBIT_SIN(O) * ORBIT_COS(I);
+	double xy = -ORBIT_SIN(w) * ORBIT_COS(O) - ORBIT_COS(w) * ORBIT_SIN(O) * ORBIT_COS(I);
 
-	return vec;
+
+	double yx = ORBIT_SIN(w) * ORBIT_SIN(I);
+	double yy = ORBIT_COS(w) * ORBIT_SIN(I);
+
+	double zx = ORBIT_COS(w) * ORBIT_SIN(O) + ORBIT_SIN(w) * ORBIT_COS(O) * ORBIT_COS(I);
+	double zy = -ORBIT_SIN(w) * ORBIT_SIN(O) + ORBIT_COS(w) * ORBIT_COS(O) * ORBIT_COS(I);
+
+	pos.x = xx * flat.x + xy * flat.y;
+	pos.y = yx * flat.x + yy * flat.y;
+	pos.z = zx * flat.x + zy * flat.y;
+
+	double dist2 = flat.y * flat.y + flat.x + flat.x;
+	double p = parent_mass * our_mass * G;
+
+	double mult = sqrt((p * orbit.smajor_axis) / dist2);
+
+	glm::dvec2 flat_vel;
+	flat_vel.x = mult * -sinE;
+	flat_vel.y = mult * sqrt1mE2 * cosE;
+
+	// Transform the same as pos
+	vel.x = xx * flat_vel.x + xy * flat_vel.y;
+	vel.y = yx * flat_vel.x + yy * flat_vel.y;
+	vel.z = zx * flat_vel.x + zy * flat_vel.y;
+
+	return CartesianState(pos, vel);
 }

@@ -11,12 +11,25 @@ class DebugDrawer
 {
 private:
 
-	struct DebugVertex
+	struct DebugVertexf
 	{
 		glm::vec3 pos;
 		glm::vec3 color;
+	};
 
-		DebugVertex(glm::vec3 p, glm::vec3 c) : pos(p), color(c) {};
+	struct DebugVertex
+	{
+		glm::dvec3 pos;
+		glm::vec3 color;
+
+		DebugVertex(glm::dvec3 p, glm::vec3 c) : pos(p), color(c) {};
+		DebugVertexf transform(glm::dmat4 c_model)
+		{
+			DebugVertexf out;
+			out.color = color;
+			out.pos = glm::vec3(c_model * glm::dvec4(pos, 1.0));
+			return out;
+		}
 	};
 
 	struct DebugShape

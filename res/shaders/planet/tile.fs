@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 
 out vec4 FragColor;
 
@@ -89,6 +89,9 @@ vec4 atmo(vec3 lightDir)
 
     float step_size = length(ray) / float(ATMO_STEPS - 1);
     float last_d = 0.0;
+
+    float dotp = exp(8.0 * dot(ray, vPosNrm)) * 4.0;
+
     for(int i = 0; i < ATMO_STEPS; i++)
     {
         float step = float(i) / float(ATMO_STEPS - 1);
@@ -96,7 +99,7 @@ vec4 atmo(vec3 lightDir)
 
 		float h = height(ipos);
 
-		d += density(h) * step_size * 6.0;
+		d += density(h) * step_size * (0.25 + dotp);
     }
 
 
@@ -113,7 +116,6 @@ vec4 atmo(vec3 lightDir)
     return vec4(col, atmo_curve(d));
 }
 
-
 void main()
 {
 
@@ -127,5 +129,5 @@ void main()
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets
-    gl_FragDepth = log2(flogz) * f_coef * 0.5;
+   gl_FragDepth = log2(flogz) * f_coef * 0.5;
 }

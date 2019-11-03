@@ -1,10 +1,11 @@
 #include "PlanetarySystem.h"
 #include "../util/DebugDrawer.h"
 
-glm::dvec3 compute_state(double t, double tol, double star_mass, PlanetaryBody* body, std::vector<glm::dvec3>* other_states)
+CartesianState compute_state(double t, double tol, double star_mass, PlanetaryBody* body, std::vector<CartesianState>* other_states)
 {
 	double parent_mass;
 	glm::dvec3 offset = glm::dvec3(0.0, 0.0, 0.0);
+	glm::dvec3 vel_offset = glm::dvec3(0.0, 0.0, 0.0);
 	if (body->parent == nullptr)
 	{
 		parent_mass = star_mass;
@@ -12,17 +13,21 @@ glm::dvec3 compute_state(double t, double tol, double star_mass, PlanetaryBody* 
 	else 
 	{
 		parent_mass = body->parent->config.mass;
-		offset = (*other_states)[body->parent->index];
+		offset = (*other_states)[body->parent->index].pos;
+		vel_offset = (*other_states)[body->parent->index].vel;
 	}
 
 	KeplerElements elems = body->orbit.to_elements_at(t, body->config.mass, parent_mass, tol);
-	glm::dvec3 pos_rel = elems.get_position();
+	CartesianState st = elems.get_cartesian(parent_mass, body->config.mass);
 
-	return pos_rel + offset;
+	st.pos += offset;
+	st.vel += vel_offset;
+
+	return st;
 }
 
 
-void PlanetarySystem::compute_states(double t, std::vector<glm::dvec3>& out, double tol)
+void PlanetarySystem::compute_states(double t, std::vector<CartesianState>& out, double tol)
 {
 	for (size_t i = 0; i < out.size(); i++)
 	{
@@ -59,25 +64,25 @@ static glm::dmat4 build_body_rotation_matrix(PlanetaryBody* body, double t)
 	return rot_matrix;
 }
 
-void PlanetarySystem::render_body(glm::dvec3 pos, PlanetaryBody* body, glm::dvec3 camera_pos, double t, 
+void PlanetarySystem::render_body(CartesianState state, PlanetaryBody* body, glm::dvec3 camera_pos, double t, 
 	glm::dmat4 proj_view, float far_plane)
 {
-	glm::dmat4 model = glm::translate(glm::dmat4(1.0), -camera_pos + pos);
+	glm::dmat4 model = glm::translate(glm::dmat4(1.0), -camera_pos + state.pos);
 	model = glm::scale(model, glm::dvec3(body->config.radius));
 
 	glm::dmat4 rot_matrix = build_body_rotation_matrix(body, t);
 	
 	model = model;
 
-	glm::dvec3 camera_pos_relative = camera_pos - pos;
-	glm::dvec3 light_dir = glm::normalize(pos);
+	glm::dvec3 camera_pos_relative = camera_pos - state.pos;
+	glm::dvec3 light_dir = glm::normalize(state.pos);
 
 	body->renderer.render(proj_view, model * rot_matrix, rot_matrix, far_plane, camera_pos_relative,
 		body->config, t, light_dir, body->dot_factor);
 
 	if (draw_debug)
 	{
-		body->renderer.draw_debug(pos, body, body->dot_factor);
+		body->renderer.draw_debug(t, state, body, body->dot_factor);
 	}
 }
 
@@ -89,20 +94,16 @@ void PlanetarySystem::render(double t, int width, int height)
 {
 	double rt = t * 0.4 + 10.0;
 
-	if (render_positions.size() == 0)
+	if (render_states.size() == 0)
 	{
-		render_positions.resize(bodies.size());
+		render_states.resize(bodies.size());
 	}
 
 	float fov = glm::radians(80.0f);
 
-	compute_states(t, render_positions, 1e-6);
+	compute_states(t, render_states, 1e-6);
 
-	zoom -= zoom * input->mouse_scroll_delta * 0.005;
-
-	double dist = bodies[0].config.radius * zoom + rt * bodies[0].config.radius * 0.0;
-
-	glm::dvec3 camera_pos = render_positions[0] - glm::dvec3(cos(rt * 0.0) * dist, 0.0, sin(rt * 0.0) * dist);
+	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir(t, glm::dvec3(0, 0, 0), 1.0, render_states, bodies);
 
 	update_render(camera_pos, fov, t);
 
@@ -112,22 +113,22 @@ void PlanetarySystem::render(double t, int width, int height)
 
 
 	glm::dmat4 proj = glm::perspective((double)fov, (double)width / (double)height, 0.1, (double)far_plane);
-	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(cos(rt * 0.0), 0.0, sin(rt)), glm::dvec3(0.0, 1.0, 0.0));
+	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), camera_dir, glm::dvec3(0.0, 1.0, 0.0));
 	glm::dmat4 proj_view = proj * view;
 
-	using BodyPositionPair = std::pair<PlanetaryBody*, glm::dvec3>;
+	using BodyPositionPair = std::pair<PlanetaryBody*, CartesianState>;
 
 	// Sort bodies by distance to camera to avoid weird atmospheres
 	std::vector<BodyPositionPair> sorted;
 
 	for (size_t i = 0; i < bodies.size(); i++)
 	{
-		sorted.push_back(std::make_pair(&bodies[i], render_positions[i]));
+		sorted.push_back(std::make_pair(&bodies[i], render_states[i]));
 	}
 
 	std::sort(sorted.begin(), sorted.end(), [camera_pos](BodyPositionPair a, BodyPositionPair b)
 	{
-		return glm::distance2(camera_pos, a.second) > glm::distance2(camera_pos, b.second);
+		return glm::distance2(camera_pos, a.second.pos) > glm::distance2(camera_pos, b.second.pos);
 	});
 
 	for (size_t i = 0; i < sorted.size(); i++)
@@ -140,10 +141,16 @@ void PlanetarySystem::render(double t, int width, int height)
 		debug_drawer->add_point(glm::dvec3(0, 0, 0), glm::vec3(1.0, 1.0, 0.5));
 	}
 
-	glm::dmat4 c_model = glm::translate(glm::dmat4(1.0f), -camera_pos);
+	glm::dmat4 c_model = glm::translate(glm::dmat4(1.0), -camera_pos);
 	// Don't forget to draw the debug shapes!
 	debug_drawer->render(proj_view, c_model, far_plane);
 
+}
+
+void PlanetarySystem::update(double dt)
+{
+	camera.focus_index = 0;
+	camera.update(dt);
 }
 
 static void load_body(PlanetaryBody* body)
@@ -243,7 +250,7 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 		
 		// Set unloaded
 		float prev_factor = bodies[i].dot_factor;
-		bodies[i].dot_factor = bodies[i].get_dot_factor((float)glm::distance(camera_pos, render_positions[i]), fov);
+		bodies[i].dot_factor = bodies[i].get_dot_factor((float)glm::distance(camera_pos, render_states[i].pos), fov);
 
 			
 
@@ -259,14 +266,14 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 
 		if (bodies[i].renderer.rocky != nullptr)
 		{
-			update_render_body_rocky(&bodies[i], render_positions[i], camera_pos, t);
+			update_render_body_rocky(&bodies[i], render_states[i].pos, camera_pos, t);
 		}
 	}
 }
 
 PlanetarySystem::PlanetarySystem()
 {
-	render_positions.resize(0);
+	render_states.resize(0);
 }
 
 

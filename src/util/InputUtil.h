@@ -20,9 +20,12 @@ public:
 	double prev_mouse_scroll;
 	double mouse_scroll;
 
+	GLFWwindow* window;
+
 	void setup(GLFWwindow* window)
 	{
 		glfwSetScrollCallback(window, scroll_callback);
+		this->window = window;
 	}
 
 	void update(GLFWwindow* window)

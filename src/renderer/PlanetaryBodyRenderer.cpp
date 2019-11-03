@@ -29,16 +29,28 @@ void PlanetaryBodyRenderer::render(glm::dmat4 proj_view, glm::dmat4 model, glm::
 }
 
 
-void PlanetaryBodyRenderer::draw_debug(glm::dvec3 pos, PlanetaryBody* body, float dot_factor)
+void PlanetaryBodyRenderer::draw_debug(double t, CartesianState st, PlanetaryBody* body, float dot_factor)
 {
 	if (dot_factor == 1.0f)
 	{
-		debug_drawer->add_point(pos, body->config.far_color);
+		debug_drawer->add_point(st.pos, body->config.far_color);
 	}
 	else
 	{
-		debug_drawer->add_line(pos, pos + body->rotation_axis * body->config.radius * 2.0, glm::vec3(1.0, 0.0, 0.0));
-		debug_drawer->add_line(pos, pos - body->rotation_axis * body->config.radius * 2.0, glm::vec3(0.0, 0.0, 1.0));
+		glm::dvec3 orbit_plane = body->orbit.to_orbit_at(t).get_plane_normal();
+		glm::dvec3 prograde = glm::normalize(st.vel);
+		glm::dvec3 normal = glm::cross(prograde, orbit_plane);
+
+		debug_drawer->add_line(st.pos, st.pos + body->rotation_axis * body->config.radius * 2.0, glm::vec3(1.0, 0.0, 0.0));
+		debug_drawer->add_line(st.pos, st.pos - body->rotation_axis * body->config.radius * 2.0, glm::vec3(0.0, 0.0, 1.0));
+		debug_drawer->add_line(st.pos, st.pos - glm::normalize(st.pos) * body->config.radius * 1.5, glm::vec3(1.0, 0.5, 0.0));
+
+		double oind_size = 2.5;
+
+		debug_drawer->add_arrow(st.pos, st.pos + orbit_plane * body->config.radius * oind_size, glm::vec3(0.0, 1.0, 1.0));
+		debug_drawer->add_arrow(st.pos, st.pos + prograde * body->config.radius * oind_size, glm::vec3(1.0, 1.0, 1.0));
+		debug_drawer->add_arrow(st.pos, st.pos + normal * body->config.radius * oind_size, glm::vec3(1.0, 1.0, 0.0));
+
 	}
 }
 

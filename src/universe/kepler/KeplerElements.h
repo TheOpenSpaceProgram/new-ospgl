@@ -16,11 +16,11 @@
 // It lacks any kind of anomaly as these are computed later on from time, 
 // or from mean anomaly directly (if using NASA elements)
 
+static constexpr double G = 6.67430e-11;
+
 
 struct KeplerOrbit
 {
-	static constexpr double G = 6.67430e-11;
-
 
 	double smajor_axis;
 	double eccentricity;
@@ -36,6 +36,17 @@ struct KeplerOrbit
 	double time_to_mean(double time, double our_mass, double parent_mass) const;
 
 	double get_period(double our_mass, double parent_mass) const;
+
+	glm::dvec3 get_plane_normal();
+};
+
+struct CartesianState
+{
+	glm::dvec3 pos;
+	glm::dvec3 vel;
+
+	CartesianState() {}
+	CartesianState(glm::dvec3 p, glm::dvec3 v) : pos(p), vel(v) {};
 };
 
 struct KeplerElements
@@ -50,7 +61,11 @@ struct KeplerElements
 	glm::dvec3 get_position();
 	// Gets velocity vector relative to parent
 	// Same coordinate system as get_position
-	glm::dvec3 get_velocity_vector();
+	glm::dvec3 get_velocity(double parent_mass, double our_mass);
+
+	// Faster than the previous two as data is shared between
+	// position and velocity, use this one!
+	CartesianState get_cartesian(double parent_mass, double our_mass);
 };
 
 // Converts a position and velocity state to orbital elements, given that

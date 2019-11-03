@@ -103,8 +103,13 @@ int main(void)
 		ImGui::NewFrame();
 
 
+		//system.update(dt);
 		editor.update((float)dt, font_code);
+		ImGui::Begin("Date");
 
+		ImGui::Text("%s", Date(t).to_string().c_str());
+
+		ImGui::End();
 
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -120,7 +125,9 @@ int main(void)
 
 
 		dt = dtt.restart();
-		t += dt * 1.0;
+		t += dt * 1000000.0;
+
+
 	}
 
 	logger->info("Ending OSP");

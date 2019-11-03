@@ -32,6 +32,7 @@ public:
 
 	static void deserialize(PlanetarySystem& to, const cpptoml::table& from)
 	{
+		to.bodies = std::vector<PlanetaryBody>();
 
 		// We first obtain all bodies and parent relations
 		std::unordered_map<std::string, std::string> parents;

@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 
 out vec4 FragColor;
 
@@ -153,12 +153,12 @@ void main()
 	vec3 col = d * (atmo_main_color * (1.0 - r_color) + atmo_sunset_color * r_color);
 
 
-	float r_factor = dot(start, light_dir);
+	float r_factor = abs(dot(start, light_dir));
 	r_factor = 1.0 - (pow(r_factor, 1.0 * 1.0 / (ds)));
 
 	vec3 mieColor = vec3(1.0, 1.0, 1.0) * (1.0 - r_factor) + atmo_sunset_color * r_factor;
 
 	FragColor = vec4(col + mie * mieColor * d, d);
 
-	gl_FragDepth = log2(flogz) * f_coef * 0.5;
+	//gl_FragDepth = log2(flogz) * f_coef * 0.5;
 }

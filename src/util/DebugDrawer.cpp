@@ -4,6 +4,7 @@ DebugDrawer* debug_drawer;
 
 void DebugDrawer::render(glm::dmat4 proj_view, glm::dmat4 c_model, float far_plane)
 {
+
 	if (draw_list.size() > 0)
 	{
 		if (points_vbo != 0)
@@ -19,20 +20,20 @@ void DebugDrawer::render(glm::dmat4 proj_view, glm::dmat4 c_model, float far_pla
 		glGenVertexArrays(1, &points_vao);
 		glGenVertexArrays(1, &lines_vao);
 
-		std::vector<DebugVertex> points;
-		std::vector<DebugVertex> lines; //< Lines go in pairs
+		std::vector<DebugVertexf> points;
+		std::vector<DebugVertexf> lines; //< Lines go in pairs
 
 		for (size_t i = 0; i < draw_list.size(); i++)
 		{
 			if (draw_list[i].verts.size() == 1)
 			{
-				points.push_back(draw_list[i].verts[0]);
+				points.push_back(draw_list[i].verts[0].transform(c_model));
 			}
 			else
 			{
 				for (size_t j = 0; j < draw_list[i].verts.size(); j++)
 				{
-					lines.push_back(draw_list[i].verts[j]);
+					lines.push_back(draw_list[i].verts[j].transform(c_model));
 				}
 			}
 		}
@@ -41,7 +42,7 @@ void DebugDrawer::render(glm::dmat4 proj_view, glm::dmat4 c_model, float far_pla
 		glBindVertexArray(points_vao);
 
 		glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(DebugVertex) * points.size(), points.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(DebugVertexf) * points.size(), points.data(), GL_STATIC_DRAW);
 
 		// pos
 		glEnableVertexAttribArray(0);
@@ -56,7 +57,7 @@ void DebugDrawer::render(glm::dmat4 proj_view, glm::dmat4 c_model, float far_pla
 		glBindVertexArray(lines_vao);
 
 		glBindBuffer(GL_ARRAY_BUFFER, lines_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(DebugVertex) * lines.size(), lines.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(DebugVertexf) * lines.size(), lines.data(), GL_STATIC_DRAW);
 
 		// pos
 		glEnableVertexAttribArray(0);
@@ -73,7 +74,7 @@ void DebugDrawer::render(glm::dmat4 proj_view, glm::dmat4 c_model, float far_pla
 		glLineWidth(line_size);
 
 		shader->use();
-		shader->setMat4("tform", proj_view * c_model);
+		shader->setMat4("tform", proj_view);
 		shader->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
 
 		// Draw them

@@ -1,11 +1,4 @@
 
--- Returns named items modificable by the user here
--- Types can be:
--- num, vec2, vec3, color
-function get_data_items()
-	return {}
-end
-
 -- Data set by caller:
 --
 --	coord_3d	-> {x, y, z}	-> Spherical 3D coordinates
@@ -18,8 +11,8 @@ end
 -- You should return height at said point in meters, can be negative
 
 local poles = make_color(0.9, 0.9, 0.9);
-local h_color = make_color(0.6, 0.3, 0.3);
-local l_color = make_color(0.4, 0.2, 0.2);
+local h_color = make_color(0.9921, 0.5215, 0.3764);
+local l_color = make_color(0.4196, 0.3098, 0.2627);
 
 function polesfun(t)
 
