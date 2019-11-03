@@ -15,7 +15,7 @@
 
 [[planet]]
 	name = "Earth"
-	config = "res/planets/test/config.toml"
+	config = "res/planets/earth/config.toml"
 
 	is_nasa_data = true
 	smajor_axis = 149598290450.51898
@@ -37,7 +37,7 @@
 
 [[planet]]
 	name = "Mars"
-	config = "res/planets/test/config.toml"
+	config = "res/planets/mars/config.toml"
 
 	is_nasa_data = true
 	smajor_axis = 227944179731.897

@@ -216,6 +216,7 @@
     <ClInclude Include="src\util\InputUtil.h" />
     <ClInclude Include="src\util\FileWatcher.h" />
     <ClInclude Include="src\util\lua\LuaNoiseLib.h" />
+    <ClInclude Include="src\util\lua\LuaUtilLib.h" />
     <ClInclude Include="src\util\serializers\glm.h" />
     <ClInclude Include="src\util\SerializeUtil.h" />
     <ClInclude Include="src\tools\planet_editor\PlanetEditor.h" />

@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <GLFW/glfw3.h>
 
 static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 

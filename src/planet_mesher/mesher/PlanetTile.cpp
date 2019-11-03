@@ -79,7 +79,7 @@ void generate_normals(T* verts, size_t verts_size, glm::dmat4 model_spheric, boo
 }
 
 template<typename T, bool water>
-void generate_vertices(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_spheric, double* heights)
+void generate_vertices(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_spheric, double* heights, glm::vec3* colors)
 {
 	for (int y = -1; y < PlanetTile::TILE_SIZE + 1; y++)
 	{
@@ -105,6 +105,7 @@ void generate_vertices(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_sphe
 			else
 			{
 				world_pos_spheric += glm::normalize(world_pos_spheric) * height;
+				vert.col = colors[r_index];
 			}
 
 			vert.pos = (glm::vec3)(inverse_model_spheric * glm::dvec4(world_pos_spheric, 1.0));
@@ -131,6 +132,10 @@ void copy_vertices(T* origin, Q* destination)
 			{
 				destination[f_index].depth = origin[o_index].col.x;
 			}
+			else
+			{
+				destination[f_index].col = origin[o_index].col;
+			}
 		}
 	}
 }
@@ -147,7 +152,7 @@ void generate_skirt(PlanetTileVertex* target, glm::dmat4 model, glm::dmat4 inver
 	glm::dvec3 world_pos_cubic = model * glm::vec4(in_tile, 1.0);
 	glm::dvec3 world_pos_spheric = MathUtil::cube_to_sphere(world_pos_cubic);
 
-	world_pos_spheric *= 0.95;
+	world_pos_spheric *= 0.90;
 
 	vert = copy_vert;
 	vert.pos = (glm::vec3)(inverse_model_spheric * glm::dvec4(world_pos_spheric, 1.0));
@@ -177,6 +182,7 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	glm::dmat4 inverse_model_spheric = glm::inverse(model_spheric);
 
 	std::array<double, (TILE_SIZE + 2) * (TILE_SIZE + 2)> heights;
+	std::array<glm::vec3, (TILE_SIZE + 2) * (TILE_SIZE + 2)> colors;
 
 	size_t depth = path.get_depth();
 
@@ -233,7 +239,7 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 				}
 				else
 				{
-					heights[i] = result.get<double>() / planet_radius;
+					heights[i] = lua_state["height"].get_or(0.0) / planet_radius;
 					if (!needs_water)
 					{
 						if (heights[i] < 0.0)
@@ -241,6 +247,10 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 							needs_water = true;
 						}
 					}
+
+					colors[i].r = (float)lua_state["color"]["r"].get_or(0.8);
+					colors[i].g = (float)lua_state["color"]["g"].get_or(0.8);
+					colors[i].b = (float)lua_state["color"]["b"].get_or(0.8);
 				}
 			}
 		}
@@ -249,7 +259,7 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	lua_state.collect_garbage();
 
 
-	generate_vertices<PlanetTileVertex, false>(work_array->data(), model, inverse_model_spheric, &heights[0]);
+	generate_vertices<PlanetTileVertex, false>(work_array->data(), model, inverse_model_spheric, &heights[0], &colors[0]);
 	generate_normals(work_array->data(), work_array->size(), model_spheric, clockwise);
 	copy_vertices(work_array->data(), vertices.data());
 
@@ -257,7 +267,7 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	water_vbo = 0;
 	if (has_water && needs_water)
 	{
-		generate_vertices<PlanetTileVertex, true>(work_array->data(), model, inverse_model_spheric, &heights[0]);
+		generate_vertices<PlanetTileVertex, true>(work_array->data(), model, inverse_model_spheric, &heights[0], nullptr);
 		generate_normals(work_array->data(), work_array->size(), model_spheric, clockwise);
 		water_vertices = new std::array<PlanetTileWaterVertex, VERTEX_COUNT>();
 		copy_vertices(work_array->data(), water_vertices->data());

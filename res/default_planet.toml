@@ -2,32 +2,33 @@ radius = 6360_000.000000000000 # meters
 mass = 5.9722e24
 
 [far_color]
-	x = 1.5
+	x = 0.2
 	y = 0.4
-	z = 0.2
+	z = 1.5
 
 [atmo]
-	exponent = 1.7
+	exponent = 1.5
+	sunset_exponent = 4.0
 	radius = 6500_000.000000000000 # meters, 0 for no atmosphere
 	[atmo.main_color]
-		x = 0.5
+		x = 0.7
 		y = 0.8
 		z = 1.7
 	[atmo.sunset_color]
-		x = 1.5
-		y = 0.4
-		z = 0.2
+		x = 1.0
+		y = 0.3
+		z = 0.1
 
 [surface]
 
-	script_path = "$$NEW_SCRIPT$$"	# Will automatically be created for you
+	script_path = "./res/planets/test/surface.lua"	# Will automatically be created for you
 	has_water = true				# Does the planet have water
 
 	[surface.noise]
 		seed = 0
-		interp = 2					# 	0 = Linear < 1 = Hermite < 2 = Quintic
+		interp = 2		# 	0 = Linear < 1 = Hermite < 2 = Quintic
 
 	[surface.lod]
-		max_depth = 12				# Max LOD depth allowed
+		max_depth = 10				# Max LOD depth allowed
 		coef_a = 2.0				# LOD coefficient A
 		coef_b = 3

@@ -68,7 +68,7 @@ int main(void)
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	PlanetEditor editor = PlanetEditor(window, "test");
+	PlanetEditor editor = PlanetEditor(window, "earth");
 
 	input = new InputUtil();
 	input->setup(window);
@@ -103,15 +103,15 @@ int main(void)
 		ImGui::NewFrame();
 
 
-		//editor.update(dt, font_code);
+		editor.update((float)dt, font_code);
 
 
 
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		
-		system.render(t, width, height);
-		//editor.render(width, height);
+		//system.render(t, width, height);
+		editor.render(width, height);
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -244,9 +244,11 @@ void PlanetRenderer::generate_and_upload_index_buffer()
 	// Right skirt
 	for (size_t y = 0; y < PlanetTile::TILE_SIZE - 1; y++)
 	{
+
 		indices[skirt_ptr * 6 + 0 + y * 3 + skirt_offset * 3] = (uint16_t)(y * PlanetTile::TILE_SIZE + (PlanetTile::TILE_SIZE - 1));
 		indices[skirt_ptr * 6 + 1 + y * 3 + skirt_offset * 3] = (uint16_t)((y + 1) * PlanetTile::TILE_SIZE + (PlanetTile::TILE_SIZE - 1));
 		indices[skirt_ptr * 6 + 2 + y * 3 + skirt_offset * 3] = (uint16_t)(skirt_ptr + 3);
+
 	}
 
 	glGenVertexArrays(1, &vao);

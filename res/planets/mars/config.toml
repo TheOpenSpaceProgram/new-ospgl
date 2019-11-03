@@ -1,0 +1,34 @@
+radius = 3389_000.0 # meters
+mass = 6.4171e23
+
+[far_color]
+	x = 1.5
+	y = 0.4
+	z = 0.2
+
+[atmo]
+	exponent = 1.8
+	sunset_exponent = 4.0
+	radius = 3460_000.000000000000 # meters, 0 for no atmosphere
+	[atmo.main_color]
+		x = 1.0
+		y = 0.3
+		z = 0.3
+	[atmo.sunset_color]
+		x = 0.1
+		y = 0.3
+		z = 1.0
+
+[surface]
+
+	script_path = "./res/planets/mars/surface.lua"
+	has_water = false				# Does the planet have water
+
+	[surface.noise]
+		seed = 0
+		interp = 2		# 	0 = Linear < 1 = Hermite < 2 = Quintic
+
+	[surface.lod]
+		max_depth = 10				# Max LOD depth allowed
+		coef_a = 2.0				# LOD coefficient A
+		coef_b = 3

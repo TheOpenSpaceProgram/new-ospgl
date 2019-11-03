@@ -81,11 +81,13 @@ void PlanetarySystem::render_body(glm::dvec3 pos, PlanetaryBody* body, glm::dvec
 	}
 }
 
+#include "../util/InputUtil.h"
 
+static double zoom = 1.0;
 
 void PlanetarySystem::render(double t, int width, int height)
 {
-	double rt = t * 0.0 + 10.0;
+	double rt = t * 0.4 + 10.0;
 
 	if (render_positions.size() == 0)
 	{
@@ -96,9 +98,11 @@ void PlanetarySystem::render(double t, int width, int height)
 
 	compute_states(t, render_positions, 1e-6);
 
-	double dist = bodies[0].config.radius * 2.0f + t * bodies[0].config.radius * 0.0;
+	zoom -= zoom * input->mouse_scroll_delta * 0.005;
 
-	glm::dvec3 camera_pos = render_positions[1] - glm::dvec3(cos(rt) * dist, 0.0, sin(rt) * dist);
+	double dist = bodies[0].config.radius * zoom + rt * bodies[0].config.radius * 0.0;
+
+	glm::dvec3 camera_pos = render_positions[0] - glm::dvec3(cos(rt * 0.0) * dist, 0.0, sin(rt * 0.0) * dist);
 
 	update_render(camera_pos, fov, t);
 
@@ -108,7 +112,7 @@ void PlanetarySystem::render(double t, int width, int height)
 
 
 	glm::dmat4 proj = glm::perspective((double)fov, (double)width / (double)height, 0.1, (double)far_plane);
-	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(cos(rt), 0.0, sin(rt)), glm::dvec3(0.0, 1.0, 0.0));
+	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(cos(rt * 0.0), 0.0, sin(rt)), glm::dvec3(0.0, 1.0, 0.0));
 	glm::dmat4 proj_view = proj * view;
 
 	using BodyPositionPair = std::pair<PlanetaryBody*, glm::dvec3>;
@@ -201,10 +205,11 @@ void PlanetarySystem::update_render_body_rocky(PlanetaryBody* body, glm::dvec3 b
 
 		glm::vec3 pos_nrm = (glm::vec3)glm::normalize(rel_camera_pos);
 		PlanetSide side = body->renderer.rocky->qtree.get_planet_side(pos_nrm);
-		glm::dvec2 offset = body->renderer.rocky->qtree.get_planet_side_offset(pos_nrm, side);
+		glm::dvec2 offset = body->renderer.rocky->qtree.get_planet_side_offset(pos_nrm, side); 
 
-		double height = std::max(glm::length(rel_camera_pos) - body->config.radius -
-			body->renderer.rocky->server->get_height(pos_nrm, 1), 1.0);
+		double altitude = body->renderer.rocky->server->get_height(pos_nrm, 1);
+
+		double height = std::max(glm::length(rel_camera_pos) - body->config.radius - altitude, 1.0);
 
 		height /= body->config.radius;
 		double depthf = (body->config.surface.coef_a - (body->config.surface.coef_a * glm::log(height)
@@ -212,15 +217,19 @@ void PlanetarySystem::update_render_body_rocky(PlanetaryBody* body, glm::dvec3 b
 
 		size_t depth = (size_t)round(std::max(std::min(depthf, (double)body->config.surface.max_depth - 1.0), -1.0) + 1.0);
 
+		// 2 takes about 120Mb of memory so it's not too high
+		// and it's the usual orbital level of detail
+		body->renderer.rocky->server->set_depth_for_unload(2);
 
 		body->renderer.rocky->qtree.set_wanted_subdivide(offset, side, depth);
 		body->renderer.rocky->qtree.dirty = true;
+
 
 		if (draw_debug)
 		{
 			// Add debug point at surface we are over
 			debug_drawer->add_point(
-				glm::inverse(rel_matrix) * glm::dvec4(glm::normalize(rel_camera_pos) * height * 1.01 * body->config.radius, 1.0),
+				glm::inverse(rel_matrix) * glm::dvec4(glm::normalize(rel_camera_pos) * (altitude * 1.1 + body->config.radius * 1.01), 1.0),
 				glm::vec3(1.0, 1.0, 1.0));
 		}
 	}

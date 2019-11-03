@@ -56,8 +56,15 @@ void PlanetTileServer::update(QuadTreePlanet& planet)
 
 			if (!found)
 			{
-				delete it->second;
-				it = tiles_w->erase(it);
+				if (it->first.get_depth() > depth_for_unload)
+				{
+					delete it->second;
+					it = tiles_w->erase(it);
+				}
+				else
+				{
+					it++;
+				}
 			}
 			else
 			{
@@ -123,17 +130,19 @@ double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
 	lua_state["coord_2d"]["x"] = projected.x;
 	lua_state["coord_2d"]["y"] = projected.y;
 
+	lua_state["radius"] = config->radius;
+
 	sol::protected_function func = lua_state["generate"];
 	auto result = func();
 
 	// We ignore errors here
 	if (result.valid())
 	{
-		return result.get<double>();
+		return lua_state["height"].get_or(0.0);
 	}
 	else
 	{
-		return 0.0f;
+		return 0.0;
 	}
 }
 
@@ -171,7 +180,6 @@ PlanetTileServer::PlanetTileServer(const std::string& script, PlanetConfig* conf
 
 	for (size_t i = 0; i < threads.size(); i++)
 	{
-		threads[i].noise.SetSeed(seed);
 		threads[i].noise.SetInterp(noise_interp);
 
 		threads[i].thread = new std::thread(thread_func, this, &threads[i]);
@@ -284,6 +292,7 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 }
 
 #include "../../util/lua/LuaNoiseLib.h"
+#include "../../util/lua/LuaUtilLib.h"
 
 void PlanetTileServer::prepare_lua(sol::state& lua_state, FastNoise* noise)
 {
@@ -291,8 +300,13 @@ void PlanetTileServer::prepare_lua(sol::state& lua_state, FastNoise* noise)
 
 	lua_state["coord_3d"] = lua_state.create_table_with("x", 0.0, "y", 0.0, "z", 0.0);
 	lua_state["coord_2d"] = lua_state.create_table_with("x", 0.0, "y", 0.0);
+	lua_state["color"] = lua_state.create_table_with("r", 0.0, "g", 0.0, "b", 0.0);
+	lua_state["height"] = 0.0;
 
 	LuaNoiseLib::load_lib(lua_state, noise);
+	LuaUtilLib::load_lib(lua_state);
+
+	noise->SetSeed(noise_seed);
 }
 
 void PlanetTileServer::default_lua(sol::state & lua_state)
