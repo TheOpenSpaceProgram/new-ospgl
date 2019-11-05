@@ -1,7 +1,10 @@
 #pragma once
 #include <string>
+#include <vector>
 #include "../../../util/SerializeUtil.h"
 #include "../../../util/serializers/glm.h"
+#include "../../../assets/Image.h"
+#include "../../../assets/AssetManager.h"
 
 struct SurfaceConfig
 {
@@ -14,6 +17,9 @@ struct SurfaceConfig
 	int interp;
 
 	bool has_water;
+
+	std::unordered_map<std::string, Image*> images;
+	std::unordered_map<std::string, std::string> image_paths;
 };
 
 template<>
@@ -43,6 +49,22 @@ public:
 
 		target.insert("lod", lod);
 
+		auto images = cpptoml::make_table_array();
+		for (auto it = what.image_paths.begin(); it != what.image_paths.end(); it++)
+		{
+			auto table = cpptoml::make_table();
+
+			table->insert("name", it->first);
+			table->insert("path", it->second);
+
+			images->push_back(table);
+		}
+
+		if (what.image_paths.size() != 0)
+		{
+			target.insert("images", images);
+		}
+
 	}
 
 	static void deserialize(SurfaceConfig& to, const cpptoml::table& from)
@@ -54,5 +76,20 @@ public:
 		SAFE_TOML_GET(to.max_depth, "lod.max_depth", int);
 		SAFE_TOML_GET(to.coef_a, "lod.coef_a", double);
 		SAFE_TOML_GET(to.coef_b, "lod.coef_b", double);
+
+		auto image_paths = from.get_table_array_qualified("images");
+		if (image_paths)
+		{
+			for (const auto& table : *image_paths)
+			{
+				to.image_paths[table->get_qualified_as<std::string>("name").value_or("null")] = table->get_qualified_as<std::string>("path").value_or("ERROR");
+			}
+
+			// Actually load images
+			for (auto it = to.image_paths.begin(); it != to.image_paths.end(); it++)
+			{
+				to.images[it->first] = assets->get<Image>(it->second);
+			}
+		}
 	}
 };

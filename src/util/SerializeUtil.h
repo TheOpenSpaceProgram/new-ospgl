@@ -87,6 +87,20 @@ public:
 		}
 	}
 
+	static const std::shared_ptr<cpptoml::table> load_string(const std::string& str)
+	{
+		std::stringstream ss = std::stringstream(str);
+		try
+		{
+			return cpptoml::parser(ss).parse();
+		}
+		catch (const cpptoml::parse_exception& ex)
+		{
+			logger->fatal("TOML parse error:\n{}", ex.what());
+			return nullptr;
+		}
+	}
+
 	static const std::shared_ptr<cpptoml::table> load_or_write_default(const cpptoml::table& def, const std::string& path)
 	{
 		std::ifstream infile(path);

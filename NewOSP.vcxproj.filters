@@ -29,6 +29,16 @@
     <None Include="res\shaders\atmosphere\atmo.vs" />
     <None Include="res\shaders\atmosphere\cheap.fs" />
     <None Include="res\shaders\atmosphere\cheap.vs" />
+    <None Include="res\default_gas.toml" />
+    <None Include="res\shaders\debug.vs" />
+    <None Include="res\shaders\debug.fs" />
+    <None Include="res\shaders\atmosphere\clouds0.fs" />
+    <None Include="res\shaders\atmosphere\clouds0.vs" />
+    <None Include="res\planets\test_gas\config.toml" />
+    <None Include="res\planets\mars\config.toml" />
+    <None Include="res\planets\mars\surface.lua" />
+    <None Include="res\planets\earth\config.toml" />
+    <None Include="res\planets\earth\surface.lua" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -125,6 +135,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\universe\Date.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\Image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dep\stb\stb_impl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -289,6 +305,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\lua\LuaUtilLib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\Image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dep\stb\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

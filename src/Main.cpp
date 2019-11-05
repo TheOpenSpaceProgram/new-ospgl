@@ -82,7 +82,7 @@ int main(void)
 	system.compute_sois(0.0);
 	system.draw_debug = true;
 
-	Date start_date = Date(2000, Date::DECEMBER, 21);
+	Date start_date = Date(2000, Date::JANUARY, 1);
 
 	t = start_date.to_seconds();
 
@@ -103,8 +103,8 @@ int main(void)
 		ImGui::NewFrame();
 
 
-		//system.update(dt);
-		editor.update((float)dt, font_code);
+		system.update(dt);
+		//editor.update((float)dt, font_code);
 		ImGui::Begin("Date");
 
 		ImGui::Text("%s", Date(t).to_string().c_str());
@@ -115,8 +115,8 @@ int main(void)
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		
-		//system.render(t, width, height);
-		editor.render(width, height);
+		system.render(t, width, height);
+		//editor.render(width, height);
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -125,7 +125,7 @@ int main(void)
 
 
 		dt = dtt.restart();
-		t += dt * 1000000.0;
+		t += dt * 0.0;
 
 
 	}

@@ -44,6 +44,8 @@ private:
 
 	double altitude;
 
+	double planet_rotation;
+
 public:
 
 	void update(float dt, ImFont* code_font);

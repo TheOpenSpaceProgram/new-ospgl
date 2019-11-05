@@ -44,16 +44,35 @@ function surface(x, y, z)
 
 end
 
+--function generate()
+--	local pole_factor = polesfun(math.abs(coord_3d.y));
+--	local s = surface(coord_3d.x, coord_3d.y, coord_3d.z) +
+--		1.0 - clamp(math.abs(coord_3d.y) * 2.5, 0.0, 1.0);
+--	local s2 = hval(coord_3d.x, coord_3d.y, coord_3d.z);
+--
+--	local s_color = mix_color(h_color, l_color, clamp(s, 0.0, 1.0));
+--
+--	height = s2 * radius * 0.001;
+--
+--	color = mix_color(s_color, poles, pole_factor + math.max(s2, 0.0) * 0.1);
+--end
+
+
+
+local hmap = get_heightmap("heightmap");
+local cmap = get_image("colormap");
+
+
+
 function generate()
-	local pole_factor = polesfun(math.abs(coord_3d.y));
-	local s = surface(coord_3d.x, coord_3d.y, coord_3d.z) +
-		1.0 - clamp(math.abs(coord_3d.y) * 2.5, 0.0, 1.0);
-	local s2 = hval(coord_3d.x, coord_3d.y, coord_3d.z);
 
-	local s_color = mix_color(h_color, l_color, clamp(s, 0.0, 1.0));
+	local earth = hmap.get_height_soft(coord_2d.x, coord_2d.y);
 
-	height = s2 * radius * 0.001;
+	noise.set_frequency(90.0);
+	noise.set_fractal_octaves(6);
 
-	color = mix_color(s_color, poles, pole_factor + math.max(s2, 0.0) * 0.1);
+	local h2 = noise.perlin3_fractal(coord_3d.x, coord_3d.y, coord_3d.z);
+
+	height = (earth * radius * 0.008) + (h2 * radius * 0.0004);
+	color = cmap.get_projected(coord_2d.x + h2 * 0.005, coord_2d.y + h2 * 0.005);
 end
-

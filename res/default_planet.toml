@@ -21,7 +21,7 @@ mass = 5.9722e24
 
 [surface]
 
-	script_path = "./res/planets/test/surface.lua"	# Will automatically be created for you
+	script_path = "$$NEW_SCRIPT$$"	# Will automatically be created for you
 	has_water = true				# Does the planet have water
 
 	[surface.noise]
