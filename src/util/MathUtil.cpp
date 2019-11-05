@@ -90,7 +90,7 @@ glm::dvec3 MathUtil::euclidean_to_spherical(glm::dvec3 eu)
 	glm::dvec3 out;
 
 	out.z = glm::sqrt(eu.x * eu.x + eu.y * eu.y + eu.z * eu.z);
-	out.x = glm::atan(eu.z / eu.x);
+	out.x = atan2(eu.z, eu.x);
 	out.y = glm::acos(eu.y / out.z);
 
 	return out;
@@ -116,8 +116,32 @@ glm::dvec2 MathUtil::euclidean_to_spherical_r1(glm::dvec3 eu)
 {
 	glm::dvec2 out;
 
-	out.x = glm::atan(eu.z / eu.x);
+	out.x = atan2(eu.z, eu.x);
 	out.y = glm::acos(eu.y);
 
 	return out;
+}
+
+int MathUtil::int_repeat(int v, int max)
+{
+	if (v < 0)
+	{
+		return (max + (-v % max)) % max;
+	}
+	else
+	{
+		return v % max;
+	}
+}
+
+int MathUtil::int_clamp(int v, int max)
+{
+	if (v < 0)
+	{
+		return 0;
+	}
+	else
+	{
+		return glm::min(v, max);
+	}
 }

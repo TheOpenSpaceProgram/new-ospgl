@@ -260,7 +260,6 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 
 	lua_state.collect_garbage();
 
-
 	generate_vertices<PlanetTileVertex, false>(work_array->data(), model, inverse_model_spheric, &heights[0], &colors[0]);
 	generate_normals(work_array->data(), work_array->size(), model_spheric, clockwise);
 	copy_vertices(work_array->data(), vertices.data());

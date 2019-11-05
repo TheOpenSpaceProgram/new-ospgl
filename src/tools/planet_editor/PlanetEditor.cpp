@@ -93,6 +93,18 @@ void PlanetEditor::update(float dt, ImFont* code_font)
 	{
 		bool moved = false;
 
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		{
+			planet_rotation += dt * 0.5;
+			moved = true;
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+		{
+			planet_rotation -= dt * 0.5;
+			moved = true;
+		}
+
 		// Motion
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		{
@@ -185,7 +197,7 @@ void PlanetEditor::render(int width, int height)
 	// ~1 light year
 	float far_plane = 1e16f;
 
-	glm::mat4 proj = glm::perspective(glm::radians(80.0f), (float)width / (float)height, 0.1f, far_plane);
+	glm::mat4 proj = glm::perspective(glm::radians(60.0f), (float)width / (float)height, 0.1f, far_plane);
 	glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), (glm::vec3)camera.forward, (glm::vec3)camera.up);
 
 	// We apply the view position to the world so floating point errors happen
@@ -195,7 +207,9 @@ void PlanetEditor::render(int width, int height)
 
 	glm::dmat4 proj_view = (glm::dmat4)proj * (glm::dmat4)view;
 
-	renderer.render(proj_view, model, glm::dmat4(1.0), far_plane, camera.pos, config, glfwGetTime(), 
+	glm::dmat4 rot = glm::rotate(planet_rotation, glm::dvec3(0.0, 1.0, 0.0));
+
+	renderer.render(proj_view, model * rot, rot, far_plane, camera.pos, config, glfwGetTime(), 
 		-glm::normalize(glm::vec3(1.0, 0.0, 0.0)), 0.0f);
 
 
@@ -305,6 +319,8 @@ PlanetEditor::PlanetEditor(GLFWwindow* window, const std::string& planet_name)
 
 	on_move();
 
+	planet_rotation = 0.0;
+
 }
 
 
@@ -350,7 +366,9 @@ void PlanetEditor::do_planet_window()
 
 void PlanetEditor::on_move()
 {
-	glm::vec3 pos_nrm = (glm::vec3)glm::normalize(camera.pos);
+	glm::dmat4 rot = glm::rotate(planet_rotation, glm::dvec3(0.0, 1.0, 0.0));
+
+	glm::vec3 pos_nrm = (glm::vec3)(glm::inverse(rot) * glm::vec4(glm::normalize(camera.pos), 1.0f));
 	PlanetSide side = renderer.rocky->qtree.get_planet_side(pos_nrm);
 	glm::dvec2 offset = renderer.rocky->qtree.get_planet_side_offset(pos_nrm, side);
 	

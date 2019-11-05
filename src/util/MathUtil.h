@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -30,6 +31,11 @@ public:
 
 	// x = azimuth, y = inclination, r = 1
 	static glm::dvec2 euclidean_to_spherical_r1(glm::dvec3 euclidean);
+
+	// Similar to GL_REPEAT
+	static int int_repeat(int v, int max);
+	// Similar to GL_CLAMP
+	static int int_clamp(int v, int max);
 };
 
 class ProjectionUtil

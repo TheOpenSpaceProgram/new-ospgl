@@ -16,7 +16,7 @@
 // It lacks any kind of anomaly as these are computed later on from time, 
 // or from mean anomaly directly (if using NASA elements)
 
-static constexpr double G = 6.67430e-11;
+static constexpr double G = 6.67259e-11;
 
 
 struct KeplerOrbit

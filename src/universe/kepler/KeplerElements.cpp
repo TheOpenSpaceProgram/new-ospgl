@@ -29,9 +29,12 @@ KeplerOrbit NASAKeplerOrbit::to_kepler_at(double time, double& mean_anomaly_out)
 	}
 
 	// Contain mean anomaly in [-180, +180]
-	// TODO: Is this correct
-	//mean_anomaly_now = fmod(mean_anomaly_now, 180.0);
-
+	/*mean_anomaly_now = fmod(mean_anomaly_now + 180.0, 360.0);
+	if (mean_anomaly_now < 0.0)
+	{
+		mean_anomaly_now += 360.0;
+	}
+	mean_anomaly_now -= 180.0;*/
 
 	KeplerOrbit out;
 
@@ -41,8 +44,6 @@ KeplerOrbit NASAKeplerOrbit::to_kepler_at(double time, double& mean_anomaly_out)
 	out.periapsis_argument = periapsis_argument_now;
 	out.asc_node_longitude = asc_node_longitude_now;
 	mean_anomaly_out = mean_anomaly_now;
-
-	glm::cos(1.0);
 
 	return out;
 }
@@ -228,8 +229,10 @@ glm::dvec3 KeplerElements::get_position()
 	glm::dvec3 out;
 
 	glm::dvec2 flat;
-	flat.x = orbit.smajor_axis * (ORBIT_COS(eccentric_anomaly) - orbit.eccentricity);
-	flat.y = orbit.smajor_axis * sqrt(1 - orbit.eccentricity * orbit.eccentricity) * ORBIT_SIN(eccentric_anomaly);
+	double ea_rad = glm::radians(eccentric_anomaly);
+
+	flat.x = orbit.smajor_axis * (ORBIT_COS(ea_rad) - orbit.eccentricity);
+	flat.y = orbit.smajor_axis * sqrt(1.0 - orbit.eccentricity * orbit.eccentricity) * ORBIT_SIN(ea_rad);
 
 	double w = glm::radians(orbit.periapsis_argument);
 	double O = glm::radians(orbit.asc_node_longitude);
@@ -261,8 +264,9 @@ CartesianState KeplerElements::get_cartesian(double parent_mass, double our_mass
 
 
 	glm::dvec2 flat;
-	double sinE = ORBIT_SIN(eccentric_anomaly);
-	double cosE = ORBIT_COS(eccentric_anomaly);
+	double ea_rad = glm::radians(eccentric_anomaly);
+	double sinE = ORBIT_SIN(ea_rad);
+	double cosE = ORBIT_COS(ea_rad);
 	double E2 = orbit.eccentricity * orbit.eccentricity;
 	double sqrt1mE2 = sqrt(1 - E2);
 	flat.x = orbit.smajor_axis * (cosE - orbit.eccentricity);

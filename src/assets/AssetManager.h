@@ -30,6 +30,8 @@ private:
 	std::unordered_map<std::type_index, std::pair<AssetTypeData, std::unordered_map<std::string, void*>>> assets;
 		
 public:
+	
+	static bool fileExists(const std::string& path);
 
 	// Low level file accesors
 	static std::string loadString(const std::string& path);

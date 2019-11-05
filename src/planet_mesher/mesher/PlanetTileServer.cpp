@@ -308,7 +308,7 @@ void PlanetTileServer::prepare_lua(sol::state& lua_state, FastNoise* noise)
 	lua_state["height"] = 0.0;
 
 	LuaNoiseLib::load_lib(lua_state, noise);
-	LuaUtilLib::load_lib(lua_state);
+	LuaUtilLib::load_lib(lua_state, config);
 
 }
 
