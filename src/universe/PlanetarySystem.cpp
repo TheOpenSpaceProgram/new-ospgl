@@ -67,12 +67,12 @@ static glm::dmat4 build_body_rotation_matrix(PlanetaryBody* body, double t)
 void PlanetarySystem::render_body(CartesianState state, PlanetaryBody* body, glm::dvec3 camera_pos, double t, 
 	glm::dmat4 proj_view, float far_plane)
 {
+	double M_TO_AU = 1.0 / 149597900000.0;
+
 	glm::dmat4 model = glm::translate(glm::dmat4(1.0), -camera_pos + state.pos);
 	model = glm::scale(model, glm::dvec3(body->config.radius));
 
 	glm::dmat4 rot_matrix = build_body_rotation_matrix(body, t);
-	
-	model = model;
 
 	glm::dvec3 camera_pos_relative = camera_pos - state.pos;
 	glm::dvec3 light_dir = glm::normalize(state.pos);
@@ -138,7 +138,13 @@ void PlanetarySystem::render(double t, int width, int height)
 
 	if (draw_debug)
 	{
+		// 1 AU
+		double axis_length = 149597900000;
 		debug_drawer->add_point(glm::dvec3(0, 0, 0), glm::vec3(1.0, 1.0, 0.5));
+
+		debug_drawer->add_line(glm::dvec3(0, 0, 0), glm::dvec3(1, 0, 0) * axis_length, glm::vec3(1.0, 0.0, 0.0));
+		debug_drawer->add_line(glm::dvec3(0, 0, 0), glm::dvec3(0, 1, 0) * axis_length, glm::vec3(0.0, 1.0, 0.0));
+		debug_drawer->add_line(glm::dvec3(0, 0, 0), glm::dvec3(0, 0, 1) * axis_length, glm::vec3(0.0, 0.0, 1.0));
 	}
 
 	glm::dmat4 c_model = glm::translate(glm::dmat4(1.0), -camera_pos);
@@ -149,7 +155,18 @@ void PlanetarySystem::render(double t, int width, int height)
 
 void PlanetarySystem::update(double dt)
 {
-	camera.focus_index = 0;
+	if (glfwGetKey(input->window, GLFW_KEY_Q) == GLFW_PRESS)
+	{
+		camera.focus_index = 0;
+	}
+
+	if (glfwGetKey(input->window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		camera.focus_index = 1;
+	}
+
+
+	//camera.distance = 1000000000000.0;
 	camera.update(dt);
 }
 

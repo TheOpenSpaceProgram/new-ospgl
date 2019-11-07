@@ -31,9 +31,10 @@
 	asc_node_longitude = 0.0
 	asc_node_longitude_var = -0.24123856
 	rotation_period = 23.9344696
-	rotation_at_epoch = 0.0
+	rotation_at_epoch = -17.4
 	north_pole_declination = 90.0
 	north_pole_right_ascension = 0.0
+
 
 [[planet]]
 	name = "Mars"
