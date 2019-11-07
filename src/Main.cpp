@@ -61,6 +61,8 @@ int main(void)
 	double dt = 0.0;
 	double t = 0.0;
 
+	double timewarp = 1.0;
+
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	glEnable(GL_CULL_FACE);
@@ -68,7 +70,7 @@ int main(void)
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	PlanetEditor editor = PlanetEditor(window, "earth");
+	PlanetEditor editor = PlanetEditor(window, "moon");
 
 	input = new InputUtil();
 	input->setup(window);
@@ -83,7 +85,7 @@ int main(void)
 	system.draw_debug = true;
 
 	//Date start_date = Date(2000, Date::MAY, 31);
-	Date start_date = Date(2000, Date::JUNE, 21);
+	Date start_date = Date(2019, Date::SEPTEMBER, 21);
 
 	start_date.day_decimal = (19.0 + 27.0 / 60.0) / 24.0;
 
@@ -111,6 +113,7 @@ int main(void)
 		ImGui::Begin("Date");
 
 		ImGui::Text("%s", Date(t).to_string().c_str());
+		ImGui::InputDouble("Timewarp", &timewarp);
 
 		ImGui::End();
 
@@ -128,7 +131,7 @@ int main(void)
 
 
 		dt = dtt.restart();
-		t += dt * 0.0;
+		t += dt * timewarp;
 
 
 	}

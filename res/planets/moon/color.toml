@@ -1,0 +1,4 @@
+channels = 3
+bitdepth = 8
+upload = false
+in_memory = true

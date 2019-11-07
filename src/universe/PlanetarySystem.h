@@ -2,7 +2,7 @@
 #include <vector>
 #include <cpptoml.h>
 #include "../util/SerializeUtil.h"
-#include "body/PlanetaryBody.h"
+#include "SystemElement.h"
 
 #include "../renderer/camera/MapCamera.h"
 
@@ -14,7 +14,7 @@ private:
 
 	std::vector<CartesianState> render_states;
 
-	void render_body(CartesianState state, PlanetaryBody* body, glm::dvec3 camera_pos, double t,
+	void render_body(CartesianState state, SystemElement* body, glm::dvec3 camera_pos, double t,
 		glm::dmat4 proj_view, float far_plane);
 
 	void update_render_body_rocky(PlanetaryBody* body, glm::dvec3 body_pos, glm::dvec3 camera_pos, double t);
@@ -30,7 +30,7 @@ public:
 
 	// Guaranteed to be ordered so that the last planets to appear
 	// are moons, or moons of moons (etc...)
-	std::vector<PlanetaryBody> bodies;
+	std::vector<SystemElement> elements;
 	
 	// Computes state of the whole system, including offsets, 
 	// at a given time

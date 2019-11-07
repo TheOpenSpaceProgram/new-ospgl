@@ -158,7 +158,7 @@ double KeplerOrbit::time_to_mean(double time, double our_mass, double parent_mas
 
 
 	double n = sqrt((G * (our_mass + parent_mass)) / (sm * sm * sm));
-	return -n * time + mean_at_epoch;
+	return glm::degrees(n) * time + mean_at_epoch;
 }
 
 double KeplerOrbit::get_period(double our_mass, double parent_mass) const

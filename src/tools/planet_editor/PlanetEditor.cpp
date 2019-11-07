@@ -326,7 +326,6 @@ PlanetEditor::PlanetEditor(GLFWwindow* window, const std::string& planet_name)
 
 PlanetEditor::~PlanetEditor()
 {
-	delete renderer.rocky->server;
 }
 
 void PlanetEditor::do_editor_window(ImFont* code_font, TextEditor* editor, const std::string& name, bool* open)

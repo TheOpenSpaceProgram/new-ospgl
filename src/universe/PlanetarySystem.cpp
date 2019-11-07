@@ -1,7 +1,7 @@
 #include "PlanetarySystem.h"
 #include "../util/DebugDrawer.h"
 
-CartesianState compute_state(double t, double tol, double star_mass, PlanetaryBody* body, std::vector<CartesianState>* other_states)
+CartesianState compute_state(double t, double tol, double star_mass, SystemElement* body, std::vector<CartesianState>* other_states)
 {
 	double parent_mass;
 	glm::dvec3 offset = glm::dvec3(0.0, 0.0, 0.0);
@@ -12,18 +12,34 @@ CartesianState compute_state(double t, double tol, double star_mass, PlanetaryBo
 	}
 	else 
 	{
-		parent_mass = body->parent->config.mass;
+		parent_mass = body->parent->get_mass(body->is_primary);
 		offset = (*other_states)[body->parent->index].pos;
 		vel_offset = (*other_states)[body->parent->index].vel;
 	}
 
-	KeplerElements elems = body->orbit.to_elements_at(t, body->config.mass, parent_mass, tol);
-	CartesianState st = elems.get_cartesian(parent_mass, body->config.mass);
+	if (body->is_primary && body->parent->is_barycenter)
+	{
+		CartesianState moon = (*other_states)[body->parent->barycenter_secondary->index];
+		// Invert it across the barycenter
+		glm::dvec3 ov = glm::normalize(moon.pos - offset);
+		moon.pos = offset - ov * body->barycenter_radius;
+		// Scale velocity
+		moon.vel = -glm::normalize(moon.vel - vel_offset) * body->barycenter_radius + vel_offset;
 
-	st.pos += offset;
-	st.vel += vel_offset;
+		return moon;
+	}
+	else
+	{
 
-	return st;
+		KeplerElements elems = body->orbit.to_elements_at(t, body->get_mass(), parent_mass, tol);
+		CartesianState st = elems.get_cartesian(parent_mass, body->get_mass());
+
+		st.pos += offset;
+		st.vel += vel_offset;
+		return st;
+	}
+
+
 }
 
 
@@ -31,23 +47,23 @@ void PlanetarySystem::compute_states(double t, std::vector<CartesianState>& out,
 {
 	for (size_t i = 0; i < out.size(); i++)
 	{
-		out[i] = compute_state(t, tol, star_mass, &bodies[i], &out);
+		out[i] = compute_state(t, tol, star_mass, &elements[i], &out);
 	}
 }
 
 void PlanetarySystem::compute_sois(double t)
 {
-	for (size_t i = 0; i < bodies.size(); i++)
+	for (size_t i = 0; i < elements.size(); i++)
 	{
-		double smajor_axis = bodies[i].orbit.to_orbit_at(t).smajor_axis;
+		double smajor_axis = elements[i].orbit.to_orbit_at(t).smajor_axis;
 
 		double parent_mass = star_mass;
-		if (bodies[i].parent != nullptr)
+		if (elements[i].parent != nullptr)
 		{
-			parent_mass = bodies[i].parent->config.mass;
+			parent_mass = elements[i].parent->get_mass();
 		}
 
-		bodies[i].soi_radius = smajor_axis * pow(bodies[i].config.mass / parent_mass, 0.4);
+		elements[i].soi_radius = smajor_axis * pow(elements[i].get_mass() / parent_mass, 0.4);
 	}
 }
 
@@ -64,25 +80,30 @@ static glm::dmat4 build_body_rotation_matrix(PlanetaryBody* body, double t)
 	return rot_matrix;
 }
 
-void PlanetarySystem::render_body(CartesianState state, PlanetaryBody* body, glm::dvec3 camera_pos, double t, 
+void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm::dvec3 camera_pos, double t, 
 	glm::dmat4 proj_view, float far_plane)
 {
 	double M_TO_AU = 1.0 / 149597900000.0;
 
-	glm::dmat4 model = glm::translate(glm::dmat4(1.0), -camera_pos + state.pos);
-	model = glm::scale(model, glm::dvec3(body->config.radius));
 
-	glm::dmat4 rot_matrix = build_body_rotation_matrix(body, t);
 
 	glm::dvec3 camera_pos_relative = camera_pos - state.pos;
 	glm::dvec3 light_dir = glm::normalize(state.pos);
 
-	body->renderer.render(proj_view, model * rot_matrix, rot_matrix, far_plane, camera_pos_relative,
-		body->config, t, light_dir, body->dot_factor);
+	if (!body->is_barycenter)
+	{
+		glm::dmat4 model = glm::translate(glm::dmat4(1.0), -camera_pos + state.pos);
+		model = glm::scale(model, glm::dvec3(body->as_body->config.radius));
+
+		glm::dmat4 rot_matrix = build_body_rotation_matrix(body->as_body, t);
+
+		body->as_body->renderer.render(proj_view, model * rot_matrix, rot_matrix, far_plane, camera_pos_relative,
+			body->as_body->config, t, light_dir, body->as_body->dot_factor);
+	}
 
 	if (draw_debug)
 	{
-		body->renderer.draw_debug(t, state, body, body->dot_factor);
+		body->as_body->renderer.draw_debug(t, state, body);
 	}
 }
 
@@ -96,14 +117,14 @@ void PlanetarySystem::render(double t, int width, int height)
 
 	if (render_states.size() == 0)
 	{
-		render_states.resize(bodies.size());
+		render_states.resize(elements.size());
 	}
 
 	float fov = glm::radians(80.0f);
 
 	compute_states(t, render_states, 1e-6);
 
-	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir(t, glm::dvec3(0, 0, 0), 1.0, render_states, bodies);
+	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir(t, glm::dvec3(0, 0, 0), 1.0, render_states, elements);
 
 	update_render(camera_pos, fov, t);
 
@@ -116,14 +137,14 @@ void PlanetarySystem::render(double t, int width, int height)
 	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), camera_dir, glm::dvec3(0.0, 1.0, 0.0));
 	glm::dmat4 proj_view = proj * view;
 
-	using BodyPositionPair = std::pair<PlanetaryBody*, CartesianState>;
+	using BodyPositionPair = std::pair<SystemElement*, CartesianState>;
 
 	// Sort bodies by distance to camera to avoid weird atmospheres
 	std::vector<BodyPositionPair> sorted;
 
-	for (size_t i = 0; i < bodies.size(); i++)
+	for (size_t i = 0; i < elements.size(); i++)
 	{
-		sorted.push_back(std::make_pair(&bodies[i], render_states[i]));
+		sorted.push_back(std::make_pair(&elements[i], render_states[i]));
 	}
 
 	std::sort(sorted.begin(), sorted.end(), [camera_pos](BodyPositionPair a, BodyPositionPair b)
@@ -165,46 +186,56 @@ void PlanetarySystem::update(double dt)
 		camera.focus_index = 1;
 	}
 
+	if (glfwGetKey(input->window, GLFW_KEY_E) == GLFW_PRESS)
+	{
+		camera.focus_index = 2;
+	}
+
+	if (glfwGetKey(input->window, GLFW_KEY_R) == GLFW_PRESS)
+	{
+		camera.focus_index = 3;
+	}
+
 
 	//camera.distance = 1000000000000.0;
 	camera.update(dt);
 }
 
-static void load_body(PlanetaryBody* body)
+static void load_body(SystemElement* body)
 {
 	logger->info("Loading body '{}'", body->name);
-	if (body->config.has_surface)
+	if (body->as_body->config.has_surface)
 	{
-		body->renderer.rocky = new RockyPlanetRenderer();
+		body->as_body->renderer.rocky = new RockyPlanetRenderer();
 
-		std::string script = assets->loadString(body->config.surface.script_path);
+		std::string script = assets->loadString(body->as_body->config.surface.script_path);
 
-		body->renderer.rocky->load(script, body->config);
+		body->as_body->renderer.rocky->load(script, body->as_body->config);
 	}
 	else
 	{
 
 	}
 
-	if (body->config.has_atmo)
+	if (body->as_body->config.has_atmo)
 	{
-		body->renderer.atmo = new AtmosphereRenderer();
+		body->as_body->renderer.atmo = new AtmosphereRenderer();
 	}
 }
 
-static void unload_body(PlanetaryBody* body)
+static void unload_body(SystemElement* body)
 {
 	logger->info("Unloading body '{}'", body->name);
-	if (body->config.has_surface && body->renderer.rocky != nullptr)
+	if (body->as_body->config.has_surface && body->as_body->renderer.rocky != nullptr)
 	{
-		delete body->renderer.rocky;
-		body->renderer.rocky = nullptr;
+		delete body->as_body->renderer.rocky;
+		body->as_body->renderer.rocky = nullptr;
 	}
 
-	if (body->config.has_atmo && body->renderer.atmo != nullptr)
+	if (body->as_body->config.has_atmo && body->as_body->renderer.atmo != nullptr)
 	{
-		delete body->renderer.atmo;
-		body->renderer.atmo = nullptr;
+		delete body->as_body->renderer.atmo;
+		body->as_body->renderer.atmo = nullptr;
 	}
 }
 
@@ -262,28 +293,32 @@ void PlanetarySystem::update_render_body_rocky(PlanetaryBody* body, glm::dvec3 b
 void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 {
 
-	for (size_t i = 0; i < bodies.size(); i++)
+	for (size_t i = 0; i < elements.size(); i++)
 	{
 		
-		// Set unloaded
-		float prev_factor = bodies[i].dot_factor;
-		bodies[i].dot_factor = bodies[i].get_dot_factor((float)glm::distance(camera_pos, render_states[i].pos), fov);
-
-			
-
-		if (prev_factor == 1.0f && bodies[i].dot_factor != 1.0f)
+		if (!elements[i].is_barycenter)
 		{
-			load_body(&bodies[i]);
-		}
 
-		if (prev_factor != 1.0f && bodies[i].dot_factor == 1.0f)
-		{
-			unload_body(&bodies[i]);
-		}
+			// Set unloaded
+			float prev_factor = elements[i].as_body->dot_factor;
+			elements[i].as_body->dot_factor = elements[i].as_body->get_dot_factor((float)glm::distance(camera_pos, render_states[i].pos), fov);
 
-		if (bodies[i].renderer.rocky != nullptr)
-		{
-			update_render_body_rocky(&bodies[i], render_states[i].pos, camera_pos, t);
+
+
+			if (prev_factor == 1.0f && elements[i].as_body->dot_factor != 1.0f)
+			{
+				load_body(&elements[i]);
+			}
+
+			if (prev_factor != 1.0f && elements[i].as_body->dot_factor == 1.0f)
+			{
+				unload_body(&elements[i]);
+			}
+
+			if (elements[i].as_body->renderer.rocky != nullptr)
+			{
+				update_render_body_rocky(elements[i].as_body, render_states[i].pos, camera_pos, t);
+			}
 		}
 	}
 }

@@ -25,7 +25,7 @@ void MapCamera::update(double dt)
 
 std::pair<glm::dvec3, glm::dvec3> MapCamera::get_camera_pos_dir(
 	double t, glm::dvec3 vessel_pos, double star_radius, std::vector<CartesianState>& render_states,
-	std::vector<PlanetaryBody>& bodies)
+	std::vector<SystemElement>& bodies)
 {
 	glm::dvec3 pos;
 	glm::dvec3 dir;
@@ -35,7 +35,7 @@ std::pair<glm::dvec3, glm::dvec3> MapCamera::get_camera_pos_dir(
 	if (focus_index == -2)
 	{
 		center = vessel_pos;
-		center_radius = 0.0;
+		center_radius = 1.0;
 	}
 	else if (focus_index == -1)
 	{
@@ -45,7 +45,15 @@ std::pair<glm::dvec3, glm::dvec3> MapCamera::get_camera_pos_dir(
 	else
 	{
 		center = render_states[focus_index].pos;
-		center_radius = bodies[focus_index].config.radius;
+		if (bodies[focus_index].is_barycenter)
+		{
+			center_radius = 1.0;
+		}
+		else
+		{
+			center_radius = bodies[focus_index].as_body->config.radius;
+		}
+		
 	}
 
 	if (distance < center_radius * 1.5)
