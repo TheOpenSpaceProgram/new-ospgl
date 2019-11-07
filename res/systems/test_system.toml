@@ -12,10 +12,9 @@
 # Rotation at epoch is in degrees
 # https://en.wikipedia.org/wiki/Axial_tilt <- J2000 used for tilt
 
-
-[[planet]]
-	name = "Earth"
-	config = "res/planets/earth/config.toml"
+[[element]]
+	name = "Earth-Moon"
+	is_barycenter = true
 
 	is_nasa_data = true
 	smajor_axis = 149598290450.51898
@@ -30,13 +29,39 @@
 	periapsis_longitude_var = 0.31795260
 	asc_node_longitude = 0.0
 	asc_node_longitude_var = -0.24123856
+
+
+[[element]]
+	name = "Earth"
+	parent = "Earth-Moon"
+	config = "res/planets/earth/config.toml"
+
+	is_primary = true
+
 	rotation_period = 23.9344696
-	rotation_at_epoch = -17.4
+	rotation_at_epoch = 18.5
 	north_pole_declination = 90.0
 	north_pole_right_ascension = 0.0
 
 
-[[planet]]
+[[element]]
+	name = "Moon"
+	parent = "Earth-Moon"
+	config = "res/planets/moon/config.toml"
+
+	smajor_axis = 384_399_000.0
+	eccentricity = 0.0549
+	inclination = 5.145
+	periapsis_argument = 318.15
+	asc_node_longitude = 125.08
+	mean_at_epoch = 135.27
+
+	rotation_period = 655.719864
+	rotation_at_epoch = 0.0
+	north_pole_declination = 65.64
+	north_pole_right_ascension = 266.86
+
+[[element]]
 	name = "Mars"
 	config = "res/planets/mars/config.toml"
 
@@ -53,7 +78,9 @@
 	periapsis_longitude_var = 0.45223625
 	asc_node_longitude = 49.71320984
 	asc_node_longitude_var = -0.26852431
+
 	rotation_period = 24.62277778
 	rotation_at_epoch = 0.0
 	north_pole_declination = 52.89
 	north_pole_right_ascension = 317.68
+

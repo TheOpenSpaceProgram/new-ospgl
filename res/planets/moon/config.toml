@@ -1,0 +1,24 @@
+radius = 1737_100.0 # meters
+mass = 7.342e22
+
+[far_color]
+	x = 0.4
+	y = 0.4
+	z = 0.4
+
+[surface]
+
+	images = [	{ name = "heightmap", path = "planets/moon/hmap"},
+				{ name = "colormap", path = "planets/moon/color"}]
+
+	script_path = "./res/planets/moon/surface.lua"
+	has_water = false				# Does the planet have water
+
+	[surface.noise]
+		seed = 0
+		interp = 2		# 	0 = Linear < 1 = Hermite < 2 = Quintic
+
+	[surface.lod]
+		max_depth = 10				# Max LOD depth allowed
+		coef_a = 2.0				# LOD coefficient A
+		coef_b = 3

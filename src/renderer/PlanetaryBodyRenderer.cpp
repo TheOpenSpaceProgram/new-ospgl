@@ -1,6 +1,6 @@
 #include "PlanetaryBodyRenderer.h"
 #include "../util/DebugDrawer.h"
-#include "../universe/body/PlanetaryBody.h"
+#include "../universe/SystemElement.h"
 
 
 void PlanetaryBodyRenderer::render(glm::dmat4 proj_view, glm::dmat4 model, glm::dmat4 rotation_matrix,
@@ -29,28 +29,36 @@ void PlanetaryBodyRenderer::render(glm::dmat4 proj_view, glm::dmat4 model, glm::
 }
 
 
-void PlanetaryBodyRenderer::draw_debug(double t, CartesianState st, PlanetaryBody* body, float dot_factor)
+void PlanetaryBodyRenderer::draw_debug(double t, CartesianState st, SystemElement* elem)
 {
-	if (dot_factor == 1.0f)
+	if (elem->is_barycenter)
 	{
-		debug_drawer->add_point(st.pos, body->config.far_color);
+
 	}
 	else
 	{
-		glm::dvec3 orbit_plane = body->orbit.to_orbit_at(t).get_plane_normal();
-		glm::dvec3 prograde = glm::normalize(st.vel);
-		glm::dvec3 normal = glm::cross(prograde, orbit_plane);
+		float dot_factor = elem->as_body->dot_factor;
+		if (dot_factor == 1.0f)
+		{
+			debug_drawer->add_point(st.pos, elem->as_body->config.far_color);
+		}
+		else
+		{
+			glm::dvec3 orbit_plane = elem->orbit.to_orbit_at(t).get_plane_normal();
+			glm::dvec3 prograde = glm::normalize(st.vel);
+			glm::dvec3 normal = glm::cross(prograde, orbit_plane);
 
-		debug_drawer->add_line(st.pos, st.pos + body->rotation_axis * body->config.radius * 2.0, glm::vec3(1.0, 0.0, 0.0));
-		debug_drawer->add_line(st.pos, st.pos - body->rotation_axis * body->config.radius * 2.0, glm::vec3(0.0, 0.0, 1.0));
-		debug_drawer->add_line(st.pos, st.pos - glm::normalize(st.pos) * body->config.radius * 1.5, glm::vec3(1.0, 0.5, 0.0));
+			debug_drawer->add_line(st.pos, st.pos + elem->as_body->rotation_axis * elem->as_body->config.radius * 2.0, glm::vec3(1.0, 0.0, 0.0));
+			debug_drawer->add_line(st.pos, st.pos - elem->as_body->rotation_axis * elem->as_body->config.radius * 2.0, glm::vec3(0.0, 0.0, 1.0));
+			debug_drawer->add_line(st.pos, st.pos - glm::normalize(st.pos) * elem->as_body->config.radius * 1.5, glm::vec3(1.0, 0.5, 0.0));
 
-		double oind_size = 2.5;
+			double oind_size = 2.5;
 
-		debug_drawer->add_arrow(st.pos, st.pos + orbit_plane * body->config.radius * oind_size, glm::vec3(0.0, 1.0, 1.0));
-		debug_drawer->add_arrow(st.pos, st.pos + prograde * body->config.radius * oind_size, glm::vec3(1.0, 1.0, 1.0));
-		debug_drawer->add_arrow(st.pos, st.pos + normal * body->config.radius * oind_size, glm::vec3(1.0, 1.0, 0.0));
+			debug_drawer->add_arrow(st.pos, st.pos + orbit_plane * elem->as_body->config.radius * oind_size, glm::vec3(0.0, 1.0, 1.0));
+			debug_drawer->add_arrow(st.pos, st.pos + prograde * elem->as_body->config.radius * oind_size, glm::vec3(1.0, 1.0, 1.0));
+			debug_drawer->add_arrow(st.pos, st.pos + normal * elem->as_body->config.radius * oind_size, glm::vec3(1.0, 1.0, 0.0));
 
+		}
 	}
 }
 
@@ -63,6 +71,17 @@ PlanetaryBodyRenderer::PlanetaryBodyRenderer()
 
 PlanetaryBodyRenderer::~PlanetaryBodyRenderer()
 {
+	if (rocky != nullptr)
+	{
+		delete rocky;
+		rocky = nullptr;
+	}
+
+	if (atmo != nullptr)
+	{
+		delete atmo;
+		atmo = nullptr;
+	}
 }
 
 void RockyPlanetRenderer::load(std::string script, PlanetConfig& config)

@@ -167,9 +167,9 @@ void main()
     vec3 nrm = normalize(vNormal + offset);
 
 
-    float diff = max(dot(-light_dir, vNormal + offset * 0.5), atmoc.w);
+    float diff = max(dot(-light_dir, vNormal + offset * 0.5), atmoc.w * 0.5);
 
-    vec3 viewDir = normalize(camera_pos - vPos);
+    vec3 viewDir = normalize(camera_pos - vNormal);
     vec3 reflectDir = reflect(light_dir, nrm);
 
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256);
@@ -183,7 +183,7 @@ void main()
     vec3 speccol = vec3(1.0, 0.3, 0.3);
     vec3 speccolb = vec3(1.0, 0.9, 0.88);
 
-    float deepfactor = max(min(pow(vDepth, 0.88) * 500.0, 1.0), 0.0);
+    float deepfactor = max(min(pow(vDepth, 0.85) * 500.0, 1.0), 0.0);
     float veryshallow = max(min(pow(vDepth, 0.44 + min(wave * 0.05, 0.0)) * 500.0, 1.0), 0.0);
 
     vec3 col = shallowcol * (1.0 - deepfactor) + deepcol * deepfactor + veryshallowcol * (1.0 - veryshallow);

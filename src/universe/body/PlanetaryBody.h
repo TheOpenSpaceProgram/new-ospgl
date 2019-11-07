@@ -12,19 +12,11 @@ public:
 
 	PlanetaryBodyRenderer renderer;
 
-	size_t index;
-
-	std::string name;
-
-	double soi_radius;
 
 	// 0 = no dot, 1 = only dot
 	// Used to save resources when rendering planets which are far away
 	float dot_factor;
 
-	// Set by PlanetarySystem deserializer
-	PlanetaryBody* parent;
-	ArbitraryKeplerOrbit orbit;
 
 	// FOV is in radians
 	float get_dot_factor(float distance, float fov);
@@ -82,10 +74,6 @@ public:
 	{
 		std::string config;
 		SAFE_TOML_GET(config, "config", std::string);
-
-		SAFE_TOML_GET(to.name, "name", std::string);
-
-		::deserialize(to.orbit, from);
 
 		auto config_toml = SerializeUtil::load_file(config);
 		::deserialize(to.config, *config_toml);

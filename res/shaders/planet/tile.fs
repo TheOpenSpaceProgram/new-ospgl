@@ -120,7 +120,7 @@ void main()
 {
     vec4 atmoc = atmo(light_dir);
 
-    float diff = max(dot(-light_dir, vNormal), atmoc.w);
+    float diff = max(dot(-light_dir, vNormal), atmoc.w * 0.5);
 
     vec3 col = vColor;
 

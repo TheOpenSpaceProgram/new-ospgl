@@ -17,9 +17,17 @@ struct RockyPlanetRenderer
 	{
 		server = nullptr;
 	}
+
+	~RockyPlanetRenderer()
+	{
+		if (server != nullptr)
+		{
+			delete server;
+		}
+	}
 };
 
-class PlanetaryBody;
+class SystemElement;
 
 // A planetary body can either be a gaseous planet
 // or a rocky body, both types only differ when seen from
@@ -37,7 +45,7 @@ public:
 		glm::dvec3 camera_pos, PlanetConfig& config, double time, glm::vec3 light_dir,
 		float dot_factor);
 
-	void draw_debug(double t, CartesianState state, PlanetaryBody* body, float dot_factor);
+	void draw_debug(double t, CartesianState state, SystemElement* elem);
 
 	PlanetaryBodyRenderer();
 	~PlanetaryBodyRenderer();
