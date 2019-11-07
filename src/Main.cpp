@@ -82,7 +82,10 @@ int main(void)
 	system.compute_sois(0.0);
 	system.draw_debug = true;
 
-	Date start_date = Date(2000, Date::JANUARY, 1);
+	//Date start_date = Date(2000, Date::MAY, 31);
+	Date start_date = Date(2000, Date::JUNE, 21);
+
+	start_date.day_decimal = (19.0 + 27.0 / 60.0) / 24.0;
 
 	t = start_date.to_seconds();
 

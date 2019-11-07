@@ -45,6 +45,8 @@ void PlanetaryBodyRenderer::draw_debug(double t, CartesianState st, PlanetaryBod
 		debug_drawer->add_line(st.pos, st.pos - body->rotation_axis * body->config.radius * 2.0, glm::vec3(0.0, 0.0, 1.0));
 		debug_drawer->add_line(st.pos, st.pos - glm::normalize(st.pos) * body->config.radius * 1.5, glm::vec3(1.0, 0.5, 0.0));
 
+		logger->info("dot(rot, sun) = {}", glm::dot(body->rotation_axis, -glm::normalize(st.pos)));
+
 		double oind_size = 2.5;
 
 		debug_drawer->add_arrow(st.pos, st.pos + orbit_plane * body->config.radius * oind_size, glm::vec3(0.0, 1.0, 1.0));

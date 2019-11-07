@@ -76,25 +76,26 @@ static inline double starting_value(double ecc, double mean)
 	double t33 = ORBIT_COS(mean);
 
 
-	return mean + ((-1.0 / 2.0) * t35 + ecc + (t34 + (3.0 / 2.0) * t33 * t35) * t33) * ORBIT_SIN(mean);
+	return mean + (-0.5 * t35 + ecc + (t34 + 1.5 * t33 * t35) * t33) * ORBIT_SIN(mean);
 }
 
 static inline double eps3(double ecc, double mean, double x)
 {
 	double t1 = ORBIT_COS(x);
-	double t2 = -1 + ecc * t1;
+	double t2 = -1.0 + ecc * t1;
 	double t3 = ORBIT_SIN(x);
 	double t4 = ecc * t3;
 	double t5 = -x + t4 + mean;
-	double t6 = t5 / ((1.0 / 2.0) * t5 * (t4 / t2) + t2);
-	return t5 / (((1.0 / 2.0) * t3 - (1.0 / 6.0) * t1 * t6) * ecc * t6 + t2);
+	double t6 = t5 / (0.5 * t5 * t4 / t2 + t2);
+	return t5 / ((0.5 * t3 - 1.0 / 6.0 * t1 * t6) * ecc * t6 + t2);
 }
 
 static inline double elliptic_iterative(double mean, double eccentricity, double tol)
 {
 	double out = 0.0;
 
-	double mnorm = fmod(mean, 2.0 * glm::pi<double>());
+	//double mnorm = mean + glm::pi<double>();  
+	double mnorm = fmod(mean, glm::two_pi<double>());
 	double e0 = starting_value(eccentricity, mnorm);
 	double de = tol + 1;
 	double count = 0;
@@ -120,7 +121,7 @@ double KeplerOrbit::mean_to_eccentric(double mean, double tol) const
 	if (eccentricity < 1.0)
 	{
 		// Elliptic solver
-		return elliptic_iterative(glm::radians(mean), eccentricity, tol);
+		return glm::degrees(elliptic_iterative(glm::radians(mean), eccentricity, tol));
 	}
 	else if (eccentricity >= 1.0)
 	{
@@ -137,7 +138,7 @@ double KeplerOrbit::eccentric_to_true(double eccentric) const
 	double half = glm::radians(eccentric) / 2.0;
 	if (eccentricity < 1.0)
 	{
-		return 2.0 * atan2(sqrt(1 + eccentricity) * ORBIT_SIN(half), sqrt(1 - eccentricity) * cos(half));
+		return 2.0 * atan2(sqrt(1.0 + eccentricity) * ORBIT_SIN(half), sqrt(1.0 - eccentricity) * cos(half));
 	}
 	else
 	{
@@ -268,7 +269,7 @@ CartesianState KeplerElements::get_cartesian(double parent_mass, double our_mass
 	double sinE = ORBIT_SIN(ea_rad);
 	double cosE = ORBIT_COS(ea_rad);
 	double E2 = orbit.eccentricity * orbit.eccentricity;
-	double sqrt1mE2 = sqrt(1 - E2);
+	double sqrt1mE2 = sqrt(1.0 - E2);
 	flat.x = orbit.smajor_axis * (cosE - orbit.eccentricity);
 	flat.y = orbit.smajor_axis * sqrt1mE2 * sinE;
 
@@ -281,7 +282,6 @@ CartesianState KeplerElements::get_cartesian(double parent_mass, double our_mass
 	double xx = ORBIT_COS(w) * ORBIT_COS(O) - ORBIT_SIN(w) * ORBIT_SIN(O) * ORBIT_COS(I);
 	double xy = -ORBIT_SIN(w) * ORBIT_COS(O) - ORBIT_COS(w) * ORBIT_SIN(O) * ORBIT_COS(I);
 
-
 	double yx = ORBIT_SIN(w) * ORBIT_SIN(I);
 	double yy = ORBIT_COS(w) * ORBIT_SIN(I);
 
@@ -292,7 +292,7 @@ CartesianState KeplerElements::get_cartesian(double parent_mass, double our_mass
 	pos.y = yx * flat.x + yy * flat.y;
 	pos.z = zx * flat.x + zy * flat.y;
 
-	double dist2 = flat.y * flat.y + flat.x + flat.x;
+	double dist2 = flat.y * flat.y + flat.x * flat.x;
 	double p = parent_mass * our_mass * G;
 
 	double mult = sqrt((p * orbit.smajor_axis) / dist2);
@@ -306,5 +306,6 @@ CartesianState KeplerElements::get_cartesian(double parent_mass, double our_mass
 	vel.y = yx * flat_vel.x + yy * flat_vel.y;
 	vel.z = zx * flat_vel.x + zy * flat_vel.y;
 
-	return CartesianState(pos, vel);
+	// We have to correct the coordinate system
+	return CartesianState(glm::vec3(-pos.x, pos.y, pos.z), glm::vec3(-vel.x, vel.y, vel.z));
 }

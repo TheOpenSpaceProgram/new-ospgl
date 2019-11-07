@@ -56,9 +56,30 @@ public:
 		SAFE_TOML_GET(np_declination, "north_pole_declination", double);
 		SAFE_TOML_GET(np_right_ascension, "north_pole_right_ascension", double);
 
+
+		// At the equinox the rotation is 22.5º towards the Z axis
+		// for Earth (the rotation matrix is valid for everything as the
+		// data is measured relative to Earth)
+		glm::dmat4 rot = glm::rotate(glm::radians(22.43671), glm::dvec3(1.0, 0.0, 0.0));
+
+		// Build the Earth-relative north pole vector
+		glm::dvec3 north_pole = glm::dvec3(0.0, 1.0, 0.0);
+		glm::dmat4 nrot = glm::dmat4(1.0); 
+		nrot *= glm::rotate(glm::radians(np_right_ascension), glm::dvec3(0.0, -1.0, 0.0));
+		nrot *= glm::rotate(glm::radians(np_declination - 90.0), glm::dvec3(1.0, 0.0, 0.0));
+
+		// Get north pole relative to Earth, then to J2000
+		glm::dvec3 r_north = rot * nrot * glm::dvec4(north_pole, 1.0);
+
+		return glm::normalize(r_north);
+
+		/*
 		// Normalized earth position at t = 0, J2000
 		// (Used to correct the coordinate system to a equinox aligned one)
-		glm::dvec3 earth_at = -glm::dvec3(-0.18017889708209486, 0.00000000000000000, 0.98363385720819907);
+		glm::dvec3 earth_at = -glm::dvec3(0.18017889708209486, 0.00000000000000000, 0.98363385720819907);
+		// Disregard the previous, apparently it needs to be (0, 0, 1)
+		// TODO: Investigate why, maybe wikipedia data is not actually taken on J2000?
+		//glm::dvec3 earth_at = -glm::dvec3(0, 0, 1);
 		glm::dvec3 base = glm::dvec3(1.0, 0.0, 0.0);
 
 		glm::dmat4 final_rot = MathUtil::rotate_from_to(earth_at, base);
@@ -70,7 +91,10 @@ public:
 		glm::dmat4 decline = glm::rotate(glm::radians(np_declination), glm::dvec3(0.0, 0.0, -1.0));
 		glm::dmat4 right_ascend = glm::rotate(glm::radians(np_right_ascension), glm::dvec3(0.0, 1.0, 0.0));
 
-		return -glm::normalize(glm::dvec3(right_ascend * final_rot * decline * glm::dvec4(base, 1.0)));
+		glm::dvec3 rot_axis = -glm::normalize(glm::dvec3(final_rot * right_ascend * decline * glm::dvec4(base, 1.0)));
+
+		return glm::dvec3(rot_axis.x, rot_axis.y, rot_axis.z);
+		*/
 	}
 
 	static void serialize(const PlanetaryBody& what, cpptoml::table& target)
