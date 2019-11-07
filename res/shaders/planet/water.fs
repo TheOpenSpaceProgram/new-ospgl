@@ -149,6 +149,9 @@ vec4 atmo(vec3 lightDir)
 
 void main()
 {
+    vec4 atmoc = atmo(light_dir);
+
+
     float wave_power = max(min(0.0000001 / pow(length(camera_pos - vPos), 2.0), 1.0), 0.0);
 
     float wave = snoise(vTexture * 703071.0 + time * 0.4);
@@ -164,7 +167,7 @@ void main()
     vec3 nrm = normalize(vNormal + offset);
 
 
-    float diff = max(dot(-light_dir, vNormal + offset * 0.5), 0.0);
+    float diff = max(dot(-light_dir, vNormal + offset * 0.5), atmoc.w);
 
     vec3 viewDir = normalize(camera_pos - vPos);
     vec3 reflectDir = reflect(light_dir, nrm);
@@ -185,7 +188,6 @@ void main()
 
     vec3 col = shallowcol * (1.0 - deepfactor) + deepcol * deepfactor + veryshallowcol * (1.0 - veryshallow);
 
-    vec4 atmoc = atmo(light_dir);
 
     FragColor = vec4((col * diff + speccol * specular * (1.0 - spec_red) + speccolb * specular * spec_red + atmoc.xyz * atmoc.w) * 0.77, min(deepfactor + 0.9, 1.0));
 

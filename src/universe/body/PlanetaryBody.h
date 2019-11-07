@@ -72,29 +72,6 @@ public:
 		glm::dvec3 r_north = rot * nrot * glm::dvec4(north_pole, 1.0);
 
 		return glm::normalize(r_north);
-
-		/*
-		// Normalized earth position at t = 0, J2000
-		// (Used to correct the coordinate system to a equinox aligned one)
-		glm::dvec3 earth_at = -glm::dvec3(0.18017889708209486, 0.00000000000000000, 0.98363385720819907);
-		// Disregard the previous, apparently it needs to be (0, 0, 1)
-		// TODO: Investigate why, maybe wikipedia data is not actually taken on J2000?
-		//glm::dvec3 earth_at = -glm::dvec3(0, 0, 1);
-		glm::dvec3 base = glm::dvec3(1.0, 0.0, 0.0);
-
-		glm::dmat4 final_rot = MathUtil::rotate_from_to(earth_at, base);
-
-		// Declination is given relative to the equator
-		np_declination += 23.43671;
-
-
-		glm::dmat4 decline = glm::rotate(glm::radians(np_declination), glm::dvec3(0.0, 0.0, -1.0));
-		glm::dmat4 right_ascend = glm::rotate(glm::radians(np_right_ascension), glm::dvec3(0.0, 1.0, 0.0));
-
-		glm::dvec3 rot_axis = -glm::normalize(glm::dvec3(final_rot * right_ascend * decline * glm::dvec4(base, 1.0)));
-
-		return glm::dvec3(rot_axis.x, rot_axis.y, rot_axis.z);
-		*/
 	}
 
 	static void serialize(const PlanetaryBody& what, cpptoml::table& target)
