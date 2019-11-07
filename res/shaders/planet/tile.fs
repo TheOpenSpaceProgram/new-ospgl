@@ -118,12 +118,12 @@ vec4 atmo(vec3 lightDir)
 
 void main()
 {
+    vec4 atmoc = atmo(light_dir);
 
-    float diff = max(dot(-light_dir, vNormal), 0.0);
+    float diff = max(dot(-light_dir, vNormal), atmoc.w);
 
     vec3 col = vColor;
 
-    vec4 atmoc = atmo(light_dir);
 
     FragColor = vec4((diff * col + atmoc.xyz * atmoc.w) * 0.77, 1.0);
 
