@@ -32,26 +32,28 @@ std::pair<glm::dvec3, glm::dvec3> MapCamera::get_camera_pos_dir(
 
 	glm::dvec3 center;
 	double center_radius;
-	if (focus_index == -2)
+	if (focus_index == -1)
 	{
 		center = vessel_pos;
 		center_radius = 1.0;
 	}
-	else if (focus_index == -1)
-	{
-		center = glm::dvec3(0, 0, 0);
-		center_radius = star_radius;
-	}
 	else
 	{
 		center = render_states[focus_index].pos;
-		if (bodies[focus_index].is_barycenter)
+		if (focus_index == 0)
 		{
-			center_radius = 1.0;
+			center_radius = star_radius;
 		}
 		else
 		{
-			center_radius = bodies[focus_index].as_body->config.radius;
+			if (bodies[focus_index - 1].is_barycenter)
+			{
+				center_radius = 1.0;
+			}
+			else
+			{
+				center_radius = bodies[focus_index - 1].as_body->config.radius;
+			}
 		}
 		
 	}

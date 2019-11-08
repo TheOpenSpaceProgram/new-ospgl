@@ -6,6 +6,7 @@
 #include "../assets/Shader.h"
 #include "../assets/AssetManager.h"
 #include "MathUtil.h"
+#include "../universe/kepler/KeplerElements.h"
 
 class DebugDrawer
 {
@@ -57,7 +58,8 @@ public:
 
 	void add_cone(glm::dvec3 base, glm::dvec3 tip, double radius, glm::vec3 color, int verts = 16);
 
-
+	// Not the drawing method in the game, just for debug, really slow!
+	void add_orbit(glm::dvec3 origin, KeplerOrbit orbit, glm::vec3 color, bool striped = false, int verts = 128);
 
 
 

@@ -143,7 +143,18 @@ public:
 
 				double mc = to.elements[i].barycenter_primary->get_mass() / to.elements[i].barycenter_secondary->get_mass();
 				to.elements[i].barycenter_primary->barycenter_radius = smajor / (1.0 + mc);
-				to.elements[i].barycenter_primary->orbit = to.elements[i].orbit;
+				to.elements[i].barycenter_primary->orbit = to.elements[i].barycenter_secondary->orbit;
+
+				// Used only for representation
+				if (to.elements[i].barycenter_primary->orbit.is_nasa_data)
+				{
+					to.elements[i].barycenter_primary->orbit.data.nasa_data.smajor_axis = to.elements[i].barycenter_primary->barycenter_radius;
+				}
+				else
+				{
+					to.elements[i].barycenter_primary->orbit.data.normal_data.smajor_axis = to.elements[i].barycenter_primary->barycenter_radius;
+				}
+				
 			}
 		}
 

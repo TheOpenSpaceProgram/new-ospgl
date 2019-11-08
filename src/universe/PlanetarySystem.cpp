@@ -1,7 +1,10 @@
 #include "PlanetarySystem.h"
 #include "../util/DebugDrawer.h"
+#include <imgui/imgui.h>
 
-CartesianState compute_state(double t, double tol, double star_mass, SystemElement* body, std::vector<CartesianState>* other_states)
+
+CartesianState compute_state(double t, double tol, double star_mass, 
+	SystemElement* body, std::vector<CartesianState>* other_states)
 {
 	double parent_mass;
 	glm::dvec3 offset = glm::dvec3(0.0, 0.0, 0.0);
@@ -13,18 +16,20 @@ CartesianState compute_state(double t, double tol, double star_mass, SystemEleme
 	else 
 	{
 		parent_mass = body->parent->get_mass(body->is_primary);
-		offset = (*other_states)[body->parent->index].pos;
-		vel_offset = (*other_states)[body->parent->index].vel;
+		offset = (*other_states)[body->parent->index + 1].pos;
+		vel_offset = (*other_states)[body->parent->index + 1].vel;
 	}
 
 	if (body->is_primary && body->parent->is_barycenter)
 	{
-		CartesianState moon = (*other_states)[body->parent->barycenter_secondary->index];
+		CartesianState moon = (*other_states)[body->parent->barycenter_secondary->index + 1];
 		// Invert it across the barycenter
 		glm::dvec3 ov = glm::normalize(moon.pos - offset);
 		moon.pos = offset - ov * body->barycenter_radius;
 		// Scale velocity
 		moon.vel = -glm::normalize(moon.vel - vel_offset) * body->barycenter_radius + vel_offset;
+
+		moon.vel = vel_offset;
 
 		return moon;
 	}
@@ -42,14 +47,60 @@ CartesianState compute_state(double t, double tol, double star_mass, SystemEleme
 
 }
 
+glm::dvec3 compute_pos(double t, double tol, double star_mass,
+	SystemElement* body, std::vector<glm::dvec3>* other_positions)
+{
+	double parent_mass;
+	glm::dvec3 offset = glm::dvec3(0.0, 0.0, 0.0);
+	if (body->parent == nullptr)
+	{
+		parent_mass = star_mass;
+	}
+	else
+	{
+		parent_mass = body->parent->get_mass(body->is_primary);
+		offset = (*other_positions)[body->parent->index + 1];
+	}
+
+	if (body->is_primary && body->parent->is_barycenter)
+	{
+		glm::dvec3 moon = (*other_positions)[body->parent->barycenter_secondary->index + 1];
+		// Invert it across the barycenter
+		glm::dvec3 ov = glm::normalize(moon - offset);
+		moon = offset - ov * body->barycenter_radius;
+		return moon;
+	}
+	else
+	{
+
+		KeplerElements elems = body->orbit.to_elements_at(t, body->get_mass(), parent_mass, tol);
+		glm::dvec3 st = elems.get_position();
+		st += offset;
+
+		return st;
+	}
+}
+
 
 void PlanetarySystem::compute_states(double t, std::vector<CartesianState>& out, double tol)
 {
-	for (size_t i = 0; i < out.size(); i++)
+	out[0] = CartesianState({ 0, 0, 0 }, { 0, 0, 0 });
+	for (size_t i = 1; i < out.size(); i++)
 	{
-		out[i] = compute_state(t, tol, star_mass, &elements[i], &out);
+		out[i] = compute_state(t, tol, star_mass, &elements[i - 1], &out);
 	}
 }
+
+void PlanetarySystem::compute_positions(double t, std::vector<glm::dvec3>& out, double tol)
+{
+	out[0] = glm::dvec3(0.0, 0.0, 0.0);
+
+	for (size_t i = 1; i < out.size(); i++)
+	{
+		out[i] = compute_pos(t, tol, star_mass, &elements[i - 1], &out);
+	}
+}
+
 
 void PlanetarySystem::compute_sois(double t)
 {
@@ -111,20 +162,15 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 
 static double zoom = 1.0;
 
-void PlanetarySystem::render(double t, int width, int height)
+void PlanetarySystem::render(int width, int height)
 {
-	double rt = t * 0.4 + 10.0;
 
-	if (render_states.size() == 0)
-	{
-		render_states.resize(elements.size());
-	}
 
 	float fov = glm::radians(80.0f);
 
-	compute_states(t, render_states, 1e-6);
 
-	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir(t, glm::dvec3(0, 0, 0), 1.0, render_states, elements);
+
+	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir(t, vessel.state.pos, 1.0, render_states, elements);
 
 	update_render(camera_pos, fov, t);
 
@@ -144,7 +190,7 @@ void PlanetarySystem::render(double t, int width, int height)
 
 	for (size_t i = 0; i < elements.size(); i++)
 	{
-		sorted.push_back(std::make_pair(&elements[i], render_states[i]));
+		sorted.push_back(std::make_pair(&elements[i], render_states[i + 1]));
 	}
 
 	std::sort(sorted.begin(), sorted.end(), [camera_pos](BodyPositionPair a, BodyPositionPair b)
@@ -166,6 +212,37 @@ void PlanetarySystem::render(double t, int width, int height)
 		debug_drawer->add_line(glm::dvec3(0, 0, 0), glm::dvec3(1, 0, 0) * axis_length, glm::vec3(1.0, 0.0, 0.0));
 		debug_drawer->add_line(glm::dvec3(0, 0, 0), glm::dvec3(0, 1, 0) * axis_length, glm::vec3(0.0, 1.0, 0.0));
 		debug_drawer->add_line(glm::dvec3(0, 0, 0), glm::dvec3(0, 0, 1) * axis_length, glm::vec3(0.0, 0.0, 1.0));
+
+		// Add debug orbits
+		for (size_t i = 0; i < elements.size(); i++)
+		{
+			glm::dvec3 origin = glm::dvec3(0, 0, 0);
+			int verts = 1024;
+			if (elements[i].parent != nullptr)
+			{
+				origin = render_states[elements[i].parent->index + 1].pos;
+				verts = 128;
+			}
+
+			glm::vec3 col;
+
+			if (elements[i].is_barycenter)
+			{
+				col = elements[i].barycenter_primary->as_body->config.far_color;
+			}
+			else
+			{
+				col = elements[i].as_body->config.far_color;
+			}
+			
+			bool striped = false;
+			if (elements[i].is_primary)
+			{
+				striped = true;
+			}
+
+			debug_drawer->add_orbit(origin, elements[i].orbit.to_orbit_at(t), col, striped, verts);
+		}
 	}
 
 	glm::dmat4 c_model = glm::translate(glm::dmat4(1.0), -camera_pos);
@@ -174,31 +251,104 @@ void PlanetarySystem::render(double t, int width, int height)
 
 }
 
+static double pt;
+static int factor;
 void PlanetarySystem::update(double dt)
 {
-	if (glfwGetKey(input->window, GLFW_KEY_Q) == GLFW_PRESS)
+	dt = 0.01;
+
+	if (render_states.size() == 0)
 	{
-		camera.focus_index = 0;
+		pt = 0.0;
+		factor = 1000;
+		render_states.resize(elements.size() + 1);
 	}
 
-	if (glfwGetKey(input->window, GLFW_KEY_W) == GLFW_PRESS)
+	compute_states(t + dt * timewarp, render_states, 1e-6);
+
+	if (vessel.state.pos == glm::dvec3(0.0, 0.0, 0.0))
 	{
-		camera.focus_index = 1;
+		vessel.state = render_states[4];
+		vessel.state.pos += glm::dvec3(10000 * 1e3, 0.0, 0.0);
+		vessel.state.vel += glm::dvec3(0.0, 0.0, 8600.0);
+	}
+	
+
+	//int factor = 10000;
+	double sub_dt = dt * factor;
+	if (timewarp < factor)
+	{
+		sub_dt = dt * timewarp;
 	}
 
-	if (glfwGetKey(input->window, GLFW_KEY_E) == GLFW_PRESS)
+	int it = 0;
+	for (double sub_t = t; sub_t < t + dt * timewarp; sub_t+=sub_dt)
 	{
-		camera.focus_index = 2;
+		// Propagate vessels
+		propagator->prepare(sub_t, sub_dt);
+		propagator->propagate(&vessel);
+
+		it++;
+
 	}
 
-	if (glfwGetKey(input->window, GLFW_KEY_R) == GLFW_PRESS)
+
+
+	pt -= dt;
+
+	if (pt < 0.0)
 	{
-		camera.focus_index = 3;
+		pts.push_back(vessel.state.pos - render_states[4].pos);
+		pt = 0.5;
 	}
 
+	for (size_t i = 0; i < pts.size(); i++)
+	{
+		debug_drawer->add_point(pts[i] + render_states[4].pos, glm::vec3(1.0, 1.0, 1.0));
+	}
+
+	debug_drawer->add_point(vessel.state.pos, glm::vec3(1.0, 0.0, 1.0));
+
+	t += dt * timewarp;
+
+	ImGui::Begin("Camera Focus");
+	
+	ImGui::InputInt("Focus", &camera.focus_index);
+
+	if (camera.focus_index < -1)
+	{
+		camera.focus_index = -1;
+	}
+
+	if (camera.focus_index > (int)elements.size())
+	{
+		camera.focus_index = (int)elements.size();
+	}
+
+	if (ImGui::Button("Position Vessel"))
+	{
+		vessel.state = render_states[4];
+		vessel.state.pos += glm::dvec3(10000 * 1e3, 0.0, 0.0);
+		vessel.state.vel += glm::dvec3(0.0, 0.0, 5000.0);
+	}
+
+	ImGui::Text("Iterations: %i", it);
+
+	ImGui::InputInt("Timestep: ", &factor);
+
+
+	ImGui::End();
 
 	//camera.distance = 1000000000000.0;
 	camera.update(dt);
+
+	
+}
+
+void PlanetarySystem::init()
+{
+	propagator->initialize(this, elements.size());
+	vessel.state.pos = glm::dvec3(0.0, 0.0, 0.0);
 }
 
 static void load_body(SystemElement* body)
@@ -290,6 +440,10 @@ void PlanetarySystem::update_render_body_rocky(PlanetaryBody* body, glm::dvec3 b
 	}
 }
 
+void PlanetarySystem::propagate_vessel(Vessel & vessel)
+{
+}
+
 void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 {
 
@@ -301,7 +455,7 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 
 			// Set unloaded
 			float prev_factor = elements[i].as_body->dot_factor;
-			elements[i].as_body->dot_factor = elements[i].as_body->get_dot_factor((float)glm::distance(camera_pos, render_states[i].pos), fov);
+			elements[i].as_body->dot_factor = elements[i].as_body->get_dot_factor((float)glm::distance(camera_pos, render_states[i + 1].pos), fov);
 
 
 
@@ -317,18 +471,24 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 
 			if (elements[i].as_body->renderer.rocky != nullptr)
 			{
-				update_render_body_rocky(elements[i].as_body, render_states[i].pos, camera_pos, t);
+				update_render_body_rocky(elements[i].as_body, render_states[i + 1].pos, camera_pos, t);
 			}
 		}
 	}
 }
 
+#include "propagator/RK4Interpolated.h"
+
 PlanetarySystem::PlanetarySystem()
 {
 	render_states.resize(0);
+	propagator = new RK4Interpolated();
+	timewarp = 1.0;
+	t = 0.0;
 }
 
 
 PlanetarySystem::~PlanetarySystem()
 {
+	delete propagator;
 }

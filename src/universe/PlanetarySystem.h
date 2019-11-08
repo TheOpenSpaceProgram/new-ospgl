@@ -2,7 +2,9 @@
 #include <vector>
 #include <cpptoml.h>
 #include "../util/SerializeUtil.h"
+#include "vessel/Vessel.h"
 #include "SystemElement.h"
+#include "propagator/SystemPropagator.h"
 
 #include "../renderer/camera/MapCamera.h"
 
@@ -19,7 +21,13 @@ private:
 
 	void update_render_body_rocky(PlanetaryBody* body, glm::dvec3 body_pos, glm::dvec3 camera_pos, double t);
 
+	void propagate_vessel(Vessel& vessel);
+
+	std::vector<glm::dvec3> pts;
+
 public:
+
+	double t, timewarp;
 
 	// The MapCamera MAY not be here, actually (TODO)
 	MapCamera camera;
@@ -32,11 +40,18 @@ public:
 	// are moons, or moons of moons (etc...)
 	std::vector<SystemElement> elements;
 	
+	Vessel vessel;
+
+	SystemPropagator* propagator;
+	
 	// Computes state of the whole system, including offsets, 
 	// at a given time
 	// We avoid allocating so you have to give a vector that's appropiately
-	// sized (same as bodies.size())
+	// sized (same as bodies.size() + 1), 0 is always the star
 	void compute_states(double t, std::vector<CartesianState>& out, double tol = 1.0e-8);
+
+	// Same as before but with positions
+	void compute_positions(double t, std::vector<glm::dvec3>& out, double tol = 1.0e-8);
 
 	// Computes state of planets which can have a noticeable effect on our vehicle
 	// It takes the index of the planet whose SOI we are inside, so moons of other
@@ -50,9 +65,11 @@ public:
 	// semi-major axis it's not really important which t you choose.
 	void compute_sois(double t);
 
-	void render(double t, int width, int height);
+	void render(int width, int height);
 	
 	void update(double dt);
+
+	void init();
 
 	// Updates LOD and similar
 	// FOV in radians
