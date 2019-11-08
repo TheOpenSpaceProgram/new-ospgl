@@ -227,13 +227,18 @@ KeplerOrbit ArbitraryKeplerOrbit::to_orbit_at(double time)
 
 glm::dvec3 KeplerElements::get_position()
 {
-	glm::dvec3 out;
+	glm::dvec3 pos;
+	glm::dvec3 vel;
+
 
 	glm::dvec2 flat;
 	double ea_rad = glm::radians(eccentric_anomaly);
-
-	flat.x = orbit.smajor_axis * (ORBIT_COS(ea_rad) - orbit.eccentricity);
-	flat.y = orbit.smajor_axis * sqrt(1.0 - orbit.eccentricity * orbit.eccentricity) * ORBIT_SIN(ea_rad);
+	double sinE = ORBIT_SIN(ea_rad);
+	double cosE = ORBIT_COS(ea_rad);
+	double E2 = orbit.eccentricity * orbit.eccentricity;
+	double sqrt1mE2 = sqrt(1.0 - E2);
+	flat.x = orbit.smajor_axis * (cosE - orbit.eccentricity);
+	flat.y = orbit.smajor_axis * sqrt1mE2 * sinE;
 
 	double w = glm::radians(orbit.periapsis_argument);
 	double O = glm::radians(orbit.asc_node_longitude);
@@ -243,7 +248,6 @@ glm::dvec3 KeplerElements::get_position()
 	// Note: The coordinates in the JPL file change y for z
 	double xx = ORBIT_COS(w) * ORBIT_COS(O) - ORBIT_SIN(w) * ORBIT_SIN(O) * ORBIT_COS(I);
 	double xy = -ORBIT_SIN(w) * ORBIT_COS(O) - ORBIT_COS(w) * ORBIT_SIN(O) * ORBIT_COS(I);
-	
 
 	double yx = ORBIT_SIN(w) * ORBIT_SIN(I);
 	double yy = ORBIT_COS(w) * ORBIT_SIN(I);
@@ -251,11 +255,12 @@ glm::dvec3 KeplerElements::get_position()
 	double zx = ORBIT_COS(w) * ORBIT_SIN(O) + ORBIT_SIN(w) * ORBIT_COS(O) * ORBIT_COS(I);
 	double zy = -ORBIT_SIN(w) * ORBIT_SIN(O) + ORBIT_COS(w) * ORBIT_COS(O) * ORBIT_COS(I);
 
-	out.x = xx * flat.x + xy * flat.y;
-	out.y = yx * flat.x + yy * flat.y;
-	out.z = zx * flat.x + zy * flat.y;
+	pos.x = xx * flat.x + xy * flat.y;
+	pos.y = yx * flat.x + yy * flat.y;
+	pos.z = zx * flat.x + zy * flat.y;
 
-	return out;
+	
+	return glm::dvec3(-pos.x, pos.y, pos.z);
 }
 
 CartesianState KeplerElements::get_cartesian(double parent_mass, double our_mass)
@@ -293,7 +298,7 @@ CartesianState KeplerElements::get_cartesian(double parent_mass, double our_mass
 	pos.z = zx * flat.x + zy * flat.y;
 
 	double dist2 = flat.y * flat.y + flat.x * flat.x;
-	double p = parent_mass * our_mass * G;
+	double p = parent_mass * G;
 
 	double mult = sqrt((p * orbit.smajor_axis) / dist2);
 
@@ -307,5 +312,5 @@ CartesianState KeplerElements::get_cartesian(double parent_mass, double our_mass
 	vel.z = zx * flat_vel.x + zy * flat_vel.y;
 
 	// We have to correct the coordinate system
-	return CartesianState(glm::vec3(-pos.x, pos.y, pos.z), glm::vec3(-vel.x, vel.y, vel.z));
+	return CartesianState(glm::dvec3(-pos.x, pos.y, pos.z), glm::dvec3(-vel.x, vel.y, vel.z));
 }

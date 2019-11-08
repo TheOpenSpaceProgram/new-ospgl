@@ -146,6 +146,12 @@
     <ClCompile Include="src\universe\SystemElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\universe\vessel\Vessel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\propagator\RK4Interpolated.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\sol.hpp">
@@ -317,6 +323,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\universe\SystemElement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\vessel\Vessel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\propagator\SystemPropagator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\propagator\RK4Interpolated.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

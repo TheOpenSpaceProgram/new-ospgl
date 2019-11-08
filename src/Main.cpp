@@ -59,9 +59,6 @@ int main(void)
 
 	Timer dtt = Timer();
 	double dt = 0.0;
-	double t = 0.0;
-
-	double timewarp = 1.0;
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -89,9 +86,11 @@ int main(void)
 
 	start_date.day_decimal = (19.0 + 27.0 / 60.0) / 24.0;
 
-	t = start_date.to_seconds();
+	system.t = start_date.to_seconds();
 
 	logger->info("Starting at: {}", start_date.to_string());
+
+	system.init();
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -112,8 +111,8 @@ int main(void)
 		//editor.update((float)dt, font_code);
 		ImGui::Begin("Date");
 
-		ImGui::Text("%s", Date(t).to_string().c_str());
-		ImGui::InputDouble("Timewarp", &timewarp);
+		ImGui::Text("%s", Date(system.t).to_string().c_str());
+		ImGui::InputDouble("Timewarp", &system.timewarp);
 
 		ImGui::End();
 
@@ -121,7 +120,7 @@ int main(void)
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		
-		system.render(t, width, height);
+		system.render(width, height);
 		//editor.render(width, height);
 
 		ImGui::Render();
@@ -129,9 +128,7 @@ int main(void)
 	
 		glfwSwapBuffers(window);
 
-
 		dt = dtt.restart();
-		t += dt * timewarp;
 
 
 	}

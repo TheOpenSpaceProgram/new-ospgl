@@ -148,6 +148,37 @@ void DebugDrawer::add_cone(glm::dvec3 base, glm::dvec3 tip, double radius, glm::
 	draw_list.push_back(shape);
 }
 
+void DebugDrawer::add_orbit(glm::dvec3 origin, KeplerOrbit orbit, glm::vec3 color, bool striped, int verts)
+{
+	DebugShape shape;
+
+	KeplerElements elems = KeplerElements();
+	elems.orbit = orbit;
+
+	elems.eccentric_anomaly = 0.0;
+	glm::dvec3 prev = elems.get_position();
+
+	for (int v = 0; v < verts; v++)
+	{
+		double theta = (double)v / (double)(verts - 1);
+		
+		elems.eccentric_anomaly = theta * 360.0;
+
+		glm::dvec3 pos = elems.get_position();
+
+		if (v % 2 == 0 || !striped)
+		{
+			shape.verts.push_back(DebugVertex(prev + origin, color));
+			shape.verts.push_back(DebugVertex(pos + origin, color));
+		}
+
+
+		prev = pos;
+	}
+
+	draw_list.push_back(shape);
+}
+
 void DebugDrawer::add_line(glm::dvec3 a, glm::dvec3 b, glm::vec3 color)
 {
 	DebugShape shape;
