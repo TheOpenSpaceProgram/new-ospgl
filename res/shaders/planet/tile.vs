@@ -29,6 +29,12 @@ vec2 get_real_uv()
 	return (aTexture / pow(2, tile.z) + tile.xy * 1000.0) * 0.001;
 }
 
+vec2 get_projected_uv(vec3 p)
+{
+	const float pi = 3.14159265358979;
+	return vec2((atan(p.z, p.x) + pi) / (2.0 * pi), acos(p.y) / pi);
+}
+
 void main()
 {
     gl_Position = tform * vec4(aPos, 1.0);
@@ -38,6 +44,9 @@ void main()
 	vColor = aColor;
 	vNormal = vec3(normal_tform * vec4(aNormal, 1.0));
 	vPosNrm = vec3(rotm_tform * vec4(aPos, 1.0));
-	vTexture = get_real_uv();
+
+	//vTexture = get_real_uv();
 	vPos = vec3(m_tform * vec4(aPos, 1.0));
+
+	vTexture =  get_projected_uv(normalize(vPos));
 }

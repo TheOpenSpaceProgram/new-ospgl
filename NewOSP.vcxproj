@@ -153,9 +153,13 @@
     <None Include="res\default_planet.lua" />
     <None Include="res\shaders\planet\water.fs" />
     <None Include="res\shaders\planet\water.vs" />
+    <None Include="res\shaders\ui\navball.fs" />
+    <None Include="res\shaders\ui\navball.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dep\stb\stb_impl.cpp" />
+    <ClCompile Include="src\util\render\TextureDrawer.cpp" />
+    <ClCompile Include="src\game\ui\Navball.cpp" />
     <ClCompile Include="src\universe\propagator\RK4Interpolated.cpp" />
     <ClCompile Include="src\assets\Image.cpp" />
     <ClCompile Include="src\universe\Date.cpp" />
@@ -191,6 +195,7 @@
     <ClCompile Include="src\planet_mesher\quadtree\QuadTreeNode.cpp" />
     <ClCompile Include="src\util\Logger.cpp" />
     <ClCompile Include="src\universe\Universe.cpp" />
+    <ClCompile Include="src\util\render\Framebuffer.cpp" />
     <ClCompile Include="src\util\Timer.cpp" />
     <ClCompile Include="src\universe\PlanetarySystem.cpp" />
     <ClCompile Include="src\universe\SystemElement.cpp" />
@@ -198,10 +203,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\stb\stb_image.h" />
+    <ClInclude Include="src\util\render\TextureDrawer.h" />
+    <ClInclude Include="src\game\ui\Navball.h" />
     <ClInclude Include="src\universe\propagator\RK4Interpolated.h" />
     <ClInclude Include="src\assets\Image.h" />
     <ClInclude Include="src\universe\Date.h" />
     <ClInclude Include="src\universe\propagator\SystemPropagator.h" />
+    <ClInclude Include="src\universe\UniverseDefinitions.h" />
     <ClInclude Include="src\util\DebugDrawer.h" />
     <ClInclude Include="src\renderer\camera\MapCamera.h" />
     <ClInclude Include="src\renderer\PlanetaryBodyRenderer.h" />
@@ -236,6 +244,7 @@
     <ClInclude Include="src\util\FileWatcher.h" />
     <ClInclude Include="src\util\lua\LuaNoiseLib.h" />
     <ClInclude Include="src\util\lua\LuaUtilLib.h" />
+    <ClInclude Include="src\util\render\Framebuffer.h" />
     <ClInclude Include="src\util\serializers\glm.h" />
     <ClInclude Include="src\util\SerializeUtil.h" />
     <ClInclude Include="src\tools\planet_editor\PlanetEditor.h" />
