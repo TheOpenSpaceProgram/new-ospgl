@@ -38,6 +38,55 @@ Image::Image(ImageConfig config, const std::string& path)
 		fdata = stbi_loadf(path.c_str(), &width, &height, &c_dump, config.channels);
 	}
 
+	if (config.upload)
+	{
+		logger->debug("Uplading texture to OpenGL");
+
+		glGenTextures(1, &id);
+		glBindTexture(GL_TEXTURE_2D, id); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+		// set the texture wrapping parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		// set texture filtering parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		GLenum source_format;
+		if (config.channels == 1)
+		{
+			source_format = GL_RED;
+		}
+		else if (config.channels == 2)
+		{
+			source_format = GL_RG;
+		}
+		else if (config.channels == 3)
+		{
+			source_format = GL_RGB;
+		}
+		else
+		{
+			source_format = GL_RGBA;
+		}
+
+		GLenum target_format = GL_RGBA;
+
+		if (u8data != nullptr)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, target_format, width, height, 0, source_format, GL_UNSIGNED_BYTE, u8data);
+		}
+		if (u16data != nullptr)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, target_format, width, height, 0, source_format, GL_UNSIGNED_SHORT, u16data);
+		}
+		if (fdata != nullptr)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, target_format, width, height, 0, source_format, GL_FLOAT, fdata);
+		}
+
+		
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
 
 	if (!config.in_memory)
 	{
@@ -58,10 +107,7 @@ Image::Image(ImageConfig config, const std::string& path)
 		}
 	}
 
-	if (config.upload)
-	{
-		// TODO
-	}
+
 }
 
 

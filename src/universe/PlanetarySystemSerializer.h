@@ -162,7 +162,7 @@ public:
 
 		// Star
 		SAFE_TOML_GET(to.star_mass, "star.mass", double);
-
+		SAFE_TOML_GET(to.star_radius, "star.radius", double);
 
 	}
 };

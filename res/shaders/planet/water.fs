@@ -107,10 +107,10 @@ vec4 atmo(vec3 lightDir)
 
     vec3 ray = vPosNrm - start;
 
-    if(length(start) > atmo_radius * 1.5)
+    if(length(start) > atmo_radius * 1.0)
     {
         // Adjust start to intersection with atmosphere
-        vec2 intersect = raySphereIntersect(start, ray, atmo_radius * 1.5);
+        vec2 intersect = raySphereIntersect(start, ray, atmo_radius * 1.0);
         start = start + intersect.x * ray;
         ray = vPosNrm - start;
     }
@@ -121,7 +121,7 @@ vec4 atmo(vec3 lightDir)
     float step_size = length(ray) / float(ATMO_STEPS - 1);
     float last_d = 0.0;
 
-    float dotp = exp(8.0 * dot(ray, vPosNrm)) * 4.0;
+    float dotp = exp(20.0 * dot(ray, vPosNrm)) * 16.0;
 
     for(int i = 0; i < ATMO_STEPS; i++)
     {
@@ -138,7 +138,7 @@ vec4 atmo(vec3 lightDir)
 	  float fade_factor_add = 0.0;
 
 	  float fade = max( min( dot(normalize(vPosNrm), -lightDir) + 0.1, fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
-	  d = min(pow(d, 0.47) * min(fade, 0.5) * 2.0, 1.0);
+	  d = min(pow(d, 0.5) * min(fade, 0.5) * 2.0, 1.0);
 
     float r_color = exp(-sunset_exponent * fade);
 
@@ -178,12 +178,12 @@ void main()
     float spec_red = pow(diff, 0.3);
 
     vec3 veryshallowcol = vec3(0.95, 0.95, 1.0);
-    vec3 shallowcol = vec3(0.7, 0.7, 1.0);
-    vec3 deepcol = vec3(0.5, 0.5, 0.8) * 0.5;
+    vec3 shallowcol = vec3(0.39, 0.62, 0.72);
+    vec3 deepcol = vec3(0.24, 0.43, 0.58) * 0.5;
     vec3 speccol = vec3(1.0, 0.3, 0.3);
     vec3 speccolb = vec3(1.0, 0.9, 0.88);
 
-    float deepfactor = max(min(pow(vDepth, 0.85) * 500.0, 1.0), 0.0);
+    float deepfactor = max(min(pow(vDepth, 0.7) * 300.0, 1.0), 0.0);
     float veryshallow = max(min(pow(vDepth, 0.44 + min(wave * 0.05, 0.0)) * 500.0, 1.0), 0.0);
 
     vec3 col = shallowcol * (1.0 - deepfactor) + deepcol * deepfactor + veryshallowcol * (1.0 - veryshallow);

@@ -47,6 +47,11 @@ private:
 
 public:
 
+	// NOTE: Flag does nothing functionally unless implemented 
+	// outside of DebugDrawer. TODO: Maybe make the flag disable
+	// debug calls?
+	bool debug_enabled;
+
 	float point_size;
 	float line_size;
 
@@ -61,6 +66,14 @@ public:
 	// Not the drawing method in the game, just for debug, really slow!
 	void add_orbit(glm::dvec3 origin, KeplerOrbit orbit, glm::vec3 color, bool striped = false, int verts = 128);
 
+	// If the transform matrix includes translations origin is not needed
+	// length simply changes the unit vectors
+	// Coordinate system is always 
+	// X: Forward
+	// Y: Up
+	// Z: Cross of Forward and Up
+	// NOTE: Origin is not transformed, but simply moves the vectors to a given location
+	void add_transform(glm::dvec3 origin, glm::dmat4 tform, double length = 1.0);
 
 
 	DebugDrawer();

@@ -39,6 +39,8 @@
     <None Include="res\planets\mars\surface.lua" />
     <None Include="res\planets\earth\config.toml" />
     <None Include="res\planets\earth\surface.lua" />
+    <None Include="res\shaders\ui\navball.fs" />
+    <None Include="res\shaders\ui\navball.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -150,6 +152,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\universe\propagator\RK4Interpolated.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\ui\Navball.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\render\Framebuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util\render\TextureDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -332,6 +343,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\universe\propagator\RK4Interpolated.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\UniverseDefinitions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\ui\Navball.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\render\Framebuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\render\TextureDrawer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

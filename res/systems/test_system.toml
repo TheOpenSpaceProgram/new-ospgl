@@ -1,5 +1,6 @@
 [star]
 	mass = 1.98847e30
+	radius = 695_508_000.0
 
 # Units are ALWAYS: meters, degrees, kilograms
 # Variation parameters are per century

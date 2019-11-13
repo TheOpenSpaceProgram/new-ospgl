@@ -25,14 +25,16 @@ private:
 
 	double t0, t1, tstep;
 
-	Derivative sample(CartesianState s0, Derivative d, double dt, PosVector& vec);
-	glm::dvec3 acceleration(glm::dvec3 p, PosVector& vec);
+	template<bool get_closest>
+	Derivative sample(CartesianState s0, Derivative d, double dt, PosVector& vec, size_t* closest);
+	template<bool get_closest>
+	glm::dvec3 acceleration(glm::dvec3 p, PosVector& vec, size_t* closest);
 
 public:
 	
 	virtual void initialize(PlanetarySystem* system, size_t body_count) override;
-	virtual void prepare(double t0, double tstep) override;
-	virtual void propagate(Vessel* v) override;
+	virtual void prepare(double t0, double tstep, PosVector& out_pos) override;
+	virtual size_t propagate(Vessel* v) override;
 
 
 };

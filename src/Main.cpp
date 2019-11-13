@@ -3,6 +3,10 @@
 #include "util/Logger.h"
 #include "util/Timer.h"
 #include "util/DebugDrawer.h"
+#include "util/render/TextureDrawer.h"
+
+#include "game/ui/Navball.h"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "util/InputUtil.h"
@@ -13,6 +17,7 @@
 #include "tools/planet_editor/PlanetEditor.h"
 #include "universe/PlanetarySystem.h"
 #include "universe/Date.h"
+
 InputUtil* input;
 
 /*
@@ -26,6 +31,7 @@ void character_callback(GLFWwindow* window, unsigned int codepoint)
 
 int main(void)
 {
+
 	int width = 1366;
 	int height = 768;
 
@@ -46,6 +52,7 @@ int main(void)
 
 	create_global_asset_manager();
 	create_global_debug_drawer();
+	create_global_texture_drawer();
 
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -67,7 +74,7 @@ int main(void)
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	PlanetEditor editor = PlanetEditor(window, "moon");
+	PlanetEditor editor = PlanetEditor(window, "earth");
 
 	input = new InputUtil();
 	input->setup(window);
@@ -79,7 +86,7 @@ int main(void)
 	SerializeUtil::read_file_to("res/systems/test_system.toml", system);
 
 	system.compute_sois(0.0);
-	system.draw_debug = true;
+	debug_drawer->debug_enabled = true;
 
 	//Date start_date = Date(2000, Date::MAY, 31);
 	Date start_date = Date(2019, Date::SEPTEMBER, 21);
@@ -91,6 +98,8 @@ int main(void)
 	logger->info("Starting at: {}", start_date.to_string());
 
 	system.init();
+
+	Navball navball;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -116,12 +125,15 @@ int main(void)
 
 		ImGui::End();
 
-
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		
 		system.render(width, height);
 		//editor.render(width, height);
+
+		navball.draw_to_texture(system.vessel.rotation, glm::quat());
+		navball.draw_to_screen({ width, height });
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -140,7 +152,9 @@ int main(void)
 	glfwDestroyWindow(window);
 	glfwTerminate();
 
+	destroy_global_texture_drawer();
 	destroy_global_asset_manager();
 	destroy_global_logger();
+
 
 }

@@ -203,6 +203,17 @@ void DebugDrawer::add_point(glm::dvec3 a, glm::vec3 color)
 	draw_list.push_back(shape);
 }
 
+void DebugDrawer::add_transform(glm::dvec3 origin, glm::dmat4 tform, double length)
+{
+	glm::dvec3 x = tform * glm::dvec4(1.0, 0.0, 0.0, 1.0) * length;
+	glm::dvec3 y = tform * glm::dvec4(0.0, 1.0, 0.0, 1.0) * length;
+	glm::dvec3 z = tform * glm::dvec4(0.0, 0.0, 1.0, 1.0) * length;
+
+	add_arrow(origin, origin + x, glm::vec3(1.0, 0.0, 0.0));
+	add_arrow(origin, origin + y, glm::vec3(0.0, 1.0, 0.0));
+	add_arrow(origin, origin + z, glm::vec3(0.0, 0.0, 1.0));
+}
+
 DebugDrawer::DebugDrawer()
 {
 	points_vbo = 0;
@@ -213,6 +224,8 @@ DebugDrawer::DebugDrawer()
 	shader = assets->get<Shader>("debug");
 	point_size = 4.0f;
 	line_size = 1.0f;
+
+	debug_enabled = false;
 }
 
 

@@ -2,8 +2,8 @@
 #include "../PlanetarySystem.h"
 #include "../vessel/Vessel.h"
 
-
-RK4Interpolated::Derivative RK4Interpolated::sample(CartesianState s0, Derivative d, double dt, PosVector& vec)
+template<bool get_closest>
+RK4Interpolated::Derivative RK4Interpolated::sample(CartesianState s0, Derivative d, double dt, PosVector& vec, size_t* closest)
 {
 	CartesianState s;
 	s.pos = s0.pos + d.dx * dt;
@@ -11,14 +11,17 @@ RK4Interpolated::Derivative RK4Interpolated::sample(CartesianState s0, Derivativ
 
 	Derivative o;
 	o.dx = s.vel;
-	o.dv = acceleration(s.pos, vec);
+	o.dv = acceleration<get_closest>(s.pos, vec, closest);
 
 	return o;
 }
 
-glm::dvec3 RK4Interpolated::acceleration(glm::dvec3 p, PosVector& vec)
+template<bool get_closest>
+glm::dvec3 RK4Interpolated::acceleration(glm::dvec3 p, PosVector& vec, size_t* closest)
 {
 	glm::dvec3 acc = glm::dvec3(0.0, 0.0, 0.0);
+
+	double min_distance2 = std::numeric_limits<double>::infinity();
 
 	for (size_t i = 0; i < vec.size(); i++)
 	{
@@ -31,6 +34,17 @@ glm::dvec3 RK4Interpolated::acceleration(glm::dvec3 p, PosVector& vec)
 			double am = (G * masses[i]) / dist2;
 
 			acc += am * diffn;
+
+			// Tiny tiny optimization, but worth it
+			if constexpr (get_closest)
+			{
+				if (dist2 < min_distance2)
+				{
+					min_distance2 = dist2;
+					*closest = i;
+				}
+			}
+
 		}
 	}
 
@@ -62,7 +76,7 @@ void RK4Interpolated::initialize(PlanetarySystem* system, size_t body_count)
 	}
 }
 
-void RK4Interpolated::prepare(double t0, double tstep)
+void RK4Interpolated::prepare(double t0, double tstep, PosVector& out_pos)
 {
 	this->t0 = t0;
 	this->t1 = t0 + tstep;
@@ -78,24 +92,30 @@ void RK4Interpolated::prepare(double t0, double tstep)
 		t05_pos[i] = glm::mix(a, b, 0.5);
 
 	}
+
+	out_pos = this->t0_pos;
 }
 
-void RK4Interpolated::propagate(Vessel* v)
+size_t RK4Interpolated::propagate(Vessel* v)
 {
 	Derivative zero = Derivative();
 	zero.dx = glm::dvec3(0.0); zero.dv = glm::dvec3(0.0);
 
 	CartesianState s0 = v->state;
 	Derivative k1, k2, k3, k4;
+	
+	size_t closest;
 
-	k1 = sample(s0, zero, tstep * 0.0, t0_pos);
-	k2 = sample(s0, k1, tstep * 0.5, t05_pos);
-	k3 = sample(s0, k2, tstep * 0.5, t05_pos);
-	k4 = sample(s0, k3, tstep * 1.0, t1_pos);
+	k1 = sample<true>(s0, zero, tstep * 0.0, t0_pos, &closest);
+	k2 = sample<false>(s0, k1, tstep * 0.5, t05_pos, nullptr);
+	k3 = sample<false>(s0, k2, tstep * 0.5, t05_pos, nullptr);
+	k4 = sample<false>(s0, k3, tstep * 1.0, t1_pos, nullptr);
 
 	glm::dvec3 dxdt = (1.0 / 6.0) * (k1.dx + 2.0 * k2.dx + 2.0 * k3.dx + k4.dx);
 	glm::dvec3 dvdt = (1.0 / 6.0) * (k1.dv + 2.0 * k2.dv + 2.0 * k3.dv + k4.dv);
 
 	v->state.pos += dxdt * tstep;
 	v->state.vel += dvdt * tstep;
+
+	return closest;
 }

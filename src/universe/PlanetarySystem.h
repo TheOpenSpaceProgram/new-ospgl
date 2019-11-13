@@ -14,14 +14,16 @@ class PlanetarySystem
 {
 private:
 
-	std::vector<CartesianState> render_states;
+	StateVector render_states;
+	PosVector physics_pos;
 
 	void render_body(CartesianState state, SystemElement* body, glm::dvec3 camera_pos, double t,
 		glm::dmat4 proj_view, float far_plane);
 
 	void update_render_body_rocky(PlanetaryBody* body, glm::dvec3 body_pos, glm::dvec3 camera_pos, double t);
 
-	void propagate_vessel(Vessel& vessel);
+	void update_physics(double dt);
+	void init_physics();
 
 	std::vector<glm::dvec3> pts;
 
@@ -31,14 +33,14 @@ public:
 
 	// The MapCamera MAY not be here, actually (TODO)
 	MapCamera camera;
-	
-	bool draw_debug;
+
 
 	double star_mass;
+	double star_radius;
 
 	// Guaranteed to be ordered so that the last planets to appear
 	// are moons, or moons of moons (etc...)
-	std::vector<SystemElement> elements;
+	ElementVector elements;
 	
 	Vessel vessel;
 

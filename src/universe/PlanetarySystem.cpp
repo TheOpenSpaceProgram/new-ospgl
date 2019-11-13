@@ -152,7 +152,7 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 			body->as_body->config, t, light_dir, body->as_body->dot_factor);
 	}
 
-	if (draw_debug)
+	if (debug_drawer->debug_enabled)
 	{
 		body->as_body->renderer.draw_debug(t, state, body);
 	}
@@ -166,11 +166,11 @@ void PlanetarySystem::render(int width, int height)
 {
 
 
-	float fov = glm::radians(80.0f);
+	float fov = glm::radians(60.0f);
 
 
 
-	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir(t, vessel.state.pos, 1.0, render_states, elements);
+	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir(t, vessel.state.pos, star_radius, render_states, elements);
 
 	update_render(camera_pos, fov, t);
 
@@ -203,7 +203,7 @@ void PlanetarySystem::render(int width, int height)
 		render_body(sorted[i].second, sorted[i].first, camera_pos, t, proj_view, far_plane);
 	}
 
-	if (draw_debug)
+	if (debug_drawer->debug_enabled)
 	{
 		// 1 AU
 		double axis_length = 149597900000;
@@ -253,26 +253,10 @@ void PlanetarySystem::render(int width, int height)
 
 static double pt;
 static int factor;
-void PlanetarySystem::update(double dt)
+
+void PlanetarySystem::update_physics(double dt)
 {
-	dt = 0.01;
-
-	if (render_states.size() == 0)
-	{
-		pt = 0.0;
-		factor = 1000;
-		render_states.resize(elements.size() + 1);
-	}
-
 	compute_states(t + dt * timewarp, render_states, 1e-6);
-
-	if (vessel.state.pos == glm::dvec3(0.0, 0.0, 0.0))
-	{
-		vessel.state = render_states[4];
-		vessel.state.pos += glm::dvec3(10000 * 1e3, 0.0, 0.0);
-		vessel.state.vel += glm::dvec3(0.0, 0.0, 8600.0);
-	}
-	
 
 	//int factor = 10000;
 	double sub_dt = dt * factor;
@@ -281,35 +265,70 @@ void PlanetarySystem::update(double dt)
 		sub_dt = dt * timewarp;
 	}
 
+	bool prev_debug = debug_drawer->debug_enabled;
+
 	int it = 0;
-	for (double sub_t = t; sub_t < t + dt * timewarp; sub_t+=sub_dt)
+	for (double sub_t = t; sub_t < t + dt * timewarp; sub_t += sub_dt)
 	{
+		// We only draw debug at sub_t = 0
+		if (it != 0)
+		{
+			debug_drawer->debug_enabled = false;
+		}
+
 		// Propagate vessels
-		propagator->prepare(sub_t, sub_dt);
-		propagator->propagate(&vessel);
+		propagator->prepare(sub_t, sub_dt, physics_pos);
+		size_t closest = propagator->propagate(&vessel);
+
+		vessel.simulate(elements, physics_pos, star_radius, closest, sub_dt);
+		
 
 		it++;
-
 	}
 
+	debug_drawer->debug_enabled = prev_debug;
 
-
-	pt -= dt;
+	pt -= dt * timewarp;
 
 	if (pt < 0.0)
 	{
-		pts.push_back(vessel.state.pos - render_states[4].pos);
-		pt = 0.5;
+		pts.push_back(vessel.state.pos - render_states[3].pos);
+		pt = 60.0 * 60.0;
 	}
 
 	for (size_t i = 0; i < pts.size(); i++)
 	{
-		debug_drawer->add_point(pts[i] + render_states[4].pos, glm::vec3(1.0, 1.0, 1.0));
+		debug_drawer->add_point(pts[i] + render_states[3].pos, glm::vec3(1.0, 1.0, 1.0));
 	}
 
-	debug_drawer->add_point(vessel.state.pos, glm::vec3(1.0, 0.0, 1.0));
+
+	vessel.draw_debug();
+
 
 	t += dt * timewarp;
+}
+
+void PlanetarySystem::init_physics()
+{
+	pt = 0.0;
+	factor = 1000;
+
+}
+
+
+void PlanetarySystem::update(double dt)
+{
+	dt = 0.01;
+
+	if (render_states.size() == 0)
+	{
+		init_physics();
+		render_states.resize(elements.size() + 1);
+	}
+
+	update_physics(dt);
+
+
 
 	ImGui::Begin("Camera Focus");
 	
@@ -327,12 +346,13 @@ void PlanetarySystem::update(double dt)
 
 	if (ImGui::Button("Position Vessel"))
 	{
-		vessel.state = render_states[4];
-		vessel.state.pos += glm::dvec3(10000 * 1e3, 0.0, 0.0);
-		vessel.state.vel += glm::dvec3(0.0, 0.0, 5000.0);
+		vessel.state = render_states[3];
+		double r = elements[2].as_body->config.radius;
+		vessel.state.pos += glm::dvec3(r * 0.8, 4000 * 1e3, 0.0);
+		vessel.state.vel += glm::dvec3(0.0, 0.0, 1250.5);
+		camera.focus_index = -1;
+		camera.distance = 5.0;
 	}
-
-	ImGui::Text("Iterations: %i", it);
 
 	ImGui::InputInt("Timestep: ", &factor);
 
@@ -430,7 +450,7 @@ void PlanetarySystem::update_render_body_rocky(PlanetaryBody* body, glm::dvec3 b
 		body->renderer.rocky->qtree.dirty = true;
 
 
-		if (draw_debug)
+		if (debug_drawer->debug_enabled)
 		{
 			// Add debug point at surface we are over
 			debug_drawer->add_point(
@@ -440,9 +460,7 @@ void PlanetarySystem::update_render_body_rocky(PlanetaryBody* body, glm::dvec3 b
 	}
 }
 
-void PlanetarySystem::propagate_vessel(Vessel & vessel)
-{
-}
+
 
 void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 {

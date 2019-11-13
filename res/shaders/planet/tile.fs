@@ -76,10 +76,10 @@ vec4 atmo(vec3 lightDir)
 
     vec3 ray = vPosNrm - start;
 
-    if(length(start) > atmo_radius * 1.5)
+    if(length(start) > atmo_radius * 1.0)
     {
         // Adjust start to intersection with atmosphere
-        vec2 intersect = raySphereIntersect(start, ray, atmo_radius * 1.5);
+        vec2 intersect = raySphereIntersect(start, ray, atmo_radius * 1.0);
         start = start + intersect.x * ray;
         ray = vPosNrm - start;
     }
@@ -90,7 +90,8 @@ vec4 atmo(vec3 lightDir)
     float step_size = length(ray) / float(ATMO_STEPS - 1);
     float last_d = 0.0;
 
-    float dotp = exp(8.0 * dot(ray, vPosNrm)) * 4.0;
+
+    float dotp = exp(20.0 * dot(ray, vPosNrm)) * 16.0;
 
     for(int i = 0; i < ATMO_STEPS; i++)
     {
@@ -107,7 +108,7 @@ vec4 atmo(vec3 lightDir)
 	  float fade_factor_add = 0.0;
 
 	  float fade = max( min( dot(normalize(vPosNrm), -lightDir) + 0.1, fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
-	  d = min(pow(d, 0.47) * min(fade, 0.5) * 2.0, 1.0);
+	  d = min(pow(d, 0.5) * min(fade, 0.5) * 2.0, 1.0);
 
     float r_color = exp(-sunset_exponent * fade);
 
@@ -123,9 +124,11 @@ void main()
     float diff = max(dot(-light_dir, vNormal), atmoc.w * 0.5);
 
     vec3 col = vColor;
-
+   // vec3 col = texture(tex, vTexture).xyz;
 
     FragColor = vec4((diff * col + atmoc.xyz * atmoc.w) * 0.77, 1.0);
+    // FragColor = vec4(diff * texture(tex, vTexture).xyz, 1.0);
+    // FragColor = vec4(vTexture, 0.0, 1.0);
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets
