@@ -25,6 +25,19 @@ float PlanetaryBody::get_dot_factor(float distance, float fov)
 	return 1.0f - glm::smoothstep(MIN_APERTURE, START_FADE_APERTURE, takes);
 }
 
+glm::dmat4 PlanetaryBody::build_rotation_matrix(double t) const
+{
+	glm::dmat4 rot_matrix = glm::mat4(1.0);
+
+	double rot_angle = glm::radians(rotation_at_epoch + t * rotation_speed);
+	rot_matrix = glm::rotate(rot_matrix, rot_angle, rotation_axis);
+	// Align pole to rotation axis
+	rot_matrix = rot_matrix * MathUtil::rotate_from_to(glm::dvec3(0.0, 1.0, 0.0), rotation_axis);
+
+
+	return rot_matrix;
+}
+
 PlanetaryBody::PlanetaryBody()
 {
 	dot_factor = 1.0f;

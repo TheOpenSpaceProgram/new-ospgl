@@ -33,6 +33,6 @@ mass = 5.9722e24
 		interp = 2		# 	0 = Linear < 1 = Hermite < 2 = Quintic
 
 	[surface.lod]
-		max_depth = 11				# Max LOD depth allowed
+		max_depth = 10				# Max LOD depth allowed
 		coef_a = 2.0				# LOD coefficient A
 		coef_b = 3

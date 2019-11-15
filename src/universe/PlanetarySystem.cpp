@@ -118,19 +118,6 @@ void PlanetarySystem::compute_sois(double t)
 	}
 }
 
-static glm::dmat4 build_body_rotation_matrix(PlanetaryBody* body, double t)
-{
-	glm::dmat4 rot_matrix = glm::mat4(1.0);
-
-	double rot_angle = glm::radians(body->rotation_at_epoch + t * body->rotation_speed);
-	rot_matrix = glm::rotate(rot_matrix, rot_angle, body->rotation_axis);
-	// Align pole to rotation axis
-	rot_matrix = rot_matrix * MathUtil::rotate_from_to(glm::dvec3(0.0, 1.0, 0.0), body->rotation_axis);
-
-
-	return rot_matrix;
-}
-
 void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm::dvec3 camera_pos, double t, 
 	glm::dmat4 proj_view, float far_plane)
 {
@@ -146,7 +133,7 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 		glm::dmat4 model = glm::translate(glm::dmat4(1.0), -camera_pos + state.pos);
 		model = glm::scale(model, glm::dvec3(body->as_body->config.radius));
 
-		glm::dmat4 rot_matrix = build_body_rotation_matrix(body->as_body, t);
+		glm::dmat4 rot_matrix = body->as_body->build_rotation_matrix(t);
 
 		body->as_body->renderer.render(proj_view, model * rot_matrix, rot_matrix, far_plane, camera_pos_relative,
 			body->as_body->config, t, light_dir, body->as_body->dot_factor);
@@ -164,13 +151,9 @@ static double zoom = 1.0;
 
 void PlanetarySystem::render(int width, int height)
 {
-
-
 	float fov = glm::radians(60.0f);
 
-
-
-	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir(t, vessel.state.pos, star_radius, render_states, elements);
+	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir(t, vessels[0].state.pos, star_radius, states_now, elements);
 
 	update_render(camera_pos, fov, t);
 
@@ -190,7 +173,7 @@ void PlanetarySystem::render(int width, int height)
 
 	for (size_t i = 0; i < elements.size(); i++)
 	{
-		sorted.push_back(std::make_pair(&elements[i], render_states[i + 1]));
+		sorted.push_back(std::make_pair(&elements[i], states_now[i + 1]));
 	}
 
 	std::sort(sorted.begin(), sorted.end(), [camera_pos](BodyPositionPair a, BodyPositionPair b)
@@ -220,7 +203,7 @@ void PlanetarySystem::render(int width, int height)
 			int verts = 1024;
 			if (elements[i].parent != nullptr)
 			{
-				origin = render_states[elements[i].parent->index + 1].pos;
+				origin = states_now[elements[i].parent->index + 1].pos;
 				verts = 128;
 			}
 
@@ -245,7 +228,22 @@ void PlanetarySystem::render(int width, int height)
 		}
 	}
 
+}
+
+void PlanetarySystem::render_debug(int width, int height)
+{
+	float fov = glm::radians(60.0f);
+	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir(t, vessels[0].state.pos, star_radius, states_now, elements);
+	// ~1 light year
+	float far_plane = 1e16f;
+
+
+	glm::dmat4 proj = glm::perspective((double)fov, (double)width / (double)height, 0.1, (double)far_plane);
+	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), camera_dir, glm::dvec3(0.0, 1.0, 0.0));
+	glm::dmat4 proj_view = proj * view;
+
 	glm::dmat4 c_model = glm::translate(glm::dmat4(1.0), -camera_pos);
+
 	// Don't forget to draw the debug shapes!
 	debug_drawer->render(proj_view, c_model, far_plane);
 
@@ -256,7 +254,7 @@ static int factor;
 
 void PlanetarySystem::update_physics(double dt)
 {
-	compute_states(t + dt * timewarp, render_states, 1e-6);
+	compute_states(t + dt * timewarp, states_now, 1e-6);
 
 	//int factor = 10000;
 	double sub_dt = dt * factor;
@@ -278,9 +276,9 @@ void PlanetarySystem::update_physics(double dt)
 
 		// Propagate vessels
 		propagator->prepare(sub_t, sub_dt, physics_pos);
-		size_t closest = propagator->propagate(&vessel);
+		size_t closest = propagator->propagate(&vessels[0]);
 
-		vessel.simulate(elements, physics_pos, star_radius, closest, sub_dt);
+		vessels[0].simulate(elements, physics_pos, star_radius, closest, sub_dt);
 		
 
 		it++;
@@ -292,17 +290,17 @@ void PlanetarySystem::update_physics(double dt)
 
 	if (pt < 0.0)
 	{
-		pts.push_back(vessel.state.pos - render_states[3].pos);
+		pts.push_back(vessels[0].state.pos - states_now[3].pos);
 		pt = 60.0 * 60.0;
 	}
 
 	for (size_t i = 0; i < pts.size(); i++)
 	{
-		debug_drawer->add_point(pts[i] + render_states[3].pos, glm::vec3(1.0, 1.0, 1.0));
+		debug_drawer->add_point(pts[i] + states_now[3].pos, glm::vec3(1.0, 1.0, 1.0));
 	}
 
 
-	vessel.draw_debug();
+	vessels[0].draw_debug();
 
 
 	t += dt * timewarp;
@@ -320,10 +318,10 @@ void PlanetarySystem::update(double dt)
 {
 	dt = 0.01;
 
-	if (render_states.size() == 0)
+	if (states_now.size() == 0)
 	{
 		init_physics();
-		render_states.resize(elements.size() + 1);
+		states_now.resize(elements.size() + 1);
 	}
 
 	update_physics(dt);
@@ -346,10 +344,10 @@ void PlanetarySystem::update(double dt)
 
 	if (ImGui::Button("Position Vessel"))
 	{
-		vessel.state = render_states[3];
-		double r = elements[2].as_body->config.radius;
-		vessel.state.pos += glm::dvec3(r * 0.8, 4000 * 1e3, 0.0);
-		vessel.state.vel += glm::dvec3(0.0, 0.0, 1250.5);
+		vessels[0].state = states_now[4];
+		double r = elements[3].as_body->config.radius;
+		vessels[0].state.pos += glm::dvec3(r * 0.8, 4000 * 1e3, 0.0);
+		vessels[0].state.vel += glm::dvec3(0.0, 0.0, 8250.5);
 		camera.focus_index = -1;
 		camera.distance = 5.0;
 	}
@@ -368,7 +366,8 @@ void PlanetarySystem::update(double dt)
 void PlanetarySystem::init()
 {
 	propagator->initialize(this, elements.size());
-	vessel.state.pos = glm::dvec3(0.0, 0.0, 0.0);
+	vessels.push_back(Vessel());
+	vessels[0].state.pos = glm::dvec3(0.0, 0.0, 0.0);
 }
 
 static void load_body(SystemElement* body)
@@ -421,7 +420,7 @@ void PlanetarySystem::update_render_body_rocky(PlanetaryBody* body, glm::dvec3 b
 	{
 		// Build camera transform matrix, to get the relative camera pos
 		glm::dmat4 rel_matrix = glm::dmat4(1.0);
-		rel_matrix = rel_matrix * glm::inverse(build_body_rotation_matrix(body, t));
+		rel_matrix = rel_matrix * glm::inverse(body->build_rotation_matrix(t));
 		rel_matrix = glm::translate(rel_matrix, -body_pos);
 
 		glm::dvec3 rel_camera_pos = rel_matrix * glm::dvec4(camera_pos, 1.0);
@@ -473,7 +472,7 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 
 			// Set unloaded
 			float prev_factor = elements[i].as_body->dot_factor;
-			elements[i].as_body->dot_factor = elements[i].as_body->get_dot_factor((float)glm::distance(camera_pos, render_states[i + 1].pos), fov);
+			elements[i].as_body->dot_factor = elements[i].as_body->get_dot_factor((float)glm::distance(camera_pos, states_now[i + 1].pos), fov);
 
 
 
@@ -489,7 +488,7 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 
 			if (elements[i].as_body->renderer.rocky != nullptr)
 			{
-				update_render_body_rocky(elements[i].as_body, render_states[i + 1].pos, camera_pos, t);
+				update_render_body_rocky(elements[i].as_body, states_now[i + 1].pos, camera_pos, t);
 			}
 		}
 	}
@@ -499,7 +498,7 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 
 PlanetarySystem::PlanetarySystem()
 {
-	render_states.resize(0);
+	states_now.resize(0);
 	propagator = new RK4Interpolated();
 	timewarp = 1.0;
 	t = 0.0;

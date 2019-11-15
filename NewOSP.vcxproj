@@ -158,6 +158,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dep\stb\stb_impl.cpp" />
+    <ClCompile Include="src\universe\SystemPointer.cpp" />
+    <ClCompile Include="src\universe\vessel\ReferenceFrame.cpp" />
     <ClCompile Include="src\util\render\TextureDrawer.cpp" />
     <ClCompile Include="src\game\ui\Navball.cpp" />
     <ClCompile Include="src\universe\propagator\RK4Interpolated.cpp" />
@@ -203,6 +205,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\stb\stb_image.h" />
+    <ClInclude Include="src\universe\SystemPointer.h" />
+    <ClInclude Include="src\universe\vessel\ReferenceFrame.h" />
     <ClInclude Include="src\util\render\TextureDrawer.h" />
     <ClInclude Include="src\game\ui\Navball.h" />
     <ClInclude Include="src\universe\propagator\RK4Interpolated.h" />

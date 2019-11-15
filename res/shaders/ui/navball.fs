@@ -83,7 +83,7 @@ vec4 doIndicator(vec3 vpos, vec3 ipos, sampler2D tex)
 void main()
 {
 	vec3 norm = normalize(vNormal);
-	vec3 lightDir = normalize(vec3(0.7, 1.0, 0));
+	vec3 lightDir = normalize(vec3(1.0, -1.0, 0));
 	float diff = max(dot(norm, lightDir), 0.0);
 	vec3 diffuse = diff * vec3(1, 1, 1);
 	diffuse = max(vec3(0.2, 0.2, 0.2), diffuse);
@@ -91,7 +91,7 @@ void main()
 	// Mapping (https://en.wikipedia.org/wiki/UV_mapping#Finding_UV_on_a_sphere)
 	float pi = 3.14159265359;
 	vec2 mapped = vec2(-atan(-vPosOriginal.x, -vPosOriginal.z)/(2*pi) + 0.5, (asin(-vPosOriginal.y) / pi + 0.5));
-	vec3 col = vec3(texture(tex, mapped));
+	vec3 col = vec3(texture(tex, vec2(0.25 - mapped.x, 1.0 - mapped.y)));
 
 	vec4 prograde = doIndicator(vPosOriginal.xyz, progradePos.xyz, progradeTex);
 	col = (prograde.xyz * prograde.w) + (col * (1.0 - prograde.w));
