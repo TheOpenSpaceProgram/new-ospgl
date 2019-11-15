@@ -122,6 +122,21 @@ glm::dvec2 MathUtil::euclidean_to_spherical_r1(glm::dvec3 eu)
 	return out;
 }
 
+glm::dquat MathUtil::quat_look_at(glm::dvec3 from, glm::dvec3 to, glm::dvec3 up, glm::dvec3 alt_up)
+{
+	glm::dvec3 dir = to - from;
+
+	/// TODO: Not sure if this is correct
+	if (glm::abs(glm::dot(dir, up)) > 0.999)
+	{
+		return glm::conjugate(glm::toQuat(glm::lookAt(from, to, up)));
+	}
+	else
+	{
+		return glm::conjugate(glm::toQuat(glm::lookAt(from, to, alt_up)));
+	}
+}
+
 int MathUtil::int_repeat(int v, int max)
 {
 	if (v < 0)

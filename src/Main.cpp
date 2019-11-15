@@ -94,7 +94,7 @@ int main(void)
 	start_date.day_decimal = (19.0 + 27.0 / 60.0) / 24.0;
 
 	system.t = start_date.to_seconds();
-
+	system.t = 0.0;
 	logger->info("Starting at: {}", start_date.to_string());
 
 	system.init();
@@ -116,6 +116,7 @@ int main(void)
 		ImGui::NewFrame();
 
 
+
 		system.update(dt);
 		//editor.update((float)dt, font_code);
 		ImGui::Begin("Date");
@@ -128,12 +129,19 @@ int main(void)
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
+
 		
 		system.render(width, height);
 		//editor.render(width, height);
 
-		navball.draw_to_texture(system.vessel.rotation, glm::quat());
+		SystemPointer center_ptr = SystemPointer(&system);
+		center_ptr.id = 3;
+		center_ptr.is_vessel = false;
+		navball.draw_to_texture(system.vessels[0], ReferenceFrame(center_ptr));
 		navball.draw_to_screen({ width, height });
+
+
+		system.render_debug(width, height);
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -5,38 +5,40 @@
 
 void Vessel::simulate(ElementVector elements, PosVector positions, double star_radius, size_t closest, double dt)
 {
-	glm::dvec3 up = glm::dvec3(1.0f, 0.0f, 0.0f);
-	glm::dvec3 fw = glm::dvec3(0.0f, 1.0f, 0.0f);
+	glm::dvec3 up = glm::dvec3(0.0f, 1.0f, 0.0f);
+	glm::dvec3 fw = glm::dvec3(1.0f, 0.0f, 0.0f);
 	glm::dvec3 rt = glm::dvec3(0.0f, 0.0f, 1.0f);
+
+	double speed = 0.1;
 
 	if (glfwGetKey(input->window, GLFW_KEY_A))
 	{
-		apply_torque(-up * dt * 0.05);
+		apply_torque(up * dt * speed);
 	}
 
 	if (glfwGetKey(input->window, GLFW_KEY_D))
 	{
-		apply_torque(up * dt * 0.05);
+		apply_torque(-up * dt * speed);
 	}
 
 	if (glfwGetKey(input->window, GLFW_KEY_Q))
 	{
-		apply_torque(-fw * dt * 0.05);
+		apply_torque(-fw * dt * speed);
 	}
 
 	if (glfwGetKey(input->window, GLFW_KEY_E))
 	{
-		apply_torque(fw * dt * 0.05);
+		apply_torque(fw * dt * speed);
 	}
 
 	if (glfwGetKey(input->window, GLFW_KEY_W))
 	{
-		apply_torque(-rt * dt * 0.05);
+		apply_torque(-rt * dt * speed);
 	}
 
 	if (glfwGetKey(input->window, GLFW_KEY_S))
 	{
-		apply_torque(rt * dt * 0.05);
+		apply_torque(rt * dt * speed);
 	}
 
 	if (glfwGetKey(input->window, GLFW_KEY_SPACE))
@@ -45,25 +47,28 @@ void Vessel::simulate(ElementVector elements, PosVector positions, double star_r
 	}
 
 	double l = glm::length(angular_momentum);
-	if (angular_momentum != glm::dvec3(0.0, 0.0, 0.0))
+	if (l >= 0.0001)
 	{
 		rotation *= glm::angleAxis(l * dt, angular_momentum / l);
+		angular_momentum *= 0.95;
 	}
+
+
 } 
 
 glm::dvec3 Vessel::get_forward()
 {
-	return rotation * glm::dvec4(0.0, 1.0, 0.0, 1.0);
+	return rotation * glm::dvec4(1.0, 0.0, 0.0, 1.0);
 }
 
 glm::dvec3 Vessel::get_right()
 {
-	return rotation * glm::dvec4(1.0, 0.0, 0.0, 1.0);
+	return rotation * glm::dvec4(0.0, 0.0, 1.0, 1.0);
 }
 
 glm::dvec3 Vessel::get_up()
 {
-	return rotation * glm::dvec4(1.0, 0.0, 0.0, 1.0);
+	return rotation * glm::dvec4(0.0, 1.0, 0.0, 1.0);
 }
 
 void Vessel::apply_torque(glm::dvec3 torque)

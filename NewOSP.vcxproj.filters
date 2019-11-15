@@ -163,6 +163,12 @@
     <ClCompile Include="src\util\render\TextureDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\universe\vessel\ReferenceFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\SystemPointer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\sol.hpp">
@@ -355,6 +361,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\render\TextureDrawer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\vessel\ReferenceFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\SystemPointer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

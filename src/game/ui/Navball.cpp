@@ -1,6 +1,8 @@
 #include "Navball.h"
 
-void Navball::draw_to_texture(glm::quat rot, glm::quat prog)
+#include "../../util/DebugDrawer.h"
+
+void Navball::draw_to_texture(const Vessel& vessel, const ReferenceFrame& frame)
 {
 	// Calculate the FOV from view distance
 	if (view_distance <= 1.0f)
@@ -8,6 +10,25 @@ void Navball::draw_to_texture(glm::quat rot, glm::quat prog)
 		view_distance = 1.0f;
 	}
 
+	glm::dvec3 rel_vel = frame.relative_velocity(vessel.state.vel);
+
+	glm::dvec3 ref_up = frame.center.get_up_now();
+
+	glm::quat tform = MathUtil::rotate_from_to(ref_up, glm::vec3(0.0, -1.0, 0.0));
+
+	glm::quat rot = vessel.rotation;
+	glm::quat prog = MathUtil::quat_look_at(glm::dvec3(0.0, 0.0, 0.0), rel_vel);
+
+	// Rot0 is a corrective rotation and also reference frame rotation
+	glm::dquat rot0 = tform; //* glm::angleAxis(glm::radians(180.0f), glm::vec3(1.0, 0.0, 0.0));
+
+	rot = (glm::quat)rot0 * rot;
+
+	glm::dvec3 prograde = glm::normalize(rel_vel);
+	glm::dvec3 normal = glm::normalize(glm::cross(rel_vel, frame.center.get_up_now()));
+	glm::dvec3 radialin = glm::cross(prograde, normal);
+
+	debug_drawer->add_line(vessel.state.pos, vessel.state.pos + glm::normalize(rel_vel) * 20.0, glm::vec3(1.0, 1.0, 1.0));
 
 	// Simple trigonometry leads to this
 	// Given the tangent point Q, the view point P and the 
@@ -21,10 +42,10 @@ void Navball::draw_to_texture(glm::quat rot, glm::quat prog)
 	// 60 degrees as we see the sphere from twice its radius
 	// (Hence we form an equilateral triangle)
 	proj = glm::perspective(fov, 1.0f, 0.01f, 255.0f);
-	view = glm::lookAt(glm::vec3(0.0f, view_distance, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.7f, 1.0f, 0.0f));
-	model = glm::mat4();
+	view = glm::lookAt(glm::vec3(view_distance, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -voffset * scale, 0.0f));
 	model = glm::scale(model, glm::vec3(scale, scale, scale));
-	model *= glm::toMat4(glm::normalize(glm::conjugate(rot)) * glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	model *= glm::toMat4(glm::normalize(glm::conjugate(rot)));
 
 	fbuffer.bind();
 
@@ -49,13 +70,13 @@ void Navball::draw_to_texture(glm::quat rot, glm::quat prog)
 
 	navball_shader->setFloat("iconSize", icon_scale);
 
-	prog = glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::normalize(prog);
-	glm::vec3 mapped_prograde = glm::normalize(prog * glm::vec3(1.0f, 0.0f, 0.0f));
-	glm::vec3 mapped_retrograde = glm::normalize(prog * glm::vec3(-1.0f, 0.0f, 0.0f));
-	glm::vec3 mapped_normal = glm::normalize(prog * glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::vec3 mapped_antinormal = glm::normalize(prog * glm::vec3(0.0f, -1.0f, 0.0f));
-	glm::vec3 mapped_radialin = glm::normalize(prog * glm::vec3(0.0f, 0.0f, 1.0f));
-	glm::vec3 mapped_radialout = glm::normalize(prog * glm::vec3(0.0f, 0.0f, -1.0f));
+
+	glm::vec3 mapped_prograde = glm::normalize(rot0 * prograde);
+	glm::vec3 mapped_retrograde = glm::normalize(rot0 * -prograde);
+	glm::vec3 mapped_normal = glm::normalize(rot0 * normal);
+	glm::vec3 mapped_antinormal = glm::normalize(rot0 * -normal);
+	glm::vec3 mapped_radialin = glm::normalize(rot0 * radialin);
+	glm::vec3 mapped_radialout = glm::normalize(rot0 * -radialin);
 	navball_shader->setVec4("progradePos", glm::vec4(mapped_prograde, 0.0f));
 	navball_shader->setVec4("retrogradePos", glm::vec4(mapped_retrograde, 0.0f));
 	navball_shader->setVec4("normalPos", glm::vec4(mapped_normal, 0.0f));
@@ -101,8 +122,9 @@ void Navball::draw_to_screen(glm::ivec2 screen_size)
 	glDisable(GL_DEPTH_TEST);
 
 	texture_drawer->draw(fbuffer.tex_color_buffer, 
-		glm::vec2(screen_size.x / 2.0f - x_size / 2.0f, screen_size.y - y_size), 
+		glm::vec2(screen_size.x * xoffset - x_size / 2.0f, screen_size.y - y_size), 
 		glm::vec2(x_size, y_size), screen_size, false);
+
 
 	glEnable(GL_DEPTH_TEST);
 }

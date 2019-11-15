@@ -25,7 +25,7 @@ public:
 
 	// Relative to system, not to center planet
 	std::pair<glm::dvec3, glm::dvec3> get_camera_pos_dir(double t, glm::dvec3 vessel_pos,
-		double star_radius, std::vector<CartesianState>& render_states,
+		double star_radius, std::vector<CartesianState>& states_now,
 		std::vector<SystemElement>& bodies);
 
 	MapCamera();

@@ -32,6 +32,9 @@ public:
 	// in the config so the user does not need to touch this
 	glm::dvec3 rotation_axis;
 
+
+	glm::dmat4 build_rotation_matrix(double t) const;
+
 	PlanetaryBody();
 	~PlanetaryBody();
 };

@@ -4,6 +4,7 @@
 #include <glm/matrix.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 class MathUtil
 {
@@ -31,6 +32,9 @@ public:
 
 	// x = azimuth, y = inclination, r = 1
 	static glm::dvec2 euclidean_to_spherical_r1(glm::dvec3 euclidean);
+
+	static glm::dquat quat_look_at(glm::dvec3 from, glm::dvec3 to,
+		glm::dvec3 up = glm::dvec3(0, 1, 0), glm::dvec3 alt_up = glm::dvec3(1, 0, 0));
 
 	// Similar to GL_REPEAT
 	static int int_repeat(int v, int max);

@@ -8,13 +8,15 @@
 
 #include "../renderer/camera/MapCamera.h"
 
+struct SystemPointer;
+
 // A system holds a central star, origin of the coordinate system, and
 // many planets orbiting it using keplerian orbits
 class PlanetarySystem
 {
 private:
 
-	StateVector render_states;
+
 	PosVector physics_pos;
 
 	void render_body(CartesianState state, SystemElement* body, glm::dvec3 camera_pos, double t,
@@ -29,6 +31,8 @@ private:
 
 public:
 
+	StateVector states_now;
+
 	double t, timewarp;
 
 	// The MapCamera MAY not be here, actually (TODO)
@@ -42,7 +46,7 @@ public:
 	// are moons, or moons of moons (etc...)
 	ElementVector elements;
 	
-	Vessel vessel;
+	std::vector<Vessel> vessels;
 
 	SystemPropagator* propagator;
 	
@@ -68,7 +72,8 @@ public:
 	void compute_sois(double t);
 
 	void render(int width, int height);
-	
+	void render_debug(int width, int height);
+
 	void update(double dt);
 
 	void init();
@@ -76,7 +81,6 @@ public:
 	// Updates LOD and similar
 	// FOV in radians
 	void update_render(glm::dvec3 camera_pos, float fov, double t);
-
 
 	PlanetarySystem();
 	~PlanetarySystem();

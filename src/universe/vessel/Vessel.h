@@ -5,8 +5,7 @@
 class PlanetarySystem;
 
 // Everything is always relative to the global coordinate frame
-// Forward is 'Y' axis (as rockets are usually vertical)
-// TODO: Maybe use 'X' as forward? More consistent
+// Forward is 'X'  axis
 // Units are as usual, but angular_momentum is expressed in (rad / s)!
 class Vessel
 {
