@@ -6,6 +6,7 @@
 #include "util/render/TextureDrawer.h"
 
 #include "game/ui/Navball.h"
+#include "assets/Config.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -62,7 +63,7 @@ int main(void)
 
 	// Font for the code editor
 	ImFont* font_default = io.Fonts->AddFontDefault();
-	ImFont* font_code = io.Fonts->AddFontFromFileTTF("./res/FiraCode-Regular.ttf", 16.0f);
+	ImFont* font_code = io.Fonts->AddFontFromFileTTF("./res/core/FiraCode-Regular.ttf", 16.0f);
 
 	Timer dtt = Timer();
 	double dt = 0.0;
@@ -74,7 +75,7 @@ int main(void)
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	PlanetEditor editor = PlanetEditor(window, "earth");
+	//PlanetEditor editor = PlanetEditor(window, "earth");
 
 	input = new InputUtil();
 	input->setup(window);
@@ -83,7 +84,7 @@ int main(void)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	PlanetarySystem system;
-	SerializeUtil::read_file_to("res/systems/test_system.toml", system);
+	assets->get_from_path<Config>("real_solar_system:systems/test_system.toml")->read_to(system);
 
 	system.compute_sois(0.0);
 	debug_drawer->debug_enabled = true;

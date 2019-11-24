@@ -69,7 +69,7 @@ Shader::~Shader()
 {
 }
 
-Shader* loadShader(const std::string& path)
+Shader* loadShader(const std::string& path, const std::string& pkg)
 {
 	
 	// We get the path to the vertex shader
@@ -77,8 +77,8 @@ Shader* loadShader(const std::string& path)
 
 	logger->info("Loading shader from file: vs -> '{}', fs -> '{}'", path, fspath);
 
-	std::string vs = AssetManager::loadString(path);
-	std::string fs = AssetManager::loadString(fspath);
+	std::string vs = AssetManager::load_string_raw(path);
+	std::string fs = AssetManager::load_string_raw(fspath);
 
 	return new Shader(vs, fs);
 }

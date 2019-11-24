@@ -124,9 +124,9 @@ in_memory = false
 
 )-";
 
-Image* loadImage(const std::string& path)
+Image* loadImage(const std::string& path, const std::string& pkg)
 {
-	if (!AssetManager::fileExists(path))
+	if (!AssetManager::file_exists(path))
 	{
 		logger->error("Could not load image {}, file not found!", path);
 		return nullptr;
@@ -141,9 +141,9 @@ Image* loadImage(const std::string& path)
 	std::stringstream tomls = std::stringstream(toml);
 
 	bool has_toml_file = false;
-	if (AssetManager::fileExists(tomlpath))
+	if (AssetManager::file_exists(tomlpath))
 	{
-		toml = assets->loadString(tomlpath);
+		toml = AssetManager::load_string_raw(tomlpath);
 		has_toml_file = true;
 	}
 

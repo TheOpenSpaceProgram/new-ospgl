@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <iostream>
 #include "../util/Logger.h"
+#include "../util/SerializeUtil.h"
 
 
 // Pointer to a function which looks like:
@@ -15,115 +16,183 @@
 // You must allocate the new asset!
 // Return nullptr if not possible
 template<typename T>
-using LoadAssetPtr = T*(*)(const std::string&);
+using LoadAssetPtr = T*(*)(const std::string&, const std::string&);
 
+// Organizes all assets into "packages", which are arbitrary
+// folders, and "directories", folders inside those packages
+// This could allow directly loading files from .zip packages 
+// in the future, but for now it uses the normal filesystem
 class AssetManager
 {
 private:
 	struct AssetTypeData
 	{
-		std::string prefix;
-		std::string extension;
 		void* loadPtr;
+		std::string name;
 	};
 
-	std::unordered_map<std::type_index, std::pair<AssetTypeData, std::unordered_map<std::string, void*>>> assets;
-		
+	// Every asset inside a package
+	using PackageAssets = std::unordered_map<std::string, void*>;
+	// Pairs every AssetTypeData with packages
+	using AssetTypeAndAssets = std::pair<AssetTypeData, PackageAssets>;
+
+
+	struct Package
+	{
+
+		// Maps every type to a AssetTypeData and packages
+		std::unordered_map<std::type_index, AssetTypeAndAssets> assets;
+
+		std::string name;
+		std::string desc;
+		std::string author;
+		std::string version;
+		std::vector<std::string> dependencies;
+
+		Package(std::string path)
+		{
+			std::string package_file_path = path + "/package.toml";
+			auto file = SerializeUtil::load_file(package_file_path);
+			name = *file->get_qualified_as<std::string>("name");
+			desc = *file->get_qualified_as<std::string>("description");
+			author = *file->get_qualified_as<std::string>("author");
+			version = *file->get_qualified_as<std::string>("version");
+
+			dependencies = std::vector<std::string>();
+
+			auto deps = *file->get_qualified_array_of<std::string>("dependencies");
+			for (auto dep : deps)
+			{
+				dependencies.push_back(dep);
+			}
+		}
+
+		Package()
+		{
+			// Shall not be used
+			name = "Invalid";
+		}
+	};
+
+
+	std::unordered_map<std::string, Package> packages;
+
+	template<typename T>
+	T* load(const std::string& package, const std::string& name);
+
+	std::string current_package;
+
 public:
 	
-	static bool fileExists(const std::string& path);
+	static bool file_exists(const std::string& path);
 
-	// Low level file accesors
-	static std::string loadString(const std::string& path);
+	// Simply loads a string from given path, no packages or anything
+	static std::string load_string_raw(const std::string& path);
 
-	template<typename T>
-	void createAssetType(LoadAssetPtr<T> loadPtr, std::string prefix, std::string extension, bool preload = false);
-
-	template<typename T>
-	T* get(const std::string& name);
+	// load_string_raw, but package aware
+	std::string load_string(const std::string& full_path, const std::string& def = "");
 
 	template<typename T>
-	T* load(const std::string& name);
+	void create_asset_type(const std::string& name, LoadAssetPtr<T> loadPtr, bool preload = false, const std::string& regex = "");
+
+	template<typename T>
+	T* get(const std::string& package, const std::string& name);
+	
+	// Valid formats:
+	// core:images/navball/navball.png -> "core" "images/navball/navball.png"
+	// images/navball/navball.png -> def "images/navball/navball.png"
+	std::pair<std::string, std::string> get_package_and_name(const std::string& full_path, const std::string& def);
+
+	// Package used when not any is specified by default
+	// Simplifies loading code quite a bit
+	void set_current_package(const std::string& pkg);
+	std::string get_current_package();
+
+	// If def = "", it will use wathever default path was set by
+	// "set_current_package". This is done to make asset loading code simpler
+	template<typename T>
+	T* get_from_path(const std::string& full_path, const std::string& def = "");
+
+	std::string resolve_path(const std::string& full_path, const std::string& def = "");
+
+	// Checks all dependencies, and logs to console loaded packages
+	// and how many assets they have got
+	void check_packages();
+
+	// Creates all packages
+	void preload();
+
+	AssetManager()
+	{
+		current_package = "core";
+	}
 };
 
 template<typename T>
-// If preload is set to true, all files with extension 'extension' will be loaded
-inline void AssetManager::createAssetType(LoadAssetPtr<T> loadPtr, std::string prefix, std::string extension, bool preload)
+// If preload is set to true, all files which match the given regex will be loaded
+inline void AssetManager::create_asset_type(const std::string& name, LoadAssetPtr<T> loadPtr, bool preload, const std::string& regex)
 {
-	logger->debug("Creating new asset type with prefix '{}' and extension '{}'", prefix, extension);
-
 	AssetTypeData tdata;
-	tdata.prefix = prefix;
+	tdata.name = name;
 	tdata.loadPtr = loadPtr;
-	tdata.extension = extension;
-	assets[typeid(T)] = std::make_pair(tdata, std::unordered_map<std::string, void*>());
 
-	if (preload)
+	for (auto it = packages.begin(); it != packages.end(); it++)
 	{
-		using recursive_directory_iterator = std::filesystem::recursive_directory_iterator;
-		for (const auto& dirEntry : recursive_directory_iterator(prefix))
-		{
-			if (dirEntry.is_regular_file())
-			{
-				auto path = dirEntry.path();
-				std::string as_str = path.string();
-
-				std::replace(as_str.begin(), as_str.end(), '\\', '/');
-
-				if (std::regex_match(as_str, std::regex(".+\\." + extension)))
-				{
-					// Remove the path and extension
-					std::string id_str = as_str.substr(prefix.size());
-					id_str = id_str.substr(0, id_str.find_last_of('.'));
-
-					load<T>(id_str);
-				}
-			}
-		}
+		it->second.assets[typeid(T)] = std::make_pair(tdata, std::unordered_map<std::string, void*>());
 	}
 }
 
 template<typename T>
-inline T* AssetManager::get(const std::string& name)
+inline T* AssetManager::get(const std::string& package, const std::string& name)
 {
-	auto it0 = assets.find(typeid(T));
-	// Make sure the asset type exists
-	logger->check(it0 != assets.end(), "Asset type must exist");	
+	auto pkg = packages.find(package);
+	logger->check(pkg != packages.end(), "Invalid package given");
 
-	auto map = &it0->second.second;
-	auto it1 = map->find(name);
+	auto assets = pkg->second.assets;
+	
+	auto it = assets.find(typeid(T));
+	logger->check(it != assets.end(), "Invalid type given");
 
-	if (it1 == map->end())
+	auto item = it->second.second.find(name);
+
+	if (item == it->second.second.end())
 	{
-		// Load the file
-		return load<T>(name);
+		return load<T>(package, name);
 	}
-	else
-	{
-		return (T*)(it1->second);
-	}
+
+	return (T*)(item->second);
 }
 
 template<typename T>
-inline T* AssetManager::load(const std::string& name)
+inline T* AssetManager::get_from_path(const std::string& full_path, const std::string& def)
 {
-	auto it0 = assets.find(typeid(T));
+	std::string ddef = def == "" ? current_package : def;
 
-	const std::string fullPath = it0->second.first.prefix + name + '.' + it0->second.first.extension;
+	auto[pkg, name] = get_package_and_name(full_path, ddef);
+	return get<T>(pkg, name);
+}
 
-	logger->debug("Loading '{}' as '{}'", fullPath, name);
+template<typename T>
+inline T* AssetManager::load(const std::string& package, const std::string& name)
+{
+	auto pkg = packages.find(package);
+	logger->check(pkg != packages.end(), "Invalid package given");
 
-	LoadAssetPtr<T> ptr = (LoadAssetPtr<T>)it0->second.first.loadPtr;
-	T* nData = ptr(fullPath);
+	auto assets = pkg->second.assets;
 
-	// Make sure something loaded
-	logger->check(nData != nullptr, "Loaded data must not be null");
+	auto it = assets.find(typeid(T));
+	logger->check(it != assets.end(), "Invalid type given");
 
-	auto map = &it0->second.second;
+	LoadAssetPtr<T> fptr = (LoadAssetPtr<T>)(it->second.first.loadPtr);
 
-	(*map)[name] = nData;
+	std::string full_path = "./res/" + package + "/" + name;
 
-	return nData;
+	T* ndata = fptr(full_path, package);
+	logger->check(ndata != nullptr, "Loaded data must not be null");
+
+	it->second.second[name] = ndata;
+
+	return ndata;
 }
 
 extern AssetManager* assets;

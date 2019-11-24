@@ -323,8 +323,8 @@ void PlanetRenderer::generate_and_upload_index_buffer()
 PlanetRenderer::PlanetRenderer()
 {
 	generate_and_upload_index_buffer();
-	shader = assets->get<Shader>("planet/tile");
-	water_shader = assets->get<Shader>("planet/water");
+	shader = assets->get<Shader>("core", "shaders/planet/tile.vs");
+	water_shader = assets->get<Shader>("core", "shaders/planet/water.vs");
 }
 
 

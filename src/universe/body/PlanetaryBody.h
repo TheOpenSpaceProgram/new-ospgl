@@ -1,6 +1,7 @@
 #pragma once
 #include "../kepler/KeplerElements.h"
 #include "config/PlanetConfig.h"
+#include "../../assets/Config.h"
 #include "../../renderer/PlanetaryBodyRenderer.h"
 #include <glm/gtx/rotate_vector.hpp>
 
@@ -78,7 +79,7 @@ public:
 		std::string config;
 		SAFE_TOML_GET(config, "config", std::string);
 
-		auto config_toml = SerializeUtil::load_file(config);
+		auto config_toml = assets->get_from_path<Config>(config)->root;
 		::deserialize(to.config, *config_toml);
 
 		static constexpr double REVS_PER_HOUR_TO_DEGREES_PER_SECOND = 0.1;
