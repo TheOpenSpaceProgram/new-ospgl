@@ -33,7 +33,7 @@ public:
 	glm::dvec3 rotation_axis;
 
 
-	glm::dmat4 build_rotation_matrix(double t) const;
+	glm::dmat4 build_rotation_matrix(double t, bool include_rot_at_epoch = true) const;
 
 	PlanetaryBody();
 	~PlanetaryBody();
