@@ -187,7 +187,7 @@ glm::dvec3 KeplerOrbit::get_plane_normal()
 	KeplerElements c = KeplerElements();  c.orbit = *this;
 	c.eccentric_anomaly = 2.0;
 
-	return -glm::triangleNormal(a.get_position(), b.get_position(), c.get_position());
+	return glm::triangleNormal(a.get_position(), b.get_position(), c.get_position());
 }
 
 KeplerElements ArbitraryKeplerOrbit::to_elements_at(double time, double our_mass, double center_mass, double tol) const

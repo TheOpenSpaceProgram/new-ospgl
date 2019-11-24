@@ -33,18 +33,26 @@ public:
 	ArbitraryKeplerOrbit orbit;
 
 	// Warning: Be careful when orbiting around barycenters
-	double get_mass(bool as_primary = false)
+	double get_mass(bool as_primary = false, bool compound = false)
 	{
 		if (is_barycenter)
 		{
-			if (as_primary)
+			if (compound)
 			{
-				return barycenter_secondary->as_body->config.mass;
+				return barycenter_primary->as_body->config.mass + barycenter_secondary->as_body->config.mass;
 			}
 			else
 			{
-				return barycenter_primary->as_body->config.mass;
+				if (as_primary)
+				{
+					return barycenter_secondary->as_body->config.mass;
+				}
+				else
+				{
+					return barycenter_primary->as_body->config.mass;
+				}
 			}
+			
 		}
 		else
 		{

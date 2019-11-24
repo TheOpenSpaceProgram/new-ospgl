@@ -1,5 +1,7 @@
 #include "MapCamera.h"
 #include "../../util/InputUtil.h"
+#include "../../universe/vessel/ReferenceFrame.h"
+
 
 
 void MapCamera::update(double dt)
@@ -23,40 +25,21 @@ void MapCamera::update(double dt)
 	}
 }
 
-std::pair<glm::dvec3, glm::dvec3> MapCamera::get_camera_pos_dir(
-	double t, glm::dvec3 vessel_pos, double star_radius, std::vector<CartesianState>& states_now,
-	std::vector<SystemElement>& bodies)
+std::pair<glm::dvec3, glm::dvec3> MapCamera::get_camera_pos_dir()
 {
+	if (frame == nullptr)
+	{
+		logger->warn("Camera lacks a reference frame!");
+		return std::make_pair(glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(1.0, 0.0, 0.0));
+	}
+
 	glm::dvec3 pos;
 	glm::dvec3 dir;
 
 	glm::dvec3 center;
 	double center_radius;
-	if (focus_index == -1)
-	{
-		center = vessel_pos;
-		center_radius = 1.0;
-	}
-	else
-	{
-		center = states_now[focus_index].pos;
-		if (focus_index == 0)
-		{
-			center_radius = star_radius;
-		}
-		else
-		{
-			if (bodies[focus_index - 1].is_barycenter)
-			{
-				center_radius = 1.0;
-			}
-			else
-			{
-				center_radius = bodies[focus_index - 1].as_body->config.radius;
-			}
-		}
-		
-	}
+	center_radius = 1.0;
+	center = frame->get_center();
 
 	if (distance < center_radius * 1.5)
 	{
@@ -66,7 +49,11 @@ std::pair<glm::dvec3, glm::dvec3> MapCamera::get_camera_pos_dir(
 	glm::dvec3 offset = MathUtil::spherical_to_euclidean_r1(circular_coord);
 	offset *= center_radius + distance;
 
-	pos = center + offset;
+	glm::dmat4 rotm = frame->get_rotation_matrix();
+
+	pos = rotm * glm::dvec4(offset, 1.0);
+
+	pos += center;
 	dir = glm::normalize(center - pos);
 
 	return std::make_pair(pos, dir);
@@ -74,7 +61,6 @@ std::pair<glm::dvec3, glm::dvec3> MapCamera::get_camera_pos_dir(
 
 MapCamera::MapCamera()
 {
-	focus_index = -1;
 	circular_coord = glm::dvec2(0.0, glm::half_pi<double>());
 	distance = 1000000.0;
 }

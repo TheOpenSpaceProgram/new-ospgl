@@ -10,18 +10,15 @@ void Navball::draw_to_texture(const Vessel& vessel, const ReferenceFrame& frame)
 		view_distance = 1.0f;
 	}
 
-	glm::dvec3 rel_vel = frame.relative_velocity(vessel.state.vel);
+	frame.draw_debug_axes();
 
-	glm::dvec3 ref_up = frame.center.get_up_now();
+	glm::dvec3 rel_vel = vessel.state.vel - frame.get_velocity();
 
-	glm::quat tform = MathUtil::rotate_from_to(ref_up, glm::vec3(0.0, -1.0, 0.0));
 
 	glm::quat rot = vessel.rotation;
 	glm::quat prog = MathUtil::quat_look_at(glm::dvec3(0.0, 0.0, 0.0), rel_vel);
 
-	// Rot0 is a corrective rotation and also reference frame rotation
-	glm::dquat rot0 = tform; //* glm::angleAxis(glm::radians(180.0f), glm::vec3(1.0, 0.0, 0.0));
-
+	glm::dquat rot0 = glm::conjugate(glm::toQuat(frame.get_rotation_matrix())); 
 	rot = (glm::quat)rot0 * rot;
 
 	glm::dvec3 prograde = glm::normalize(rel_vel);

@@ -34,7 +34,7 @@ glm::dvec3 SystemPointer::get_position_now() const
 	}
 	else
 	{
-		return system->states_now[id].pos;
+		return system->states_now[id + 1].pos;
 	}
 }
 
@@ -87,6 +87,18 @@ glm::dvec3 SystemPointer::get_velocity_now() const
 	}
 	else
 	{
-		return system->states_now[id].vel;
+		return system->states_now[id + 1].vel;
+	}
+}
+
+double SystemPointer::get_mass() const
+{
+	if (is_vessel)
+	{
+		return get_vessel()->mass;
+	}
+	else
+	{
+		return get_element()->get_mass(false, true);
 	}
 }

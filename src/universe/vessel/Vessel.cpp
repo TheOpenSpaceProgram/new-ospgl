@@ -89,10 +89,13 @@ void Vessel::draw_debug()
 	}
 
 	double scale = 10.0;
+	scale = 1e9;
 
 	debug_drawer->add_point(state.pos, glm::vec3(1.0, 0.0, 1.0));
 	debug_drawer->add_transform(state.pos, glm::toMat4(rotation), scale);
 	debug_drawer->add_arrow(state.pos, state.pos + angular_momentum * scale, glm::vec3(0.3, 0.3, 1.0));
+
+	debug_drawer->add_cone(state.pos, state.pos + get_forward() * 10.0, 2.0, glm::vec3(0.5, 0.5, 0.5), 32);
 }
 
 Vessel::Vessel()

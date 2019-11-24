@@ -3,6 +3,8 @@
 #include <vector>
 #include "../../universe/SystemElement.h"
 
+struct ReferenceFrame;
+
 class MapCamera
 {
 private:
@@ -11,9 +13,7 @@ private:
 
 public:
 
-	// -1 for sun
-	// -2 for vessel
-	int focus_index;
+	ReferenceFrame* frame;
 
 	// In meters FROM SURFACE (so zoom is easy to implement)
 
@@ -24,9 +24,7 @@ public:
 	void update(double dt);
 
 	// Relative to system, not to center planet
-	std::pair<glm::dvec3, glm::dvec3> get_camera_pos_dir(double t, glm::dvec3 vessel_pos,
-		double star_radius, std::vector<CartesianState>& states_now,
-		std::vector<SystemElement>& bodies);
+	std::pair<glm::dvec3, glm::dvec3> get_camera_pos_dir();
 
 	MapCamera();
 	~MapCamera();

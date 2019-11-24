@@ -12,6 +12,8 @@ class Vessel
 
 public:
 	
+	double mass;
+
 	CartesianState state;
 	glm::dquat rotation;
 	glm::dvec3 angular_momentum; //< Length = Angular velocity (rad / s)

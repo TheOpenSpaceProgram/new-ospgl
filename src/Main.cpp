@@ -101,6 +101,22 @@ int main(void)
 
 	Navball navball;
 
+
+	SystemPointer center_ptr = SystemPointer(&system);
+	center_ptr.id = 0;
+	center_ptr.is_vessel = true;
+
+	SystemPointer secondary_ptr = SystemPointer(&system);
+	secondary_ptr.id = 3;
+	secondary_ptr.is_vessel = false;
+
+	ReferenceFrame ref(center_ptr);
+	ref.mode = ReferenceFrame::INERTIAL;
+	ref.center2 = secondary_ptr;
+
+
+	system.camera.frame = &ref;
+
 	while (!glfwWindowShouldClose(window))
 	{
 		input->update(window);
@@ -134,12 +150,8 @@ int main(void)
 		system.render(width, height);
 		//editor.render(width, height);
 
-		SystemPointer center_ptr = SystemPointer(&system);
-		center_ptr.id = 3;
-		center_ptr.is_vessel = false;
-		navball.draw_to_texture(system.vessels[0], ReferenceFrame(center_ptr));
+		navball.draw_to_texture(system.vessels[0], ref);
 		navball.draw_to_screen({ width, height });
-
 
 		system.render_debug(width, height);
 

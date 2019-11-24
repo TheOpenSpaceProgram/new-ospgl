@@ -1,7 +1,7 @@
 #include "PlanetarySystem.h"
 #include "../util/DebugDrawer.h"
 #include <imgui/imgui.h>
-
+#include "vessel/ReferenceFrame.h"
 
 CartesianState compute_state(double t, double tol, double star_mass, 
 	SystemElement* body, std::vector<CartesianState>* other_states)
@@ -153,7 +153,7 @@ void PlanetarySystem::render(int width, int height)
 {
 	float fov = glm::radians(60.0f);
 
-	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir(t, vessels[0].state.pos, star_radius, states_now, elements);
+	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir();
 
 	update_render(camera_pos, fov, t);
 
@@ -233,7 +233,7 @@ void PlanetarySystem::render(int width, int height)
 void PlanetarySystem::render_debug(int width, int height)
 {
 	float fov = glm::radians(60.0f);
-	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir(t, vessels[0].state.pos, star_radius, states_now, elements);
+	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir();
 	// ~1 light year
 	float far_plane = 1e16f;
 
@@ -290,13 +290,26 @@ void PlanetarySystem::update_physics(double dt)
 
 	if (pt < 0.0)
 	{
-		pts.push_back(vessels[0].state.pos - states_now[3].pos);
-		pt = 60.0 * 60.0;
+		glm::dvec3 p = 
+			camera.frame->get_rotation_matrix() * glm::dvec4(vessels[0].state.pos - camera.frame->get_center(), 1.0f);
+		pts.push_back(p);
+		pt = 60.0;
 	}
+
+	glm::dvec3 pp;
 
 	for (size_t i = 0; i < pts.size(); i++)
 	{
-		debug_drawer->add_point(pts[i] + states_now[3].pos, glm::vec3(1.0, 1.0, 1.0));
+		glm::dvec3 p = glm::dvec3(glm::inverse(camera.frame->get_rotation_matrix()) * glm::dvec4(pts[i], 1.0f))
+			+ camera.frame->get_center();
+
+		if (i > 1)
+		{
+			debug_drawer->add_line(pp, p, glm::vec3(1.0, 1.0, 1.0));
+		}
+
+
+		pp = p;
 	}
 
 
@@ -330,25 +343,12 @@ void PlanetarySystem::update(double dt)
 
 	ImGui::Begin("Camera Focus");
 	
-	ImGui::InputInt("Focus", &camera.focus_index);
-
-	if (camera.focus_index < -1)
-	{
-		camera.focus_index = -1;
-	}
-
-	if (camera.focus_index > (int)elements.size())
-	{
-		camera.focus_index = (int)elements.size();
-	}
-
 	if (ImGui::Button("Position Vessel"))
 	{
 		vessels[0].state = states_now[4];
 		double r = elements[3].as_body->config.radius;
-		vessels[0].state.pos += glm::dvec3(r * 0.8, 4000 * 1e3, 0.0);
-		vessels[0].state.vel += glm::dvec3(0.0, 0.0, 8250.5);
-		camera.focus_index = -1;
+		vessels[0].state.pos += glm::dvec3(r * 1.2, 0.0, 0.0);
+		vessels[0].state.vel += glm::dvec3(0.0, 0.0, 10000.5);
 		camera.distance = 5.0;
 	}
 

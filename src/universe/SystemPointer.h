@@ -6,9 +6,10 @@ struct SystemPointer
 private:
 
 
-	PlanetarySystem* system;
 
 public:
+
+	PlanetarySystem* system;
 
 	bool is_vessel;
 	int id;
@@ -22,6 +23,8 @@ public:
 	glm::dvec3 get_up_now() const;
 
 	glm::dvec3 get_velocity_now() const;
+
+	double get_mass() const;
 
 	SystemPointer(PlanetarySystem* sys)
 	{
