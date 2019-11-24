@@ -1,0 +1,5 @@
+name = "Real Solar System"
+description = "A realistic solar system"
+author = "OSP stuff from Tatjam. Textures from NathanKell (KSP RSS)"
+version = "0.0.1"
+dependencies = ["core"]

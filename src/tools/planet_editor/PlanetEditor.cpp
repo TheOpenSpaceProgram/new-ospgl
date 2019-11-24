@@ -243,7 +243,7 @@ void PlanetEditor::on_script_file_change()
 
 	}
 
-	std::string scripts = assets->loadString(path);
+	std::string scripts = assets->load_string(path);
 	renderer.rocky->server = new PlanetTileServer(scripts, &config, 0, 0, config.surface.has_water);
 
 	renderer.rocky->qtree.dirty = true;
@@ -308,7 +308,7 @@ PlanetEditor::PlanetEditor(GLFWwindow* window, const std::string& planet_name)
 
 
 
-	std::string script = assets->loadString(path);
+	std::string script = assets->load_string(path);
 	renderer.rocky->load(script, config);
 	
 

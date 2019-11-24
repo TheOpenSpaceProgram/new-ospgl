@@ -9,6 +9,7 @@
 struct SurfaceConfig
 {
 	std::string script_path;
+	std::string script_path_raw;
 	int max_depth;
 	double coef_a;
 	double coef_b;
@@ -29,7 +30,7 @@ public:
 
 	static void serialize(const SurfaceConfig& what, cpptoml::table& target)
 	{
-		target.insert("script_path", what.script_path);
+		target.insert("script_path", what.script_path_raw);
 		target.insert("seed", what.seed);
 		target.insert("has_water", what.has_water);
 
@@ -70,12 +71,14 @@ public:
 	static void deserialize(SurfaceConfig& to, const cpptoml::table& from)
 	{
 		SAFE_TOML_GET(to.has_water, "has_water", bool);
-		SAFE_TOML_GET(to.script_path, "script_path", std::string);
+		SAFE_TOML_GET(to.script_path_raw, "script_path", std::string);
 		SAFE_TOML_GET(to.seed, "noise.seed", int);
 		SAFE_TOML_GET(to.interp, "noise.interp", int);
 		SAFE_TOML_GET(to.max_depth, "lod.max_depth", int);
 		SAFE_TOML_GET(to.coef_a, "lod.coef_a", double);
 		SAFE_TOML_GET(to.coef_b, "lod.coef_b", double);
+
+		to.script_path = assets->resolve_path(to.script_path_raw);
 
 		auto image_paths = from.get_table_array_qualified("images");
 		if (image_paths)
@@ -88,7 +91,7 @@ public:
 			// Actually load images
 			for (auto it = to.image_paths.begin(); it != to.image_paths.end(); it++)
 			{
-				to.images[it->first] = assets->get<Image>(it->second);
+				to.images[it->first] = assets->get_from_path<Image>(it->second);
 			}
 		}
 	}

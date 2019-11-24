@@ -55,6 +55,6 @@ public:
 	~Shader();
 };
 
-Shader* loadShader(const std::string& path);
+Shader* loadShader(const std::string& path, const std::string& pkg);
 
 

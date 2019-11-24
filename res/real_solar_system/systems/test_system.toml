@@ -35,7 +35,7 @@
 [[element]]
 	name = "Earth"
 	parent = "Earth-Moon"
-	config = "res/planets/earth/config.toml"
+	config = "planets/earth/config.toml"
 
 	is_primary = true
 
@@ -48,7 +48,7 @@
 [[element]]
 	name = "Moon"
 	parent = "Earth-Moon"
-	config = "res/planets/moon/config.toml"
+	config = "planets/moon/config.toml"
 
 	smajor_axis = 384_399_000.0
 	eccentricity = 0.0549
@@ -64,7 +64,7 @@
 
 [[element]]
 	name = "Mars"
-	config = "res/planets/mars/config.toml"
+	config = "planets/mars/config.toml"
 
 	is_nasa_data = true
 	smajor_axis = 227944179731.897

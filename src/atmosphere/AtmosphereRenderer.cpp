@@ -80,7 +80,7 @@ AtmosphereRenderer::AtmosphereRenderer()
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	atmo = assets->get<Shader>("atmosphere/cheap");
+	atmo = assets->get<Shader>("core", "shaders/atmosphere/cheap.vs");
 
 	SphereGeometry::generate_and_upload(&atmo_vao, &atmo_vbo, &atmo_ebo, &index_count, 64);
 }

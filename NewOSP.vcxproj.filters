@@ -18,29 +18,31 @@
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
     <None Include="lua51.dll" />
-    <None Include="res\shaders\planet\tile.vs" />
-    <None Include="res\shaders\planet\tile.fs" />
-    <None Include="res\default_planet.lua" />
     <None Include="imgui.ini" />
-    <None Include="res\default_planet.toml" />
-    <None Include="res\shaders\planet\water.fs" />
-    <None Include="res\shaders\planet\water.vs" />
-    <None Include="res\shaders\atmosphere\atmo.fs" />
-    <None Include="res\shaders\atmosphere\atmo.vs" />
-    <None Include="res\shaders\atmosphere\cheap.fs" />
-    <None Include="res\shaders\atmosphere\cheap.vs" />
-    <None Include="res\default_gas.toml" />
-    <None Include="res\shaders\debug.vs" />
-    <None Include="res\shaders\debug.fs" />
-    <None Include="res\shaders\atmosphere\clouds0.fs" />
-    <None Include="res\shaders\atmosphere\clouds0.vs" />
-    <None Include="res\planets\test_gas\config.toml" />
-    <None Include="res\planets\mars\config.toml" />
-    <None Include="res\planets\mars\surface.lua" />
-    <None Include="res\planets\earth\config.toml" />
-    <None Include="res\planets\earth\surface.lua" />
-    <None Include="res\shaders\ui\navball.fs" />
-    <None Include="res\shaders\ui\navball.vs" />
+    <None Include="res\core\shaders\atmosphere\atmo.fs" />
+    <None Include="res\core\shaders\atmosphere\atmo.vs" />
+    <None Include="res\core\shaders\atmosphere\cheap.fs" />
+    <None Include="res\core\shaders\atmosphere\cheap.vs" />
+    <None Include="res\core\shaders\atmosphere\clouds0.fs" />
+    <None Include="res\core\shaders\atmosphere\clouds0.vs" />
+    <None Include="res\core\shaders\planet\tile.fs" />
+    <None Include="res\core\shaders\planet\tile.vs" />
+    <None Include="res\core\shaders\planet\water.fs" />
+    <None Include="res\core\shaders\planet\water.vs" />
+    <None Include="res\core\shaders\ui\navball.fs" />
+    <None Include="res\core\shaders\ui\navball.vs" />
+    <None Include="res\core\shaders\debug.fs" />
+    <None Include="res\core\shaders\debug.vs" />
+    <None Include="res\real_solar_system\planets\earth\config.toml" />
+    <None Include="res\real_solar_system\planets\earth\surface.lua" />
+    <None Include="res\real_solar_system\planets\mars\config.toml" />
+    <None Include="res\real_solar_system\planets\mars\surface.lua" />
+    <None Include="res\real_solar_system\planets\test_gas\config.toml" />
+    <None Include="res\core\default_gas.toml" />
+    <None Include="res\core\default_planet.lua" />
+    <None Include="res\core\default_planet.toml" />
+    <None Include="res\core\package.toml" />
+    <None Include="res\real_solar_system\package.toml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -167,6 +169,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\universe\SystemPointer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\Config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -367,6 +372,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\universe\SystemPointer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\Config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

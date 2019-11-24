@@ -377,7 +377,7 @@ static void load_body(SystemElement* body)
 	{
 		body->as_body->renderer.rocky = new RockyPlanetRenderer();
 
-		std::string script = assets->loadString(body->as_body->config.surface.script_path);
+		std::string script = assets->load_string_raw(body->as_body->config.surface.script_path);
 
 		body->as_body->renderer.rocky->load(script, body->as_body->config);
 	}

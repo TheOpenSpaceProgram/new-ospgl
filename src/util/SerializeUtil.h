@@ -118,6 +118,22 @@ public:
 		}
 	}
 
+	template<typename T>
+	static void read_to(const cpptoml::table& root, T& target, const std::string& sub_path = "")
+	{;
+
+		if (sub_path != "")
+		{
+			deserialize(target, *root.get_table(sub_path));
+		}
+		else
+		{
+			deserialize(target, root);
+		}
+
+
+	}
+
 	// Leave subpath empty for root
 	template<typename T>
 	static void read_file_to(const std::string& path, T& target, const std::string& sub_path = "")
