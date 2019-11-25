@@ -113,6 +113,29 @@ Image::Image(ImageConfig config, const std::string& path)
 
 Image::~Image()
 {
+	if (config.in_memory)
+	{
+		if (u8data != nullptr)
+		{
+			delete u8data;
+			u8data = nullptr;
+		}
+		if (u16data != nullptr)
+		{
+			delete u16data;
+			u16data = nullptr;
+		}
+		if (fdata != nullptr)
+		{
+			delete fdata;
+			fdata = nullptr;
+		}
+	}
+
+	if (config.upload && id != 0)
+	{
+		glDeleteTextures(1, &id);
+	}
 }
 
 static const std::string default_toml = R"-(
