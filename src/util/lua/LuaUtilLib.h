@@ -7,7 +7,8 @@ class LuaUtilLib
 {
 public:
 
-	static void load_lib(sol::state& lua_state, PlanetConfig* config)
+	static void load_lib(sol::state& lua_state, PlanetConfig* config, 
+		std::unordered_map<std::string, AssetHandle<Image>>& images)
 	{
 		lua_state["make_color"] = [&lua_state](double r, double g, double b)
 		{
@@ -33,26 +34,26 @@ public:
 
 	
 		// Images are always casted to 4 channel 8 bit color
-		lua_state["get_image"] = [&lua_state, config](const std::string& name)
+		lua_state["get_image"] = [&lua_state, config, &images](const std::string& name)
 		{
 			sol::table out_image = lua_state.create_table();
 
 			Image* img = nullptr;
-			auto it = config->surface.images.find(name);
-			if (it == config->surface.images.end())
+			auto it = images.find(name);
+			if (it == images.end())
 			{
 				logger->error("Tried to get a image which did not exist");
 
 			}
 			else
 			{
-				if (it->second->get_config().channels != 3 || it->second->get_config().bitdepth != 8)
+				if (it->second.get()->get_config().channels != 3 || it->second.get()->get_config().bitdepth != 8)
 				{
 					logger->error("Tried to get a image which is a heightmap, make sure it has channel = 3 and bitdepth = 8");
 				}
 			}
 
-			img = it->second;
+			img = it->second.get();
 
 			out_image["get_projected"] = [&lua_state, img](float x, float y)
 			{
@@ -131,26 +132,26 @@ public:
 		};
 
 		// Heightmaps are always 1 channel 16 bit color
-		lua_state["get_heightmap"] = [&lua_state, config](const std::string& name)
+		lua_state["get_heightmap"] = [&lua_state, config, &images](const std::string& name)
 		{
 			sol::table out_image = lua_state.create_table();
 
 			Image* img = nullptr;
-			auto it = config->surface.images.find(name);
-			if (it == config->surface.images.end())
+			auto it = images.find(name);
+			if (it == images.end())
 			{
 				logger->error("Tried to get a heightmap which did not exist");
 				
 			}
 			else
 			{
-				if (it->second->get_config().channels != 1 || it->second->get_config().bitdepth != 16)
+				if (it->second.get()->get_config().channels != 1 || it->second.get()->get_config().bitdepth != 16)
 				{
 					logger->error("Tried to get a heightmap which is a image, make sure it has channel = 1 and bitdepth = 16");
 				}
 			}
 
-			img = it->second;
+			img = it->second.get();
 			
 			// Interpolated pixel getter, assumes tiling x and clamped y
 			out_image["get_height_soft"] = [&lua_state, img](float x, float y)

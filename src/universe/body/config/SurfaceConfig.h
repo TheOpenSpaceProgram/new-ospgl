@@ -6,6 +6,8 @@
 #include "../../../assets/Image.h"
 #include "../../../assets/AssetManager.h"
 
+constexpr bool LOAD_SURFACES_ON_START = false;
+
 struct SurfaceConfig
 {
 	std::string script_path;
@@ -19,8 +21,8 @@ struct SurfaceConfig
 
 	bool has_water;
 
-	std::unordered_map<std::string, Image*> images;
-	std::unordered_map<std::string, std::string> image_paths;
+	std::unordered_map<std::string, AssetPointer> image_paths;
+
 };
 
 template<>
@@ -56,7 +58,7 @@ public:
 			auto table = cpptoml::make_table();
 
 			table->insert("name", it->first);
-			table->insert("path", it->second);
+			table->insert("path", it->second.to_path());
 
 			images->push_back(table);
 		}
@@ -85,14 +87,10 @@ public:
 		{
 			for (const auto& table : *image_paths)
 			{
-				to.image_paths[table->get_qualified_as<std::string>("name").value_or("null")] = table->get_qualified_as<std::string>("path").value_or("ERROR");
+				to.image_paths[table->get_qualified_as<std::string>("name").value_or("null")] 
+					= AssetPointer(table->get_qualified_as<std::string>("path").value_or("ERROR"));
 			}
 
-			// Actually load images
-			for (auto it = to.image_paths.begin(); it != to.image_paths.end(); it++)
-			{
-				to.images[it->first] = assets->get_from_path<Image>(it->second);
-			}
 		}
 	}
 };

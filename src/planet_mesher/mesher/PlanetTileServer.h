@@ -64,10 +64,14 @@ public:
 
 	using TileMap = std::unordered_map<PlanetTilePath, PlanetTile*, PlanetTilePathHasher>;
 
+
+
 	// Used for waking up threads efficiently, instead
 	// of a wait-loop which uses 100% CPU
 	std::mutex condition_mtx;
 	std::condition_variable condition_var;
+
+	std::unordered_map<std::string, AssetHandle<Image>> images;
 
 	Atomic<TileMap> tiles;
 	// Threads always try to work on the highest priority
