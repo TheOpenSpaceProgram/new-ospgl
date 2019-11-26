@@ -84,7 +84,7 @@ int main(void)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	PlanetarySystem system;
-	assets->get_from_path<Config>("real_solar_system:systems/test_system.toml")->read_to(system);
+	assets->get_from_path<Config>("rss:systems/test_system.toml")->read_to(system);
 
 	system.compute_sois(0.0);
 	debug_drawer->debug_enabled = true;

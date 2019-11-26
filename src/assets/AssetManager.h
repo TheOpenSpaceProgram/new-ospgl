@@ -53,6 +53,8 @@ private:
 		// Maps every type to a AssetTypeData and packages
 		std::unordered_map<std::type_index, AssetTypeAndAssets> assets;
 
+		std::string id;
+		std::string folder;
 		std::string name;
 		std::string desc;
 		std::string author;
@@ -67,6 +69,10 @@ private:
 			desc = *file->get_qualified_as<std::string>("description");
 			author = *file->get_qualified_as<std::string>("author");
 			version = *file->get_qualified_as<std::string>("version");
+			id = *file->get_qualified_as<std::string>("id");
+
+			// By default the folder is the id
+			folder = file->get_qualified_as<std::string>("folder").value_or(id);
 
 			dependencies = std::vector<std::string>();
 
@@ -212,9 +218,7 @@ inline void AssetManager::free(const std::string& package, const std::string& na
 template<typename T>
 inline T* AssetManager::get_from_path(const std::string& full_path, const std::string& def)
 {
-	std::string ddef = def == "" ? current_package : def;
-
-	auto[pkg, name] = get_package_and_name(full_path, ddef);
+	auto[pkg, name] = get_package_and_name(full_path, def);
 	return get<T>(pkg, name);
 }
 

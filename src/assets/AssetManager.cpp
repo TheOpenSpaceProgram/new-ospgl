@@ -58,11 +58,17 @@ std::pair<std::string, std::string> AssetManager::get_package_and_name(const std
 	{
 		package = ddef;
 		name = full_path;
+
 	}
 	else
 	{
 		package = full_path.substr(0, idx);
 		name = full_path.substr(idx + 1);
+	}
+
+	while(name[0] == '/')
+	{ 
+		name = name.substr(1);
 	}
 
 	return std::make_pair(package, name);
@@ -89,7 +95,7 @@ void AssetManager::check_packages()
 {
 	for (auto it = packages.begin(); it != packages.end(); it++)
 	{
-		logger->info("Package '{} {}' ({})", it->second.name, it->second.version, it->first);
+		logger->info("Package '{} {}' ('{}' loaded as '{}')", it->second.name, it->second.version, it->second.id, it->first);
 
 		for (size_t i = 0; i < it->second.dependencies.size(); i++)
 		{
