@@ -1,5 +1,6 @@
+id = "core"
 name = "OSP Core"
 description = "All files needed to run the most bare-bones OSP"
-author = "Tatjam" 
+author = "Tatjam"
 version = "0.0.1"
-dependencies = []
+dependencies = ["navball", "default_shaders"]

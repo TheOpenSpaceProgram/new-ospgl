@@ -1,0 +1,6 @@
+id = "rss"
+name = "Real Solar System"
+description = "A realistic solar system"
+author = "Tatjam"
+version = "0.0.1"
+dependencies = ["rss_textures"]

@@ -33,16 +33,16 @@
     <None Include="res\core\shaders\ui\navball.vs" />
     <None Include="res\core\shaders\debug.fs" />
     <None Include="res\core\shaders\debug.vs" />
-    <None Include="res\real_solar_system\planets\earth\config.toml" />
-    <None Include="res\real_solar_system\planets\earth\surface.lua" />
-    <None Include="res\real_solar_system\planets\mars\config.toml" />
-    <None Include="res\real_solar_system\planets\mars\surface.lua" />
-    <None Include="res\real_solar_system\planets\test_gas\config.toml" />
     <None Include="res\core\default_gas.toml" />
     <None Include="res\core\default_planet.lua" />
     <None Include="res\core\default_planet.toml" />
     <None Include="res\core\package.toml" />
-    <None Include="res\real_solar_system\package.toml" />
+    <None Include="res\rss\planets\earth\config.toml" />
+    <None Include="res\rss\planets\earth\surface.lua" />
+    <None Include="res\rss\planets\mars\config.toml" />
+    <None Include="res\rss\planets\mars\surface.lua" />
+    <None Include="res\rss\planets\test_gas\config.toml" />
+    <None Include="res\rss\package.toml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">

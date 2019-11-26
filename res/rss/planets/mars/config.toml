@@ -21,8 +21,8 @@ mass = 6.4171e23
 
 [surface]
 
-	images = [	{ name = "heightmap", path = "planets/mars/hmap.png"},
-				{ name = "colormap", path = "planets/mars/color.png"}]
+	images = [	{ name = "heightmap", path = "rss_textures:mars/hmap.png"},
+				{ name = "colormap", path = "rss_textures:mars/color.png"}]
 
 	script_path = "planets/mars/surface.lua"
 	has_water = false				# Does the planet have water

@@ -22,8 +22,8 @@ mass = 5.9722e24
 [surface]
 
 
-	images = [	{ name = "heightmap", path = "planets/earth/hmap.png"},
-				{ name = "colormap", path = "planets/earth/color.png"}]
+	images = [	{ name = "heightmap", path = "rss_textures:earth/hmap.png"},
+				{ name = "colormap", path = "rss_textures:earth/color.png"}]
 
 	script_path = "planets/earth/surface.lua"	# Will automatically be created for you
 	has_water = true				# Does the planet have water

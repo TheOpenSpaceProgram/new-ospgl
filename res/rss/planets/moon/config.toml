@@ -8,8 +8,8 @@ mass = 7.342e22
 
 [surface]
 
-	images = [	{ name = "heightmap", path = "planets/moon/hmap.png"},
-				{ name = "colormap", path = "planets/moon/color.png"}]
+	images = [	{ name = "heightmap", path = "rss_textures://moon/hmap.png"},
+				{ name = "colormap", path = "rss_textures://moon/color.png"}]
 
 	script_path = "planets/moon/surface.lua"
 	has_water = false				# Does the planet have water

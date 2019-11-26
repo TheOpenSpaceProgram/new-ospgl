@@ -129,15 +129,15 @@ void Navball::draw_to_screen(glm::ivec2 screen_size)
 
 Navball::Navball() : fbuffer(256, 256)
 {
-	navball_shader = assets->get<Shader>("core", "shaders/ui/navball.vs");
-	texture = assets->get<Image>("core", "navball/navball.png");
-	prograde_tex = assets->get<Image>("core", "navball/prograde.png");
-	retrograde_tex = assets->get<Image>("core", "navball/retrograde.png");
-	normal_tex = assets->get<Image>("core", "navball/normal.png");
-	antinormal_tex = assets->get<Image>("core", "navball/antinormal.png");
-	radialin_tex = assets->get<Image>("core", "navball/radialin.png");
-	radialout_tex = assets->get<Image>("core", "navball/radialout.png");
-	frame_tex = assets->get<Image>("core", "navball/frame.png");
+	navball_shader = assets->get<Shader>("navball", "navball.vs");
+	texture = assets->get<Image>("navball", "navball.png");
+	prograde_tex = assets->get<Image>("navball", "prograde.png");
+	retrograde_tex = assets->get<Image>("navball", "retrograde.png");
+	normal_tex = assets->get<Image>("navball", "normal.png");
+	antinormal_tex = assets->get<Image>("navball", "antinormal.png");
+	radialin_tex = assets->get<Image>("navball", "radialin.png");
+	radialout_tex = assets->get<Image>("navball", "radialout.png");
+	frame_tex = assets->get<Image>("navball", "frame.png");
 
 	SphereGeometry::generate_and_upload(&ball_vao, &ball_vbo, &ball_ebo, &ball_index_count, 64);
 }

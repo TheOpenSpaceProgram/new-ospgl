@@ -1,0 +1,7 @@
+id = "rss_textures_hd"
+folder = "rss_textures"
+name = "Real Solar System Textures (HD)"
+description = "Textures for the real solar system"
+author = "NathanKell (KSP RSS), ported to OSP by Tatjam"
+version = "0.0.1"
+dependencies = []
