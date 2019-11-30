@@ -172,7 +172,7 @@
     <ClCompile Include="src\renderer\camera\MapCamera.cpp" />
     <ClCompile Include="src\renderer\PlanetaryBodyRenderer.cpp" />
     <ClCompile Include="src\universe\kepler\KeplerElements.cpp" />
-    <ClCompile Include="src\universe\body\PlanetaryBody.cpp" />
+    <ClCompile Include="src\universe\element\body\PlanetaryBody.cpp" />
     <ClCompile Include="src\atmosphere\AtmosphereRenderer.cpp" />
     <ClCompile Include="dep\FastNoise\FastNoise.cpp" />
     <ClCompile Include="dep\glad\glad.c">
@@ -203,12 +203,14 @@
     <ClCompile Include="src\util\render\Framebuffer.cpp" />
     <ClCompile Include="src\util\Timer.cpp" />
     <ClCompile Include="src\universe\PlanetarySystem.cpp" />
-    <ClCompile Include="src\universe\SystemElement.cpp" />
+    <ClCompile Include="src\universe\element\SystemElement.cpp" />
     <ClCompile Include="src\universe\vessel\Vessel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\assets\Config.h" />
     <ClInclude Include="dep\stb\stb_image.h" />
+    <ClInclude Include="src\universe\element\barycenter\Barycenter.h" />
+    <ClInclude Include="src\universe\element\star\Star.h" />
     <ClInclude Include="src\universe\SystemPointer.h" />
     <ClInclude Include="src\universe\vessel\ReferenceFrame.h" />
     <ClInclude Include="src\util\render\TextureDrawer.h" />
@@ -221,12 +223,12 @@
     <ClInclude Include="src\util\DebugDrawer.h" />
     <ClInclude Include="src\renderer\camera\MapCamera.h" />
     <ClInclude Include="src\renderer\PlanetaryBodyRenderer.h" />
-    <ClInclude Include="src\universe\body\config\AtmoConfig.h" />
-    <ClInclude Include="src\universe\body\config\GasConfig.h" />
-    <ClInclude Include="src\universe\body\config\SurfaceConfig.h" />
-    <ClInclude Include="src\universe\body\config\PlanetConfig.h" />
+    <ClInclude Include="src\universe\element\body\config\AtmoConfig.h" />
+    <ClInclude Include="src\universe\element\body\config\GasConfig.h" />
+    <ClInclude Include="src\universe\element\body\config\SurfaceConfig.h" />
+    <ClInclude Include="src\universe\element\body\config\PlanetConfig.h" />
     <ClInclude Include="src\universe\kepler\KeplerElements.h" />
-    <ClInclude Include="src\universe\body\PlanetaryBody.h" />
+    <ClInclude Include="src\universe\element\body\PlanetaryBody.h" />
     <ClInclude Include="src\universe\PlanetarySystemSerializer.h" />
     <ClInclude Include="src\util\geometry\SphereGeometry.h" />
     <ClInclude Include="src\atmosphere\AtmosphereRenderer.h" />
@@ -272,7 +274,7 @@
     <ClInclude Include="src\util\ThreadUtil.h" />
     <ClInclude Include="src\util\Timer.h" />
     <ClInclude Include="src\universe\PlanetarySystem.h" />
-    <ClInclude Include="src\universe\SystemElement.h" />
+    <ClInclude Include="src\universe\element\SystemElement.h" />
     <ClInclude Include="src\universe\vessel\Vessel.h" />
   </ItemGroup>
   <ItemGroup>

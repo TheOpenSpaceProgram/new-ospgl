@@ -34,17 +34,22 @@ glm::dvec3 SystemPointer::get_position_now() const
 	}
 	else
 	{
-		return system->states_now[id + 1].pos;
+		return system->states_now[id].pos;
 	}
 }
 
 static glm::dvec3 transform_vector(glm::dvec3 vec, const SystemElement* elem, double t)
 {
 
-	if (elem->is_barycenter)
+	if (elem->type == SystemElement::BARYCENTER)
 	{
 		// TODO: Get the rotation to make the line joining the main and secondary
 		// bodies the forward (X) axis
+		return vec;
+	}
+	else if (elem->type == SystemElement::STAR)
+	{
+		// Star is always fixed
 		return vec;
 	}
 	else
@@ -87,7 +92,7 @@ glm::dvec3 SystemPointer::get_velocity_now() const
 	}
 	else
 	{
-		return system->states_now[id + 1].vel;
+		return system->states_now[id].vel;
 	}
 }
 

@@ -3,7 +3,7 @@
 #include <cpptoml.h>
 #include "../util/SerializeUtil.h"
 #include "vessel/Vessel.h"
-#include "SystemElement.h"
+#include "element/SystemElement.h"
 #include "propagator/SystemPropagator.h"
 
 #include "../renderer/camera/MapCamera.h"
@@ -37,10 +37,6 @@ public:
 
 	// The MapCamera MAY not be here, actually (TODO)
 	MapCamera camera;
-
-
-	double star_mass;
-	double star_radius;
 
 	// Guaranteed to be ordered so that the last planets to appear
 	// are moons, or moons of moons (etc...)

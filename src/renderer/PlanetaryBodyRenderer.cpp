@@ -1,6 +1,6 @@
 #include "PlanetaryBodyRenderer.h"
 #include "../util/DebugDrawer.h"
-#include "../universe/SystemElement.h"
+#include "../universe/element/SystemElement.h"
 
 
 void PlanetaryBodyRenderer::render(glm::dmat4 proj_view, glm::dmat4 model, glm::dmat4 rotation_matrix,
@@ -31,11 +31,11 @@ void PlanetaryBodyRenderer::render(glm::dmat4 proj_view, glm::dmat4 model, glm::
 
 void PlanetaryBodyRenderer::draw_debug(double t, CartesianState st, SystemElement* elem)
 {
-	if (elem->is_barycenter)
-	{
-
+	if (elem->type == SystemElement::BARYCENTER)
+	{ 
+		// Barycenter
 	}
-	else
+	else if(elem->type == SystemElement::BODY)
 	{
 		float dot_factor = elem->as_body->dot_factor;
 		if (dot_factor == 1.0f)
@@ -59,6 +59,10 @@ void PlanetaryBodyRenderer::draw_debug(double t, CartesianState st, SystemElemen
 			debug_drawer->add_arrow(st.pos, st.pos + normal * elem->as_body->config.radius * oind_size, glm::vec3(1.0, 1.0, 0.0));
 
 		}
+	}
+	else
+	{
+		// Star
 	}
 }
 

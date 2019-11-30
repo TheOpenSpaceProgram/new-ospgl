@@ -54,24 +54,22 @@ glm::dvec3 RK4Interpolated::acceleration(glm::dvec3 p, PosVector& vec, size_t* c
 void RK4Interpolated::initialize(PlanetarySystem* system, size_t body_count)
 {
 	this->sys = system;
-	t0_pos.resize(body_count + 1);
-	t1_pos.resize(body_count + 1);
-	t05_pos.resize(body_count + 1);
+	t0_pos.resize(body_count);
+	t1_pos.resize(body_count);
+	t05_pos.resize(body_count);
 
-	masses.resize(body_count + 1);
-
-	masses[0] = system->star_mass;
+	masses.resize(body_count);
 
 	// Obtain masses
 	for (size_t i = 0; i < body_count; i++)
 	{
-		if (system->elements[i].is_barycenter)
+		if (system->elements[i].type == SystemElement::BARYCENTER)
 		{
-			masses[i + 1] = 0.0;
+			masses[i] = 0.0;
 		}
 		else
 		{
-			masses[i + 1] = system->elements[i].as_body->config.mass;
+			masses[i] = system->elements[i].get_mass();
 		}
 	}
 }

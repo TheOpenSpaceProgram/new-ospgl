@@ -10,7 +10,7 @@
 #include <array>
 #include <thread>
 #include <sol.hpp>
-#include "../../universe/body/config/PlanetConfig.h"
+#include "../../universe/element/body/config/PlanetConfig.h"
 #include <FastNoise/FastNoise.h>
 
 struct PlanetTileThread

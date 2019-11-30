@@ -123,9 +123,6 @@
     <ClCompile Include="src\universe\PlanetarySystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\universe\body\PlanetaryBody.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\universe\kepler\KeplerElements.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -145,9 +142,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dep\stb\stb_impl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\universe\SystemElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\universe\vessel\Vessel.cpp">
@@ -172,6 +166,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\assets\Config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\element\body\PlanetaryBody.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\element\SystemElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -302,9 +302,6 @@
     <ClInclude Include="src\universe\PlanetarySystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\universe\body\PlanetaryBody.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\universe\kepler\KeplerElements.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -312,18 +309,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\PlanetaryBodyRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\universe\body\config\PlanetConfig.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\universe\body\config\AtmoConfig.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\universe\body\config\SurfaceConfig.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\universe\body\config\GasConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\camera\MapCamera.h">
@@ -342,9 +327,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dep\stb\stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\universe\SystemElement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\universe\vessel\Vessel.h">
@@ -375,6 +357,30 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\assets\Config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\element\body\config\AtmoConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\element\body\config\GasConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\element\body\config\PlanetConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\element\body\config\SurfaceConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\element\body\PlanetaryBody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\element\SystemElement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\element\barycenter\Barycenter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\element\star\Star.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

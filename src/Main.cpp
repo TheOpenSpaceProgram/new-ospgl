@@ -103,11 +103,9 @@ int main(void)
 	Navball navball;
 
 
-	SystemPointer center_ptr = SystemPointer(&system);
-	center_ptr.id = 0;
-	center_ptr.is_vessel = true;
+	SystemPointer center_ptr = SystemPointer(&system, 0, true);
 
-	SystemPointer secondary_ptr = SystemPointer(&system);
+	SystemPointer secondary_ptr = SystemPointer(&system, "Earth");
 	secondary_ptr.id = 3;
 	secondary_ptr.is_vessel = false;
 

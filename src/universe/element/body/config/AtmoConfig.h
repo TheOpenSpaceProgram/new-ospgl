@@ -1,6 +1,6 @@
 #pragma once
-#include "../../../util/SerializeUtil.h"
-#include "../../../util/serializers/glm.h"
+#include "../../../../util/SerializeUtil.h"
+#include "../../../../util/serializers/glm.h"
 
 
 struct AtmoConfig

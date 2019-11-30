@@ -1,7 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <vector>
-#include "../../universe/SystemElement.h"
 
 struct ReferenceFrame;
 

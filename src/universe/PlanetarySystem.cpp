@@ -3,26 +3,25 @@
 #include <imgui/imgui.h>
 #include "vessel/ReferenceFrame.h"
 
-CartesianState compute_state(double t, double tol, double star_mass, 
+CartesianState compute_state(double t, double tol, 
 	SystemElement* body, std::vector<CartesianState>* other_states)
 {
+	if (body->type == SystemElement::STAR)
+	{
+		return CartesianState(glm::dvec3(0.0, 0.0, 0.0), glm::dvec3(0.0, 0.0, 0.0));
+	}
+
 	double parent_mass;
 	glm::dvec3 offset = glm::dvec3(0.0, 0.0, 0.0);
 	glm::dvec3 vel_offset = glm::dvec3(0.0, 0.0, 0.0);
-	if (body->parent == nullptr)
-	{
-		parent_mass = star_mass;
-	}
-	else 
-	{
-		parent_mass = body->parent->get_mass(body->is_primary);
-		offset = (*other_states)[body->parent->index + 1].pos;
-		vel_offset = (*other_states)[body->parent->index + 1].vel;
-	}
 
-	if (body->is_primary && body->parent->is_barycenter)
+	parent_mass = body->parent->get_mass(body->is_primary);
+	offset = (*other_states)[body->parent->index].pos;
+	vel_offset = (*other_states)[body->parent->index].vel;
+
+	if (body->is_primary && body->parent->type == SystemElement::BARYCENTER)
 	{
-		CartesianState moon = (*other_states)[body->parent->barycenter_secondary->index + 1];
+		CartesianState moon = (*other_states)[body->parent->as_barycenter->secondary->index];
 		// Invert it across the barycenter
 		glm::dvec3 ov = glm::normalize(moon.pos - offset);
 		moon.pos = offset - ov * body->barycenter_radius;
@@ -47,24 +46,22 @@ CartesianState compute_state(double t, double tol, double star_mass,
 
 }
 
-glm::dvec3 compute_pos(double t, double tol, double star_mass,
+glm::dvec3 compute_pos(double t, double tol,
 	SystemElement* body, std::vector<glm::dvec3>* other_positions)
 {
-	double parent_mass;
-	glm::dvec3 offset = glm::dvec3(0.0, 0.0, 0.0);
-	if (body->parent == nullptr)
+	if (body->type == SystemElement::STAR)
 	{
-		parent_mass = star_mass;
-	}
-	else
-	{
-		parent_mass = body->parent->get_mass(body->is_primary);
-		offset = (*other_positions)[body->parent->index + 1];
+		return glm::dvec3(0.0, 0.0, 0.0);
 	}
 
-	if (body->is_primary && body->parent->is_barycenter)
+	double parent_mass;
+	glm::dvec3 offset = glm::dvec3(0.0, 0.0, 0.0);
+	parent_mass = body->parent->get_mass(body->is_primary);
+	offset = (*other_positions)[body->parent->index];
+
+	if (body->is_primary && body->parent->type == SystemElement::BARYCENTER)
 	{
-		glm::dvec3 moon = (*other_positions)[body->parent->barycenter_secondary->index + 1];
+		glm::dvec3 moon = (*other_positions)[body->parent->as_barycenter->secondary->index];
 		// Invert it across the barycenter
 		glm::dvec3 ov = glm::normalize(moon - offset);
 		moon = offset - ov * body->barycenter_radius;
@@ -84,35 +81,30 @@ glm::dvec3 compute_pos(double t, double tol, double star_mass,
 
 void PlanetarySystem::compute_states(double t, std::vector<CartesianState>& out, double tol)
 {
-	out[0] = CartesianState({ 0, 0, 0 }, { 0, 0, 0 });
-	for (size_t i = 1; i < out.size(); i++)
+	for (size_t i = 0; i < out.size(); i++)
 	{
-		out[i] = compute_state(t, tol, star_mass, &elements[i - 1], &out);
+		out[i] = compute_state(t, tol, &elements[i], &out);
 	}
 }
 
 void PlanetarySystem::compute_positions(double t, std::vector<glm::dvec3>& out, double tol)
 {
-	out[0] = glm::dvec3(0.0, 0.0, 0.0);
-
-	for (size_t i = 1; i < out.size(); i++)
+	for (size_t i = 0; i < out.size(); i++)
 	{
-		out[i] = compute_pos(t, tol, star_mass, &elements[i - 1], &out);
+		out[i] = compute_pos(t, tol, &elements[i], &out);
 	}
 }
 
 
 void PlanetarySystem::compute_sois(double t)
 {
-	for (size_t i = 0; i < elements.size(); i++)
+	elements[0].soi_radius = std::numeric_limits<double>::infinity();
+
+	for (size_t i = 1; i < elements.size(); i++)
 	{
 		double smajor_axis = elements[i].orbit.to_orbit_at(t).smajor_axis;
 
-		double parent_mass = star_mass;
-		if (elements[i].parent != nullptr)
-		{
-			parent_mass = elements[i].parent->get_mass();
-		}
+		double parent_mass = elements[i].parent->get_mass();
 
 		elements[i].soi_radius = smajor_axis * pow(elements[i].get_mass() / parent_mass, 0.4);
 	}
@@ -128,7 +120,7 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 	glm::dvec3 camera_pos_relative = camera_pos - state.pos;
 	glm::dvec3 light_dir = glm::normalize(state.pos);
 
-	if (!body->is_barycenter)
+	if (body->type == SystemElement::BODY)
 	{
 		glm::dmat4 model = glm::translate(glm::dmat4(1.0), -camera_pos + state.pos);
 		model = glm::scale(model, glm::dvec3(body->as_body->config.radius));
@@ -173,7 +165,7 @@ void PlanetarySystem::render(int width, int height)
 
 	for (size_t i = 0; i < elements.size(); i++)
 	{
-		sorted.push_back(std::make_pair(&elements[i], states_now[i + 1]));
+		sorted.push_back(std::make_pair(&elements[i], states_now[i]));
 	}
 
 	std::sort(sorted.begin(), sorted.end(), [camera_pos](BodyPositionPair a, BodyPositionPair b)
@@ -197,21 +189,21 @@ void PlanetarySystem::render(int width, int height)
 		debug_drawer->add_line(glm::dvec3(0, 0, 0), glm::dvec3(0, 0, 1) * axis_length, glm::vec3(0.0, 0.0, 1.0));
 
 		// Add debug orbits
-		for (size_t i = 0; i < elements.size(); i++)
+		for (size_t i = 1; i < elements.size(); i++)
 		{
 			glm::dvec3 origin = glm::dvec3(0, 0, 0);
 			int verts = 1024;
 			if (elements[i].parent != nullptr)
 			{
-				origin = states_now[elements[i].parent->index + 1].pos;
+				origin = states_now[elements[i].parent->index].pos;
 				verts = 128;
 			}
 
 			glm::vec3 col;
 
-			if (elements[i].is_barycenter)
+			if (elements[i].type == SystemElement::BARYCENTER)
 			{
-				col = elements[i].barycenter_primary->as_body->config.far_color;
+				col = elements[i].as_barycenter->primary->as_body->config.far_color;
 			}
 			else
 			{
@@ -278,7 +270,7 @@ void PlanetarySystem::update_physics(double dt)
 		propagator->prepare(sub_t, sub_dt, physics_pos);
 		size_t closest = propagator->propagate(&vessels[0]);
 
-		vessels[0].simulate(elements, physics_pos, star_radius, closest, sub_dt);
+		vessels[0].simulate(elements, physics_pos, closest, sub_dt);
 		
 
 		it++;
@@ -334,7 +326,7 @@ void PlanetarySystem::update(double dt)
 	if (states_now.size() == 0)
 	{
 		init_physics();
-		states_now.resize(elements.size() + 1);
+		states_now.resize(elements.size());
 	}
 
 	update_physics(dt);
@@ -346,7 +338,7 @@ void PlanetarySystem::update(double dt)
 	if (ImGui::Button("Position Vessel"))
 	{
 		vessels[0].state = states_now[4];
-		double r = elements[3].as_body->config.radius;
+		double r = elements[4].as_body->config.radius;
 		vessels[0].state.pos += glm::dvec3(r * 1.2, 0.0, 0.0);
 		vessels[0].state.vel += glm::dvec3(0.0, 0.0, 10000.5);
 		camera.distance = 5.0;
@@ -467,12 +459,12 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 	for (size_t i = 0; i < elements.size(); i++)
 	{
 		
-		if (!elements[i].is_barycenter)
+		if (elements[i].type == SystemElement::BODY)
 		{
 
 			// Set unloaded
 			float prev_factor = elements[i].as_body->dot_factor;
-			elements[i].as_body->dot_factor = elements[i].as_body->get_dot_factor((float)glm::distance(camera_pos, states_now[i + 1].pos), fov);
+			elements[i].as_body->dot_factor = elements[i].as_body->get_dot_factor((float)glm::distance(camera_pos, states_now[i].pos), fov);
 
 
 
@@ -488,7 +480,7 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 
 			if (elements[i].as_body->renderer.rocky != nullptr)
 			{
-				update_render_body_rocky(elements[i].as_body, states_now[i + 1].pos, camera_pos, t);
+				update_render_body_rocky(elements[i].as_body, states_now[i].pos, camera_pos, t);
 			}
 		}
 	}

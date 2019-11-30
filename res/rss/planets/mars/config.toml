@@ -26,6 +26,7 @@ mass = 6.4171e23
 
 	script_path = "planets/mars/surface.lua"
 	has_water = false				# Does the planet have water
+	max_height = 50_000.0
 
 	[surface.noise]
 		seed = 0

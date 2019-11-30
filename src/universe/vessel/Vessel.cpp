@@ -3,7 +3,7 @@
 #include "../../util/InputUtil.h"
 #include <GLFW/glfw3.h>
 
-void Vessel::simulate(ElementVector elements, PosVector positions, double star_radius, size_t closest, double dt)
+void Vessel::simulate(ElementVector elements, PosVector positions, size_t closest, double dt)
 {
 	glm::dvec3 up = glm::dvec3(0.0f, 1.0f, 0.0f);
 	glm::dvec3 fw = glm::dvec3(1.0f, 0.0f, 0.0f);
@@ -51,6 +51,11 @@ void Vessel::simulate(ElementVector elements, PosVector positions, double star_r
 	{
 		rotation *= glm::angleAxis(l * dt, angular_momentum / l);
 		angular_momentum *= 0.95;
+	}
+
+	if (closest != 0)
+	{
+
 	}
 
 

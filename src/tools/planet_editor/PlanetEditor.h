@@ -2,7 +2,7 @@
 #include "../../assets/AssetManager.h"
 #include "../../renderer/PlanetaryBodyRenderer.h"
 
-#include "../../universe/body/config/PlanetConfig.h"
+#include "../../universe/element/body/config/PlanetConfig.h"
 #include <imgui/imgui.h>
 #include <TextEditor/TextEditor.h>
 #include "../../util/FileWatcher.h"
