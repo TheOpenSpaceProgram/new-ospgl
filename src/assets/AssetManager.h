@@ -272,12 +272,9 @@ inline void AssetManager::load(const std::string& package, const std::string& na
 		if (!cfg->get(all.first))
 		{
 			cfg->insert(all.first, all.second);
-		}
+		} 
 	}
-
-
 	
-
 
 	T* ndata = fptr(full_path, package, *cfg);
 	logger->check(ndata != nullptr, "Loaded data must not be null");
@@ -286,15 +283,17 @@ inline void AssetManager::load(const std::string& package, const std::string& na
 	asset.uses = 0;
 	asset.data = ndata;
 
+	asset.dont_unload = cfg->get_qualified_as<bool>("dont_unload").value_or(false);
+	
 	it->second.second[name] = asset;
-
+	 
 	logger->debug("Loaded asset '{}:{}'", package, name);
-}
+}	
 
 extern AssetManager* assets;
 
 // Creates the default asset manager, with all 
-// asset types loaded
+// asset types loaded 
 void create_global_asset_manager();
 
 void destroy_global_asset_manager();
