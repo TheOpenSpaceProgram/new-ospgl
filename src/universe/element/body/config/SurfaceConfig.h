@@ -1,10 +1,10 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "../../../util/SerializeUtil.h"
-#include "../../../util/serializers/glm.h"
-#include "../../../assets/Image.h"
-#include "../../../assets/AssetManager.h"
+#include "../../../../util/SerializeUtil.h"
+#include "../../../../util/serializers/glm.h"
+#include "../../../../assets/Image.h"
+#include "../../../../assets/AssetManager.h"
 
 constexpr bool LOAD_SURFACES_ON_START = false;
 
@@ -20,6 +20,12 @@ struct SurfaceConfig
 	int interp;
 
 	bool has_water;
+
+	// A rough estimate of maximum heigth from sea-level
+	// Doesn't need to be really exact, but make sure it's
+	// higher than the actual maximum height, otherwise physics 
+	// will break
+	float max_height;
 
 	std::unordered_map<std::string, AssetPointer> image_paths;
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "../kepler/KeplerElements.h"
-#include "../SystemElement.h"
+#include "../element/SystemElement.h"
 #include "../UniverseDefinitions.h"
 class PlanetarySystem;
 
@@ -19,7 +19,7 @@ public:
 	glm::dvec3 angular_momentum; //< Length = Angular velocity (rad / s)
 
 	// Called after every state propagation
-	void simulate(ElementVector elements, PosVector positions, double star_radius, size_t closest, double dt);
+	void simulate(ElementVector elements, PosVector positions, size_t closest, double dt);
 
 	glm::dvec3 get_forward();
 	glm::dvec3 get_right();

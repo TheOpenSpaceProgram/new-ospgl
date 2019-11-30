@@ -30,4 +30,17 @@ public:
 	{
 		this->system = sys;
 	}
+
+	// From body name
+	SystemPointer(PlanetarySystem* sys, std::string body_name)
+	{
+		this->system = sys;
+	}
+
+	SystemPointer(PlanetarySystem* sys, int id, bool is_vessel = true)
+	{
+		this->system = sys;
+		this->id = id;
+		this->is_vessel = is_vessel;
+	}
 };

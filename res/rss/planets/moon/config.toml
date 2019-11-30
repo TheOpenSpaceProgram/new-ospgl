@@ -13,6 +13,7 @@ mass = 7.342e22
 
 	script_path = "planets/moon/surface.lua"
 	has_water = false				# Does the planet have water
+	max_height = 50_000.0
 
 	[surface.noise]
 		seed = 0

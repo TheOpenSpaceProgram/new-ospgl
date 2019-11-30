@@ -1,13 +1,14 @@
 #pragma once
-#include "../kepler/KeplerElements.h"
+#include "../../kepler/KeplerElements.h"
 #include "config/PlanetConfig.h"
-#include "../../assets/Config.h"
-#include "../../renderer/PlanetaryBodyRenderer.h"
+#include "../../../assets/Config.h"
+#include "../../../renderer/PlanetaryBodyRenderer.h"
 #include <glm/gtx/rotate_vector.hpp>
 
 class PlanetaryBody
 {
 public:
+
 
 	PlanetConfig config;
 
@@ -32,6 +33,7 @@ public:
 	// and declination (towards north celestial pole, towards 'y')
 	// in the config so the user does not need to touch this
 	glm::dvec3 rotation_axis;
+
 
 
 	glm::dmat4 build_rotation_matrix(double t, bool include_rot_at_epoch = true) const;

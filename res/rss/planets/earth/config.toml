@@ -27,6 +27,7 @@ mass = 5.9722e24
 
 	script_path = "planets/earth/surface.lua"	# Will automatically be created for you
 	has_water = true				# Does the planet have water
+	max_height = 50_000.0
 
 	[surface.noise]
 		seed = 0

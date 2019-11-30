@@ -1,17 +1,29 @@
 #pragma once
-#include "kepler/KeplerElements.h"
+#include "../kepler/KeplerElements.h"
 #include "body/PlanetaryBody.h"
+#include "barycenter/Barycenter.h"
+#include "star/Star.h"
+
 class SystemElement
 {
 public:
+
+	enum SystemElementType
+	{
+		STAR,
+		BARYCENTER,
+		BODY
+	};
 
 	size_t index;
 
 	std::string name;
 
-	bool is_barycenter;
+	SystemElementType type;
 
 	PlanetaryBody* as_body;
+	Barycenter* as_barycenter;
+	Star* as_star;
 
 	// Only needed on bodies which orbit barycenters
 	// If a body is a primary it does not need any orbital 
@@ -19,40 +31,40 @@ public:
 	// on load time)
 	bool is_primary;
 
-	// Only appears on barycenters
-	SystemElement* barycenter_primary;
-	SystemElement* barycenter_secondary;
-
-	// Only appears on barycenter primaries
-	double barycenter_radius;
 
 	double soi_radius;
 
 	// Set by PlanetarySystem deserializer
 	SystemElement* parent;
 	ArbitraryKeplerOrbit orbit;
+	// Applied to barycenter primaries only
+	double barycenter_radius;
 
 	// Warning: Be careful when orbiting around barycenters
 	double get_mass(bool as_primary = false, bool compound = false)
 	{
-		if (is_barycenter)
+		if (type == STAR)
+		{
+			return as_star->mass;
+		}
+		else if (type == BARYCENTER)
 		{
 			if (compound)
 			{
-				return barycenter_primary->as_body->config.mass + barycenter_secondary->as_body->config.mass;
+				return as_barycenter->primary->as_body->config.mass + as_barycenter->secondary->as_body->config.mass;
 			}
 			else
 			{
 				if (as_primary)
 				{
-					return barycenter_secondary->as_body->config.mass;
+					return as_barycenter->secondary->as_body->config.mass;
 				}
 				else
 				{
-					return barycenter_primary->as_body->config.mass;
+					return as_barycenter->primary->as_body->config.mass;
 				}
 			}
-			
+
 		}
 		else
 		{
@@ -73,13 +85,17 @@ public:
 	{
 	}
 
+	// Deserialize is only called for bodies and barycenters
+	// Star is special
 	static void deserialize(SystemElement& to, const cpptoml::table& from)
 	{
 		to.as_body = nullptr;
 
 		SAFE_TOML_GET(to.name, "name", std::string);
 
-		SAFE_TOML_GET_OR(to.is_barycenter, "is_barycenter", bool, false);
+		bool is_barycenter;
+
+		SAFE_TOML_GET_OR(is_barycenter, "is_barycenter", bool, false);
 		SAFE_TOML_GET_OR(to.is_primary, "is_primary", bool, false);
 
 		if (!to.is_primary)
@@ -87,10 +103,17 @@ public:
 			::deserialize(to.orbit, from);
 		}
 
-		if (!to.is_barycenter)
+		if (is_barycenter)
 		{
+			to.type = SystemElement::BARYCENTER;
+			to.as_barycenter = new Barycenter();
+		}
+		else
+		{
+			to.type = SystemElement::BODY;
 			to.as_body = new PlanetaryBody();
 			::deserialize(*to.as_body, from);
+
 		}
 	}
 };

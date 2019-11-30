@@ -60,7 +60,7 @@ glm::dvec3 ReferenceFrame::get_x_axis(double t) const
 		else
 		{
 			SystemElement* celem = center.get_element();
-			if (celem->is_barycenter)
+			if (celem->type == SystemElement::BARYCENTER)
 			{
 				return x;
 			}
@@ -80,12 +80,12 @@ glm::dvec3 ReferenceFrame::get_x_axis(double t) const
 		}
 
 		SystemElement* celem = center.get_element();
-		if (celem->is_barycenter)
+		if (celem->type == SystemElement::BARYCENTER)
 		{
 			if (std::isinf(t))
 			{
-				glm::dvec3 primary = center.system->states_now[celem->barycenter_primary->index + 1].pos;
-				glm::dvec3 secondary = center.system->states_now[celem->barycenter_secondary->index + 1].pos;
+				glm::dvec3 primary = center.system->states_now[celem->as_barycenter->primary->index].pos;
+				glm::dvec3 secondary = center.system->states_now[celem->as_barycenter->secondary->index].pos;
 
 				return glm::normalize(secondary - primary);
 			}
@@ -184,7 +184,7 @@ glm::dvec3 ReferenceFrame::get_y_axis(double t) const
 		else
 		{
 			SystemElement* celem = center.get_element();
-			if (celem->is_barycenter)
+			if (celem->type == SystemElement::BARYCENTER)
 			{
 				return y;
 			}
@@ -204,11 +204,11 @@ glm::dvec3 ReferenceFrame::get_y_axis(double t) const
 		}
 
 		SystemElement* celem = center.get_element();
-		if (celem->is_barycenter)
+		if (celem->type == SystemElement::BARYCENTER)
 		{
 			if (std::isinf(t))
 			{
-				return glm::normalize(celem->barycenter_secondary->orbit.to_orbit_at(center.system->t).get_plane_normal());
+				return glm::normalize(celem->as_barycenter->secondary->orbit.to_orbit_at(center.system->t).get_plane_normal());
 			}
 			return y;
 		}

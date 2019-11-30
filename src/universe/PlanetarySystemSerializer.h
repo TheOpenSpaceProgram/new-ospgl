@@ -82,24 +82,37 @@ public:
 		// Copy array
 		to.elements = temp_array;
 
+		SystemElement star_element;
+		star_element.type = SystemElement::STAR;
+
+		// Insert star
+		to.elements.insert(to.elements.begin(), star_element);
+
 		// Reassign parents and indexes
 		for (size_t i = 0; i < to.elements.size(); i++)
 		{
 			to.elements[i].index = i;
 			to.elements[i].parent = nullptr;
 
-			if (parents[to.elements[i].name] != "")
+			if (i != 0)
 			{
-				for (size_t j = 0; j < to.elements.size(); j++)
+				if (parents[to.elements[i].name] != "")
 				{
-					if (to.elements[j].name == parents[to.elements[i].name])
+					for (size_t j = 0; j < to.elements.size(); j++)
 					{
-						TOML_CHECK_FUNC(j != i, "Can't set a body's parent to itself");
-						to.elements[i].parent = &to.elements[j];
+						if (to.elements[j].name == parents[to.elements[i].name])
+						{
+							TOML_CHECK_FUNC(j != i, "Can't set a body's parent to itself");
+							to.elements[i].parent = &to.elements[j];
+						}
 					}
 				}
 
-				TOML_CHECK_FUNC(to.elements[i].parent != nullptr, "A body's parent was invalid");
+
+				if (to.elements[i].parent == nullptr)
+				{
+					to.elements[i].parent = &to.elements[0];
+				}
 			}
 		}
 
@@ -108,13 +121,13 @@ public:
 		// a barycenter is the parent of another
 		for (int i = (int)to.elements.size() - 1; i >= 0; i--)
 		{
-			if (to.elements[i].is_barycenter)
+			if (to.elements[i].type == SystemElement::BARYCENTER)
 			{
 				for (size_t j = 0; j < to.elements.size(); j++)
 				{
 					if (to.elements[j].parent == &to.elements[i])
 					{
-						if (to.elements[j].is_barycenter)
+						if (to.elements[j].type == SystemElement::BARYCENTER)
 						{
 							// TODO: Is this easy to implement?
 							logger->fatal("Nested barycenters are not allowed!");
@@ -123,11 +136,11 @@ public:
 						{
 							if (to.elements[j].is_primary)
 							{
-								to.elements[i].barycenter_primary = &to.elements[j];
+								to.elements[i].as_barycenter->primary = &to.elements[j];
 							}
 							else
 							{
-								to.elements[i].barycenter_secondary = &to.elements[j];
+								to.elements[i].as_barycenter->secondary = &to.elements[j];
 							}
 						}
 					}
@@ -138,21 +151,21 @@ public:
 				// always opposite of its secondary)
 				// TODO: Add this to the docs, variable smajor axis is not 
 				// updated in barycenters
-				auto elems = to.elements[i].barycenter_secondary->orbit.to_orbit_at(0.0);
+				auto elems = to.elements[i].as_barycenter->secondary->orbit.to_orbit_at(0.0);
 				double smajor = elems.smajor_axis;
 
-				double mc = to.elements[i].barycenter_primary->get_mass() / to.elements[i].barycenter_secondary->get_mass();
-				to.elements[i].barycenter_primary->barycenter_radius = smajor / (1.0 + mc);
-				to.elements[i].barycenter_primary->orbit = to.elements[i].barycenter_secondary->orbit;
+				double mc = to.elements[i].as_barycenter->primary->get_mass() / to.elements[i].as_barycenter->secondary->get_mass();
+				to.elements[i].as_barycenter->primary->barycenter_radius = smajor / (1.0 + mc);
+				to.elements[i].as_barycenter->primary->orbit = to.elements[i].as_barycenter->secondary->orbit;
 
 				// Used only for representation
-				if (to.elements[i].barycenter_primary->orbit.is_nasa_data)
+				if (to.elements[i].as_barycenter->primary->orbit.is_nasa_data)
 				{
-					to.elements[i].barycenter_primary->orbit.data.nasa_data.smajor_axis = to.elements[i].barycenter_primary->barycenter_radius;
+					to.elements[i].as_barycenter->primary->orbit.data.nasa_data.smajor_axis = to.elements[i].as_barycenter->primary->barycenter_radius;
 				}
 				else
 				{
-					to.elements[i].barycenter_primary->orbit.data.normal_data.smajor_axis = to.elements[i].barycenter_primary->barycenter_radius;
+					to.elements[i].as_barycenter->primary->orbit.data.normal_data.smajor_axis = to.elements[i].as_barycenter->primary->barycenter_radius;
 				}
 				
 			}
@@ -161,8 +174,8 @@ public:
 	
 
 		// Star
-		SAFE_TOML_GET(to.star_mass, "star.mass", double);
-		SAFE_TOML_GET(to.star_radius, "star.radius", double);
-
+		to.elements[0].as_star = new Star();
+		::deserialize(*to.elements[0].as_star, *from.get_table_qualified("star"));
+		to.elements[0].name = from.get_qualified_as<std::string>("star.name").value_or("Star");
 	}
 };

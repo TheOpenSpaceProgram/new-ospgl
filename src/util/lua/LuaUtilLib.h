@@ -1,7 +1,7 @@
 #pragma once
 #include <sol.hpp>
 #include <glm/glm.hpp>
-#include "../../universe/body/config/PlanetConfig.h"
+#include "../../universe/element/body/config/PlanetConfig.h"
 
 class LuaUtilLib
 {
