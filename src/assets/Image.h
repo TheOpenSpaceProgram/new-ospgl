@@ -74,7 +74,7 @@ public:
 	~Image();
 };
 
-Image* loadImage(const std::string& path, const std::string& pkg);
+Image* loadImage(const std::string& path, const std::string& pkg, const cpptoml::table& cfg);
 
 
 

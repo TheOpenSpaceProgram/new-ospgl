@@ -4,6 +4,7 @@
 #include "../util/Logger.h"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <cpptoml.h>
 
 // Not only do we load the shader, and make it easily usable
 // we also run a preprocessor to allow includes
@@ -55,6 +56,6 @@ public:
 	~Shader();
 };
 
-Shader* loadShader(const std::string& path, const std::string& pkg);
+Shader* loadShader(const std::string& path, const std::string& pkg, const cpptoml::table& cfg);
 
 

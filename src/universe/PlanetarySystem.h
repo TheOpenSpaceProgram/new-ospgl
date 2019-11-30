@@ -31,6 +31,8 @@ private:
 
 public:
 
+	std::unordered_map<std::string, size_t> name_to_index;
+	
 	StateVector states_now;
 
 	double t, timewarp;

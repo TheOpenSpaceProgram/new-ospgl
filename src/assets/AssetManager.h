@@ -16,7 +16,7 @@
 // You must allocate the new asset!
 // Return nullptr if not possible
 template<typename T>
-using LoadAssetPtr = T*(*)(const std::string&, const std::string&);
+using LoadAssetPtr = T*(*)(const std::string&, const std::string&, const cpptoml::table& config);
 
 template<typename T>
 struct AssetHandle;
@@ -38,6 +38,9 @@ private:
 	{
 		int uses;
 		void* data;
+
+		bool preload;
+		bool dont_unload;
 	};
 
 
@@ -207,7 +210,7 @@ inline void AssetManager::free(const std::string& package, const std::string& na
 	item->second.uses--;
 
 	// Check for de-allocation
-	if (item->second.uses <= 0)
+	if (item->second.uses <= 0 && !item->second.dont_unload)
 	{
 		logger->debug("Unloaded unused asset '{}:{}'", package, name);
 		delete (T*)item->second.data;
@@ -237,8 +240,46 @@ inline void AssetManager::load(const std::string& package, const std::string& na
 	LoadAssetPtr<T> fptr = (LoadAssetPtr<T>)(it->second.first.loadPtr);
 
 	std::string full_path = "./res/" + package + "/" + name;
+	std::string full_folder = full_path.substr(0, full_path.find_last_of('/') + 1);
 
-	T* ndata = fptr(full_path, package);
+	// Load config
+	std::shared_ptr<cpptoml::table> folder_config = cpptoml::make_table();
+	std::shared_ptr<cpptoml::table> asset_config = cpptoml::make_table();
+	std::shared_ptr<cpptoml::table> cfg = cpptoml::make_table();
+
+	// TODO: Search all folders up in the hierarchy up to package folder
+	// to accumulate changes!
+
+	if (file_exists(full_folder + "assets.toml"))
+	{
+		folder_config = SerializeUtil::load_file(full_folder + "assets.toml");
+	}
+
+	if (file_exists(full_path + ".toml"))
+	{
+		asset_config = SerializeUtil::load_file(full_path + ".toml");
+	}
+
+	// cfg prioritizes asset_config
+
+	for (auto all : *asset_config)
+	{
+		cfg->insert(all.first, all.second);
+	}
+
+	for (auto all : *folder_config)
+	{
+		if (!cfg->get(all.first))
+		{
+			cfg->insert(all.first, all.second);
+		}
+	}
+
+
+	
+
+
+	T* ndata = fptr(full_path, package, *cfg);
 	logger->check(ndata != nullptr, "Loaded data must not be null");
 
 	Asset asset;

@@ -69,14 +69,11 @@ Shader::~Shader()
 {
 }
 
-Shader* loadShader(const std::string& path, const std::string& pkg)
+Shader* loadShader(const std::string& path, const std::string& pkg, const cpptoml::table& cfg)
 {
 	
 	// We get the path to the vertex shader
 	std::string fspath = path.substr(0, path.find_last_of('.')) + ".fs";
-
-	logger->info("Loading shader from file: vs -> '{}', fs -> '{}'", path, fspath);
-
 	std::string vs = AssetManager::load_string_raw(path);
 	std::string fs = AssetManager::load_string_raw(fspath);
 

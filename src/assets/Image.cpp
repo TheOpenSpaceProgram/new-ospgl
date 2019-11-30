@@ -147,7 +147,7 @@ in_memory = false
 
 )-";
 
-Image* loadImage(const std::string& path, const std::string& pkg)
+Image* loadImage(const std::string& path, const std::string& pkg, const cpptoml::table& cfg)
 {
 	if (!AssetManager::file_exists(path))
 	{
@@ -160,32 +160,23 @@ Image* loadImage(const std::string& path, const std::string& pkg)
 	// We get the path to the vertex shader
 	std::string tomlpath = path.substr(0, path.find_last_of('.')) + ".toml";
 
-	std::string toml = default_toml;
-	std::stringstream tomls = std::stringstream(toml);
+	std::shared_ptr<cpptoml::table> def_toml = SerializeUtil::load_string(default_toml);
 
-	bool has_toml_file = false;
-	if (AssetManager::file_exists(tomlpath))
+
+	std::shared_ptr<cpptoml::table> sub_ptr = nullptr;
+
+	if (cfg.get_table_qualified("image"))
 	{
-		toml = AssetManager::load_string_raw(tomlpath);
-		has_toml_file = true;
-	}
-
-
-
-	if (!has_toml_file)
-	{
-		logger->info("Loading image from file: '{}'", path);
+		sub_ptr = cfg.get_table_qualified("image");
 	}
 	else
 	{
-		logger->info("Loading image from file: '{}' with config", path);
+		sub_ptr = def_toml;
 	}
 
 	ImageConfig config;
-	
-	auto tomlv = SerializeUtil::load_string(toml);
-	::deserialize(config, *tomlv);
-	
+	::deserialize(config, *sub_ptr);
+
 	Image* n_image = new Image(config, path);
 
 	return n_image;

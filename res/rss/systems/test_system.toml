@@ -51,7 +51,7 @@
 	parent = "Earth-Moon"
 	config = "planets/moon/config.toml"
 
-	smajor_axis = 384_399_000.0
+	smajor_axis = 384308437.7707066
 	eccentricity = 0.0549
 	inclination = 5.145
 	periapsis_argument = 318.15
@@ -59,7 +59,7 @@
 	mean_at_epoch = 135.27
 
 	rotation_period = 655.719864
-	rotation_at_epoch = 0.0
+	rotation_at_epoch = 135.0
 	north_pole_declination = 65.64
 	north_pole_right_ascension = 266.86
 

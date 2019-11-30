@@ -15,7 +15,7 @@ void Logger::log(int level, const char* format, fmt::format_args args)
 	if (level == 0)
 	{
 		prefix = "DBG";
-		std::cout << rang::fg::gray;
+		std::cout << rang::fgB::black;
 	}
 	else if (level == 1)
 	{
