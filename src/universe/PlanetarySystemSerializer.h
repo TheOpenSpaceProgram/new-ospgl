@@ -177,5 +177,11 @@ public:
 		to.elements[0].as_star = new Star();
 		::deserialize(*to.elements[0].as_star, *from.get_table_qualified("star"));
 		to.elements[0].name = from.get_qualified_as<std::string>("star.name").value_or("Star");
+
+		to.name_to_index = std::unordered_map<std::string, size_t>();
+		for (size_t i = 0; i < to.elements.size(); i++)
+		{
+			to.name_to_index[to.elements[i].name] = i;
+		}
 	}
 };

@@ -1,6 +1,6 @@
 #include "Config.h"
 
-Config* loadConfig(const std::string& path, const std::string& pkg)
+Config* loadConfig(const std::string& path, const std::string& pkg, const cpptoml::table& ccfg)
 {
 	logger->info("Loading config from file: '{}'", path);
 

@@ -35,6 +35,8 @@ public:
 	SystemPointer(PlanetarySystem* sys, std::string body_name)
 	{
 		this->system = sys;
+		this->id = (int)sys->name_to_index[body_name];
+		this->is_vessel = false;
 	}
 
 	SystemPointer(PlanetarySystem* sys, int id, bool is_vessel = true)

@@ -337,10 +337,9 @@ void PlanetarySystem::update(double dt)
 	
 	if (ImGui::Button("Position Vessel"))
 	{
-		vessels[0].state = states_now[4];
-		double r = elements[4].as_body->config.radius;
-		vessels[0].state.pos += glm::dvec3(r * 1.2, 0.0, 0.0);
-		vessels[0].state.vel += glm::dvec3(0.0, 0.0, 10000.5);
+		vessels[0].state = states_now[name_to_index["Earth"]];
+		vessels[0].state.pos += glm::dvec3(42164000.0, 0.0, 0.0);
+		vessels[0].state.vel += glm::dvec3(0.0, 0.0, 3074.6);
 		camera.distance = 5.0;
 	}
 

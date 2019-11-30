@@ -103,14 +103,11 @@ int main(void)
 	Navball navball;
 
 
-	SystemPointer center_ptr = SystemPointer(&system, 0, true);
-
+	SystemPointer center_ptr = SystemPointer(&system, "Moon");
 	SystemPointer secondary_ptr = SystemPointer(&system, "Earth");
-	secondary_ptr.id = 3;
-	secondary_ptr.is_vessel = false;
 
 	ReferenceFrame ref(center_ptr);
-	ref.mode = ReferenceFrame::INERTIAL;
+	ref.mode = ReferenceFrame::ALIGNED;
 	ref.center2 = secondary_ptr;
 
 
