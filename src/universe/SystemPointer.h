@@ -1,5 +1,9 @@
 #pragma once
-#include "PlanetarySystem.h"
+
+#include "vessel/Vessel.h"
+#include "element/SystemElement.h"
+
+class PlanetarySystem;
 
 struct SystemPointer
 {
@@ -26,23 +30,12 @@ public:
 
 	double get_mass() const;
 
-	SystemPointer(PlanetarySystem* sys)
-	{
-		this->system = sys;
-	}
+	SystemPointer(PlanetarySystem* sys);
 
 	// From body name
-	SystemPointer(PlanetarySystem* sys, std::string body_name)
-	{
-		this->system = sys;
-		this->id = (int)sys->name_to_index[body_name];
-		this->is_vessel = false;
-	}
+	SystemPointer(PlanetarySystem* sys, std::string body_name);
 
-	SystemPointer(PlanetarySystem* sys, int id, bool is_vessel = true)
-	{
-		this->system = sys;
-		this->id = id;
-		this->is_vessel = is_vessel;
-	}
+
+	SystemPointer(PlanetarySystem* sys, int id, bool is_vessel = true);
+
 };

@@ -1,4 +1,5 @@
 #include "ReferenceFrame.h"
+#include "../PlanetarySystem.h"
 
 glm::dvec3 ReferenceFrame::get_velocity() const
 {

@@ -2,6 +2,7 @@
 
 #include <glm/gtx/quaternion.hpp>
 #include "../SystemPointer.h"
+#include <optional>
 
 class PlanetarySystem;
 

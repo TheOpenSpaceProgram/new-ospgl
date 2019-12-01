@@ -280,29 +280,9 @@ void PlanetarySystem::update_physics(double dt)
 
 	pt -= dt * timewarp;
 
-	if (pt < 0.0)
-	{
-		glm::dvec3 p = 
-			camera.frame->get_rotation_matrix() * glm::dvec4(vessels[0].state.pos - camera.frame->get_center(), 1.0f);
-		pts.push_back(p);
-		pt = 60.0;
-	}
 
 	glm::dvec3 pp;
 
-	for (size_t i = 0; i < pts.size(); i++)
-	{
-		glm::dvec3 p = glm::dvec3(glm::inverse(camera.frame->get_rotation_matrix()) * glm::dvec4(pts[i], 1.0f))
-			+ camera.frame->get_center();
-
-		if (i > 1)
-		{
-			debug_drawer->add_line(pp, p, glm::vec3(1.0, 1.0, 1.0));
-		}
-
-
-		pp = p;
-	}
 
 
 	vessels[0].draw_debug();
@@ -487,7 +467,7 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 
 #include "propagator/RK4Interpolated.h"
 
-PlanetarySystem::PlanetarySystem()
+PlanetarySystem::PlanetarySystem() : camera(SystemPointer(this))
 {
 	states_now.resize(0);
 	propagator = new RK4Interpolated();
