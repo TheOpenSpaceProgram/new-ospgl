@@ -111,7 +111,7 @@ int main(void)
 	ref.center2 = secondary_ptr;
 
 
-	system.camera.frame = &ref;
+	system.camera = MapCamera(SystemPointer(&system, "Earth"));
 
 	while (!glfwWindowShouldClose(window))
 	{

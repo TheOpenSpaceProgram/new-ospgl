@@ -1,4 +1,5 @@
 #include "SystemPointer.h"
+#include "PlanetarySystem.h"
 
 Vessel* SystemPointer::get_vessel() const
 {
@@ -106,4 +107,26 @@ double SystemPointer::get_mass() const
 	{
 		return get_element()->get_mass(false, true);
 	}
+}
+
+SystemPointer::SystemPointer(PlanetarySystem * sys)
+{
+	this->system = sys;
+	// Solar focus
+	this->id = 0;
+	this->is_vessel = false;
+}
+
+SystemPointer::SystemPointer(PlanetarySystem * sys, std::string body_name)
+{
+	this->system = sys;
+	this->id = (int)sys->name_to_index[body_name];
+	this->is_vessel = false;
+}
+
+SystemPointer::SystemPointer(PlanetarySystem * sys, int id, bool is_vessel)
+{
+	this->system = sys;
+	this->id = id;
+	this->is_vessel = is_vessel;
 }
