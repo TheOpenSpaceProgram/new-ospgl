@@ -43,6 +43,10 @@ public:
 
 	std::unordered_map<uint32_t, Glyph> chars;
 
+	// Shortcut, just calls text_drawer->draw_text
+	void draw_text(const std::string& text, glm::vec2 pos, glm::ivec2 screen, 
+		glm::vec4 color = glm::vec4(1.0, 1.0, 1.0, 1.0), float scale = 1.0f);
+
 	BitmapFont(const std::vector<uint8_t>& fnt, Image* image);
 	~BitmapFont();
 };

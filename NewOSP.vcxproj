@@ -210,6 +210,11 @@
     <ClCompile Include="src\util\render\TextDrawer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="dep\utf8\utf8.h" />
+    <ClInclude Include="dep\utf8\utf8\checked.h" />
+    <ClInclude Include="dep\utf8\utf8\core.h" />
+    <ClInclude Include="dep\utf8\utf8\cpp11.h" />
+    <ClInclude Include="dep\utf8\utf8\unchecked.h" />
     <ClInclude Include="src\assets\BitmapFont.h" />
     <ClInclude Include="src\renderer\Renderer.h" />
     <ClInclude Include="src\assets\Config.h" />

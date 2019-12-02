@@ -2,6 +2,9 @@
 #include <unordered_map>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include "../../assets/BitmapFont.h"
+#include "../../assets/Shader.h"
 
 // Uses the AssetManager to obtain fonts dinamically.
 //
@@ -13,11 +16,18 @@ class TextDrawer
 {
 private:
 
+	// We draw every letter with a single quad
+	// If perfomance is bad I will write a new 
+	// faster method (hopefully only 1 draw call per text)
+	GLuint vao, vbo;
 
+	Shader* shader;
 
 public:
 
-	void draw_bitmap_text(const std::wstring& text, glm::vec2 pos, glm::ivec2 screen, glm::vec3 color, float scale = 1.0f);
+	// String is encoded as UTF-8
+	void draw_text(const std::string& text, BitmapFont* font, glm::vec2 pos, glm::ivec2 screen, 
+		glm::vec4 color = glm::vec4(1.0, 1.0, 1.0, 1.0), float scale = 1.0f);
 
 	TextDrawer();
 	~TextDrawer();
