@@ -4,16 +4,15 @@
 #include "util/Timer.h"
 #include "util/DebugDrawer.h"
 #include "util/render/TextureDrawer.h"
+#include "renderer/Renderer.h"
 
 #include "game/ui/Navball.h"
 #include "assets/Config.h"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+
 #include "util/InputUtil.h"
 #include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
+
 
 #include "tools/planet_editor/PlanetEditor.h"
 #include "universe/PlanetarySystem.h"
@@ -21,67 +20,33 @@
 
 InputUtil* input;
 
-/*
-void character_callback(GLFWwindow* window, unsigned int codepoint)
-{
-	ImGuiIO& io = ImGui::GetIO();
-	//io.InputQueueCharacters.push_back(codepoint);
-	io.AddInputCharacter(codepoint);
-}
-*/
 
 int main(void)
 {
-
-	int width = 1366;
-	int height = 768;
 
 	create_global_logger();
 
 	logger->info("Starting OSP");
 
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	GLFWwindow* window = glfwCreateWindow(width, height, "New OSP", NULL, NULL);
-	glfwMakeContextCurrent(window);
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	std::shared_ptr<cpptoml::table> config = SerializeUtil::load_file("settings.toml");
+
+	if (!config)
 	{
-		logger->fatal("Could not initialize glad");
+		logger->fatal("Could not find config file!");
 	}
+
+	Renderer renderer = Renderer(*config);
 
 	create_global_asset_manager();
 	create_global_debug_drawer();
 	create_global_texture_drawer();
 
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 130");
-	ImGui::StyleColorsDark();
-
-	// Font for the code editor
-	ImFont* font_default = io.Fonts->AddFontDefault();
-	ImFont* font_code = io.Fonts->AddFontFromFileTTF("./res/core/FiraCode-Regular.ttf", 16.0f);
-
 	Timer dtt = Timer();
 	double dt = 0.0;
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	//PlanetEditor editor = PlanetEditor(window, "earth");
-
 	input = new InputUtil();
-	input->setup(window);
+	input->setup(renderer.window);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	PlanetarySystem system;
 	assets->get_from_path<Config>("rss:systems/test_system.toml")->read_to(system);
@@ -113,12 +78,11 @@ int main(void)
 
 	system.camera = MapCamera(SystemPointer(&system, "Earth"));
 
-	while (!glfwWindowShouldClose(window))
-	{
-		input->update(window);
 
-		glfwGetWindowSize(window, &width, &height);
-		glViewport(0, 0, width, height);
+	while (!glfwWindowShouldClose(renderer.window))
+	{
+		input->update(renderer.window);
+
 
 		glfwPollEvents();
 
@@ -139,22 +103,28 @@ int main(void)
 		ImGui::End();
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-
+		renderer.prepare_draw();
 		
-		system.render(width, height);
-		//editor.render(width, height);
+		if (renderer.render_enabled)
+		{
 
-		navball.draw_to_texture(system.vessels[0], ref);
-		navball.draw_to_screen({ width, height });
+			system.render(renderer.get_width(), renderer.get_height());
+			//editor.render(width, height);
 
-		system.render_debug(width, height);
+			system.render_debug(renderer.get_width(), renderer.get_height());
+
+			renderer.prepare_gui();
+
+			navball.draw_to_texture(system.vessels[0], ref);
+			navball.draw_to_screen({ renderer.get_width(), renderer.get_height() });
+
+		}
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	
-		glfwSwapBuffers(window);
+
+		glfwSwapBuffers(renderer.window);
 
 		dt = dtt.restart();
 
@@ -164,9 +134,6 @@ int main(void)
 	logger->info("Ending OSP");
 
 	delete input;
-
-	glfwDestroyWindow(window);
-	glfwTerminate();
 
 	destroy_global_texture_drawer();
 	destroy_global_asset_manager();

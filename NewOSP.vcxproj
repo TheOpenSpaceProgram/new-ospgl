@@ -160,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dep\stb\stb_impl.cpp" />
+    <ClCompile Include="src\renderer\Renderer.cpp" />
     <ClCompile Include="src\assets\Config.cpp" />
     <ClCompile Include="src\universe\SystemPointer.cpp" />
     <ClCompile Include="src\universe\vessel\ReferenceFrame.cpp" />
@@ -208,6 +209,7 @@
     <ClCompile Include="src\util\render\TextDrawer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\renderer\Renderer.h" />
     <ClInclude Include="src\assets\Config.h" />
     <ClInclude Include="dep\stb\stb_image.h" />
     <ClInclude Include="src\universe\element\barycenter\Barycenter.h" />

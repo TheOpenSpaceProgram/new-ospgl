@@ -61,7 +61,7 @@ void Logger::log(int level, const char* format, fmt::format_args args)
 
 void Logger::check(bool condition, const char* text, bool ftal)
 {
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(CHECK_ALWAYS)
 	return check_important(condition, text, ftal);
 #endif
 }
