@@ -1,3 +1,5 @@
+dont_unload = true
+
 [image]
 	channels = 3
 	bitdepth = 8

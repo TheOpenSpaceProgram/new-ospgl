@@ -62,6 +62,8 @@ MapCamera::MapCamera(SystemPointer ptr) : center_ptr(ptr)
 {
 	circular_coord = glm::dvec2(0.0, glm::half_pi<double>());
 	distance = 1000000.0;
+
+	scroll_vel = 0.0;
 }
 
 

@@ -2,6 +2,10 @@
 #include <fmt/core.h>
 #include <vector>
 
+// Comment to disable "debug" logging in Release
+#define LOG_DEBUG_ALWAYS
+// Comment to disable "check" calls in Release
+#define CHECK_ALWAYS
 
 class Logger
 {
@@ -17,7 +21,7 @@ public:
 	template <typename... Args>
 	void debug(const char* format, const Args & ... args)
 	{
-#ifdef _DEBUG
+#if defined(_DEBUG) || defined(LOG_DEBUG_ALWAYS)
 		log(0, format, fmt::make_format_args(args...));
 #endif
 	}

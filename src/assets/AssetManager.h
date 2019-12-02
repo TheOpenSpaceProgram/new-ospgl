@@ -249,9 +249,12 @@ inline void AssetManager::load(const std::string& package, const std::string& na
 
 	// TODO: Search all folders up in the hierarchy up to package folder
 	// to accumulate changes!
+	// TODO: Think whether that is actually worth it, or even neccesary
+
 
 	if (file_exists(full_folder + "assets.toml"))
 	{
+
 		folder_config = SerializeUtil::load_file(full_folder + "assets.toml");
 	}
 

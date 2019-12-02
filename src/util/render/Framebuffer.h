@@ -6,6 +6,8 @@ class Framebuffer
 {
 private:
 	size_t width, height;
+	
+	GLint unbind_to;
 
 public:
 
@@ -31,4 +33,5 @@ public:
 	Framebuffer(size_t width, size_t height);
 	~Framebuffer();
 };
+
 
