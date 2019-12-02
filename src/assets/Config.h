@@ -20,7 +20,7 @@ public:
 
 };
 
-Config* loadConfig(const std::string& path, const std::string& pkg, const cpptoml::table& cfg);
+Config* loadConfig(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
 
 template<typename T>
 inline void Config::read_to(T& target, const std::string& sub_path)

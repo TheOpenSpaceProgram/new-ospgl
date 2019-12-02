@@ -4,6 +4,7 @@
 #include "util/Timer.h"
 #include "util/DebugDrawer.h"
 #include "util/render/TextureDrawer.h"
+#include "util/render/TextDrawer.h"
 #include "renderer/Renderer.h"
 
 #include "game/ui/Navball.h"
@@ -17,6 +18,8 @@
 #include "tools/planet_editor/PlanetEditor.h"
 #include "universe/PlanetarySystem.h"
 #include "universe/Date.h"
+
+#include "assets/BitmapFont.h"
 
 InputUtil* input;
 
@@ -40,6 +43,7 @@ int main(void)
 	create_global_asset_manager();
 	create_global_debug_drawer();
 	create_global_texture_drawer();
+	create_global_text_drawer();
 
 	Timer dtt = Timer();
 	double dt = 0.0;
@@ -78,6 +82,7 @@ int main(void)
 
 	system.camera = MapCamera(SystemPointer(&system, "Earth"));
 
+	BitmapFont* font = assets->get<BitmapFont>("core", "fonts/fira_code_medium.fnt");
 
 	while (!glfwWindowShouldClose(renderer.window))
 	{
@@ -135,6 +140,7 @@ int main(void)
 
 	delete input;
 
+	destroy_global_text_drawer();
 	destroy_global_texture_drawer();
 	destroy_global_asset_manager();
 	destroy_global_logger();

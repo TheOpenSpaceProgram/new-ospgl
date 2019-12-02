@@ -56,6 +56,6 @@ public:
 	~Shader();
 };
 
-Shader* loadShader(const std::string& path, const std::string& pkg, const cpptoml::table& cfg);
+Shader* loadShader(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
 
 
