@@ -2,6 +2,7 @@
 #include "AssetManager.h"
 #include <iostream>
 #include <fstream>
+#include "../util/render/TextDrawer.h"
 
 // TODO: Not really sure about endianness on this thing?
 
@@ -35,10 +36,16 @@ uint16_t read_uint16_t(size_t offset, const std::vector<uint8_t>& fnt)
 
 int read_int(size_t offset, const std::vector<uint8_t>& fnt)
 {
-	int o0 = (int)fnt[offset + 0];
-	int o1 = (int)fnt[offset + 1];
+	uint8_t o0 = fnt[offset + 0];
+	uint8_t o1 = fnt[offset + 1];
 
-	return o1 << 8 | o0;
+	// Some weird stuff has to be done to keep bits unperturbed
+
+	uint16_t lower = o1 << 8 | o0;
+
+	int16_t as_int16 = static_cast<int16_t>(lower);
+
+	return (int)as_int16;
 }
 
 Block get_block(size_t offset, const std::vector<uint8_t>& fnt)
@@ -55,6 +62,11 @@ Block get_block(size_t offset, const std::vector<uint8_t>& fnt)
 	return out;
 }
 
+
+void BitmapFont::draw_text(const std::string& text, glm::vec2 pos, glm::ivec2 screen, glm::vec4 color, float scale)
+{
+	text_drawer->draw_text(text, this, pos, screen, color, scale);
+}
 
 BitmapFont::BitmapFont(const std::vector<uint8_t>& fnt, Image* image)
 {
@@ -102,7 +114,7 @@ BitmapFont::BitmapFont(const std::vector<uint8_t>& fnt, Image* image)
 				chars[id] = g;
 			}
 		}
-		// TODO: Parse kerning
+		// TODO: Parse kerning (maybe neccesary for some fonts)
 	}
 
 	logger->debug("Loaded {} characters", chars.size());

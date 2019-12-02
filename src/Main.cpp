@@ -1,4 +1,4 @@
-#include <sol.hpp>
+﻿#include <sol.hpp>
 #include <iostream>
 #include "util/Logger.h"
 #include "util/Timer.h"
@@ -82,7 +82,6 @@ int main(void)
 
 	system.camera = MapCamera(SystemPointer(&system, "Earth"));
 
-	BitmapFont* font = assets->get<BitmapFont>("core", "fonts/fira_code_medium.fnt");
 
 	while (!glfwWindowShouldClose(renderer.window))
 	{
@@ -123,6 +122,10 @@ int main(void)
 
 			navball.draw_to_texture(system.vessels[0], ref);
 			navball.draw_to_screen({ renderer.get_width(), renderer.get_height() });
+
+			auto font = assets->get<BitmapFont>("core", "fonts/fira_code_medium.fnt");
+
+
 
 		}
 
