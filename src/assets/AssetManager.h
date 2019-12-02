@@ -16,7 +16,7 @@
 // You must allocate the new asset!
 // Return nullptr if not possible
 template<typename T>
-using LoadAssetPtr = T*(*)(const std::string&, const std::string&, const cpptoml::table& config);
+using LoadAssetPtr = T*(*)(const std::string&, const std::string&, const std::string&, const cpptoml::table& config);
 
 template<typename T>
 struct AssetHandle;
@@ -107,6 +107,8 @@ public:
 
 	// Simply loads a string from given path, no packages or anything
 	static std::string load_string_raw(const std::string& path);
+
+	static std::vector<uint8_t> load_binary_raw(const std::string& path);
 
 	// load_string_raw, but package aware
 	std::string load_string(const std::string& full_path, const std::string& def = "");
@@ -279,7 +281,7 @@ inline void AssetManager::load(const std::string& package, const std::string& na
 	}
 	
 
-	T* ndata = fptr(full_path, package, *cfg);
+	T* ndata = fptr(full_path, name, package, *cfg);
 	logger->check(ndata != nullptr, "Loaded data must not be null");
 
 	Asset asset;

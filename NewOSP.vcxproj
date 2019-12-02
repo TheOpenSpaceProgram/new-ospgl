@@ -159,6 +159,7 @@
     <None Include="res\core\shaders\ui\navball.vs" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\assets\BitmapFont.cpp" />
     <ClCompile Include="dep\stb\stb_impl.cpp" />
     <ClCompile Include="src\renderer\Renderer.cpp" />
     <ClCompile Include="src\assets\Config.cpp" />
@@ -209,6 +210,7 @@
     <ClCompile Include="src\util\render\TextDrawer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\assets\BitmapFont.h" />
     <ClInclude Include="src\renderer\Renderer.h" />
     <ClInclude Include="src\assets\Config.h" />
     <ClInclude Include="dep\stb\stb_image.h" />

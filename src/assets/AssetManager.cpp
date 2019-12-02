@@ -2,6 +2,7 @@
 #include "Shader.h"
 #include "Image.h"
 #include "Config.h"
+#include "BitmapFont.h"
 #include <istream>
 #include <fstream>
 
@@ -17,6 +18,7 @@ void create_global_asset_manager()
 	assets->create_asset_type<Shader>("Shader", loadShader, true, "[.]vs");
 	assets->create_asset_type<Image>("Image", loadImage);
 	assets->create_asset_type<Config>("Config", loadConfig, true, "[.]toml");
+	assets->create_asset_type<BitmapFont>("Bitmap Font", loadBitmapFont, true, "[.]fnt");
 
 	assets->check_packages();
 }
@@ -43,6 +45,28 @@ std::string AssetManager::load_string_raw(const std::string& path)
 	std::string str((std::istreambuf_iterator<char>(t)),
 		std::istreambuf_iterator<char>());
 	return str;
+}
+
+std::vector<uint8_t> AssetManager::load_binary_raw(const std::string& path)
+{
+	std::ifstream file(path, std::ios::binary);
+	file.unsetf(std::ios::skipws);
+	std::streampos file_size;
+
+	file.seekg(0, std::ios::end);
+	file_size = file.tellg();
+	file.seekg(0, std::ios::beg);
+
+	// reserve capacity
+	std::vector<uint8_t> vec;
+	vec.reserve(file_size);
+
+	// read the data:
+	vec.insert(vec.begin(),
+		std::istream_iterator<uint8_t>(file),
+		std::istream_iterator<uint8_t>());
+
+	return vec;
 }
 
 std::pair<std::string, std::string> AssetManager::get_package_and_name(const std::string& full_path, const std::string& def)

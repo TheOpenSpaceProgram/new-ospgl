@@ -147,18 +147,13 @@ in_memory = false
 
 )-";
 
-Image* loadImage(const std::string& path, const std::string& pkg, const cpptoml::table& cfg)
+Image* loadImage(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
 {
 	if (!AssetManager::file_exists(path))
 	{
 		logger->error("Could not load image {}, file not found!", path);
 		return nullptr;
 	}
-
-	// Find TOML config file in same path if present,
-	// otherwise use default config
-	// We get the path to the vertex shader
-	std::string tomlpath = path.substr(0, path.find_last_of('.')) + ".toml";
 
 	std::shared_ptr<cpptoml::table> def_toml = SerializeUtil::load_string(default_toml);
 
