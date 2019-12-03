@@ -23,11 +23,27 @@ private:
 
 	Shader* shader;
 
+	void draw_glyphs(const std::vector<BitmapFont::Glyph>& ps, BitmapFont* font, glm::vec2 pos, glm::ivec2 screen,
+		glm::vec4 color, glm::vec2 scale);
+
 public:
+
+	enum Alignment
+	{
+		LEFT,
+		CENTER,
+		RIGHT
+	};
 
 	// String is encoded as UTF-8
 	void draw_text(const std::string& text, BitmapFont* font, glm::vec2 pos, glm::ivec2 screen, 
-		glm::vec4 color = glm::vec4(1.0, 1.0, 1.0, 1.0), float scale = 1.0f);
+		glm::vec4 color = glm::vec4(1.0, 1.0, 1.0, 1.0), glm::vec2 scale = glm::vec2(1.0f, 1.0f));
+
+	void draw_text_aligned(const std::string& text, BitmapFont* font, glm::vec2 pos, Alignment alig, 
+		glm::ivec2 screen, glm::vec4 color = glm::vec4(1.0, 1.0, 1.0, 1.0), glm::vec2 scale = glm::vec2(1.0f, 1.0f));
+
+	// Gets the width of a given text in pixels (apply scale by multiplying)
+	int get_size(const std::string& text, BitmapFont* font);
 
 	TextDrawer();
 	~TextDrawer();

@@ -5,13 +5,10 @@
 
 TextDrawer* text_drawer;
 
-void TextDrawer::draw_text(const std::string& text, BitmapFont* font, glm::vec2 pos, 
-	glm::ivec2 screen, glm::vec4 color, float scale)
+void TextDrawer::draw_glyphs(const std::vector<BitmapFont::Glyph>& ps, BitmapFont * font, glm::vec2 pos, 
+	glm::ivec2 screen, glm::vec4 color, glm::vec2 scale)
 {
 	glDisable(GL_DEPTH_TEST);
-
-	auto it = text.begin();
-
 	glm::vec3 spos = glm::vec3(pos.x, pos.y, 0.0f);
 	glm::mat4 view = glm::ortho(0.0f, (float)screen.x, (float)screen.y, 0.0f, -1.0f, 1.0f);
 
@@ -27,6 +24,56 @@ void TextDrawer::draw_text(const std::string& text, BitmapFont* font, glm::vec2 
 	float iwidth = (float)font->img->get_width();
 	float iheight = (float)font->img->get_height();
 
+	for(size_t i = 0; i < ps.size(); i++)
+	{
+		BitmapFont::Glyph gl = ps[i];
+
+
+		glm::vec3 gscale = glm::vec3((float)gl.width * glm::abs(scale.x), (float)gl.height * glm::abs(scale.y), 1.0f);
+
+		glm::vec2 offset = glm::vec2((float)gl.xoffset * scale.x, (float)gl.yoffset * scale.y);
+
+		glm::mat4 model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(offset, 0.0f));
+		model = glm::translate(model, spos);
+		model = glm::scale(model, gscale);
+		glm::mat4 tform = view * model;
+
+		glm::vec2 tex_off = glm::vec2((float)gl.x / iwidth, (float)gl.y / iheight);
+		glm::vec2 tex_size = glm::vec2((float)gl.width / iwidth, (float)gl.height / iheight);
+
+
+		shader->setMat4("tform", tform);
+		shader->setVec4("texoff", glm::vec4(tex_off.x, tex_off.y, tex_size.x, tex_size.y));
+		shader->setVec2("scale", scale);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		spos.x += (float)gl.xadvance * scale.x;
+
+	}
+
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glEnable(GL_DEPTH_TEST);
+}
+
+void TextDrawer::draw_text(const std::string& text, BitmapFont* font, glm::vec2 pos,
+	glm::ivec2 screen, glm::vec4 color, glm::vec2 scale)
+{
+	draw_text_aligned(text, font, pos, Alignment::LEFT, screen, color, scale);
+}
+
+void TextDrawer::draw_text_aligned(const std::string& text, BitmapFont* font, glm::vec2 pos, Alignment alig,
+	 glm::ivec2 screen, glm::vec4 color, glm::vec2 scale)
+{
+
+	float x_off = 0;
+
+	auto it = text.begin();
+
+	std::vector<BitmapFont::Glyph> glyphs;
+
 	while (it != text.end())
 	{
 		uint32_t code_point = utf8::unchecked::next(it);
@@ -38,42 +85,60 @@ void TextDrawer::draw_text(const std::string& text, BitmapFont* font, glm::vec2 
 		{
 			// Question mark
 			gl = font->chars[63];
-		}	
+		}
 		else
 		{
 			gl = cit->second;
 		}
 
-		// Space is empty ;)
-		if (code_point != 32)
-		{
-			glm::vec3 gscale = glm::vec3((float)gl.width * scale, (float)gl.height * scale, 1.0f);
+		glyphs.push_back(gl);
 
-			glm::vec2 offset = glm::vec2((float)gl.xoffset * scale, (float)gl.yoffset * scale);
-
-			glm::mat4 model = glm::mat4(1.0);
-			model = glm::translate(model, glm::vec3(offset, 0.0f));
-			model = glm::translate(model, spos);
-			model = glm::scale(model, gscale);
-			glm::mat4 tform = view * model;
-
-			glm::vec2 tex_off = glm::vec2((float)gl.x / iwidth, (float)gl.y / iheight);
-			glm::vec2 tex_size = glm::vec2((float)gl.width / iwidth, (float)gl.height / iheight);
-
-			shader->setMat4("tform", tform);
-			shader->setVec4("texoff", glm::vec4(tex_off.x, tex_off.y, tex_size.x, tex_size.y));
-
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-		}
-		spos.x += (float)gl.xadvance * scale;
+		x_off += gl.xadvance * scale.x;
 
 	}
 
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glm::vec2 npos = pos;
 
-	glEnable(GL_DEPTH_TEST);
-	
+	if (alig == CENTER)
+	{
+		npos.x -= x_off * 0.5f;
+	}
+	else if(alig == RIGHT)
+	{
+		npos.x -= x_off;
+	}
+
+	draw_glyphs(glyphs, font, npos, screen, color, scale);
+}
+
+int TextDrawer::get_size(const std::string & text, BitmapFont * font)
+{
+	int x_off = 0;
+
+	auto it = text.begin();
+
+	while (it != text.end())
+	{
+		uint32_t code_point = utf8::unchecked::next(it);
+
+		// TODO: Optimize this
+		BitmapFont::Glyph gl;
+		auto cit = font->chars.find(code_point);
+		if (cit == font->chars.end())
+		{
+			// Question mark
+			gl = font->chars[63];
+		}
+		else
+		{
+			gl = cit->second;
+		}
+
+		x_off += gl.xadvance;
+
+	}
+
+	return x_off;
 }
 
 TextDrawer::TextDrawer()

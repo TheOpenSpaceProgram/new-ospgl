@@ -136,6 +136,7 @@
     <None Include="res\core\default_gas.toml" />
     <None Include="res\core\default_planet.toml" />
     <None Include="res\core\package.toml" />
+    <None Include="res\navball\navball.toml" />
     <None Include="res\rss\package.toml" />
     <None Include="res\rss\planets\earth\config.toml" />
     <None Include="res\rss\planets\earth\surface.lua" />
