@@ -3,8 +3,11 @@
 #include "../../assets/Image.h"
 #include "../../assets/Shader.h"
 #include "../../assets/AssetManager.h"
+#include "../../assets/BitmapFont.h"
+
 #include "../../util/render/Framebuffer.h"
 #include "../../util/render/TextureDrawer.h"
+#include "../../util/render/TextDrawer.h"
 #include "../../util/geometry/SphereGeometry.h"
 
 #include "../../universe/vessel/Vessel.h"
@@ -32,6 +35,8 @@ public:
 	Image* radialin_tex;
 	Image* radialout_tex;
 
+	BitmapFont* speed_font;
+
 	float view_distance = 4.0f;
 	// Used to fit the navball inside the frame texture
 	float scale = 0.9f;
@@ -56,4 +61,25 @@ public:
 	Navball();
 	~Navball();
 };
+
+
+template<>
+class GenericSerializer<Navball>
+{
+public:
+
+	static void serialize(const Navball& what, cpptoml::table& target)
+	{
+	}
+
+	// Deserialize is only called for bodies and barycenters
+	// Star is special
+	static void deserialize(Navball& to, const cpptoml::table& from)
+	{
+		std::string speed_font_path;
+		SAFE_TOML_GET_OR(speed_font_path, "speed_font", std::string, "core:fonts/fira_code_medium.fnt");
+		to.speed_font = assets->get_from_path<BitmapFont>(speed_font_path);
+	}
+};
+
 

@@ -36,6 +36,8 @@ public:
 	inline int get_width() { return width; }
 	inline int get_height() { return height; }
 
+	inline glm::ivec2 get_size() { return glm::ivec2(width, height); }
+
 	int get_index(int x, int y);
 
 	// All get functions are slightly slow as they

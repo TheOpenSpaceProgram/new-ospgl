@@ -70,6 +70,8 @@ int main(void)
 	system.init();
 
 	Navball navball;
+	Config* navball_config = assets->get<Config>("navball", "navball.toml");
+	navball_config->read_to(navball);
 
 
 	SystemPointer center_ptr = SystemPointer(&system, "Moon");
@@ -80,7 +82,7 @@ int main(void)
 	ref.center2 = secondary_ptr;
 
 
-	system.camera = MapCamera(SystemPointer(&system, "Earth"));
+	system.camera = MapCamera(SystemPointer(&system, "Sun"));
 
 
 	while (!glfwWindowShouldClose(renderer.window))
@@ -124,8 +126,6 @@ int main(void)
 			navball.draw_to_screen({ renderer.get_width(), renderer.get_height() });
 
 			auto font = assets->get<BitmapFont>("core", "fonts/fira_code_medium.fnt");
-
-
 
 		}
 

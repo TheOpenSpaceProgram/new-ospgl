@@ -105,6 +105,17 @@ void Navball::draw_to_texture(const Vessel& vessel, const ReferenceFrame& frame)
 		//glm::vec2(fbuffer.get_size().x, -fbuffer.get_size().y), fbuffer.get_size());
 		fbuffer.get_size(), fbuffer.get_size());
 
+	// Draw speed
+	glm::vec2 speed_text_pos = glm::vec2(180, 114) / (glm::vec2)frame_tex->get_size() * (glm::vec2)fbuffer.get_size();
+	speed_text_pos.y = (float)fbuffer.get_size().y - speed_text_pos.y;
+	
+	std::string speed_text = std::to_string((int)glm::length(rel_vel));
+
+	text_drawer->draw_text_aligned(
+		speed_text, speed_font, speed_text_pos, TextDrawer::LEFT,
+		fbuffer.get_size(), glm::vec4(0.196, 0.706, 0.2, 1.0), 
+		glm::vec2(final_scale * 0.5f, -final_scale * 0.5f));
+
 	fbuffer.unbind();
 }
 

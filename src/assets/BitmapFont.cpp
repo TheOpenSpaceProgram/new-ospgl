@@ -63,10 +63,6 @@ Block get_block(size_t offset, const std::vector<uint8_t>& fnt)
 }
 
 
-void BitmapFont::draw_text(const std::string& text, glm::vec2 pos, glm::ivec2 screen, glm::vec4 color, float scale)
-{
-	text_drawer->draw_text(text, this, pos, screen, color, scale);
-}
 
 BitmapFont::BitmapFont(const std::vector<uint8_t>& fnt, Image* image)
 {
