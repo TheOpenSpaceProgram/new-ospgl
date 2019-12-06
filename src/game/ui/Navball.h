@@ -11,7 +11,7 @@
 #include "../../util/geometry/SphereGeometry.h"
 
 #include "../../universe/vessel/Vessel.h"
-#include "../../universe/vessel/ReferenceFrame.h"
+#include "../../universe/ReferenceFrame.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>

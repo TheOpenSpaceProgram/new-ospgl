@@ -34,9 +34,9 @@ public:
 	// in the config so the user does not need to touch this
 	glm::dvec3 rotation_axis;
 
-
-
 	glm::dmat4 build_rotation_matrix(double t, bool include_rot_at_epoch = true) const;
+	glm::dvec3 get_rotation_speed(glm::dvec3 at_relative);
+
 
 	PlanetaryBody();
 	~PlanetaryBody();

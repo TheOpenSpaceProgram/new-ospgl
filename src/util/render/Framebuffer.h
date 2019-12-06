@@ -9,6 +9,8 @@ private:
 	
 	GLint unbind_to;
 
+	GLsizei unbind_viewport[4];
+
 public:
 
 	// GL framebuffer object

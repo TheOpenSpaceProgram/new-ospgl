@@ -137,6 +137,26 @@ glm::dquat MathUtil::quat_look_at(glm::dvec3 from, glm::dvec3 to, glm::dvec3 up,
 	}
 }
 
+double MathUtil::distance_to_line(glm::dvec3 a, glm::dvec3 b, glm::dvec3 p)
+{
+	glm::dvec3 ab = b - a;
+	glm::dvec3 ap = p - a;
+
+	if (glm::dot(ap, ab) <= 0.0)
+	{
+		return glm::length(ap);
+	}
+
+	glm::dvec3 bp = p - b;
+
+	if (glm::dot(bp, ab) >= 0.0)
+	{
+		return glm::length(bp);
+	}
+
+	return glm::length(glm::cross(ab, ap)) / glm::length(ab);
+}
+
 int MathUtil::int_repeat(int v, int max)
 {
 	if (v < 0)
