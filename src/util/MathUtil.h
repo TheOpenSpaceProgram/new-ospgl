@@ -36,6 +36,8 @@ public:
 	static glm::dquat quat_look_at(glm::dvec3 from, glm::dvec3 to,
 		glm::dvec3 up = glm::dvec3(0, 1, 0), glm::dvec3 alt_up = glm::dvec3(1, 0, 0));
 
+	static double distance_to_line(glm::dvec3 la, glm::dvec3 lb, glm::dvec3 from);
+
 	// Similar to GL_REPEAT
 	static int int_repeat(int v, int max);
 	// Similar to GL_CLAMP

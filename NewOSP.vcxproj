@@ -84,14 +84,14 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Programming\glfw-3.2.1\include;D:\Programming\fmt-6.0.0\include;C:\Users\Usuario\Source\Repos\NewOSP\dep;D:\Programming\LuaJIT-2.0.5\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Programming\Bullet\bullet3-2.88\src;D:\Programming\glfw-3.2.1\include;D:\Programming\fmt-6.0.0\include;C:\Users\Usuario\Source\Repos\NewOSP\dep;D:\Programming\LuaJIT-2.0.5\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>D:\Programming\glfw-3.2.1\glfw-3.2.1.bin.WIN64\lib-vc2015;D:\Programming\fmt-6.0.0\build\Debug;D:\Programming\LuaJIT-2.0.5\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;fmtd.lib;lua51.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\Programming\Bullet\bullet3-2.88\bin;D:\Programming\glfw-3.2.1\glfw-3.2.1.bin.WIN64\lib-vc2015;D:\Programming\fmt-6.0.0\build\Debug;D:\Programming\LuaJIT-2.0.5\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Bullet3Dynamics_vs2010_x64_debug.lib;Bullet3Collision_vs2010_x64_debug.lib;LinearMath_vs2010_x64_debug.lib;BulletSoftBody_vs2010_x64_debug.lib;glfw3.lib;fmtd.lib;lua51.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -116,7 +116,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Programming\glfw-3.2.1\include;D:\Programming\fmt-6.0.0\include;C:\Users\Usuario\Source\Repos\NewOSP\dep;D:\Programming\LuaJIT-2.0.5\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Programming\Bullet\bullet3-2.88\src;D:\Programming\glfw-3.2.1\include;D:\Programming\fmt-6.0.0\include;C:\Users\Usuario\Source\Repos\NewOSP\dep;D:\Programming\LuaJIT-2.0.5\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -124,8 +124,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>D:\Programming\glfw-3.2.1\glfw-3.2.1.bin.WIN64\lib-vc2015;D:\Programming\fmt-6.0.0\build\Release;D:\Programming\LuaJIT-2.0.5\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;fmt.lib;lua51.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\Programming\Bullet\bullet3-2.88\bin;D:\Programming\glfw-3.2.1\glfw-3.2.1.bin.WIN64\lib-vc2015;D:\Programming\fmt-6.0.0\build\Release;D:\Programming\LuaJIT-2.0.5\src;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Bullet3Dynamics_vs2010_x64_release.lib;Bullet3Collision_vs2010_x64_release.lib;LinearMath_vs2010_x64_release.lib;BulletSoftBody_vs2010_x64_release.lib;glfw3.lib;fmt.lib;lua51.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -160,12 +160,15 @@
     <None Include="res\core\shaders\ui\navball.vs" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\BulletExperiments.cpp" />
+    <ClCompile Include="src\universe\predictor\PredictionDrawer.cpp" />
     <ClCompile Include="src\assets\BitmapFont.cpp" />
     <ClCompile Include="dep\stb\stb_impl.cpp" />
     <ClCompile Include="src\renderer\Renderer.cpp" />
     <ClCompile Include="src\assets\Config.cpp" />
     <ClCompile Include="src\universe\SystemPointer.cpp" />
-    <ClCompile Include="src\universe\vessel\ReferenceFrame.cpp" />
+    <ClCompile Include="src\universe\ReferenceFrame.cpp" />
+    <ClCompile Include="src\universe\predictor\OrbitPredictor.cpp" />
     <ClCompile Include="src\util\render\TextureDrawer.cpp" />
     <ClCompile Include="src\game\ui\Navball.cpp" />
     <ClCompile Include="src\universe\propagator\RK4Interpolated.cpp" />
@@ -199,7 +202,6 @@
     <ClCompile Include="src\planet_mesher\mesher\PlanetTileServer.cpp" />
     <ClCompile Include="src\util\MathUtil.cpp" />
     <ClCompile Include="src\planet_mesher\quadtree\QuadTreePlanet.cpp" />
-    <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\planet_mesher\quadtree\QuadTreeNode.cpp" />
     <ClCompile Include="src\util\Logger.cpp" />
     <ClCompile Include="src\universe\Universe.cpp" />
@@ -216,6 +218,7 @@
     <ClInclude Include="dep\utf8\utf8\core.h" />
     <ClInclude Include="dep\utf8\utf8\cpp11.h" />
     <ClInclude Include="dep\utf8\utf8\unchecked.h" />
+    <ClInclude Include="src\universe\predictor\PredictionDrawer.h" />
     <ClInclude Include="src\assets\BitmapFont.h" />
     <ClInclude Include="src\renderer\Renderer.h" />
     <ClInclude Include="src\assets\Config.h" />
@@ -223,7 +226,8 @@
     <ClInclude Include="src\universe\element\barycenter\Barycenter.h" />
     <ClInclude Include="src\universe\element\star\Star.h" />
     <ClInclude Include="src\universe\SystemPointer.h" />
-    <ClInclude Include="src\universe\vessel\ReferenceFrame.h" />
+    <ClInclude Include="src\universe\ReferenceFrame.h" />
+    <ClInclude Include="src\universe\predictor\OrbitPredictor.h" />
     <ClInclude Include="src\util\render\TextureDrawer.h" />
     <ClInclude Include="src\game\ui\Navball.h" />
     <ClInclude Include="src\universe\propagator\RK4Interpolated.h" />

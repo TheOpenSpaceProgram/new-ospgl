@@ -40,6 +40,19 @@ glm::dmat4 PlanetaryBody::build_rotation_matrix(double t, bool include_at_epoch)
 	return rot_matrix;
 }
 
+glm::dvec3 PlanetaryBody::get_rotation_speed(glm::dvec3 relative)
+{
+	glm::dvec3 rp = relative;
+
+	double dist_to_axis = MathUtil::distance_to_line(-rotation_axis, rotation_axis, rp);
+
+	double speed_mod = dist_to_axis * glm::radians(rotation_speed);
+
+	glm::dvec3 tg = glm::normalize(glm::cross(rotation_axis, relative));
+
+	return tg * speed_mod;
+}
+
 PlanetaryBody::PlanetaryBody()
 {
 	dot_factor = 1.0f;

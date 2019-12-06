@@ -1,7 +1,7 @@
 #include "PlanetarySystem.h"
 #include "../util/DebugDrawer.h"
 #include <imgui/imgui.h>
-#include "vessel/ReferenceFrame.h"
+#include "ReferenceFrame.h"
 
 CartesianState compute_state(double t, double tol, 
 	SystemElement* body, std::vector<CartesianState>* other_states)
@@ -318,8 +318,16 @@ void PlanetarySystem::update(double dt)
 	if (ImGui::Button("Position Vessel"))
 	{
 		vessels[0].state = states_now[name_to_index["Earth"]];
-		vessels[0].state.pos += glm::dvec3(42164000.0, 0.0, 0.0);
-		vessels[0].state.vel += glm::dvec3(0.0, 0.0, 3074.6);
+		vessels[0].state.pos += (glm::dvec3)(elements[name_to_index["Earth"]].as_body->build_rotation_matrix(0.0) 
+			* glm::dvec4(42164000.0, 0.0, 0.0, 1.0));
+
+		double mod = -3074.6;
+
+
+
+		vessels[0].state.vel += glm::normalize(glm::cross(vessels[0].state.pos - states_now[name_to_index["Earth"]].pos,
+			elements[name_to_index["Earth"]].as_body->rotation_axis)) * mod;
+
 		camera.distance = 5.0;
 	}
 

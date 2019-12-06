@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/gtx/quaternion.hpp>
-#include "../SystemPointer.h"
+#include "SystemPointer.h"
 #include <optional>
 
 class PlanetarySystem;
@@ -72,7 +72,8 @@ struct ReferenceFrame
 
 	glm::dmat4 get_rotation_matrix() const;
 
-	glm::dvec3 get_velocity() const;
+	// Needs position as surface velocity may vary
+	glm::dvec3 get_velocity(glm::dvec3 pos) const;
 	glm::dvec3 get_center() const;
 
 	void draw_debug_axes() const;

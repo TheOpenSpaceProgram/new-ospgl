@@ -1,7 +1,8 @@
 #include "ReferenceFrame.h"
-#include "../PlanetarySystem.h"
+#include "PlanetarySystem.h"
+#include "../util/DebugDrawer.h"
 
-glm::dvec3 ReferenceFrame::get_velocity() const
+glm::dvec3 ReferenceFrame::get_velocity(glm::dvec3 pos) const
 {
 	if (mode == ALIGNED_BARYCENTRIC)
 	{
@@ -13,6 +14,19 @@ glm::dvec3 ReferenceFrame::get_velocity() const
 
 		glm::dvec3 average = (c * c_mass + s * s_mass) / (c_mass + s_mass);
 		return average;
+	}
+	else if (mode == ROTATING)
+	{
+		glm::dvec3 in = center.get_velocity_now();
+		glm::dvec3 rel = pos - center.get_position_now();
+		glm::dvec3 rot = center.get_element()->as_body->get_rotation_speed(rel);
+
+		glm::dvec3 c = rel * center.get_element()->as_body->config.radius * 1.1 + center.get_position_now();
+
+		debug_drawer->add_line(c, c + rot * 1000000.0, glm::vec3(1.0, 0.0, 1.0));
+		debug_drawer->add_point(c, glm::vec3(1.0, 0.0, 1.0));
+
+		return in + rot;
 	}
 	else
 	{
@@ -267,7 +281,7 @@ glm::dvec3 ReferenceFrame::get_y_axis(double t) const
 	}
 	else if (mode == ReferenceFrame::ALIGNED_BARYCENTRIC)
 	{
-		glm::dvec3 center_vel = get_velocity();
+		glm::dvec3 center_vel = get_velocity(glm::dvec3(0.0));
 		glm::dvec3 s_vel = center2->get_velocity_now();
 		glm::dvec3 c_vel = center.get_velocity_now();
 
@@ -290,7 +304,7 @@ glm::dmat4 ReferenceFrame::get_rotation_matrix() const
 	return glm::dmat3(get_x_axis(), get_y_axis(), get_z_axis());
 }
 
-#include "../../util/DebugDrawer.h"
+#include "../util/DebugDrawer.h"
 
 
 

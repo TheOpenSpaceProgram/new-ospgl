@@ -5,13 +5,17 @@
 void Framebuffer::bind()
 {
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &unbind_to);
+	glGetIntegerv(GL_VIEWPORT, &unbind_viewport[0]);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, fbuffer);
+
+	glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 }
 
 void Framebuffer::unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)unbind_to);
+	glViewport(0, 0, unbind_viewport[2], unbind_viewport[3]);
 }
 
 void Framebuffer::set_viewport()

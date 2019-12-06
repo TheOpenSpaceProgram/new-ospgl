@@ -10,9 +10,7 @@ void Navball::draw_to_texture(const Vessel& vessel, const ReferenceFrame& frame)
 		view_distance = 1.0f;
 	}
 
-	frame.draw_debug_axes();
-
-	glm::dvec3 rel_vel = vessel.state.vel - frame.get_velocity();
+	glm::dvec3 rel_vel = vessel.state.vel - frame.get_velocity(vessel.state.pos);
 
 
 	glm::quat rot = vessel.rotation;
@@ -46,7 +44,6 @@ void Navball::draw_to_texture(const Vessel& vessel, const ReferenceFrame& frame)
 
 	fbuffer.bind();
 
-	fbuffer.set_viewport();
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
