@@ -15,7 +15,7 @@ uniform vec4 texoff;
 void main()
 {
 	vec2 uv;
-	
+
 	if(scale.x < 0)
 	{
 		uv.y = (1.0 - aTex.x) * texoff.z + texoff.x;

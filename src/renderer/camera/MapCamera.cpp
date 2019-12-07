@@ -58,12 +58,32 @@ std::pair<glm::dvec3, glm::dvec3> MapCamera::get_camera_pos_dir()
 	return std::make_pair(pos, dir);
 }
 
+glm::dmat4 MapCamera::get_proj_view(int width, int height)
+{
+	auto[camera_pos, camera_dir] = get_camera_pos_dir();
+	// ~1 light year
+	float far_plane = 1e16f;
+
+
+	glm::dmat4 proj = glm::perspective(glm::radians(fov), (double)width / (double)height, 0.1, (double)far_plane);
+	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), camera_dir, glm::dvec3(0.0, 1.0, 0.0));
+	glm::dmat4 proj_view = proj * view;
+
+	return proj_view;
+}
+
+glm::dmat4 MapCamera::get_cmodel()
+{
+	return glm::translate(glm::dmat4(1.0), -get_camera_pos_dir().first);
+}
+
 MapCamera::MapCamera(SystemPointer ptr) : center_ptr(ptr)
 {
 	circular_coord = glm::dvec2(0.0, glm::half_pi<double>());
 	distance = 1000000.0;
 
 	scroll_vel = 0.0;
+	fov = 60.0;
 }
 
 
