@@ -187,6 +187,9 @@
     <ClCompile Include="src\universe\predictor\PredictionDrawer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\camera\SimpleCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\BulletExperiments.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -427,6 +430,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\universe\predictor\PredictionDrawer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\debug\BulletDebugDrawer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\glm\BulletGlmCompat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\camera\SimpleCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

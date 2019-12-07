@@ -187,6 +187,14 @@ void DebugDrawer::add_line(glm::dvec3 a, glm::dvec3 b, glm::vec3 color)
 	draw_list.push_back(shape);
 }
 
+void DebugDrawer::add_line(glm::dvec3 a, glm::dvec3 b, glm::vec3 acolor, glm::vec3 bcolor)
+{
+	DebugShape shape;
+	shape.verts.push_back(DebugVertex(a, acolor));
+	shape.verts.push_back(DebugVertex(b, bcolor));
+	draw_list.push_back(shape);
+}
+
 void DebugDrawer::add_arrow(glm::dvec3 a, glm::dvec3 b, glm::vec3 color)
 {
 	add_line(a, b, color);

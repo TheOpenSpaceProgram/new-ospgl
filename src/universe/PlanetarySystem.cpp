@@ -150,13 +150,9 @@ void PlanetarySystem::render(int width, int height)
 	update_render(camera_pos, fov, t);
 
 
-	// ~1 light year
+	glm::dmat4 proj_view = camera.get_proj_view(width, height);
+	glm::dmat4 c_model = camera.get_cmodel();
 	float far_plane = 1e16f;
-
-
-	glm::dmat4 proj = glm::perspective((double)fov, (double)width / (double)height, 0.1, (double)far_plane);
-	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), camera_dir, glm::dvec3(0.0, 1.0, 0.0));
-	glm::dmat4 proj_view = proj * view;
 
 	using BodyPositionPair = std::pair<SystemElement*, CartesianState>;
 
@@ -224,17 +220,9 @@ void PlanetarySystem::render(int width, int height)
 
 void PlanetarySystem::render_debug(int width, int height)
 {
-	float fov = glm::radians(60.0f);
-	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir();
-	// ~1 light year
+	glm::dmat4 proj_view = camera.get_proj_view(width, height);
+	glm::dmat4 c_model = camera.get_cmodel();
 	float far_plane = 1e16f;
-
-
-	glm::dmat4 proj = glm::perspective((double)fov, (double)width / (double)height, 0.1, (double)far_plane);
-	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), camera_dir, glm::dvec3(0.0, 1.0, 0.0));
-	glm::dmat4 proj_view = proj * view;
-
-	glm::dmat4 c_model = glm::translate(glm::dmat4(1.0), -camera_pos);
 
 	// Don't forget to draw the debug shapes!
 	debug_drawer->render(proj_view, c_model, far_plane);

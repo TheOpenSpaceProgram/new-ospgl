@@ -59,6 +59,7 @@ public:
 
 	void add_point(glm::dvec3 a, glm::vec3 color);
 	void add_line(glm::dvec3 a, glm::dvec3 b, glm::vec3 color);
+	void add_line(glm::dvec3 a, glm::dvec3 b, glm::vec3 acolor, glm::vec3 bcolor);
 	void add_arrow(glm::dvec3 a, glm::dvec3 b, glm::vec3 color);
 
 	void add_cone(glm::dvec3 base, glm::dvec3 tip, double radius, glm::vec3 color, int verts = 16);
