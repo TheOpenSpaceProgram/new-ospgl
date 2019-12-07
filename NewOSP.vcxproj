@@ -162,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\BulletExperiments.cpp" />
+    <ClCompile Include="src\vehicle\part\Part.cpp" />
     <ClCompile Include="src\renderer\camera\SimpleCamera.cpp" />
     <ClCompile Include="src\universe\predictor\PredictionDrawer.cpp" />
     <ClCompile Include="src\assets\BitmapFont.cpp" />
@@ -213,8 +214,11 @@
     <ClCompile Include="src\universe\element\SystemElement.cpp" />
     <ClCompile Include="src\universe\vessel\Vessel.cpp" />
     <ClCompile Include="src\util\render\TextDrawer.cpp" />
+    <ClCompile Include="src\vehicle\Vehicle.cpp" />
+    <ClCompile Include="src\vehicle\part\Piece.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\vehicle\part\Part.h" />
     <ClInclude Include="src\renderer\camera\SimpleCamera.h" />
     <ClInclude Include="src\physics\debug\BulletDebugDrawer.h" />
     <ClInclude Include="dep\utf8\utf8.h" />
@@ -297,6 +301,8 @@
     <ClInclude Include="src\universe\element\SystemElement.h" />
     <ClInclude Include="src\universe\vessel\Vessel.h" />
     <ClInclude Include="src\util\render\TextDrawer.h" />
+    <ClInclude Include="src\vehicle\Vehicle.h" />
+    <ClInclude Include="src\vehicle\part\Piece.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="output.log" />

@@ -109,8 +109,8 @@ int main(void)
 		btTransform groundTransform;
 		groundTransform.setIdentity();
 		groundTransform.setOrigin(to_btVector3(base + glm::dvec3(0.0, -56.0, 0.0)));
-		
-		
+
+
 
 		btScalar mass(100000000000.0);
 
@@ -253,14 +253,18 @@ int main(void)
 		ImGui::NewFrame();
 
 
-		camera.pos += base_speed * dt;
+
+		double step = 1.0 / 60.0;
+		int sub_steps = world->stepSimulation(dt, 10);
+
+		// AGGHH this is neccesary :(
+		camera.pos += base_speed * (double)sub_steps * step;
 		btTransform tform;
 
 		// SECOND ARGUMENT HAS TO BE ZERO, OTHERWISE IT BREAKS!
 		// (Because we change the floor position while the engine
 		// may have a different dt, resulting in jumps)
 		// TODO: Find a way to allow substeps
-		world->stepSimulation(dt, 0);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -285,9 +289,13 @@ int main(void)
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+
+
 		glfwSwapBuffers(renderer.window);
 
 		dt = dtt.restart();
+
+
 
 	}
 
