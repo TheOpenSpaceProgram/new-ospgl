@@ -2,6 +2,11 @@
 #include "part/Part.h"
 #include "part/Piece.h"
 
+
+#pragma warning(push, 0)
+#include <btBulletDynamicsCommon.h>
+#pragma warning(pop)
+
 #include <unordered_set>
 #include <vector>
 
@@ -20,14 +25,8 @@ class Vehicle
 {
 public:
 
-	struct WeldedGroup
-	{
-		std::vector<Piece*> pieces;
-		btRigidBody* rigid_body;
-		btMotionState* motion_state;
-	};
-	
-	std::vector<WeldedGroup> welded;
+
+	std::vector<WeldedGroup*> welded;
 
 	Piece* root;
 
@@ -38,10 +37,12 @@ public:
 	void update_physics();
 
 	// Called when a part separates or joins
-	void build_physics();
+	void build_physics(btDynamicsWorld* world);
 
 	// Creates new vehicles from any separated pieces
 	std::vector<Vehicle*> handle_separation();
+
+	void draw_debug();
 
 	Vehicle();
 	~Vehicle();

@@ -21,26 +21,28 @@
 
 #include "physics/debug/BulletDebugDrawer.h"
 
+#include "vehicle/Vehicle.h"
+
 InputUtil* input;
 
-btRigidBody* floor_body;
-btMotionState* floor_state;
-glm::dvec3 base_speed;
 
-
-void test(btDynamicsWorld* world, btScalar timeStep)
+Piece create_dummy_piece(glm::dvec3 offset, double radius = 1.0)
 {
-	btTransform tform;
-	//btTransform tform = floor_body->getWorldTransform();
-	//floor_state->getWorldTransform(tform);
-	//tform.getOrigin() += to_btVector3(base_speed * (double)timeStep);
-	//floor_body->setWorldTransform(tform);
-	//floor_state->setWorldTransform(tform);
-	tform = floor_body->getWorldTransform();
+	Piece out = Piece();
 
-	floor_body->setLinearVelocity(to_btVector3(base_speed));
-	floor_body->setAngularVelocity(btVector3(0.0, 0.0, 0.0));
-	floor_body->setWorldTransform(tform);
+	btCollisionShape* colShape = new btSphereShape(btScalar(radius));
+
+	out.collider = colShape;
+	
+	btTransform off_tform;
+	off_tform.setIdentity();
+	off_tform.setOrigin(to_btVector3(offset));
+
+	out.position = off_tform;
+
+	out.mass = (4.0 / 3.0) * glm::pi<double>() * radius * radius * radius;
+
+	return out;
 }
 
 int main(void)
@@ -72,11 +74,8 @@ int main(void)
 
 	double AU = 149597900000.0;
 
-	glm::dvec3 base = glm::dvec3(AU * 10.0, 0.0, 0.0);
-	base_speed = glm::dvec3(100000.0, 0.0, 0.0);
-
 	SimpleCamera camera = SimpleCamera();
-	camera.pos = base + glm::dvec3(-40.0f, 0.0f, -20.0f);
+	glm::dvec3 cam_offset = glm::dvec3(-10.0, 0.0f, -5.0f);
 	camera.fw = glm::normalize(glm::dvec3(1.0f, 0.0f, 0.5f));
 
 	btDefaultCollisionConfiguration* collision_config = new btDefaultCollisionConfiguration();
@@ -85,6 +84,7 @@ int main(void)
 	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver();
 	btDiscreteDynamicsWorld* world = new btDiscreteDynamicsWorld(dispatcher, brf_interface, solver, collision_config);
 
+	world->setGravity({ 0.0, -1.0, 0.0 });
 
 	BulletDebugDrawer* bullet_debug_drawer = new BulletDebugDrawer();
 	world->setDebugDrawer(bullet_debug_drawer);
@@ -94,151 +94,35 @@ int main(void)
 		btIDebugDraw::DBG_DrawContactPoints |
 		btIDebugDraw::DBG_DrawWireframe);
 
-	world->setGravity(btVector3(0.0, -10.0, 0.0));
+	Vehicle veh = Vehicle();
+	Piece control = create_dummy_piece({ 0.0, 0.0, 0.0 }, 1.0);
+	Piece fuel = create_dummy_piece({ 0.0, -3.0, 0.0 }, 2.0);
+	Piece rad = create_dummy_piece({ 2.5, -3.0, 0.0 }, 0.5);
+	Piece rad2 = create_dummy_piece({ 3.5, -3.0, 0.0 }, 0.5);
+	Piece fuel2 = create_dummy_piece({ 5, -3.0, 0.0 }, 1.0);
+	
+	control.attached_to = nullptr;
+	fuel.attached_to = &control;
+	rad.attached_to = &fuel;
+	rad2.attached_to = &rad;
+	fuel2.attached_to = &rad2;
 
+	fuel.welded = true;
+	rad.welded = true;
+	rad2.welded = false;
+	fuel2.welded = true;
 
-	btRigidBody* a;
-	btRigidBody* b;
-	btRigidBody* c;
+	veh.all_pieces.push_back(&control);
+	veh.all_pieces.push_back(&fuel);
+	veh.all_pieces.push_back(&rad);
+	veh.all_pieces.push_back(&rad2);
+	veh.all_pieces.push_back(&fuel2);
 
-	world->setInternalTickCallback(test);
+	veh.root = &control;
 
-	{
-		btCollisionShape* groundShape = new btBoxShape(btVector3(btScalar(50.), btScalar(50.), btScalar(50.)));
+	veh.build_physics(world);
 
-		btTransform groundTransform;
-		groundTransform.setIdentity();
-		groundTransform.setOrigin(to_btVector3(base + glm::dvec3(0.0, -56.0, 0.0)));
-
-
-
-		btScalar mass(100000000000.0);
-
-		//rigidbody is dynamic if and only if mass is non zero, otherwise static
-		bool isDynamic = (mass != 0.f);
-
-		btVector3 localInertia(0, 0, 0);
-		if (isDynamic)
-			groundShape->calculateLocalInertia(mass, localInertia);
-
-		//using motionstate is optional, it provides interpolation capabilities, and only synchronizes 'active' objects
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(groundTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, groundShape, localInertia);
-		btRigidBody* body = new btRigidBody(rbInfo);
-
-		//body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-		//body->setActivationState(DISABLE_DEACTIVATION);
-
-		//add the body to the dynamics world
-		world->addRigidBody(body);
-		floor_body = body;
-		floor_state = myMotionState;
-
-		floor_body->setLinearVelocity(to_btVector3(base_speed));
-		floor_body->setGravity(btVector3(0.0, 0.0, 0.0));
-	}
-
-	{
-		//create a dynamic rigidbody
-
-		//btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
-		btCollisionShape* colShape = new btSphereShape(btScalar(1.));
-
-		/// Create Dynamic Objects
-		btTransform startTransform;
-		startTransform.setIdentity();
-
-		btScalar mass(4.f);
-
-		//rigidbody is dynamic if and only if mass is non zero, otherwise static
-		bool isDynamic = (mass != 0.f);
-
-		btVector3 localInertia(0, 0, 0);
-		if (isDynamic)
-			colShape->calculateLocalInertia(mass, localInertia);
-
-		startTransform.setOrigin(to_btVector3(base + glm::dvec3(4, 14, 0)));
-
-		//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-		btRigidBody* body = new btRigidBody(rbInfo);
-
-		world->addRigidBody(body);
-		body->setLinearVelocity(to_btVector3(base_speed));
-
-		a = body;
-	}
-
-	{
-		//create a dynamic rigidbody
-
-		//btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
-		btCollisionShape* colShape = new btSphereShape(btScalar(1.));
-
-		/// Create Dynamic Objects
-		btTransform startTransform;
-		startTransform.setIdentity();
-
-		btScalar mass(4.f);
-
-		//rigidbody is dynamic if and only if mass is non zero, otherwise static
-		bool isDynamic = (mass != 0.f);
-
-		btVector3 localInertia(0, 0, 0);
-		if (isDynamic)
-			colShape->calculateLocalInertia(mass, localInertia);
-
-		startTransform.setOrigin(to_btVector3(base + glm::dvec3(4, 6, 0)));
-
-		//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-		btRigidBody* body = new btRigidBody(rbInfo);
-
-		world->addRigidBody(body);
-		body->setLinearVelocity(to_btVector3(base_speed));
-
-		c = body;
-	}
-
-	{
-		//create a dynamic rigidbody
-
-		//btCollisionShape* colShape = new btBoxShape(btVector3(1,1,1));
-		btCollisionShape* colShape = new btBoxShape(to_btVector3(glm::dvec3(2.0, 2.0, 2.0)));
-
-		/// Create Dynamic Objects
-		btTransform startTransform;
-		startTransform.setIdentity();
-
-		btScalar mass(1.f);
-
-		//rigidbody is dynamic if and only if mass is non zero, otherwise static
-		bool isDynamic = (mass != 0.f);
-
-		btVector3 localInertia(0, 0, 0);
-		if (isDynamic)
-			colShape->calculateLocalInertia(mass, localInertia);
-
-		startTransform.setOrigin(to_btVector3(base + glm::dvec3(1, 10, 0)));
-
-		//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, myMotionState, colShape, localInertia);
-		btRigidBody* body = new btRigidBody(rbInfo);
-
-		world->addRigidBody(body);
-		body->setLinearVelocity(to_btVector3(base_speed));
-
-		b = body;
-	}
-
-	btPoint2PointConstraint* link = new btPoint2PointConstraint(*a, *b, btVector3(0.0, -7.0, 0.0), btVector3(0.0, -2.0, 0.0));
-	btPoint2PointConstraint* link2 = new btPoint2PointConstraint(*a, *c, btVector3(0.0, -7.0, 0.0), btVector3(0.0, 2.0, 0.0));
-
-	world->addConstraint(link);
-	world->addConstraint(link2);
+	double t = 0.0;
 
 	while (!glfwWindowShouldClose(renderer.window))
 	{
@@ -255,22 +139,32 @@ int main(void)
 
 
 		double step = 1.0 / 60.0;
-		int sub_steps = world->stepSimulation(dt, 10);
+		int max_steps = 32;
 
-		// AGGHH this is neccesary :(
-		camera.pos += base_speed * (double)sub_steps * step;
-		btTransform tform;
+		double max_dt = (max_steps - 1) * step;
 
-		// SECOND ARGUMENT HAS TO BE ZERO, OTHERWISE IT BREAKS!
-		// (Because we change the floor position while the engine
-		// may have a different dt, resulting in jumps)
-		// TODO: Find a way to allow substeps
+		if (dt > max_dt)
+		{
+			logger->warn("Delta-time too high ({})/({}), slowing down", dt, max_dt);
+			dt = max_dt;
+		}
+
+		int sub_steps = world->stepSimulation(dt, max_steps, btScalar(step));
+
+
+		glm::dvec3 fuel2_pos = to_dvec3(fuel2.get_current_position().getOrigin());
+
+		cam_offset = glm::dvec3(sin(t * 0.5) * 10.0, 3.0, cos(t * 0.5) * 10.0);
+		camera.pos = cam_offset + fuel2_pos;
+		camera.fw = glm::normalize(fuel2_pos-camera.pos);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 		renderer.prepare_draw();
 
-
+		debug_drawer->add_point(fuel2_pos, glm::vec3(1.0, 0.0, 1.0));
+		veh.draw_debug();
+	
 
 		glm::dmat4 proj_view = camera.get_proj_view(renderer.get_width(), renderer.get_height());
 		glm::dmat4 c_model = camera.get_cmodel();
@@ -294,7 +188,7 @@ int main(void)
 		glfwSwapBuffers(renderer.window);
 
 		dt = dtt.restart();
-
+		t += dt;
 
 
 	}
