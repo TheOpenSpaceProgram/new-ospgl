@@ -8,6 +8,15 @@
 #include <any>
 
 class Part;
+class Piece;
+
+struct WeldedGroup
+{
+	std::vector<Piece*> pieces;
+	btRigidBody* rigid_body;
+	btMotionState* motion_state;
+};
+
 
 // Pieces are what actually makes up a vehicle
 // It has functionality (disabled when we
@@ -25,14 +34,8 @@ public:
 	// root subparts
 	Part* part;
 
-	// Position in the current vessel, absolute coordinates
-	// On separation it's not readjusted, it's offset doesn't
-	// really matter
+	// Position in the current vessel at start of simulation
 	btTransform position;
-
-	// Set to true when we are "welded" to other parts
-	bool is_joined_to_others;
-
 
 	double mass;
 
@@ -43,6 +46,11 @@ public:
 	// to the shared rigidbody, same as motion_state
 	btRigidBody* rigid_body;
 	btMotionState* motion_state;
+
+	// Used as an offset for rendering, the adjusted
+	// position of this collider in the welded shared
+	// collider
+	btTransform welded_tform;
 
 	// Only root pieces can attach to pieces outside
 	// of their part, non-root can only attach to other
@@ -57,7 +65,12 @@ public:
 	// Otherwise there will be a link between it and its 
 	// attached_to part, this can be a constraint or any
 	// other thing (maybe wires or ropes?)
-	bool is_welded;
+	// nullptr if we are not welded
+	WeldedGroup* in_group;
+
+	bool welded;
+
+	btTransform get_current_position();
 
 	Piece();
 	~Piece();
