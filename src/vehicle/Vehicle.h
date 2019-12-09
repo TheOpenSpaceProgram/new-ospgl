@@ -23,6 +23,9 @@
 
 class Vehicle
 {
+private:
+
+
 public:
 
 
@@ -32,11 +35,11 @@ public:
 
 	std::vector<Piece*> all_pieces;
 
-	// Called almost every frame, as mass can 
-	// flow from fuel tanks and similar
 	void update_physics();
 
-	// Called when a part separates or joins
+	// Called when a part separates or joins, or the type of
+	// link changes, so the physics engine can recreate the
+	// rigid bodies.
 	void build_physics(btDynamicsWorld* world);
 
 	// Creates new vehicles from any separated pieces

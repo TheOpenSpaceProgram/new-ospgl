@@ -72,9 +72,16 @@ public:
 
 	bool welded;
 
-	btTransform get_current_transform();
-	btVector3 get_current_linear();
-	btVector3 get_current_angular();
+	// Guaranteed to get the actual welded state, even if the
+	// user sets "welded" to false and "build_physics" has not
+	// yet been called. Mostly used internally
+	bool is_welded();
+	btTransform get_global_transform();
+	btTransform get_local_transform();
+	btVector3 get_linear_velocity();
+	btVector3 get_angular_velocity();
+	// Returns zero on non-welded pieces
+	btVector3 get_tangential_velocity();
 
 	// If welded, returns the position of the part
 	// relative to its rigid body, otherwise it's

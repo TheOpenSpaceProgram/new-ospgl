@@ -74,7 +74,8 @@ int main(void)
 
 	double AU = 149597900000.0;
 
-	glm::dvec3 base = glm::dvec3(AU, 0.0, 0.0);
+	glm::dvec3 base = glm::dvec3(1.0 * AU, 0.0, 0.0);
+	glm::dvec3 vbase = glm::dvec3(40000.0, 0.0, 0.0);
 
 	SimpleCamera camera = SimpleCamera();
 	glm::dvec3 cam_offset = glm::dvec3(-10.0, 0.0f, -5.0f);
@@ -131,6 +132,13 @@ int main(void)
 	veh.build_physics(world);
 
 	double t = 0.0;
+	double pt = 0.0;
+
+	btTransform tform = btTransform::getIdentity();
+	tform.setOrigin(to_btVector3(base));
+
+	veh.welded[0]->rigid_body->setWorldTransform(tform);
+	veh.welded[0]->rigid_body->setLinearVelocity(to_btVector3(vbase));
 
 	while (!glfwWindowShouldClose(renderer.window))
 	{
@@ -160,15 +168,18 @@ int main(void)
 
 		int sub_steps = world->stepSimulation(dt, max_steps, btScalar(step));
 
+		double pdt = step * sub_steps;
+		pt += pdt;
+
 		if (glfwGetKey(input->window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 		{
-			glm::dmat4 tform = glm::toMat4(to_dquat(fuel2.get_current_transform().getRotation()));
+			glm::dmat4 tform = glm::toMat4(to_dquat(fuel2.get_global_transform().getRotation()));
 			glm::dvec3 f = tform * glm::dvec4(glm::dvec3(0.0, 1.0, 0.0) * 100.0, 1.0);
-			glm::dmat4 tform2 = glm::toMat4(to_dquat(fuel3.get_current_transform().getRotation()));
+			glm::dmat4 tform2 = glm::toMat4(to_dquat(fuel3.get_global_transform().getRotation()));
 			glm::dvec3 f2 = -tform2 * glm::dvec4(glm::dvec3(0.0, 1.0, 0.0) * 100.0, 1.0);
 
-			glm::dvec3 pos = to_dvec3(fuel2.get_current_transform().getOrigin());
-			glm::dvec3 pos2 = to_dvec3(fuel3.get_current_transform().getOrigin());
+			glm::dvec3 pos = to_dvec3(fuel2.get_global_transform().getOrigin());
+			glm::dvec3 pos2 = to_dvec3(fuel3.get_global_transform().getOrigin());
 
 			fuel2.rigid_body->applyForce(to_btVector3(f), fuel2.get_relative_position());
 			fuel3.rigid_body->applyForce(to_btVector3(f2), fuel3.get_relative_position());
@@ -186,12 +197,12 @@ int main(void)
 		}
 
 
-		glm::dvec3 fuel2_pos = to_dvec3(fuel2.get_current_transform().getOrigin());
+		glm::dvec3 fuel2_pos = to_dvec3(fuel2.get_global_transform().getOrigin());
 
 		//cam_offset = glm::dvec3(sin(t * 0.5) * 30.0, -2.0, cos(t * 0.5) * 30.0);
-		cam_offset = glm::dvec3(30.0, 0.0, 0.0);
-		camera.pos = cam_offset;// + fuel2_pos;
-		camera.fw = glm::normalize(-camera.pos);
+		cam_offset = glm::dvec3(30.0, 0.0, 30.0);
+		camera.pos = base + cam_offset + vbase * pt;// + fuel2_pos;
+		camera.fw = glm::normalize((base + vbase * pt)-camera.pos);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
