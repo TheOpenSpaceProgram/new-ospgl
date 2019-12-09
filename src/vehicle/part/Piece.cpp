@@ -2,9 +2,14 @@
 
 
 
-btTransform Piece::get_current_transform()
+bool Piece::is_welded()
 {
-	if (motion_state == nullptr)
+	return in_group != nullptr;
+}
+
+btTransform Piece::get_global_transform()
+{
+	if (rigid_body == nullptr)
 	{
 		return position;
 	}
@@ -12,12 +17,10 @@ btTransform Piece::get_current_transform()
 	{
 		btTransform tform;
 
-
 		//motion_state->getWorldTransform(tform);
-
 		tform = rigid_body->getWorldTransform();
 
-		if (in_group != nullptr)
+		if (is_welded())
 		{
 			return tform * welded_tform;
 		}
@@ -28,7 +31,20 @@ btTransform Piece::get_current_transform()
 	}
 }
 
-btVector3 Piece::get_current_linear()
+btTransform Piece::get_local_transform()
+{
+	if (is_welded())
+	{
+		return welded_tform;
+	}
+	else
+	{
+		return btTransform::getIdentity();
+	}
+	
+}
+
+btVector3 Piece::get_linear_velocity()
 {
 	if (rigid_body == nullptr)
 	{
@@ -37,20 +53,16 @@ btVector3 Piece::get_current_linear()
 	else
 	{
 		btVector3 base = rigid_body->getLinearVelocity();
-		if (in_group != nullptr)
+		if (is_welded())
 		{
-			// We have to add the linear component that we may have
-			// got from rotation
-			btVector3 r = get_current_transform().getOrigin() - rigid_body->getWorldTransform().getOrigin();
-			btVector3 linear = rigid_body->getAngularVelocity().cross(r);
-			base += linear;
+			base += get_tangential_velocity();
 		}
 
 		return base;
 	}
 }
 
-btVector3 Piece::get_current_angular()
+btVector3 Piece::get_angular_velocity()
 {
 	if (rigid_body == nullptr)
 	{
@@ -59,16 +71,25 @@ btVector3 Piece::get_current_angular()
 	else
 	{
 		return rigid_body->getAngularVelocity();
-		/*btVector3 rv = get_relative_position();
-		btVector3 pv = mass * (get_current_linear() - rigid_body->getLinearVelocity());
-
-		return rv.cross(pv) / mass;*/
 	}
+}
+
+btVector3 Piece::get_tangential_velocity()
+{
+	if (!is_welded())
+	{
+		return btVector3(0.0, 0.0, 0.0);
+	}
+
+	btVector3 r = get_relative_position();
+	btVector3 tangential = rigid_body->getAngularVelocity().cross(r);
+	
+	return tangential;
 }
 
 btVector3 Piece::get_relative_position()
 {
-	return get_current_transform().getOrigin() - rigid_body->getWorldTransform().getOrigin();
+	return get_global_transform().getOrigin() - rigid_body->getWorldTransform().getOrigin();
 }
 
 Piece::Piece()
