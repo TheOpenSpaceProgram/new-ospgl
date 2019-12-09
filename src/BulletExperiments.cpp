@@ -74,6 +74,8 @@ int main(void)
 
 	double AU = 149597900000.0;
 
+	glm::dvec3 base = glm::dvec3(AU, 0.0, 0.0);
+
 	SimpleCamera camera = SimpleCamera();
 	glm::dvec3 cam_offset = glm::dvec3(-10.0, 0.0f, -5.0f);
 	camera.fw = glm::normalize(glm::dvec3(1.0f, 0.0f, 0.5f));
@@ -84,7 +86,7 @@ int main(void)
 	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver();
 	btDiscreteDynamicsWorld* world = new btDiscreteDynamicsWorld(dispatcher, brf_interface, solver, collision_config);
 
-	world->setGravity({ 0.0, -1.0, 0.0 });
+	world->setGravity({ 0.0, 0.0, 0.0 });
 
 	BulletDebugDrawer* bullet_debug_drawer = new BulletDebugDrawer();
 	world->setDebugDrawer(bullet_debug_drawer);
@@ -92,31 +94,37 @@ int main(void)
 	bullet_debug_drawer->setDebugMode(
 		btIDebugDraw::DBG_DrawConstraints |
 		btIDebugDraw::DBG_DrawContactPoints |
-		btIDebugDraw::DBG_DrawWireframe);
+		btIDebugDraw::DBG_DrawWireframe |
+		btIDebugDraw::DBG_DrawFrames |
+		btIDebugDraw::DBG_DrawConstraintLimits);
 
 	Vehicle veh = Vehicle();
 	Piece control = create_dummy_piece({ 0.0, 0.0, 0.0 }, 1.0);
 	Piece fuel = create_dummy_piece({ 0.0, -3.0, 0.0 }, 2.0);
 	Piece rad = create_dummy_piece({ 2.5, -3.0, 0.0 }, 0.5);
-	Piece rad2 = create_dummy_piece({ 3.5, -3.0, 0.0 }, 0.5);
+	Piece rad2 = create_dummy_piece({ -2.5, -3.0, 0.0 }, 0.5);
 	Piece fuel2 = create_dummy_piece({ 5, -3.0, 0.0 }, 1.0);
-	
+	Piece fuel3 = create_dummy_piece({ -5, -3.0, 0.0 }, 1.0);
+
 	control.attached_to = nullptr;
 	fuel.attached_to = &control;
 	rad.attached_to = &fuel;
-	rad2.attached_to = &rad;
-	fuel2.attached_to = &rad2;
+	rad2.attached_to = &fuel;
+	fuel2.attached_to = &rad;
+	fuel3.attached_to = &rad2;
 
 	fuel.welded = true;
 	rad.welded = true;
-	rad2.welded = false;
+	rad2.welded = true;
 	fuel2.welded = true;
+	fuel3.welded = true;
 
 	veh.all_pieces.push_back(&control);
 	veh.all_pieces.push_back(&fuel);
 	veh.all_pieces.push_back(&rad);
 	veh.all_pieces.push_back(&rad2);
 	veh.all_pieces.push_back(&fuel2);
+	veh.all_pieces.push_back(&fuel3);
 
 	veh.root = &control;
 
@@ -149,14 +157,41 @@ int main(void)
 			dt = max_dt;
 		}
 
+
 		int sub_steps = world->stepSimulation(dt, max_steps, btScalar(step));
 
+		if (glfwGetKey(input->window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		{
+			glm::dmat4 tform = glm::toMat4(to_dquat(fuel2.get_current_transform().getRotation()));
+			glm::dvec3 f = tform * glm::dvec4(glm::dvec3(0.0, 1.0, 0.0) * 100.0, 1.0);
+			glm::dmat4 tform2 = glm::toMat4(to_dquat(fuel3.get_current_transform().getRotation()));
+			glm::dvec3 f2 = -tform2 * glm::dvec4(glm::dvec3(0.0, 1.0, 0.0) * 100.0, 1.0);
 
-		glm::dvec3 fuel2_pos = to_dvec3(fuel2.get_current_position().getOrigin());
+			glm::dvec3 pos = to_dvec3(fuel2.get_current_transform().getOrigin());
+			glm::dvec3 pos2 = to_dvec3(fuel3.get_current_transform().getOrigin());
 
-		cam_offset = glm::dvec3(sin(t * 0.5) * 10.0, 3.0, cos(t * 0.5) * 10.0);
-		camera.pos = cam_offset + fuel2_pos;
-		camera.fw = glm::normalize(fuel2_pos-camera.pos);
+			fuel2.rigid_body->applyForce(to_btVector3(f), fuel2.get_relative_position());
+			fuel3.rigid_body->applyForce(to_btVector3(f2), fuel3.get_relative_position());
+
+
+			debug_drawer->add_cone(pos, pos - f, 1.0, glm::vec3(1.0, 1.0, 0.0));
+			debug_drawer->add_cone(pos2, pos2 - f2, 1.0, glm::vec3(1.0, 1.0, 0.0));
+		}
+
+		if (glfwGetKey(input->window, GLFW_KEY_SPACE) == GLFW_PRESS)
+		{
+			rad.welded = false;
+			rad2.welded = false;
+			veh.build_physics(world);
+		}
+
+
+		glm::dvec3 fuel2_pos = to_dvec3(fuel2.get_current_transform().getOrigin());
+
+		//cam_offset = glm::dvec3(sin(t * 0.5) * 30.0, -2.0, cos(t * 0.5) * 30.0);
+		cam_offset = glm::dvec3(30.0, 0.0, 0.0);
+		camera.pos = cam_offset;// + fuel2_pos;
+		camera.fw = glm::normalize(-camera.pos);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 

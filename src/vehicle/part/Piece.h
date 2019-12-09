@@ -25,6 +25,8 @@ struct WeldedGroup
 // as it may be joined with other pieces into a single one
 class Piece
 {
+
+	
 public:
 
 	bool is_root;
@@ -70,7 +72,14 @@ public:
 
 	bool welded;
 
-	btTransform get_current_position();
+	btTransform get_current_transform();
+	btVector3 get_current_linear();
+	btVector3 get_current_angular();
+
+	// If welded, returns the position of the part
+	// relative to its rigid body, otherwise it's
+	// the same as get_current_position
+	btVector3 get_relative_position();
 
 	Piece();
 	~Piece();

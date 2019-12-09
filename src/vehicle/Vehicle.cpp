@@ -11,14 +11,29 @@ void Vehicle::build_physics(btDynamicsWorld* world)
 	// groups, and individual colliders for every other piece
 	// The bool is used later on to check if the group was already present
 	std::vector<WeldedGroupCreation> welded_groups;
-	std::vector<Piece*> single_pieces;
+
+	struct PieceState
+	{
+		btTransform transform;
+		btVector3 linear;
+		btVector3 angular;
+	};
+
+	std::unordered_map<Piece*, PieceState> states_at_start;
 
 	for (Piece* piece : all_pieces)
 	{
+		PieceState st;
+		st.transform = piece->get_current_transform();
+		st.linear = piece->get_current_linear();
+		st.angular = piece->get_current_angular();
+
+		states_at_start[piece] = st;
+
+		bool found = false;
+		// Find what welded group to add this to
 		if (piece->welded)
 		{
-			bool found = false;
-			// Find what welded group to add this to
 			for (size_t i = 0; i < welded_groups.size(); i++)
 			{
 				if (welded_groups[i].first.count(piece->attached_to) != 0)
@@ -28,28 +43,30 @@ void Vehicle::build_physics(btDynamicsWorld* world)
 					break;
 				}
 			}
+		}
 
-			if (!found)
+		if (!found)
+		{
+			welded_groups.push_back(std::make_pair(std::unordered_set<Piece*>(), false));
+			welded_groups[welded_groups.size() - 1].first.insert(piece);
+			if (piece->welded)
 			{
-				welded_groups.push_back(std::make_pair(std::unordered_set<Piece*>(), false));
-				welded_groups[welded_groups.size() - 1].first.insert(piece);
 				welded_groups[welded_groups.size() - 1].first.insert(piece->attached_to);
 			}
-
-			// Remove single collider
-			if (piece->in_group == nullptr)
-			{
-				if (piece->rigid_body != nullptr)
-				{
-					world->removeRigidBody(piece->rigid_body);
-					delete piece->rigid_body;
-					delete piece->motion_state;
-
-				}
-			}
 		}
-		else
+
+	}
+
+
+	std::vector<Piece*> single_pieces;
+	// Find single piece (groups of only one piece)
+
+	for (auto it = welded_groups.begin(); it != welded_groups.end();)
+	{
+		if (it->first.size() == 1)
 		{
+			Piece* piece = *it->first.begin();
+
 			single_pieces.push_back(piece);
 			// Remove welded colliders, if it had any
 			if (piece->in_group != nullptr)
@@ -59,10 +76,15 @@ void Vehicle::build_physics(btDynamicsWorld* world)
 				piece->in_group = nullptr;
 			}
 
+			it = welded_groups.erase(it);
+		}
+		else
+		{
+			it++;
 		}
 	}
 
-	// TODO: Remove welded groups that changed
+
 	for (auto it = welded.begin(); it != welded.end();)
 	{
 		WeldedGroup* wgroup = *it;
@@ -75,7 +97,7 @@ void Vehicle::build_physics(btDynamicsWorld* world)
 			int count = 0;
 			for (size_t i = 0; i < wgroup->pieces.size(); i++)
 			{
-				count += welded_groups[j].first.count(wgroup->pieces[i]);
+				count += (int)welded_groups[j].first.count(wgroup->pieces[i]);
 			}
 
 			if (count == wgroup->pieces.size())
@@ -112,7 +134,7 @@ void Vehicle::build_physics(btDynamicsWorld* world)
 			n_group->pieces.reserve(wg.first.size());
 
 			// Create collider
-			btCompoundShape* temp_collider = new btCompoundShape();
+			btCompoundShape temp_collider = btCompoundShape();
 			btCompoundShape* collider = new btCompoundShape();
 
 			btTransform identity;
@@ -126,8 +148,8 @@ void Vehicle::build_physics(btDynamicsWorld* world)
 
 			for (Piece* p : wg.first)
 			{
-				p->welded_tform = p->get_current_position();
-				temp_collider->addChildShape(p->welded_tform, p->collider);
+				p->welded_tform = states_at_start[p].transform;
+				temp_collider.addChildShape(p->welded_tform, p->collider);
 				masses.push_back(p->mass);
 				tot_mass += p->mass;
 			}
@@ -135,19 +157,18 @@ void Vehicle::build_physics(btDynamicsWorld* world)
 			// Create rigidbody
 			btVector3 local_inertia;
 
-			temp_collider->calculatePrincipalAxisTransform(masses.data(), principal, local_inertia);
+			temp_collider.calculatePrincipalAxisTransform(masses.data(), principal, local_inertia);
 
 			btTransform principal_inverse = principal.inverse();
 
-			for (int i = 0; i < temp_collider->getNumChildShapes(); i++)
+			for (int i = 0; i < temp_collider.getNumChildShapes(); i++)
 			{
 				// Note: If principal_inverse is rightmost term, it breaks
 				// TODO: Investigate if this is an error in bullet, as I copied the code from bullet examples
-				collider->addChildShape(principal_inverse * temp_collider->getChildTransform(i),
-					temp_collider->getChildShape(i));
+				collider->addChildShape(principal_inverse * temp_collider.getChildTransform(i),
+					temp_collider.getChildShape(i));
 			}
 
-			delete temp_collider;
 
 			//collider->calculateLocalInertia(tot_mass, local_inertia);
 
@@ -155,7 +176,12 @@ void Vehicle::build_physics(btDynamicsWorld* world)
 			btRigidBody::btRigidBodyConstructionInfo info(tot_mass, motion_state, collider, local_inertia);
 			btRigidBody* rigid_body = new btRigidBody(info);
 
+			rigid_body->setActivationState(DISABLE_DEACTIVATION);
+
 			world->addRigidBody(rigid_body);
+
+			btVector3 total_impulse = btVector3(0.0, 0.0, 0.0);
+			btVector3 total_torque = btVector3(0.0, 0.0, 0.0);
 
 			for (Piece* p : wg.first)
 			{
@@ -164,7 +190,17 @@ void Vehicle::build_physics(btDynamicsWorld* world)
 				p->rigid_body = rigid_body;
 				p->motion_state = motion_state;
 				p->welded_tform = principal_inverse * p->welded_tform;
+
+				// Apply old impulses
+				//rigid_body->applyImpulse((states_at_start[p].linear * p->mass) / tot_mass, p->get_relative_position());
+				rigid_body->applyCentralImpulse(states_at_start[p].linear * p->mass);
+				total_torque += states_at_start[p].angular;
 			}
+
+			total_torque /= (btScalar)wg.first.size();
+
+			//rigid_body->setAngularVelocity(btVector3(0, 0, 0));
+			rigid_body->setAngularVelocity(total_torque);
 
 			n_group->rigid_body = rigid_body;
 			n_group->motion_state = motion_state;
@@ -181,16 +217,25 @@ void Vehicle::build_physics(btDynamicsWorld* world)
 			btVector3 local_inertia;
 			piece->collider->calculateLocalInertia(piece->mass, local_inertia);
 
-			btMotionState* motion_state = new btDefaultMotionState(piece->position);
+			btMotionState* motion_state = new btDefaultMotionState(states_at_start[piece].transform);
 			btRigidBody::btRigidBodyConstructionInfo info(piece->mass, motion_state, piece->collider, local_inertia);
 			btRigidBody* rigid_body = new btRigidBody(info);
+
+			rigid_body->setActivationState(DISABLE_DEACTIVATION);
 
 			world->addRigidBody(rigid_body);
 
 			piece->rigid_body = rigid_body;
 			piece->motion_state = motion_state;
+
+			// Apply old impulses
+			rigid_body->applyImpulse(states_at_start[piece].linear * piece->mass, piece->get_relative_position());
+			rigid_body->setAngularVelocity(states_at_start[piece].angular);
 		}
 	}
+
+
+
 
 }
 
@@ -288,13 +333,13 @@ void Vehicle::draw_debug()
 			color = glm::vec3(1.0, 0.7, 1.0);
 		}
 
-		glm::dvec3 ppos = to_dvec3(p->get_current_position().getOrigin());
+		glm::dvec3 ppos = to_dvec3(p->get_current_transform().getOrigin());
 
 		debug_drawer->add_point(ppos, color);
 		
 		if (link != nullptr)
 		{
-			glm::dvec3 dpos = to_dvec3(link->get_current_position().getOrigin());
+			glm::dvec3 dpos = to_dvec3(link->get_current_transform().getOrigin());
 
 			if (p->welded)
 			{
