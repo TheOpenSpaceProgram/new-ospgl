@@ -1,20 +1,29 @@
 #pragma once
 #pragma warning(push, 0)
-#include <BulletDynamics/Dynamics/btRigidBody.h>
+#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 #pragma warning(pop)
 
 #include <vector>
 #include <unordered_map>
 #include <any>
+#include <memory>
+
+#include "link/Link.h"
+
+
 
 class Part;
 class Piece;
+class Vehicle;
 
 struct WeldedGroup
 {
 	std::vector<Piece*> pieces;
 	btRigidBody* rigid_body;
 	btMotionState* motion_state;
+
+	// Should the rigidbody be rebuilt?
+	bool dirty;
 };
 
 
@@ -25,9 +34,13 @@ struct WeldedGroup
 // as it may be joined with other pieces into a single one
 class Piece
 {
+private:
 
+	bool dirty;
 	
 public:
+
+	Vehicle* in_vehicle;
 
 	bool is_root;
 
@@ -36,12 +49,13 @@ public:
 	// root subparts
 	Part* part;
 
-	// Position in the current vessel at start of simulation
-	btTransform position;
-
 	double mass;
 
 	// Collider shape OF THIS SUBPART
+	// If you want a advanced compound collider with moving
+	// parts (for example, a fuel tank with simulated "liquid" 
+	// fuel, that's free to move), create another Piece
+	// which is always welded. That works better. (TODO: Check perfomance)
 	btCollisionShape* collider;
 
 	// If is_joined_to_others is true then this points
@@ -69,8 +83,9 @@ public:
 	// other thing (maybe wires or ropes?)
 	// nullptr if we are not welded
 	WeldedGroup* in_group;
-
 	bool welded;
+	// Negative if not welded
+	int welded_collider_id;
 
 	// Guaranteed to get the actual welded state, even if the
 	// user sets "welded" to false and "build_physics" has not
@@ -88,7 +103,21 @@ public:
 	// the same as get_current_position
 	btVector3 get_relative_position();
 
+	void set_dirty();
+
+	// The piece OWNS the link, which can be null
+	std::unique_ptr<Link> link;
+	// The point in our collider where the link originates
+	btVector3 link_from;
+	// The point in the other collider where the link arrives
+	btVector3 link_to;
+
 	Piece();
 	~Piece();
+
+	// Pieces cannot be copied, nor moved
+	Piece(Piece&&) = default;
+	Piece& operator=(Piece&&) = default;
+
 };
 

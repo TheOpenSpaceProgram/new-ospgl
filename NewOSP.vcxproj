@@ -161,7 +161,6 @@
     <None Include="res\core\shaders\ui\navball.vs" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\vehicle\part\Link.cpp" />
     <ClCompile Include="src\BulletExperiments.cpp" />
     <ClCompile Include="src\vehicle\part\Part.cpp" />
     <ClCompile Include="src\renderer\camera\SimpleCamera.cpp" />
@@ -219,7 +218,7 @@
     <ClCompile Include="src\vehicle\part\Piece.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\vehicle\part\Link.h" />
+    <ClInclude Include="src\vehicle\part\link\Link.h" />
     <ClInclude Include="src\vehicle\part\Part.h" />
     <ClInclude Include="src\renderer\camera\SimpleCamera.h" />
     <ClInclude Include="src\physics\debug\BulletDebugDrawer.h" />
