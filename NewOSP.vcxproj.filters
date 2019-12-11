@@ -202,9 +202,6 @@
     <ClCompile Include="src\BulletExperiments.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vehicle\part\Link.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\sol.hpp">
@@ -462,7 +459,7 @@
     <ClInclude Include="src\vehicle\part\Piece.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vehicle\part\Link.h">
+    <ClInclude Include="src\vehicle\part\link\Link.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

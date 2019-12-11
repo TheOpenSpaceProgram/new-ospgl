@@ -1,6 +1,6 @@
 #include "Piece.h"
-
-
+#include "../Vehicle.h"
+#include "../../util/Logger.h"
 
 bool Piece::is_welded()
 {
@@ -9,25 +9,20 @@ bool Piece::is_welded()
 
 btTransform Piece::get_global_transform()
 {
-	if (rigid_body == nullptr)
+	logger->check(rigid_body != nullptr, "Part is not added to a vessel");
+
+	btTransform tform;
+
+	//motion_state->getWorldTransform(tform);
+	tform = rigid_body->getWorldTransform();
+
+	if (is_welded())
 	{
-		return position;
+		return tform * welded_tform;
 	}
 	else
 	{
-		btTransform tform;
-
-		//motion_state->getWorldTransform(tform);
-		tform = rigid_body->getWorldTransform();
-
-		if (is_welded())
-		{
-			return tform * welded_tform;
-		}
-		else
-		{
-			return tform;
-		}
+		return tform;
 	}
 }
 
@@ -46,36 +41,29 @@ btTransform Piece::get_local_transform()
 
 btVector3 Piece::get_linear_velocity()
 {
-	if (rigid_body == nullptr)
-	{
-		return btVector3(0.0, 0.0, 0.0);
-	}
-	else
-	{
-		btVector3 base = rigid_body->getLinearVelocity();
-		if (is_welded())
-		{
-			base += get_tangential_velocity();
-		}
+	logger->check(rigid_body != nullptr, "Part is not added to a vessel");
 
-		return base;
+	btVector3 base = rigid_body->getLinearVelocity();
+	if (is_welded())
+	{
+		base += get_tangential_velocity();
 	}
+
+	return base;
 }
 
 btVector3 Piece::get_angular_velocity()
 {
-	if (rigid_body == nullptr)
-	{
-		return btVector3(0.0, 0.0, 0.0);
-	}
-	else
-	{
-		return rigid_body->getAngularVelocity();
-	}
+	logger->check(rigid_body != nullptr, "Part is not added to a vessel");
+
+	return rigid_body->getAngularVelocity();
+
 }
 
 btVector3 Piece::get_tangential_velocity()
 {
+	logger->check(rigid_body != nullptr, "Part is not added to a vessel");
+
 	if (!is_welded())
 	{
 		return btVector3(0.0, 0.0, 0.0);
@@ -89,10 +77,27 @@ btVector3 Piece::get_tangential_velocity()
 
 btVector3 Piece::get_relative_position()
 {
+	logger->check(rigid_body != nullptr, "Part is not added to a vessel");
+
 	return get_global_transform().getOrigin() - rigid_body->getWorldTransform().getOrigin();
 }
 
-Piece::Piece()
+void Piece::set_dirty()
+{
+	if (in_group != nullptr)
+	{
+		in_group->dirty = true;
+	}
+	else
+	{
+		dirty = true;
+	}
+
+	in_vehicle->dirty = true;
+}
+
+
+Piece::Piece() : link(nullptr)
 {
 	attached_to = nullptr;
 	part = nullptr;
