@@ -98,13 +98,15 @@ int main(void)
 		btIDebugDraw::DBG_DrawFrames |
 		btIDebugDraw::DBG_DrawConstraintLimits);
 
-	Vehicle veh = Vehicle(world);
-	Piece* fuel = create_dummy_piece({ 0.0, -3.0, 0.0 }, &veh, 2.0);
-	Piece* control = create_dummy_piece({ 0.0, 0.0, 0.0 }, &veh, 1.0);
-	Piece* rad2 = create_dummy_piece({ -2.5, -3.0, 0.0 }, &veh, 0.5);
-	Piece* rad = create_dummy_piece({ 2.5, -3.0, 0.0 }, &veh, 0.5);
-	Piece* fuel3 = create_dummy_piece({ -5, -3.0, 0.0 }, &veh, 1.0);
-	Piece* fuel2 = create_dummy_piece({ 5, -3.0, 0.0 }, &veh, 1.0);
+	std::vector<Vehicle*> vehicles;
+
+	Vehicle* veh = new Vehicle(world);
+	Piece* fuel = create_dummy_piece({ 0.0, -3.0, 0.0 }, veh, 2.0);
+	Piece* control = create_dummy_piece({ 0.0, 0.0, 0.0 }, veh, 1.0);
+	Piece* rad2 = create_dummy_piece({ -2.5, -3.0, 0.0 }, veh, 0.5);
+	Piece* rad = create_dummy_piece({ 2.5, -3.0, 0.0 }, veh, 0.5);
+	Piece* fuel3 = create_dummy_piece({ -5, -3.0, 0.0 }, veh, 1.0);
+	Piece* fuel2 = create_dummy_piece({ 5, -3.0, 0.0 }, veh, 1.0);
 
 
 	control->attached_to = nullptr;
@@ -120,17 +122,17 @@ int main(void)
 	fuel2->welded = true;
 	fuel3->welded = true;
 
-	veh.root = control;
+	veh->root = control;
 
-	veh.sort();
+	veh->sort();
 
-	veh.build_physics();
+	veh->build_physics();
 
 	double t = 0.0;
 	double pt = 0.0;
 
-	veh.set_position(to_btVector3(base));
-	veh.set_linear_velocity(to_btVector3(vbase));
+	veh->set_position(to_btVector3(base));
+	veh->set_linear_velocity(to_btVector3(vbase));
 
 	while (!glfwWindowShouldClose(renderer.window))
 	{
@@ -185,7 +187,8 @@ int main(void)
 		{
 			rad->welded = false;
 			rad2->welded = false;
-			veh.build_physics();
+			veh->handle_separation();
+			veh->build_physics();
 		}
 
 
@@ -201,7 +204,7 @@ int main(void)
 		renderer.prepare_draw();
 
 		debug_drawer->add_point(fuel2_pos, glm::vec3(1.0, 0.0, 1.0));
-		veh.draw_debug();
+		veh->draw_debug();
 	
 
 		glm::dmat4 proj_view = camera.get_proj_view(renderer.get_width(), renderer.get_height());

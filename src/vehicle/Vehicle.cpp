@@ -252,6 +252,19 @@ static void create_piece_physics(Piece* piece, std::unordered_map<Piece*, PieceS
 	rigid_body->setAngularVelocity(states_at_start[piece].angular);
 }
 
+void Vehicle::update(std::vector<Vehicle*>& vehicles)
+{
+	if (dirty)
+	{
+		auto n_vehicles = handle_separation();
+		vehicles.insert(vehicles.end(), n_vehicles.begin(), n_vehicles.end());
+
+		sort(); //< Not sure if needed
+
+		build_physics();
+	}
+}
+
 void Vehicle::build_physics()
 {	
 
@@ -267,6 +280,7 @@ void Vehicle::build_physics()
 
 	for (Piece* piece : all_pieces)
 	{
+		piece->in_vehicle = this;
 		states_at_start[piece] = obtain_piece_state(piece);
 
 		add_to_welded_groups(welded_groups, piece);
@@ -311,7 +325,85 @@ std::vector<Vehicle*> Vehicle::handle_separation()
 	std::vector<Vehicle*> n_vehicles;
 
 	// Find all pieces that can't reach root, and create a new vehicle from them
-	// Assumes the vehicle is sorted!
+	// Assumes the vehicle was sorted before the part separated!
+	// (Don't sort with a part separated)
+
+	std::vector<std::vector<Piece*>> n_pieces;
+
+	for (auto it = all_pieces.begin(); it != all_pieces.end(); )
+	{
+		Piece* p = *it;
+
+		if (p == root)
+		{
+			it++;
+			continue;
+		}
+
+		// Handle broken links
+		if (p->welded == false)
+		{
+			if (p->link == nullptr)
+			{
+				p->attached_to = nullptr;
+			}
+			else
+			{
+				if (p->link->is_broken())
+				{
+					p->attached_to = nullptr;
+				}
+			}
+		}
+
+		if (p->attached_to == nullptr)
+		{
+			n_pieces.push_back(std::vector<Piece*>());
+			n_pieces[n_pieces.size() - 1].push_back(p);
+
+			it = all_pieces.erase(it);
+		}
+		else
+		{
+			bool removed = false;
+
+			for (auto& list : n_pieces)
+			{
+				for (auto sub_p : list)
+				{
+					if (p->attached_to == sub_p)
+					{
+						list.push_back(p);
+						it = all_pieces.erase(it);
+						removed = true;
+
+						// Lord, I'm sorry, but this is the cleanest option
+						goto out;
+					}
+				}
+			}
+
+			out:
+
+			if (!removed)
+			{
+				it++;
+			}
+		}
+	}
+
+	for (auto& n_vessel_pieces : n_pieces)
+	{
+		Vehicle* n_vehicle = new Vehicle(world);
+
+		n_vehicle->all_pieces = n_vessel_pieces;
+		n_vehicle->root = n_vessel_pieces[0];
+
+		n_vehicle->sort();
+		n_vehicle->build_physics();
+
+		n_vehicles.push_back(n_vehicle);
+	}
 
 	return n_vehicles;
 }
@@ -405,6 +497,8 @@ void Vehicle::sort()
 		open = new_open;
 		
 	}
+
+	logger->check(sorted.size() == all_pieces.size(), "Vehicle was sorted while some pieces were not attached!");
 
 	this->all_pieces = sorted;
 }

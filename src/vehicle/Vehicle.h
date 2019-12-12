@@ -44,7 +44,8 @@ public:
 	std::vector<Piece*> single_pieces;
 
 	// Call every frame, it checks the dirty flag
-	void update();
+	// Can create new vehicles if parts separate
+	void update(std::vector<Vehicle*>& vehicles);
 
 	// Called when a part separates or joins, or the type of
 	// link changes, so the physics engine can recreate the
