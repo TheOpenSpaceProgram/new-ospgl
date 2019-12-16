@@ -3,6 +3,8 @@
 #include "Image.h"
 #include "Config.h"
 #include "BitmapFont.h"
+#include "Model.h"
+
 #include <istream>
 #include <fstream>
 
@@ -15,10 +17,11 @@ void create_global_asset_manager()
 
 	assets->preload();
 
-	assets->create_asset_type<Shader>("Shader", loadShader, true, "[.]vs");
+	assets->create_asset_type<Shader>("Shader", loadShader);
 	assets->create_asset_type<Image>("Image", loadImage);
-	assets->create_asset_type<Config>("Config", loadConfig, true, "[.]toml");
-	assets->create_asset_type<BitmapFont>("Bitmap Font", loadBitmapFont, true, "[.]fnt");
+	assets->create_asset_type<Config>("Config", loadConfig);
+	assets->create_asset_type<BitmapFont>("Bitmap Font", loadBitmapFont);
+	assets->create_asset_type<Model>("Model", loadModel);
 
 	assets->check_packages();
 }

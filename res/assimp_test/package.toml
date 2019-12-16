@@ -1,0 +1,6 @@
+id = "assimp_test"
+name = "Test for Assimp"
+description = "A test for the assimp library"
+author = "Tatjam"
+version = "0.0.1"
+dependencies = ["navball"]
