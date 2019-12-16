@@ -45,11 +45,10 @@ public:
 
 	// Call every frame, it checks the dirty flag
 	// Can create new vehicles if parts separate
-	void update(std::vector<Vehicle*>& vehicles);
+	std::vector<Vehicle*> update();
 
-	// Called when a part separates or joins, or the type of
-	// link changes, so the physics engine can recreate the
-	// rigid bodies.
+	// Called automatically by update to rebuild the physics
+	// whenever the dirty flag is set
 	void build_physics();
 
 	// Piece gets 0 velocity and angular momentum

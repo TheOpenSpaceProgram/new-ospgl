@@ -26,6 +26,10 @@
 InputUtil* input;
 
 
+#include "assets/Model.h"
+
+
+
 Piece* create_dummy_piece(glm::dvec3 offset, Vehicle* veh, double radius = 1.0)
 {
 	Piece* out = new Piece();
@@ -44,6 +48,7 @@ Piece* create_dummy_piece(glm::dvec3 offset, Vehicle* veh, double radius = 1.0)
 	
 	return out;
 }
+
 
 int main(void)
 {
@@ -67,7 +72,10 @@ int main(void)
 	create_global_text_drawer();
 
 	Timer dtt = Timer();
+	Timer pdtt = Timer();
+
 	double dt = 0.0;
+	double pdt = 0.0;
 
 	input = new InputUtil();
 	input->setup(renderer.window);
@@ -98,41 +106,14 @@ int main(void)
 		btIDebugDraw::DBG_DrawFrames |
 		btIDebugDraw::DBG_DrawConstraintLimits);
 
+
 	std::vector<Vehicle*> vehicles;
 
-	Vehicle* veh = new Vehicle(world);
-	Piece* fuel = create_dummy_piece({ 0.0, -3.0, 0.0 }, veh, 2.0);
-	Piece* control = create_dummy_piece({ 0.0, 0.0, 0.0 }, veh, 1.0);
-	Piece* rad2 = create_dummy_piece({ -2.5, -3.0, 0.0 }, veh, 0.5);
-	Piece* rad = create_dummy_piece({ 2.5, -3.0, 0.0 }, veh, 0.5);
-	Piece* fuel3 = create_dummy_piece({ -5, -3.0, 0.0 }, veh, 1.0);
-	Piece* fuel2 = create_dummy_piece({ 5, -3.0, 0.0 }, veh, 1.0);
-
-
-	control->attached_to = nullptr;
-	fuel->attached_to = control;
-	rad->attached_to = fuel;
-	rad2->attached_to = fuel;
-	fuel2->attached_to = rad;
-	fuel3->attached_to = rad2;
-
-	fuel->welded = true;
-	rad->welded = true;
-	rad2->welded = true;
-	fuel2->welded = true;
-	fuel3->welded = true;
-
-	veh->root = control;
-
-	veh->sort();
-
-	veh->build_physics();
-
-	double t = 0.0;
 	double pt = 0.0;
+	double t = 0.0;
 
-	veh->set_position(to_btVector3(base));
-	veh->set_linear_velocity(to_btVector3(vbase));
+
+	Model* m = assets->get<Model>("assimp_test", "test/test.blend");
 
 	while (!glfwWindowShouldClose(renderer.window))
 	{
@@ -160,52 +141,29 @@ int main(void)
 		}
 
 
-		int sub_steps = world->stepSimulation(dt, max_steps, btScalar(step));
+		int sub_steps = world->stepSimulation(pdt, max_steps, btScalar(step));
+		pdt = pdtt.restart();
 
-		double pdt = step * sub_steps;
+
 		pt += pdt;
 
-		if (glfwGetKey(input->window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+
+		std::vector<Vehicle*> n_vehicles;
+
+		for (Vehicle* v : vehicles)
 		{
-			glm::dmat4 tform = glm::toMat4(to_dquat(fuel2->get_global_transform().getRotation()));
-			glm::dvec3 f = tform * glm::dvec4(glm::dvec3(0.0, 1.0, 0.0) * 100.0, 1.0);
-			glm::dmat4 tform2 = glm::toMat4(to_dquat(fuel3->get_global_transform().getRotation()));
-			glm::dvec3 f2 = -tform2 * glm::dvec4(glm::dvec3(0.0, 1.0, 0.0) * 100.0, 1.0);
-
-			glm::dvec3 pos = to_dvec3(fuel2->get_global_transform().getOrigin());
-			glm::dvec3 pos2 = to_dvec3(fuel3->get_global_transform().getOrigin());
-
-			fuel2->rigid_body->applyForce(to_btVector3(f), fuel2->get_relative_position());
-			fuel3->rigid_body->applyForce(to_btVector3(f2), fuel3->get_relative_position());
+			v->draw_debug();
+			auto n = v->update();
+			n_vehicles.insert(n_vehicles.end(), n.begin(), n.end());
 
 
-			debug_drawer->add_cone(pos, pos - f, 1.0, glm::vec3(1.0, 1.0, 0.0));
-			debug_drawer->add_cone(pos2, pos2 - f2, 1.0, glm::vec3(1.0, 1.0, 0.0));
 		}
 
-		if (glfwGetKey(input->window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		{
-			rad->welded = false;
-			rad2->welded = false;
-			veh->handle_separation();
-			veh->build_physics();
-		}
-
-
-		glm::dvec3 fuel2_pos = to_dvec3(fuel2->get_global_transform().getOrigin());
-
-		//cam_offset = glm::dvec3(sin(t * 0.5) * 30.0, -2.0, cos(t * 0.5) * 30.0);
-		cam_offset = glm::dvec3(30.0, 0.0, 30.0);
-		camera.pos = base + cam_offset + vbase * pt;// + fuel2_pos;
-		camera.fw = glm::normalize((base + vbase * pt)-camera.pos);
+		vehicles.insert(vehicles.end(), n_vehicles.begin(), n_vehicles.end());
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 		renderer.prepare_draw();
-
-		debug_drawer->add_point(fuel2_pos, glm::vec3(1.0, 0.0, 1.0));
-		veh->draw_debug();
-	
 
 		glm::dmat4 proj_view = camera.get_proj_view(renderer.get_width(), renderer.get_height());
 		glm::dmat4 c_model = camera.get_cmodel();
@@ -230,6 +188,8 @@ int main(void)
 
 		dt = dtt.restart();
 		t += dt;
+
+		//logger->info("T: {} | PT: {}", t, pt);
 
 
 	}

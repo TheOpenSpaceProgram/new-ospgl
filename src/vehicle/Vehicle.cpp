@@ -101,7 +101,7 @@ static void remove_outdated_welded_groups(
 				count += (int)welded_groups[j].first.count(wgroup->pieces[i]);
 			}
 
-			if (count == wgroup->pieces.size())
+			if (count == wgroup->pieces.size() && !wgroup->dirty)
 			{
 				found = true;
 				welded_groups[j].second = true;
@@ -252,17 +252,20 @@ static void create_piece_physics(Piece* piece, std::unordered_map<Piece*, PieceS
 	rigid_body->setAngularVelocity(states_at_start[piece].angular);
 }
 
-void Vehicle::update(std::vector<Vehicle*>& vehicles)
+std::vector<Vehicle*> Vehicle::update()
 {
+	std::vector<Vehicle*> n_vehicles;
+
 	if (dirty)
 	{
-		auto n_vehicles = handle_separation();
-		vehicles.insert(vehicles.end(), n_vehicles.begin(), n_vehicles.end());
+		n_vehicles = handle_separation();
 
 		sort(); //< Not sure if needed
 
 		build_physics();
 	}
+
+	return n_vehicles;
 }
 
 void Vehicle::build_physics()

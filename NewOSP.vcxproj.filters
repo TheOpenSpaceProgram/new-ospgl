@@ -44,6 +44,7 @@
     <None Include="res\rss\planets\test_gas\config.toml" />
     <None Include="res\rss\package.toml" />
     <None Include="res\navball\navball.toml" />
+    <None Include="res\assimp_test\package.toml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\Logger.cpp">
@@ -200,6 +201,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\BulletExperiments.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -460,6 +464,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vehicle\part\link\Link.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

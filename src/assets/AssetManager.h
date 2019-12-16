@@ -388,6 +388,7 @@ public:
 		// To satisfy std vectors, not really needed
 	}
 
+	// We must take the ownership
 	AssetHandle(AssetHandle&& b)
 	{
 		this->pkg = b.pkg;
@@ -402,6 +403,16 @@ public:
 	~AssetHandle()
 	{
 		unload();
+	}
+
+	T* operator->()
+	{
+		return get();
+	}
+
+	T& operator*()
+	{
+		return *get();
 	}
 };
 
