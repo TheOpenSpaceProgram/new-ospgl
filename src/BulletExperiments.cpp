@@ -71,126 +71,140 @@ int main(void)
 	create_global_texture_drawer();
 	create_global_text_drawer();
 
-	Timer dtt = Timer();
-	Timer pdtt = Timer();
-
-	double dt = 0.0;
-	double pdt = 0.0;
-
-	input = new InputUtil();
-	input->setup(renderer.window);
-
-	double AU = 149597900000.0;
-
-	glm::dvec3 base = glm::dvec3(1.0 * AU, 0.0, 0.0);
-	glm::dvec3 vbase = glm::dvec3(40000.0, 0.0, 0.0);
-
-	SimpleCamera camera = SimpleCamera();
-	glm::dvec3 cam_offset = glm::dvec3(-10.0, 0.0f, -5.0f);
-	camera.fw = glm::normalize(glm::dvec3(1.0f, 0.0f, 0.5f));
-
-	btDefaultCollisionConfiguration* collision_config = new btDefaultCollisionConfiguration();
-	btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collision_config);
-	btBroadphaseInterface* brf_interface = new btDbvtBroadphase();
-	btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver();
-	btDiscreteDynamicsWorld* world = new btDiscreteDynamicsWorld(dispatcher, brf_interface, solver, collision_config);
-
-	world->setGravity({ 0.0, 0.0, 0.0 });
-
-	BulletDebugDrawer* bullet_debug_drawer = new BulletDebugDrawer();
-	world->setDebugDrawer(bullet_debug_drawer);
-
-	bullet_debug_drawer->setDebugMode(
-		btIDebugDraw::DBG_DrawConstraints |
-		btIDebugDraw::DBG_DrawWireframe |
-		btIDebugDraw::DBG_DrawFrames |
-		btIDebugDraw::DBG_DrawConstraintLimits);
-
-
-	std::vector<Vehicle*> vehicles;
-
-	double pt = 0.0;
-	double t = 0.0;
-
-
-	Model* m = assets->get<Model>("assimp_test", "test/test.blend");
-
-	while (!glfwWindowShouldClose(renderer.window))
 	{
-		input->update(renderer.window);
+		Timer dtt = Timer();
+		Timer pdtt = Timer();
+
+		double dt = 0.0;
+		double pdt = 0.0;
+
+		input = new InputUtil();
+		input->setup(renderer.window);
+
+		double AU = 149597900000.0;
+
+		glm::dvec3 base = glm::dvec3(0.0 * AU, 0.0, 0.0);
+		glm::dvec3 vbase = glm::dvec3(0.0, 0.0, 0.0);
+
+		SimpleCamera camera = SimpleCamera();
+		glm::dvec3 cam_offset = glm::dvec3(-10.0, 0.0f, -5.0f);
+		camera.fw = glm::normalize(glm::dvec3(1.0f, 0.0f, 0.5f));
+
+		btDefaultCollisionConfiguration* collision_config = new btDefaultCollisionConfiguration();
+		btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collision_config);
+		btBroadphaseInterface* brf_interface = new btDbvtBroadphase();
+		btSequentialImpulseConstraintSolver* solver = new btSequentialImpulseConstraintSolver();
+		btDiscreteDynamicsWorld* world = new btDiscreteDynamicsWorld(dispatcher, brf_interface, solver, collision_config);
+
+		world->setGravity({ 0.0, 0.0, 0.0 });
+
+		BulletDebugDrawer* bullet_debug_drawer = new BulletDebugDrawer();
+		world->setDebugDrawer(bullet_debug_drawer);
+
+		bullet_debug_drawer->setDebugMode(
+			btIDebugDraw::DBG_DrawConstraints |
+			btIDebugDraw::DBG_DrawWireframe |
+			btIDebugDraw::DBG_DrawFrames |
+			btIDebugDraw::DBG_DrawConstraintLimits);
 
 
-		glfwPollEvents();
+		std::vector<Vehicle*> vehicles;
+
+		double pt = 0.0;
+		double t = 0.0;
+
+		AssetHandle<Model> m = AssetHandle<Model>("assimp_test", "test/test.blend");
+		GPUModelPointer gpu_ptr = GPUModelPointer(std::move(m));
 
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
-
-
-		double step = 1.0 / 60.0;
-		int max_steps = 32;
-
-		double max_dt = (max_steps - 1) * step;
-
-		if (dt > max_dt)
+		while (!glfwWindowShouldClose(renderer.window))
 		{
-			logger->warn("Delta-time too high ({})/({}), slowing down", dt, max_dt);
-			dt = max_dt;
+			input->update(renderer.window);
+
+
+			glfwPollEvents();
+
+
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+
+
+
+			double step = 1.0 / 60.0;
+			int max_steps = 32;
+
+			double max_dt = (max_steps - 1) * step;
+
+			if (dt > max_dt)
+			{
+				logger->warn("Delta-time too high ({})/({}), slowing down", dt, max_dt);
+				dt = max_dt;
+			}
+
+
+			int sub_steps = world->stepSimulation(pdt, max_steps, btScalar(step));
+			pdt = pdtt.restart();
+
+
+			pt += pdt;
+
+
+			std::vector<Vehicle*> n_vehicles;
+
+			for (Vehicle* v : vehicles)
+			{
+				v->draw_debug();
+				auto n = v->update();
+				n_vehicles.insert(n_vehicles.end(), n.begin(), n.end());
+
+
+			}
+
+			vehicles.insert(vehicles.end(), n_vehicles.begin(), n_vehicles.end());
+
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+			renderer.prepare_draw();
+
+			CameraUniforms c_uniforms = camera.get_camera_uniforms(renderer.get_width(), renderer.get_height());
+
+			glm::dmat4 proj_view = c_uniforms.proj_view;
+			glm::dmat4 c_model = c_uniforms.c_model;
+			float far_plane = c_uniforms.far_plane;
+
+			if (renderer.render_enabled)
+			{
+				world->debugDrawWorld();
+
+				glm::dmat4 model = glm::dmat4(1.0);
+				model = glm::translate(model, base + vbase * pt + glm::dvec3(10.0, 0.0, 0.0));
+
+				Node* n = gpu_ptr.get_node("Test");
+				n->meshes[0].bind_uniforms(c_uniforms, model);
+				n->meshes[0].draw_command();
+
+
+				debug_drawer->render(proj_view, c_model, far_plane);
+
+				renderer.prepare_gui();
+
+			}
+
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
+
+			glfwSwapBuffers(renderer.window);
+
+			dt = dtt.restart();
+			t += dt;
+
+			//logger->info("T: {} | PT: {}", t, pt);
+
+
 		}
-
-
-		int sub_steps = world->stepSimulation(pdt, max_steps, btScalar(step));
-		pdt = pdtt.restart();
-
-
-		pt += pdt;
-
-
-		std::vector<Vehicle*> n_vehicles;
-
-		for (Vehicle* v : vehicles)
-		{
-			v->draw_debug();
-			auto n = v->update();
-			n_vehicles.insert(n_vehicles.end(), n.begin(), n.end());
-
-
-		}
-
-		vehicles.insert(vehicles.end(), n_vehicles.begin(), n_vehicles.end());
-
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-		renderer.prepare_draw();
-
-		glm::dmat4 proj_view = camera.get_proj_view(renderer.get_width(), renderer.get_height());
-		glm::dmat4 c_model = camera.get_cmodel();
-		float far_plane = 1e16f;
-
-		if (renderer.render_enabled)
-		{
-			world->debugDrawWorld();
-
-			debug_drawer->render(proj_view, c_model, far_plane);
-
-			renderer.prepare_gui();
-
-		}
-
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-
-
-		glfwSwapBuffers(renderer.window);
-
-		dt = dtt.restart();
-		t += dt;
-
-		//logger->info("T: {} | PT: {}", t, pt);
-
 
 	}
 

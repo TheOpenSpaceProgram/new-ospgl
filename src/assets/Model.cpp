@@ -60,7 +60,10 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to)
 	m->data = (float*)malloc(vert_size * mesh->mNumVertices);
 	m->indices = (uint32_t*)malloc(sizeof(uint32_t) * mesh->mNumFaces * 3);
 
+	m->data_size = vert_size * mesh->mNumVertices;
+
 	bool log_once_tangents = false;
+	bool log_once_colors = false;
 
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
@@ -69,6 +72,8 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to)
 		m->indices[i * 3 + 1] = face.mIndices[1];
 		m->indices[i * 3 + 2] = face.mIndices[2];
 	}
+
+	m->index_count = mesh->mNumFaces * 3;
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
@@ -146,20 +151,51 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to)
 			
 		}
 
+		// We only support one vertex color map
 		if (config.has_cl3)
 		{
-			// We only support one color map
-			m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
-			m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
-			m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
+			if (mesh->mColors[0])
+			{
+				m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
+				m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
+				m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
+			}
+			else
+			{
+				m->data[i0 + j * o] = 0.0f; j++;
+				m->data[i0 + j * o] = 0.0f; j++;
+				m->data[i0 + j * o] = 0.0f; j++;
+
+				if (!log_once_colors)
+				{
+					logger->warn("Could not find vertex colors. Make sure your model has them!");
+					log_once_colors = true;
+				}
+			}
 		}
 
 		if (config.has_cl4)
 		{
-			m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
-			m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
-			m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
-			m->data[i0 + j * o] = mesh->mColors[0][i].a; j++;
+			if (mesh->mColors[0])
+			{
+				m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
+				m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
+				m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
+				m->data[i0 + j * o] = mesh->mColors[0][i].a; j++;
+			}
+			else
+			{
+				m->data[i0 + j * o] = 0.0f; j++;
+				m->data[i0 + j * o] = 0.0f; j++;
+				m->data[i0 + j * o] = 0.0f; j++;
+				m->data[i0 + j * o] = 0.0f; j++;
+
+				if (!log_once_colors)
+				{
+					logger->warn("Could not find vertex colors. Make sure your model has them!");
+					log_once_colors = true;
+				}
+			}
 		}
 	}
 }
@@ -190,7 +226,7 @@ void Mesh::upload()
 		glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
 
 		ptr_num++;
-		offset += 3;
+		offset += 3 * sizeof(float);
 	}
 
 	if (material->cfg.has_nrm)
@@ -200,7 +236,7 @@ void Mesh::upload()
 		glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
 
 		ptr_num++;
-		offset += 3;
+		offset += 3 * sizeof(float);
 	}
 
 	if (material->cfg.has_tex)
@@ -210,7 +246,7 @@ void Mesh::upload()
 		glVertexAttribPointer(ptr_num, 2, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
 
 		ptr_num++;
-		offset += 2;
+		offset += 2 * sizeof(float);
 	}
 
 	if (material->cfg.has_tgt)
@@ -219,7 +255,7 @@ void Mesh::upload()
 		glEnableVertexAttribArray(ptr_num);
 		glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
 		ptr_num++;
-		offset += 3;
+		offset += 3 * sizeof(float);
 
 		// Bitangent
 		glEnableVertexAttribArray(ptr_num);
@@ -235,7 +271,7 @@ void Mesh::upload()
 		glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
 
 		ptr_num++;
-		offset += 3;
+		offset += 3 * sizeof(float);
 	}
 
 	if (material->cfg.has_cl4)
@@ -245,7 +281,7 @@ void Mesh::upload()
 		glVertexAttribPointer(ptr_num, 4, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
 
 		ptr_num++;
-		offset += 4;
+		offset += 4 * sizeof(float);
 	}
 	
 	glBindVertexArray(0);
@@ -268,6 +304,15 @@ void Mesh::unload()
 	material.unload();
 }
 
+void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model)
+{
+	// TODO
+	material->shader->use();
+
+	material->set(nullptr);
+	material->set_core(uniforms, model);
+}
+
 void Mesh::draw_command()
 {
 	logger->check(vao != 0, "Tried to render a non-loaded mesh");
@@ -281,13 +326,26 @@ void Mesh::draw_command()
 
 void Model::upload()
 {
-
+	for (auto it = node_by_name.begin(); it != node_by_name.end(); it++)
+	{
+		for (size_t i = 0; i < it->second->meshes.size(); i++)
+		{
+			it->second->meshes[i].upload();
+		}
+	}
 	
 	uploaded = true;
 }
 
 void Model::unload()
 {
+	for (auto it = node_by_name.begin(); it != node_by_name.end(); it++)
+	{
+		for (size_t i = 0; i < it->second->meshes.size(); i++)
+		{
+			it->second->meshes[i].unload();
+		}
+	}
 	uploaded = false;
 }
 
@@ -354,7 +412,7 @@ Node* GPUModelPointer::get_root_node()
 	return model->root;
 }
 
-GPUModelPointer::GPUModelPointer(AssetHandle<Model> model)
+GPUModelPointer::GPUModelPointer(AssetHandle<Model>&& m) : model(std::move(m))
 {
 	model->get_gpu();
 }

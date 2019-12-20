@@ -33,8 +33,8 @@ public:
 	void upload();
 	void unload();
 
-	// Binds basic uniforms
-	void draw(const CameraUniforms& uniforms);
+	// Binds core uniforms and material uniforms
+	void bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model);
 
 	// Only issues the draw command, does absolutely nothing else
 	void draw_command();
@@ -124,7 +124,8 @@ public:
 	// Same as above
 	Node* get_root_node();
 
-	GPUModelPointer(AssetHandle<Model> model);
+	// We take ownership of the asset handle (std::move)
+	GPUModelPointer(AssetHandle<Model>&& model);
 	~GPUModelPointer();
 };
 

@@ -2,10 +2,14 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <tuple>
+#include "CameraUniforms.h"
+
 
 class SimpleCamera
 {
 private:
+	glm::dmat4 get_proj_view(int w, int h);
+	glm::dmat4 get_cmodel();
 
 public:
 
@@ -17,10 +21,11 @@ public:
 
 	void update(double dt);
 
+	// Relative to system, not to center planet
 	std::pair<glm::dvec3, glm::dvec3> get_camera_pos_dir();
 
-	glm::dmat4 get_proj_view(int w, int h);
-	glm::dmat4 get_cmodel();
+	CameraUniforms get_camera_uniforms(int w, int h);
+
 
 
 	SimpleCamera();
