@@ -27,6 +27,7 @@ private:
 
 public:
 
+
 	bool render_enabled;
 
 	GLFWwindow* window;

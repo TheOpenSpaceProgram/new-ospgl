@@ -36,6 +36,8 @@ public:
 	StateVector states_now;
 
 	double t, timewarp;
+	
+	CameraUniforms camera_uniforms;
 
 	// The MapCamera MAY not be here, actually (TODO)
 	MapCamera camera;

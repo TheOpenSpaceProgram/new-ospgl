@@ -7,6 +7,8 @@
 #include "../../universe/SystemPointer.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "CameraUniforms.h"
+
 // Allows locking the camera on anything, but only
 // on intertial reference frames
 class MapCamera
@@ -14,6 +16,8 @@ class MapCamera
 private:
 
 	double scroll_vel;
+	glm::dmat4 get_proj_view(int w, int h);
+	glm::dmat4 get_cmodel();
 
 public:
 
@@ -32,8 +36,7 @@ public:
 	// Relative to system, not to center planet
 	std::pair<glm::dvec3, glm::dvec3> get_camera_pos_dir();
 
-	glm::dmat4 get_proj_view(int w, int h);
-	glm::dmat4 get_cmodel();
+	CameraUniforms get_camera_uniforms(int w, int h);
 
 	MapCamera(SystemPointer ptr);
 	~MapCamera();

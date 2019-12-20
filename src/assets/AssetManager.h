@@ -102,7 +102,7 @@ private:
 	std::string current_package;
 
 public:
-	
+
 	static bool file_exists(const std::string& path);
 
 	// Simply loads a string from given path, no packages or anything
@@ -281,8 +281,10 @@ inline void AssetManager::load(const std::string& package, const std::string& na
 	}
 	
 
+	set_current_package(package);
 	T* ndata = fptr(full_path, name, package, *cfg);
 	logger->check(ndata != nullptr, "Loaded data must not be null");
+	set_current_package("core");
 
 	Asset asset;
 	asset.uses = 0;
@@ -339,6 +341,8 @@ public:
 
 	T* get()
 	{
+		logger->check(pkg != "" && name != "", "Tried to get a null asset handle");
+
 		if (data != nullptr)
 		{
 			return data;
