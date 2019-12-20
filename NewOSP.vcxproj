@@ -134,7 +134,9 @@
     <None Include=".gitignore" />
     <None Include="imgui.ini" />
     <None Include="lua51.dll" />
+    <None Include="res\assimp_test\materials\mat_test.toml" />
     <None Include="res\assimp_test\package.toml" />
+    <None Include="res\assimp_test\test\test.blend.toml" />
     <None Include="res\core\default_gas.toml" />
     <None Include="res\core\default_planet.toml" />
     <None Include="res\core\package.toml" />
@@ -163,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\assets\Model.cpp" />
+    <ClCompile Include="src\assets\Material.cpp" />
     <ClCompile Include="src\BulletExperiments.cpp" />
     <ClCompile Include="src\vehicle\part\Part.cpp" />
     <ClCompile Include="src\renderer\camera\SimpleCamera.cpp" />
@@ -220,7 +223,9 @@
     <ClCompile Include="src\vehicle\part\Piece.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\assets\Material.h" />
     <ClInclude Include="src\assets\Model.h" />
+    <ClInclude Include="src\renderer\camera\CameraUniforms.h" />
     <ClInclude Include="src\vehicle\part\link\Link.h" />
     <ClInclude Include="src\vehicle\part\Part.h" />
     <ClInclude Include="src\renderer\camera\SimpleCamera.h" />

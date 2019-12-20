@@ -1,0 +1,6 @@
+shader = "core:shaders/debug.vs"
+
+
+[uniforms]
+
+	diffuse = "navball:antinormal.png"

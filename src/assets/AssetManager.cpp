@@ -4,6 +4,8 @@
 #include "Config.h"
 #include "BitmapFont.h"
 #include "Model.h"
+#include "Material.h"
+
 
 #include <istream>
 #include <fstream>
@@ -22,6 +24,7 @@ void create_global_asset_manager()
 	assets->create_asset_type<Config>("Config", loadConfig);
 	assets->create_asset_type<BitmapFont>("Bitmap Font", loadBitmapFont);
 	assets->create_asset_type<Model>("Model", loadModel);
+	assets->create_asset_type<Material>("Material", loadMaterial);
 
 	assets->check_packages();
 }

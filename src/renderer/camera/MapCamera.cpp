@@ -58,6 +58,30 @@ std::pair<glm::dvec3, glm::dvec3> MapCamera::get_camera_pos_dir()
 	return std::make_pair(pos, dir);
 }
 
+CameraUniforms MapCamera::get_camera_uniforms(int w, int h)
+{
+	CameraUniforms out;
+
+	auto[camera_pos, camera_dir] = get_camera_pos_dir();
+	// ~1 light year
+	float far_plane = 1e16f;
+
+
+	glm::dmat4 proj = glm::perspective(glm::radians(fov), (double)w / (double)h, 0.1, (double)far_plane);
+	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), camera_dir, glm::dvec3(0.0, 1.0, 0.0));
+	glm::dmat4 proj_view = proj * view;
+
+	out.proj = proj;
+	out.view = view;
+	out.proj_view = proj_view;
+	out.c_model = glm::translate(glm::dmat4(1.0), -camera_pos);
+	out.tform = proj * view * out.c_model;
+	out.far_plane = 10e16f;
+	out.cam_pos = camera_pos;
+
+	return out;
+}
+
 glm::dmat4 MapCamera::get_proj_view(int width, int height)
 {
 	auto[camera_pos, camera_dir] = get_camera_pos_dir();

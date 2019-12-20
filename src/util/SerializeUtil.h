@@ -28,6 +28,9 @@
 	TOML_CHECK_FUNC(from.get_table_qualified(name).operator bool(), "Table " name " of type" #type " was malformed"); \
 	{auto table = from.get_table_qualified(name); ::deserialize<type>(target, *table);}
 
+#define SAFE_TOML_GET_OR_IGNORE(target, name, type) \
+	do{ auto t = from.get_qualified_as<type>(name); if (t){target = *t;}}while(0);
+
 template<typename T>
 class GenericSerializer
 {

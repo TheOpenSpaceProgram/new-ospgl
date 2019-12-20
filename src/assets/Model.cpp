@@ -9,6 +9,12 @@ void Model::process_node(aiNode* node, const aiScene* scene, Node* to)
 {
 	Node* n_node = new Node();
 
+	n_node->name = node->mName.C_Str();
+
+	logger->check(node_by_name.find(n_node->name) == node_by_name.end(), "We don't support non-unique node names");
+
+	node_by_name[n_node->name] =n_node;
+
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
 		// the node object only contains indices to index the actual objects in the scene. 
@@ -36,8 +42,16 @@ void Model::process_node(aiNode* node, const aiScene* scene, Node* to)
 
 void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to)
 {
-	to->meshes.push_back(Mesh(config));
+	aiMaterial* ai_mat = scene->mMaterials[mesh->mMaterialIndex];
+
+	AssetPointer mat_ptr = AssetPointer(ai_mat->GetName().C_Str());
+
+	AssetHandle<Material> mat = AssetHandle<Material>(mat_ptr);
+
+	to->meshes.push_back(Mesh(std::move(mat)));
 	Mesh* m = &to->meshes[to->meshes.size() - 1];
+
+	MeshConfig& config = m->material->cfg;
 
 	size_t vert_size = config.get_vertex_size();
 	size_t floats_per_vert = config.get_vertex_floats();
@@ -80,15 +94,26 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to)
 		{
 			if (mesh->mTextureCoords[0])
 			{
+				glm::vec2 uv;
+				uv.x = mesh->mTextureCoords[0][i].x;
+				uv.y = mesh->mTextureCoords[0][i].y;
+
+				if (config.flip_uv)
+				{
+					uv.y = 1.0f - uv.y;
+				}
+
 				// We only support one UV map
-				m->data[i0 + j * o] = mesh->mTextureCoords[0][i].x; j++;
-				m->data[i0 + j * o] = mesh->mTextureCoords[0][i].y; j++;
+				m->data[i0 + j * o] = uv.x; j++;
+				m->data[i0 + j * o] = uv.y; j++;
 			}
 			else
 			{
 				m->data[i0 + j * o] = 0.0f; j++;
 				m->data[i0 + j * o] = 0.0f; j++;
 			}
+
+			
 			
 		}
 
@@ -154,11 +179,11 @@ void Mesh::upload()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
 
-	size_t ptr_num = 0;
-	size_t stride = cfg.get_vertex_floats();
+	GLuint ptr_num = 0;
+	GLsizei stride = (GLsizei)material->cfg.get_vertex_floats();
 	size_t offset = 0;
 
-	if (cfg.has_pos)
+	if (material->cfg.has_pos)
 	{
 		// Position
 		glEnableVertexAttribArray(ptr_num);
@@ -168,7 +193,7 @@ void Mesh::upload()
 		offset += 3;
 	}
 
-	if (cfg.has_nrm)
+	if (material->cfg.has_nrm)
 	{
 		// Normal
 		glEnableVertexAttribArray(ptr_num);
@@ -178,7 +203,7 @@ void Mesh::upload()
 		offset += 3;
 	}
 
-	if (cfg.has_tex)
+	if (material->cfg.has_tex)
 	{
 		// Texture 
 		glEnableVertexAttribArray(ptr_num);
@@ -188,7 +213,7 @@ void Mesh::upload()
 		offset += 2;
 	}
 
-	if (cfg.has_tgt)
+	if (material->cfg.has_tgt)
 	{
 		// Tangent
 		glEnableVertexAttribArray(ptr_num);
@@ -203,7 +228,7 @@ void Mesh::upload()
 		offset += 3;
 	}
 
-	if (cfg.has_cl3)
+	if (material->cfg.has_cl3)
 	{
 		// Color (RGB)
 		glEnableVertexAttribArray(ptr_num);
@@ -213,7 +238,7 @@ void Mesh::upload()
 		offset += 3;
 	}
 
-	if (cfg.has_cl4)
+	if (material->cfg.has_cl4)
 	{
 		// Color (RGBA)
 		glEnableVertexAttribArray(ptr_num);
@@ -226,6 +251,8 @@ void Mesh::upload()
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	material.get();
 }
 
 void Mesh::unload()
@@ -237,9 +264,11 @@ void Mesh::unload()
 	vao = 0;
 	ebo = 0;
 	vbo = 0;
+
+	material.unload();
 }
 
-void Mesh::draw()
+void Mesh::draw_command()
 {
 	logger->check(vao != 0, "Tried to render a non-loaded mesh");
 
@@ -283,9 +312,8 @@ void Model::free_gpu()
 
 
 
-Model::Model(ModelConfig config, const aiScene* scene)
+Model::Model(const aiScene* scene)
 {
-	this->config = config;
 	gpu_users = 0;
 	uploaded = false;
 
@@ -298,22 +326,33 @@ Model::~Model()
 
 Model* loadModel(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
 {
-	ModelConfig config = ModelConfig();
-
-	if (cfg.get_table_qualified("model"))
-	{
-		auto ctoml = cfg.get_table_qualified("model");
-		SerializeUtil::read_to(*ctoml, config);
-	}
+	unsigned int flags = 
+		aiProcess_Triangulate | aiProcess_JoinIdenticalVertices |
+		aiProcess_GenSmoothNormals | aiProcess_GenUVCoords |
+	    aiProcess_CalcTangentSpace | aiProcess_SortByPType;
 
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, config.get_assimp_flags());
+	const aiScene* scene = importer.ReadFile(path, flags);
 
-	Model* m = new Model(config, scene);
+	Model* m = new Model(scene);
 
 	return m;
 }
 
+
+Node* GPUModelPointer::get_node(std::string name)
+{
+	auto it = model->node_by_name.find(name);
+
+	logger->check(it != model->node_by_name.end(), "Tried to get a node which does not exist");
+
+	return it->second;
+}
+
+Node* GPUModelPointer::get_root_node()
+{
+	return model->root;
+}
 
 GPUModelPointer::GPUModelPointer(AssetHandle<Model> model)
 {
@@ -323,68 +362,4 @@ GPUModelPointer::GPUModelPointer(AssetHandle<Model> model)
 GPUModelPointer::~GPUModelPointer()
 {
 	model->free_gpu();
-}
-
-ModelConfig::ModelConfig()
-{
-	// Default config for your typical 3d model
-	// without vertex colors
-	has_pos = true;
-	has_nrm = true;
-	has_tex = true;
-	has_tgt = true;
-	has_cl3 = false;
-	has_cl4 = false;
-	flip_uv = true;
-}
-
-size_t ModelConfig::get_vertex_floats()
-{
-	size_t out = 0;
-
-	// We use ternary to avoid weird situations such
-	// as has_pos = 3 (it would be true)
-	out += has_pos ? 3 : 0;
-	out += has_nrm ? 3 : 0;
-	out += has_tex ? 2 : 0;
-	out += has_tgt ? 6 : 0;
-	out += has_cl3 ? 3 : 0;
-	out += has_cl4 ? 4 : 0;
-
-	return out;
-}
-
-size_t ModelConfig::get_vertex_size()
-{
-	return get_vertex_floats() * sizeof(float);
-}
-
-unsigned int ModelConfig::get_assimp_flags()
-{
-	unsigned int flags = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices;
-
-	if (has_nrm)
-	{
-		flags |= aiProcess_GenSmoothNormals;
-	}
-
-	if (has_tex)
-	{
-		flags |= aiProcess_GenUVCoords;
-	}
-
-	if (flip_uv)
-	{
-		flags |= aiProcess_FlipUVs;
-	}
-
-	if (has_tgt)
-	{
-		flags |= aiProcess_CalcTangentSpace;
-	}
-
-	// We don't allow lines or points so this allows us to easily erase them
-	flags |= aiProcess_SortByPType;
-
-	return flags;
 }

@@ -143,6 +143,8 @@ static double zoom = 1.0;
 
 void PlanetarySystem::render(int width, int height)
 {
+	camera_uniforms = camera.get_camera_uniforms(width, height);
+
 	float fov = glm::radians(60.0f);
 
 	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir();
@@ -150,9 +152,9 @@ void PlanetarySystem::render(int width, int height)
 	update_render(camera_pos, fov, t);
 
 
-	glm::dmat4 proj_view = camera.get_proj_view(width, height);
-	glm::dmat4 c_model = camera.get_cmodel();
-	float far_plane = 1e16f;
+	glm::dmat4 proj_view = camera_uniforms.proj_view;
+	glm::dmat4 c_model = camera_uniforms.c_model;
+	float far_plane = camera_uniforms.far_plane;
 
 	using BodyPositionPair = std::pair<SystemElement*, CartesianState>;
 
@@ -220,9 +222,9 @@ void PlanetarySystem::render(int width, int height)
 
 void PlanetarySystem::render_debug(int width, int height)
 {
-	glm::dmat4 proj_view = camera.get_proj_view(width, height);
-	glm::dmat4 c_model = camera.get_cmodel();
-	float far_plane = 1e16f;
+	glm::dmat4 proj_view = camera_uniforms.proj_view;
+	glm::dmat4 c_model = camera_uniforms.c_model;
+	float far_plane = camera_uniforms.far_plane;
 
 	// Don't forget to draw the debug shapes!
 	debug_drawer->render(proj_view, c_model, far_plane);

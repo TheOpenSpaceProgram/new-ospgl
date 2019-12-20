@@ -45,6 +45,8 @@
     <None Include="res\rss\package.toml" />
     <None Include="res\navball\navball.toml" />
     <None Include="res\assimp_test\package.toml" />
+    <None Include="res\assimp_test\materials\mat_test.toml" />
+    <None Include="res\assimp_test\test\test.blend.toml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\Logger.cpp">
@@ -204,6 +206,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\assets\Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -467,6 +472,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\assets\Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\camera\CameraUniforms.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
