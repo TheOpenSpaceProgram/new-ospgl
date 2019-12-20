@@ -23,7 +23,6 @@ struct MeshConfig
 	//
 	// If, for example, you only have nrm and cl3
 	// then the uniforms will be 0 = nrm and 1 = cl3
-	//
 	bool has_pos;
 	bool has_nrm;
 	bool has_tex;
@@ -95,8 +94,38 @@ public:
 		type = EMPTY;
 	}
 
+	Uniform(Uniform&& b)
+	{
+		value = b.value;
+		type = b.type;
+
+		if (type == TEX)
+		{
+			b.value.as_tex = nullptr;
+		}
+	}
+	
+	Uniform& operator=(Uniform&& other)
+	{
+		if (this != &other)
+		{
+			value = other.value;
+			type = other.type;
+
+			if (other.type == TEX && other.value.as_tex != nullptr)
+			{	
+				other.value.as_tex = nullptr;
+			}
+		}
+
+		return *this;
+	}
+
+
 	~Uniform();
 };
+
+
 
 using AssimpTexture = std::pair <aiTextureType, AssetHandle<Image>>;
 
@@ -121,11 +150,11 @@ struct Material
 	// - model = "model"
 	// - camera_tform = "camera_tform"
 	// - proj_view = "proj_view"
-	// - far_plane = "far_plane"
+	// - f_coef = "f_coef"
 	// - camera_relative = "camera_relative"
 	// If any equals "", it's not binded
 	std::string mat4_proj, mat4_view, mat4_camera_model, mat4_proj_view, mat4_camera_tform, mat4_model,
-		float_far_plane, vec3_camera_relative;
+		mat4_final_tform, float_far_plane, float_f_coef, vec3_camera_relative;
 
 	// Name of the different other core uniforms
 
@@ -243,16 +272,20 @@ public:
 		to.mat4_proj_view = "proj_view"; 
 		to.mat4_camera_tform = "camera_tform";
 		to.mat4_model = "model";
-		to.float_far_plane = "far_plane";
+		to.float_far_plane = "";
+		to.float_f_coef = "f_coef";
+		to.mat4_final_tform = "";
 		to.vec3_camera_relative = "camera_relative";
-
+		
 		SAFE_TOML_GET_OR_IGNORE(to.mat4_proj, "proj", std::string);
+		SAFE_TOML_GET_OR_IGNORE(to.mat4_final_tform, "final_tform", std::string);
 		SAFE_TOML_GET_OR_IGNORE(to.mat4_view, "view", std::string);
 		SAFE_TOML_GET_OR_IGNORE(to.mat4_camera_model, "camera_model", std::string);
 		SAFE_TOML_GET_OR_IGNORE(to.mat4_proj_view, "proj_view", std::string);
 		SAFE_TOML_GET_OR_IGNORE(to.mat4_camera_tform, "camera_tform", std::string);
 		SAFE_TOML_GET_OR_IGNORE(to.mat4_model, "model", std::string);
 		SAFE_TOML_GET_OR_IGNORE(to.float_far_plane, "far_plane", std::string);
+		SAFE_TOML_GET_OR_IGNORE(to.float_f_coef, "f_coef", std::string);
 		SAFE_TOML_GET_OR_IGNORE(to.vec3_camera_relative, "camera_relative", std::string);
 
 	}
@@ -274,12 +307,12 @@ public:
 	{
 		MeshConfig default = MeshConfig();
 
-		SAFE_TOML_GET_OR(to.has_pos, "has_pos", bool, default.has_pos);
-		SAFE_TOML_GET_OR(to.has_nrm, "has_nrm", bool, default.has_nrm);
-		SAFE_TOML_GET_OR(to.has_nrm, "has_tex", bool, default.has_tex);
-		SAFE_TOML_GET_OR(to.has_nrm, "has_tgt", bool, default.has_tgt);
-		SAFE_TOML_GET_OR(to.has_nrm, "has_cl3", bool, default.has_cl3);
-		SAFE_TOML_GET_OR(to.has_nrm, "has_cl4", bool, default.has_cl4);
-		SAFE_TOML_GET_OR(to.has_nrm, "flip_uv", bool, default.flip_uv);
+		SAFE_TOML_GET_OR(to.has_pos, "has_pos", bool, false);
+		SAFE_TOML_GET_OR(to.has_nrm, "has_nrm", bool, false);
+		SAFE_TOML_GET_OR(to.has_tex, "has_tex", bool, false);
+		SAFE_TOML_GET_OR(to.has_tgt, "has_tgt", bool, false);
+		SAFE_TOML_GET_OR(to.has_cl3, "has_cl3", bool, false);
+		SAFE_TOML_GET_OR(to.has_cl4, "has_cl4", bool, false);
+		SAFE_TOML_GET_OR(to.flip_uv, "flip_uv", bool, false);
 	}
 };

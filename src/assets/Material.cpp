@@ -80,7 +80,7 @@ Uniform::Uniform(std::string pkg, std::string name)
 
 Uniform::~Uniform()
 {
-	if (type == TEX)
+	if (type == TEX && value.as_tex != nullptr)
 	{
 		delete value.as_tex;
 	}
@@ -126,6 +126,11 @@ void Material::set(std::vector<AssimpTexture>* assimp_textures)
 
 void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
 {
+	glm::dmat4 final_model;
+
+
+	final_model = glm::translate(model, -cu.cam_pos);
+
 	if (mat4_proj != "")
 	{
 		shader->setMat4(mat4_proj, cu.proj);
@@ -151,23 +156,25 @@ void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
 		shader->setMat4(mat4_camera_tform, cu.tform);
 	}
 
+	if (mat4_final_tform != "")
+	{
+		glm::dmat4 final_tform = cu.tform * final_model;
+		shader->setMat4(mat4_final_tform, final_tform);
+	}
+
 	if (mat4_model != "")
 	{
-		glm::dvec3 scale;
-		glm::dquat rotation;
-		glm::dvec3 translation;
-		glm::dvec3 skew;
-		glm::dvec4 perspective;
-		glm::decompose(model, scale, rotation, translation, skew, perspective);
-
-		glm::dmat4 final_matrix = glm::translate(model, -translation + (translation - cu.cam_pos));
-
-		shader->setMat4(mat4_model, final_matrix);
+		shader->setMat4(mat4_model, final_model);
 	}
 
 	if (float_far_plane != "")
 	{
 		shader->setFloat(float_far_plane, cu.far_plane);
+	}
+
+	if (float_f_coef != "")
+	{
+		shader->setFloat(float_f_coef, 2.0f / glm::log2(cu.far_plane + 1.0f));
 	}
 
 	if (vec3_camera_relative != "")
