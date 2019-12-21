@@ -86,41 +86,13 @@ Uniform::~Uniform()
 	}
 }
 
-void Material::set(std::vector<AssimpTexture>* assimp_textures)
+void Material::set()
 {
-	std::unordered_map<std::string, AssetHandle<Image>*> replaced_textures;
-
-	if (assimp_textures != nullptr)
-	{
-		for (AssimpTexture& atex : *assimp_textures)
-		{
-			auto it = assimp_texture_type_to_uniform.find(atex.first);
-			if (it != assimp_texture_type_to_uniform.end())
-			{
-				replaced_textures[it->second] = &atex.second;
-			}
-		}
-	}
-
 	int gl_tex = 0;
 
 	for (auto it = uniforms.begin(); it != uniforms.end(); it++)
 	{
-		auto replaced = replaced_textures.find(it->first);
-
-		if (replaced == replaced_textures.end())
-		{
-			it->second.set(shader, it->first, &gl_tex);
-		}
-		else
-		{
-			glActiveTexture(GL_TEXTURE0 + gl_tex);
-			glBindTexture(GL_TEXTURE_2D, replaced->second->get()->id);
-
-			shader->setInt(it->first, gl_tex);
-
-			gl_tex++;
-		}
+		it->second.set(shader, it->first, &gl_tex);
 	}
 }
 
@@ -131,55 +103,55 @@ void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
 
 	final_model = glm::translate(model, -cu.cam_pos);
 
-	if (mat4_proj != "")
+	if (core_uniforms.mat4_proj != "")
 	{
-		shader->setMat4(mat4_proj, cu.proj);
+		shader->setMat4(core_uniforms.mat4_proj, cu.proj);
 	}
 
-	if (mat4_view != "")
+	if (core_uniforms.mat4_view != "")
 	{
-		shader->setMat4(mat4_view, cu.view);
+		shader->setMat4(core_uniforms.mat4_view, cu.view);
 	}
 
-	if (mat4_camera_model != "")
+	if (core_uniforms.mat4_camera_model != "")
 	{
-		shader->setMat4(mat4_camera_model, cu.c_model);
+		shader->setMat4(core_uniforms.mat4_camera_model, cu.c_model);
 	}
 
-	if (mat4_proj_view != "")
+	if (core_uniforms.mat4_proj_view != "")
 	{
-		shader->setMat4(mat4_proj_view, cu.proj_view);
+		shader->setMat4(core_uniforms.mat4_proj_view, cu.proj_view);
 	}
 
-	if (mat4_camera_tform != "")
+	if (core_uniforms.mat4_camera_tform != "")
 	{
-		shader->setMat4(mat4_camera_tform, cu.tform);
+		shader->setMat4(core_uniforms.mat4_camera_tform, cu.tform);
 	}
 
-	if (mat4_final_tform != "")
+	if (core_uniforms.mat4_final_tform != "")
 	{
 		glm::dmat4 final_tform = cu.tform * final_model;
-		shader->setMat4(mat4_final_tform, final_tform);
+		shader->setMat4(core_uniforms.mat4_final_tform, final_tform);
 	}
 
-	if (mat4_model != "")
+	if (core_uniforms.mat4_model != "")
 	{
-		shader->setMat4(mat4_model, final_model);
+		shader->setMat4(core_uniforms.mat4_model, final_model);
 	}
 
-	if (float_far_plane != "")
+	if (core_uniforms.float_far_plane != "")
 	{
-		shader->setFloat(float_far_plane, cu.far_plane);
+		shader->setFloat(core_uniforms.float_far_plane, cu.far_plane);
 	}
 
-	if (float_f_coef != "")
+	if (core_uniforms.float_f_coef != "")
 	{
-		shader->setFloat(float_f_coef, 2.0f / glm::log2(cu.far_plane + 1.0f));
+		shader->setFloat(core_uniforms.float_f_coef, 2.0f / glm::log2(cu.far_plane + 1.0f));
 	}
 
-	if (vec3_camera_relative != "")
+	if (core_uniforms.vec3_camera_relative != "")
 	{
-		shader->setVec3(vec3_camera_relative, cu.cam_pos);
+		shader->setVec3(core_uniforms.vec3_camera_relative, cu.cam_pos);
 	}
 
 }

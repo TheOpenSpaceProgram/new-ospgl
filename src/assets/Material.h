@@ -7,6 +7,8 @@
 #include "../util/SerializeUtil.h"
 #include "../renderer/camera/CameraUniforms.h"
 #include <glm/gtx/matrix_decompose.hpp>
+#include <algorithm>
+#include <iostream>
 
 #include <assimp/material.h>
 
@@ -129,6 +131,35 @@ public:
 
 using AssimpTexture = std::pair <aiTextureType, AssetHandle<Image>>;
 
+struct CoreUniforms
+{
+	// Name of the different core uniforms
+// By default materials bind
+// - model = "model"
+// - camera_tform = "camera_tform"
+// - proj_view = "proj_view"
+// - f_coef = "f_coef"
+// - camera_relative = "camera_relative"
+// If any equals "", it's not binded
+	std::string mat4_proj, mat4_view, mat4_camera_model, mat4_proj_view, mat4_camera_tform, mat4_model,
+		mat4_final_tform, float_far_plane, float_f_coef, vec3_camera_relative;
+
+	CoreUniforms()
+	{
+		// Defaults
+		mat4_proj = "";
+		mat4_view = "";
+		mat4_camera_model = "";
+		mat4_proj_view = "proj_view";
+		mat4_camera_tform = "camera_tform";
+		mat4_model = "model";
+		float_far_plane = "";
+		float_f_coef = "f_coef";
+		mat4_final_tform = "";
+		vec3_camera_relative = "camera_relative";
+	}
+};
+
 struct Material
 {
 
@@ -145,22 +176,13 @@ struct Material
 	// realistically there will be no need for more than that.
 	std::unordered_map<aiTextureType, std::string> assimp_texture_type_to_uniform;
 
-	// Name of the different core uniforms
-	// By default materials bind
-	// - model = "model"
-	// - camera_tform = "camera_tform"
-	// - proj_view = "proj_view"
-	// - f_coef = "f_coef"
-	// - camera_relative = "camera_relative"
-	// If any equals "", it's not binded
-	std::string mat4_proj, mat4_view, mat4_camera_model, mat4_proj_view, mat4_camera_tform, mat4_model,
-		mat4_final_tform, float_far_plane, float_f_coef, vec3_camera_relative;
+
 
 	// Name of the different other core uniforms
+	CoreUniforms core_uniforms;
 
 
-
-	void set(std::vector<AssimpTexture>* assimp_textures = nullptr);
+	void set();
 	void set_core(const CameraUniforms& cu, glm::dmat4 model);
 
 };
@@ -177,6 +199,71 @@ public:
 		logger->check(false, "Not implemented");
 	}
 
+	static void obtain_uniforms(Material& to, const cpptoml::table& uniforms)
+	{
+		for (auto sub : uniforms)
+		{
+			std::string name = sub.first;
+			auto contents = sub.second;
+
+			if (contents->is_table())
+			{
+				// Can be vec2, vec3 or vec4
+				auto table = contents->as_table();
+
+				auto x_opt = table->get_qualified_as<double>("x");
+				auto y_opt = table->get_qualified_as<double>("y");
+				auto z_opt = table->get_qualified_as<double>("z");
+				auto w_opt = table->get_qualified_as<double>("w");
+
+				if (w_opt)
+				{
+					to.uniforms[name] = Uniform(glm::vec4(*x_opt, *y_opt, *z_opt, *w_opt));
+				}
+				else if (z_opt)
+				{
+					to.uniforms[name] = Uniform(glm::vec3(*x_opt, *y_opt, *z_opt));
+				}
+				else if (y_opt)
+				{
+					to.uniforms[name] = Uniform(glm::vec2(*x_opt, *y_opt));
+				}
+				else
+				{
+					logger->warn("Invalid vector uniform size (name = {})", name);
+				}
+			}
+			else if (contents->is_value())
+			{
+				// int, float or tex
+				auto as_int = contents->as<int64_t>();
+				auto as_decimal = contents->as<double>();
+				auto as_tex = contents->as<std::string>();
+
+				if (as_int)
+				{
+					to.uniforms[name] = Uniform((int)as_int->get());
+				}
+				else if (as_decimal)
+				{
+					to.uniforms[name] = Uniform((float)as_decimal->get());
+				}
+				else if (as_tex)
+				{
+					auto[pkg, name] = assets->get_package_and_name(as_tex->get(), assets->get_current_package());
+					to.uniforms[name] = Uniform(pkg, name);
+				}
+				else
+				{
+					logger->warn("Unknown uniform type (name = {})", name);
+				}
+			}
+			else
+			{
+				logger->warn("Unknown uniform type (name = {})", name);
+			}
+		}
+	}
 
 	// Deserialize is only called for bodies and barycenters
 	// Star is special
@@ -198,96 +285,47 @@ public:
 			to.cfg = MeshConfig();
 		}
 
-		auto uniforms = from.get_table_qualified("uniforms");
-		if (uniforms)
+		auto core_toml = from.get_table_qualified("core_uniforms");
+		if (core_toml)
 		{
-			for (auto sub : *uniforms)
-			{
-				std::string name = sub.first;
-				auto contents = sub.second;
-
-				if (contents->is_table())
-				{
-					// Can be vec2, vec3 or vec4
-					auto table = contents->as_table();
-					
-					auto x_opt = table->get_qualified_as<double>("x");
-					auto y_opt = table->get_qualified_as<double>("y");
-					auto z_opt = table->get_qualified_as<double>("z");
-					auto w_opt = table->get_qualified_as<double>("w");
-
-					if (w_opt)
-					{
-						to.uniforms[name] = Uniform(glm::vec4(*x_opt, *y_opt, *z_opt, *w_opt));
-					}
-					else if (z_opt) 
-					{
-						to.uniforms[name] = Uniform(glm::vec3(*x_opt, *y_opt, *z_opt));
-					}
-					else if (y_opt)
-					{
-						to.uniforms[name] = Uniform(glm::vec2(*x_opt, *y_opt));
-					}
-					else
-					{
-						logger->warn("Invalid vector uniform size (name = {})", name);
-					}
-				}
-				else if(contents->is_value())
-				{
-					// int, float or tex
-					auto as_int = contents->as<int64_t>();
-					auto as_decimal = contents->as<double>();
-					auto as_tex = contents->as<std::string>();
-
-					if (as_int)
-					{
-						to.uniforms[name] = Uniform((int)as_int->get());
-					}
-					else if (as_decimal)
-					{
-						to.uniforms[name] = Uniform((float)as_decimal->get());
-					}
-					else if (as_tex)
-					{
-						auto[pkg, name] = assets->get_package_and_name(as_tex->get(), assets->get_current_package());
-						to.uniforms[name] = Uniform(pkg, name);
-					}
-					else
-					{
-						logger->warn("Unknown uniform type (name = {})", name);
-					}
-				}
-				else
-				{
-					logger->warn("Unknown uniform type (name = {})", name);
-				}
-			}
+			SerializeUtil::read_to(*core_toml, to.core_uniforms);
+		}
+		else
+		{
+			to.core_uniforms = CoreUniforms();
 		}
 
-		// Defaults
-		to.mat4_proj = ""; 
-		to.mat4_view = "";
-		to.mat4_camera_model = ""; 
-		to.mat4_proj_view = "proj_view"; 
-		to.mat4_camera_tform = "camera_tform";
-		to.mat4_model = "model";
-		to.float_far_plane = "";
-		to.float_f_coef = "f_coef";
-		to.mat4_final_tform = "";
-		to.vec3_camera_relative = "camera_relative";
-		
-		SAFE_TOML_GET_OR_IGNORE(to.mat4_proj, "proj", std::string);
-		SAFE_TOML_GET_OR_IGNORE(to.mat4_final_tform, "final_tform", std::string);
-		SAFE_TOML_GET_OR_IGNORE(to.mat4_view, "view", std::string);
-		SAFE_TOML_GET_OR_IGNORE(to.mat4_camera_model, "camera_model", std::string);
-		SAFE_TOML_GET_OR_IGNORE(to.mat4_proj_view, "proj_view", std::string);
-		SAFE_TOML_GET_OR_IGNORE(to.mat4_camera_tform, "camera_tform", std::string);
-		SAFE_TOML_GET_OR_IGNORE(to.mat4_model, "model", std::string);
-		SAFE_TOML_GET_OR_IGNORE(to.float_far_plane, "far_plane", std::string);
-		SAFE_TOML_GET_OR_IGNORE(to.float_f_coef, "f_coef", std::string);
-		SAFE_TOML_GET_OR_IGNORE(to.vec3_camera_relative, "camera_relative", std::string);
+		auto uniforms_toml = from.get_table_qualified("uniforms");
+		if (uniforms_toml)
+		{
+			obtain_uniforms(to, *uniforms_toml);
+		}
 
+	}
+};
+
+template<>
+class GenericSerializer<CoreUniforms>
+{
+public:
+
+	static void serialize(const CoreUniforms& what, cpptoml::table& target)
+	{
+		logger->check(false, "Not implemented");
+	}
+
+	static void deserialize(CoreUniforms& to, const cpptoml::table& from)
+	{
+		SAFE_TOML_GET_OR(to.mat4_proj, "proj", std::string, "");
+		SAFE_TOML_GET_OR(to.mat4_final_tform, "final_tform", std::string, "");
+		SAFE_TOML_GET_OR(to.mat4_view, "view", std::string, "");
+		SAFE_TOML_GET_OR(to.mat4_camera_model, "camera_model", std::string, "");
+		SAFE_TOML_GET_OR(to.mat4_proj_view, "proj_view", std::string, "");
+		SAFE_TOML_GET_OR(to.mat4_camera_tform, "camera_tform", std::string, "");
+		SAFE_TOML_GET_OR(to.mat4_model, "model", std::string, "");
+		SAFE_TOML_GET_OR(to.float_far_plane, "far_plane", std::string, "");
+		SAFE_TOML_GET_OR(to.float_f_coef, "f_coef", std::string, "");
+		SAFE_TOML_GET_OR(to.vec3_camera_relative, "camera_relative", std::string, "");
 	}
 };
 
@@ -305,8 +343,6 @@ public:
 
 	static void deserialize(MeshConfig& to, const cpptoml::table& from)
 	{
-		MeshConfig default = MeshConfig();
-
 		SAFE_TOML_GET_OR(to.has_pos, "has_pos", bool, false);
 		SAFE_TOML_GET_OR(to.has_nrm, "has_nrm", bool, false);
 		SAFE_TOML_GET_OR(to.has_tex, "has_tex", bool, false);

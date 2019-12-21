@@ -28,6 +28,8 @@ private:
 	// It's only loaded while we are uploaded
 	AssetHandle<Material> material;
 
+	std::vector<AssimpTexture> textures;
+
 public:
 
 	void upload();
@@ -72,6 +74,7 @@ private:
 
 	void process_node(aiNode* node, const aiScene* scene, Node* to);
 	void process_mesh(aiMesh* mesh, const aiScene* scene, Node* to);
+
 
 	friend class Mesh;
 	friend struct GPUModelPointer;
