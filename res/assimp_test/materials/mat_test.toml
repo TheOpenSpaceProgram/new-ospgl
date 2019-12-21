@@ -1,15 +1,9 @@
-shader = "core:shaders/debug.vs"
-
-model = ""
-camera_tform = ""
-proj_view = ""
-camera_relative = ""
-final_tform = "tform"
+shader = "shader/simple.vs"
 
 [uniforms]
-
-	diffuse = "navball:antinormal.png"
+	diffuse = "navball:navball.png"
 
 [config]
 	has_pos = true
-	has_cl4 = true
+	has_nrm = true
+	has_tex = true

@@ -44,9 +44,11 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to)
 {
 	aiMaterial* ai_mat = scene->mMaterials[mesh->mMaterialIndex];
 
+
 	AssetPointer mat_ptr = AssetPointer(ai_mat->GetName().C_Str());
 
 	AssetHandle<Material> mat = AssetHandle<Material>(mat_ptr);
+
 
 	to->meshes.push_back(Mesh(std::move(mat)));
 	Mesh* m = &to->meshes[to->meshes.size() - 1];
@@ -201,6 +203,7 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to)
 }
 
 
+
 void Mesh::upload()
 {
 	glGenBuffers(1, &vbo);
@@ -309,7 +312,7 @@ void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model)
 	// TODO
 	material->shader->use();
 
-	material->set(nullptr);
+	material->set();
 	material->set_core(uniforms, model);
 }
 

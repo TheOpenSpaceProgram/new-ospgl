@@ -281,10 +281,11 @@ inline void AssetManager::load(const std::string& package, const std::string& na
 	}
 	
 
+	std::string old_pkg = get_current_package();
 	set_current_package(package);
 	T* ndata = fptr(full_path, name, package, *cfg);
 	logger->check(ndata != nullptr, "Loaded data must not be null");
-	set_current_package("core");
+	set_current_package(old_pkg);
 
 	Asset asset;
 	asset.uses = 0;
