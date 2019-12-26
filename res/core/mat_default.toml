@@ -1,0 +1,6 @@
+shader = "shaders/simple.vs"
+
+[config]
+	has_pos = true
+	has_nrm = true
+	has_tex = true

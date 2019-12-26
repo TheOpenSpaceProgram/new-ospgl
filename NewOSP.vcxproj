@@ -137,8 +137,10 @@
     <None Include="res\assimp_test\materials\mat_test.toml" />
     <None Include="res\assimp_test\package.toml" />
     <None Include="res\assimp_test\test\test.blend.toml" />
+    <None Include="res\assimp_test\test\part_test.toml" />
     <None Include="res\core\default_gas.toml" />
     <None Include="res\core\default_planet.toml" />
+    <None Include="res\core\mat_default.toml" />
     <None Include="res\core\package.toml" />
     <None Include="res\navball\navball.toml" />
     <None Include="res\rss\package.toml" />
@@ -162,8 +164,12 @@
     <None Include="res\core\shaders\planet\water.vs" />
     <None Include="res\core\shaders\ui\navball.fs" />
     <None Include="res\core\shaders\ui\navball.vs" />
+    <None Include="res\test_script.lua" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\lua\libs\LuaLogger.cpp" />
+    <ClCompile Include="src\lua\LuaCore.cpp" />
+    <ClCompile Include="src\vehicle\part\Machine.cpp" />
     <ClCompile Include="src\assets\Model.cpp" />
     <ClCompile Include="src\assets\Material.cpp" />
     <ClCompile Include="src\BulletExperiments.cpp" />
@@ -223,6 +229,10 @@
     <ClCompile Include="src\vehicle\part\Piece.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\lua\libs\LuaLogger.h" />
+    <ClInclude Include="src\lua\LuaCore.h" />
+    <ClInclude Include="src\lua\LuaLib.h" />
+    <ClInclude Include="src\vehicle\part\Machine.h" />
     <ClInclude Include="src\assets\Material.h" />
     <ClInclude Include="src\assets\Model.h" />
     <ClInclude Include="src\renderer\camera\CameraUniforms.h" />

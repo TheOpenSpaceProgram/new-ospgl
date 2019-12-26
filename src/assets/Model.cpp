@@ -5,7 +5,7 @@
 #include <assimp/postprocess.h>
 
 
-void Model::process_node(aiNode* node, const aiScene* scene, Node* to)
+void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool drawable_parent)
 {
 	Node* n_node = new Node();
 
@@ -15,18 +15,26 @@ void Model::process_node(aiNode* node, const aiScene* scene, Node* to)
 
 	node_by_name[n_node->name] =n_node;
 
+	bool drawable = drawable_parent;
+
+	if (n_node->name.rfind("col_", 0) == 0) 
+	{
+		drawable = false;
+	}
+
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
 		// the node object only contains indices to index the actual objects in the scene. 
 		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		process_mesh(mesh, scene, n_node);
+
+		process_mesh(mesh, scene, n_node, drawable);
 	}
 
 	// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
-		process_node(node->mChildren[i], scene, n_node);
+		process_node(node->mChildren[i], scene, n_node, drawable);
 	}
 
 	if (to == nullptr)
@@ -40,12 +48,25 @@ void Model::process_node(aiNode* node, const aiScene* scene, Node* to)
 
 }
 
-void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to)
+void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool drawable)
 {
 	aiMaterial* ai_mat = scene->mMaterials[mesh->mMaterialIndex];
 
+	AssetPointer mat_ptr;
 
-	AssetPointer mat_ptr = AssetPointer(ai_mat->GetName().C_Str());
+	std::string ai_mat_name = ai_mat->GetName().C_Str();
+
+	size_t pos = ai_mat_name.find_last_of('.');
+
+	if (pos < ai_mat_name.size() && ai_mat_name.substr(pos) == "toml")
+	{
+		mat_ptr = AssetPointer(ai_mat->GetName().C_Str());
+	}
+	else
+	{
+		// TODO: Default material
+		mat_ptr = AssetPointer("core:mat_default.toml");
+	}
 
 	AssetHandle<Material> mat = AssetHandle<Material>(mat_ptr);
 
@@ -204,111 +225,124 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to)
 
 
 
+bool Mesh::is_drawable()
+{
+	return drawable;
+}
+
 void Mesh::upload()
 {
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
-	glGenVertexArrays(1, &vao);
-
-	glBindVertexArray(vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, data_size, data, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
-
-	GLuint ptr_num = 0;
-	GLsizei stride = (GLsizei)material->cfg.get_vertex_floats();
-	size_t offset = 0;
-
-	if (material->cfg.has_pos)
+	if (drawable)
 	{
-		// Position
-		glEnableVertexAttribArray(ptr_num);
-		glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
+		glGenBuffers(1, &vbo);
+		glGenBuffers(1, &ebo);
+		glGenVertexArrays(1, &vao);
 
-		ptr_num++;
-		offset += 3 * sizeof(float);
+		glBindVertexArray(vao);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, data_size, data, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+
+		GLuint ptr_num = 0;
+		GLsizei stride = (GLsizei)material->cfg.get_vertex_floats();
+		size_t offset = 0;
+
+		if (material->cfg.has_pos)
+		{
+			// Position
+			glEnableVertexAttribArray(ptr_num);
+			glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
+
+			ptr_num++;
+			offset += 3 * sizeof(float);
+		}
+
+		if (material->cfg.has_nrm)
+		{
+			// Normal
+			glEnableVertexAttribArray(ptr_num);
+			glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
+
+			ptr_num++;
+			offset += 3 * sizeof(float);
+		}
+
+		if (material->cfg.has_tex)
+		{
+			// Texture 
+			glEnableVertexAttribArray(ptr_num);
+			glVertexAttribPointer(ptr_num, 2, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
+
+			ptr_num++;
+			offset += 2 * sizeof(float);
+		}
+
+		if (material->cfg.has_tgt)
+		{
+			// Tangent
+			glEnableVertexAttribArray(ptr_num);
+			glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
+			ptr_num++;
+			offset += 3 * sizeof(float);
+
+			// Bitangent
+			glEnableVertexAttribArray(ptr_num);
+			glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
+			ptr_num++;
+			offset += 3;
+		}
+
+		if (material->cfg.has_cl3)
+		{
+			// Color (RGB)
+			glEnableVertexAttribArray(ptr_num);
+			glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
+
+			ptr_num++;
+			offset += 3 * sizeof(float);
+		}
+
+		if (material->cfg.has_cl4)
+		{
+			// Color (RGBA)
+			glEnableVertexAttribArray(ptr_num);
+			glVertexAttribPointer(ptr_num, 4, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
+
+			ptr_num++;
+			offset += 4 * sizeof(float);
+		}
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		material.get();
 	}
-
-	if (material->cfg.has_nrm)
-	{
-		// Normal
-		glEnableVertexAttribArray(ptr_num);
-		glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
-
-		ptr_num++;
-		offset += 3 * sizeof(float);
-	}
-
-	if (material->cfg.has_tex)
-	{
-		// Texture 
-		glEnableVertexAttribArray(ptr_num);
-		glVertexAttribPointer(ptr_num, 2, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
-
-		ptr_num++;
-		offset += 2 * sizeof(float);
-	}
-
-	if (material->cfg.has_tgt)
-	{
-		// Tangent
-		glEnableVertexAttribArray(ptr_num);
-		glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
-		ptr_num++;
-		offset += 3 * sizeof(float);
-
-		// Bitangent
-		glEnableVertexAttribArray(ptr_num);
-		glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
-		ptr_num++;
-		offset += 3;
-	}
-
-	if (material->cfg.has_cl3)
-	{
-		// Color (RGB)
-		glEnableVertexAttribArray(ptr_num);
-		glVertexAttribPointer(ptr_num, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
-
-		ptr_num++;
-		offset += 3 * sizeof(float);
-	}
-
-	if (material->cfg.has_cl4)
-	{
-		// Color (RGBA)
-		glEnableVertexAttribArray(ptr_num);
-		glVertexAttribPointer(ptr_num, 4, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)offset);
-
-		ptr_num++;
-		offset += 4 * sizeof(float);
-	}
-	
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	material.get();
 }
 
 void Mesh::unload()
 {
-	glDeleteBuffers(1, &vbo);
-	glDeleteBuffers(1, &ebo);
-	glDeleteVertexArrays(1, &vao);
+	if (drawable)
+	{
+		glDeleteBuffers(1, &vbo);
+		glDeleteBuffers(1, &ebo);
+		glDeleteVertexArrays(1, &vao);
 
-	vao = 0;
-	ebo = 0;
-	vbo = 0;
+		vao = 0;
+		ebo = 0;
+		vbo = 0;
 
-	material.unload();
+		material.unload();
+	}
 }
 
 void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model)
 {
+	logger->check(drawable != false, "Cannot draw a non-drawable mesh!");
+
 	// TODO
 	material->shader->use();
 
@@ -318,6 +352,8 @@ void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model)
 
 void Mesh::draw_command()
 {
+	logger->check(drawable != false, "Cannot draw a non-drawable mesh!");
+
 	logger->check(vao != 0, "Tried to render a non-loaded mesh");
 
 	glBindVertexArray(vao);
@@ -378,7 +414,7 @@ Model::Model(const aiScene* scene)
 	gpu_users = 0;
 	uploaded = false;
 
-	process_node(scene->mRootNode, scene, nullptr);
+	process_node(scene->mRootNode, scene, nullptr, true);
 }
 
 Model::~Model()
