@@ -44,8 +44,6 @@ struct MeshConfig
 
 };
 
-
-
 struct Uniform
 {
 private:

@@ -1,0 +1,24 @@
+model = "test/rad_decoupler.blend"
+
+name = "RDC-01"
+country = "United States"
+manufacturer = "Rocket Factory"
+description = "A very good radial decoupler"
+
+[[machines]]
+	script_path = "machine.lua"
+
+	data1 = 10
+	data2 = 100
+
+[piece_decoupled]
+	mass = 50.0
+
+	[piece_decoupled.link]
+		to = "piece_root"
+		point = "link_0"
+		welded = true
+		# No physical link
+
+[piece_root]
+	mass = 100.0

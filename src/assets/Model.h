@@ -30,7 +30,13 @@ private:
 
 	std::vector<AssimpTexture> textures;
 
+	bool drawable;
+
 public:
+
+	// Stuff that starts with 'col_' are colliders
+	// Any children of a non-drawable is not drawable!
+	bool is_drawable();
 
 	void upload();
 	void unload();
@@ -72,8 +78,8 @@ class Model
 {
 private:
 
-	void process_node(aiNode* node, const aiScene* scene, Node* to);
-	void process_mesh(aiMesh* mesh, const aiScene* scene, Node* to);
+	void process_node(aiNode* node, const aiScene* scene, Node* to, bool drawable);
+	void process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool drawable);
 
 
 	friend class Mesh;

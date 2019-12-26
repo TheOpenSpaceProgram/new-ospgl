@@ -42,8 +42,6 @@ public:
 
 	Vehicle* in_vehicle;
 
-	bool is_root;
-
 	// If nullptr it means we are separated from our
 	// parent subpart. Always present and has value on
 	// root subparts
@@ -77,8 +75,8 @@ public:
 	Piece* attached_to;
 
 	// If a part is welded, then its collider is shared
-	// with other pieces, being welded
-	// Otherwise there will be a link between it and its 
+	// with other pieces
+	// Otherwise there MAY be a link between it and its 
 	// attached_to part, this can be a constraint or any
 	// other thing (maybe wires or ropes?)
 	// nullptr if we are not welded
@@ -99,8 +97,8 @@ public:
 	btVector3 get_tangential_velocity();
 
 	// If welded, returns the position of the part
-	// relative to its rigid body, otherwise it's
-	// the same as get_current_position
+	// relative to its rigid body, otherwise it
+	// always returns (0, 0, 0)
 	btVector3 get_relative_position();
 
 	void set_dirty();

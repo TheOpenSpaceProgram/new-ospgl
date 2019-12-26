@@ -17,6 +17,10 @@
 // IMPORTANT:
 // You must have a cpptoml table named "from" to use these functions
 
+#define SAFE_TOML_GET_FROM(from, target, name, type) \
+	TOML_CHECK_FUNC(from.get_qualified_as<type>(name).operator bool(), "Data " name " of type " #type " was malformed"); \
+	target = *from.get_qualified_as<type>(name);
+
 #define SAFE_TOML_GET(target, name, type) \
 	TOML_CHECK_FUNC(from.get_qualified_as<type>(name).operator bool(), "Data " name " of type " #type " was malformed"); \
 	target = *from.get_qualified_as<type>(name);

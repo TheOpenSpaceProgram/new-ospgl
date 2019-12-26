@@ -45,8 +45,11 @@
     <None Include="res\rss\package.toml" />
     <None Include="res\navball\navball.toml" />
     <None Include="res\assimp_test\package.toml" />
-    <None Include="res\assimp_test\materials\mat_test.toml" />
     <None Include="res\assimp_test\test\test.blend.toml" />
+    <None Include="res\assimp_test\test\part_test.toml" />
+    <None Include="res\assimp_test\materials\mat_test.toml" />
+    <None Include="res\core\mat_default.toml" />
+    <None Include="res\test_script.lua" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\Logger.cpp">
@@ -209,6 +212,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\assets\Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vehicle\part\Machine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lua\LuaCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lua\libs\LuaLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -478,6 +490,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\camera\CameraUniforms.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vehicle\part\Machine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lua\LuaCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lua\libs\LuaLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lua\LuaLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

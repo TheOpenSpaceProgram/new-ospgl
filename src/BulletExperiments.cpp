@@ -28,6 +28,8 @@ InputUtil* input;
 
 #include "assets/Model.h"
 
+#include "lua/LuaCore.h"
+
 
 
 Piece* create_dummy_piece(glm::dvec3 offset, Vehicle* veh, double radius = 1.0)
@@ -70,6 +72,18 @@ int main(void)
 	create_global_debug_drawer();
 	create_global_texture_drawer();
 	create_global_text_drawer();
+	create_global_lua_core();
+
+	sol::state n_state = sol::state();
+	lua_core->load(n_state, "memer");
+
+	auto res = n_state.safe_script_file("./res/test_script.lua", sol::script_pass_on_error);
+
+	if (!res.valid())
+	{
+		sol::error err = res;
+		logger->warn("Error: {}", err.what());
+	}
 
 	{
 		Timer dtt = Timer();
@@ -113,7 +127,7 @@ int main(void)
 		double pt = 0.0;
 		double t = 0.0;
 
-		AssetHandle<Model> m = AssetHandle<Model>("assimp_test", "test/test.blend");
+		AssetHandle<Model> m = AssetHandle<Model>("assimp_test", "test/rad_decoupler.blend");
 		GPUModelPointer gpu_ptr = GPUModelPointer(std::move(m));
 
 
@@ -180,11 +194,6 @@ int main(void)
 				glm::dmat4 model = glm::dmat4(1.0);
 				model = glm::translate(model, base + vbase * pt + glm::dvec3(10.0, 0.0, 0.0));
 
-				Node* n = gpu_ptr.get_node("Test");
-				n->meshes[0].bind_uniforms(c_uniforms, model);
-				n->meshes[0].draw_command();
-
-
 				debug_drawer->render(proj_view, c_model, far_plane);
 
 				renderer.prepare_gui();
@@ -212,6 +221,7 @@ int main(void)
 
 	delete input;
 
+	destroy_global_lua_core();
 	destroy_global_text_drawer();
 	destroy_global_texture_drawer();
 	destroy_global_asset_manager();
