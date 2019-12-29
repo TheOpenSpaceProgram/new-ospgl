@@ -27,8 +27,9 @@ public:
 	enum LibraryID
 	{
 		UNKNOWN,
-		LOGGER,	// LuaLogger
-
+		LOGGER,		// LuaLogger
+		GLM,		// LuaGlm
+		NOISE,		// LuaNoise
 
 		COUNT
 	};

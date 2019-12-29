@@ -2,6 +2,8 @@
 #include "../assets/AssetManager.h"
 
 #include "libs/LuaLogger.h"
+#include "libs/LuaGlm.h"
+#include "libs/LuaNoise.h"
 
 LuaCore* lua_core;
 
@@ -66,6 +68,14 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::LOGGER;
 	}
+	else if (name == "glm")
+	{
+		return LibraryID::GLM;
+	}
+	else if (name == "noise")
+	{
+		return LibraryID::NOISE;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -97,6 +107,8 @@ LuaCore::LuaCore()
 {
 	libraries[LibraryID::UNKNOWN] = nullptr;
 	libraries[LibraryID::LOGGER] = new LuaLogger();
+	libraries[LibraryID::GLM] = new LuaGlm();
+	libraries[LibraryID::NOISE] = new LuaNoise();
 }
 
 LuaCore::~LuaCore()

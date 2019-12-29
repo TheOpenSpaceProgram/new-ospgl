@@ -13,6 +13,6 @@ uniform float f_coef;
 
 void main()
 {
-    FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+    FragColor = vColor;
     gl_FragDepth = log2(flogz) * f_coef * 0.5;
 }

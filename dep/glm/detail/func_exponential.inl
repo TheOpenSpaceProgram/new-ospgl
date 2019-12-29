@@ -117,6 +117,7 @@ namespace detail
 	}
 
 	// sqrt
+	// TODO: Why the hell was it inversesqrt??? (Maybe update glm, that was weird)
 	using std::sqrt;
 	template <typename T, precision P, template <typename, precision> class vecType>
 	GLM_FUNC_QUALIFIER vecType<T, P> sqrt(vecType<T, P> const & x)
