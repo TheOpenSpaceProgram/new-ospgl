@@ -134,6 +134,7 @@
     <None Include=".gitignore" />
     <None Include="imgui.ini" />
     <None Include="lua51.dll" />
+    <None Include="lua_examples\glm\tests.lua" />
     <None Include="res\assimp_test\materials\mat_test.toml" />
     <None Include="res\assimp_test\package.toml" />
     <None Include="res\assimp_test\test\test.blend.toml" />
@@ -167,12 +168,14 @@
     <None Include="res\test_script.lua" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\BulletExperiments.cpp" />
+    <ClCompile Include="src\lua\libs\LuaNoise.cpp" />
+    <ClCompile Include="src\lua\libs\LuaGlm.cpp" />
     <ClCompile Include="src\lua\libs\LuaLogger.cpp" />
     <ClCompile Include="src\lua\LuaCore.cpp" />
     <ClCompile Include="src\vehicle\part\Machine.cpp" />
     <ClCompile Include="src\assets\Model.cpp" />
     <ClCompile Include="src\assets\Material.cpp" />
-    <ClCompile Include="src\BulletExperiments.cpp" />
     <ClCompile Include="src\vehicle\part\Part.cpp" />
     <ClCompile Include="src\renderer\camera\SimpleCamera.cpp" />
     <ClCompile Include="src\universe\predictor\PredictionDrawer.cpp" />
@@ -229,6 +232,8 @@
     <ClCompile Include="src\vehicle\part\Piece.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\lua\libs\LuaNoise.h" />
+    <ClInclude Include="src\lua\libs\LuaGlm.h" />
     <ClInclude Include="src\lua\libs\LuaLogger.h" />
     <ClInclude Include="src\lua\LuaCore.h" />
     <ClInclude Include="src\lua\LuaLib.h" />

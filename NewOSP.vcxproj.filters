@@ -50,6 +50,7 @@
     <None Include="res\assimp_test\materials\mat_test.toml" />
     <None Include="res\core\mat_default.toml" />
     <None Include="res\test_script.lua" />
+    <None Include="lua_examples\glm\tests.lua" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\Logger.cpp">
@@ -205,9 +206,6 @@
     <ClCompile Include="src\vehicle\part\Piece.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\BulletExperiments.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\assets\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -217,10 +215,19 @@
     <ClCompile Include="src\vehicle\part\Machine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\lua\libs\LuaLogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lua\libs\LuaGlm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\lua\LuaCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\lua\libs\LuaLogger.cpp">
+    <ClCompile Include="src\lua\libs\LuaNoise.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BulletExperiments.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -495,13 +502,19 @@
     <ClInclude Include="src\vehicle\part\Machine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\lua\LuaCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\lua\libs\LuaLogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\lua\LuaLib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lua\libs\LuaGlm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lua\LuaCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lua\libs\LuaNoise.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

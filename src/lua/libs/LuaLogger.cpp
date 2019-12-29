@@ -29,28 +29,28 @@ static std::string get_debug_trace(lua_State* L)
 
 void LuaLogger::load_to(sol::table& table)
 {
-	table["debug"] = [](sol::this_state s, std::string str)
+	table.set_function("debug", [](sol::this_state s, sol::object str)
 	{
-		logger->debug("[{}]: {}", get_debug_trace(s.L), str);
-	};
+		logger->debug("[{}]: {}", get_debug_trace(s.L), sol::state_view(s).get<sol::function>("tostring")(str).get<std::string>());
+	});
 
-	table["info"] = [](sol::this_state s, std::string str)
+	table.set_function("info", [](sol::this_state s, sol::object str)
 	{
-		logger->info("[{}]: {}", get_debug_trace(s.L), str);
-	};
+		logger->info("[{}]: {}", get_debug_trace(s.L), sol::state_view(s).get<sol::function>("tostring")(str).get<std::string>());
+	});
 
-	table["warn"] = [](sol::this_state s, std::string str)
+	table.set_function("warn", [](sol::this_state s, sol::object str)
 	{
-		logger->warn("[{}]: {}", get_debug_trace(s.L), str);
-	};
+		logger->warn("[{}]: {}", get_debug_trace(s.L), sol::state_view(s).get<sol::function>("tostring")(str).get<std::string>());
+	});
 
-	table["error"] = [](sol::this_state s, std::string str)
+	table.set_function("error", [](sol::this_state s, sol::object str)
 	{
-		logger->error("[{}]: {}", get_debug_trace(s.L), str);
-	};
+		logger->error("[{}]: {}", get_debug_trace(s.L), sol::state_view(s).get<sol::function>("tostring")(str).get<std::string>());
+	});
 
-	table["fatal"] = [](sol::this_state s, std::string str)
+	table.set_function("fatal", [](sol::this_state s, sol::object str)
 	{
-		logger->fatal("[{}]: {}", get_debug_trace(s.L), str);
-	};
+		logger->fatal("[{}]: {}", get_debug_trace(s.L), sol::state_view(s).get<sol::function>("tostring")(str).get<std::string>());
+	});
 }

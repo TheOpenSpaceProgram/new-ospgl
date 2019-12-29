@@ -21,6 +21,9 @@
 
 #include "assets/BitmapFont.h"
 
+#include "lua/LuaCore.h"
+
+
 InputUtil* input;
 
 
@@ -44,6 +47,7 @@ int main(void)
 	create_global_debug_drawer();
 	create_global_texture_drawer();
 	create_global_text_drawer();
+	create_global_lua_core();
 
 	Timer dtt = Timer();
 	double dt = 0.0;
@@ -53,7 +57,7 @@ int main(void)
 
 
 	PlanetarySystem system;
-	assets->get_from_path<Config>("rss:systems/test_system.toml")->read_to(system);
+	assets->get_from_path<Config>("rss:systems/system_test.toml")->read_to(system);
 
 	system.compute_sois(0.0);
 	debug_drawer->debug_enabled = true;
@@ -146,6 +150,7 @@ int main(void)
 
 	delete input;
 
+	destroy_global_lua_core();
 	destroy_global_text_drawer();
 	destroy_global_texture_drawer();
 	destroy_global_asset_manager();
