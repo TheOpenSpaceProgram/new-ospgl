@@ -34,8 +34,6 @@
     <None Include="res\core\shaders\debug.fs" />
     <None Include="res\core\shaders\debug.vs" />
     <None Include="res\core\default_gas.toml" />
-    <None Include="res\core\default_planet.lua" />
-    <None Include="res\core\default_planet.toml" />
     <None Include="res\core\package.toml" />
     <None Include="res\rss\planets\earth\config.toml" />
     <None Include="res\rss\planets\earth\surface.lua" />
@@ -111,9 +109,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dep\imgui\imgui_demo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dep\TextEditor\TextEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\tools\planet_editor\EditorCamera.h">
@@ -227,6 +222,12 @@
     <ClCompile Include="src\lua\libs\LuaNoise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\lua\libs\LuaImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lua\libs\LuaAssets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\BulletExperiments.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -325,9 +326,6 @@
     <ClInclude Include="dep\imgui\imstb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dep\TextEditor\TextEditor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dep\cpptoml.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -344,9 +342,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="dep\FastNoise\FastNoise.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\util\lua\LuaNoiseLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\atmosphere\AtmosphereRenderer.h">
@@ -515,6 +510,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\lua\libs\LuaNoise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lua\libs\LuaImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lua\libs\LuaAssets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

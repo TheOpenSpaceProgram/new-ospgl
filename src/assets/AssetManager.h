@@ -97,7 +97,7 @@ private:
 	std::unordered_map<std::string, Package> packages;
 
 	template<typename T>
-	void load(const std::string& package, const std::string& name);
+	bool load(const std::string& package, const std::string& name);
 
 	std::string current_package;
 
@@ -117,9 +117,14 @@ public:
 	void create_asset_type(const std::string& name, LoadAssetPtr<T> loadPtr, bool preload = false, const std::string& regex = "");
 
 	// If you use this manually make sure you free the asset if it's a heavy-weight resource
+	// It crashes if the asset does not exist (or it could not be loaded)
 	template<typename T>
 	T* get(const std::string& package, const std::string& name, bool use = true);
-	
+
+	// Same as get but returns nullptr if asset could not be loaded
+	template<typename T>
+	T* get_or_null(const std::string& package, const std::string name, bool use = true);
+
 	// Frees a single use from an asset
 	template<typename T>
 	void free(const std::string& package, const std::string& name);
@@ -186,7 +191,38 @@ inline T* AssetManager::get(const std::string& package, const std::string& name,
 
 	if (item == it->second.second.end())
 	{
-		load<T>(package, name);
+		bool result = load<T>(package, name);
+		logger->check(result, "Could not load asset");
+		item = it->second.second.find(name);
+	}
+
+	if (use)
+	{
+		item->second.uses++;
+	}
+	return (T*)(item->second.data);
+}
+
+template<typename T>
+inline T * AssetManager::get_or_null(const std::string & package, const std::string name, bool use)
+{
+	auto pkg = packages.find(package);
+	logger->check(pkg != packages.end(), "Invalid package given");
+
+	auto assets = &pkg->second.assets;
+
+	auto it = assets->find(typeid(T));
+	logger->check(it != assets->end(), "Invalid type given");
+
+	auto item = it->second.second.find(name);
+
+	if (item == it->second.second.end())
+	{
+		bool result = load<T>(package, name);
+		if (!result)
+		{
+			return nullptr;
+		}
 		item = it->second.second.find(name);
 	}
 
@@ -229,7 +265,7 @@ inline T* AssetManager::get_from_path(const std::string& full_path, const std::s
 
 
 template<typename T>
-inline void AssetManager::load(const std::string& package, const std::string& name)
+inline bool AssetManager::load(const std::string& package, const std::string& name)
 {
 	auto pkg = packages.find(package);
 	logger->check(pkg != packages.end(), "Invalid package given");
@@ -284,8 +320,12 @@ inline void AssetManager::load(const std::string& package, const std::string& na
 	std::string old_pkg = get_current_package();
 	set_current_package(package);
 	T* ndata = fptr(full_path, name, package, *cfg);
-	logger->check(ndata != nullptr, "Loaded data must not be null");
 	set_current_package(old_pkg);
+
+	if (ndata == nullptr)
+	{
+		return false;
+	}
 
 	Asset asset;
 	asset.uses = 0;
@@ -296,6 +336,8 @@ inline void AssetManager::load(const std::string& package, const std::string& na
 	it->second.second[name] = asset;
 	 
 	logger->debug("Loaded asset '{}:{}'", package, name);
+
+	return true;
 }	
 
 extern AssetManager* assets;
@@ -418,6 +460,11 @@ public:
 	T& operator*()
 	{
 		return *get();
+	}
+
+	bool is_null()
+	{
+		return b.data == nullptr;
 	}
 };
 

@@ -1,19 +1,15 @@
+local glm = require("glm")
 
 -- Data set by caller:
 --
---	coord_3d	-> {x, y, z}	-> Spherical 3D coordinates
---	coord_2d	-> {x, y}		-> Equirrectangular 2D coordinates (azimuth, elevation)
+--	coord_3d	-> vec3			-> Spherical 3D coordinates
+--	coord_2d	-> vec2			-> Equirrectangular 2D coordinates (azimuth, elevation)
 --	depth		-> int			-> Tile depth
---	radius		-> float		-> Radius of the planet
---	data		-> table		-> Data set by the user
---
--- Also, all utility terrain generating functions can be used
--- You should return height at said point in meters, can be negative
+--	radius		-> number		-> Radius of the planet
 
-
+local hmap = assets.get_image("rss_textures:earth/hmap.png")
 local hmap = get_heightmap("heightmap");
 local cmap = get_image("colormap");
-
 
 
 function generate()
@@ -26,5 +22,6 @@ function generate()
 
 	height = (earth * radius * 0.002);
 	color = cmap.get_projected(coord_2d.x, coord_2d.y);
+
 end
 

@@ -208,11 +208,8 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 			glm::dvec3 sphere = world_pos_spheric;
 			glm::dvec2 projected = MathUtil::euclidean_to_spherical_r1(sphere);
 
-			lua_state["coord_3d"]["x"] = sphere.x;
-			lua_state["coord_3d"]["y"] = sphere.y;
-			lua_state["coord_3d"]["z"] = sphere.z;
-			lua_state["coord_2d"]["x"] = projected.x;
-			lua_state["coord_2d"]["y"] = projected.y;
+			lua_state["coord_3d"] = sphere;
+			lua_state["coord_2d"] = projected;
 
 			clear();
 

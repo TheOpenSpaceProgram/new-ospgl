@@ -16,8 +16,6 @@ struct ImageConfig
 };
 
 
-// Not only do we load the shader, and make it easily usable
-// we also run a preprocessor to allow includes
 class Image
 {
 private:
@@ -32,11 +30,11 @@ private:
 
 public:
 
-	ImageConfig get_config() { return config; }
-	inline int get_width() { return width; }
-	inline int get_height() { return height; }
+	ImageConfig get_config() const { return config; }
+	inline int get_width() const { return width; }
+	inline int get_height() const { return height; }
 
-	inline glm::ivec2 get_size() { return glm::ivec2(width, height); }
+	inline glm::ivec2 get_size() const { return glm::ivec2(width, height); }
 
 	int get_index(int x, int y);
 
