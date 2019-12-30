@@ -75,6 +75,7 @@ std::vector<uint8_t> AssetManager::load_binary_raw(const std::string& path)
 	return vec;
 }
 
+
 std::pair<std::string, std::string> AssetManager::get_package_and_name(const std::string& full_path, const std::string& def)
 {
 	std::string ddef = def == "" ? current_package : def;

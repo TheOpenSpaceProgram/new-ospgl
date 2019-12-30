@@ -99,7 +99,7 @@ void PlanetTileServer::set_depth_for_unload(int depth)
 	depth_for_unload = depth;
 }
 
-void safe_lua(sol::state& state, const std::string& script, bool& wrote_error)
+void safe_lua(sol::state& state, const std::string& script, bool& wrote_error, const std::string& script_path)
 {
 	state.safe_script(script, [&wrote_error](lua_State*, sol::protected_function_result pfr)
 	{
@@ -112,7 +112,7 @@ void safe_lua(sol::state& state, const std::string& script, bool& wrote_error)
 		}
 
 		return pfr;
-	});
+	}, script_path);
 }
 
 double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
@@ -121,14 +121,11 @@ double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
 	glm::dvec2 projected = MathUtil::euclidean_to_spherical_r1(pos_3d);
 
 
-	default_lua(lua_state, &noise);
+	default_lua(lua_state);
 
-	lua_state["coord_3d"]["x"] = pos_3d.x;
-	lua_state["coord_3d"]["y"] = pos_3d.y;
-	lua_state["coord_3d"]["z"] = pos_3d.z;
+	lua_state["coord_3d"] = pos_3d;
 
-	lua_state["coord_2d"]["x"] = projected.x;
-	lua_state["coord_2d"]["y"] = projected.y;
+	lua_state["coord_2d"] = projected;
 
 	lua_state["radius"] = config->radius;
 	lua_state["depth"] = depth;
@@ -147,25 +144,10 @@ double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
 	}
 }
 
-PlanetTileServer::PlanetTileServer(const std::string& script, PlanetConfig* config, 
-	int seed, int interp, bool has_water)
+PlanetTileServer::PlanetTileServer(const std::string& script, const std::string& script_path, 
+	PlanetConfig* config, bool has_water)
 {
 	this->has_water = has_water;
-
-	noise_seed = seed;
-	if (interp == 0)
-	{
-		noise_interp = FastNoise::Interp::Linear;
-	}
-	else if (interp == 1)
-	{
-		noise_interp = FastNoise::Interp::Hermite;
-	}
-	else
-	{
-		noise_interp = FastNoise::Interp::Quintic;
-	}
-
 
 	this->config = config;
 	has_errors = false;
@@ -174,30 +156,16 @@ PlanetTileServer::PlanetTileServer(const std::string& script, PlanetConfig* conf
 
 	bool wrote_error = false;
 
-
-	auto image_paths = config->surface.image_paths;
-	// Load all images
-	for (auto it = image_paths.begin(); it != image_paths.end(); it++)
-	{
-		images.emplace(std::make_pair(it->first, it->second));
-	}
-
-	prepare_lua(lua_state, &noise);
-	safe_lua(lua_state, script, wrote_error);
-	noise = FastNoise();
-	noise.SetSeed(seed);
-	noise.SetInterp(noise_interp);
+	prepare_lua(lua_state);
+	safe_lua(lua_state, script, wrote_error, script_path);
 
 	for (size_t i = 0; i < threads.size(); i++)
 	{
-		threads[i].noise = FastNoise();
-		threads[i].noise.SetInterp(noise_interp);
-		threads[i].noise.SetSeed(seed);
 
 		threads[i].thread = new std::thread(thread_func, this, &threads[i]);
-		prepare_lua(threads[i].lua_state, &threads[i].noise);
+		prepare_lua(threads[i].lua_state);
 		
-		safe_lua(threads[i].lua_state, script, wrote_error);
+		safe_lua(threads[i].lua_state, script, wrote_error, script_path);
 
 		if (wrote_error)
 		{
@@ -270,7 +238,7 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 			PlanetTile* ntile = new PlanetTile();
 			bool has_errors = ntile->generate(target, server->config->radius, thread->lua_state, server->has_water,
 				work_array, [&server, &thread]() {
-				server->default_lua(thread->lua_state, &thread->noise);
+				server->default_lua(thread->lua_state);
 			});
 
 			if (has_errors)
@@ -303,30 +271,23 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 	delete work_array;
 }
 
-#include "../../util/lua/LuaNoiseLib.h"
 #include "../../util/lua/LuaUtilLib.h"
 
-void PlanetTileServer::prepare_lua(sol::state& lua_state, FastNoise* noise)
+void PlanetTileServer::prepare_lua(sol::state& lua_state)
 {
-	lua_state.open_libraries(sol::lib::math, sol::lib::table, sol::lib::base);
-
-	lua_state["coord_3d"] = lua_state.create_table_with("x", 0.0, "y", 0.0, "z", 0.0);
-	lua_state["coord_2d"] = lua_state.create_table_with("x", 0.0, "y", 0.0);
+	lua_core->load(lua_state, assets->get_current_package());
+	
+	lua_state["coord_3d"] = glm::dvec3();
+	lua_state["coord_2d"] = glm::dvec2();
 	lua_state["color"] = lua_state.create_table_with("r", 0.0, "g", 0.0, "b", 0.0);
 	lua_state["height"] = 0.0;
 
-	LuaNoiseLib::load_lib(lua_state, noise);
 	LuaUtilLib::load_lib(lua_state, config, images);
 
 }
 
-void PlanetTileServer::default_lua(sol::state & lua_state, FastNoise* noise)
+void PlanetTileServer::default_lua(sol::state& lua_state)
 {
-	noise->SetFrequency(0.01);
-	noise->SetFractalOctaves(3);
-	noise->SetFractalLacunarity(2.0);
-	noise->SetFractalGain(0.5);
-	noise->SetFractalType(FastNoise::FBM);
-	noise->SetCellularReturnType(FastNoise::CellValue);
+
 }
 

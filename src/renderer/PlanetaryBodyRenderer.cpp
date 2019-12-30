@@ -88,12 +88,12 @@ PlanetaryBodyRenderer::~PlanetaryBodyRenderer()
 	}
 }
 
-void RockyPlanetRenderer::load(std::string script, PlanetConfig& config)
+void RockyPlanetRenderer::load(const std::string& script, const std::string& script_path, PlanetConfig& config)
 {
 	if (server != nullptr)
 	{
 		delete server;
 	}
 
-	server = new PlanetTileServer(script, &config, config.surface.seed, config.surface.interp, config.surface.has_water);
+	server = new PlanetTileServer(script, script_path, &config, config.surface.has_water);
 }

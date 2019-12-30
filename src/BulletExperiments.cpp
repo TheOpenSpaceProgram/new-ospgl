@@ -79,6 +79,8 @@ int main(void)
 
 	auto res = n_state.safe_script_file("./res/test_script.lua", sol::script_pass_on_error);
 
+	n_state.collect_garbage();
+
 	if (!res.valid())
 	{
 		sol::error err = res;

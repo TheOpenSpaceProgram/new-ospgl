@@ -194,7 +194,6 @@ void LuaNoise::load_to(sol::table & table)
 
 	table.set_function("new", table["noise"].get<sol::table>()["new"].get<sol::function>());
 	
-
 }
 
 LuaNoise::LuaNoise()

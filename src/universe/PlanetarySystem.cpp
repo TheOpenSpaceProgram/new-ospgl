@@ -348,7 +348,7 @@ static void load_body(SystemElement* body)
 
 		std::string script = assets->load_string_raw(body->as_body->config.surface.script_path);
 
-		body->as_body->renderer.rocky->load(script, body->as_body->config);
+		body->as_body->renderer.rocky->load(script, body->as_body->config.surface.script_path_raw, body->as_body->config);
 	}
 	else
 	{
