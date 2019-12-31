@@ -228,7 +228,7 @@
     <ClCompile Include="src\lua\libs\LuaAssets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\BulletExperiments.cpp">
+    <ClCompile Include="src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -369,9 +369,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\universe\Date.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\util\lua\LuaUtilLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\assets\Image.h">

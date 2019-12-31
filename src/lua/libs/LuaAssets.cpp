@@ -9,14 +9,17 @@ void LuaAssets::load_to(sol::table& table)
 		sol::meta_function::to_string, [](const LuaAssetHandle<Image>& img)
 	{
 		return fmt::format("path: {}:{}, res: {}", img.pkg, img.name, (void*)img.data);
-	},
-		sol::meta_function::index, [](sol::usertype<LuaAssetHandle<Image>> self, sol::lua_value idx)
-	{		
-		auto img = self["get"](self).get<sol::usertype<Image>>();
-
-		return img[idx].get<sol::object>();
 	});
 
+	table.new_usertype<Image>("image",
+		"get_size", &Image::get_sized,
+		"get_width", &Image::get_width,
+		"get_height", &Image::get_height,
+		"sample_bilinear", sol::overload(
+			sol::resolve<glm::dvec4(glm::dvec2)>(&Image::sample_bilinear_double),
+			sol::resolve<glm::dvec4(double, double)>(&Image::sample_bilinear_double)
+		)	
+		);
 
 	table.set_function(
 		"get_image", [](sol::this_state st, const std::string& path)

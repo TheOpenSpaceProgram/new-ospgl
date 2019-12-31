@@ -2,6 +2,7 @@
 #include "AssetManager.h"
 #include <stb/stb_image.h>
 #include <sstream>
+#include "../util/MathUtil.h"
 
 int Image::get_index(int x, int y)
 {
@@ -9,34 +10,103 @@ int Image::get_index(int x, int y)
 	return y * width + x;
 }
 
+glm::vec4 Image::sample_bilinear(float x, float y)
+{
+	logger->check(config.in_memory, "Image must be present in RAM for CPU sampling");
+
+	int w = get_width();
+	int h = get_height();
+
+	glm::vec2 cf = glm::vec2(x * w, y * h);
+
+	float x1 = floor(x * (float)w);
+	float x2 = ceil(x * (float)w);
+	float y1 = floor(y * (float)h);
+	float y2 = ceil(y * (float)h);
+
+
+
+	glm::vec2 tl = glm::vec2(x1, y1);
+	glm::vec2 tr = glm::vec2(x2, y1);
+	glm::vec2 bl = glm::vec2(x1, y2);
+	glm::vec2 br = glm::vec2(x2, y2);
+
+	int tli = get_index(MathUtil::int_repeat((int)tl.x, w - 1), MathUtil::int_clamp((int)tl.y, h - 1));
+	int tri = get_index(MathUtil::int_repeat((int)tr.x, w - 1), MathUtil::int_clamp((int)tr.y, h - 1));
+	int bli = get_index(MathUtil::int_repeat((int)bl.x, w - 1), MathUtil::int_clamp((int)bl.y, h - 1));
+	int bri = get_index(MathUtil::int_repeat((int)br.x, w - 1), MathUtil::int_clamp((int)br.y, h - 1));
+
+	glm::vec4 tls = get_rgba(tli);
+	glm::vec4 trs = get_rgba(tri);
+	glm::vec4 bls = get_rgba(bli);
+	glm::vec4 brs = get_rgba(bri);
+
+	// Interpolate in X, which we use as the base interp
+	float x_point = (cf.x - x1) / (x2 - x1);
+
+	glm::vec4 xtop = glm::mix(tls, trs, x_point);
+	glm::vec4 xbot = glm::mix(bls, brs, x_point);
+
+	// Interpolate in Y, between xtop and xbot
+	float y_point = (cf.y - y1) / (y2 - y1);
+	glm::vec4 interp;
+
+	if (x1 == x2 && y1 == y2)
+	{
+		// Return any of them
+		interp = tls;
+	}
+	else if (x1 == x2)
+	{
+		// Interpolate in y
+		interp = glm::mix(tls, bls, y_point);
+	}
+	else if (y1 == y2)
+	{
+		// Interpolate in x
+		interp = glm::mix(tls, trs, x_point);
+	}
+	else
+	{
+		interp = glm::mix(xtop, xbot, y_point);
+	}
+
+	return interp;
+}
+
+glm::vec4 Image::sample_bilinear(glm::vec2 px)
+{
+	return sample_bilinear(px.x, px.y);
+}
+
+glm::dvec4 Image::sample_bilinear_double(glm::dvec2 px)
+{
+	return sample_bilinear_double(px.x, px.y);
+}
+
+glm::dvec4 Image::sample_bilinear_double(double x, double y)
+{
+	return sample_bilinear((float)x, (float)y);
+}
+
+glm::vec4 Image::get_rgba(int i)
+{
+	return glm::vec4(fdata[i * 4 + 0], fdata[i * 4 + 1], fdata[i * 4 + 2], fdata[i * 4 + 3]);
+}
+
+glm::vec4 Image::get_rgba(int x, int y)
+{
+	return get_rgba(get_index(x, y));
+}
+
 Image::Image(ImageConfig config, const std::string& path)
 {
 	this->config = config;
 
-	u8data = nullptr;
-	u16data = nullptr;
-	fdata = nullptr;
-
-	logger->check(config.channels == 1 || config.channels == 2 || 
-		config.channels == 3 || config.channels == 4, "Invalid image channels");
-
-	logger->check(config.bitdepth == 8 || config.bitdepth == 16 ||
-		config.bitdepth == 32, "Invalid image bit depth");
-
-
 	int c_dump;
-	if (config.bitdepth == 8)
-	{
-		u8data = stbi_load(path.c_str(), &width, &height, &c_dump, config.channels);
-	}
-	else if (config.bitdepth == 16)
-	{
-		u16data = stbi_load_16(path.c_str(), &width, &height, &c_dump, config.channels);
-	}
-	else
-	{
-		fdata = stbi_loadf(path.c_str(), &width, &height, &c_dump, config.channels);
-	}
+
+	uint8_t* u8data = stbi_load(path.c_str(), &width, &height, &c_dump, 4);
+	fdata = nullptr;
 
 	if (config.upload)
 	{
@@ -52,60 +122,30 @@ Image::Image(ImageConfig config, const std::string& path)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		GLenum source_format;
-		if (config.channels == 1)
-		{
-			source_format = GL_RED;
-		}
-		else if (config.channels == 2)
-		{
-			source_format = GL_RG;
-		}
-		else if (config.channels == 3)
-		{
-			source_format = GL_RGB;
-		}
-		else
-		{
-			source_format = GL_RGBA;
-		}
+		source_format = GL_RGBA;
 
 		GLenum target_format = GL_RGBA;
 
-		if (u8data != nullptr)
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, target_format, width, height, 0, source_format, GL_UNSIGNED_BYTE, u8data);
-		}
-		if (u16data != nullptr)
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, target_format, width, height, 0, source_format, GL_UNSIGNED_SHORT, u16data);
-		}
-		if (fdata != nullptr)
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, target_format, width, height, 0, source_format, GL_FLOAT, fdata);
-		}
+		glTexImage2D(GL_TEXTURE_2D, 0, target_format, width, height, 0, source_format, GL_UNSIGNED_BYTE, u8data);
 
 		
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
-	if (!config.in_memory)
+	if (config.in_memory)
 	{
-		if (u8data != nullptr)
+		// We must convert image data to floats
+		fdata = (float*)malloc(width * height * 4 * sizeof(float));
+		for (size_t i = 0; i < width * height; i++)
 		{
-			delete u8data;
-			u8data = nullptr;
-		}
-		if (u16data != nullptr)
-		{
-			delete u16data;
-			u16data = nullptr;
-		}
-		if (fdata != nullptr)
-		{
-			delete fdata;
-			fdata = nullptr;
+			fdata[i * 4 + 0] = (float)u8data[i * 4 + 0] / 255.0f;
+			fdata[i * 4 + 1] = (float)u8data[i * 4 + 1] / 255.0f;
+			fdata[i * 4 + 2] = (float)u8data[i * 4 + 2] / 255.0f;
+			fdata[i * 4 + 3] = (float)u8data[i * 4 + 3] / 255.0f;
 		}
 	}
+
+	stbi_image_free(u8data);
 
 
 }
@@ -115,19 +155,9 @@ Image::~Image()
 {
 	if (config.in_memory)
 	{
-		if (u8data != nullptr)
-		{
-			delete u8data;
-			u8data = nullptr;
-		}
-		if (u16data != nullptr)
-		{
-			delete u16data;
-			u16data = nullptr;
-		}
 		if (fdata != nullptr)
 		{
-			delete fdata;
+			free(fdata);
 			fdata = nullptr;
 		}
 	}
@@ -140,8 +170,6 @@ Image::~Image()
 
 static const std::string default_toml = R"-(
 
-bitdepth = 8
-channels = 4
 upload = true
 in_memory = false
 

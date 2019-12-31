@@ -166,13 +166,13 @@
     <None Include="res\test_script.lua" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\BulletExperiments.cpp" />
     <ClCompile Include="src\lua\libs\LuaAssets.cpp" />
     <ClCompile Include="src\lua\libs\LuaImage.cpp" />
     <ClCompile Include="src\lua\libs\LuaNoise.cpp" />
     <ClCompile Include="src\lua\libs\LuaGlm.cpp" />
     <ClCompile Include="src\lua\libs\LuaLogger.cpp" />
     <ClCompile Include="src\lua\LuaCore.cpp" />
+    <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\vehicle\part\Machine.cpp" />
     <ClCompile Include="src\assets\Model.cpp" />
     <ClCompile Include="src\assets\Material.cpp" />
@@ -300,7 +300,6 @@
     <ClInclude Include="dep\sol.hpp" />
     <ClInclude Include="src\util\InputUtil.h" />
     <ClInclude Include="src\util\FileWatcher.h" />
-    <ClInclude Include="src\util\lua\LuaUtilLib.h" />
     <ClInclude Include="src\util\render\Framebuffer.h" />
     <ClInclude Include="src\util\serializers\glm.h" />
     <ClInclude Include="src\util\SerializeUtil.h" />
