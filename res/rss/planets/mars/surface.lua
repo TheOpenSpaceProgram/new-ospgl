@@ -1,78 +1,22 @@
+local glm = require("glm")
+local assets = require("assets")
 
--- Data set by caller:
---
---	coord_3d	-> {x, y, z}	-> Spherical 3D coordinates
---	coord_2d	-> {x, y}		-> Equirrectangular 2D coordinates (azimuth, elevation)
---	depth		-> int			-> Tile depth
---	radius		-> float		-> Radius of the planet
---	data		-> table		-> Data set by the user
---
--- Also, all utility terrain generating functions can be used
--- You should return height at said point in meters, can be negative
+local hmap = assets.get_image("rss_textures:mars/hmap.png")
+local cmap = assets.get_image("rss_textures:mars/color.png")
 
-local poles = make_color(0.9, 0.9, 0.9);
-local h_color = make_color(0.9921, 0.5215, 0.3764);
-local l_color = make_color(0.4196, 0.3098, 0.2627);
+function projected_to_pixel(prj)
 
-function polesfun(t)
-
-	return clamp(1.0 - (1.0 / (1.5 * t * t * t * t)) + 0.5, 0.0, 1.0);
+	return glm.vec2.new(prj.x / glm.two_pi + 0.5, prj.y / glm.pi);
 
 end
 
-function hval(x, y, z)
+function generate(info, out)
 
-	noise.set_frequency(100.0);
-	noise.set_fractal_octaves(10);
-	noise.set_fractal_gain(0.6);
+	local pix = projected_to_pixel(info.coord_2d);
+	local earth = hmap:get():sample_bilinear(pix).x;
 
-	local n = noise.perlin3_fractal(x, y, z);
-
-	return clamp(math.pow(n, 0.7), 0.0, 1.0);
+	out.height = (earth * info.radius * 0.002);
+	out.color = cmap:get():sample_bilinear(pix):to_vec3();
 
 end
 
-function surface(x, y, z)
-
-	noise.set_frequency(3.0);
-	noise.set_fractal_octaves(10);
-	noise.set_fractal_gain(0.6);
-
-	local n = noise.perlin3_fractal(x, y, z);
-
-	return clamp(n * 2.0, -1.0, 1.0);
-
-end
-
---function generate()
---	local pole_factor = polesfun(math.abs(coord_3d.y));
---	local s = surface(coord_3d.x, coord_3d.y, coord_3d.z) +
---		1.0 - clamp(math.abs(coord_3d.y) * 2.5, 0.0, 1.0);
---	local s2 = hval(coord_3d.x, coord_3d.y, coord_3d.z);
---
---	local s_color = mix_color(h_color, l_color, clamp(s, 0.0, 1.0));
---
---	height = s2 * radius * 0.001;
---
---	color = mix_color(s_color, poles, pole_factor + math.max(s2, 0.0) * 0.1);
---end
-
-
-
-local hmap = get_heightmap("heightmap");
-local cmap = get_image("colormap");
-
-
-
-function generate()
-
-	local earth = hmap.get_height_soft(coord_2d.x, coord_2d.y);
-
-	noise.set_frequency(90.0);
-	noise.set_fractal_octaves(6);
-
-	local h2 = noise.perlin3_fractal(coord_3d.x, coord_3d.y, coord_3d.z);
-
-	height = (earth * radius * 0.008) + (h2 * radius * 0.0004);
-	color = cmap.get_projected(coord_2d.x + h2 * 0.005, coord_2d.y + h2 * 0.005);
-end

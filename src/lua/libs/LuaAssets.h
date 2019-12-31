@@ -24,9 +24,9 @@
 		The C++ AssetManager uses AssetHandles for this, but templates are not
 		supported in lua so we instead use a custom implementation.
 
-		You can access the resource directly, we implement 'index'.
-		You can also access the inner resource by calling :get, but it's not recommended
-		as memory errors can happen if you were to store the returned value.
+		You can access the inner resource by calling :get, but make sure that you
+		don't store the return for long as the asset may be unloaded and you will
+		get garbage (or crash the program).
 
 		You cannot create your own asset handles, you must obtain them from get_x
 
@@ -70,6 +70,11 @@ struct LuaAssetHandle
 	T* get()
 	{
 		return data;
+	}
+
+	explicit operator T()
+	{
+		return *data;
 	}
 
 	// Invalidates this (makes it null) and returns a new valid handle

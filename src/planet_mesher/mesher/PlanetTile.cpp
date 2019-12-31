@@ -186,11 +186,12 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 
 	size_t depth = path.get_depth();
 
-	lua_state["depth"] = depth;
-	lua_state["radius"] = planet_radius;
-
 	// We only need water if there is a tile over the water level (height = 0)
 	bool needs_water = false;
+
+	GeneratorInfo info;
+	info.depth = (int)depth;
+	info.radius = planet_radius;
 
 	for (int x = -1; x < TILE_SIZE + 1; x++)
 	{
@@ -208,15 +209,19 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 			glm::dvec3 sphere = world_pos_spheric;
 			glm::dvec2 projected = MathUtil::euclidean_to_spherical_r1(sphere);
 
-			lua_state["coord_3d"] = sphere;
-			lua_state["coord_2d"] = projected;
-
 			clear();
 
 			size_t i = (y + 1) * (TILE_SIZE + 2) + (x + 1);
 			
 			sol::protected_function func = lua_state["generate"];
 			 
+			info.coord_3d = sphere;
+			info.coord_2d = projected;
+
+			GeneratorOut out;
+			out.height = 1.0;
+			out.color = glm::dvec3(1.0, 0.0, 1.0);
+
 			// TODO: Texture generation
 			// If an error happens, generating will lag 
 			// (exceptions are really slow)
@@ -227,7 +232,7 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 			}
 			else
 			{
-				auto result = func();
+				auto result = func(info, &out);
 				if (!result.valid())
 				{
 					sol::error err = result;
@@ -238,7 +243,7 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 				}
 				else
 				{
-					heights[i] = lua_state["height"].get_or(0.0) / planet_radius;
+					heights[i] = out.height / planet_radius;
 					if (!needs_water)
 					{
 						if (heights[i] < 0.0)
@@ -247,9 +252,9 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 						}
 					}
 
-					colors[i].r = (float)lua_state["color"]["r"].get_or(0.8);
-					colors[i].g = (float)lua_state["color"]["g"].get_or(0.8);
-					colors[i].b = (float)lua_state["color"]["b"].get_or(0.8);
+					glm::dvec3 default = glm::dvec3(1.0, 0.0, 1.0);
+					colors[i] = (glm::vec3)out.color;
+
 				}
 			}
 		}

@@ -30,6 +30,20 @@ struct PlanetTileWaterVertex
 struct PlanetTile
 {
 
+	struct GeneratorInfo
+	{
+		glm::dvec3 coord_3d;
+		glm::dvec2 coord_2d;
+		double radius;
+		int depth;
+	};
+	
+	struct GeneratorOut
+	{
+		double height;
+		glm::dvec3 color;
+	};
+
 	bool clockwise;
 
 	GLuint vbo, water_vbo;

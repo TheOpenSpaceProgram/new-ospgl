@@ -271,19 +271,21 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 	delete work_array;
 }
 
-#include "../../util/lua/LuaUtilLib.h"
-
 void PlanetTileServer::prepare_lua(sol::state& lua_state)
 {
 	lua_core->load(lua_state, assets->get_current_package());
-	
-	lua_state["coord_3d"] = glm::dvec3();
-	lua_state["coord_2d"] = glm::dvec2();
-	lua_state["color"] = lua_state.create_table_with("r", 0.0, "g", 0.0, "b", 0.0);
-	lua_state["height"] = 0.0;
 
-	LuaUtilLib::load_lib(lua_state, config, images);
 
+	// We must define the little utility struct GeneratorInfo
+	lua_state.new_usertype<PlanetTile::GeneratorInfo>("generator_info",
+		"coord_3d", &PlanetTile::GeneratorInfo::coord_3d,
+		"coord_2d", &PlanetTile::GeneratorInfo::coord_2d,
+		"radius", &PlanetTile::GeneratorInfo::radius,
+		"depth", &PlanetTile::GeneratorInfo::depth);
+
+	lua_state.new_usertype<PlanetTile::GeneratorOut>("generator_out",
+		"height", &PlanetTile::GeneratorOut::height,
+		"color", &PlanetTile::GeneratorOut::color);
 }
 
 void PlanetTileServer::default_lua(sol::state& lua_state)

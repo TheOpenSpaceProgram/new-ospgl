@@ -1,26 +1,23 @@
 local glm = require("glm")
-
--- Data set by caller:
---
---	coord_3d	-> vec3			-> Spherical 3D coordinates
---	coord_2d	-> vec2			-> Equirrectangular 2D coordinates (azimuth, elevation)
---	depth		-> int			-> Tile depth
---	radius		-> number		-> Radius of the planet
-
-local hmap = get_heightmap("heightmap");
-local cmap = get_image("colormap");
+local assets = require("assets")
 
 
-function generate()
+local hmap = assets.get_image("rss_textures:moon/hmap.png")
+local cmap = assets.get_image("rss_textures:moon/color.png")
 
-	local earth = hmap.get_height_soft(coord_2d.x, coord_2d.y) - 0.0941;
-	if earth < 0.0 then
+function projected_to_pixel(prj)
 
-		earth = earth - earth * earth * 160.0;
-	end
+	return glm.vec2.new(prj.x / glm.two_pi + 0.5, prj.y / glm.pi);
 
-	height = (earth * radius * 0.002);
-	color = cmap.get_projected(coord_2d.x, coord_2d.y);
+end
+
+function generate(info, out)
+
+	local pix = projected_to_pixel(info.coord_2d);
+	local earth = hmap:get():sample_bilinear(pix).x;
+
+	out.height = (earth * info.radius * 0.002);
+	out.color = cmap:get():sample_bilinear(pix):to_vec3();
 
 end
 
