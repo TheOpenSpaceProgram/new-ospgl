@@ -243,7 +243,7 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 				}
 				else
 				{
-					heights[i] = out.height / planet_radius;
+					heights[i] = (out.height) / planet_radius;
 					if (!needs_water)
 					{
 						if (heights[i] < 0.0)

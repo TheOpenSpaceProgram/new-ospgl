@@ -5,6 +5,7 @@
 #include "BitmapFont.h"
 #include "Model.h"
 #include "Material.h"
+#include "PartPrototype.h"
 
 
 #include <istream>
@@ -25,6 +26,7 @@ void create_global_asset_manager()
 	assets->create_asset_type<BitmapFont>("Bitmap Font", loadBitmapFont);
 	assets->create_asset_type<Model>("Model", loadModel);
 	assets->create_asset_type<Material>("Material", loadMaterial);
+	assets->create_asset_type<PartPrototype>("Part Prototype", loadPartPrototype);
 
 	assets->check_packages();
 }

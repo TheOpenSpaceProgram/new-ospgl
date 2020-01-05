@@ -10,6 +10,7 @@
 	- Many functions are not implemented (rarely used in C++)
 	- Some functions only offer certain overloads (rarely used in C++)
 	- We offer utility functions 'vec4:to_vec3' '[vec4/vec3]:to_vec2' for easier typecasting
+	- We offer utility functions ':unpack()' that return the coordinates to satisfy multi argument functions
 
 	Note that everything is in doubles, but the 'd' suffix is not added!
 	Lua uses doubles natively so this makes sense.

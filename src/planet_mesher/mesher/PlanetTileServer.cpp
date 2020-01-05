@@ -123,20 +123,21 @@ double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
 
 	default_lua(lua_state);
 
-	lua_state["coord_3d"] = pos_3d;
+	PlanetTile::GeneratorInfo info;
+	info.depth = (int)depth;
+	info.coord_3d = pos_3d;
+	info.coord_2d = projected;
+	info.radius = config->radius;
 
-	lua_state["coord_2d"] = projected;
-
-	lua_state["radius"] = config->radius;
-	lua_state["depth"] = depth;
+	PlanetTile::GeneratorOut out;
 
 	sol::protected_function func = lua_state["generate"];
-	auto result = func();
+	auto result = func(info, &out);
 
 	// We ignore errors here
 	if (result.valid())
 	{
-		return lua_state["height"].get_or(0.0);
+		return out.height;
 	}
 	else
 	{

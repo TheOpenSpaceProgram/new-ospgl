@@ -1,6 +1,9 @@
 #pragma once
 #include <glm/glm.hpp>
+#pragma warning(push, 0)
 #include <LinearMath/btVector3.h>
+#include <glm/gtx/quaternion.hpp>
+#pragma warning(pop)
 
 // TODO: Maybe  pass by reference is more perfomant?
 
@@ -36,3 +39,8 @@ inline btVector3 to_btVector3(glm::tvec3<T> d)
 	return btVector3((btScalar)d.x, (btScalar)d.y, (btScalar)d.z);
 }
 
+template<typename T>
+inline btQuaternion to_btQuaternion(glm::tquat<T> d)
+{
+	return btQuaternion((btScalar)d.x, (btScalar)d.y, (btScalar)d.z, (btScalar)d.w);
+}

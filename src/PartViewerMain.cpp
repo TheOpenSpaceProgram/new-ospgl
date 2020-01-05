@@ -1,28 +1,19 @@
 #include <sol.hpp>
 #include <iostream>
 #include "util/Logger.h"
-#include "util/Timer.h"
 #include "util/DebugDrawer.h"
-#include "util/render/TextureDrawer.h"
 #include "util/render/TextDrawer.h"
+#include "util/Timer.h"
 #include "renderer/Renderer.h"
 
-#include "game/ui/Navball.h"
 #include "assets/Config.h"
-
 
 #include "util/InputUtil.h"
 #include <imgui/imgui.h>
 
-
-#include "tools/planet_editor/PlanetEditor.h"
-#include "universe/PlanetarySystem.h"
-#include "universe/Date.h"
-
-#include "assets/BitmapFont.h"
-
 #include "lua/LuaCore.h"
 
+#include "tools/part_viewer/PartViewer.h"
 
 InputUtil* input;
 
@@ -50,19 +41,14 @@ int main(void)
 	create_global_lua_core();
 
 	{
+
+		PartViewer part_viewer = PartViewer("test_parts://parts/capsule/part_capsule.toml");
+
 		Timer dtt = Timer();
 		double dt = 0.0;
 
 		input = new InputUtil();
 		input->setup(renderer.window);
-
-
-		Navball navball;
-		Config* navball_config = assets->get<Config>("navball", "navball.toml");
-		navball_config->read_to(navball);
-
-		PlanetEditor editor = PlanetEditor(renderer.window, "rss:planets/earth/config.toml");
-
 
 		while (!glfwWindowShouldClose(renderer.window))
 		{
@@ -76,9 +62,7 @@ int main(void)
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
-
-
-			editor.update((float)dt);
+			part_viewer.update(dt);
 
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -86,11 +70,8 @@ int main(void)
 
 			if (renderer.render_enabled)
 			{
-				editor.render(renderer.get_width(), renderer.get_height());
-
+				part_viewer.render(renderer.get_size());
 				renderer.prepare_gui();
-
-
 			}
 
 			ImGui::Render();

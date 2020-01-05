@@ -144,9 +144,6 @@ public:
 	template<typename T>
 	T* get_from_path(const std::string& full_path, const std::string& def = "");
 
-	template<typename T>
-	AssetHandle<T> get_handle_from_path(const std::string& full_path, bool load_now = true, const std::string& def = "");
-
 	std::string resolve_path(const std::string& full_path, const std::string& def = "");
 
 	// Checks all dependencies, and logs to console loaded packages
@@ -318,6 +315,9 @@ inline bool AssetManager::load(const std::string& package, const std::string& na
 	
 
 	std::string old_pkg = get_current_package();
+	
+	logger->check_important(file_exists(full_path), "Asset file must exist");
+
 	set_current_package(package);
 	T* ndata = fptr(full_path, name, package, *cfg);
 	set_current_package(old_pkg);
@@ -407,8 +407,24 @@ public:
 	}
 
 	// Set load_now to false to avoid loading the asset just as the handle is created
-	AssetHandle(std::string pkg, std::string name, bool load_now = true)
+	AssetHandle(const std::string& pkg, const std::string& name, bool load_now = true)
 	{
+		this->pkg = pkg;
+		this->name = name;
+
+		if (load_now)
+		{
+			data = assets->get<T>(pkg, name);
+		}
+		else
+		{
+			data = nullptr;
+		}
+	}
+
+	AssetHandle(const std::string& path, bool load_now = true)
+	{
+		auto[pkg, name] = assets->get_package_and_name(path, assets->get_current_package());
 		this->pkg = pkg;
 		this->name = name;
 
@@ -447,9 +463,33 @@ public:
 		b.name = "null";
 	}
 
+	AssetHandle<T>& operator=(AssetHandle<T>&& other)
+	{
+		this->pkg = other.pkg;
+		this->name = other.name;
+		this->data = other.data;
+
+		other.data = nullptr;
+		other.pkg = "null";
+		other.name = "null";
+
+		return *this;
+	}
+
+	// Returns a new AssetHandle, keeping this one valid
+	AssetHandle<T> duplicate() const
+	{
+		return AssetHandle<T>(pkg, name);
+	}
+
 	~AssetHandle()
 	{
 		unload();
+	}
+
+	bool is_null()
+	{
+		return data == nullptr;
 	}
 
 	T* operator->()
@@ -462,18 +502,5 @@ public:
 		return *get();
 	}
 
-	bool is_null()
-	{
-		return b.data == nullptr;
-	}
 };
 
-template<typename T>
-inline AssetHandle<T> AssetManager::get_handle_from_path(const std::string & full_path, bool load_now, const std::string & def)
-{
-	std::string ddef = def == "" ? current_package : def;
-
-	auto[pkg, name] = get_package_and_name(full_path, ddef);
-
-	return AssetHandle<T>(pkg, name, load_now);
-}
