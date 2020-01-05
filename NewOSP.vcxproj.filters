@@ -228,7 +228,13 @@
     <ClCompile Include="src\lua\libs\LuaAssets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Main.cpp">
+    <ClCompile Include="src\PartViewerMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tools\part_viewer\PartViewer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\assets\PartPrototype.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -513,6 +519,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\lua\libs\LuaAssets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tools\part_viewer\PartViewer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\assets\PartPrototype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

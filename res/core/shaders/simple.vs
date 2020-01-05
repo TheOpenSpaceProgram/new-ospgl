@@ -25,4 +25,5 @@ void main()
 	vPos = aPos;
 	vNrm = aNrm;
 	vTex = aTex;
+
 }

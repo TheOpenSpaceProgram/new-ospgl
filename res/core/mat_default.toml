@@ -1,5 +1,8 @@
 shader = "shaders/simple.vs"
 
+[uniforms]
+	diffuse = "core:notex.png"
+
 [config]
 	has_pos = true
 	has_nrm = true

@@ -3,11 +3,38 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
+#include <glm/gtx/quaternion.hpp>
 
 void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool drawable_parent)
 {
 	Node* n_node = new Node();
+
+	aiMetadata* m = node->mMetaData;
+	// Extract all properties:
+	if (m)
+	{
+		for (size_t i = 0; i < m->mNumProperties; i++)
+		{
+			std::string key = std::string(m->mKeys[i].C_Str());
+			aiMetadataEntry entry = m->mValues[i];
+
+			// TODO: Maybe handle other property types, we don't need them yet!
+			if (entry.mType == 5)
+			{
+				std::string cont = std::string(((aiString*)(entry.mData))->C_Str());
+				n_node->properties[key] = cont;
+			}
+		}
+	}
+
+	aiVector3D scaling, pos;
+	aiQuaternion rot;
+	node->mTransformation.Decompose(scaling, rot, pos);
+
+	n_node->sub_transform = glm::dmat4(1.0);
+	n_node->sub_transform = glm::translate(n_node->sub_transform, glm::dvec3(pos.x, pos.y, pos.z));
+	n_node->sub_transform = glm::scale(n_node->sub_transform, glm::dvec3(scaling.x, scaling.y, scaling.z));
+	n_node->sub_transform = n_node->sub_transform * glm::toMat4(glm::dquat(rot.w, rot.x, rot.y, rot.z));
 
 	n_node->name = node->mName.C_Str();
 
@@ -17,7 +44,7 @@ void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool draw
 
 	bool drawable = drawable_parent;
 
-	if (n_node->name.rfind("col_", 0) == 0) 
+	if (n_node->name.rfind(Model::COLLIDER_PREFIX, 0) == 0) 
 	{
 		drawable = false;
 	}
@@ -50,8 +77,9 @@ void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool draw
 
 void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool drawable)
 {
+	
 	aiMaterial* ai_mat = scene->mMaterials[mesh->mMaterialIndex];
-
+	
 	AssetPointer mat_ptr;
 
 	std::string ai_mat_name = ai_mat->GetName().C_Str();
@@ -73,152 +101,175 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool draw
 
 	to->meshes.push_back(Mesh(std::move(mat)));
 	Mesh* m = &to->meshes[to->meshes.size() - 1];
+	m->drawable = drawable;
 
 	MeshConfig& config = m->material->cfg;
 
 	size_t vert_size = config.get_vertex_size();
 	size_t floats_per_vert = config.get_vertex_floats();
 
-	// Work directly in the vector
-	m->data = (float*)malloc(vert_size * mesh->mNumVertices);
-	m->indices = (uint32_t*)malloc(sizeof(uint32_t) * mesh->mNumFaces * 3);
-
-	m->data_size = vert_size * mesh->mNumVertices;
-
-	bool log_once_tangents = false;
-	bool log_once_colors = false;
-
-	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+	if (drawable)
 	{
-		aiFace face = mesh->mFaces[i];
-		m->indices[i * 3 + 0] = face.mIndices[0];
-		m->indices[i * 3 + 1] = face.mIndices[1];
-		m->indices[i * 3 + 2] = face.mIndices[2];
+
+		// Work directly in the vector
+		m->data = (float*)malloc(vert_size * mesh->mNumVertices);
+		m->indices = (uint32_t*)malloc(sizeof(uint32_t) * mesh->mNumFaces * 3);
+
+		m->data_size = vert_size * mesh->mNumVertices;
+
+		bool log_once_tangents = false;
+		bool log_once_colors = false;
+
+		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+		{
+			aiFace face = mesh->mFaces[i];
+			m->indices[i * 3 + 0] = face.mIndices[0];
+			m->indices[i * 3 + 1] = face.mIndices[1];
+			m->indices[i * 3 + 2] = face.mIndices[2];
+		}
+
+		m->index_count = mesh->mNumFaces * 3;
+
+		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+		{
+			size_t i0 = i * floats_per_vert;
+			constexpr size_t o = 1; //< 1 Because we index using floats, could be removed ;)
+			size_t j = 0;
+
+			if (config.has_pos)
+			{
+				m->data[i0 + j * o] = mesh->mVertices[i].x; j++;
+				m->data[i0 + j * o] = mesh->mVertices[i].y; j++;
+				m->data[i0 + j * o] = mesh->mVertices[i].z; j++;
+			}
+
+			if (config.has_nrm)
+			{
+				m->data[i0 + j * o] = mesh->mNormals[i].x; j++;
+				m->data[i0 + j * o] = mesh->mNormals[i].y; j++;
+				m->data[i0 + j * o] = mesh->mNormals[i].z; j++;
+			}
+
+			if (config.has_tex)
+			{
+				if (mesh->mTextureCoords[0])
+				{
+					glm::vec2 uv;
+					uv.x = mesh->mTextureCoords[0][i].x;
+					uv.y = mesh->mTextureCoords[0][i].y;
+
+					if (config.flip_uv)
+					{
+						uv.y = 1.0f - uv.y;
+					}
+
+					// We only support one UV map
+					m->data[i0 + j * o] = uv.x; j++;
+					m->data[i0 + j * o] = uv.y; j++;
+				}
+				else
+				{
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+				}
+
+
+
+			}
+
+			if (config.has_tgt)
+			{
+				if (mesh->mTangents)
+				{
+					m->data[i0 + j * o] = mesh->mTangents[i].x; j++;
+					m->data[i0 + j * o] = mesh->mTangents[i].y; j++;
+					m->data[i0 + j * o] = mesh->mTangents[i].z; j++;
+					m->data[i0 + j * o] = mesh->mBitangents[i].x; j++;
+					m->data[i0 + j * o] = mesh->mBitangents[i].y; j++;
+					m->data[i0 + j * o] = mesh->mBitangents[i].z; j++;
+				}
+				else
+				{
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+
+					if (!log_once_tangents)
+					{
+						logger->warn("Could not find tangents. Make sure your model has texture coordinates and normals!");
+						log_once_tangents = true;
+					}
+				}
+
+			}
+
+			// We only support one vertex color map
+			if (config.has_cl3)
+			{
+				if (mesh->mColors[0])
+				{
+					m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
+					m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
+					m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
+				}
+				else
+				{
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+
+					if (!log_once_colors)
+					{
+						logger->warn("Could not find vertex colors. Make sure your model has them!");
+						log_once_colors = true;
+					}
+				}
+			}
+
+			if (config.has_cl4)
+			{
+				if (mesh->mColors[0])
+				{
+					m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
+					m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
+					m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
+					m->data[i0 + j * o] = mesh->mColors[0][i].a; j++;
+				}
+				else
+				{
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+
+					if (!log_once_colors)
+					{
+						logger->warn("Could not find vertex colors. Make sure your model has them!");
+						log_once_colors = true;
+					}
+				}
+			}
+		}
 	}
-
-	m->index_count = mesh->mNumFaces * 3;
-
-	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+	else
 	{
-		size_t i0 = i * floats_per_vert;
-		constexpr size_t o = 1; //< 1 Because we index using floats, could be removed ;)
-		size_t j = 0;
-
-		if (config.has_pos)
+		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 		{
-			m->data[i0 + j * o] = mesh->mVertices[i].x; j++;
-			m->data[i0 + j * o] = mesh->mVertices[i].y; j++;
-			m->data[i0 + j * o] = mesh->mVertices[i].z; j++;
-		}
+			aiFace face = mesh->mFaces[i];
+			unsigned int v0 = face.mIndices[0];
+			unsigned int v1 = face.mIndices[1];
+			unsigned int v2 = face.mIndices[2];
 
-		if (config.has_nrm)
-		{
-			m->data[i0 + j * o] = mesh->mNormals[i].x; j++;
-			m->data[i0 + j * o] = mesh->mNormals[i].y; j++;
-			m->data[i0 + j * o] = mesh->mNormals[i].z; j++;
-		}
+			glm::vec3 p0 = glm::vec3(mesh->mVertices[v0].x, mesh->mVertices[v0].y, mesh->mVertices[v0].z);
+			glm::vec3 p1 = glm::vec3(mesh->mVertices[v1].x, mesh->mVertices[v1].y, mesh->mVertices[v1].z);
+			glm::vec3 p2 = glm::vec3(mesh->mVertices[v2].x, mesh->mVertices[v2].y, mesh->mVertices[v2].z);
 
-		if (config.has_tex)
-		{
-			if (mesh->mTextureCoords[0])
-			{
-				glm::vec2 uv;
-				uv.x = mesh->mTextureCoords[0][i].x;
-				uv.y = mesh->mTextureCoords[0][i].y;
-
-				if (config.flip_uv)
-				{
-					uv.y = 1.0f - uv.y;
-				}
-
-				// We only support one UV map
-				m->data[i0 + j * o] = uv.x; j++;
-				m->data[i0 + j * o] = uv.y; j++;
-			}
-			else
-			{
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-			}
-
-			
-			
-		}
-
-		if (config.has_tgt)
-		{
-			if (mesh->mTangents)
-			{
-				m->data[i0 + j * o] = mesh->mTangents[i].x; j++;
-				m->data[i0 + j * o] = mesh->mTangents[i].y; j++;
-				m->data[i0 + j * o] = mesh->mTangents[i].z; j++;
-				m->data[i0 + j * o] = mesh->mBitangents[i].x; j++;
-				m->data[i0 + j * o] = mesh->mBitangents[i].y; j++;
-				m->data[i0 + j * o] = mesh->mBitangents[i].z; j++;
-			}
-			else
-			{
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-
-				if (!log_once_tangents)
-				{
-					logger->warn("Could not find tangents. Make sure your model has texture coordinates and normals!");
-					log_once_tangents = true;
-				}
-			}
-			
-		}
-
-		// We only support one vertex color map
-		if (config.has_cl3)
-		{
-			if (mesh->mColors[0])
-			{
-				m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
-				m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
-				m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
-			}
-			else
-			{
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-
-				if (!log_once_colors)
-				{
-					logger->warn("Could not find vertex colors. Make sure your model has them!");
-					log_once_colors = true;
-				}
-			}
-		}
-
-		if (config.has_cl4)
-		{
-			if (mesh->mColors[0])
-			{
-				m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
-				m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
-				m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
-				m->data[i0 + j * o] = mesh->mColors[0][i].a; j++;
-			}
-			else
-			{
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-
-				if (!log_once_colors)
-				{
-					logger->warn("Could not find vertex colors. Make sure your model has them!");
-					log_once_colors = true;
-				}
-			}
+			m->verts.push_back(p0);
+			m->verts.push_back(p1);
+			m->verts.push_back(p2);
 		}
 	}
 }
@@ -453,10 +504,41 @@ Node* GPUModelPointer::get_root_node()
 
 GPUModelPointer::GPUModelPointer(AssetHandle<Model>&& m) : model(std::move(m))
 {
-	model->get_gpu();
+	if (!is_null())
+	{
+		model->get_gpu();
+	}
 }
 
 GPUModelPointer::~GPUModelPointer()
 {
-	model->free_gpu();
+	if (!is_null())
+	{
+		model->free_gpu();
+	}
+}
+
+void Node::draw_all_meshes(const CameraUniforms & uniforms, glm::dmat4 model)
+{
+	for (Mesh& mesh : meshes)
+	{
+		if (mesh.is_drawable())
+		{
+			mesh.bind_uniforms(uniforms, model);
+			mesh.draw_command();
+		}
+	}
+
+}
+
+void Node::draw(const CameraUniforms & uniforms, glm::dmat4 model)
+{
+	glm::dmat4 n_model = sub_transform * model;
+
+	draw_all_meshes(uniforms, n_model);
+
+	for (Node* node : children)
+	{
+		node->draw(uniforms, n_model);
+	}
 }

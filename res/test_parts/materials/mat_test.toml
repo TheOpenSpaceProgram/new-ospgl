@@ -1,7 +1,7 @@
 shader = "shader/simple.vs"
 
 [uniforms]
-	diffuse = "navball:navball.png"
+	diffuse = "core:notex.png"
 
 [config]
 	has_pos = true
