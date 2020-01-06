@@ -17,6 +17,8 @@ in vec2 vTex;
 
 void main()
 {
-    FragColor = texture(diffuse, vTex);
+    float diffusel = max(dot(vNrm, vec3(1.0, 0.0, 0.0)), 0.5);
+
+    FragColor = vec4(texture(diffuse, vTex).rgb * diffusel, 1.0);
     gl_FragDepth = log2(flogz) * f_coef * 0.5;
 }

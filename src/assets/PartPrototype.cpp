@@ -6,8 +6,6 @@
 #pragma warning(pop)
 #include "../physics/glm/BulletGlmCompat.h"
 
-// TODO: Find out why the hell are these / 2.0 required all over the place for correct alignment
-
 void PartPrototype::load_collider(btCollisionShape** target, Node* n)
 {
 	
@@ -90,7 +88,7 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 				glm::decompose(child->sub_transform * n->sub_transform, scale, orient, translate, skew, persp);
 
 
-				tform.setOrigin(to_btVector3(translate / 2.0));
+				tform.setOrigin(to_btVector3(translate));
 				tform.setRotation(to_btQuaternion(orient));
 				proto.collider->setLocalScaling(to_btVector3(scale));
 
@@ -194,7 +192,7 @@ std::pair<glm::vec3, glm::vec3> PartPrototype::obtain_bounds(Mesh* m)
 		if (v.z > max.z) { max.z = v.z; }
 	}
 
-	return std::make_pair(min / 2.0f, max / 2.0f);
+	return std::make_pair(min, max);
 
 }
 
@@ -217,7 +215,7 @@ void PartPrototype::load_collider_compound(btCollisionShape** target, Node* n)
 
 		glm::decompose(child->sub_transform, scale, orient, translate, skew, persp);
 
-		tform.setOrigin(to_btVector3(translate / 2.0));
+		tform.setOrigin(to_btVector3(translate));
 		tform.setRotation(to_btQuaternion(orient));
 		n_shape->setLocalScaling(to_btVector3(scale));
 
@@ -305,7 +303,7 @@ void PartPrototype::load_collider_convex(btCollisionShape** target, Node* n)
 
 	for (size_t i = 0; i < n->meshes[0].verts.size(); i++)
 	{
-		target_c->addPoint(to_btVector3(n->meshes[0].verts[i] / 2.0f), false);
+		target_c->addPoint(to_btVector3(n->meshes[0].verts[i]), false);
 	}
 
 	target_c->recalcLocalAabb();

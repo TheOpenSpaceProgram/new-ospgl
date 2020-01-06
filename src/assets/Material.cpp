@@ -118,10 +118,6 @@ void Material::set(std::vector<AssimpTexture>& assimp_textures)
 
 void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
 {
-	glm::dmat4 final_model;
-
-
-	final_model = glm::translate(model, -cu.cam_pos);
 
 	if (core_uniforms.mat4_proj != "")
 	{
@@ -150,13 +146,13 @@ void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
 
 	if (core_uniforms.mat4_final_tform != "")
 	{
-		glm::dmat4 final_tform = cu.tform * final_model;
+		glm::dmat4 final_tform = cu.tform * model;
 		shader->setMat4(core_uniforms.mat4_final_tform, final_tform);
 	}
 
 	if (core_uniforms.mat4_model != "")
 	{
-		shader->setMat4(core_uniforms.mat4_model, final_model);
+		shader->setMat4(core_uniforms.mat4_model, model);
 	}
 
 	if (core_uniforms.float_far_plane != "")

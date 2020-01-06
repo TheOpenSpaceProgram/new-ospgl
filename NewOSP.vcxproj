@@ -167,6 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\assets\PartPrototype.cpp" />
+    <ClCompile Include="src\PartViewerMain.cpp" />
     <ClCompile Include="src\tools\part_viewer\PartViewer.cpp" />
     <ClCompile Include="src\lua\libs\LuaAssets.cpp" />
     <ClCompile Include="src\lua\libs\LuaImage.cpp" />
@@ -174,7 +175,6 @@
     <ClCompile Include="src\lua\libs\LuaGlm.cpp" />
     <ClCompile Include="src\lua\libs\LuaLogger.cpp" />
     <ClCompile Include="src\lua\LuaCore.cpp" />
-    <ClCompile Include="src\PartViewerMain.cpp" />
     <ClCompile Include="src\vehicle\part\Machine.cpp" />
     <ClCompile Include="src\assets\Model.cpp" />
     <ClCompile Include="src\assets\Material.cpp" />

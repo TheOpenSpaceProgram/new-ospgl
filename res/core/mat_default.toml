@@ -10,3 +10,4 @@ shader = "shaders/simple.vs"
 	has_pos = true
 	has_nrm = true
 	has_tex = true
+	flip_uv = true

@@ -228,13 +228,13 @@
     <ClCompile Include="src\lua\libs\LuaAssets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PartViewerMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\tools\part_viewer\PartViewer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\assets\PartPrototype.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PartViewerMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
