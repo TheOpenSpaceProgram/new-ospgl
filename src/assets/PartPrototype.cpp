@@ -56,6 +56,8 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 {
 	PiecePrototype proto = PiecePrototype(std::move(n));
 	
+	auto node_toml = toml.get_table(n->name);
+
 	bool loaded = false;
 	// Extract collider, the hardest part
 	for (Node* child : n->children)
@@ -64,7 +66,21 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 		{
 			if (!loaded)
 			{
+				if (node_toml == nullptr)
+				{
+					logger->fatal("Piece '{}' has collider and does not have a config entry", n->name);
+				}
+
 				load_collider(&proto.collider, child);
+
+				auto mass_toml = node_toml->get_as<double>("mass");
+
+				if (!mass_toml)
+				{
+					logger->fatal("Piece '{}' has no mass entry", n->name);
+				}
+
+				proto.mass = *mass_toml;
 
 				btTransform tform;
 				glm::dvec3 scale, translate, skew;
@@ -275,8 +291,24 @@ void PartPrototype::load_collider_capsule(btCollisionShape** target, Node* n)
 
 void PartPrototype::load_collider_concave(btCollisionShape** target, Node* n)
 {
+	logger->fatal("Not yet implemented");
 }
 
 void PartPrototype::load_collider_convex(btCollisionShape** target, Node* n)
 {
+	// TODO: Is this the best method?
+	// Bullet's little documentation only cites this method, but there are 
+	// other convex mesh classes
+
+	*target = new btConvexHullShape();
+	btConvexHullShape* target_c = (btConvexHullShape*)(*target);
+
+	for (size_t i = 0; i < n->meshes[0].verts.size(); i++)
+	{
+		target_c->addPoint(to_btVector3(n->meshes[0].verts[i] / 2.0f), false);
+	}
+
+	target_c->recalcLocalAabb();
+	target_c->optimizeConvexHull();
+
 }

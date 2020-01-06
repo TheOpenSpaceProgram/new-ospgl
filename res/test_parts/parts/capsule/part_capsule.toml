@@ -6,5 +6,5 @@ manufacturer = "Rocket Factory"
 description = "Crew goes in and hopefully out later in the mission"
 
 
-[piece_root]
+[p_root]
 	mass = 100.0

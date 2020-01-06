@@ -75,6 +75,21 @@ void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool draw
 
 }
 
+void replace_all(std::string& data, const std::string& search, const std::string& replace)
+{
+	// Get the first occurrence
+	size_t pos = data.find(search);
+
+	// Repeat till end is reached
+	while (pos != std::string::npos)
+	{
+		// Replace this occurrence of Sub String
+		data.replace(pos, search.size(), replace);
+		// Get the next occurrence from the current position
+		pos = data.find(search, pos + replace.size());
+	}
+}
+
 void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool drawable)
 {
 	
@@ -92,10 +107,10 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool draw
 	}
 	else
 	{
-		// TODO: Default material
 		mat_ptr = AssetPointer("core:mat_default.toml");
 	}
 
+	
 	AssetHandle<Material> mat = AssetHandle<Material>(mat_ptr);
 
 
@@ -103,33 +118,88 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool draw
 	Mesh* m = &to->meshes[to->meshes.size() - 1];
 	m->drawable = drawable;
 
+	// Load Assimp textures
+	for (int type = 0; type < (int)aiTextureType::aiTextureType_UNKNOWN; type++)
+	{
+		aiTextureType type_t = (aiTextureType)type;
+		unsigned int count = ai_mat->GetTextureCount(type_t);
+
+		// TODO: Handle multiple textures of the same type
+		if (count > 1)
+		{
+			logger->warn("Multiple textures of the same type are not yet supported.");
+		}
+		else if (count == 1)
+		{
+			aiString path;
+			// TODO: Maybe handle other texture parameters? Atleast pass them to the shaders
+			ai_mat->GetTexture(type_t, 0, &path);
+
+			std::string path_s = std::string(path.C_Str());
+			// Sanitize the path
+			replace_all(path_s, "\\", "/");
+			// We find 'res/', after it is the package name, and then the name, pretty easy
+			size_t pos = path_s.find("res/");
+			if (pos == std::string::npos)
+			{
+				logger->warn("Invalid path '{}' given in texture, ignoring!", path_s);
+			}
+			else
+			{
+				std::string sub_path = path_s.substr(pos + 4); //< +4 skips the res/
+				size_t first_dash = sub_path.find_first_of('/');
+				if (first_dash == std::string::npos)
+				{
+					logger->warn("Invalid path '{}' given in texture, ignoring!", path_s);
+				}
+				else
+				{
+					std::string pkg = sub_path.substr(0, first_dash);
+					std::string name = sub_path.substr(first_dash + 1);
+
+					AssimpTexture assimp_tex;
+					assimp_tex.first = type_t;
+					assimp_tex.second = std::move(AssetHandle<Image>(pkg, name, false));
+
+					// Load the texture
+					m->textures.push_back(assimp_tex);
+				}
+			}
+		}
+
+	}
+
+
 	MeshConfig& config = m->material->cfg;
 
 	size_t vert_size = config.get_vertex_size();
 	size_t floats_per_vert = config.get_vertex_floats();
+
+	m->indices = (uint32_t*)malloc(sizeof(uint32_t) * mesh->mNumFaces * 3);
+	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+	{
+		aiFace face = mesh->mFaces[i];
+		m->indices[i * 3 + 0] = face.mIndices[0];
+		m->indices[i * 3 + 1] = face.mIndices[1];
+		m->indices[i * 3 + 2] = face.mIndices[2];
+	}
+	m->index_count = mesh->mNumFaces * 3;
+
 
 	if (drawable)
 	{
 
 		// Work directly in the vector
 		m->data = (float*)malloc(vert_size * mesh->mNumVertices);
-		m->indices = (uint32_t*)malloc(sizeof(uint32_t) * mesh->mNumFaces * 3);
-
+	
 		m->data_size = vert_size * mesh->mNumVertices;
 
 		bool log_once_tangents = false;
 		bool log_once_colors = false;
 
-		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-		{
-			aiFace face = mesh->mFaces[i];
-			m->indices[i * 3 + 0] = face.mIndices[0];
-			m->indices[i * 3 + 1] = face.mIndices[1];
-			m->indices[i * 3 + 2] = face.mIndices[2];
-		}
+		
 
-		m->index_count = mesh->mNumFaces * 3;
-
+	
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
 			size_t i0 = i * floats_per_vert;
@@ -256,20 +326,10 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool draw
 	}
 	else
 	{
-		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
-			aiFace face = mesh->mFaces[i];
-			unsigned int v0 = face.mIndices[0];
-			unsigned int v1 = face.mIndices[1];
-			unsigned int v2 = face.mIndices[2];
-
-			glm::vec3 p0 = glm::vec3(mesh->mVertices[v0].x, mesh->mVertices[v0].y, mesh->mVertices[v0].z);
-			glm::vec3 p1 = glm::vec3(mesh->mVertices[v1].x, mesh->mVertices[v1].y, mesh->mVertices[v1].z);
-			glm::vec3 p2 = glm::vec3(mesh->mVertices[v2].x, mesh->mVertices[v2].y, mesh->mVertices[v2].z);
-
+			glm::vec3 p0 = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
 			m->verts.push_back(p0);
-			m->verts.push_back(p1);
-			m->verts.push_back(p2);
 		}
 	}
 }
@@ -397,7 +457,7 @@ void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model)
 	// TODO
 	material->shader->use();
 
-	material->set();
+	material->set(textures);
 	material->set_core(uniforms, model);
 }
 

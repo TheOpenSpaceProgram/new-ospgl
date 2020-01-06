@@ -126,19 +126,49 @@ public:
 };
 
 
+struct AssimpTexture
+{
+	aiTextureType first;
+	AssetHandle<Image> second;
 
-using AssimpTexture = std::pair <aiTextureType, AssetHandle<Image>>;
+	AssimpTexture()
+	{
+		this->first = aiTextureType_UNKNOWN;
+		this->second = AssetHandle<Image>();
+	}
+
+	AssimpTexture(AssimpTexture&& b)
+	{
+		this->first = b.first;
+		this->second = std::move(b.second);
+	}
+
+	AssimpTexture(const AssimpTexture& b)
+	{
+		this->first = b.first;
+		this->second = b.second.duplicate();
+	}
+
+
+	AssimpTexture& operator=(AssimpTexture&& b)
+	{
+		this->first = b.first;
+		this->second = std::move(b.second);
+
+		return *this;
+	}
+};
 
 struct CoreUniforms
 {
 	// Name of the different core uniforms
-// By default materials bind
-// - model = "model"
-// - camera_tform = "camera_tform"
-// - proj_view = "proj_view"
-// - f_coef = "f_coef"
-// - camera_relative = "camera_relative"
-// If any equals "", it's not binded
+	// By default materials bind
+	// - model = "model"
+	// - camera_tform = "camera_tform"
+	// - proj_view = "proj_view"
+	// - f_coef = "f_coef"
+	// - camera_relative = "camera_relative"
+	// If any equals "", it's not binded
 	std::string mat4_proj, mat4_view, mat4_camera_model, mat4_proj_view, mat4_camera_tform, mat4_model,
 		mat4_final_tform, float_far_plane, float_f_coef, vec3_camera_relative;
 
@@ -180,7 +210,7 @@ struct Material
 	CoreUniforms core_uniforms;
 
 
-	void set();
+	void set(std::vector<AssimpTexture>& assimp_textures);
 	void set_core(const CameraUniforms& cu, glm::dmat4 model);
 
 };
@@ -297,6 +327,92 @@ public:
 		if (uniforms_toml)
 		{
 			obtain_uniforms(to, *uniforms_toml);
+		}
+
+		auto asssimp_textures_toml = from.get_table_qualified("assimp_textures");
+		if (asssimp_textures_toml)
+		{
+			for (auto entry : *asssimp_textures_toml)
+			{
+				if (entry.second->is_value() && entry.second->as<std::string>())
+				{
+					std::string val = entry.second->as<std::string>()->get();
+
+					if (entry.first == "diffuse")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_DIFFUSE] = val;
+					}
+					else if(entry.first == "specular")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_SPECULAR] = val;
+					}
+					else if (entry.first == "ambient")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_AMBIENT] = val;
+					}
+					else if (entry.first == "emissive")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_EMISSIVE] = val;
+					}
+					else if (entry.first == "height")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_HEIGHT] = val;
+					}
+					else if (entry.first == "normals")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_NORMALS] = val;
+					}
+					else if (entry.first == "shininess")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_SHININESS] = val;
+					}
+					else if (entry.first == "opacity")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_OPACITY] = val;
+					}
+					else if (entry.first == "displacement")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_DISPLACEMENT] = val;
+					}
+					else if (entry.first == "lightmap")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_LIGHTMAP] = val;
+					}
+					else if (entry.first == "reflection")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_REFLECTION] = val;
+					}
+					// PBR Materials
+					else if (entry.first == "base_color")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_BASE_COLOR] = val;
+					}
+					else if (entry.first == "normal_camera")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_NORMAL_CAMERA] = val;
+					}
+					else if (entry.first == "emission_color")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_EMISSION_COLOR] = val;
+					}
+					else if (entry.first == "metalness")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_METALNESS] = val;
+					}
+					else if (entry.first == "diffuse_roughness")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_DIFFUSE_ROUGHNESS] = val;
+					}
+					else if (entry.first == "ambient_occlusion")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_AMBIENT_OCCLUSION] = val;
+					}
+					else
+					{
+						logger->warn("Unknown assimp texture type '{}'", entry.first);
+					}
+				}
+			}
 		}
 
 	}

@@ -19,9 +19,6 @@ private:
 
 	GLuint vbo, vao, ebo;
 
-	size_t data_size;
-	size_t index_count;
-
 
 
 	// It's only loaded while we are uploaded
@@ -33,11 +30,16 @@ private:
 
 public:
 
+	size_t data_size;
+	size_t index_count;
+
 	// Only present on non drawable meshes! Used internally
 	std::vector<glm::vec3> verts;
 
-	// These two are only present on drawable meshes!
+	// data is only present on drawable meshes
 	float* data;
+
+	// Present on both, as both use indexed vertices
 	uint32_t* indices;
 
 	// Stuff that starts with 'col_' are colliders
