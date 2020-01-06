@@ -86,7 +86,7 @@ Uniform::~Uniform()
 	}
 }
 
-void Material::set()
+void Material::set(std::vector<AssimpTexture>& assimp_textures)
 {
 	int gl_tex = 0;
 
@@ -94,6 +94,26 @@ void Material::set()
 	{
 		it->second.set(shader, it->first, &gl_tex);
 	}
+
+	for (auto it = assimp_textures.begin(); it != assimp_textures.end(); it++)
+	{
+		aiTextureType type = it->first;
+		auto translates = assimp_texture_type_to_uniform.find(type);
+		if (translates != assimp_texture_type_to_uniform.end())
+		{
+			AssetHandle<Image>* img = &it->second;
+
+			std::string uniform = translates->second;
+
+			glActiveTexture(GL_TEXTURE0 + gl_tex);
+			glBindTexture(GL_TEXTURE_2D, img->get()->id);
+
+			shader->setInt(uniform, gl_tex);
+
+			gl_tex++;
+		}
+	}
+
 }
 
 void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)

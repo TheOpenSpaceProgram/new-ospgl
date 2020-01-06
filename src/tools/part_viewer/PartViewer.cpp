@@ -52,17 +52,20 @@ PartViewer::PartViewer(const std::string& part_path)
 	// Create rigidbodies so they render
 	for (PiecePrototype& piece : part->pieces)
 	{
-		btTransform tform = piece.collider_offset;
+		if (piece.collider)
+		{
+			btTransform tform = piece.collider_offset;
 
-		btVector3 local_inertia;
-		piece.collider->calculateLocalInertia(1.0, local_inertia);
+			btVector3 local_inertia;
+			piece.collider->calculateLocalInertia(1.0, local_inertia);
 
-		btMotionState* motion_state = new btDefaultMotionState(tform);
-		btRigidBody::btRigidBodyConstructionInfo info(1.0, motion_state, piece.collider, local_inertia);
-		btRigidBody* rigid_body = new btRigidBody(info);
+			btMotionState* motion_state = new btDefaultMotionState(tform);
+			btRigidBody::btRigidBodyConstructionInfo info(1.0, motion_state, piece.collider, local_inertia);
+			btRigidBody* rigid_body = new btRigidBody(info);
 
-		world->addRigidBody(rigid_body);
-		bodies.push_back(rigid_body);
+			world->addRigidBody(rigid_body);
+			bodies.push_back(rigid_body);
+		}
 	}
 
 }

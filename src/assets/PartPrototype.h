@@ -12,10 +12,13 @@ struct PiecePrototype
 	btCollisionShape* collider;
 	btTransform collider_offset;
 	
+	double mass;
+	
 	PiecePrototype(GPUModelNodePointer&& n) : model_node(std::move(n))
 	{
 		this->collider = nullptr;
 		this->collider_offset = btTransform::getIdentity();
+		this->mass = 1.0;
 	}
 
 	// We have to declare copy constructor
@@ -23,6 +26,7 @@ struct PiecePrototype
 	{
 		this->collider = b.collider;
 		this->collider_offset = b.collider_offset;
+		this->mass = b.mass;
 	}
 
 	// Copy, used for std containers
@@ -31,6 +35,7 @@ struct PiecePrototype
 		this->model_node = b.model_node.duplicate();
 		this->collider = b.collider;
 		this->collider_offset = b.collider_offset;
+		this->mass = b.mass;
 
 		return *this;
 	}
@@ -52,8 +57,7 @@ struct PiecePrototype
 // - If there is only one piece in a part, then that piece is root, but you are recommended to name it 'p_root'
 // - If there are no pieces named 'p_root', then the root piece may be any of them. Not recommended!
 // - The model format MUST support attributes. You can enable it in blender export, .fbx works pretty well!
-//
-// Collider Types:
+// - Usage of concave collision meshes should be avoided, they are quite slow!
 //
 // NOTE: We keep the model loaded!
 class PartPrototype
