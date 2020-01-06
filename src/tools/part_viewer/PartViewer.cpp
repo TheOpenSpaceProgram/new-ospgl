@@ -15,11 +15,13 @@ void PartViewer::render(glm::ivec2 win_size)
 	camera.fw = -camera.pos;
 
 	CameraUniforms c_uniforms = camera.get_camera_uniforms(win_size.x, win_size.y);
-
 	for (size_t i = 0; i < part->pieces.size(); i++)
 	{
 		part->pieces[i].model_node->draw(c_uniforms, model);
+
 	}
+
+	debug_drawer->add_line(glm::dvec3(0.0, 0.1, 0.5), glm::dvec3(10.0, 0.0, 0.0), glm::vec3(1.0, 0.0, 1.0));
 
 	world->debugDrawWorld();
 

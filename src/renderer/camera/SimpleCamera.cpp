@@ -30,7 +30,7 @@ CameraUniforms SimpleCamera::get_camera_uniforms(int w, int h)
 	out.proj_view = proj_view;
 	out.c_model = glm::translate(glm::dmat4(1.0), -camera_pos);
 	out.tform = proj * view * out.c_model;
-	out.far_plane = 10e16f;
+	out.far_plane = far_plane;
 	out.cam_pos = camera_pos;
 
 	return out;
