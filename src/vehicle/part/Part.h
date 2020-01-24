@@ -10,13 +10,13 @@ class Part
 {
 public:
 
-	PartPrototype proto;
+	//AssetHandle<PartPrototype> proto;
 
 	std::vector<Machine> machines;
 
-	// Index 0 is always the root subpart, which
-	// MUST be present. Separated pieces simply disappear
-	std::vector<Piece*> pieces;
+	// "p_root" is always the root, and is always present
+	// When a piece goes missing, it turns to null, but the map entry stays
+	std::unordered_map<std::string, Piece*> pieces;
 
 	Part();
 	~Part();

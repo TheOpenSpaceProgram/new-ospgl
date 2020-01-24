@@ -57,6 +57,11 @@ public:
 		glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 	}
 
+	inline void setMat3(const std::string& name, glm::mat3 value) const
+	{
+		glUniformMatrix3fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+	}
+
 	Shader(const std::string& vertexData, const std::string& fragmentData);
 	~Shader();
 };

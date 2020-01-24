@@ -14,6 +14,8 @@ void PartPrototype::load_collider(btCollisionShape** target, Node* n)
 
 	std::string collider_prop_s = collider_prop->second;
 
+
+
 	if (collider_prop_s == "compound")
 	{
 		load_collider_compound(target, n);
@@ -47,6 +49,16 @@ void PartPrototype::load_collider(btCollisionShape** target, Node* n)
 		load_collider_convex(target, n);
 	}
 
+	double margin = 0.02;
+
+	auto margin_prop = n->properties.find("margin");
+
+	if (margin_prop != n->properties.end())
+	{
+		
+	}
+
+	(*target)->setMargin(margin);
 
 }
 
@@ -69,6 +81,7 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 					logger->fatal("Piece '{}' has collider and does not have a config entry", n->name);
 				}
 
+				proto.render_offset = child->sub_transform;
 				load_collider(&proto.collider, child);
 
 				auto mass_toml = node_toml->get_as<double>("mass");
@@ -104,14 +117,8 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 		}
 	}
 
-	if (proto.model_node->name == PartPrototype::ROOT_NAME)
-	{
-		pieces.insert(pieces.begin(), proto);
-	}
-	else
-	{
-		pieces.push_back(proto);
-	}
+
+	pieces[proto.model_node->name] = proto;
 
 
 }
@@ -144,11 +151,11 @@ PartPrototype::PartPrototype() : model(std::move(AssetHandle<Model>()))
 
 PartPrototype::~PartPrototype()
 {
-	for (size_t i = 0; i < pieces.size(); i++)
+	for (auto it = pieces.begin(); it != pieces.end(); it++)
 	{
-		if (pieces[i].collider)
+		if (it->second.collider)
 		{
-			delete pieces[i].collider;
+			delete it->second.collider;
 		}
 	}
 }
@@ -308,5 +315,4 @@ void PartPrototype::load_collider_convex(btCollisionShape** target, Node* n)
 
 	target_c->recalcLocalAabb();
 	target_c->optimizeConvexHull();
-
 }

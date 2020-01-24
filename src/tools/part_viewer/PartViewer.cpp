@@ -15,9 +15,9 @@ void PartViewer::render(glm::ivec2 win_size)
 	camera.fw = -camera.pos;
 
 	CameraUniforms c_uniforms = camera.get_camera_uniforms(win_size.x, win_size.y);
-	for (size_t i = 0; i < part->pieces.size(); i++)
+	for (auto it = part->pieces.begin(); it != part->pieces.end(); it++)
 	{
-		part->pieces[i].model_node->draw(c_uniforms, model);
+		it->second.model_node->draw(c_uniforms, model);
 
 	}
 
@@ -50,10 +50,11 @@ PartViewer::PartViewer(const std::string& part_path)
 		btIDebugDraw::DBG_DrawFrames |
 		btIDebugDraw::DBG_DrawConstraintLimits);
 
-
 	// Create rigidbodies so they render
-	for (PiecePrototype& piece : part->pieces)
+	for (auto it = part->pieces.begin(); it != part->pieces.end(); it++)
 	{
+		PiecePrototype& piece = it->second;
+
 		if (piece.collider)
 		{
 			btTransform tform = piece.collider_offset;

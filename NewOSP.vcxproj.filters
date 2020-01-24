@@ -234,7 +234,10 @@
     <ClCompile Include="src\assets\PartPrototype.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PartViewerMain.cpp">
+    <ClCompile Include="src\BulletExperiments.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vehicle\part\link\SimpleLink.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -525,6 +528,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\assets\PartPrototype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vehicle\part\link\SimpleLink.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

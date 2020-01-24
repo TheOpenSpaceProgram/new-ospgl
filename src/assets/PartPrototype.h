@@ -10,13 +10,15 @@ struct PiecePrototype
 	GPUModelNodePointer model_node;
 
 	btCollisionShape* collider;
+	glm::dmat4 render_offset; //< Offset inside of the part, for rendering
 	btTransform collider_offset;
-	
+
 	double mass;
 	
 	PiecePrototype(GPUModelNodePointer&& n) : model_node(std::move(n))
 	{
 		this->collider = nullptr;
+		this->render_offset = glm::dmat4(1.0);
 		this->collider_offset = btTransform::getIdentity();
 		this->mass = 1.0;
 	}
@@ -26,6 +28,7 @@ struct PiecePrototype
 	{
 		this->collider = b.collider;
 		this->collider_offset = b.collider_offset;
+		this->render_offset = b.render_offset;
 		this->mass = b.mass;
 	}
 
@@ -35,9 +38,15 @@ struct PiecePrototype
 		this->model_node = b.model_node.duplicate();
 		this->collider = b.collider;
 		this->collider_offset = b.collider_offset;
+		this->render_offset = b.render_offset;
 		this->mass = b.mass;
 
 		return *this;
+	}
+
+	PiecePrototype() : model_node()
+	{
+		collider = nullptr;
 	}
 };
 
@@ -90,7 +99,7 @@ public:
 	static constexpr char* ROOT_NAME = "p_root";
 
 	// First one is always root
-	std::vector<PiecePrototype> pieces;
+	std::unordered_map<std::string, PiecePrototype> pieces;
 
 	GPUModelPointer model;
 	std::string name;

@@ -35,7 +35,7 @@ void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool draw
 	n_node->sub_transform = glm::translate(n_node->sub_transform, glm::dvec3(pos.x, pos.y, pos.z));
 	n_node->sub_transform = glm::scale(n_node->sub_transform, glm::dvec3(scaling.x, scaling.y, scaling.z));
 	n_node->sub_transform = n_node->sub_transform * glm::toMat4(glm::dquat(rot.w, rot.x, rot.y, rot.z));
-
+	
 	n_node->name = node->mName.C_Str();
 
 	logger->check(node_by_name.find(n_node->name) == node_by_name.end(), "We don't support non-unique node names");
@@ -591,14 +591,22 @@ void Node::draw_all_meshes(const CameraUniforms & uniforms, glm::dmat4 model)
 
 }
 
-void Node::draw(const CameraUniforms & uniforms, glm::dmat4 model)
+void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, bool ignore_our_subtform)
 {
-	glm::dmat4 n_model = sub_transform * model;
+	glm::dmat4 n_model;
+	if (ignore_our_subtform)
+	{
+		n_model = model;
+	}
+	else
+	{
+		n_model = sub_transform * model;
+	}
 
 	draw_all_meshes(uniforms, n_model);
 
 	for (Node* node : children)
 	{
-		node->draw(uniforms, n_model);
+		node->draw(uniforms, n_model, false);
 	}
 }

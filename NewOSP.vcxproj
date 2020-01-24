@@ -166,8 +166,9 @@
     <None Include="res\test_script.lua" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\vehicle\part\link\SimpleLink.cpp" />
     <ClCompile Include="src\assets\PartPrototype.cpp" />
-    <ClCompile Include="src\PartViewerMain.cpp" />
+    <ClCompile Include="src\BulletExperiments.cpp" />
     <ClCompile Include="src\tools\part_viewer\PartViewer.cpp" />
     <ClCompile Include="src\lua\libs\LuaAssets.cpp" />
     <ClCompile Include="src\lua\libs\LuaImage.cpp" />
@@ -233,6 +234,7 @@
     <ClCompile Include="src\vehicle\part\Piece.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\vehicle\part\link\SimpleLink.h" />
     <ClInclude Include="src\assets\PartPrototype.h" />
     <ClInclude Include="src\tools\part_viewer\PartViewer.h" />
     <ClInclude Include="src\lua\libs\LuaAssets.h" />

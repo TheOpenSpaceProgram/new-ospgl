@@ -22,6 +22,7 @@
 #include "physics/debug/BulletDebugDrawer.h"
 
 #include "vehicle/Vehicle.h"
+#include "vehicle/part/link/SimpleLink.h"
 
 InputUtil* input;
 
@@ -29,27 +30,6 @@ InputUtil* input;
 #include "assets/Model.h"
 
 #include "lua/LuaCore.h"
-
-
-
-Piece* create_dummy_piece(glm::dvec3 offset, Vehicle* veh, double radius = 1.0)
-{
-	Piece* out = new Piece();
-
-	btCollisionShape* colShape = new btBoxShape(btVector3(radius, radius, radius));
-
-	out->collider = colShape;
-	
-	btTransform off_tform;
-	off_tform.setIdentity();
-	off_tform.setOrigin(to_btVector3(offset));
-
-	out->mass = (4.0 / 3.0) * glm::pi<double>() * radius * radius * radius;
-
-	veh->add_piece(out, off_tform);
-	
-	return out;
-}
 
 
 int main(void)
@@ -74,19 +54,6 @@ int main(void)
 	create_global_text_drawer();
 	create_global_lua_core();
 
-	sol::state n_state = sol::state();
-	lua_core->load(n_state, "memer");
-
-	auto res = n_state.safe_script_file("./res/test_script.lua", sol::script_pass_on_error);
-
-	n_state.collect_garbage();
-
-	if (!res.valid())
-	{
-		sol::error err = res;
-		logger->warn("Error: {}", err.what());
-	}
-
 	{
 		Timer dtt = Timer();
 		Timer pdtt = Timer();
@@ -99,12 +66,10 @@ int main(void)
 
 		double AU = 149597900000.0;
 
-		glm::dvec3 base = glm::dvec3(0.0 * AU, 0.0, 0.0);
-		glm::dvec3 vbase = glm::dvec3(0.0, 0.0, 0.0);
-
 		SimpleCamera camera = SimpleCamera();
-		glm::dvec3 cam_offset = glm::dvec3(-10.0, 0.0f, -5.0f);
-		camera.fw = glm::normalize(glm::dvec3(1.0f, 0.0f, 0.5f));
+		glm::dvec3 cam_offset = glm::dvec3(-10.0, 0.0f, 0.0f);
+		camera.fw = glm::normalize(glm::dvec3(1.0f, 0.0f, 0.0));
+		camera.pos = cam_offset;
 
 		btDefaultCollisionConfiguration* collision_config = new btDefaultCollisionConfiguration();
 		btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collision_config);
@@ -129,10 +94,36 @@ int main(void)
 		double pt = 0.0;
 		double t = 0.0;
 
-		AssetHandle<Model> m = AssetHandle<Model>("assimp_test", "test/rad_decoupler.blend");
-		GPUModelPointer gpu_ptr = GPUModelPointer(std::move(m));
 
+		AssetHandle<PartPrototype> capsule = AssetHandle<PartPrototype>("test_parts:parts/capsule/part_capsule.toml");
+		AssetHandle<PartPrototype> engine = AssetHandle<PartPrototype>("test_parts:parts/engine/part_engine.toml");
 
+		Vehicle* v = new Vehicle(world);
+		vehicles.push_back(v);
+
+		Piece p_capsule = Piece(capsule.duplicate(), "p_root");
+		Piece p_engine = Piece(engine.duplicate(), "p_root");
+		Piece p_engine2 = Piece(engine.duplicate(), "p_root");
+
+		v->add_piece(&p_capsule, btTransform::getIdentity());
+		btTransform enginet = btTransform::getIdentity();
+		enginet.setOrigin(btVector3(0.0, 0.0, -2.05));
+		v->add_piece(&p_engine, enginet);
+
+		// Dont forget!
+		v->root = &p_capsule;
+
+		p_engine.attached_to = &p_capsule;
+		p_engine.link_from = btVector3(0.0, 0.0, 2.0 / 2.0);
+		p_engine.link_to = btVector3(0.0, 0.0, -2.0 / 2.0);
+
+		p_engine.link = std::make_unique<SimpleLink>(world);
+
+		v->build_physics();
+
+		double force = 6000.0;
+
+		
 		while (!glfwWindowShouldClose(renderer.window))
 		{
 			input->update(renderer.window);
@@ -158,6 +149,18 @@ int main(void)
 				dt = max_dt;
 			}
 
+			if (glfwGetKey(renderer.window, GLFW_KEY_L) == GLFW_PRESS)
+			{
+				//p_capsule.rigid_body->applyForce(btVector3(0.0, 0.0, -force), btVector3(0.0, 0.0, 0.0));
+				p_engine.rigid_body->applyForce(btVector3(0.0, 0.0, force), btVector3(0.0, 0.0, 0.0));
+			}
+
+			if (glfwGetKey(renderer.window, GLFW_KEY_O) == GLFW_PRESS)
+			{
+				//p_capsule.rigid_body->applyForce(btVector3(0.0, 0.0, -force), btVector3(0.0, 0.0, 0.0));
+				p_engine.rigid_body->applyForce(btVector3(0.0, 0.0, -force), btVector3(0.0, 0.0, 0.0));
+			}
+			
 
 			int sub_steps = world->stepSimulation(pdt, max_steps, btScalar(step));
 			pdt = pdtt.restart();
@@ -183,18 +186,31 @@ int main(void)
 
 			renderer.prepare_draw();
 
+			camera.update(dt);
 			CameraUniforms c_uniforms = camera.get_camera_uniforms(renderer.get_width(), renderer.get_height());
 
 			glm::dmat4 proj_view = c_uniforms.proj_view;
 			glm::dmat4 c_model = c_uniforms.c_model;
 			float far_plane = c_uniforms.far_plane;
 
+			logger->info("{}", p_engine.link->is_broken());
+
 			if (renderer.render_enabled)
 			{
 				world->debugDrawWorld();
 
-				glm::dmat4 model = glm::dmat4(1.0);
-				model = glm::translate(model, base + vbase * pt + glm::dvec3(10.0, 0.0, 0.0));
+				glm::dmat4 capsule_tform = to_dmat4(p_capsule.get_global_transform());
+				glm::dmat4 engine_tform = to_dmat4(p_engine.get_global_transform());
+
+				glm::dmat4 capsule_rtform = glm::inverse(p_capsule.collider_offset);
+				glm::dmat4 engine_rtform = glm::inverse(p_engine.collider_offset);
+
+				glm::dmat4 capsule_ftform = capsule_rtform * capsule_tform;
+				glm::dmat4 engine_ftform = engine_rtform * engine_tform;
+
+
+				p_capsule.model_node->draw(c_uniforms, capsule_ftform, true);
+				p_engine.model_node->draw(c_uniforms, engine_ftform, true);
 
 				debug_drawer->render(proj_view, c_model, far_plane);
 

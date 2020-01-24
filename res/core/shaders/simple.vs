@@ -4,10 +4,12 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNrm;
 layout (location = 2) in vec2 aTex;
 
+uniform mat3 normal_model;
 uniform mat4 model;
 uniform mat4 camera_tform;
 uniform mat4 proj_view;
 uniform vec3 camera_relative;
+
 
 uniform float f_coef;
 
@@ -23,7 +25,7 @@ void main()
 	flogz = 1.0 + gl_Position.w;
 
 	vPos = aPos;
-	vNrm = aNrm;
+	vNrm = normal_model * aNrm;
 	vTex = aTex;
 
 }
