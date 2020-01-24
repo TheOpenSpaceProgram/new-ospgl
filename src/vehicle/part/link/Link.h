@@ -2,6 +2,7 @@
 
 #pragma warning(push, 0)
 #include <BulletDynamics/Dynamics/btRigidBody.h>
+#include <btBulletDynamicsCommon.h>
 #pragma warning(pop)
 
 // Base class for any link, which can be as simple as
@@ -11,7 +12,7 @@ class Link
 public:
 
 	// Called when the pieces are unwelded, or first created
-	virtual void activate(btDynamicsWorld* world,
+	virtual void activate(
 		btRigidBody* from, btVector3 from_point,
 		btRigidBody* to, btVector3 to_point
 	) = 0;

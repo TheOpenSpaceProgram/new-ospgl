@@ -256,6 +256,20 @@ std::vector<Vehicle*> Vehicle::update()
 {
 	std::vector<Vehicle*> n_vehicles;
 
+	// Check for any broken links, they instantly set the dirty flags,
+	// but they cannot set it themselves
+	for (Piece* p : all_pieces)
+	{
+		if (p->link != nullptr && p->attached_to != nullptr)
+		{
+			if (p->link->is_broken())
+			{
+				dirty = true;
+				break;
+			}
+		}
+	}
+
 	if (dirty)
 	{
 		n_vehicles = handle_separation();
@@ -305,10 +319,21 @@ void Vehicle::build_physics()
 		{
 			create_piece_physics(piece, states_at_start, world);
 		}
+
+	
 	}
 
+	for (Piece* piece : single_pieces)
+	{
+		// piece->attached_to cannot have null rigidbody as it will have already been built
+		// in the previous loop
+		if (piece->attached_to != nullptr && piece->link != nullptr)
+		{
+			piece->link->activate(piece->rigid_body, piece->link_from, piece->attached_to->rigid_body, piece->link_to);
+		}
+	}
 
-	// TODO: Create links between non-welded parts
+	
 
 }
 
@@ -355,6 +380,7 @@ std::vector<Vehicle*> Vehicle::handle_separation()
 				if (p->link->is_broken())
 				{
 					p->attached_to = nullptr;
+					p->link->deactivate();
 				}
 			}
 		}

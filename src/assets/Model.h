@@ -81,9 +81,12 @@ struct Node
 	std::unordered_map<std::string, std::string> properties;
 
 	void draw_all_meshes(const CameraUniforms& uniforms, glm::dmat4 model);
+
 	// Draws all meshes, and call sthe same on all children,
 	// accumulating sub transforms
-	void draw(const CameraUniforms& uniforms, glm::dmat4 model);
+	// The ignore_our_subtform flag is useful specially for stuff like parts
+	// where the piece transform is ignored during game rendering
+	void draw(const CameraUniforms& uniforms, glm::dmat4 model, bool ignore_our_subtform = false);
 };
 
 // Models allow loading 3d models using the assimp library
@@ -154,6 +157,11 @@ public:
 	// Same as above
 	Node* get_root_node();
 
+	GPUModelPointer() : model()
+	{
+
+	}
+
 	// We must take the ownership
 	GPUModelPointer(GPUModelPointer&& b)
 	{
@@ -200,7 +208,10 @@ struct GPUModelNodePointer
 	GPUModelPointer model_ptr;
 	Node* sub_node;
 
-
+	GPUModelNodePointer() : model_ptr()
+	{
+		sub_node = nullptr;
+	}
 
 	GPUModelNodePointer(GPUModelNodePointer&& b) : model_ptr(std::move(b.model_ptr))
 	{
@@ -212,6 +223,7 @@ struct GPUModelNodePointer
 	{
 		this->model_ptr = std::move(b.model_ptr);
 		b.model_ptr = GPUModelPointer(AssetHandle<Model>());
+		this->sub_node = b.sub_node;
 
 		return *this;
 	}

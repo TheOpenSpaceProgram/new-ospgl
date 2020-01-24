@@ -168,9 +168,10 @@ struct CoreUniforms
 	// - proj_view = "proj_view"
 	// - f_coef = "f_coef"
 	// - camera_relative = "camera_relative"
+	// - normal_model = "normal_model"
 	// If any equals "", it's not binded
 	std::string mat4_proj, mat4_view, mat4_camera_model, mat4_proj_view, mat4_camera_tform, mat4_model,
-		mat4_final_tform, float_far_plane, float_f_coef, vec3_camera_relative;
+		mat4_final_tform, mat3_normal_model, float_far_plane, float_f_coef, vec3_camera_relative;
 
 	CoreUniforms()
 	{
@@ -181,6 +182,7 @@ struct CoreUniforms
 		mat4_proj_view = "proj_view";
 		mat4_camera_tform = "camera_tform";
 		mat4_model = "model";
+		mat3_normal_model = "normal_model";
 		float_far_plane = "";
 		float_f_coef = "f_coef";
 		mat4_final_tform = "";

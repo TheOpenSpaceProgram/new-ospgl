@@ -155,6 +155,11 @@ void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
 		shader->setMat4(core_uniforms.mat4_model, model);
 	}
 
+	if (core_uniforms.mat3_normal_model != "")
+	{
+		shader->setMat3(core_uniforms.mat3_normal_model, glm::mat3(transpose(inverse(model))));
+	}
+
 	if (core_uniforms.float_far_plane != "")
 	{
 		shader->setFloat(core_uniforms.float_far_plane, cu.far_plane);
@@ -169,6 +174,8 @@ void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
 	{
 		shader->setVec3(core_uniforms.vec3_camera_relative, cu.cam_pos);
 	}
+
+	
 
 }
 

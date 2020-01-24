@@ -42,7 +42,7 @@ int main(void)
 
 	{
 
-		PartViewer part_viewer = PartViewer("test_parts://parts/capsule/part_capsule.toml");
+		PartViewer part_viewer = PartViewer("test_parts://parts/engine/part_engine.toml");
 
 		Timer dtt = Timer();
 		double dt = 0.0;

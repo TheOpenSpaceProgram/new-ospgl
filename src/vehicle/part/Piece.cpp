@@ -97,7 +97,8 @@ void Piece::set_dirty()
 }
 
 
-Piece::Piece() : link(nullptr)
+Piece::Piece(AssetHandle<PartPrototype>&& part_proto, std::string piece_name) 
+	: model_node(part_proto->pieces[piece_name].model_node.duplicate())
 {
 	attached_to = nullptr;
 	part = nullptr;
@@ -105,10 +106,12 @@ Piece::Piece() : link(nullptr)
 	rigid_body = nullptr;
 	motion_state = nullptr;
 	in_group = nullptr;
-
 	welded = false;
-}
 
+	mass = part_proto->pieces[piece_name].mass;
+	collider = part_proto->pieces[piece_name].collider;
+	collider_offset = part_proto->pieces[piece_name].render_offset;
+}
 
 Piece::~Piece()
 {

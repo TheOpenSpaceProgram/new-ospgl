@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "link/Link.h"
+#include "../../assets/PartPrototype.h"
 
 
 
@@ -40,10 +41,14 @@ private:
 	
 public:
 
+	GPUModelNodePointer model_node;
+	// We have to keep it loaded! This is the easiest way
+	AssetHandle<PartPrototype> part_prototype;
+
 	Vehicle* in_vehicle;
 
 	// If nullptr it means we are separated from our
-	// parent subpart. Always present and has value on
+	// parent subpart. Always has value on
 	// root subparts
 	Part* part;
 
@@ -65,6 +70,9 @@ public:
 	// position of this collider in the welded shared
 	// collider
 	btTransform welded_tform;
+
+	// Collider offset relative to the piece node, used for rendering
+	glm::dmat4 collider_offset;
 
 	// Only root pieces can attach to pieces outside
 	// of their part, non-root can only attach to other
@@ -110,7 +118,7 @@ public:
 	// The point in the other collider where the link arrives
 	btVector3 link_to;
 
-	Piece();
+	Piece(AssetHandle<PartPrototype>&& part_proto, std::string piece_name);
 	~Piece();
 
 	// Pieces cannot be copied, nor moved
