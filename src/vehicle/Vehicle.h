@@ -29,6 +29,7 @@ class Vehicle
 {
 private:
 
+	bool breaking_enabled;
 
 public:
 
@@ -67,6 +68,8 @@ public:
 	// Orders the all_pieces array so that parts are ordered
 	// from distance to root
 	void sort();
+
+	void set_breaking_enabled(bool value);
 
 	Vehicle(btDynamicsWorld* world);
 	~Vehicle();

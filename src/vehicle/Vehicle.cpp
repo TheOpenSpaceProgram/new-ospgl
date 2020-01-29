@@ -114,9 +114,17 @@ static void remove_outdated_welded_groups(
 			// We remove the group as it is not present anymore
 			world->removeRigidBody(wgroup->rigid_body);
 
+			// Set all group rigidbodies to nullptr!
+			for (Piece* p : wgroup->pieces)
+			{
+				p->rigid_body = nullptr;
+			}
+
 			delete wgroup->motion_state;
 			delete wgroup->rigid_body;
 			delete wgroup;
+
+
 
 			it = welded.erase(it);
 		}
@@ -129,7 +137,8 @@ static void remove_outdated_welded_groups(
 
 static void create_new_welded_group(
 	std::vector<WeldedGroup*>& welded, WeldedGroupCreation& wg, 
-	std::unordered_map<Piece*, PieceState>& states_at_start, btDynamicsWorld* world)
+	std::unordered_map<Piece*, PieceState>& states_at_start, btDynamicsWorld* world,
+	std::vector<Piece*>& all_pieces)
 {
 	if (wg.second == false)
 	{
@@ -158,8 +167,6 @@ static void create_new_welded_group(
 			tot_mass += p->mass;
 
 			p->welded_collider_id = temp_collider.getNumChildShapes() - 1;
-
-			// TODO: Remove link from part
 		}
 
 		// Create rigidbody
@@ -193,6 +200,24 @@ static void create_new_welded_group(
 		{
 			n_group->pieces.push_back(p);
 			p->in_group = n_group;
+
+			if (p->rigid_body != nullptr)
+			{
+				// We must be careful here, we may be removing an already welded rigidbody!
+				for (Piece* sp : wg.first)
+				{
+					if (sp->rigid_body == p->rigid_body && sp != p)
+					{
+						sp->rigid_body = nullptr;
+					}
+				}
+
+				
+
+				world->removeRigidBody(p->rigid_body);
+				delete p->rigid_body;
+			}
+
 			p->rigid_body = rigid_body;
 			p->motion_state = motion_state;
 			p->welded_tform = principal_inverse * p->welded_tform;
@@ -272,18 +297,40 @@ std::vector<Vehicle*> Vehicle::update()
 
 	if (dirty)
 	{
+
+
 		n_vehicles = handle_separation();
 
 		sort(); //< Not sure if needed
 
 		build_physics();
+
+		for (Piece* p : all_pieces)
+		{
+			if (p->link != nullptr && p->attached_to != nullptr)
+			{
+				p->link->set_breaking_enabled(breaking_enabled);
+			}
+		}
+
+		dirty = false;
+
 	}
+
 
 	return n_vehicles;
 }
 
 void Vehicle::build_physics()
 {	
+	// Remove all old links
+	for (Piece* piece : all_pieces)
+	{
+		if (piece->link != nullptr)
+		{
+			piece->link->deactivate();
+		}
+	}
 
 	// We need to create shared colliders for all welded 
 	// groups, and individual colliders for every other piece
@@ -299,7 +346,7 @@ void Vehicle::build_physics()
 	{
 		piece->in_vehicle = this;
 		states_at_start[piece] = obtain_piece_state(piece);
-
+	
 		add_to_welded_groups(welded_groups, piece);
 	}
 
@@ -310,7 +357,7 @@ void Vehicle::build_physics()
 
 	for (WeldedGroupCreation& wg : welded_groups)
 	{
-		create_new_welded_group(welded, wg, states_at_start, world);
+		create_new_welded_group(welded, wg, states_at_start, world, all_pieces);
 	}
 
 	for (Piece* piece : single_pieces)
@@ -319,17 +366,23 @@ void Vehicle::build_physics()
 		{
 			create_piece_physics(piece, states_at_start, world);
 		}
-
-	
 	}
 
-	for (Piece* piece : single_pieces)
+	for (Piece* piece : all_pieces)
 	{
 		// piece->attached_to cannot have null rigidbody as it will have already been built
 		// in the previous loop
-		if (piece->attached_to != nullptr && piece->link != nullptr)
+		if (piece->attached_to != nullptr && piece->link != nullptr && !piece->welded)
 		{
-			piece->link->activate(piece->rigid_body, piece->link_from, piece->attached_to->rigid_body, piece->link_to);
+			btTransform from_tform = btTransform::getIdentity();
+			btTransform to_tform = btTransform::getIdentity();
+
+			from_tform.setOrigin(piece->link_from);
+			to_tform.setOrigin(piece->link_to);
+
+			btTransform real_from = piece->get_local_transform() * from_tform;
+			btTransform real_to = piece->attached_to->get_local_transform() * to_tform;
+			piece->link->activate(piece->rigid_body, real_from, piece->attached_to->rigid_body, real_to);
 		}
 	}
 
@@ -352,19 +405,15 @@ std::vector<Vehicle*> Vehicle::handle_separation()
 {
 	std::vector<Vehicle*> n_vehicles;
 
-	// Find all pieces that can't reach root, and create a new vehicle from them
-	// Assumes the vehicle was sorted before the part separated!
-	// (Don't sort with a part separated)
+	std::unordered_set<WeldedGroup*> wgroups;
 
-	std::vector<std::vector<Piece*>> n_pieces;
-
-	for (auto it = all_pieces.begin(); it != all_pieces.end(); )
+	// First pass to remove any broken links
+	for (auto it = all_pieces.begin(); it != all_pieces.end(); it++)
 	{
 		Piece* p = *it;
 
 		if (p == root)
 		{
-			it++;
 			continue;
 		}
 
@@ -384,6 +433,24 @@ std::vector<Vehicle*> Vehicle::handle_separation()
 				}
 			}
 		}
+	}
+
+	// Find all pieces that can't reach root, and create a new vehicle from them
+	// Assumes the vehicle was sorted before the part separated!
+	// (Don't sort with a part separated)
+
+	std::vector<std::vector<Piece*>> n_pieces;
+
+	for (auto it = all_pieces.begin(); it != all_pieces.end(); )
+	{
+		Piece* p = *it;
+
+		if (p == root)
+		{
+			it++;
+			continue;
+		}
+
 
 		if (p->attached_to == nullptr)
 		{
@@ -420,19 +487,72 @@ std::vector<Vehicle*> Vehicle::handle_separation()
 			}
 		}
 	}
+	
+	// Find welded groups to transfer
 
 	for (auto& n_vessel_pieces : n_pieces)
 	{
+		for (WeldedGroup* w : welded)
+		{
+			for (size_t i = 0; i < n_vessel_pieces.size(); i++)
+			{
+				if (w->rigid_body == n_vessel_pieces[i]->rigid_body)
+				{
+					wgroups.insert(w);
+				}
+			}
+		}
+	}
+
+
+	// Here we remove the welded groups from original vessel
+	for (WeldedGroup* w : wgroups)
+	{
+		for (size_t i = 0; i < welded.size(); i++)
+		{
+			if (welded[i] == w)
+			{
+				welded.erase(welded.begin() + i);
+				break;
+			}
+		}
+	}
+
+	for (auto& n_vessel_pieces : n_pieces)
+	{
+
+
 		Vehicle* n_vehicle = new Vehicle(world);
 
 		n_vehicle->all_pieces = n_vessel_pieces;
 		n_vehicle->root = n_vessel_pieces[0];
+
+		for (WeldedGroup* w : wgroups)
+		{
+			for (size_t i = 0; i < w->pieces.size(); i++)
+			{
+				for (size_t j = 0; j < n_vessel_pieces.size(); j++)
+				{
+					if (n_vessel_pieces[j] == w->pieces[i])
+					{
+						// Transfer the welded group
+						n_vehicle->welded.push_back(w);
+						i = w->pieces.size() + 1;
+						break;
+					}
+				}
+
+			}
+
+		}
 
 		n_vehicle->sort();
 		n_vehicle->build_physics();
 
 		n_vehicles.push_back(n_vehicle);
 	}
+
+
 
 	return n_vehicles;
 }
@@ -532,9 +652,16 @@ void Vehicle::sort()
 	this->all_pieces = sorted;
 }
 
+void Vehicle::set_breaking_enabled(bool value)
+{
+	dirty = true;
+	this->breaking_enabled = value;
+}
+
 Vehicle::Vehicle(btDynamicsWorld* world)
 {
 	this->world = world;
+	this->breaking_enabled = false;
 }
 
 
