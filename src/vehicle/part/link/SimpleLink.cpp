@@ -1,22 +1,18 @@
 #include "SimpleLink.h"
 
-void SimpleLink::activate(btRigidBody* from, btVector3 from_point, btRigidBody* to, btVector3 to_point)
+void SimpleLink::activate(btRigidBody* from, btTransform from_frame, btRigidBody* to, btTransform to_frame)
 {
 	if (constraint == nullptr)
 	{
-		btTransform frame_a = btTransform::getIdentity();
-		btTransform frame_b = btTransform::getIdentity();
-		frame_a.setOrigin(from_point);
-		frame_b.setOrigin(to_point);
 
 		constraint = new btGeneric6DofSpringConstraint(
-			*from, *to, frame_a, frame_b, true);
+			*from, *to, from_frame, to_frame, true);
 
 
 		constraint->enableSpring(2, true);
 		constraint->setStiffness(2, 10000.0);
 		constraint->setDamping(2, 0.00005);
-		constraint->setBreakingImpulseThreshold(9.0);
+		constraint->setBreakingImpulseThreshold(30.0);
 		constraint->setLinearUpperLimit(btVector3(0., 0., 10.5));
 		constraint->setLinearLowerLimit(btVector3(0., 0., -10.5));
 
@@ -38,6 +34,8 @@ void SimpleLink::deactivate()
 	{
 		world->removeConstraint(constraint);
 		delete constraint;
+
+		constraint = nullptr;
 	}
 }
 
@@ -49,6 +47,14 @@ bool SimpleLink::is_broken()
 	}
 
 	return !constraint->isEnabled();
+}
+
+void SimpleLink::set_breaking_enabled(bool value)
+{
+	if (constraint)
+	{
+		constraint->setBreakingImpulseThreshold(value ? 30.0 : 100000000.0);
+	}
 }
 
 SimpleLink::SimpleLink(btDynamicsWorld* world)

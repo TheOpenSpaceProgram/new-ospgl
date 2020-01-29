@@ -117,6 +117,8 @@ public:
 	btVector3 link_from;
 	// The point in the other collider where the link arrives
 	btVector3 link_to;
+	// What axis should be the link's forward? In part relative coordinates
+	btVector3 link_forward;
 
 	Piece(AssetHandle<PartPrototype>&& part_proto, std::string piece_name);
 	~Piece();

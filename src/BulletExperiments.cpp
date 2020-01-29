@@ -109,6 +109,8 @@ int main(void)
 		btTransform enginet = btTransform::getIdentity();
 		enginet.setOrigin(btVector3(0.0, 0.0, -2.05));
 		v->add_piece(&p_engine, enginet);
+		enginet.setOrigin(btVector3(0.0, 2.1, -2.05));
+		v->add_piece(&p_engine2, enginet);
 
 		// Dont forget!
 		v->root = &p_capsule;
@@ -118,10 +120,32 @@ int main(void)
 		p_engine.link_to = btVector3(0.0, 0.0, -2.0 / 2.0);
 
 		p_engine.link = std::make_unique<SimpleLink>(world);
+		p_engine.welded = false;
 
-		v->build_physics();
+		p_engine2.attached_to = &p_engine;
+		p_engine2.link_from = btVector3(0.0, -1.0, 0.0);
+		p_engine2.link_to = btVector3(0.0, 1.0, 0.0);
+		p_engine2.link = std::make_unique<SimpleLink>(world);
+		p_engine2.welded = false;
 
-		double force = 6000.0;
+		v->dirty = true;
+		std::vector<Vehicle*> n_vehicles;
+
+		for (Vehicle* v : vehicles)
+		{
+			v->draw_debug();
+			auto n = v->update();
+			n_vehicles.insert(n_vehicles.end(), n.begin(), n.end());
+
+
+		}
+
+		vehicles.insert(vehicles.end(), n_vehicles.begin(), n_vehicles.end());
+
+
+		double force = 600.0;
+
+	
 
 		
 		while (!glfwWindowShouldClose(renderer.window))
@@ -149,24 +173,48 @@ int main(void)
 				dt = max_dt;
 			}
 
+			btVector3 origin = p_engine.get_local_transform() * btVector3(0.0, 0.0, 0.0);
+
 			if (glfwGetKey(renderer.window, GLFW_KEY_L) == GLFW_PRESS)
 			{
-				//p_capsule.rigid_body->applyForce(btVector3(0.0, 0.0, -force), btVector3(0.0, 0.0, 0.0));
-				p_engine.rigid_body->applyForce(btVector3(0.0, 0.0, force), btVector3(0.0, 0.0, 0.0));
+				p_engine.rigid_body->applyForce(btVector3(0.0, 0.0, force), origin);
 			}
 
 			if (glfwGetKey(renderer.window, GLFW_KEY_O) == GLFW_PRESS)
 			{
-				//p_capsule.rigid_body->applyForce(btVector3(0.0, 0.0, -force), btVector3(0.0, 0.0, 0.0));
-				p_engine.rigid_body->applyForce(btVector3(0.0, 0.0, -force), btVector3(0.0, 0.0, 0.0));
+				p_engine.rigid_body->applyForce(btVector3(0.0, 0.0, -force), origin);
 			}
-			
+
+			if (glfwGetKey(renderer.window, GLFW_KEY_Y) == GLFW_PRESS)
+			{
+				p_engine.welded = false;
+				p_engine.set_dirty();
+			}
+
+
+			if (glfwGetKey(renderer.window, GLFW_KEY_H) == GLFW_PRESS)
+			{
+				p_engine.welded = true;
+				p_engine.set_dirty();
+			}
+
+			if (glfwGetKey(renderer.window, GLFW_KEY_I) == GLFW_PRESS)
+			{
+				force = 1000.0;
+			}
+			if (glfwGetKey(renderer.window, GLFW_KEY_K) == GLFW_PRESS)
+			{
+				force = 6000.0;
+			}
+
+
 
 			int sub_steps = world->stepSimulation(pdt, max_steps, btScalar(step));
 			pdt = pdtt.restart();
 
-
 			pt += pdt;
+
+			v->set_breaking_enabled(pt > 0.5);
 
 
 			std::vector<Vehicle*> n_vehicles;
@@ -192,8 +240,6 @@ int main(void)
 			glm::dmat4 proj_view = c_uniforms.proj_view;
 			glm::dmat4 c_model = c_uniforms.c_model;
 			float far_plane = c_uniforms.far_plane;
-
-			logger->info("{}", p_engine.link->is_broken());
 
 			if (renderer.render_enabled)
 			{

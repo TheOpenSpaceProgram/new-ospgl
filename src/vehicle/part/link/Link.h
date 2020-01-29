@@ -13,14 +13,19 @@ public:
 
 	// Called when the pieces are unwelded, or first created
 	virtual void activate(
-		btRigidBody* from, btVector3 from_point,
-		btRigidBody* to, btVector3 to_point
+		btRigidBody* from, btTransform from_frame,
+		btRigidBody* to, btTransform to_frame
 	) = 0;
 
 	// Called when the pieces are welded
+	// Keep in mind special links may have to implement some custom
+	// functionality to keep the previous state if they are reactivated,
+	// for example, ropes or motors which must remember their last position
 	virtual void deactivate() = 0;
 
 	// Return true if the link has broken and should be deleted
 	virtual bool is_broken() = 0;
+
+	virtual void set_breaking_enabled(bool value) = 0;
 };
 
