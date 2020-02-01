@@ -62,14 +62,16 @@ public:
 
 	void draw_debug();
 
-	void set_position(btVector3 pos);
-	void set_linear_velocity(btVector3 vel);
+	void set_position(glm::dvec3 pos);
+	void set_linear_velocity(glm::dvec3 vel);
 
 	// Orders the all_pieces array so that parts are ordered
 	// from distance to root
 	void sort();
 
 	void set_breaking_enabled(bool value);
+
+	void render(CameraUniforms& camera_uniforms);
 
 	Vehicle(btDynamicsWorld* world);
 	~Vehicle();

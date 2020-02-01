@@ -1,5 +1,3 @@
-#include <sol.hpp>
-#include <iostream>
 #include "util/Logger.h"
 #include "util/Timer.h"
 #include "util/DebugDrawer.h"
@@ -21,15 +19,26 @@
 
 #include "physics/debug/BulletDebugDrawer.h"
 
+#include "universe/PlanetarySystem.h"
+#include "universe/Date.h"
+
 #include "vehicle/Vehicle.h"
 #include "vehicle/part/link/SimpleLink.h"
+#include "assets/Model.h"
+#include "lua/LuaCore.h"
+
 
 InputUtil* input;
 
-
-#include "assets/Model.h"
-
-#include "lua/LuaCore.h"
+void update_vehicles(std::vector<Vehicle*>& vehicles)
+{
+	for (Vehicle* v : vehicles)
+	{
+		v->draw_debug();
+		auto n = v->update();
+		vehicles.insert(vehicles.end(), n.begin(), n.end());
+	}
+}
 
 
 int main(void)
@@ -108,7 +117,6 @@ int main(void)
 		enginet.setOrigin(btVector3(0.0, 0.0, -2.00));
 		v->add_piece(&p_engine, enginet);
 
-		// Dont forget!
 		v->root = &p_capsule;
 
 		p_engine.attached_to = &p_capsule;
@@ -119,25 +127,33 @@ int main(void)
 		p_engine.welded = false;
 
 		v->dirty = true;
-		std::vector<Vehicle*> n_vehicles;
-
-		for (Vehicle* v : vehicles)
-		{
-			v->draw_debug();
-			auto n = v->update();
-			n_vehicles.insert(n_vehicles.end(), n.begin(), n.end());
 
 
-		}
-
-		vehicles.insert(vehicles.end(), n_vehicles.begin(), n_vehicles.end());
+		update_vehicles(vehicles);
 
 
-		double force = 600.0;
+		PlanetarySystem system;
+		assets->get_from_path<Config>("rss:systems/system_test.toml")->read_to(system);
 
-	
+		system.compute_sois(0.0);
+		debug_drawer->debug_enabled = true;
 
-		
+		//Date start_date = Date(2000, Date::MAY, 31);
+		Date start_date = Date(2019, Date::SEPTEMBER, 21);
+
+		start_date.day_decimal = (19.0 + 27.0 / 60.0) / 24.0;
+
+		system.t = start_date.to_seconds();
+		system.t = 0.0;
+		logger->info("Starting at: {}", start_date.to_string());
+
+		system.init();
+
+		system.update(0.0);
+
+		v->set_position(system.states_now[1].pos + glm::dvec3(100000000.0, 0.0, 0.0));
+		//v->set_position(glm::dvec3(1000000000.0, 0.0, 0.0));
+
 		while (!glfwWindowShouldClose(renderer.window))
 		{
 			input->update(renderer.window);
@@ -163,18 +179,6 @@ int main(void)
 				dt = max_dt;
 			}
 
-			btVector3 origin = p_engine.get_local_transform() * btVector3(0.0, 0.0, 0.0);
-
-			if (glfwGetKey(renderer.window, GLFW_KEY_L) == GLFW_PRESS)
-			{
-				p_engine.rigid_body->applyForce(btVector3(0.0, 0.0, force), origin);
-			}
-
-			if (glfwGetKey(renderer.window, GLFW_KEY_O) == GLFW_PRESS)
-			{
-				p_engine.rigid_body->applyForce(btVector3(0.0, 0.0, -force), origin);
-			}
-
 			if (glfwGetKey(renderer.window, GLFW_KEY_Y) == GLFW_PRESS)
 			{
 				p_engine.welded = false;
@@ -188,15 +192,6 @@ int main(void)
 				p_engine.set_dirty();
 			}
 
-			if (glfwGetKey(renderer.window, GLFW_KEY_I) == GLFW_PRESS)
-			{
-				force = 1000.0;
-			}
-			if (glfwGetKey(renderer.window, GLFW_KEY_K) == GLFW_PRESS)
-			{
-				force = 6000.0;
-			}
-
 
 
 			int sub_steps = world->stepSimulation(dt, max_steps, btScalar(step));
@@ -207,22 +202,14 @@ int main(void)
 
 			v->set_breaking_enabled(pt > 0.0);
 
+			camera.center = to_dvec3(p_engine.get_global_transform().getOrigin());
 			camera.update(pdt);
 
 			std::vector<Vehicle*> n_vehicles;
 
-			for (Vehicle* v : vehicles)
-			{
-				v->draw_debug();
-				auto n = v->update();
-				n_vehicles.insert(n_vehicles.end(), n.begin(), n.end());
+			update_vehicles(vehicles);
 
-
-			}
-
-			vehicles.insert(vehicles.end(), n_vehicles.begin(), n_vehicles.end());
-
-			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			system.update(pdt);
 
 			renderer.prepare_draw();
 
@@ -237,18 +224,14 @@ int main(void)
 			{
 				world->debugDrawWorld();
 
-				glm::dmat4 capsule_tform = to_dmat4(p_capsule.get_global_transform());
-				glm::dmat4 engine_tform = to_dmat4(p_engine.get_global_transform());
+				system.render(renderer.get_width(), renderer.get_height(), c_uniforms);
 
-				glm::dmat4 capsule_rtform = glm::inverse(p_capsule.collider_offset);
-				glm::dmat4 engine_rtform = glm::inverse(p_engine.collider_offset);
+				for (Vehicle* v : vehicles)
+				{
+					v->render(c_uniforms);
+				}
 
-				glm::dmat4 capsule_ftform = capsule_rtform * capsule_tform;
-				glm::dmat4 engine_ftform = engine_rtform * engine_tform;
-
-
-				p_capsule.model_node->draw(c_uniforms, capsule_ftform, true);
-				p_engine.model_node->draw(c_uniforms, engine_ftform, true);
+				system.render_debug(renderer.get_width(), renderer.get_height(), c_uniforms);
 
 				debug_drawer->render(proj_view, c_model, far_plane);
 
@@ -256,17 +239,10 @@ int main(void)
 
 			}
 
-			ImGui::Render();
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-
-
-			glfwSwapBuffers(renderer.window);
+			renderer.finish();
 
 			dt = dtt.restart();
 			t += dt;
-
-			//logger->info("T: {} | PT: {}", t, pt);
 
 
 		}

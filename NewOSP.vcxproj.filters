@@ -234,10 +234,10 @@
     <ClCompile Include="src\assets\PartPrototype.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\BulletExperiments.cpp">
+    <ClCompile Include="src\vehicle\part\link\SimpleLink.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vehicle\part\link\SimpleLink.cpp">
+    <ClCompile Include="src\VehicleInWorld.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

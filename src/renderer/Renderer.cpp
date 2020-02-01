@@ -20,6 +20,8 @@ void Renderer::resize(int nwidth, int nheight, float nscale)
 
 void Renderer::prepare_draw()
 {
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
 	int nwidth = 0, nheight = 0;
 
 	glfwGetFramebufferSize(window, &nwidth, &nheight);
@@ -73,6 +75,18 @@ void Renderer::prepare_gui()
 			glm::vec2(width, height),
 			glm::vec2(width, height), true);
 	}
+}
+
+void Renderer::finish()
+{
+
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
+
+	glfwSwapBuffers(window);
+
 }
 
 int Renderer::get_width()
@@ -157,6 +171,7 @@ Renderer::Renderer(cpptoml::table& settings)
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_CLAMP);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	resize(width, height, scale);

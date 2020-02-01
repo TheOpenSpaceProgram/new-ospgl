@@ -28,7 +28,7 @@ inline glm::dmat4 to_dmat4(const btTransform data)
 
 	data.getOpenGLMatrix(&matrix[0]);
 
-	return glm::mat4(
+	return glm::dmat4(
 		matrix[0], matrix[1], matrix[2], matrix[3],
 		matrix[4], matrix[5], matrix[6], matrix[7],
 		matrix[8], matrix[9], matrix[10], matrix[11],

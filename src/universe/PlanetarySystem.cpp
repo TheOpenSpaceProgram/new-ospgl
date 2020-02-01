@@ -141,13 +141,11 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 
 static double zoom = 1.0;
 
-void PlanetarySystem::render(int width, int height)
+void PlanetarySystem::render(int width, int height, CameraUniforms& camera_uniforms)
 {
-	camera_uniforms = camera.get_camera_uniforms(width, height);
-
 	float fov = glm::radians(60.0f);
 
-	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir();
+	glm::dvec3 camera_pos = camera_uniforms.cam_pos;
 
 	update_render(camera_pos, fov, t);
 
@@ -220,7 +218,7 @@ void PlanetarySystem::render(int width, int height)
 
 }
 
-void PlanetarySystem::render_debug(int width, int height)
+void PlanetarySystem::render_debug(int width, int height, CameraUniforms& camera_uniforms)
 {
 	glm::dmat4 proj_view = camera_uniforms.proj_view;
 	glm::dmat4 c_model = camera_uniforms.c_model;
@@ -300,35 +298,6 @@ void PlanetarySystem::update(double dt)
 	}
 
 	update_physics(dt);
-
-
-
-	ImGui::Begin("Camera Focus");
-	
-	if (ImGui::Button("Position Vessel"))
-	{
-		vessels[0].state = states_now[name_to_index["Earth"]];
-		vessels[0].state.pos += (glm::dvec3)(elements[name_to_index["Earth"]].as_body->build_rotation_matrix(0.0) 
-			* glm::dvec4(42164000.0, 0.0, 0.0, 1.0));
-
-		double mod = -3074.6;
-
-
-
-		vessels[0].state.vel += glm::normalize(glm::cross(vessels[0].state.pos - states_now[name_to_index["Earth"]].pos,
-			elements[name_to_index["Earth"]].as_body->rotation_axis)) * mod;
-
-		camera.distance = 5.0;
-	}
-
-	ImGui::InputInt("Timestep: ", &factor);
-
-
-	ImGui::End();
-
-	//camera.distance = 1000000000000.0;
-	camera.update(dt);
-
 	
 }
 
@@ -465,7 +434,7 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 
 #include "propagator/RK4Interpolated.h"
 
-PlanetarySystem::PlanetarySystem() : camera(SystemPointer(this))
+PlanetarySystem::PlanetarySystem()
 {
 	states_now.resize(0);
 	propagator = new RK4Interpolated();
