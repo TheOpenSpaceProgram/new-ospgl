@@ -83,7 +83,7 @@ void SimpleCamera::update(double dt)
 
 std::pair<glm::dvec3, glm::dvec3> SimpleCamera::get_camera_pos_dir()
 {
-	return std::make_pair(pos, fw);
+	return std::make_pair(pos + center, fw);
 }
 
 CameraUniforms SimpleCamera::get_camera_uniforms(int w, int h)
@@ -96,7 +96,7 @@ CameraUniforms SimpleCamera::get_camera_uniforms(int w, int h)
 
 
 	glm::dmat4 proj = glm::perspective(glm::radians(fov), (double)w / (double)h, NEAR_PLANE, (double)far_plane);
-	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), camera_dir, glm::dvec3(0.0, 1.0, 0.0));
+	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), camera_dir, up);
 	glm::dmat4 proj_view = proj * view;
 
 	out.proj = proj;
@@ -119,7 +119,7 @@ glm::dmat4 SimpleCamera::get_proj_view(int width, int height)
 
 
 	glm::dmat4 proj = glm::perspective(glm::radians(fov), (double)width / (double)height, NEAR_PLANE, (double)far_plane);
-	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), camera_dir, glm::dvec3(0.0, 1.0, 0.0));
+	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), camera_dir, up);
 	glm::dmat4 proj_view = proj * view;
 
 	return proj_view;

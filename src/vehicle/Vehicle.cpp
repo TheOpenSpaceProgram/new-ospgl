@@ -212,8 +212,6 @@ static void create_new_welded_group(
 					}
 				}
 
-				
-
 				world->removeRigidBody(p->rigid_body);
 				delete p->rigid_body;
 			}
@@ -297,8 +295,6 @@ std::vector<Vehicle*> Vehicle::update()
 
 	if (dirty)
 	{
-
-
 		n_vehicles = handle_separation();
 
 		sort(); //< Not sure if needed
@@ -521,7 +517,6 @@ std::vector<Vehicle*> Vehicle::handle_separation()
 	for (auto& n_vessel_pieces : n_pieces)
 	{
 
-
 		Vehicle* n_vehicle = new Vehicle(world);
 
 		n_vehicle->all_pieces = n_vessel_pieces;
@@ -557,63 +552,34 @@ std::vector<Vehicle*> Vehicle::handle_separation()
 	return n_vehicles;
 }
 
-void Vehicle::draw_debug()
+
+void Vehicle::set_position(glm::dvec3 pos)
 {
-	for (size_t i = 0; i < all_pieces.size(); i++)
-	{
-		glm::vec3 color = glm::vec3(0.7, 0.7, 0.7);
+	btVector3 bt = to_btVector3(pos);
 
-		Piece* p = all_pieces[i];
-		Piece* link = p->attached_to;
-
-		if (link == nullptr)
-		{
-			color = glm::vec3(1.0, 0.7, 1.0);
-		}
-
-		glm::dvec3 ppos = to_dvec3(p->get_global_transform().getOrigin());
-
-		debug_drawer->add_point(ppos, color);
-		
-		if (link != nullptr)
-		{
-			glm::dvec3 dpos = to_dvec3(link->get_global_transform().getOrigin());
-
-			if (p->welded)
-			{
-				debug_drawer->add_line(ppos, dpos, glm::dvec3(0.8, 0.8, 0.8));
-			}
-			else
-			{
-				debug_drawer->add_line(ppos, dpos, glm::dvec3(0.8, 0.3, 0.3));
-			}
-		}
-	}
-}
-
-void Vehicle::set_position(btVector3 pos)
-{
 	for (WeldedGroup* g : welded)
 	{
-		g->rigid_body->getWorldTransform().setOrigin(pos);
+		g->rigid_body->getWorldTransform().setOrigin(bt);
 	}
 
 	for (Piece* p : single_pieces)
 	{
-		p->rigid_body->getWorldTransform().setOrigin(pos);
+		p->rigid_body->getWorldTransform().setOrigin(bt);
 	}
 }
 
-void Vehicle::set_linear_velocity(btVector3 vel)
+void Vehicle::set_linear_velocity(glm::dvec3 vel)
 {
+	btVector3 bt = to_btVector3(vel);
+
 	for (WeldedGroup* g : welded)
 	{
-		g->rigid_body->setLinearVelocity(vel);
+		g->rigid_body->setLinearVelocity(bt);
 	}
 
 	for (Piece* p : single_pieces)
 	{
-		p->rigid_body->setLinearVelocity(vel);
+		p->rigid_body->setLinearVelocity(bt);
 	}
 }
 
@@ -658,6 +624,15 @@ void Vehicle::set_breaking_enabled(bool value)
 	this->breaking_enabled = value;
 }
 
+void Vehicle::render(CameraUniforms& camera_uniforms)
+{
+	for (Piece* p : all_pieces)
+	{
+		glm::dmat4 tform = glm::inverse(p->collider_offset) * to_dmat4(p->get_global_transform());
+		p->model_node->draw(camera_uniforms, tform, true);
+	}
+}
+
 Vehicle::Vehicle(btDynamicsWorld* world)
 {
 	this->world = world;
@@ -667,4 +642,38 @@ Vehicle::Vehicle(btDynamicsWorld* world)
 
 Vehicle::~Vehicle()
 {
+}
+
+void Vehicle::draw_debug()
+{
+	for (size_t i = 0; i < all_pieces.size(); i++)
+	{
+		glm::vec3 color = glm::vec3(0.7, 0.7, 0.7);
+
+		Piece* p = all_pieces[i];
+		Piece* link = p->attached_to;
+
+		if (link == nullptr)
+		{
+			color = glm::vec3(1.0, 0.7, 1.0);
+		}
+
+		glm::dvec3 ppos = to_dvec3(p->get_global_transform().getOrigin());
+
+		debug_drawer->add_point(ppos, color);
+
+		if (link != nullptr)
+		{
+			glm::dvec3 dpos = to_dvec3(link->get_global_transform().getOrigin());
+
+			if (p->welded)
+			{
+				debug_drawer->add_line(ppos, dpos, glm::dvec3(0.8, 0.8, 0.8));
+			}
+			else
+			{
+				debug_drawer->add_line(ppos, dpos, glm::dvec3(0.8, 0.3, 0.3));
+			}
+		}
+	}
 }

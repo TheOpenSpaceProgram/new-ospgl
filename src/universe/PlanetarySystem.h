@@ -36,11 +36,6 @@ public:
 	StateVector states_now;
 
 	double t, timewarp;
-	
-	CameraUniforms camera_uniforms;
-
-	// The MapCamera MAY not be here, actually (TODO)
-	MapCamera camera;
 
 	// Guaranteed to be ordered so that the last planets to appear
 	// are moons, or moons of moons (etc...)
@@ -71,8 +66,8 @@ public:
 	// semi-major axis it's not really important which t you choose.
 	void compute_sois(double t);
 
-	void render(int width, int height);
-	void render_debug(int width, int height);
+	void render(int width, int height, CameraUniforms& cu);
+	void render_debug(int width, int height, CameraUniforms& cu);
 
 	void update(double dt);
 

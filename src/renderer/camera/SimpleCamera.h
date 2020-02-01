@@ -13,7 +13,7 @@ private:
 
 public:
 
-	constexpr static double NEAR_PLANE = 0.000001;
+	constexpr static double NEAR_PLANE = 1e-6;
 
 	// In degrees
 	double fov;
@@ -24,6 +24,8 @@ public:
 	glm::dvec3 pos;
 	glm::dvec3 up;
 	glm::dvec3 fw;
+
+	glm::dvec3 center;
 
 	void update(double dt);
 

@@ -163,13 +163,15 @@ struct CoreUniforms
 {
 	// Name of the different core uniforms
 	// By default materials bind
-	// - model = "model"
-	// - camera_tform = "camera_tform"
+	// - final_tform = "final_tform"
 	// - proj_view = "proj_view"
 	// - f_coef = "f_coef"
 	// - camera_relative = "camera_relative"
 	// - normal_model = "normal_model"
-	// If any equals "", it's not binded
+	// Using camera_tform and the like is not a good idea as the camera usually is very far from the origin
+	// final_tform fixes this as it combines both the model and camera translation, so the end result is
+	// near the origin, or if it's far away, it will be actually fara way from the camera
+	// If any equals "", it's not bound
 	std::string mat4_proj, mat4_view, mat4_camera_model, mat4_proj_view, mat4_camera_tform, mat4_model,
 		mat4_final_tform, mat3_normal_model, float_far_plane, float_f_coef, vec3_camera_relative;
 
@@ -180,12 +182,12 @@ struct CoreUniforms
 		mat4_view = "";
 		mat4_camera_model = "";
 		mat4_proj_view = "proj_view";
-		mat4_camera_tform = "camera_tform";
-		mat4_model = "model";
+		mat4_camera_tform = "";
+		mat4_model = "";
 		mat3_normal_model = "normal_model";
 		float_far_plane = "";
 		float_f_coef = "f_coef";
-		mat4_final_tform = "";
+		mat4_final_tform = "final_tform";
 		vec3_camera_relative = "camera_relative";
 	}
 };

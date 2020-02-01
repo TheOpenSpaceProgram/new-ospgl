@@ -43,6 +43,8 @@ public:
 	// to draw directly to backbuffer
 	void prepare_gui();
 
+	void finish();
+
 	int get_width();
 	int get_height();
 
