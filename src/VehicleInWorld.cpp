@@ -67,7 +67,6 @@ int main(void)
 		Timer dtt = Timer();
 
 		double dt = 0.0;
-		double pdt = 0.0;
 
 		input = new InputUtil();
 		input->setup(renderer.window);
@@ -75,6 +74,7 @@ int main(void)
 		double AU = 149597900000.0;
 
 		SimpleCamera camera = SimpleCamera();
+		camera.speed = 100000.0;
 		glm::dvec3 cam_offset = glm::dvec3(-10.0, 0.0f, 0.0f);
 		camera.fw = glm::normalize(glm::dvec3(1.0f, 0.0f, 0.0));
 		camera.pos = cam_offset;
@@ -90,16 +90,17 @@ int main(void)
 		BulletDebugDrawer* bullet_debug_drawer = new BulletDebugDrawer();
 		world->setDebugDrawer(bullet_debug_drawer);
 
+
 		bullet_debug_drawer->setDebugMode(
 			btIDebugDraw::DBG_DrawConstraints |
 			btIDebugDraw::DBG_DrawWireframe |
 			btIDebugDraw::DBG_DrawFrames |
-			btIDebugDraw::DBG_DrawConstraintLimits);
+			btIDebugDraw::DBG_DrawConstraintLimits |
+			btIDebugDraw::DBG_DrawAabb);
 
 
 		std::vector<Vehicle*> vehicles;
 
-		double pt = 0.0;
 		double t = 0.0;
 
 
@@ -133,26 +134,28 @@ int main(void)
 
 
 		PlanetarySystem system;
-		assets->get_from_path<Config>("rss:systems/system_test.toml")->read_to(system);
+		assets->get_from_path<Config>("debug_system:systems/system.toml")->read_to(system);
 
 		system.compute_sois(0.0);
 		debug_drawer->debug_enabled = true;
 
 		//Date start_date = Date(2000, Date::MAY, 31);
-		Date start_date = Date(2019, Date::SEPTEMBER, 21);
+		Date start_date = Date(2020, Date::JUNE, 21);
 
 		start_date.day_decimal = (19.0 + 27.0 / 60.0) / 24.0;
 
 		system.t = start_date.to_seconds();
-		system.t = 0.0;
 		logger->info("Starting at: {}", start_date.to_string());
 
-		system.init();
+		system.init(world);
 
-		system.update(0.0);
+		system.update(0.0, world);
 
-		v->set_position(system.states_now[1].pos + glm::dvec3(100000000.0, 0.0, 0.0));
-		//v->set_position(glm::dvec3(1000000000.0, 0.0, 0.0));
+		v->set_position(system.states_now[3].pos + glm::dvec3(6361000.0, 0.0, 0.0));
+		v->set_linear_velocity(system.states_now[3].vel);
+		//v->set_position(glm::dvec3(10.0, 0.0, 0.0));
+
+		p_engine.rigid_body->applyImpulse(btVector3(0.0, 0.0, 1.0) * 100.0, btVector3(1.0, 0.0, 0.0));
 
 		while (!glfwWindowShouldClose(renderer.window))
 		{
@@ -169,7 +172,7 @@ int main(void)
 
 
 			double step = 1.0 / 60.0;
-			int max_steps = 32;
+			const int max_steps = 32;
 
 			double max_dt = (max_steps - 1) * step;
 
@@ -191,25 +194,21 @@ int main(void)
 				p_engine.welded = true;
 				p_engine.set_dirty();
 			}
+			
 
+			
+			double sub_steps = (double)world->stepSimulation(dt, max_steps, btScalar(step));
 
-
-			int sub_steps = world->stepSimulation(dt, max_steps, btScalar(step));
-
-			pdt = step * sub_steps;
-
-			pt += pdt;
-
-			v->set_breaking_enabled(pt > 0.0);
+			v->set_breaking_enabled(t > 0.0);
 
 			camera.center = to_dvec3(p_engine.get_global_transform().getOrigin());
-			camera.update(pdt);
+			camera.update(dt);
 
 			std::vector<Vehicle*> n_vehicles;
 
 			update_vehicles(vehicles);
 
-			system.update(pdt);
+			system.update(dt, world);
 
 			renderer.prepare_draw();
 
@@ -228,7 +227,7 @@ int main(void)
 
 				for (Vehicle* v : vehicles)
 				{
-					v->render(c_uniforms);
+					v->render(c_uniforms, LightingUniforms());
 				}
 
 				system.render_debug(renderer.get_width(), renderer.get_height(), c_uniforms);

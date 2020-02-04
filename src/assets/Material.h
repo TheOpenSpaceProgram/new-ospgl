@@ -6,6 +6,7 @@
 #include "Config.h"
 #include "../util/SerializeUtil.h"
 #include "../renderer/camera/CameraUniforms.h"
+#include "../renderer/lighting/LightingUniforms.h"
 #include <glm/gtx/matrix_decompose.hpp>
 #include <algorithm>
 #include <iostream>
@@ -175,6 +176,12 @@ struct CoreUniforms
 	std::string mat4_proj, mat4_view, mat4_camera_model, mat4_proj_view, mat4_camera_tform, mat4_model,
 		mat4_final_tform, mat3_normal_model, float_far_plane, float_f_coef, vec3_camera_relative;
 
+	// Lightning core uniforms:
+
+	// The direction the sun light comes from. Sun is a point light extremely far away,
+	// when we are close to the sun, additional "planetshine" is used
+	std::string vec3_sunlight_dir;
+
 	CoreUniforms()
 	{
 		// Defaults
@@ -189,6 +196,8 @@ struct CoreUniforms
 		float_f_coef = "f_coef";
 		mat4_final_tform = "final_tform";
 		vec3_camera_relative = "camera_relative";
+
+		vec3_sunlight_dir = "sunlight_dir";
 	}
 };
 
@@ -215,7 +224,7 @@ struct Material
 
 
 	void set(std::vector<AssimpTexture>& assimp_textures);
-	void set_core(const CameraUniforms& cu, glm::dmat4 model);
+	void set_core(const CameraUniforms& cu, const LightingUniforms& lu, glm::dmat4 model);
 
 };
 

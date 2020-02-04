@@ -62,7 +62,10 @@ public:
 
 	void draw_debug();
 
+	// The root part ends up in the given position, other parts
+	// keep their relative position
 	void set_position(glm::dvec3 pos);
+	// Relative velocities are properly kept
 	void set_linear_velocity(glm::dvec3 vel);
 
 	// Orders the all_pieces array so that parts are ordered
@@ -71,7 +74,7 @@ public:
 
 	void set_breaking_enabled(bool value);
 
-	void render(CameraUniforms& camera_uniforms);
+	void render(CameraUniforms& camera_uniforms, const LightingUniforms& lu);
 
 	Vehicle(btDynamicsWorld* world);
 	~Vehicle();

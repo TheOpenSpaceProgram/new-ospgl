@@ -236,6 +236,8 @@ void PlanetarySystem::update_physics(double dt)
 {
 	compute_states(t + dt * timewarp, states_now, 1e-6);
 
+
+	// TODO: Fix this mess
 	//int factor = 10000;
 	double sub_dt = dt * factor;
 	if (timewarp < factor)
@@ -255,10 +257,10 @@ void PlanetarySystem::update_physics(double dt)
 		}
 
 		// Propagate vessels
-		propagator->prepare(sub_t, sub_dt, physics_pos);
-		size_t closest = propagator->propagate(&vessels[0]);
+		//propagator->prepare(sub_t, sub_dt, physics_pos);
+		//size_t closest = propagator->propagate(&vessels[0]);
 
-		vessels[0].simulate(elements, physics_pos, closest, sub_dt);
+		//vessels[0].simulate(elements, physics_pos, closest, sub_dt);
 		
 
 		it++;
@@ -273,13 +275,13 @@ void PlanetarySystem::update_physics(double dt)
 
 
 
-	vessels[0].draw_debug();
+	//vessels[0].draw_debug();
 
 
 	t += dt * timewarp;
 }
 
-void PlanetarySystem::init_physics()
+void PlanetarySystem::init_physics(btDynamicsWorld* world)
 {
 	pt = 0.0;
 	factor = 1000;
@@ -287,13 +289,14 @@ void PlanetarySystem::init_physics()
 }
 
 
-void PlanetarySystem::update(double dt)
+void PlanetarySystem::update(double dt, btDynamicsWorld* world)
 {
-	dt = 0.01;
+	// Wooooops:
+	//dt = 0.01;
 
 	if (states_now.size() == 0)
 	{
-		init_physics();
+		init_physics(world);
 		states_now.resize(elements.size());
 	}
 
@@ -301,11 +304,10 @@ void PlanetarySystem::update(double dt)
 	
 }
 
-void PlanetarySystem::init()
+void PlanetarySystem::init(btDynamicsWorld* world)
 {
 	propagator->initialize(this, elements.size());
-	vessels.push_back(Vessel());
-	vessels[0].state.pos = glm::dvec3(0.0, 0.0, 0.0);
+
 }
 
 static void load_body(SystemElement* body)

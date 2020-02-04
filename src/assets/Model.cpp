@@ -450,7 +450,7 @@ void Mesh::unload()
 	}
 }
 
-void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model)
+void Mesh::bind_uniforms(const CameraUniforms& uniforms, const LightingUniforms& lu, glm::dmat4 model)
 {
 	logger->check(drawable != false, "Cannot draw a non-drawable mesh!");
 
@@ -458,7 +458,7 @@ void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model)
 	material->shader->use();
 
 	material->set(textures);
-	material->set_core(uniforms, model);
+	material->set_core(uniforms, lu, model);
 }
 
 void Mesh::draw_command()
@@ -578,20 +578,20 @@ GPUModelPointer::~GPUModelPointer()
 	}
 }
 
-void Node::draw_all_meshes(const CameraUniforms & uniforms, glm::dmat4 model)
+void Node::draw_all_meshes(const CameraUniforms & uniforms, const LightingUniforms& lu, glm::dmat4 model)
 {
 	for (Mesh& mesh : meshes)
 	{
 		if (mesh.is_drawable())
 		{
-			mesh.bind_uniforms(uniforms, model);
+			mesh.bind_uniforms(uniforms, lu, model);
 			mesh.draw_command();
 		}
 	}
 
 }
 
-void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, bool ignore_our_subtform)
+void Node::draw(const CameraUniforms& uniforms, const LightingUniforms& lu, glm::dmat4 model, bool ignore_our_subtform)
 {
 	glm::dmat4 n_model;
 	if (ignore_our_subtform)
@@ -603,10 +603,10 @@ void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, bool ignore_ou
 		n_model = sub_transform * model;
 	}
 
-	draw_all_meshes(uniforms, n_model);
+	draw_all_meshes(uniforms, lu, n_model);
 
 	for (Node* node : children)
 	{
-		node->draw(uniforms, n_model, false);
+		node->draw(uniforms, lu, n_model, false);
 	}
 }

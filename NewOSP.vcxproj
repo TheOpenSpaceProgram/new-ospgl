@@ -232,8 +232,10 @@
     <ClCompile Include="src\util\render\TextDrawer.cpp" />
     <ClCompile Include="src\vehicle\Vehicle.cpp" />
     <ClCompile Include="src\vehicle\part\Piece.cpp" />
+    <ClCompile Include="src\physics\ground\SurfaceCollision.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\renderer\lighting\LightingUniforms.h" />
     <ClInclude Include="src\vehicle\part\link\SimpleLink.h" />
     <ClInclude Include="src\assets\PartPrototype.h" />
     <ClInclude Include="src\tools\part_viewer\PartViewer.h" />
@@ -331,6 +333,7 @@
     <ClInclude Include="src\util\render\TextDrawer.h" />
     <ClInclude Include="src\vehicle\Vehicle.h" />
     <ClInclude Include="src\vehicle\part\Piece.h" />
+    <ClInclude Include="src\physics\ground\SurfaceCollision.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="output.log" />

@@ -22,7 +22,7 @@ struct SurfaceConfig
 	// Doesn't need to be really exact, but make sure it's
 	// higher than the actual maximum height, otherwise physics 
 	// will break
-	float max_height;
+	double max_height;
 
 };
 
@@ -59,6 +59,8 @@ public:
 		SAFE_TOML_GET(to.max_depth, "lod.max_depth", int);
 		SAFE_TOML_GET(to.coef_a, "lod.coef_a", double);
 		SAFE_TOML_GET(to.coef_b, "lod.coef_b", double);
+
+		SAFE_TOML_GET(to.max_height, "max_height", double);
 
 		to.script_path = assets->resolve_path(to.script_path_raw);
 	}

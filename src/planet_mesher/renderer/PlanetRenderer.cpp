@@ -137,7 +137,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 				}
 
 				// Can be used for tides, or simple waves as we do here
-				double sfactor = 1.0 + sin(time * 0.3) * 0.00000025;
+				double sfactor = 1.0 + sin(time * 0.3) * 0.000000025;
 
 				glm::dmat4 t_model = glm::dmat4(1.0f);
 				t_model = glm::scale(t_model, glm::dvec3(sfactor, sfactor, sfactor));

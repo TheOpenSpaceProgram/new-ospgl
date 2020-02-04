@@ -5,6 +5,7 @@
 #include "../../../renderer/PlanetaryBodyRenderer.h"
 #include <glm/gtx/rotate_vector.hpp>
 
+
 class PlanetaryBody
 {
 public:
@@ -13,7 +14,6 @@ public:
 	PlanetConfig config;
 
 	PlanetaryBodyRenderer renderer;
-
 
 	// 0 = no dot, 1 = only dot
 	// Used to save resources when rendering planets which are far away
@@ -36,7 +36,6 @@ public:
 
 	glm::dmat4 build_rotation_matrix(double t, bool include_rot_at_epoch = true) const;
 	glm::dvec3 get_rotation_speed(glm::dvec3 at_relative);
-
 
 	PlanetaryBody();
 	~PlanetaryBody();

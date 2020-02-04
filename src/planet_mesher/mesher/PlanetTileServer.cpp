@@ -180,6 +180,7 @@ PlanetTileServer::~PlanetTileServer()
 {
 	threads_run = false;
 
+
 	for (size_t i = 0; i < threads.size(); i++)
 	{
 		// We must work hard to get those threads to wake up!
@@ -194,6 +195,7 @@ PlanetTileServer::~PlanetTileServer()
 	{
 		delete it->second;
 	}
+
 
 
 }

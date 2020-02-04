@@ -13,8 +13,8 @@ btTransform Piece::get_global_transform()
 
 	btTransform tform;
 
-	//motion_state->getWorldTransform(tform);
-	tform = rigid_body->getWorldTransform();
+	motion_state->getWorldTransform(tform);
+	//tform = rigid_body->getWorldTransform();
 
 	if (is_welded())
 	{
