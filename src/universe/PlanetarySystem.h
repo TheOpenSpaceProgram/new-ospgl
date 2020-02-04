@@ -8,6 +8,10 @@
 
 #include "../renderer/camera/MapCamera.h"
 
+#pragma warning(push, 0)
+#include <btBulletDynamicsCommon.h>
+#pragma warning(pop)
+
 struct SystemPointer;
 
 // A system holds a central star, origin of the coordinate system, and
@@ -25,7 +29,7 @@ private:
 	void update_render_body_rocky(PlanetaryBody* body, glm::dvec3 body_pos, glm::dvec3 camera_pos, double t);
 
 	void update_physics(double dt);
-	void init_physics();
+	void init_physics(btDynamicsWorld* world);
 
 	std::vector<glm::dvec3> pts;
 
@@ -69,9 +73,9 @@ public:
 	void render(int width, int height, CameraUniforms& cu);
 	void render_debug(int width, int height, CameraUniforms& cu);
 
-	void update(double dt);
+	void update(double dt, btDynamicsWorld* world);
 
-	void init();
+	void init(btDynamicsWorld* world);
 
 	// Updates LOD and similar
 	// FOV in radians

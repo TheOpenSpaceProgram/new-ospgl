@@ -252,7 +252,6 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 						}
 					}
 
-					glm::dvec3 default = glm::dvec3(1.0, 0.0, 1.0);
 					colors[i] = (glm::vec3)out.color;
 
 				}

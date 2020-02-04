@@ -17,7 +17,7 @@ void PartViewer::render(glm::ivec2 win_size)
 	CameraUniforms c_uniforms = camera.get_camera_uniforms(win_size.x, win_size.y);
 	for (auto it = part->pieces.begin(); it != part->pieces.end(); it++)
 	{
-		it->second.model_node->draw(c_uniforms, model);
+		it->second.model_node->draw(c_uniforms, LightingUniforms(), model);
 
 	}
 

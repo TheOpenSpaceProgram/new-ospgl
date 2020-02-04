@@ -240,6 +240,9 @@
     <ClCompile Include="src\VehicleInWorld.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\physics\ground\SurfaceCollision.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\sol.hpp">
@@ -531,6 +534,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vehicle\part\link\SimpleLink.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\lighting\LightingUniforms.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\ground\SurfaceCollision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -52,7 +52,7 @@ public:
 
 
 	// Binds core uniforms and material uniforms
-	void bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model);
+	void bind_uniforms(const CameraUniforms& uniforms, const LightingUniforms& lu, glm::dmat4 model);
 
 	// Only issues the draw command, does absolutely nothing else
 	void draw_command();
@@ -80,13 +80,13 @@ struct Node
 
 	std::unordered_map<std::string, std::string> properties;
 
-	void draw_all_meshes(const CameraUniforms& uniforms, glm::dmat4 model);
+	void draw_all_meshes(const CameraUniforms& uniforms, const LightingUniforms& lu, glm::dmat4 model);
 
 	// Draws all meshes, and call sthe same on all children,
 	// accumulating sub transforms
 	// The ignore_our_subtform flag is useful specially for stuff like parts
 	// where the piece transform is ignored during game rendering
-	void draw(const CameraUniforms& uniforms, glm::dmat4 model, bool ignore_our_subtform = false);
+	void draw(const CameraUniforms& uniforms, const LightingUniforms& lu, glm::dmat4 model, bool ignore_our_subtform = false);
 };
 
 // Models allow loading 3d models using the assimp library

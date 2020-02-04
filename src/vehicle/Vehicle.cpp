@@ -247,6 +247,8 @@ static void add_piece_physics(Piece* piece, btTransform tform, btDynamicsWorld* 
 
 	rigid_body->setActivationState(DISABLE_DEACTIVATION);
 
+
+
 	world->addRigidBody(rigid_body);
 
 	piece->rigid_body = rigid_body;
@@ -557,14 +559,18 @@ void Vehicle::set_position(glm::dvec3 pos)
 {
 	btVector3 bt = to_btVector3(pos);
 
+	btVector3 root_pos = root->get_global_transform().getOrigin();
+
 	for (WeldedGroup* g : welded)
 	{
-		g->rigid_body->getWorldTransform().setOrigin(bt);
+		btVector3 off = g->rigid_body->getWorldTransform().getOrigin() - root_pos;
+		g->rigid_body->getWorldTransform().setOrigin(bt + off);
 	}
 
 	for (Piece* p : single_pieces)
 	{
-		p->rigid_body->getWorldTransform().setOrigin(bt);
+		btVector3 off = p->get_global_transform().getOrigin() - root_pos;
+		p->rigid_body->getWorldTransform().setOrigin(bt + off);
 	}
 }
 
@@ -572,14 +578,18 @@ void Vehicle::set_linear_velocity(glm::dvec3 vel)
 {
 	btVector3 bt = to_btVector3(vel);
 
+	btVector3 root_vel = root->rigid_body->getLinearVelocity();
+
 	for (WeldedGroup* g : welded)
 	{
-		g->rigid_body->setLinearVelocity(bt);
+		btVector3 off = g->rigid_body->getLinearVelocity() - root_vel;
+		g->rigid_body->setLinearVelocity(bt + off);
 	}
 
 	for (Piece* p : single_pieces)
 	{
-		p->rigid_body->setLinearVelocity(bt);
+		btVector3 off = p->rigid_body->getLinearVelocity() - root_vel;
+		p->rigid_body->setLinearVelocity(bt + off);
 	}
 }
 
@@ -624,12 +634,12 @@ void Vehicle::set_breaking_enabled(bool value)
 	this->breaking_enabled = value;
 }
 
-void Vehicle::render(CameraUniforms& camera_uniforms)
+void Vehicle::render(CameraUniforms& camera_uniforms, const LightingUniforms& lu)
 {
 	for (Piece* p : all_pieces)
 	{
 		glm::dmat4 tform = glm::inverse(p->collider_offset) * to_dmat4(p->get_global_transform());
-		p->model_node->draw(camera_uniforms, tform, true);
+		p->model_node->draw(camera_uniforms, lu, tform, true);
 	}
 }
 
