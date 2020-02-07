@@ -116,6 +116,35 @@ void generate_vertices(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_sphe
 	}
 }
 
+
+template<typename T>
+void generate_vertices_simple(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_spheric, double* heights)
+{
+	for (int y = -1; y < PlanetTile::TILE_SIZE + 1; y++)
+	{
+		for (int x = -1; x < PlanetTile::TILE_SIZE + 1; x++)
+		{
+			size_t r_index = (y + 1) * (PlanetTile::TILE_SIZE + 2) + (x + 1);
+
+			double tx = (double)x / ((double)PlanetTile::TILE_SIZE - 1.0);
+			double ty = (double)y / ((double)PlanetTile::TILE_SIZE - 1.0);
+
+			T vert;
+			glm::dvec3 in_tile = glm::dvec3(tx, ty, 0.0);
+
+			glm::dvec3 world_pos_cubic = model * glm::vec4(in_tile, 1.0);
+			glm::dvec3 world_pos_spheric = MathUtil::cube_to_sphere(world_pos_cubic);
+
+			double height = heights[r_index];
+
+			vert.pos = (glm::vec3)(inverse_model_spheric * glm::dvec4(world_pos_spheric, 1.0));
+			vert.nrm = glm::vec3(0.0f, 0.0f, 0.0f);
+
+			verts[r_index] = vert;
+		}
+	}
+}
+
 template<typename T, typename Q>
 void copy_vertices(T* origin, Q* destination)
 {
@@ -128,13 +157,17 @@ void copy_vertices(T* origin, Q* destination)
 
 			destination[f_index].pos = origin[o_index].pos;
 			destination[f_index].nrm = origin[o_index].nrm;
-			if constexpr (std::is_same<Q, PlanetTileWaterVertex>::value)
+			if constexpr (!std::is_same<Q, PlanetTileSimpleVertex>::value)
 			{
-				destination[f_index].depth = origin[o_index].col.x;
-			}
-			else
-			{
-				destination[f_index].col = origin[o_index].col;
+
+				if constexpr (std::is_same<Q, PlanetTileWaterVertex>::value)
+				{
+					destination[f_index].depth = origin[o_index].col.x;
+				}
+				else
+				{
+					destination[f_index].col = origin[o_index].col;
+				}
 			}
 		}
 	}
@@ -162,7 +195,7 @@ void generate_skirt(PlanetTileVertex* target, glm::dmat4 model, glm::dmat4 inver
 
 
 bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state& lua_state, bool has_water,
-	VertexArray<PlanetTileVertex>* work_array, std::function<void(void)> clear)
+	VertexArray<PlanetTileVertex, PlanetTile::TILE_SIZE>* work_array)
 {
 	
 	bool errors = false;
@@ -192,6 +225,7 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	GeneratorInfo info;
 	info.depth = (int)depth;
 	info.radius = planet_radius;
+	info.needs_color = true;
 
 	for (int x = -1; x < TILE_SIZE + 1; x++)
 	{
@@ -208,8 +242,6 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 
 			glm::dvec3 sphere = world_pos_spheric;
 			glm::dvec2 projected = MathUtil::euclidean_to_spherical_r1(sphere);
-
-			clear();
 
 			size_t i = (y + 1) * (TILE_SIZE + 2) + (x + 1);
 			
@@ -297,6 +329,96 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	
 	return errors;
 
+}
+
+bool PlanetTile::generate_simple(PlanetTilePath path, double planet_radius, sol::state& lua_state,
+	VertexArray<PlanetTileSimpleVertex, PlanetTile::PHYSICS_SIZE>* work_array,
+	OutPhysicsArray* out_array)
+{
+	bool errors = false;
+
+	bool clockwise = false;
+
+	if (path.side == PY ||
+		path.side == NY ||
+		path.side == NX)
+	{
+		clockwise = true;
+	}
+
+	glm::dmat4 model = path.get_model_matrix();
+	glm::dmat4 model_spheric = path.get_model_spheric_matrix();
+	glm::dmat4 inverse_model = glm::inverse(model);
+	glm::dmat4 inverse_model_spheric = glm::inverse(model_spheric);
+
+	std::array<double, (TILE_SIZE + 2) * (TILE_SIZE + 2)> heights;
+
+	size_t depth = path.get_depth();
+
+	GeneratorInfo info;
+	info.depth = (int)depth;
+	info.radius = planet_radius;
+	info.needs_color = false;
+	for (int x = -1; x < TILE_SIZE + 1; x++)
+	{
+		for (int y = -1; y < TILE_SIZE + 1; y++)
+		{
+
+			double tx = (double)x / ((double)TILE_SIZE - 1.0);
+			double ty = (double)y / ((double)TILE_SIZE - 1.0);
+
+			glm::dvec3 in_tile = glm::dvec3(tx, ty, 0.0);
+
+			glm::dvec3 world_pos_cubic = model * glm::dvec4(in_tile, 1.0);
+			glm::dvec3 world_pos_spheric = MathUtil::cube_to_sphere(world_pos_cubic);
+
+			glm::dvec3 sphere = world_pos_spheric;
+			glm::dvec2 projected = MathUtil::euclidean_to_spherical_r1(sphere);
+
+			size_t i = (y + 1) * (TILE_SIZE + 2) + (x + 1);
+
+			sol::protected_function func = lua_state["generate"];
+
+			info.coord_3d = sphere;
+			info.coord_2d = projected;
+
+			GeneratorOut out;
+			out.height = 1.0;
+			out.color = glm::dvec3(1.0, 0.0, 1.0);
+
+			// If an error happens, generating will lag 
+			// (exceptions are really slow)
+			// So we instead flatten the whole world
+			if (errors)
+			{
+				heights[i] = 0.0f;
+			}
+			else
+			{
+				auto result = func(info, &out);
+				if (!result.valid())
+				{
+					sol::error err = result;
+					logger->error("Lua Runtime Error:\n{}", err.what());
+					// We only write one error per tile so we don't overload the log
+					errors = true;
+					heights[i] = 0.0;
+				}
+				else
+				{
+					heights[i] = (out.height) / planet_radius;
+				}
+			}
+		}
+	}
+
+	lua_state.collect_garbage();
+
+	generate_vertices_simple<PlanetTileSimpleVertex>(work_array->data(), model, inverse_model_spheric, &heights[0]);
+	generate_normals(work_array->data(), work_array->size(), model_spheric, clockwise);
+	copy_vertices(work_array->data(), out_array->data());
+
+	return errors;
 }
 
 void PlanetTile::upload()

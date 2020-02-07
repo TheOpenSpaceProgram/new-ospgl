@@ -243,6 +243,9 @@
     <ClCompile Include="src\physics\ground\SurfaceCollision.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\physics\ground\CollisionShape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\sol.hpp">
@@ -540,6 +543,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\physics\ground\SurfaceCollision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\ground\CollisionShape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -23,10 +23,14 @@ struct PlanetTileWaterVertex
 	float depth;
 };
 
+struct PlanetTileSimpleVertex
+{
+	glm::vec3 pos;
+	glm::vec3 nrm;
+};
+
 
 // The index buffer is common to all planet tiles
-// TODO: A good optimization would be optional texture 
-// generation (for the physics engine)
 struct PlanetTile
 {
 
@@ -36,6 +40,8 @@ struct PlanetTile
 		glm::dvec2 coord_2d;
 		double radius;
 		int depth;
+
+		bool needs_color;
 	};
 	
 	struct GeneratorOut
@@ -50,12 +56,14 @@ struct PlanetTile
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
 	static const int TILE_SIZE = 64;
+	static const int PHYSICS_SIZE = 64;
 	static const int VERTEX_COUNT = TILE_SIZE * TILE_SIZE + 4;
 	static const int INDEX_COUNT = (TILE_SIZE - 1) * (TILE_SIZE - 1) * 6 + (TILE_SIZE - 1) * 4 * 3;
 
-	template <typename T>
-	using VertexArray = std::array<T, (PlanetTile::TILE_SIZE + 2) * (PlanetTile::TILE_SIZE + 2)>;
+	template <typename T, size_t S>
+	using VertexArray = std::array<T, (S + 2) * (S + 2)>;
 
+	using OutPhysicsArray = std::array<PlanetTileSimpleVertex, PHYSICS_SIZE * PHYSICS_SIZE>;
 
 	std::array<PlanetTileVertex, VERTEX_COUNT> vertices;
 
@@ -64,7 +72,14 @@ struct PlanetTile
 
 	// Return true if errors happened
 	bool generate(PlanetTilePath path, double planet_radius, sol::state& lua_state, bool has_water,
-		VertexArray<PlanetTileVertex>* work_array, std::function<void(void)> clear);
+		VertexArray<PlanetTileVertex, PlanetTile::TILE_SIZE>* work_array);
+
+	// Simply generates stuff to the output_array, that's it, we can be static 
+	static bool generate_simple(PlanetTilePath path, double planet_radius, sol::state& lua_state,
+		VertexArray<PlanetTileSimpleVertex, PlanetTile::PHYSICS_SIZE>* work_array,
+		OutPhysicsArray* out_array);
+
+	
 
 	void upload();
 

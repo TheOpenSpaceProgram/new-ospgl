@@ -166,6 +166,7 @@
     <None Include="res\test_script.lua" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\physics\ground\CollisionShape.cpp" />
     <ClCompile Include="src\VehicleInWorld.cpp" />
     <ClCompile Include="src\vehicle\part\link\SimpleLink.cpp" />
     <ClCompile Include="src\assets\PartPrototype.cpp" />
@@ -235,6 +236,7 @@
     <ClCompile Include="src\physics\ground\SurfaceCollision.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\physics\ground\CollisionShape.h" />
     <ClInclude Include="src\renderer\lighting\LightingUniforms.h" />
     <ClInclude Include="src\vehicle\part\link\SimpleLink.h" />
     <ClInclude Include="src\assets\PartPrototype.h" />
