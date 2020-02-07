@@ -210,7 +210,8 @@ void PlanetTileServer::do_imgui()
 
 void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* thread)
 {
-	PlanetTile::VertexArray<PlanetTileVertex>* work_array = new PlanetTile::VertexArray<PlanetTileVertex>();
+	PlanetTile::VertexArray<PlanetTileVertex, PlanetTile::TILE_SIZE>* work_array = 
+		new PlanetTile::VertexArray<PlanetTileVertex, PlanetTile::TILE_SIZE>();
 	while (server->threads_run)
 	{
 		std::unique_lock<std::mutex> lock(server->condition_mtx);
@@ -239,10 +240,8 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 
 			// Work on the target
 			PlanetTile* ntile = new PlanetTile();
-			bool has_errors = ntile->generate(target, server->config->radius, thread->lua_state, server->has_water,
-				work_array, [&server, &thread]() {
-				server->default_lua(thread->lua_state);
-			});
+			bool has_errors = ntile->generate(target, server->config->radius, 
+				thread->lua_state, server->has_water, work_array);
 
 			if (has_errors)
 			{

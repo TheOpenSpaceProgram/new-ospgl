@@ -40,6 +40,46 @@ void update_vehicles(std::vector<Vehicle*>& vehicles)
 	}
 }
 
+btVector3 pos;
+btVector3 vel;
+btRigidBody* rigid;
+btMotionState* state;
+double sst = 0.0;
+double tistep = 0.0;
+
+class CustomMotionState : public btMotionState
+{
+public:
+
+	virtual void getWorldTransform(btTransform& worldTrans) const
+	{
+
+		worldTrans.setIdentity();
+		worldTrans.setOrigin(pos + vel * sst);
+
+	}
+
+	//Bullet only calls the update of worldtransform for active objects
+	virtual void setWorldTransform(const btTransform& worldTrans)
+	{
+
+	}
+};
+
+
+void callback(btDynamicsWorld* world, btScalar tstep)
+{
+	btTransform p1 = btTransform::getIdentity();
+	p1.setOrigin(pos + vel * sst);
+	rigid->setWorldTransform(p1);
+	//state->setWorldTransform(p1);
+
+	//rigid->setLinearVelocity(vel);
+	sst += tstep;
+
+
+}
+
 
 int main(void)
 {
@@ -74,7 +114,7 @@ int main(void)
 		double AU = 149597900000.0;
 
 		SimpleCamera camera = SimpleCamera();
-		camera.speed = 100000.0;
+		camera.speed = 100.0;
 		glm::dvec3 cam_offset = glm::dvec3(-10.0, 0.0f, 0.0f);
 		camera.fw = glm::normalize(glm::dvec3(1.0f, 0.0f, 0.0));
 		camera.pos = cam_offset;
@@ -151,11 +191,46 @@ int main(void)
 
 		system.update(0.0, world);
 
+		glm::dvec3 vvvel = glm::dvec3(100000.0, 45000.0, 10000.0);
+
 		v->set_position(system.states_now[3].pos + glm::dvec3(6361000.0, 0.0, 0.0));
-		v->set_linear_velocity(system.states_now[3].vel);
+		v->set_linear_velocity(vvvel);
 		//v->set_position(glm::dvec3(10.0, 0.0, 0.0));
 
 		p_engine.rigid_body->applyImpulse(btVector3(0.0, 0.0, 1.0) * 100.0, btVector3(1.0, 0.0, 0.0));
+		
+		btTriangleMesh* mesh = new btTriangleMesh();
+		mesh->addTriangle(btVector3(0.0, -50.0, 0.0), btVector3(0.0, 50.0, 50.0), btVector3(0.0, 50.0, -50.0));
+
+		//CustomMotionState* st = new CustomMotionState();
+		btDefaultMotionState* st = new btDefaultMotionState();
+		btBvhTriangleMeshShape* plane = new btBvhTriangleMeshShape((btStridingMeshInterface*)mesh, true);
+		//btBoxShape* plane = new btBoxShape(btVector3(1.0, 10.0, 10.0));
+		btRigidBody* rg = new btRigidBody(0.0, nullptr, plane, btVector3(0.0, 0.0, 0.0));
+		rg->setCollisionFlags(rg->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+		rg->setActivationState(DISABLE_DEACTIVATION);
+
+		btTransform p1 = btTransform::getIdentity();
+		btVector3 ppos = to_btVector3(system.states_now[3].pos + glm::dvec3(6361000.0, 0.0, 0.0) + glm::dvec3(10.0, 0.0, 0.0));
+		btVector3 base_vel = to_btVector3(vvvel);
+		p1.setOrigin(pos);
+		rg->setWorldTransform(p1);
+
+		world->addRigidBody(rg);
+
+
+		world->setInternalTickCallback(callback, nullptr, true);
+
+		rigid = rg;
+		pos = ppos;
+		vel = base_vel;
+		sst = t;
+		state = st;
+
+		/*p_engine.rigid_body->setCcdMotionThreshold(0.0001);
+		p_engine.rigid_body->setCcdSweptSphereRadius(0.5);
+		p_capsule.rigid_body->setCcdMotionThreshold(0.0001);
+		p_capsule.rigid_body->setCcdSweptSphereRadius(0.5);*/
 
 		while (!glfwWindowShouldClose(renderer.window))
 		{
@@ -171,10 +246,12 @@ int main(void)
 
 
 
-			double step = 1.0 / 60.0;
+			double step = 1.0 / 30.0;
 			const int max_steps = 32;
 
 			double max_dt = (max_steps - 1) * step;
+
+
 
 			if (dt > max_dt)
 			{
@@ -196,8 +273,12 @@ int main(void)
 			}
 			
 
+
 			
+
 			double sub_steps = (double)world->stepSimulation(dt, max_steps, btScalar(step));
+			p_engine.rigid_body->setGravity(btVector3(9.0, 0.0, 0.0));
+			p_capsule.rigid_body->setGravity(btVector3(9.0, 0.0, 0.0));
 
 			v->set_breaking_enabled(t > 0.0);
 
@@ -208,7 +289,7 @@ int main(void)
 
 			update_vehicles(vehicles);
 
-			system.update(dt, world);
+			//system.update(dt, world);
 
 			renderer.prepare_draw();
 
@@ -219,11 +300,17 @@ int main(void)
 			glm::dmat4 c_model = c_uniforms.c_model;
 			float far_plane = c_uniforms.far_plane;
 
+			glm::dvec3 p = to_dvec3(pos + vel * t);
+
+			debug_drawer->add_line(
+				to_dvec3(p_engine.get_global_transform().getOrigin()),
+				p, glm::vec3(1.0, 0.0, 1.0));
+
 			if (renderer.render_enabled)
 			{
 				world->debugDrawWorld();
 
-				system.render(renderer.get_width(), renderer.get_height(), c_uniforms);
+				//system.render(renderer.get_width(), renderer.get_height(), c_uniforms);
 
 				for (Vehicle* v : vehicles)
 				{
