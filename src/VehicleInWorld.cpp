@@ -191,7 +191,7 @@ int main(void)
 
 		system.update(0.0, world);
 
-		glm::dvec3 vvvel = glm::dvec3(100000.0, 45000.0, 10000.0);
+		glm::dvec3 vvvel = system.states_now[3].vel;
 
 		v->set_position(system.states_now[3].pos + glm::dvec3(6361000.0, 0.0, 0.0));
 		v->set_linear_velocity(vvvel);
@@ -232,6 +232,9 @@ int main(void)
 		p_capsule.rigid_body->setCcdMotionThreshold(0.0001);
 		p_capsule.rigid_body->setCcdSweptSphereRadius(0.5);*/
 
+		const double step = 1.0 / 30.0;
+		const int max_steps = 1;
+
 		while (!glfwWindowShouldClose(renderer.window))
 		{
 			input->update(renderer.window);
@@ -246,18 +249,8 @@ int main(void)
 
 
 
-			double step = 1.0 / 30.0;
-			const int max_steps = 32;
-
-			double max_dt = (max_steps - 1) * step;
 
 
-
-			if (dt > max_dt)
-			{
-				logger->warn("Delta-time too high ({})/({}), slowing down", dt, max_dt);
-				dt = max_dt;
-			}
 
 			if (glfwGetKey(renderer.window, GLFW_KEY_Y) == GLFW_PRESS)
 			{
@@ -289,7 +282,7 @@ int main(void)
 
 			update_vehicles(vehicles);
 
-			//system.update(dt, world);
+			system.update(dt, world);
 
 			renderer.prepare_draw();
 
@@ -310,7 +303,7 @@ int main(void)
 			{
 				world->debugDrawWorld();
 
-				//system.render(renderer.get_width(), renderer.get_height(), c_uniforms);
+				system.render(renderer.get_width(), renderer.get_height(), c_uniforms);
 
 				for (Vehicle* v : vehicles)
 				{
@@ -328,6 +321,14 @@ int main(void)
 			renderer.finish();
 
 			dt = dtt.restart();
+
+			double max_dt = (double)(max_steps) * step;
+			if (dt > max_dt)
+			{
+				logger->warn("Delta-time too high ({})/({}), slowing down", dt, max_dt);
+				dt = max_dt;
+			}
+
 			t += dt;
 
 
