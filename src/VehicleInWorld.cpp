@@ -27,6 +27,8 @@
 #include "assets/Model.h"
 #include "lua/LuaCore.h"
 
+#include "physics/ground/GroundShape.h"
+
 
 InputUtil* input;
 
@@ -40,37 +42,16 @@ void update_vehicles(std::vector<Vehicle*>& vehicles)
 	}
 }
 
-btVector3 pos;
-btVector3 vel;
+PlanetarySystem* ssystem;
 btRigidBody* rigid;
-btMotionState* state;
 double sst = 0.0;
-double tistep = 0.0;
 
-class CustomMotionState : public btMotionState
-{
-public:
-
-	virtual void getWorldTransform(btTransform& worldTrans) const
-	{
-
-		worldTrans.setIdentity();
-		worldTrans.setOrigin(pos + vel * sst);
-
-	}
-
-	//Bullet only calls the update of worldtransform for active objects
-	virtual void setWorldTransform(const btTransform& worldTrans)
-	{
-
-	}
-};
 
 
 void callback(btDynamicsWorld* world, btScalar tstep)
 {
 	btTransform p1 = btTransform::getIdentity();
-	p1.setOrigin(pos + vel * sst);
+	p1.setOrigin(to_btVector3(ssystem->states_now[3].pos));
 	rigid->setWorldTransform(p1);
 	//state->setWorldTransform(p1);
 
@@ -199,21 +180,20 @@ int main(void)
 
 		p_engine.rigid_body->applyImpulse(btVector3(0.0, 0.0, 1.0) * 100.0, btVector3(1.0, 0.0, 0.0));
 		
-		btTriangleMesh* mesh = new btTriangleMesh();
-		mesh->addTriangle(btVector3(0.0, -50.0, 0.0), btVector3(0.0, 50.0, 50.0), btVector3(0.0, 50.0, -50.0));
+		//btTriangleMesh* mesh = new btTriangleMesh();
+		//mesh->addTriangle(btVector3(0.0, -50.0, 0.0), btVector3(0.0, 50.0, 50.0), btVector3(0.0, 50.0, -50.0));
 
 		//CustomMotionState* st = new CustomMotionState();
 		btDefaultMotionState* st = new btDefaultMotionState();
-		btBvhTriangleMeshShape* plane = new btBvhTriangleMeshShape((btStridingMeshInterface*)mesh, true);
+		//btBvhTriangleMeshShape* plane = new btBvhTriangleMeshShape((btStridingMeshInterface*)mesh, true);
+		GroundShape* plane = new GroundShape(system.elements[3].as_body);
 		//btBoxShape* plane = new btBoxShape(btVector3(1.0, 10.0, 10.0));
 		btRigidBody* rg = new btRigidBody(0.0, nullptr, plane, btVector3(0.0, 0.0, 0.0));
 		rg->setCollisionFlags(rg->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 		rg->setActivationState(DISABLE_DEACTIVATION);
 
 		btTransform p1 = btTransform::getIdentity();
-		btVector3 ppos = to_btVector3(system.states_now[3].pos + glm::dvec3(6361000.0, 0.0, 0.0) + glm::dvec3(10.0, 0.0, 0.0));
-		btVector3 base_vel = to_btVector3(vvvel);
-		p1.setOrigin(pos);
+		p1.setOrigin(to_btVector3(system.states_now[3].pos));
 		rg->setWorldTransform(p1);
 
 		world->addRigidBody(rg);
@@ -222,15 +202,8 @@ int main(void)
 		world->setInternalTickCallback(callback, nullptr, true);
 
 		rigid = rg;
-		pos = ppos;
-		vel = base_vel;
 		sst = t;
-		state = st;
-
-		/*p_engine.rigid_body->setCcdMotionThreshold(0.0001);
-		p_engine.rigid_body->setCcdSweptSphereRadius(0.5);
-		p_capsule.rigid_body->setCcdMotionThreshold(0.0001);
-		p_capsule.rigid_body->setCcdSweptSphereRadius(0.5);*/
+		ssystem = &system;
 
 		const double step = 1.0 / 30.0;
 		const int max_steps = 1;
@@ -267,11 +240,12 @@ int main(void)
 			
 
 
-			
+			system.update(dt, world);
+			plane->cur_offset = system.states_now[3].pos;
 
 			double sub_steps = (double)world->stepSimulation(dt, max_steps, btScalar(step));
-			p_engine.rigid_body->setGravity(btVector3(9.0, 0.0, 0.0));
-			p_capsule.rigid_body->setGravity(btVector3(9.0, 0.0, 0.0));
+			//p_engine.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
+			//p_capsule.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
 
 			v->set_breaking_enabled(t > 0.0);
 
@@ -282,8 +256,6 @@ int main(void)
 
 			update_vehicles(vehicles);
 
-			system.update(dt, world);
-
 			renderer.prepare_draw();
 
 
@@ -292,12 +264,6 @@ int main(void)
 			glm::dmat4 proj_view = c_uniforms.proj_view;
 			glm::dmat4 c_model = c_uniforms.c_model;
 			float far_plane = c_uniforms.far_plane;
-
-			glm::dvec3 p = to_dvec3(pos + vel * t);
-
-			debug_drawer->add_line(
-				to_dvec3(p_engine.get_global_transform().getOrigin()),
-				p, glm::vec3(1.0, 0.0, 1.0));
 
 			if (renderer.render_enabled)
 			{

@@ -10,7 +10,7 @@ class PlanetTileServer;
 // of the tree, specially across side boundaries,
 // and conversion between coordinate systems
 // It also keeps another copy of the whole
-// planetary system used for rendering when small tiles
+// system used for rendering when small tiles
 // are not yet generated
 class QuadTreePlanet
 {
@@ -67,6 +67,9 @@ public:
 	// Tries to update subdivision, if the server has finished building
 	void update(PlanetTileServer& server);
 	
+	// Not used by the rendering code, but by physics
+	void subdivide_to(glm::dvec2 offset, PlanetSide side, size_t depth);
+
 	QuadTreePlanet();
 	~QuadTreePlanet();
 };
