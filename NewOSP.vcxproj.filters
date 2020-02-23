@@ -240,10 +240,10 @@
     <ClCompile Include="src\VehicleInWorld.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\physics\ground\SurfaceCollision.cpp">
+    <ClCompile Include="src\physics\ground\GroundShape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\physics\ground\CollisionShape.cpp">
+    <ClCompile Include="src\physics\ground\GroundShapeServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -542,10 +542,10 @@
     <ClInclude Include="src\renderer\lighting\LightingUniforms.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\physics\ground\SurfaceCollision.h">
+    <ClInclude Include="src\physics\ground\GroundShape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\physics\ground\CollisionShape.h">
+    <ClInclude Include="src\physics\ground\GroundShapeServer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -166,7 +166,8 @@
     <None Include="res\test_script.lua" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\physics\ground\CollisionShape.cpp" />
+    <ClCompile Include="src\physics\ground\GroundShapeServer.cpp" />
+    <ClCompile Include="src\physics\ground\GroundShape.cpp" />
     <ClCompile Include="src\VehicleInWorld.cpp" />
     <ClCompile Include="src\vehicle\part\link\SimpleLink.cpp" />
     <ClCompile Include="src\assets\PartPrototype.cpp" />
@@ -233,10 +234,10 @@
     <ClCompile Include="src\util\render\TextDrawer.cpp" />
     <ClCompile Include="src\vehicle\Vehicle.cpp" />
     <ClCompile Include="src\vehicle\part\Piece.cpp" />
-    <ClCompile Include="src\physics\ground\SurfaceCollision.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\physics\ground\CollisionShape.h" />
+    <ClInclude Include="src\physics\ground\GroundShapeServer.h" />
+    <ClInclude Include="src\physics\ground\GroundShape.h" />
     <ClInclude Include="src\renderer\lighting\LightingUniforms.h" />
     <ClInclude Include="src\vehicle\part\link\SimpleLink.h" />
     <ClInclude Include="src\assets\PartPrototype.h" />
@@ -335,7 +336,6 @@
     <ClInclude Include="src\util\render\TextDrawer.h" />
     <ClInclude Include="src\vehicle\Vehicle.h" />
     <ClInclude Include="src\vehicle\part\Piece.h" />
-    <ClInclude Include="src\physics\ground\SurfaceCollision.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="output.log" />
