@@ -6,6 +6,8 @@
 #include <glm/gtx/normal.hpp>
 #include <sol.hpp>
 #include <functional>
+#include "../../lua/LuaCore.h"
+#include "../../assets/AssetManager.h"
 
 // TODO: Tile vertex structure
 // We may not even use colors
@@ -55,15 +57,18 @@ struct PlanetTile
 	GLuint vbo, water_vbo;
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
-	static const int TILE_SIZE = 64;
-	static const int PHYSICS_SIZE = 64;
+	static const int TILE_SIZE = 32;
+	static const int PHYSICS_SIZE = 16;
+	static const int PHYSICS_GRAPHICS_RELATION = TILE_SIZE / PHYSICS_SIZE;
 	static const int VERTEX_COUNT = TILE_SIZE * TILE_SIZE + 4;
 	static const int INDEX_COUNT = (TILE_SIZE - 1) * (TILE_SIZE - 1) * 6 + (TILE_SIZE - 1) * 4 * 3;
+	static const int PHYSICS_INDEX_COUNT = (PHYSICS_SIZE - 1) * (PHYSICS_SIZE - 1) * 6;
 
 	template <typename T, size_t S>
 	using VertexArray = std::array<T, (S + 2) * (S + 2)>;
 
-	using OutPhysicsArray = std::array<PlanetTileSimpleVertex, PHYSICS_SIZE * PHYSICS_SIZE>;
+	template<size_t S>
+	using OutPhysicsArray = std::array<PlanetTileSimpleVertex, S * S>;
 
 	std::array<PlanetTileVertex, VERTEX_COUNT> vertices;
 
@@ -75,17 +80,21 @@ struct PlanetTile
 		VertexArray<PlanetTileVertex, PlanetTile::TILE_SIZE>* work_array);
 
 	// Simply generates stuff to the output_array, that's it, we can be static 
-	static bool generate_simple(PlanetTilePath path, double planet_radius, sol::state& lua_state,
+	static bool generate_physics(PlanetTilePath path, double planet_radius, sol::state& lua_state,
 		VertexArray<PlanetTileSimpleVertex, PlanetTile::PHYSICS_SIZE>* work_array,
-		OutPhysicsArray* out_array);
+		OutPhysicsArray<PlanetTile::PHYSICS_SIZE>* out_array);
 
-	
+	static void prepare_lua(sol::state& lua_state);
 
 	void upload();
 
 	bool is_uploaded() { return vbo != 0; }
 
 	bool has_water() { return water_vbo != 0; }
+
+	static void generate_index_array_with_skirts(std::array<uint16_t, INDEX_COUNT>& target, size_t& bulk_index_count);
+
+	static void generate_physics_index_array(std::array<uint16_t, PHYSICS_INDEX_COUNT>& target);
 
 
 	PlanetTile();

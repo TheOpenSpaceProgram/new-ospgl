@@ -50,16 +50,27 @@ double sst = 0.0;
 
 void callback(btDynamicsWorld* world, btScalar tstep)
 {
+	ssystem->update(tstep, world, true);
+
+
 	btTransform p1 = btTransform::getIdentity();
-	p1.setOrigin(to_btVector3(ssystem->states_now[3].pos));
+	p1.setOrigin(to_btVector3(ssystem->bullet_states[3].pos));
+	glm::dmat4 mat = ssystem->elements[3].as_body->build_rotation_matrix(ssystem->bt);
+	glm::dquat quat = glm::dquat(mat);
+
+	btQuaternion rot = to_btQuaternion(quat);
+
+	p1.setRotation(rot);
+
 	rigid->setWorldTransform(p1);
 	//state->setWorldTransform(p1);
 
 	//rigid->setLinearVelocity(vel);
+
 	sst += tstep;
 
-
 }
+
 
 
 int main(void)
@@ -146,8 +157,8 @@ int main(void)
 		p_engine.link_to = btVector3(0.0, 0.0, -2.0 / 2.0);
 
 		p_engine.link = std::make_unique<SimpleLink>(world);
-		p_engine.welded = false;
-
+		p_engine.welded = true;
+		
 		v->dirty = true;
 
 
@@ -161,16 +172,16 @@ int main(void)
 		debug_drawer->debug_enabled = true;
 
 		//Date start_date = Date(2000, Date::MAY, 31);
-		Date start_date = Date(2020, Date::JUNE, 21);
+		Date start_date = Date(2030, Date::AUGUST, 21);
 
-		start_date.day_decimal = (19.0 + 27.0 / 60.0) / 24.0;
 
 		system.t = start_date.to_seconds();
 		logger->info("Starting at: {}", start_date.to_string());
 
 		system.init(world);
 
-		system.update(0.0, world);
+		system.update(0.0, world, false);
+		system.update(0.0, world, true);
 
 		glm::dvec3 vvvel = system.states_now[3].vel;
 
@@ -178,7 +189,7 @@ int main(void)
 		v->set_linear_velocity(vvvel);
 		//v->set_position(glm::dvec3(10.0, 0.0, 0.0));
 
-		p_engine.rigid_body->applyImpulse(btVector3(0.0, 0.0, 1.0) * 100.0, btVector3(1.0, 0.0, 0.0));
+		//p_engine.rigid_body->applyImpulse(btVector3(0.0, 0.0, 1.0) * 100.0, btVector3(1.0, 0.0, 0.0));
 		
 		//btTriangleMesh* mesh = new btTriangleMesh();
 		//mesh->addTriangle(btVector3(0.0, -50.0, 0.0), btVector3(0.0, 50.0, 50.0), btVector3(0.0, 50.0, -50.0));
@@ -188,9 +199,14 @@ int main(void)
 		//btBvhTriangleMeshShape* plane = new btBvhTriangleMeshShape((btStridingMeshInterface*)mesh, true);
 		GroundShape* plane = new GroundShape(system.elements[3].as_body);
 		//btBoxShape* plane = new btBoxShape(btVector3(1.0, 10.0, 10.0));
-		btRigidBody* rg = new btRigidBody(0.0, nullptr, plane, btVector3(0.0, 0.0, 0.0));
+		btRigidBody* rg = new btRigidBody(10000000000.0, nullptr, plane, btVector3(0.0, 0.0, 0.0));
 		rg->setCollisionFlags(rg->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 		rg->setActivationState(DISABLE_DEACTIVATION);
+
+		rg->setRestitution(0.5);
+		rg->setFriction(0.5);
+
+		plane->setMargin(2.0);
 
 		btTransform p1 = btTransform::getIdentity();
 		p1.setOrigin(to_btVector3(system.states_now[3].pos));
@@ -208,6 +224,9 @@ int main(void)
 		const double step = 1.0 / 30.0;
 		const int max_steps = 1;
 
+		p_engine.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
+		p_capsule.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
+
 		while (!glfwWindowShouldClose(renderer.window))
 		{
 			input->update(renderer.window);
@@ -219,10 +238,6 @@ int main(void)
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
-
-
-
-
 
 
 			if (glfwGetKey(renderer.window, GLFW_KEY_Y) == GLFW_PRESS)
@@ -239,13 +254,11 @@ int main(void)
 			}
 			
 
-
-			system.update(dt, world);
-			plane->cur_offset = system.states_now[3].pos;
+			ssystem->update(dt, world, false);
 
 			double sub_steps = (double)world->stepSimulation(dt, max_steps, btScalar(step));
-			//p_engine.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
-			//p_capsule.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
+
+			plane->cur_offset = system.states_now[3].pos;
 
 			v->set_breaking_enabled(t > 0.0);
 

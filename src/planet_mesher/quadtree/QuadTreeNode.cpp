@@ -128,6 +128,28 @@ QuadTreeNode* QuadTreeNode::get_recursive(glm::dvec2 coord, size_t maxDepth)
 	}
 }
 
+QuadTreeNode* QuadTreeNode::get_recursive_simple(glm::dvec2 coord, size_t maxDepth)
+{
+	if (depth < maxDepth)
+	{
+		int result = get_quadrant(coord);
+		if (result == -1)
+		{
+			return NULL; //< Should never happen
+		}
+
+		QuadTreeQuadrant quad = (QuadTreeQuadrant)result;
+		QuadTreeNode* child = get_or_split(quad);
+
+		return child->get_recursive_simple(coord, maxDepth);
+
+	}
+	else
+	{
+		return this;
+	}
+}
+
 glm::dvec2 QuadTreeNode::get_center()
 {
 	return glm::dvec2(min_point.x + size / 2.0, min_point.y + size / 2.0);
@@ -647,7 +669,7 @@ bool QuadTreeNode::touches_any_edge()
 
 #include "../mesher/PlanetTileServer.h"
 
-void QuadTreeNode::draw_gui(int SCL, PlanetTileServer& server)
+void QuadTreeNode::draw_gui(int SCL, PlanetTileServer* server)
 {
 	ImDrawList* drawList = ImGui::GetWindowDrawList();
 	ImVec2 min = ImGui::GetItemRectMin();
@@ -671,15 +693,18 @@ void QuadTreeNode::draw_gui(int SCL, PlanetTileServer& server)
 	}
 	else
 	{
-		PlanetTilePath path = PlanetTilePath(get_path(), planetside);
-
+		if (server)
 		{
-			auto server_tiles = server.tiles.try_get();
+			PlanetTilePath path = PlanetTilePath(get_path(), planetside);
 
-			if (!server_tiles.is_null() && server_tiles->find(path) != server_tiles->end())
 			{
-				// Shade if we are built
-				drawList->AddLine(tl, br, ImColor(0.5f, 0.5f, 0.5f), 1.0f);
+				auto server_tiles = server->tiles.try_get();
+
+				if (!server_tiles.is_null() && server_tiles->find(path) != server_tiles->end())
+				{
+					// Shade if we are built
+					drawList->AddLine(tl, br, ImColor(0.5f, 0.5f, 0.5f), 1.0f);
+				}
 			}
 		}
 	}

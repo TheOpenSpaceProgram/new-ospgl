@@ -305,7 +305,7 @@ void PlanetEditor::do_planet_window()
 
 		if (ImGui::CollapsingHeader("Quadtree", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			renderer.rocky->qtree.do_imgui(*renderer.rocky->server);
+			renderer.rocky->qtree.do_imgui(renderer.rocky->server);
 		}
 
 		if (ImGui::CollapsingHeader("Tile Server"))

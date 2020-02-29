@@ -1,6 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
 #pragma warning(push, 0)
+#include <LinearMath/btQuaternion.h>
+#include <LinearMath/btTransform.h>
 #include <LinearMath/btVector3.h>
 #include <glm/gtx/quaternion.hpp>
 #pragma warning(pop)

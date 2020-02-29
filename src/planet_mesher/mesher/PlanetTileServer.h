@@ -7,13 +7,15 @@
 #include <thread>
 #include <FastNoise/FastNoise.h>
 
+#include "../../util/LuaUtil.h"
+#include "../../lua/LuaCore.h"
 #include "../../universe/element/body/config/PlanetConfig.h"
 #include "PlanetTilePath.h"
 #include "PlanetTile.h"
 #include "../quadtree/QuadTreePlanet.h"
 #include "../../util/ThreadUtil.h"
 
-#include "../../lua/LuaCore.h"
+
 
 
 
@@ -40,8 +42,6 @@ private:
 	std::array<PlanetTileThread, WORKER_THREAD_COUNT> threads;
 
 	static void thread_func(PlanetTileServer* server, PlanetTileThread* thread);
-
-	void prepare_lua(sol::state& lua_state);
 
 	// Loads default values for the different libraries
 	void default_lua(sol::state& lua_state);

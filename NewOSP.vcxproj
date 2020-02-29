@@ -239,6 +239,7 @@
     <ClInclude Include="src\physics\ground\GroundShapeServer.h" />
     <ClInclude Include="src\physics\ground\GroundShape.h" />
     <ClInclude Include="src\renderer\lighting\LightingUniforms.h" />
+    <ClInclude Include="src\util\LuaUtil.h" />
     <ClInclude Include="src\vehicle\part\link\SimpleLink.h" />
     <ClInclude Include="src\assets\PartPrototype.h" />
     <ClInclude Include="src\tools\part_viewer\PartViewer.h" />

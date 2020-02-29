@@ -28,7 +28,7 @@ private:
 
 	void update_render_body_rocky(PlanetaryBody* body, glm::dvec3 body_pos, glm::dvec3 camera_pos, double t);
 
-	void update_physics(double dt);
+	void update_physics(double dt, bool bullet);
 	void init_physics(btDynamicsWorld* world);
 
 	std::vector<glm::dvec3> pts;
@@ -38,8 +38,15 @@ public:
 	std::unordered_map<std::string, size_t> name_to_index;
 	
 	StateVector states_now;
+	// Updates with bullet physics dt instead of normal dt
+	// TODO: Maybe the visual and physics states could
+	// simply be this interpolated to save some CPU cycles
+	// as planets don't really change direction much in the 
+	// span of a few milliseconds
+	StateVector bullet_states;
 
 	double t, timewarp;
+	double bt;
 
 	// Guaranteed to be ordered so that the last planets to appear
 	// are moons, or moons of moons (etc...)
@@ -73,7 +80,7 @@ public:
 	void render(int width, int height, CameraUniforms& cu);
 	void render_debug(int width, int height, CameraUniforms& cu);
 
-	void update(double dt, btDynamicsWorld* world);
+	void update(double dt, btDynamicsWorld* world, bool bullet);
 
 	void init(btDynamicsWorld* world);
 

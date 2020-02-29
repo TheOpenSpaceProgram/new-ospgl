@@ -2,11 +2,17 @@
 #include "../../util/Logger.h"
 #include "../../assets/AssetManager.h"
 
+#include <imgui/imgui.h>
+
 void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, 
 	glm::dmat4 wmodel, glm::dmat4 normal_matrix, glm::dmat4 rot_tform,
 	float far_plane, glm::dvec3 camera_pos,
 	PlanetConfig& config, double time, glm::vec3 light_dir)
 {
+	/*ImGui::Begin("Planet Surface", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+	planet.do_imgui(nullptr);
+	ImGui::End();*/
+
 	auto render_tiles = planet.get_all_render_leaf_paths();
 
 	// Renderer really needs the tiles so some tiny
@@ -170,39 +176,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 void PlanetRenderer::generate_and_upload_index_buffer()
 {
-	for (size_t i = 0; i < indices.size(); i++)
-	{
-		indices[i] = 65535;
-	}
-
-	// Bulk indices
-	for (size_t y = 0; y < PlanetTile::TILE_SIZE - 1; y++)
-	{
-		for (size_t x = 0; x < PlanetTile::TILE_SIZE - 1; x++)
-		{
-			uint16_t vi = (uint16_t)(y * PlanetTile::TILE_SIZE + x);
-			size_t i = (y * (PlanetTile::TILE_SIZE - 1) + x) * 6;
-
-			// Right
-			indices[i + 0] = vi + 1;
-			// Center
-			indices[i + 1] = vi;
-			// Bottom
-			indices[i + 2] = vi + PlanetTile::TILE_SIZE;
-
-
-			// Bottom Right
-			indices[i + 0 + 3] = vi + 1 + PlanetTile::TILE_SIZE;
-			// Right
-			indices[i + 1 + 3] = vi + 1;
-			// Bottom
-			indices[i + 2 + 3] = vi + PlanetTile::TILE_SIZE;
-
-		}
-	}
-
-
-	bulk_index_count = (PlanetTile::TILE_SIZE - 1) * (PlanetTile::TILE_SIZE - 1) * 6;
+	PlanetTile::generate_index_array_with_skirts(indices, bulk_index_count);
 
 	std::array<glm::vec2, PlanetTile::TILE_SIZE * PlanetTile::TILE_SIZE> uvs;
 
@@ -220,43 +194,6 @@ void PlanetRenderer::generate_and_upload_index_buffer()
 		}
 	}
 
-	// Now skirt indices
-	size_t skirt_ptr = (PlanetTile::TILE_SIZE - 1) * (PlanetTile::TILE_SIZE - 1);
-	size_t skirt_off = PlanetTile::TILE_SIZE * PlanetTile::TILE_SIZE;
-	size_t skirt_offset = (PlanetTile::TILE_SIZE - 1) * 3;
-	// Up skirt
-	for (size_t x = 0; x < PlanetTile::TILE_SIZE - 1; x++)
-	{
-		indices[skirt_ptr * 6 + 0 + x * 3 + skirt_offset * 0] = (uint16_t)(0 * PlanetTile::TILE_SIZE + x);
-		indices[skirt_ptr * 6 + 1 + x * 3 + skirt_offset * 0] = (uint16_t)(0 * PlanetTile::TILE_SIZE + x + 1);
-		indices[skirt_ptr * 6 + 2 + x * 3 + skirt_offset * 0] = (uint16_t)(skirt_off);
-	}
-
-	// Down skirt
-	for (size_t x = 0; x < PlanetTile::TILE_SIZE - 1; x++)
-	{
-		indices[skirt_ptr * 6 + 0 + x * 3 + skirt_offset * 1] = (uint16_t)((PlanetTile::TILE_SIZE - 1) * PlanetTile::TILE_SIZE + x + 1);
-		indices[skirt_ptr * 6 + 1 + x * 3 + skirt_offset * 1] = (uint16_t)((PlanetTile::TILE_SIZE - 1) * PlanetTile::TILE_SIZE + x);
-		indices[skirt_ptr * 6 + 2 + x * 3 + skirt_offset * 1] = (uint16_t)(skirt_off + 1);
-	}
-
-	// Left skirt
-	for (size_t y = 0; y < PlanetTile::TILE_SIZE - 1; y++)
-	{
-		indices[skirt_ptr * 6 + 0 + y * 3 + skirt_offset * 2] = (uint16_t)((y + 1) * PlanetTile::TILE_SIZE + 0);
-		indices[skirt_ptr * 6 + 1 + y * 3 + skirt_offset * 2] = (uint16_t)(y * PlanetTile::TILE_SIZE + 0);
-		indices[skirt_ptr * 6 + 2 + y * 3 + skirt_offset * 2] = (uint16_t)(skirt_off + 2);
-	}
-
-	// Right skirt
-	for (size_t y = 0; y < PlanetTile::TILE_SIZE - 1; y++)
-	{
-
-		indices[skirt_ptr * 6 + 0 + y * 3 + skirt_offset * 3] = (uint16_t)(y * PlanetTile::TILE_SIZE + (PlanetTile::TILE_SIZE - 1));
-		indices[skirt_ptr * 6 + 1 + y * 3 + skirt_offset * 3] = (uint16_t)((y + 1) * PlanetTile::TILE_SIZE + (PlanetTile::TILE_SIZE - 1));
-		indices[skirt_ptr * 6 + 2 + y * 3 + skirt_offset * 3] = (uint16_t)(skirt_off + 3);
-	}
-	
 	glGenVertexArrays(1, &vao);
 	glGenVertexArrays(1, &water_vao);
 	glGenBuffers(1, &uv_bo);

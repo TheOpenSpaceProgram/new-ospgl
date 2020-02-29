@@ -7,4 +7,4 @@ description = "Crew goes in and hopefully out later in the mission"
 
 
 [p_root]
-	mass = 100.0
+	mass = 400.0
