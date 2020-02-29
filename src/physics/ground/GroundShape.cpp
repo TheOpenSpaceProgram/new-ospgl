@@ -12,6 +12,8 @@ void GroundShape::getAabb(const btTransform& t, btVector3& aabbMin, btVector3& a
 	aabbMax = trans + size;
 }
 
+#include <imgui/imgui.h>
+
 void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVector3& aabb_b₀, const btVector3& aabb_b₁) const
 {
 	btVector3 debug_b₀(btScalar(-BT_LARGE_FLOAT), btScalar(-BT_LARGE_FLOAT), btScalar(-BT_LARGE_FLOAT));
@@ -20,7 +22,17 @@ void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVect
 
 	if (aabb_b₀ == debug_b₀ && aabb_b₁ == debug_b₁)
 	{
-		// Debug pass, ignore or just draw a rough overview of the whole planet (TODO)
+		// We draw all loaded tiles
+		for (auto it = server->cache.begin(); it != server->cache.end(); it++)
+		{
+			btVector3* verts = it->second->verts;
+
+			// Return the triangles
+			for (size_t i = 0; i < PlanetTile::PHYSICS_INDEX_COUNT; i += 3)
+			{
+				callback->processTriangle(&verts[i], (int)0, (int)(i / 3));
+			}
+		}
 	}
 	else
 	{
@@ -49,9 +61,22 @@ void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVect
 		// We create a new quad tree every time, perfomance is not that bad
 		QuadTreePlanet quad_tree = QuadTreePlanet();
 
+
 		glm::dvec3 normalized[8];
 
-		size_t wanted_depth = 10;
+		size_t wanted_depth = body->config.surface.max_depth + PlanetTile::PHYSICS_GRAPHICS_RELATION;
+
+		glm::dvec3 rel = glm::normalize(aabb_box[0]);
+
+		// We now subdivide the quadtree down to a given depth using the
+		// 3D points, and generate the edge triangles of every leaf node
+		// of the wanted depth
+		// Maybe we should do a line check or something like that
+		// or a volume check to make sure the whole AABB gets high detail
+		// BUT unless vehicles are totally massive this should
+		// not really matter much
+		// TODO: If we implement massive vehicles, write that code :P
+
 
 		for (size_t i = 0; i < 8; i++)
 		{
@@ -63,14 +88,10 @@ void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVect
 			quad_tree.subdivide_to(off, side, wanted_depth);
 		}
 
-		// We now subdivide the quadtree down to a given depth using the
-		// 3D points, and generate the edge triangles of every leaf node
-		// of the wanted depth
-		// Maybe we should do a line check or something like that
-		// or a volume check to make sure the whole AABB gets high detail
-		// BUT unless vehicles are totally massive this should
-		// not really matter much
-		// TODO: If we implement massive vehicles, write that code :P
+		/*ImGui::Begin("Lel", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+		quad_tree.do_imgui(nullptr);
+		ImGui::End();*/
+
 
 		auto leafs = quad_tree.get_all_leafs();
 		for (QuadTreeNode* leaf : leafs)
@@ -79,10 +100,13 @@ void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVect
 			// matter for physics
 			if (leaf->depth == wanted_depth)
 			{
-				GroundTriangles* triangles = server->query(leaf);
+				btVector3* verts = server->query(leaf, 1.0);
 
 				// Return the triangles
-				
+				for (size_t i = 0; i < PlanetTile::PHYSICS_INDEX_COUNT; i+=3)
+				{
+					callback->processTriangle(&verts[i], (int)0, (int)(i / 3));
+				}
 			}
 		}
 		
@@ -97,7 +121,7 @@ GroundShape::GroundShape(PlanetaryBody* body)
 	// and crashes with some weird errors, this works flawlessly
 	m_shapeType = TRIANGLE_MESH_SHAPE_PROXYTYPE;
 
-	server = new GroundShapeServer();
+	server = new GroundShapeServer(body);
 }
 
 

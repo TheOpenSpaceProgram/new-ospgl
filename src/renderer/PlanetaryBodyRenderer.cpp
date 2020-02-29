@@ -7,6 +7,7 @@ void PlanetaryBodyRenderer::render(glm::dmat4 proj_view, glm::dmat4 model, glm::
 	double far_plane, glm::dvec3 camera_pos, 
 	PlanetConfig & config, double time, glm::vec3 light_dir, float dot_factor)
 {
+
 	if (atmo != nullptr)
 	{
 		glm::dmat4 amodel = glm::translate(glm::dmat4(1.0f), -camera_pos);

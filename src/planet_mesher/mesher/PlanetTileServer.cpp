@@ -99,21 +99,7 @@ void PlanetTileServer::set_depth_for_unload(int depth)
 	depth_for_unload = depth;
 }
 
-void safe_lua(sol::state& state, const std::string& script, bool& wrote_error, const std::string& script_path)
-{
-	state.safe_script(script, [&wrote_error](lua_State*, sol::protected_function_result pfr)
-	{
 
-		if (!wrote_error)
-		{
-			sol::error err = pfr;
-			logger->error("Lua Error:\n{}", err.what());
-			wrote_error = true;
-		}
-
-		return pfr;
-	}, script_path);
-}
 
 double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
 {
@@ -157,16 +143,16 @@ PlanetTileServer::PlanetTileServer(const std::string& script, const std::string&
 
 	bool wrote_error = false;
 
-	prepare_lua(lua_state);
-	safe_lua(lua_state, script, wrote_error, script_path);
+	PlanetTile::prepare_lua(lua_state);
+	LuaUtil::safe_lua(lua_state, script, wrote_error, script_path);
 
 	for (size_t i = 0; i < threads.size(); i++)
 	{
 
 		threads[i].thread = new std::thread(thread_func, this, &threads[i]);
-		prepare_lua(threads[i].lua_state);
+		PlanetTile::prepare_lua(threads[i].lua_state);
 		
-		safe_lua(threads[i].lua_state, script, wrote_error, script_path);
+		LuaUtil::safe_lua(threads[i].lua_state, script, wrote_error, script_path);
 
 		if (wrote_error)
 		{
@@ -271,23 +257,6 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 	}
 
 	delete work_array;
-}
-
-void PlanetTileServer::prepare_lua(sol::state& lua_state)
-{
-	lua_core->load(lua_state, assets->get_current_package());
-
-
-	// We must define the little utility struct GeneratorInfo
-	lua_state.new_usertype<PlanetTile::GeneratorInfo>("generator_info",
-		"coord_3d", &PlanetTile::GeneratorInfo::coord_3d,
-		"coord_2d", &PlanetTile::GeneratorInfo::coord_2d,
-		"radius", &PlanetTile::GeneratorInfo::radius,
-		"depth", &PlanetTile::GeneratorInfo::depth);
-
-	lua_state.new_usertype<PlanetTile::GeneratorOut>("generator_out",
-		"height", &PlanetTile::GeneratorOut::height,
-		"color", &PlanetTile::GeneratorOut::color);
 }
 
 void PlanetTileServer::default_lua(sol::state& lua_state)

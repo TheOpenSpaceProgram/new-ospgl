@@ -232,67 +232,98 @@ void PlanetarySystem::render_debug(int width, int height, CameraUniforms& camera
 static double pt;
 static int factor;
 
-void PlanetarySystem::update_physics(double dt)
+void PlanetarySystem::update_physics(double dt, bool bullet)
 {
-	compute_states(t + dt * timewarp, states_now, 1e-6);
-
-
-	// TODO: Fix this mess
-	//int factor = 10000;
-	double sub_dt = dt * factor;
-	if (timewarp < factor)
+	StateVector* v;
+	double tnow;
+	if (bullet)
 	{
-		sub_dt = dt * timewarp;
+		tnow = bt;
+		v = &bullet_states;
+	}
+	else
+	{
+		tnow = t;
+		v = &states_now;
 	}
 
-	bool prev_debug = debug_drawer->debug_enabled;
+	compute_states(tnow + dt * timewarp, *v, 1e-6);
 
-	int it = 0;
-	for (double sub_t = t; sub_t < t + dt * timewarp; sub_t += sub_dt)
+
+	if (!bullet)
 	{
-		// We only draw debug at sub_t = 0
-		if (it != 0)
+		// TODO: Fix this mess
+		//int factor = 10000;
+		/*double sub_dt = dt * factor;
+		if (timewarp < factor)
 		{
-			debug_drawer->debug_enabled = false;
+			sub_dt = dt * timewarp;
 		}
 
-		// Propagate vessels
-		//propagator->prepare(sub_t, sub_dt, physics_pos);
-		//size_t closest = propagator->propagate(&vessels[0]);
+		bool prev_debug = debug_drawer->debug_enabled;
 
-		//vessels[0].simulate(elements, physics_pos, closest, sub_dt);
-		
+		int it = 0;
+		for (double sub_t = t; sub_t < t + dt * timewarp; sub_t += sub_dt)
+		{
+			// We only draw debug at sub_t = 0
+			if (it != 0)
+			{
+				debug_drawer->debug_enabled = false;
+			}
 
-		it++;
+			// Propagate vessels
+			//propagator->prepare(sub_t, sub_dt, physics_pos);
+			//size_t closest = propagator->propagate(&vessels[0]);
+
+			//vessels[0].simulate(elements, physics_pos, closest, sub_dt);
+
+
+			it++;
+		}
+
+		debug_drawer->debug_enabled = prev_debug;
+
+		pt -= dt * timewarp;
+
+
+		glm::dvec3 pp;
+
+
+
+		//vessels[0].draw_debug();
+		*/
 	}
 
-	debug_drawer->debug_enabled = prev_debug;
-
-	pt -= dt * timewarp;
-
-
-	glm::dvec3 pp;
-
-
-
-	//vessels[0].draw_debug();
-
-
-	t += dt * timewarp;
+	if (bullet)
+	{
+		bt += dt * timewarp;
+	}
+	else
+	{ 
+		t += dt * timewarp;
+	}
+	
 }
 
 void PlanetarySystem::init_physics(btDynamicsWorld* world)
 {
-	pt = 0.0;
+	bt = t;
+
+	pt = 0;
 	factor = 1000;
 
 }
 
 
-void PlanetarySystem::update(double dt, btDynamicsWorld* world)
+void PlanetarySystem::update(double dt, btDynamicsWorld* world, bool bullet)
 {
 	// Wooooops:
 	//dt = 0.01;
+
+	if (bullet_states.size() == 0)
+	{
+		bullet_states.resize(elements.size());
+	}
 
 	if (states_now.size() == 0)
 	{
@@ -300,7 +331,7 @@ void PlanetarySystem::update(double dt, btDynamicsWorld* world)
 		states_now.resize(elements.size());
 	}
 
-	update_physics(dt);
+	update_physics(dt, bullet);
 	
 }
 

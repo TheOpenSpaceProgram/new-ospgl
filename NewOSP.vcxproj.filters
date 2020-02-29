@@ -548,6 +548,9 @@
     <ClInclude Include="src\physics\ground\GroundShapeServer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\LuaUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="output.log" />
