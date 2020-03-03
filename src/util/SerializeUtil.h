@@ -9,9 +9,13 @@
 #define DO_TOML_CHECK_ON_RELEASE
 
 #ifdef DO_TOML_CHECK_ON_RELEASE
+
 #define TOML_CHECK_FUNC logger->check_important
+
 #elif
+
 #define TOML_CHECK_FUNC logger->check
+
 #endif
 
 // IMPORTANT:
