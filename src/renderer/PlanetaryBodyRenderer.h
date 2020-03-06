@@ -11,8 +11,8 @@ struct RockyPlanetRenderer
 	PlanetTileServer* server;
 	PlanetRenderer renderer;
 
-	void load(std::string script, PlanetConfig& config);
-
+	void load(const std::string& script, const std::string& script_path, PlanetConfig& config);
+	
 	RockyPlanetRenderer()
 	{
 		server = nullptr;

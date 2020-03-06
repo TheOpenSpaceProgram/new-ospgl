@@ -97,7 +97,7 @@ private:
 	std::unordered_map<std::string, Package> packages;
 
 	template<typename T>
-	void load(const std::string& package, const std::string& name);
+	bool load(const std::string& package, const std::string& name);
 
 	std::string current_package;
 
@@ -117,9 +117,14 @@ public:
 	void create_asset_type(const std::string& name, LoadAssetPtr<T> loadPtr, bool preload = false, const std::string& regex = "");
 
 	// If you use this manually make sure you free the asset if it's a heavy-weight resource
+	// It crashes if the asset does not exist (or it could not be loaded)
 	template<typename T>
 	T* get(const std::string& package, const std::string& name, bool use = true);
-	
+
+	// Same as get but returns nullptr if asset could not be loaded
+	template<typename T>
+	T* get_or_null(const std::string& package, const std::string name, bool use = true);
+
 	// Frees a single use from an asset
 	template<typename T>
 	void free(const std::string& package, const std::string& name);
@@ -138,9 +143,6 @@ public:
 	// "set_current_package". This is done to make asset loading code simpler
 	template<typename T>
 	T* get_from_path(const std::string& full_path, const std::string& def = "");
-
-	template<typename T>
-	AssetHandle<T> get_handle_from_path(const std::string& full_path, bool load_now = true, const std::string& def = "");
 
 	std::string resolve_path(const std::string& full_path, const std::string& def = "");
 
@@ -163,7 +165,11 @@ inline void AssetManager::create_asset_type(const std::string& name, LoadAssetPt
 {
 	AssetTypeData tdata;
 	tdata.name = name;
+<<<<<<< HEAD
 	tdata.loadPtr = reinterpret_cast<void*>(loadPtr);
+=======
+	tdata.loadPtr = (void*)loadPtr;
+>>>>>>> master
 
 	for (auto it = packages.begin(); it != packages.end(); it++)
 	{
@@ -186,7 +192,38 @@ inline T* AssetManager::get(const std::string& package, const std::string& name,
 
 	if (item == it->second.second.end())
 	{
-		load<T>(package, name);
+		bool result = load<T>(package, name);
+		logger->check(result, "Could not load asset");
+		item = it->second.second.find(name);
+	}
+
+	if (use)
+	{
+		item->second.uses++;
+	}
+	return (T*)(item->second.data);
+}
+
+template<typename T>
+inline T * AssetManager::get_or_null(const std::string & package, const std::string name, bool use)
+{
+	auto pkg = packages.find(package);
+	logger->check(pkg != packages.end(), "Invalid package given");
+
+	auto assets = &pkg->second.assets;
+
+	auto it = assets->find(typeid(T));
+	logger->check(it != assets->end(), "Invalid type given");
+
+	auto item = it->second.second.find(name);
+
+	if (item == it->second.second.end())
+	{
+		bool result = load<T>(package, name);
+		if (!result)
+		{
+			return nullptr;
+		}
 		item = it->second.second.find(name);
 	}
 
@@ -229,7 +266,7 @@ inline T* AssetManager::get_from_path(const std::string& full_path, const std::s
 
 
 template<typename T>
-inline void AssetManager::load(const std::string& package, const std::string& name)
+inline bool AssetManager::load(const std::string& package, const std::string& name)
 {
 	auto pkg = packages.find(package);
 	logger->check(pkg != packages.end(), "Invalid package given");
@@ -282,10 +319,17 @@ inline void AssetManager::load(const std::string& package, const std::string& na
 	
 
 	std::string old_pkg = get_current_package();
+	
+	logger->check_important(file_exists(full_path), "Asset file must exist");
+
 	set_current_package(package);
 	T* ndata = fptr(full_path, name, package, *cfg);
-	logger->check(ndata != nullptr, "Loaded data must not be null");
 	set_current_package(old_pkg);
+
+	if (ndata == nullptr)
+	{
+		return false;
+	}
 
 	Asset asset;
 	asset.uses = 0;
@@ -296,6 +340,8 @@ inline void AssetManager::load(const std::string& package, const std::string& na
 	it->second.second[name] = asset;
 	 
 	logger->debug("Loaded asset '{}:{}'", package, name);
+
+	return true;
 }	
 
 extern AssetManager* assets;
@@ -365,8 +411,24 @@ public:
 	}
 
 	// Set load_now to false to avoid loading the asset just as the handle is created
-	AssetHandle(std::string pkg, std::string name, bool load_now = true)
+	AssetHandle(const std::string& pkg, const std::string& name, bool load_now = true)
 	{
+		this->pkg = pkg;
+		this->name = name;
+
+		if (load_now)
+		{
+			data = assets->get<T>(pkg, name);
+		}
+		else
+		{
+			data = nullptr;
+		}
+	}
+
+	AssetHandle(const std::string& path, bool load_now = true)
+	{
+		auto[pkg, name] = assets->get_package_and_name(path, assets->get_current_package());
 		this->pkg = pkg;
 		this->name = name;
 
@@ -405,9 +467,33 @@ public:
 		b.name = "null";
 	}
 
+	AssetHandle<T>& operator=(AssetHandle<T>&& other)
+	{
+		this->pkg = other.pkg;
+		this->name = other.name;
+		this->data = other.data;
+
+		other.data = nullptr;
+		other.pkg = "null";
+		other.name = "null";
+
+		return *this;
+	}
+
+	// Returns a new AssetHandle, keeping this one valid
+	AssetHandle<T> duplicate() const
+	{
+		return AssetHandle<T>(pkg, name);
+	}
+
 	~AssetHandle()
 	{
 		unload();
+	}
+
+	bool is_null()
+	{
+		return data == nullptr;
 	}
 
 	T* operator->()
@@ -419,14 +505,6 @@ public:
 	{
 		return *get();
 	}
+
 };
 
-template<typename T>
-inline AssetHandle<T> AssetManager::get_handle_from_path(const std::string & full_path, bool load_now, const std::string & def)
-{
-	std::string ddef = def == "" ? current_package : def;
-
-	auto[pkg, name] = get_package_and_name(full_path, ddef);
-
-	return AssetHandle<T>(pkg, name, load_now);
-}

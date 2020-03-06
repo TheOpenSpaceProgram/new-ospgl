@@ -37,7 +37,7 @@ vec2 get_projected_uv(vec3 p)
 
 void main()
 {
-    gl_Position = tform * vec4(aPos, 1.0);
+    gl_Position = tform * vec4(aPos, 1.0f);
 	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * f_coef - 1.0;
 	flogz = 1.0 + gl_Position.w;
 

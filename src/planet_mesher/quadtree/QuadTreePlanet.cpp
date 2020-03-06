@@ -275,6 +275,11 @@ void QuadTreePlanet::update(PlanetTileServer& server)
 	}
 }
 
+QuadTreeNode* QuadTreePlanet::subdivide_to(glm::dvec2 offset, PlanetSide side, size_t depth)
+{
+	return sides[side].get_recursive_simple(offset, depth);
+}
+
 QuadTreePlanet::QuadTreePlanet()
 {
 	iteration = 0;
@@ -374,7 +379,7 @@ QuadTreePlanet::~QuadTreePlanet()
 
 
 
-void QuadTreePlanet::do_imgui(PlanetTileServer& server)
+void QuadTreePlanet::do_imgui(PlanetTileServer* server)
 {
 	ImGui::Text("X (P/N)");
 
@@ -442,3 +447,4 @@ void QuadTreePlanet::do_imgui(PlanetTileServer& server)
 	ImGui::Text("Wanted Depth: %i", wanted_depth);
 
 }
+

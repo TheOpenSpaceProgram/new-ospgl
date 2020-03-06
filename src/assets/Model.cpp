@@ -3,12 +3,39 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
+#include <glm/gtx/quaternion.hpp>
 
 void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool drawable_parent)
 {
 	Node* n_node = new Node();
 
+	aiMetadata* m = node->mMetaData;
+	// Extract all properties:
+	if (m)
+	{
+		for (size_t i = 0; i < m->mNumProperties; i++)
+		{
+			std::string key = std::string(m->mKeys[i].C_Str());
+			aiMetadataEntry entry = m->mValues[i];
+
+			// TODO: Maybe handle other property types, we don't need them yet!
+			if (entry.mType == 5)
+			{
+				std::string cont = std::string(((aiString*)(entry.mData))->C_Str());
+				n_node->properties[key] = cont;
+			}
+		}
+	}
+
+	aiVector3D scaling, pos;
+	aiQuaternion rot;
+	node->mTransformation.Decompose(scaling, rot, pos);
+
+	n_node->sub_transform = glm::dmat4(1.0);
+	n_node->sub_transform = glm::translate(n_node->sub_transform, glm::dvec3(pos.x, pos.y, pos.z));
+	n_node->sub_transform = glm::scale(n_node->sub_transform, glm::dvec3(scaling.x, scaling.y, scaling.z));
+	n_node->sub_transform = n_node->sub_transform * glm::toMat4(glm::dquat(rot.w, rot.x, rot.y, rot.z));
+	
 	n_node->name = node->mName.C_Str();
 
 	logger->check(node_by_name.find(n_node->name) == node_by_name.end(), "We don't support non-unique node names");
@@ -17,7 +44,7 @@ void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool draw
 
 	bool drawable = drawable_parent;
 
-	if (n_node->name.rfind("col_", 0) == 0) 
+	if (n_node->name.rfind(Model::COLLIDER_PREFIX, 0) == 0) 
 	{
 		drawable = false;
 	}
@@ -48,10 +75,26 @@ void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool draw
 
 }
 
+void replace_all(std::string& data, const std::string& search, const std::string& replace)
+{
+	// Get the first occurrence
+	size_t pos = data.find(search);
+
+	// Repeat till end is reached
+	while (pos != std::string::npos)
+	{
+		// Replace this occurrence of Sub String
+		data.replace(pos, search.size(), replace);
+		// Get the next occurrence from the current position
+		pos = data.find(search, pos + replace.size());
+	}
+}
+
 void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool drawable)
 {
+	
 	aiMaterial* ai_mat = scene->mMaterials[mesh->mMaterialIndex];
-
+	
 	AssetPointer mat_ptr;
 
 	std::string ai_mat_name = ai_mat->GetName().C_Str();
@@ -64,30 +107,75 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool draw
 	}
 	else
 	{
-		// TODO: Default material
 		mat_ptr = AssetPointer("core:mat_default.toml");
 	}
 
+	
 	AssetHandle<Material> mat = AssetHandle<Material>(mat_ptr);
 
 
 	to->meshes.push_back(Mesh(std::move(mat)));
 	Mesh* m = &to->meshes[to->meshes.size() - 1];
+	m->drawable = drawable;
+
+	// Load Assimp textures
+	for (int type = 0; type < (int)aiTextureType::aiTextureType_UNKNOWN; type++)
+	{
+		aiTextureType type_t = (aiTextureType)type;
+		unsigned int count = ai_mat->GetTextureCount(type_t);
+
+		// TODO: Handle multiple textures of the same type
+		if (count > 1)
+		{
+			logger->warn("Multiple textures of the same type are not yet supported.");
+		}
+		else if (count == 1)
+		{
+			aiString path;
+			// TODO: Maybe handle other texture parameters? Atleast pass them to the shaders
+			ai_mat->GetTexture(type_t, 0, &path);
+
+			std::string path_s = std::string(path.C_Str());
+			// Sanitize the path
+			replace_all(path_s, "\\", "/");
+			// We find 'res/', after it is the package name, and then the name, pretty easy
+			size_t pos = path_s.find("res/");
+			if (pos == std::string::npos)
+			{
+				logger->warn("Invalid path '{}' given in texture, ignoring!", path_s);
+			}
+			else
+			{
+				std::string sub_path = path_s.substr(pos + 4); //< +4 skips the res/
+				size_t first_dash = sub_path.find_first_of('/');
+				if (first_dash == std::string::npos)
+				{
+					logger->warn("Invalid path '{}' given in texture, ignoring!", path_s);
+				}
+				else
+				{
+					std::string pkg = sub_path.substr(0, first_dash);
+					std::string name = sub_path.substr(first_dash + 1);
+
+					AssimpTexture assimp_tex;
+					assimp_tex.first = type_t;
+					assimp_tex.second = std::move(AssetHandle<Image>(pkg, name, false));
+
+					// Load the texture
+					m->textures.push_back(assimp_tex);
+				}
+			}
+		}
+
+	}
+
 
 	MeshConfig& config = m->material->cfg;
 
 	size_t vert_size = config.get_vertex_size();
 	size_t floats_per_vert = config.get_vertex_floats();
 
-	// Work directly in the vector
-	m->data = (float*)malloc(vert_size * mesh->mNumVertices);
 	m->indices = (uint32_t*)malloc(sizeof(uint32_t) * mesh->mNumFaces * 3);
-
-	m->data_size = vert_size * mesh->mNumVertices;
-
-	bool log_once_tangents = false;
-	bool log_once_colors = false;
-
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
 		aiFace face = mesh->mFaces[i];
@@ -95,130 +183,153 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool draw
 		m->indices[i * 3 + 1] = face.mIndices[1];
 		m->indices[i * 3 + 2] = face.mIndices[2];
 	}
-
 	m->index_count = mesh->mNumFaces * 3;
 
-	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+
+	if (drawable)
 	{
-		size_t i0 = i * floats_per_vert;
-		constexpr size_t o = 1; //< 1 Because we index using floats, could be removed ;)
-		size_t j = 0;
 
-		if (config.has_pos)
-		{
-			m->data[i0 + j * o] = mesh->mVertices[i].x; j++;
-			m->data[i0 + j * o] = mesh->mVertices[i].y; j++;
-			m->data[i0 + j * o] = mesh->mVertices[i].z; j++;
-		}
+		// Work directly in the vector
+		m->data = (float*)malloc(vert_size * mesh->mNumVertices);
+	
+		m->data_size = vert_size * mesh->mNumVertices;
 
-		if (config.has_nrm)
-		{
-			m->data[i0 + j * o] = mesh->mNormals[i].x; j++;
-			m->data[i0 + j * o] = mesh->mNormals[i].y; j++;
-			m->data[i0 + j * o] = mesh->mNormals[i].z; j++;
-		}
+		bool log_once_tangents = false;
+		bool log_once_colors = false;
 
-		if (config.has_tex)
+		
+
+	
+		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
-			if (mesh->mTextureCoords[0])
+			size_t i0 = i * floats_per_vert;
+			constexpr size_t o = 1; //< 1 Because we index using floats, could be removed ;)
+			size_t j = 0;
+
+			if (config.has_pos)
 			{
-				glm::vec2 uv;
-				uv.x = mesh->mTextureCoords[0][i].x;
-				uv.y = mesh->mTextureCoords[0][i].y;
+				m->data[i0 + j * o] = mesh->mVertices[i].x; j++;
+				m->data[i0 + j * o] = mesh->mVertices[i].y; j++;
+				m->data[i0 + j * o] = mesh->mVertices[i].z; j++;
+			}
 
-				if (config.flip_uv)
+			if (config.has_nrm)
+			{
+				m->data[i0 + j * o] = mesh->mNormals[i].x; j++;
+				m->data[i0 + j * o] = mesh->mNormals[i].y; j++;
+				m->data[i0 + j * o] = mesh->mNormals[i].z; j++;
+			}
+
+			if (config.has_tex)
+			{
+				if (mesh->mTextureCoords[0])
 				{
-					uv.y = 1.0f - uv.y;
+					glm::vec2 uv;
+					uv.x = mesh->mTextureCoords[0][i].x;
+					uv.y = mesh->mTextureCoords[0][i].y;
+
+					if (config.flip_uv)
+					{
+						uv.y = 1.0f - uv.y;
+					}
+
+					// We only support one UV map
+					m->data[i0 + j * o] = uv.x; j++;
+					m->data[i0 + j * o] = uv.y; j++;
+				}
+				else
+				{
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
 				}
 
-				// We only support one UV map
-				m->data[i0 + j * o] = uv.x; j++;
-				m->data[i0 + j * o] = uv.y; j++;
-			}
-			else
-			{
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
+
+
 			}
 
-			
-			
-		}
-
-		if (config.has_tgt)
-		{
-			if (mesh->mTangents)
+			if (config.has_tgt)
 			{
-				m->data[i0 + j * o] = mesh->mTangents[i].x; j++;
-				m->data[i0 + j * o] = mesh->mTangents[i].y; j++;
-				m->data[i0 + j * o] = mesh->mTangents[i].z; j++;
-				m->data[i0 + j * o] = mesh->mBitangents[i].x; j++;
-				m->data[i0 + j * o] = mesh->mBitangents[i].y; j++;
-				m->data[i0 + j * o] = mesh->mBitangents[i].z; j++;
-			}
-			else
-			{
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-
-				if (!log_once_tangents)
+				if (mesh->mTangents)
 				{
-					logger->warn("Could not find tangents. Make sure your model has texture coordinates and normals!");
-					log_once_tangents = true;
+					m->data[i0 + j * o] = mesh->mTangents[i].x; j++;
+					m->data[i0 + j * o] = mesh->mTangents[i].y; j++;
+					m->data[i0 + j * o] = mesh->mTangents[i].z; j++;
+					m->data[i0 + j * o] = mesh->mBitangents[i].x; j++;
+					m->data[i0 + j * o] = mesh->mBitangents[i].y; j++;
+					m->data[i0 + j * o] = mesh->mBitangents[i].z; j++;
+				}
+				else
+				{
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+
+					if (!log_once_tangents)
+					{
+						logger->warn("Could not find tangents. Make sure your model has texture coordinates and normals!");
+						log_once_tangents = true;
+					}
+				}
+
+			}
+
+			// We only support one vertex color map
+			if (config.has_cl3)
+			{
+				if (mesh->mColors[0])
+				{
+					m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
+					m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
+					m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
+				}
+				else
+				{
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+
+					if (!log_once_colors)
+					{
+						logger->warn("Could not find vertex colors. Make sure your model has them!");
+						log_once_colors = true;
+					}
 				}
 			}
-			
-		}
 
-		// We only support one vertex color map
-		if (config.has_cl3)
-		{
-			if (mesh->mColors[0])
+			if (config.has_cl4)
 			{
-				m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
-				m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
-				m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
-			}
-			else
-			{
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-
-				if (!log_once_colors)
+				if (mesh->mColors[0])
 				{
-					logger->warn("Could not find vertex colors. Make sure your model has them!");
-					log_once_colors = true;
+					m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
+					m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
+					m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
+					m->data[i0 + j * o] = mesh->mColors[0][i].a; j++;
+				}
+				else
+				{
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+					m->data[i0 + j * o] = 0.0f; j++;
+
+					if (!log_once_colors)
+					{
+						logger->warn("Could not find vertex colors. Make sure your model has them!");
+						log_once_colors = true;
+					}
 				}
 			}
 		}
-
-		if (config.has_cl4)
+	}
+	else
+	{
+		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
-			if (mesh->mColors[0])
-			{
-				m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
-				m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
-				m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
-				m->data[i0 + j * o] = mesh->mColors[0][i].a; j++;
-			}
-			else
-			{
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-				m->data[i0 + j * o] = 0.0f; j++;
-
-				if (!log_once_colors)
-				{
-					logger->warn("Could not find vertex colors. Make sure your model has them!");
-					log_once_colors = true;
-				}
-			}
+			glm::vec3 p0 = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+			m->verts.push_back(p0);
 		}
 	}
 }
@@ -339,15 +450,15 @@ void Mesh::unload()
 	}
 }
 
-void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model)
+void Mesh::bind_uniforms(const CameraUniforms& uniforms, const LightingUniforms& lu, glm::dmat4 model)
 {
 	logger->check(drawable != false, "Cannot draw a non-drawable mesh!");
 
 	// TODO
 	material->shader->use();
 
-	material->set();
-	material->set_core(uniforms, model);
+	material->set(textures);
+	material->set_core(uniforms, lu, model);
 }
 
 void Mesh::draw_command()
@@ -453,10 +564,49 @@ Node* GPUModelPointer::get_root_node()
 
 GPUModelPointer::GPUModelPointer(AssetHandle<Model>&& m) : model(std::move(m))
 {
-	model->get_gpu();
+	if (!is_null())
+	{
+		model->get_gpu();
+	}
 }
 
 GPUModelPointer::~GPUModelPointer()
 {
-	model->free_gpu();
+	if (!is_null())
+	{
+		model->free_gpu();
+	}
+}
+
+void Node::draw_all_meshes(const CameraUniforms & uniforms, const LightingUniforms& lu, glm::dmat4 model)
+{
+	for (Mesh& mesh : meshes)
+	{
+		if (mesh.is_drawable())
+		{
+			mesh.bind_uniforms(uniforms, lu, model);
+			mesh.draw_command();
+		}
+	}
+
+}
+
+void Node::draw(const CameraUniforms& uniforms, const LightingUniforms& lu, glm::dmat4 model, bool ignore_our_subtform)
+{
+	glm::dmat4 n_model;
+	if (ignore_our_subtform)
+	{
+		n_model = model;
+	}
+	else
+	{
+		n_model = sub_transform * model;
+	}
+
+	draw_all_meshes(uniforms, lu, n_model);
+
+	for (Node* node : children)
+	{
+		node->draw(uniforms, lu, n_model, false);
+	}
 }

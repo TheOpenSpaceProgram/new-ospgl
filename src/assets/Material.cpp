@@ -86,7 +86,7 @@ Uniform::~Uniform()
 	}
 }
 
-void Material::set()
+void Material::set(std::vector<AssimpTexture>& assimp_textures)
 {
 	int gl_tex = 0;
 
@@ -94,14 +94,30 @@ void Material::set()
 	{
 		it->second.set(shader, it->first, &gl_tex);
 	}
+
+	for (auto it = assimp_textures.begin(); it != assimp_textures.end(); it++)
+	{
+		aiTextureType type = it->first;
+		auto translates = assimp_texture_type_to_uniform.find(type);
+		if (translates != assimp_texture_type_to_uniform.end())
+		{
+			AssetHandle<Image>* img = &it->second;
+
+			std::string uniform = translates->second;
+
+			glActiveTexture(GL_TEXTURE0 + gl_tex);
+			glBindTexture(GL_TEXTURE_2D, img->get()->id);
+
+			shader->setInt(uniform, gl_tex);
+
+			gl_tex++;
+		}
+	}
+
 }
 
-void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
+void Material::set_core(const CameraUniforms& cu, const LightingUniforms& lu, glm::dmat4 model)
 {
-	glm::dmat4 final_model;
-
-
-	final_model = glm::translate(model, -cu.cam_pos);
 
 	if (core_uniforms.mat4_proj != "")
 	{
@@ -130,13 +146,18 @@ void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
 
 	if (core_uniforms.mat4_final_tform != "")
 	{
-		glm::dmat4 final_tform = cu.tform * final_model;
+		glm::dmat4 final_tform = cu.tform * model;
 		shader->setMat4(core_uniforms.mat4_final_tform, final_tform);
 	}
 
 	if (core_uniforms.mat4_model != "")
 	{
-		shader->setMat4(core_uniforms.mat4_model, final_model);
+		shader->setMat4(core_uniforms.mat4_model, model);
+	}
+
+	if (core_uniforms.mat3_normal_model != "")
+	{
+		shader->setMat3(core_uniforms.mat3_normal_model, glm::mat3(transpose(inverse(model))));
 	}
 
 	if (core_uniforms.float_far_plane != "")
@@ -153,6 +174,17 @@ void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
 	{
 		shader->setVec3(core_uniforms.vec3_camera_relative, cu.cam_pos);
 	}
+
+	if (core_uniforms.vec3_sunlight_dir != "")
+	{
+		// Wherever (0, 0, 0) ends up after applying "model" is our new position
+		glm::dvec3 our_pos = glm::dvec3(model * glm::dvec4(0.0, 0.0, 0.0, 1.0));
+		glm::dvec3 sunlight_dir = lu.sun_pos - our_pos;
+		sunlight_dir = glm::normalize(sunlight_dir);
+
+		shader->setVec3(core_uniforms.vec3_sunlight_dir, sunlight_dir);
+	}
+	
 
 }
 

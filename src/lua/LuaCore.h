@@ -30,6 +30,7 @@ public:
 		LOGGER,		// LuaLogger
 		GLM,		// LuaGlm
 		NOISE,		// LuaNoise
+		ASSETS,		// LuaAssets
 
 		COUNT
 	};

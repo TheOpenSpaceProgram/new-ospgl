@@ -29,6 +29,7 @@ class Vehicle
 {
 private:
 
+	bool breaking_enabled;
 
 public:
 
@@ -61,12 +62,19 @@ public:
 
 	void draw_debug();
 
-	void set_position(btVector3 pos);
-	void set_linear_velocity(btVector3 vel);
+	// The root part ends up in the given position, other parts
+	// keep their relative position
+	void set_position(glm::dvec3 pos);
+	// Relative velocities are properly kept
+	void set_linear_velocity(glm::dvec3 vel);
 
 	// Orders the all_pieces array so that parts are ordered
 	// from distance to root
 	void sort();
+
+	void set_breaking_enabled(bool value);
+
+	void render(CameraUniforms& camera_uniforms, const LightingUniforms& lu);
 
 	Vehicle(btDynamicsWorld* world);
 	~Vehicle();

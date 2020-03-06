@@ -141,13 +141,11 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 
 static double zoom = 1.0;
 
-void PlanetarySystem::render(int width, int height)
+void PlanetarySystem::render(int width, int height, CameraUniforms& camera_uniforms)
 {
-	camera_uniforms = camera.get_camera_uniforms(width, height);
-
 	float fov = glm::radians(60.0f);
 
-	auto[camera_pos, camera_dir] = camera.get_camera_pos_dir();
+	glm::dvec3 camera_pos = camera_uniforms.cam_pos;
 
 	update_render(camera_pos, fov, t);
 
@@ -220,7 +218,7 @@ void PlanetarySystem::render(int width, int height)
 
 }
 
-void PlanetarySystem::render_debug(int width, int height)
+void PlanetarySystem::render_debug(int width, int height, CameraUniforms& camera_uniforms)
 {
 	glm::dmat4 proj_view = camera_uniforms.proj_view;
 	glm::dmat4 c_model = camera_uniforms.c_model;
@@ -234,109 +232,113 @@ void PlanetarySystem::render_debug(int width, int height)
 static double pt;
 static int factor;
 
-void PlanetarySystem::update_physics(double dt)
+void PlanetarySystem::update_physics(double dt, bool bullet)
 {
-	compute_states(t + dt * timewarp, states_now, 1e-6);
-
-	//int factor = 10000;
-	double sub_dt = dt * factor;
-	if (timewarp < factor)
+	StateVector* v;
+	double tnow;
+	if (bullet)
 	{
-		sub_dt = dt * timewarp;
+		tnow = bt;
+		v = &bullet_states;
+	}
+	else
+	{
+		tnow = t;
+		v = &states_now;
 	}
 
-	bool prev_debug = debug_drawer->debug_enabled;
+	compute_states(tnow + dt * timewarp, *v, 1e-6);
 
-	int it = 0;
-	for (double sub_t = t; sub_t < t + dt * timewarp; sub_t += sub_dt)
+
+	if (!bullet)
 	{
-		// We only draw debug at sub_t = 0
-		if (it != 0)
+		// TODO: Fix this mess
+		//int factor = 10000;
+		/*double sub_dt = dt * factor;
+		if (timewarp < factor)
 		{
-			debug_drawer->debug_enabled = false;
+			sub_dt = dt * timewarp;
 		}
 
-		// Propagate vessels
-		propagator->prepare(sub_t, sub_dt, physics_pos);
-		size_t closest = propagator->propagate(&vessels[0]);
+		bool prev_debug = debug_drawer->debug_enabled;
 
-		vessels[0].simulate(elements, physics_pos, closest, sub_dt);
-		
+		int it = 0;
+		for (double sub_t = t; sub_t < t + dt * timewarp; sub_t += sub_dt)
+		{
+			// We only draw debug at sub_t = 0
+			if (it != 0)
+			{
+				debug_drawer->debug_enabled = false;
+			}
 
-		it++;
+			// Propagate vessels
+			//propagator->prepare(sub_t, sub_dt, physics_pos);
+			//size_t closest = propagator->propagate(&vessels[0]);
+
+			//vessels[0].simulate(elements, physics_pos, closest, sub_dt);
+
+
+			it++;
+		}
+
+		debug_drawer->debug_enabled = prev_debug;
+
+		pt -= dt * timewarp;
+
+
+		glm::dvec3 pp;
+
+
+
+		//vessels[0].draw_debug();
+		*/
 	}
 
-	debug_drawer->debug_enabled = prev_debug;
-
-	pt -= dt * timewarp;
-
-
-	glm::dvec3 pp;
-
-
-
-	vessels[0].draw_debug();
-
-
-	t += dt * timewarp;
+	if (bullet)
+	{
+		bt += dt * timewarp;
+	}
+	else
+	{ 
+		t += dt * timewarp;
+	}
+	
 }
 
-void PlanetarySystem::init_physics()
+void PlanetarySystem::init_physics(btDynamicsWorld* world)
 {
-	pt = 0.0;
+	bt = t;
+
+	pt = 0;
 	factor = 1000;
 
 }
 
 
-void PlanetarySystem::update(double dt)
+void PlanetarySystem::update(double dt, btDynamicsWorld* world, bool bullet)
 {
-	dt = 0.01;
+	// Wooooops:
+	//dt = 0.01;
+
+	if (bullet_states.size() == 0)
+	{
+		bullet_states.resize(elements.size());
+	}
 
 	if (states_now.size() == 0)
 	{
-		init_physics();
+		init_physics(world);
 		states_now.resize(elements.size());
 	}
 
-	update_physics(dt);
-
-
-
-	ImGui::Begin("Camera Focus");
-	
-	if (ImGui::Button("Position Vessel"))
-	{
-		vessels[0].state = states_now[name_to_index["Earth"]];
-		vessels[0].state.pos += (glm::dvec3)(elements[name_to_index["Earth"]].as_body->build_rotation_matrix(0.0) 
-			* glm::dvec4(42164000.0, 0.0, 0.0, 1.0));
-
-		double mod = -3074.6;
-
-
-
-		vessels[0].state.vel += glm::normalize(glm::cross(vessels[0].state.pos - states_now[name_to_index["Earth"]].pos,
-			elements[name_to_index["Earth"]].as_body->rotation_axis)) * mod;
-
-		camera.distance = 5.0;
-	}
-
-	ImGui::InputInt("Timestep: ", &factor);
-
-
-	ImGui::End();
-
-	//camera.distance = 1000000000000.0;
-	camera.update(dt);
-
+	update_physics(dt, bullet);
 	
 }
 
-void PlanetarySystem::init()
+void PlanetarySystem::init(btDynamicsWorld* world)
 {
 	propagator->initialize(this, elements.size());
-	vessels.push_back(Vessel());
-	vessels[0].state.pos = glm::dvec3(0.0, 0.0, 0.0);
+
 }
 
 static void load_body(SystemElement* body)
@@ -348,7 +350,7 @@ static void load_body(SystemElement* body)
 
 		std::string script = assets->load_string_raw(body->as_body->config.surface.script_path);
 
-		body->as_body->renderer.rocky->load(script, body->as_body->config);
+		body->as_body->renderer.rocky->load(script, body->as_body->config.surface.script_path_raw, body->as_body->config);
 	}
 	else
 	{
@@ -465,7 +467,7 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 
 #include "propagator/RK4Interpolated.h"
 
-PlanetarySystem::PlanetarySystem() : camera(SystemPointer(this))
+PlanetarySystem::PlanetarySystem()
 {
 	states_now.resize(0);
 	propagator = new RK4Interpolated();

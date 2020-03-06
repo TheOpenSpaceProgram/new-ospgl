@@ -1,0 +1,10 @@
+model = "parts/engine/engine.fbx"
+
+name = "Fire Tube Mk. 1"
+country = "United States"
+manufacturer = "Rocket Factory"
+description = "Generates thrust"
+
+
+[p_root]
+	mass = 400.0

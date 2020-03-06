@@ -7,6 +7,7 @@ void PlanetaryBodyRenderer::render(glm::dmat4 proj_view, glm::dmat4 model, glm::
 	double far_plane, glm::dvec3 camera_pos, 
 	PlanetConfig & config, double time, glm::vec3 light_dir, float dot_factor)
 {
+
 	if (atmo != nullptr)
 	{
 		glm::dmat4 amodel = glm::translate(glm::dmat4(1.0f), -camera_pos);
@@ -88,12 +89,12 @@ PlanetaryBodyRenderer::~PlanetaryBodyRenderer()
 	}
 }
 
-void RockyPlanetRenderer::load(std::string script, PlanetConfig& config)
+void RockyPlanetRenderer::load(const std::string& script, const std::string& script_path, PlanetConfig& config)
 {
 	if (server != nullptr)
 	{
 		delete server;
 	}
 
-	server = new PlanetTileServer(script, &config, config.surface.seed, config.surface.interp, config.surface.has_water);
+	server = new PlanetTileServer(script, script_path, &config, config.surface.has_water);
 }

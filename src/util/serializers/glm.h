@@ -17,8 +17,9 @@ public:
 	{
 		if constexpr (std::is_same<T, float>::value)
 		{
-			double x, y;
-	        SAFE_TOML_GET(x, "x", double);
+			double x, y
+
+			SAFE_TOML_GET(x, "x", double);
 			SAFE_TOML_GET(y, "y", double);
 
 			target.x = (float)x;

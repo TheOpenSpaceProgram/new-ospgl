@@ -6,6 +6,7 @@
 #include "Config.h"
 #include "../util/SerializeUtil.h"
 #include "../renderer/camera/CameraUniforms.h"
+#include "../renderer/lighting/LightingUniforms.h"
 #include <glm/gtx/matrix_decompose.hpp>
 #include <algorithm>
 #include <iostream>
@@ -126,21 +127,60 @@ public:
 };
 
 
+struct AssimpTexture
+{
+	aiTextureType first;
+	AssetHandle<Image> second;
 
-using AssimpTexture = std::pair <aiTextureType, AssetHandle<Image>>;
+	AssimpTexture()
+	{
+		this->first = aiTextureType_UNKNOWN;
+		this->second = AssetHandle<Image>();
+	}
+
+	AssimpTexture(AssimpTexture&& b)
+	{
+		this->first = b.first;
+		this->second = std::move(b.second);
+	}
+
+	AssimpTexture(const AssimpTexture& b)
+	{
+		this->first = b.first;
+		this->second = b.second.duplicate();
+	}
+
+
+	AssimpTexture& operator=(AssimpTexture&& b)
+	{
+		this->first = b.first;
+		this->second = std::move(b.second);
+
+		return *this;
+	}
+};
 
 struct CoreUniforms
 {
 	// Name of the different core uniforms
-// By default materials bind
-// - model = "model"
-// - camera_tform = "camera_tform"
-// - proj_view = "proj_view"
-// - f_coef = "f_coef"
-// - camera_relative = "camera_relative"
-// If any equals "", it's not binded
+	// By default materials bind
+	// - final_tform = "final_tform"
+	// - proj_view = "proj_view"
+	// - f_coef = "f_coef"
+	// - camera_relative = "camera_relative"
+	// - normal_model = "normal_model"
+	// Using camera_tform and the like is not a good idea as the camera usually is very far from the origin
+	// final_tform fixes this as it combines both the model and camera translation, so the end result is
+	// near the origin, or if it's far away, it will be actually fara way from the camera
+	// If any equals "", it's not bound
 	std::string mat4_proj, mat4_view, mat4_camera_model, mat4_proj_view, mat4_camera_tform, mat4_model,
-		mat4_final_tform, float_far_plane, float_f_coef, vec3_camera_relative;
+		mat4_final_tform, mat3_normal_model, float_far_plane, float_f_coef, vec3_camera_relative;
+
+	// Lightning core uniforms:
+
+	// The direction the sun light comes from. Sun is a point light extremely far away,
+	// when we are close to the sun, additional "planetshine" is used
+	std::string vec3_sunlight_dir;
 
 	CoreUniforms()
 	{
@@ -149,12 +189,15 @@ struct CoreUniforms
 		mat4_view = "";
 		mat4_camera_model = "";
 		mat4_proj_view = "proj_view";
-		mat4_camera_tform = "camera_tform";
-		mat4_model = "model";
+		mat4_camera_tform = "";
+		mat4_model = "";
+		mat3_normal_model = "normal_model";
 		float_far_plane = "";
 		float_f_coef = "f_coef";
-		mat4_final_tform = "";
+		mat4_final_tform = "final_tform";
 		vec3_camera_relative = "camera_relative";
+
+		vec3_sunlight_dir = "sunlight_dir";
 	}
 };
 
@@ -180,8 +223,8 @@ struct Material
 	CoreUniforms core_uniforms;
 
 
-	void set();
-	void set_core(const CameraUniforms& cu, glm::dmat4 model);
+	void set(std::vector<AssimpTexture>& assimp_textures);
+	void set_core(const CameraUniforms& cu, const LightingUniforms& lu, glm::dmat4 model);
 
 };
 
@@ -297,6 +340,92 @@ public:
 		if (uniforms_toml)
 		{
 			obtain_uniforms(to, *uniforms_toml);
+		}
+
+		auto asssimp_textures_toml = from.get_table_qualified("assimp_textures");
+		if (asssimp_textures_toml)
+		{
+			for (auto entry : *asssimp_textures_toml)
+			{
+				if (entry.second->is_value() && entry.second->as<std::string>())
+				{
+					std::string val = entry.second->as<std::string>()->get();
+
+					if (entry.first == "diffuse")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_DIFFUSE] = val;
+					}
+					else if(entry.first == "specular")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_SPECULAR] = val;
+					}
+					else if (entry.first == "ambient")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_AMBIENT] = val;
+					}
+					else if (entry.first == "emissive")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_EMISSIVE] = val;
+					}
+					else if (entry.first == "height")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_HEIGHT] = val;
+					}
+					else if (entry.first == "normals")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_NORMALS] = val;
+					}
+					else if (entry.first == "shininess")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_SHININESS] = val;
+					}
+					else if (entry.first == "opacity")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_OPACITY] = val;
+					}
+					else if (entry.first == "displacement")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_DISPLACEMENT] = val;
+					}
+					else if (entry.first == "lightmap")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_LIGHTMAP] = val;
+					}
+					else if (entry.first == "reflection")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_REFLECTION] = val;
+					}
+					// PBR Materials
+					else if (entry.first == "base_color")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_BASE_COLOR] = val;
+					}
+					else if (entry.first == "normal_camera")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_NORMAL_CAMERA] = val;
+					}
+					else if (entry.first == "emission_color")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_EMISSION_COLOR] = val;
+					}
+					else if (entry.first == "metalness")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_METALNESS] = val;
+					}
+					else if (entry.first == "diffuse_roughness")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_DIFFUSE_ROUGHNESS] = val;
+					}
+					else if (entry.first == "ambient_occlusion")
+					{
+						to.assimp_texture_type_to_uniform[aiTextureType_AMBIENT_OCCLUSION] = val;
+					}
+					else
+					{
+						logger->warn("Unknown assimp texture type '{}'", entry.first);
+					}
+				}
+			}
 		}
 
 	}

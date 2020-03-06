@@ -1,6 +1,11 @@
 #pragma once
 #include <glm/glm.hpp>
+#pragma warning(push, 0)
+#include <LinearMath/btQuaternion.h>
+#include <LinearMath/btTransform.h>
 #include <LinearMath/btVector3.h>
+#include <glm/gtx/quaternion.hpp>
+#pragma warning(pop)
 
 // TODO: Maybe  pass by reference is more perfomant?
 
@@ -21,13 +26,15 @@ inline glm::dquat to_dquat(const btQuaternion data)
 
 inline glm::dmat4 to_dmat4(const btTransform data)
 {
-	glm::dvec3 off = to_dvec3(data.getOrigin());
-	glm::dquat rot = to_dquat(data.getRotation());
+	btScalar matrix[16];
 
-	glm::dmat4 mat = glm::translate(glm::dmat4(1.0), off);
-	mat = glm::toMat4(rot) * mat;
+	data.getOpenGLMatrix(&matrix[0]);
 
-	return mat;
+	return glm::dmat4(
+		matrix[0], matrix[1], matrix[2], matrix[3],
+		matrix[4], matrix[5], matrix[6], matrix[7],
+		matrix[8], matrix[9], matrix[10], matrix[11],
+		matrix[12], matrix[13], matrix[14], matrix[15]);
 }
 
 template<typename T>
@@ -36,3 +43,8 @@ inline btVector3 to_btVector3(glm::tvec3<T> d)
 	return btVector3((btScalar)d.x, (btScalar)d.y, (btScalar)d.z);
 }
 
+template<typename T>
+inline btQuaternion to_btQuaternion(glm::tquat<T> d)
+{
+	return btQuaternion((btScalar)d.x, (btScalar)d.y, (btScalar)d.z, (btScalar)d.w);
+}

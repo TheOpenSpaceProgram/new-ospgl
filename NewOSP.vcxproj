@@ -140,7 +140,6 @@
     <None Include="res\assimp_test\test\test.blend.toml" />
     <None Include="res\assimp_test\test\part_test.toml" />
     <None Include="res\core\default_gas.toml" />
-    <None Include="res\core\default_planet.toml" />
     <None Include="res\core\mat_default.toml" />
     <None Include="res\core\package.toml" />
     <None Include="res\navball\navball.toml" />
@@ -160,7 +159,6 @@
     <None Include="res\core\shaders\debug.vs" />
     <None Include="res\core\shaders\planet\tile.fs" />
     <None Include="res\core\shaders\planet\tile.vs" />
-    <None Include="res\core\default_planet.lua" />
     <None Include="res\core\shaders\planet\water.fs" />
     <None Include="res\core\shaders\planet\water.vs" />
     <None Include="res\core\shaders\ui\navball.fs" />
@@ -168,7 +166,14 @@
     <None Include="res\test_script.lua" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\BulletExperiments.cpp" />
+    <ClCompile Include="src\physics\ground\GroundShapeServer.cpp" />
+    <ClCompile Include="src\physics\ground\GroundShape.cpp" />
+    <ClCompile Include="src\VehicleInWorld.cpp" />
+    <ClCompile Include="src\vehicle\part\link\SimpleLink.cpp" />
+    <ClCompile Include="src\assets\PartPrototype.cpp" />
+    <ClCompile Include="src\tools\part_viewer\PartViewer.cpp" />
+    <ClCompile Include="src\lua\libs\LuaAssets.cpp" />
+    <ClCompile Include="src\lua\libs\LuaImage.cpp" />
     <ClCompile Include="src\lua\libs\LuaNoise.cpp" />
     <ClCompile Include="src\lua\libs\LuaGlm.cpp" />
     <ClCompile Include="src\lua\libs\LuaLogger.cpp" />
@@ -209,7 +214,6 @@
     <ClCompile Include="dep\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="dep\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="dep\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="dep\TextEditor\TextEditor.cpp" />
     <ClCompile Include="src\tools\planet_editor\EditorCamera.h" />
     <ClCompile Include="src\tools\planet_editor\PlanetEditor.cpp" />
     <ClCompile Include="src\assets\AssetManager.cpp" />
@@ -233,6 +237,15 @@
     <ClCompile Include="src\vehicle\part\Piece.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\physics\ground\GroundShapeServer.h" />
+    <ClInclude Include="src\physics\ground\GroundShape.h" />
+    <ClInclude Include="src\renderer\lighting\LightingUniforms.h" />
+    <ClInclude Include="src\util\LuaUtil.h" />
+    <ClInclude Include="src\vehicle\part\link\SimpleLink.h" />
+    <ClInclude Include="src\assets\PartPrototype.h" />
+    <ClInclude Include="src\tools\part_viewer\PartViewer.h" />
+    <ClInclude Include="src\lua\libs\LuaAssets.h" />
+    <ClInclude Include="src\lua\libs\LuaImage.h" />
     <ClInclude Include="src\lua\libs\LuaNoise.h" />
     <ClInclude Include="src\lua\libs\LuaGlm.h" />
     <ClInclude Include="src\lua\libs\LuaLogger.h" />
@@ -298,11 +311,8 @@
     <ClInclude Include="dep\imgui\stb_truetype.h" />
     <ClInclude Include="dep\rang.hpp" />
     <ClInclude Include="dep\sol.hpp" />
-    <ClInclude Include="dep\TextEditor\TextEditor.h" />
     <ClInclude Include="src\util\InputUtil.h" />
     <ClInclude Include="src\util\FileWatcher.h" />
-    <ClInclude Include="src\util\lua\LuaNoiseLib.h" />
-    <ClInclude Include="src\util\lua\LuaUtilLib.h" />
     <ClInclude Include="src\util\render\Framebuffer.h" />
     <ClInclude Include="src\util\serializers\glm.h" />
     <ClInclude Include="src\util\SerializeUtil.h" />

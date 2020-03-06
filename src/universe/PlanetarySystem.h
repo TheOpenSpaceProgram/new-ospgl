@@ -8,6 +8,10 @@
 
 #include "../renderer/camera/MapCamera.h"
 
+#pragma warning(push, 0)
+#include <btBulletDynamicsCommon.h>
+#pragma warning(pop)
+
 struct SystemPointer;
 
 // A system holds a central star, origin of the coordinate system, and
@@ -24,8 +28,8 @@ private:
 
 	void update_render_body_rocky(PlanetaryBody* body, glm::dvec3 body_pos, glm::dvec3 camera_pos, double t);
 
-	void update_physics(double dt);
-	void init_physics();
+	void update_physics(double dt, bool bullet);
+	void init_physics(btDynamicsWorld* world);
 
 	std::vector<glm::dvec3> pts;
 
@@ -34,13 +38,15 @@ public:
 	std::unordered_map<std::string, size_t> name_to_index;
 	
 	StateVector states_now;
+	// Updates with bullet physics dt instead of normal dt
+	// TODO: Maybe the visual and physics states could
+	// simply be this interpolated to save some CPU cycles
+	// as planets don't really change direction much in the 
+	// span of a few milliseconds
+	StateVector bullet_states;
 
 	double t, timewarp;
-	
-	CameraUniforms camera_uniforms;
-
-	// The MapCamera MAY not be here, actually (TODO)
-	MapCamera camera;
+	double bt;
 
 	// Guaranteed to be ordered so that the last planets to appear
 	// are moons, or moons of moons (etc...)
@@ -71,12 +77,12 @@ public:
 	// semi-major axis it's not really important which t you choose.
 	void compute_sois(double t);
 
-	void render(int width, int height);
-	void render_debug(int width, int height);
+	void render(int width, int height, CameraUniforms& cu);
+	void render_debug(int width, int height, CameraUniforms& cu);
 
-	void update(double dt);
+	void update(double dt, btDynamicsWorld* world, bool bullet);
 
-	void init();
+	void init(btDynamicsWorld* world);
 
 	// Updates LOD and similar
 	// FOV in radians
