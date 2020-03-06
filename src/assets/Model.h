@@ -5,11 +5,11 @@
 #include "Material.h"
 #include "../renderer/camera/CameraUniforms.h"
 
+
+
 struct aiScene;
 struct aiNode;
 struct aiMesh;
-
-
 
 class Mesh 
 {
@@ -19,11 +19,7 @@ private:
 
 	GLuint vbo, vao, ebo;
 
-	size_t data_size;
-	size_t index_count;
 
-	float* data;
-	uint32_t* indices;
 
 	// It's only loaded while we are uploaded
 	AssetHandle<Material> material;
@@ -34,15 +30,29 @@ private:
 
 public:
 
+	size_t data_size;
+	size_t index_count;
+
+	// Only present on non drawable meshes! Used internally
+	std::vector<glm::vec3> verts;
+
+	// data is only present on drawable meshes
+	float* data;
+
+	// Present on both, as both use indexed vertices
+	uint32_t* indices;
+
 	// Stuff that starts with 'col_' are colliders
 	// Any children of a non-drawable is not drawable!
+	// Non-drawable stuff gets the aditional vertex positions loaded
 	bool is_drawable();
 
 	void upload();
 	void unload();
 
+
 	// Binds core uniforms and material uniforms
-	void bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model);
+	void bind_uniforms(const CameraUniforms& uniforms, const LightingUniforms& lu, glm::dmat4 model);
 
 	// Only issues the draw command, does absolutely nothing else
 	void draw_command();
@@ -64,9 +74,19 @@ struct Node
 	std::string name;
 
 	std::vector<Mesh> meshes;
-	glm::mat4 sub_transform;
+	glm::dmat4 sub_transform;
 
 	std::vector<Node*> children;
+
+	std::unordered_map<std::string, std::string> properties;
+
+	void draw_all_meshes(const CameraUniforms& uniforms, const LightingUniforms& lu, glm::dmat4 model);
+
+	// Draws all meshes, and call sthe same on all children,
+	// accumulating sub transforms
+	// The ignore_our_subtform flag is useful specially for stuff like parts
+	// where the piece transform is ignored during game rendering
+	void draw(const CameraUniforms& uniforms, const LightingUniforms& lu, glm::dmat4 model, bool ignore_our_subtform = false);
 };
 
 // Models allow loading 3d models using the assimp library
@@ -77,6 +97,7 @@ struct Node
 class Model
 {
 private:
+
 
 	void process_node(aiNode* node, const aiScene* scene, Node* to, bool drawable);
 	void process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool drawable);
@@ -96,6 +117,8 @@ private:
 
 public:
 
+	static constexpr char* COLLIDER_PREFIX = "col_";
+
 	std::unordered_map<std::string, Node*> node_by_name;
 
 	void get_gpu();
@@ -113,6 +136,7 @@ Model* loadModel(const std::string& path, const std::string& name, const std::st
 // GPU allocated model. When there are no GPU users, the model
 // is unloaded from the GPU.
 // Models, once loaded, are always kept in RAM for fast uploading
+// They are a non-copyable resource, similar to AssetHandle
 struct GPUModelPointer
 {
 private:
@@ -133,8 +157,104 @@ public:
 	// Same as above
 	Node* get_root_node();
 
+	GPUModelPointer() : model()
+	{
+
+	}
+
+	// We must take the ownership
+	GPUModelPointer(GPUModelPointer&& b)
+	{
+		this->model = std::move(b.model);
+		b.model = AssetHandle<Model>();
+	}
+
+	GPUModelPointer& operator=(GPUModelPointer&& b)
+	{
+		this->model = std::move(b.model);
+		b.model = AssetHandle<Model>();
+		return *this;
+	}
+
+	GPUModelPointer duplicate() const
+	{
+		return GPUModelPointer(model.duplicate());
+	}
+
+	bool is_null()
+	{
+		return model.is_null();
+	}
+
 	// We take ownership of the asset handle (std::move)
 	GPUModelPointer(AssetHandle<Model>&& model);
 	~GPUModelPointer();
+
+	Model* operator->()
+	{
+		return model.operator->();
+	}
+
+	Model& operator*()
+	{
+		return model.operator*();
+	}
+
 };
 
+// Useful if you only want a node, same as before, non copyable
+struct GPUModelNodePointer
+{
+	GPUModelPointer model_ptr;
+	Node* sub_node;
+
+	GPUModelNodePointer() : model_ptr()
+	{
+		sub_node = nullptr;
+	}
+
+	GPUModelNodePointer(GPUModelNodePointer&& b) : model_ptr(std::move(b.model_ptr))
+	{
+		b.model_ptr = GPUModelPointer(AssetHandle<Model>());
+		sub_node = b.sub_node;
+	}
+
+	GPUModelNodePointer& operator=(GPUModelNodePointer&& b)
+	{
+		this->model_ptr = std::move(b.model_ptr);
+		b.model_ptr = GPUModelPointer(AssetHandle<Model>());
+		this->sub_node = b.sub_node;
+
+		return *this;
+	}
+
+	GPUModelNodePointer duplicate() const
+	{
+		return GPUModelNodePointer(std::move(model_ptr.duplicate()), sub_node->name);
+	}
+
+	bool is_null()
+	{
+		return model_ptr.is_null();
+	}
+
+	GPUModelNodePointer(GPUModelPointer&& n_model_ptr, const std::string& sub_name) : model_ptr(std::move(n_model_ptr))
+	{
+		this->sub_node = model_ptr.get_node(sub_name);
+	}
+
+	// Automatic destructor is good
+
+
+	Node* operator->()
+	{
+		return sub_node;
+	}
+
+	Node& operator*()
+	{
+		return *sub_node;
+	}
+
+
+};

@@ -47,7 +47,7 @@ void Logger::log(int level, const char* format, fmt::format_args args)
 
 	if (level == 4)
 	{
-		std::cout << "Program will now abort" << std::endl;
+		std::cout << "Raising exception" << std::endl;
 		flushCounter = 0;
 	}
 
@@ -55,7 +55,7 @@ void Logger::log(int level, const char* format, fmt::format_args args)
 
 	if (level == 4)
 	{
-		abort();
+		throw("Fatal error");
 	}
 }
 
@@ -70,14 +70,11 @@ void Logger::check_important(bool condition, const char * text, bool ftal)
 {
 	if (!condition)
 	{
-		if (ftal)
-		{
-			fatal("Condition '{}' failed", text);
-		}
-		else
-		{
-			error("Condition '{}' failed", text);
-		}
+		std::string str = fmt::format("Condition '{}' failed", text);
+		error("Condition '{}' failed", text);
+		// We throw instead of crashing so lua can handle the checks properly
+		// without crashing the program
+		throw(str);
 	}
 }
 

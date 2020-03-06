@@ -1,9 +1,0 @@
-shader = "shader/simple.vs"
-
-[uniforms]
-	diffuse = "navball:navball.png"
-
-[config]
-	has_pos = true
-	has_nrm = true
-	has_tex = true

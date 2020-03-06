@@ -59,6 +59,9 @@ public:
 	// the central function of the planet rendering system
 	QuadTreeNode* get_recursive(glm::dvec2 coord, size_t maxDepth);
 
+	// Simpler method that ignores diagonal detail, used by physics
+	QuadTreeNode* get_recursive_simple(glm::dvec2 coord, size_t maxDepth);
+
 	glm::dvec2 get_center();
 
 	// Returns a equivalent to QuadTreeQuadrant if inside, -1 if outside
@@ -72,7 +75,7 @@ public:
 	void obtain_neighbors(QuadTreeQuadrant quad, bool nosplit = false);
 
 	// Draws a "widget" of the subdivided quad tree nodes
-	void draw_gui(int guiSize, PlanetTileServer& server);
+	void draw_gui(int guiSize, PlanetTileServer* server);
 
 	QuadTreeSide find_touching_side(QuadTreeNode* node);
 

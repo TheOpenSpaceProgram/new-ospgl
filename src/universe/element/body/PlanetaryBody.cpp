@@ -53,9 +53,12 @@ glm::dvec3 PlanetaryBody::get_rotation_speed(glm::dvec3 relative)
 	return tg * speed_mod;
 }
 
+
 PlanetaryBody::PlanetaryBody()
 {
+
 	dot_factor = 1.0f;
+
 }
 
 

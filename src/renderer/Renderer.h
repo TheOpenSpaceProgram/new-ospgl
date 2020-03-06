@@ -27,6 +27,7 @@ private:
 
 public:
 
+	bool wireframe;
 
 	bool render_enabled;
 
@@ -42,6 +43,8 @@ public:
 	// Draws the framebuffer to screen and prepares OpenGL
 	// to draw directly to backbuffer
 	void prepare_gui();
+
+	void finish();
 
 	int get_width();
 	int get_height();

@@ -2,7 +2,7 @@
 #include <fstream>
 #include "../../util/DebugDrawer.h"
 
-void PlanetEditor::update(float dt, ImFont* code_font)
+void PlanetEditor::update(float dt)
 {
 	if (ImGui::BeginMainMenuBar())
 	{
@@ -229,30 +229,28 @@ void PlanetEditor::on_script_file_change()
 
 	if (!exists)
 	{
-		logger->warn("Script file did not exist, copying default");
+		logger->warn("Script file did not exist, creating empty file");
 
 		std::filesystem::path script_path = path;
 		script_path.remove_filename();
 
 		std::filesystem::create_directories(script_path);
 
-		std::ifstream src("./res/default_planet.lua", std::ios::binary);
 		std::ofstream dst(path, std::ios::binary);
 
-		dst << src.rdbuf();
+		dst << "\n";
 
 	}
 
-	std::string scripts = assets->load_string(path);
-	renderer.rocky->server = new PlanetTileServer(scripts, &config, 0, 0, config.surface.has_water);
-
+	std::string scripts = assets->load_string_raw(path);
+	renderer.rocky->load(scripts, path, config);
 	renderer.rocky->qtree.dirty = true;
 }
 
 void PlanetEditor::on_config_file_change()
 {
 
-	SerializeUtil::read_file_to(config_path, config);
+	SerializeUtil::read_file_to(assets->resolve_path(config_path), config);
 
 	if (config.surface.script_path != path)
 	{
@@ -262,7 +260,7 @@ void PlanetEditor::on_config_file_change()
 	on_script_file_change();
 }
 
-PlanetEditor::PlanetEditor(GLFWwindow* window, const std::string& planet_name)
+PlanetEditor::PlanetEditor(GLFWwindow* window, const std::string& planet_config_path)
 {
 	renderer.rocky = new RockyPlanetRenderer();
 	renderer.atmo = new AtmosphereRenderer();
@@ -270,50 +268,19 @@ PlanetEditor::PlanetEditor(GLFWwindow* window, const std::string& planet_name)
 	this->window = window;
 	last_frame_save = false;
 
+	this->config_path = planet_config_path;
+	auto[pkg, _] = assets->get_package_and_name(planet_config_path, "core");
 
-	config_path = "./res/planets/" + planet_name + "/config.toml";
+	assets->set_current_package(pkg);
 
-	// Copy default config if file does not exists
-	std::ifstream f2(config_path);
-	if (!f2.good())
-	{
-		std::filesystem::path cpath = config_path;
-		cpath.remove_filename();
+	SerializeUtil::read_file_to(assets->resolve_path(config_path), config);
 
-		std::filesystem::create_directories(cpath);
-
-		std::ifstream src("./res/default_planet.toml", std::ios::binary);
-		std::ofstream dst(config_path, std::ios::binary);
-
-		dst << src.rdbuf();
-	}
-
-
-	SerializeUtil::read_file_to(config_path, config);
-
-	if (config.surface.script_path == "$$NEW_SCRIPT$$")
-	{
-		path = "./res/planets/" + planet_name + "/surface.lua";
-		config.surface.script_path = path;
-		SerializeUtil::write_to(config_path, config);
-	}
-	else
-	{
-		path = config.surface.script_path;
-	}
+	path = config.surface.script_path;
 
 	on_script_file_change();
 
-
-
-
-
-	std::string script = assets->load_string(path);
-	renderer.rocky->load(script, config);
-	
-
 	script_watch = FileWatcher(path);
-	config_watch = FileWatcher(config_path);
+	config_watch = FileWatcher(assets->resolve_path(config_path));
 	
 	camera.reset(config.radius);
 
@@ -328,19 +295,6 @@ PlanetEditor::~PlanetEditor()
 {
 }
 
-void PlanetEditor::do_editor_window(ImFont* code_font, TextEditor* editor, const std::string& name, bool* open)
-{
-	ImGui::Begin(name.c_str(), open);
-
-	ImGui::PushFont(code_font);
-
-	editor->Render((name + "EDIT").c_str());
-	
-	ImGui::PopFont();
-
-	ImGui::End();
-}
-
 
 void PlanetEditor::do_planet_window()
 {
@@ -351,7 +305,7 @@ void PlanetEditor::do_planet_window()
 
 		if (ImGui::CollapsingHeader("Quadtree", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			renderer.rocky->qtree.do_imgui(*renderer.rocky->server);
+			renderer.rocky->qtree.do_imgui(renderer.rocky->server);
 		}
 
 		if (ImGui::CollapsingHeader("Tile Server"))

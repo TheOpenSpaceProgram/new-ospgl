@@ -12,11 +12,13 @@ in vec3 vNrm;
 in vec2 vTex;
 
 
-
+uniform vec3 sunlight_dir;
 
 
 void main()
 {
-    FragColor = texture(diffuse, vTex);
+    float diffusel = max(dot(vNrm, sunlight_dir), 0.01);
+
+    FragColor = vec4(texture(diffuse, vTex).rgb * diffusel, 1.0);
     gl_FragDepth = log2(flogz) * f_coef * 0.5;
 }

@@ -2,22 +2,27 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include "../../util/ThreadUtil.h"
-#include "PlanetTilePath.h"
-#include "PlanetTile.h"
-#include "../quadtree/QuadTreePlanet.h"
 #include <set>
 #include <array>
 #include <thread>
-#include <sol.hpp>
-#include "../../universe/element/body/config/PlanetConfig.h"
 #include <FastNoise/FastNoise.h>
+
+#include "../../util/LuaUtil.h"
+#include "../../lua/LuaCore.h"
+#include "../../universe/element/body/config/PlanetConfig.h"
+#include "PlanetTilePath.h"
+#include "PlanetTile.h"
+#include "../quadtree/QuadTreePlanet.h"
+#include "../../util/ThreadUtil.h"
+
+
+
+
 
 struct PlanetTileThread
 {
 	sol::state lua_state;
 	std::thread* thread;
-	FastNoise noise;
 };
 
 // The tile server handles storage, creation and removal
@@ -27,8 +32,6 @@ struct PlanetTileThread
 class PlanetTileServer
 {
 private:
-
-	FastNoise noise;
 
 	bool dirty;
 
@@ -40,10 +43,8 @@ private:
 
 	static void thread_func(PlanetTileServer* server, PlanetTileThread* thread);
 
-	void prepare_lua(sol::state& lua_state, FastNoise* noise);
-
 	// Loads default values for the different libraries
-	void default_lua(sol::state& lua_state, FastNoise* noise);
+	void default_lua(sol::state& lua_state);
 
 	// We keep a little state to find height and so 
 	// everybody can query to find stuff about the script
@@ -99,7 +100,7 @@ public:
 
 	// Make sure you call once a OpenGL context is available
 	// as we will create the index buffer here
-	PlanetTileServer(const std::string& script, PlanetConfig* config, int seed, int noise_interp, bool has_water);
+	PlanetTileServer(const std::string& script, const std::string& script_path, PlanetConfig* config, bool has_water);
 	~PlanetTileServer();
 };
 

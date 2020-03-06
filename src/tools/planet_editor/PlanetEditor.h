@@ -4,7 +4,6 @@
 
 #include "../../universe/element/body/config/PlanetConfig.h"
 #include <imgui/imgui.h>
-#include <TextEditor/TextEditor.h>
 #include "../../util/FileWatcher.h"
 #include <GLFW/glfw3.h>
 #include "EditorCamera.h"
@@ -33,7 +32,6 @@ private:
 	bool show_script_editor, show_config_editor, show_planet_info;
 	bool wireframe;
 
-	void do_editor_window(ImFont* code_font, TextEditor* editor, const std::string& name, bool* close);
 	void do_planet_window();
 
 	void on_move();
@@ -48,14 +46,14 @@ private:
 
 public:
 
-	void update(float dt, ImFont* code_font);
+	void update(float dt);
 	void render(int width, int height);
 
 	// Called by the file watcher
 	void on_script_file_change();
 	void on_config_file_change();
 
-	PlanetEditor(GLFWwindow* window, const std::string& planet_name);
+	PlanetEditor(GLFWwindow* window, const std::string& planet_config_path);
 	~PlanetEditor();
 };
 
