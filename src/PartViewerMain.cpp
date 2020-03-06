@@ -1,4 +1,4 @@
-#include <sol.hpp>
+/*#include <sol.hpp>
 #include <iostream>
 #include "util/Logger.h"
 #include "util/DebugDrawer.h"
@@ -98,3 +98,4 @@ int main(void)
 
 
 }
+*/

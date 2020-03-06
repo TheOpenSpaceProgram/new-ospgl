@@ -271,9 +271,9 @@ void QuadTreePlanet::update(PlanetTileServer& server)
 	}
 }
 
-void QuadTreePlanet::subdivide_to(glm::dvec2 offset, PlanetSide side, size_t depth)
+QuadTreeNode* QuadTreePlanet::subdivide_to(glm::dvec2 offset, PlanetSide side, size_t depth)
 {
-	sides[side].get_recursive_simple(offset, depth);
+	return sides[side].get_recursive_simple(offset, depth);
 }
 
 QuadTreePlanet::QuadTreePlanet()

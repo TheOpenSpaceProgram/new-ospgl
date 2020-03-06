@@ -203,8 +203,8 @@ int main(void)
 		rg->setCollisionFlags(rg->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 		rg->setActivationState(DISABLE_DEACTIVATION);
 
-		rg->setRestitution(0.5);
-		rg->setFriction(0.5);
+		rg->setRestitution(1.0);
+		rg->setFriction(0.8);
 
 		plane->setMargin(2.0);
 
@@ -224,8 +224,9 @@ int main(void)
 		const double step = 1.0 / 30.0;
 		const int max_steps = 1;
 
-		p_engine.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
-		p_capsule.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
+		//p_engine.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
+		//p_capsule.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
+
 
 		while (!glfwWindowShouldClose(renderer.window))
 		{
@@ -251,6 +252,16 @@ int main(void)
 			{
 				p_engine.welded = true;
 				p_engine.set_dirty();
+			}
+
+			if (glfwGetKey(renderer.window, GLFW_KEY_B) == GLFW_PRESS)
+			{
+				v->set_position(system.states_now[3].pos + glm::dvec3(6361000.0, 0.0, 4000.0));
+			}
+
+			if (glfwGetKey(renderer.window, GLFW_KEY_V) == GLFW_PRESS)
+			{
+				v->set_position(system.states_now[3].pos + glm::dvec3(6361000.0, 500.0, 0.0));
 			}
 			
 
@@ -308,6 +319,7 @@ int main(void)
 				dt = max_dt;
 			}
 
+			dt = max_dt;
 			t += dt;
 
 

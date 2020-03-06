@@ -20,6 +20,11 @@ void Renderer::resize(int nwidth, int nheight, float nscale)
 
 void Renderer::prepare_draw()
 {
+	if (wireframe)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	int nwidth = 0, nheight = 0;
@@ -61,6 +66,12 @@ void Renderer::prepare_draw()
 
 void Renderer::prepare_gui()
 {
+	if (wireframe)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+
 	if (render_enabled)
 	{
 		fbuffer->unbind();
@@ -86,6 +97,8 @@ void Renderer::finish()
 
 
 	glfwSwapBuffers(window);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 }
 
