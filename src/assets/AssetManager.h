@@ -168,9 +168,6 @@ inline void AssetManager::create_asset_type(const std::string& name, LoadAssetPt
 
 	tdata.loadPtr = reinterpret_cast<void*>(loadPtr);
 
-	tdata.loadPtr = (void*)loadPtr;
-
-
 	for (auto it = packages.begin(); it != packages.end(); it++)
 	{
 		it->second.assets[typeid(T)] = std::make_pair(tdata, std::unordered_map<std::string, Asset>());
