@@ -178,7 +178,6 @@
     <ClCompile Include="src\lua\libs\LuaGlm.cpp" />
     <ClCompile Include="src\lua\libs\LuaLogger.cpp" />
     <ClCompile Include="src\lua\LuaCore.cpp" />
-    <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\vehicle\part\Machine.cpp" />
     <ClCompile Include="src\assets\Model.cpp" />
     <ClCompile Include="src\assets\Material.cpp" />
