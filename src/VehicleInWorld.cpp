@@ -26,6 +26,7 @@
 #include "lua/LuaCore.h"
 
 #include "physics/ground/GroundShape.h"
+#include "physics/debug/BulletDebugDrawer.h"
 
 
 InputUtil* input;

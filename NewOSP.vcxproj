@@ -166,6 +166,9 @@
     <None Include="res\test_script.lua" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\EditorMain.cpp" />
+    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\PartViewerMain.cpp" />
     <ClCompile Include="src\physics\ground\GroundShapeServer.cpp" />
     <ClCompile Include="src\physics\ground\GroundShape.cpp" />
     <ClCompile Include="src\VehicleInWorld.cpp" />

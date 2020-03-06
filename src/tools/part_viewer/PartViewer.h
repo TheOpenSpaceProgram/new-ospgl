@@ -8,6 +8,8 @@
 #include <BulletDynamics/ConstraintSolver/btNNCGConstraintSolver.h>
 #pragma warning(pop)
 
+#include "../../physics/debug/BulletDebugDrawer.h"
+
 // Supports reloading of the part for quick design from the developer
 class PartViewer
 {
