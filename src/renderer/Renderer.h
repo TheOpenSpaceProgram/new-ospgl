@@ -27,6 +27,7 @@ private:
 
 public:
 
+	bool wireframe;
 
 	bool render_enabled;
 

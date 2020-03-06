@@ -18,16 +18,17 @@ public:
 		if constexpr (std::is_same<T, float>::value)
 		{
 			double x, y
-				SAFE_TOML_GET(x, "x", double);
+
+			SAFE_TOML_GET(x, "x", double);
 			SAFE_TOML_GET(y, "y", double);
 
-			to.x = (float)x;
-			to.y = (float)y;
+			target.x = (float)x;
+			target.y = (float)y;
 		}
 		else
 		{
-			SAFE_TOML_GET(to.x, "x", double);
-			SAFE_TOML_GET(to.y, "y", double);
+			SAFE_TOML_GET(target.x, "x", double);
+			SAFE_TOML_GET(target.y, "y", double);
 		}
 	}
 };

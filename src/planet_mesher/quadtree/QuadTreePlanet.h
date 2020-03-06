@@ -69,7 +69,7 @@ public:
 	
 	// Not used by the rendering code, but by physics
 	// USES SIMPLE SPLITTING!
-	void subdivide_to(glm::dvec2 offset, PlanetSide side, size_t depth);
+	QuadTreeNode* subdivide_to(glm::dvec2 offset, PlanetSide side, size_t depth);
 
 	QuadTreePlanet();
 	~QuadTreePlanet();

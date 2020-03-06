@@ -119,16 +119,32 @@ void generate_vertices(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_sphe
 
 
 template<int S, typename T>
-void generate_vertices_simple(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_spheric, double* heights)
+void generate_vertices_simple(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_spheric, double* heights, 
+	bool xskip, bool yskip)
 {
-	for (int y = -1; y < S + 1; y++)
+	int fac = PlanetTile::PHYSICS_GRAPHICS_RELATION;
+	// We need some small tricks to keep the render and physics vertices aligned
+	for (int y = 0; y < PlanetTile::TILE_SIZE; y++)
 	{
-		for (int x = -1; x < S + 1; x++)
+		for (int x = 0; x < PlanetTile::TILE_SIZE; x++)
 		{
-			size_t r_index = (y + 1) * (S + 2) + (x + 1);
+			if (xskip && !(x % fac == fac / 2 && y % fac == 0))
+			{
+				continue;
+			}
 
-			double tx = (double)x / ((double)S - 1.0);
-			double ty = (double)y / ((double)S - 1.0);
+			/*if (yskip && !(x % fac == 0 && y % fac == fac / 2))
+			{
+				continue;
+			}*/
+
+
+			size_t r_index = (y / fac) * S + (x / fac);
+
+			double tx = (double)x / ((double)PlanetTile::TILE_SIZE - 1.0);
+			double ty = (double)y / ((double)PlanetTile::TILE_SIZE - 1.0);
+
+			double height = heights[r_index];
 
 			T vert;
 			glm::dvec3 in_tile = glm::dvec3(tx, ty, 0.0);
@@ -136,12 +152,9 @@ void generate_vertices_simple(T* verts, glm::dmat4 model, glm::dmat4 inverse_mod
 			glm::dvec3 world_pos_cubic = model * glm::vec4(in_tile, 1.0);
 			glm::dvec3 world_pos_spheric = MathUtil::cube_to_sphere(world_pos_cubic);
 
-			double height = heights[r_index];
-
 			world_pos_spheric += glm::normalize(world_pos_spheric) * height;
 
 			vert.pos = (glm::vec3)(inverse_model_spheric * glm::dvec4(world_pos_spheric, 1.0));
-			vert.nrm = glm::vec3(0.0f, 0.0f, 0.0f);
 
 			verts[r_index] = vert;
 		}
@@ -175,6 +188,7 @@ void copy_vertices(T* origin, Q* destination)
 		}
 	}
 }
+
 
 void generate_skirt(PlanetTileVertex* target, glm::dmat4 model, glm::dmat4 inverse_model_spheric, PlanetTileVertex& copy_vert)
 {
@@ -230,6 +244,9 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	info.radius = planet_radius;
 	info.needs_color = true;
 
+	sol::protected_function func = lua_state["generate"];
+
+
 	for (int x = -1; x < TILE_SIZE + 1; x++)
 	{
 		for (int y = -1; y < TILE_SIZE + 1; y++)
@@ -248,8 +265,6 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 
 			size_t i = (y + 1) * (TILE_SIZE + 2) + (x + 1);
 			
-			sol::protected_function func = lua_state["generate"];
-			 
 			info.coord_3d = sphere;
 			info.coord_2d = projected;
 
@@ -336,26 +351,16 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 
 
 bool PlanetTile::generate_physics(PlanetTilePath path, double planet_radius, sol::state& lua_state,
-	VertexArray<PlanetTileSimpleVertex, PlanetTile::PHYSICS_SIZE>* work_array,
-	OutPhysicsArray<PlanetTile::PHYSICS_SIZE>* out_array)
+	SimpleVertexArray<PlanetTile::PHYSICS_SIZE>* work_array)
 {
 	bool errors = false;
-
-	bool clockwise = false;
-
-	if (path.side == PY ||
-		path.side == NY ||
-		path.side == NX)
-	{
-		clockwise = true;
-	}
 
 	glm::dmat4 model = path.get_model_matrix();
 	glm::dmat4 model_spheric = path.get_model_spheric_matrix();
 	glm::dmat4 inverse_model = glm::inverse(model);
 	glm::dmat4 inverse_model_spheric = glm::inverse(model_spheric);
 
-	std::array<double, (PHYSICS_SIZE + 2) * (PHYSICS_SIZE + 2)> heights;
+	std::array<double, PHYSICS_SIZE * PHYSICS_SIZE> heights;
 
 	size_t depth = path.get_depth();
 
@@ -363,13 +368,42 @@ bool PlanetTile::generate_physics(PlanetTilePath path, double planet_radius, sol
 	info.depth = (int)depth;
 	info.radius = planet_radius;
 	info.needs_color = false;
-	for (int x = -1; x < PHYSICS_SIZE + 1; x++)
-	{
-		for (int y = -1; y < PHYSICS_SIZE + 1; y++)
-		{
 
-			double tx = (double)x / ((double)PHYSICS_SIZE - 1.0);
-			double ty = (double)y / ((double)PHYSICS_SIZE - 1.0);
+	sol::protected_function func = lua_state["generate"];
+
+	bool xskip = false, yskip = false;
+
+	auto last = *(path.path.end() - 1);
+	if (last == QuadTreeQuadrant::NORTH_EAST || last == QuadTreeQuadrant::NORTH_WEST)
+	{
+		xskip = true;
+	}
+	 
+	/*if (last == QuadTreeQuadrant::SOUTH_EAST || last == QuadTreeQuadrant::SOUTH_WEST)
+	{
+		yskip = true;
+	}*/
+
+	int fac = PlanetTile::PHYSICS_GRAPHICS_RELATION;
+	// We need some small tricks to keep the render and physics vertices aligned
+	for (int y = 0; y < PlanetTile::TILE_SIZE; y++)
+	{
+		for (int x = 0; x < PlanetTile::TILE_SIZE; x++)
+		{
+			if (xskip && !(x % fac == fac / 2 && y % fac == 0))
+			{
+				continue;
+			}
+
+			/*if (yskip && !(x % fac == 0 && y % fac == fac/2))
+			{
+				continue;
+			}*/
+
+			size_t r_index = (y / fac) * PlanetTile::PHYSICS_SIZE + (x / fac);
+
+			double tx = (double)x / ((double)PlanetTile::TILE_SIZE - 1.0);
+			double ty = (double)y / ((double)PlanetTile::TILE_SIZE - 1.0);
 
 			glm::dvec3 in_tile = glm::dvec3(tx, ty, 0.0);
 
@@ -379,9 +413,6 @@ bool PlanetTile::generate_physics(PlanetTilePath path, double planet_radius, sol
 			glm::dvec3 sphere = world_pos_spheric;
 			glm::dvec2 projected = MathUtil::euclidean_to_spherical_r1(sphere);
 
-			size_t i = (y + 1) * (PHYSICS_SIZE + 2) + (x + 1);
-
-			sol::protected_function func = lua_state["generate"];
 
 			info.coord_3d = sphere;
 			info.coord_2d = projected;
@@ -395,7 +426,7 @@ bool PlanetTile::generate_physics(PlanetTilePath path, double planet_radius, sol
 			// So we instead flatten the whole world
 			if (errors)
 			{
-				heights[i] = 0.0f;
+				heights[r_index] = 0.0f;
 			}
 			else
 			{
@@ -406,11 +437,11 @@ bool PlanetTile::generate_physics(PlanetTilePath path, double planet_radius, sol
 					logger->error("Lua Runtime Error:\n{}", err.what());
 					// We only write one error per tile so we don't overload the log
 					errors = true;
-					heights[i] = 0.0;
+					heights[r_index] = 0.0;
 				}
 				else
 				{
-					heights[i] = (out.height) / planet_radius;
+					heights[r_index] = (out.height) / planet_radius;
 				}
 			}
 		}
@@ -418,9 +449,7 @@ bool PlanetTile::generate_physics(PlanetTilePath path, double planet_radius, sol
 
 	lua_state.collect_garbage();
 
-	generate_vertices_simple<PHYSICS_SIZE, PlanetTileSimpleVertex>(work_array->data(), model, inverse_model_spheric, &heights[0]);
-	generate_normals<PHYSICS_SIZE>(work_array->data(), work_array->size(), model_spheric, clockwise);
-	copy_vertices<PHYSICS_SIZE>(work_array->data(), out_array->data());
+	generate_vertices_simple<PHYSICS_SIZE, PlanetTileSimpleVertex>(work_array->data(), model, inverse_model_spheric, heights.data(), xskip, yskip);
 
 	return errors;
 }

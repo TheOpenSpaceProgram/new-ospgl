@@ -43,18 +43,19 @@ GroundShapeServer::~GroundShapeServer()
 GroundShapeServer::TileAndTriangles::TileAndTriangles(PlanetTilePath npath, double time, GroundShapeServer* server) 
 	: path(npath)
 {
-	double growth = -2.1500;
+	//double growth = -2.1500;
+	double growth = 0.0;
 	double planet_radius = server->body->config.radius + growth;
 
-	PlanetTile::generate_physics(path, server->body->config.radius, server->lua, &server->work_array, &server->out_array);
+	PlanetTile::generate_physics(npath, server->body->config.radius, server->lua, &server->work_array);
 
-	glm::dmat4 model = glm::dmat4();
+	glm::dmat4 model = glm::dmat4(1.0);
 	model = glm::scale(model, glm::dvec3(planet_radius));
 	model = model * path.get_model_spheric_matrix();
 
 	for (size_t i = 0; i < server->indices.size(); i++)
 	{
-		glm::dvec3 v = server->out_array[server->indices[i]].pos;
+		glm::dvec3 v = server->work_array[server->indices[i]].pos;
 		// Transform to real position relative to planet
 		v = model * glm::dvec4(v, 1.0);
 

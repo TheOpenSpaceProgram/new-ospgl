@@ -45,8 +45,7 @@ public:
 	
 	std::unordered_map<PlanetTilePath, TileAndTriangles*, PlanetTilePathHasher> cache;
 
-	PlanetTile::VertexArray<PlanetTileSimpleVertex, PlanetTile::PHYSICS_SIZE> work_array;
-	PlanetTile::OutPhysicsArray<PlanetTile::PHYSICS_SIZE> out_array;
+	PlanetTile::SimpleVertexArray<PlanetTile::PHYSICS_SIZE> work_array;
 
 	sol::state lua;
 

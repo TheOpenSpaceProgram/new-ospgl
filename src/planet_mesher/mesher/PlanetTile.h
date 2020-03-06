@@ -28,7 +28,6 @@ struct PlanetTileWaterVertex
 struct PlanetTileSimpleVertex
 {
 	glm::vec3 pos;
-	glm::vec3 nrm;
 };
 
 
@@ -57,8 +56,8 @@ struct PlanetTile
 	GLuint vbo, water_vbo;
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
-	static const int TILE_SIZE = 32;
-	static const int PHYSICS_SIZE = 16;
+	static const int TILE_SIZE = 16;
+	static const int PHYSICS_SIZE = TILE_SIZE / 2;
 	static const int PHYSICS_GRAPHICS_RELATION = TILE_SIZE / PHYSICS_SIZE;
 	static const int VERTEX_COUNT = TILE_SIZE * TILE_SIZE + 4;
 	static const int INDEX_COUNT = (TILE_SIZE - 1) * (TILE_SIZE - 1) * 6 + (TILE_SIZE - 1) * 4 * 3;
@@ -68,7 +67,7 @@ struct PlanetTile
 	using VertexArray = std::array<T, (S + 2) * (S + 2)>;
 
 	template<size_t S>
-	using OutPhysicsArray = std::array<PlanetTileSimpleVertex, S * S>;
+	using SimpleVertexArray = std::array<PlanetTileSimpleVertex, S * S>;
 
 	std::array<PlanetTileVertex, VERTEX_COUNT> vertices;
 
@@ -81,8 +80,7 @@ struct PlanetTile
 
 	// Simply generates stuff to the output_array, that's it, we can be static 
 	static bool generate_physics(PlanetTilePath path, double planet_radius, sol::state& lua_state,
-		VertexArray<PlanetTileSimpleVertex, PlanetTile::PHYSICS_SIZE>* work_array,
-		OutPhysicsArray<PlanetTile::PHYSICS_SIZE>* out_array);
+		SimpleVertexArray<PHYSICS_SIZE>* work_array);
 
 	static void prepare_lua(sol::state& lua_state);
 

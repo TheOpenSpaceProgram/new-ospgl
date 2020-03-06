@@ -64,7 +64,7 @@ void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVect
 
 		glm::dvec3 normalized[8];
 
-		size_t wanted_depth = body->config.surface.max_depth + PlanetTile::PHYSICS_GRAPHICS_RELATION;
+		size_t wanted_depth = body->config.surface.max_depth + PlanetTile::PHYSICS_GRAPHICS_RELATION - 1;
 
 		glm::dvec3 rel = glm::normalize(aabb_box[0]);
 
@@ -77,6 +77,7 @@ void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVect
 		// not really matter much
 		// TODO: If we implement massive vehicles, write that code :P
 
+		std::vector<QuadTreeNode*> leafs = std::vector<QuadTreeNode*>();
 
 		for (size_t i = 0; i < 8; i++)
 		{
@@ -85,7 +86,12 @@ void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVect
 			PlanetSide side = quad_tree.get_planet_side(normalized[i]);
 			glm::dvec2 off = quad_tree.get_planet_side_offset(normalized[i], side);
 
-			quad_tree.subdivide_to(off, side, wanted_depth);
+			
+			QuadTreeNode* n_leaf = quad_tree.subdivide_to(off, side, wanted_depth);
+			if (std::find(leafs.begin(), leafs.end(), n_leaf) == leafs.end())
+			{
+				leafs.push_back(n_leaf);
+			}
 		}
 
 		/*ImGui::Begin("Lel", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
@@ -93,20 +99,14 @@ void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVect
 		ImGui::End();*/
 
 
-		auto leafs = quad_tree.get_all_leafs();
+		
 		for (QuadTreeNode* leaf : leafs)
 		{
-			// We only want full depth leafs, the other ones dont
-			// matter for physics
-			if (leaf->depth == wanted_depth)
+			btVector3* verts = server->query(leaf, 1.0);
+			// Return the triangles
+			for (size_t i = 0; i < PlanetTile::PHYSICS_INDEX_COUNT; i+=3)
 			{
-				btVector3* verts = server->query(leaf, 1.0);
-
-				// Return the triangles
-				for (size_t i = 0; i < PlanetTile::PHYSICS_INDEX_COUNT; i+=3)
-				{
-					callback->processTriangle(&verts[i], (int)0, (int)(i / 3));
-				}
+				callback->processTriangle(&verts[i], (int)0, (int)(i / 3));
 			}
 		}
 		
