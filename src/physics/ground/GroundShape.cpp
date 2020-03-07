@@ -1,4 +1,4 @@
-﻿#include "GroundShape.h"
+#include "GroundShape.h"
 
 
 
@@ -14,13 +14,13 @@ void GroundShape::getAabb(const btTransform& t, btVector3& aabbMin, btVector3& a
 
 #include <imgui/imgui.h>
 
-void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVector3& aabb_b₀, const btVector3& aabb_b₁) const
+void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVector3& aabb_b0, const btVector3& aabb_b1) const
 {
-	btVector3 debug_b₀(btScalar(-BT_LARGE_FLOAT), btScalar(-BT_LARGE_FLOAT), btScalar(-BT_LARGE_FLOAT));
-	btVector3 debug_b₁(btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT));
+	btVector3 debug_b0(btScalar(-BT_LARGE_FLOAT), btScalar(-BT_LARGE_FLOAT), btScalar(-BT_LARGE_FLOAT));
+	btVector3 debug_b1(btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT));
 
 
-	if (aabb_b₀ == debug_b₀ && aabb_b₁ == debug_b₁)
+	if (aabb_b0 == debug_b0 && aabb_b1 == debug_b1)
 	{
 		// We draw all loaded tiles
 		for (auto it = server->cache.begin(); it != server->cache.end(); it++)
@@ -41,22 +41,22 @@ void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVect
 			return;
 		}
 
-		glm::dvec3 aabb₀ = to_dvec3(aabb_b₀);
-		glm::dvec3 aabb₁ = to_dvec3(aabb_b₁);
+		glm::dvec3 aabb0 = to_dvec3(aabb_b0);
+		glm::dvec3 aabb1 = to_dvec3(aabb_b1);
 
-		glm::dvec3 Δaabb = aabb₁ - aabb₀;
+		glm::dvec3 daabb = aabb1 - aabb0;
 
 		// We need to "project" the aabb into the sphere, to do so we build the box
 		// with all its vertices
 		glm::dvec3 aabb_box[8];
-		aabb_box[0] = aabb₀;
-		aabb_box[1] = aabb₀ + glm::dvec3(Δaabb.x, 0.0, 0.0);
-		aabb_box[2] = aabb₀ + glm::dvec3(Δaabb.x, 0.0, Δaabb.z);
-		aabb_box[3] = aabb₀ + glm::dvec3(0.0, 0.0, Δaabb.z);
-		aabb_box[4] = aabb₀ + glm::dvec3(0.0, Δaabb.y, 0.0);
-		aabb_box[5] = aabb₀ + glm::dvec3(Δaabb.x, Δaabb.y, 0.0);
-		aabb_box[6] = aabb₀ + glm::dvec3(0.0, Δaabb.y, Δaabb.z);
-		aabb_box[7] = aabb₁;
+		aabb_box[0] = aabb0;
+		aabb_box[1] = aabb0 + glm::dvec3(daabb.x, 0.0, 0.0);
+		aabb_box[2] = aabb0 + glm::dvec3(daabb.x, 0.0, daabb.z);
+		aabb_box[3] = aabb0 + glm::dvec3(0.0, 0.0, daabb.z);
+		aabb_box[4] = aabb0 + glm::dvec3(0.0, daabb.y, 0.0);
+		aabb_box[5] = aabb0 + glm::dvec3(daabb.x, daabb.y, 0.0);
+		aabb_box[6] = aabb0 + glm::dvec3(0.0, daabb.y, daabb.z);
+		aabb_box[7] = aabb1;
 
 		// We create a new quad tree every time, perfomance is not that bad
 		QuadTreePlanet quad_tree = QuadTreePlanet();
