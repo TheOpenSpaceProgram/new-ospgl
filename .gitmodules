@@ -1,0 +1,15 @@
+[submodule "dep/bullet3"]
+	path = dep/bullet3
+	url = https://github.com/TheOpenSpaceProgram/ospgl-bullet.git
+[submodule "dep/fmt"]
+	path = dep/fmt
+	url = https://github.com/fmtlib/fmt.git
+[submodule "dep/LuaJIT-cmake"]
+	path = dep/LuaJIT-cmake
+	url = https://github.com/Titaniumtown/LuaJIT-cmake.git
+[submodule "dep/assimp"]
+	path = dep/assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "dep/osp"]
+	path = dep/osp
+	url = https://github.com/TheOpenSpaceProgram/osp.git

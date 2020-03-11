@@ -17,8 +17,6 @@
 #include <BulletDynamics/ConstraintSolver/btNNCGConstraintSolver.h>
 #pragma warning(pop)
 
-#include "physics/debug/BulletDebugDrawer.h"
-
 #include "universe/PlanetarySystem.h"
 #include "universe/Date.h"
 
@@ -28,6 +26,7 @@
 #include "lua/LuaCore.h"
 
 #include "physics/ground/GroundShape.h"
+#include "physics/debug/BulletDebugDrawer.h"
 
 
 InputUtil* input;
