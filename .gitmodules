@@ -1,6 +1,6 @@
 [submodule "dep/bullet3"]
 	path = dep/bullet3
-	url = https://github.com/bulletphysics/bullet3.git
+	url = https://github.com/TheOpenSpaceProgram/ospgl-bullet.git
 [submodule "dep/fmt"]
 	path = dep/fmt
 	url = https://github.com/fmtlib/fmt.git
