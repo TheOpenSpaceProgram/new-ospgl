@@ -47,4 +47,4 @@ add_subdirectory(dep/assimp)
 include_directories(OSPGL PUBLIC dep/assimp/include)   
 include_directories(OSPGL PUBLIC dep/bullet3/src)
 
-target_link_libraries(OSPGL fmt liblua-static assimp ${CMAKE_DL_LIBS})
+target_link_libraries(OSPGL fmt liblua-static assimp BulletSoftBody BulletDynamics BulletCollision LinearMath ${CMAKE_DL_LIBS})
