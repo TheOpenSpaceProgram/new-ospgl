@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "Navball.h"
 
 #include "../../util/DebugDrawer.h"
@@ -31,7 +33,7 @@ void Navball::draw_to_texture(const Vessel& vessel, const ReferenceFrame& frame)
 	// we know the sine as we know the opposite to the angle (1.0f) and the
 	// hypothenuse (view_distance)
 	float angle_sin = 1.0f / view_distance;
-	float fov = std::asinf(angle_sin) * 2.0f;
+	float fov = std::asin(angle_sin) * 2.0f;
 
 	glm::mat4 view, proj, model;
 	// 60 degrees as we see the sphere from twice its radius

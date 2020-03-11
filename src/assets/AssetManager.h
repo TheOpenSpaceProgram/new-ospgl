@@ -165,7 +165,8 @@ inline void AssetManager::create_asset_type(const std::string& name, LoadAssetPt
 {
 	AssetTypeData tdata;
 	tdata.name = name;
-	tdata.loadPtr = (void*)loadPtr;
+
+	tdata.loadPtr = reinterpret_cast<void*>(loadPtr);
 
 	for (auto it = packages.begin(); it != packages.end(); it++)
 	{

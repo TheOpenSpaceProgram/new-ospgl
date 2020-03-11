@@ -1,8 +1,12 @@
+#include <cmath>
+
 #include "QuadTreePlanet.h"
 #include "imgui/imgui.h"
 
 #include "../mesher/PlanetTileServer.h"
 #include "../../util/Logger.h"
+
+using namespace std;
 
 void QuadTreePlanet::flatten()
 {
