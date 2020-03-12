@@ -17,8 +17,6 @@ set(GLAD_SOURCES "dep/glad/glad.c")
 set(STB_SOURCES "dep/stb/stb_impl.cpp")
 set(FASTNOISE_SOURCES "dep/FastNoise/FastNoise.cpp")
 
-set(CMAKE_LD_FLAGS  "${CMAKE_LD_FLAGS} -llua -ldl")
-
 add_executable(OSPGL ${OSP_SOURCES} ${IMGUI_SOURCES} ${GLAD_SOURCES} ${BULLET_SOURCES} ${FASTNOISE_SOURCES} ${STB_SOURCES})
 
 include_directories(dep)
