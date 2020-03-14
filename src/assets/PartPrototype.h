@@ -3,6 +3,9 @@
 #include "Model.h"
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
+#define PIECE_DEFAULT_FRICTION 0.7
+#define PIECE_DEFAULT_RESTITUTION 0.1
+
 // NOTE: PartPrototype handles the lifetime of collider
 // NOTE: Colliders are always Z axis is up (same as blender!)
 struct PiecePrototype
@@ -14,6 +17,8 @@ struct PiecePrototype
 	btTransform collider_offset;
 
 	double mass;
+	double friction;
+	double restitution;
 	
 	PiecePrototype(GPUModelNodePointer&& n) : model_node(std::move(n))
 	{
@@ -21,6 +26,8 @@ struct PiecePrototype
 		this->render_offset = glm::dmat4(1.0);
 		this->collider_offset = btTransform::getIdentity();
 		this->mass = 1.0;
+		this->restitution = PIECE_DEFAULT_RESTITUTION;
+		this->friction = PIECE_DEFAULT_FRICTION;
 	}
 
 	// We have to declare copy constructor
@@ -30,6 +37,8 @@ struct PiecePrototype
 		this->collider_offset = b.collider_offset;
 		this->render_offset = b.render_offset;
 		this->mass = b.mass;
+		this->restitution = b.restitution;
+		this->friction = b.friction;
 	}
 
 	// Copy, used for std containers
@@ -40,6 +49,8 @@ struct PiecePrototype
 		this->collider_offset = b.collider_offset;
 		this->render_offset = b.render_offset;
 		this->mass = b.mass;
+		this->restitution = b.restitution;
+		this->friction = b.friction;
 
 		return *this;
 	}

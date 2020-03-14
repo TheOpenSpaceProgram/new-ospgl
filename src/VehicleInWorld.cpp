@@ -86,9 +86,10 @@ int main(void)
 		logger->fatal("Could not find config file!");
 	}
 
+	create_global_asset_manager();
+
 	Renderer renderer = Renderer(*config);
 
-	create_global_asset_manager();
 	create_global_debug_drawer();
 	create_global_texture_drawer();
 	create_global_text_drawer();
@@ -223,8 +224,8 @@ int main(void)
 		const double step = 1.0 / 30.0;
 		const int max_steps = 1;
 
-		//p_engine.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
-		//p_capsule.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
+		p_engine.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
+		p_capsule.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
 
 
 		while (!glfwWindowShouldClose(renderer.window))

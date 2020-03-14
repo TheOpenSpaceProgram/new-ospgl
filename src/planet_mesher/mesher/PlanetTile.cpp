@@ -162,7 +162,6 @@ void copy_vertices(T* origin, Q* destination)
 			destination[f_index].nrm = origin[o_index].nrm;
 			if constexpr (!std::is_same<Q, PlanetTileSimpleVertex>::value)
 			{
-
 				if constexpr (std::is_same<Q, PlanetTileWaterVertex>::value)
 				{
 					destination[f_index].depth = origin[o_index].col.x;

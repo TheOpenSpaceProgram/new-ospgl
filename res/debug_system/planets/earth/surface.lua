@@ -2,7 +2,7 @@ local glm = require("glm")
 local assets = require("assets")
 local noise = require("noise")
 
-local ngen = noise.new(12434);
+local ngen = noise.new(164212);
 ngen:set_fractal_octaves(12);
 
 local grass = glm.vec3.new(0.196, 0.275, 0.027);

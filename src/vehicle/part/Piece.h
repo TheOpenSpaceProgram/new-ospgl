@@ -54,6 +54,9 @@ public:
 
 	double mass;
 
+	double friction;
+	double restitution;
+
 	// Collider shape OF THIS SUBPART
 	// If you want a advanced compound collider with moving
 	// parts (for example, a fuel tank with simulated "liquid" 

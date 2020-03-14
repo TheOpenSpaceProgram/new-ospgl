@@ -109,6 +109,9 @@ Piece::Piece(AssetHandle<PartPrototype>&& part_proto, std::string piece_name)
 	welded = false;
 
 	mass = part_proto->pieces[piece_name].mass;
+	friction = part_proto->pieces[piece_name].friction;
+	restitution = part_proto->pieces[piece_name].restitution;
+
 	collider = part_proto->pieces[piece_name].collider;
 	collider_offset = part_proto->pieces[piece_name].render_offset;
 }

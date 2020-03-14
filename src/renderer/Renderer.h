@@ -11,6 +11,9 @@
 
 // Allows scaled rendering of the 3D scene to a framebuffer
 // and then UI drawing (in real resolution) over it
+// It first does a deferred rendering pass, and then a
+// forward rendering pass for transparent objects 
+// (aka atmospheres)
 class Renderer
 {
 private:
@@ -23,7 +26,7 @@ private:
 	bool doing_fbuffer;
 
 
-
+	Shader* fullscreen;
 
 public:
 

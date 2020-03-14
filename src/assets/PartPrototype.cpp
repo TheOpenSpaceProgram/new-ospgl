@@ -93,6 +93,9 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 
 				proto.mass = *mass_toml;
 
+				proto.friction = node_toml->get_as<double>("friction").value_or(PIECE_DEFAULT_FRICTION);
+				proto.restitution = node_toml->get_as<double>("restitution").value_or(PIECE_DEFAULT_RESTITUTION);
+
 				btTransform tform;
 				glm::dvec3 scale, translate, skew;
 				glm::dquat orient;

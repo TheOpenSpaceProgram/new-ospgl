@@ -191,6 +191,10 @@ static void create_new_welded_group(
 
 		rigid_body->setActivationState(DISABLE_DEACTIVATION);
 
+		// TODO: Think, maybe we can do the average of all parts? Maybe using default values is good
+		rigid_body->setFriction(PIECE_DEFAULT_FRICTION);
+		rigid_body->setRestitution(PIECE_DEFAULT_RESTITUTION);
+
 		world->addRigidBody(rigid_body);
 
 		btVector3 total_impulse = btVector3(0.0, 0.0, 0.0);
@@ -266,6 +270,9 @@ static void create_piece_physics(Piece* piece, std::unordered_map<Piece*, PieceS
 	btRigidBody* rigid_body = new btRigidBody(info);
 
 	rigid_body->setActivationState(DISABLE_DEACTIVATION);
+
+	rigid_body->setFriction(piece->friction);
+	rigid_body->setRestitution(piece->restitution);
 
 	world->addRigidBody(rigid_body);
 

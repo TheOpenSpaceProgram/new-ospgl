@@ -44,7 +44,7 @@ GroundShapeServer::TileAndTriangles::TileAndTriangles(PlanetTilePath npath, doub
 	: path(npath)
 {
 	//double growth = -2.1500;
-	double growth = 0.0;
+	double growth =-2.15;
 	double planet_radius = server->body->config.radius + growth;
 
 	PlanetTile::generate_physics(npath, server->body->config.radius, server->lua, &server->work_array);

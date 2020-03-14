@@ -19,7 +19,8 @@ public:
 	// All coordinates are pixel screen coordinates
 	// (We use ortographic projection)
 	void draw(GLuint tex, glm::vec2 pos, glm::vec2 size, glm::ivec2 screen_size, bool vflip = true);
-
+	void draw(GLuint tex, glm::vec2 pos, glm::vec2 size, glm::ivec2 screen_size, Shader* cshader, bool vflip = true);
+		
 	TextureDrawer();
 	~TextureDrawer();
 };

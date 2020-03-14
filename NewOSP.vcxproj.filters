@@ -51,6 +51,8 @@
     <None Include="lua_examples\glm\tests.lua" />
     <None Include=".gitmodules" />
     <None Include="settings.toml" />
+    <None Include="res\core\shaders\fullscreen\fullscreen.vs" />
+    <None Include="res\core\shaders\fullscreen\fullscreen.fs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\Logger.cpp">
@@ -255,6 +257,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\PartViewerMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\GBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -560,6 +565,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\LuaUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\GBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

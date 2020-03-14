@@ -15,6 +15,11 @@ void destroy_global_texture_drawer()
 
 void TextureDrawer::draw(GLuint tex, glm::vec2 pos, glm::vec2 size, glm::ivec2 screen_size, bool vflip)
 {
+	draw(tex, pos, size, screen_size, this->shader, true);
+}
+
+void TextureDrawer::draw(GLuint tex, glm::vec2 pos, glm::vec2 size, glm::ivec2 screen_size, Shader* cshader, bool vflip)
+{
 	glm::mat4 view = glm::ortho(0.0f, (float)screen_size.x, (float)screen_size.y, 0.0f, -1.0f, 1.0f);
 	glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(pos, 0.0f));
 	//model = glm::translate(model, glm::vec3(-size.x, -size.y, 0.0f));
@@ -23,14 +28,14 @@ void TextureDrawer::draw(GLuint tex, glm::vec2 pos, glm::vec2 size, glm::ivec2 s
 
 	glm::mat4 tform = view * model;
 
-	shader->use();
+	cshader->use();
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
 
-	shader->setInt("tex", 0);
-	shader->setMat4("tform", tform);
-	shader->setInt("vflip", vflip);
+	cshader->setInt("tex", 0);
+	cshader->setMat4("tform", tform);
+	cshader->setInt("vflip", vflip);
 
 	glBindVertexArray(vao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);

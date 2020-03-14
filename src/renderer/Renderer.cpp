@@ -1,5 +1,5 @@
 #include "Renderer.h"
-
+#include "../assets/AssetManager.h"
 
 
 void Renderer::resize(int nwidth, int nheight, float nscale)
@@ -84,7 +84,7 @@ void Renderer::prepare_gui()
 		texture_drawer->draw(fbuffer->tex_color_buffer,
 			glm::vec2(0, 0),
 			glm::vec2(width, height),
-			glm::vec2(width, height), true);
+			glm::vec2(width, height), fullscreen, true);
 	}
 }
 
@@ -188,6 +188,8 @@ Renderer::Renderer(cpptoml::table& settings)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	resize(width, height, scale);
+
+	fullscreen = assets->get<Shader>("core", "shaders/fullscreen/fullscreen.vs");
 
 }
 
