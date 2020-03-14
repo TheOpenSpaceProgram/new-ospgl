@@ -132,6 +132,7 @@
   <ItemGroup>
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
+    <None Include=".gitmodules" />
     <None Include="imgui.ini" />
     <None Include="lua51.dll" />
     <None Include="lua_examples\glm\tests.lua" />
@@ -164,6 +165,7 @@
     <None Include="res\core\shaders\ui\navball.fs" />
     <None Include="res\core\shaders\ui\navball.vs" />
     <None Include="res\test_script.lua" />
+    <None Include="settings.toml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EditorMain.cpp" />
@@ -342,6 +344,7 @@
     <ClInclude Include="src\vehicle\part\Piece.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="CMakeLists.txt" />
     <Text Include="output.log" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -56,9 +56,10 @@ struct PlanetTile
 	GLuint vbo, water_vbo;
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
-	static const int TILE_SIZE = 16;
-	static const int PHYSICS_SIZE = TILE_SIZE / 2;
-	static const int PHYSICS_GRAPHICS_RELATION = TILE_SIZE / PHYSICS_SIZE;
+	static const int TILE_SIZE = 32;
+	// TODO: Make it possible for this number to be different, the whole tile is overkill
+	static const int PHYSICS_SIZE = TILE_SIZE;
+	static const int PHYSICS_GRAPHICS_RELATION = TILE_SIZE / (PHYSICS_SIZE - 1);
 	static const int VERTEX_COUNT = TILE_SIZE * TILE_SIZE + 4;
 	static const int INDEX_COUNT = (TILE_SIZE - 1) * (TILE_SIZE - 1) * 6 + (TILE_SIZE - 1) * 4 * 3;
 	static const int PHYSICS_INDEX_COUNT = (PHYSICS_SIZE - 1) * (PHYSICS_SIZE - 1) * 6;

@@ -118,31 +118,18 @@ void generate_vertices(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_sphe
 }
 
 
-template<int S, typename T>
-void generate_vertices_simple(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_spheric, double* heights, 
-	bool xskip, bool yskip)
+template<typename T>
+void generate_vertices_simple(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_spheric, double* heights)
 {
-	int fac = PlanetTile::PHYSICS_GRAPHICS_RELATION;
 	// We need some small tricks to keep the render and physics vertices aligned
-	for (int y = 0; y < PlanetTile::TILE_SIZE; y++)
+	for (int y = 0; y < PlanetTile::PHYSICS_SIZE; y++)
 	{
-		for (int x = 0; x < PlanetTile::TILE_SIZE; x++)
+		for (int x = 0; x < PlanetTile::PHYSICS_SIZE; x++)
 		{
-			if (xskip && !(x % fac == fac / 2 && y % fac == 0))
-			{
-				continue;
-			}
+			size_t r_index = y * PlanetTile::PHYSICS_SIZE + x;
 
-			/*if (yskip && !(x % fac == 0 && y % fac == fac / 2))
-			{
-				continue;
-			}*/
-
-
-			size_t r_index = (y / fac) * S + (x / fac);
-
-			double tx = (double)x / ((double)PlanetTile::TILE_SIZE - 1.0);
-			double ty = (double)y / ((double)PlanetTile::TILE_SIZE - 1.0);
+			double tx = (double)x / ((double)PlanetTile::PHYSICS_SIZE - 1.0);
+			double ty = (double)y / ((double)PlanetTile::PHYSICS_SIZE - 1.0);
 
 			double height = heights[r_index];
 
@@ -371,39 +358,17 @@ bool PlanetTile::generate_physics(PlanetTilePath path, double planet_radius, sol
 
 	sol::protected_function func = lua_state["generate"];
 
-	bool xskip = false, yskip = false;
-
-	auto last = *(path.path.end() - 1);
-	if (last == QuadTreeQuadrant::NORTH_EAST || last == QuadTreeQuadrant::NORTH_WEST)
-	{
-		xskip = true;
-	}
 	 
-	/*if (last == QuadTreeQuadrant::SOUTH_EAST || last == QuadTreeQuadrant::SOUTH_WEST)
-	{
-		yskip = true;
-	}*/
-
-	int fac = PlanetTile::PHYSICS_GRAPHICS_RELATION;
 	// We need some small tricks to keep the render and physics vertices aligned
-	for (int y = 0; y < PlanetTile::TILE_SIZE; y++)
+	for (int y = 0; y < PlanetTile::PHYSICS_SIZE; y++)
 	{
-		for (int x = 0; x < PlanetTile::TILE_SIZE; x++)
+		for (int x = 0; x < PlanetTile::PHYSICS_SIZE; x++)
 		{
-			if (xskip && !(x % fac == fac / 2 && y % fac == 0))
-			{
-				continue;
-			}
 
-			/*if (yskip && !(x % fac == 0 && y % fac == fac/2))
-			{
-				continue;
-			}*/
+			size_t r_index = y * PlanetTile::PHYSICS_SIZE + x;
 
-			size_t r_index = (y / fac) * PlanetTile::PHYSICS_SIZE + (x / fac);
-
-			double tx = (double)x / ((double)PlanetTile::TILE_SIZE - 1.0);
-			double ty = (double)y / ((double)PlanetTile::TILE_SIZE - 1.0);
+			double tx = (double)x / ((double)PlanetTile::PHYSICS_SIZE - 1.0);
+			double ty = (double)y / ((double)PlanetTile::PHYSICS_SIZE - 1.0);
 
 			glm::dvec3 in_tile = glm::dvec3(tx, ty, 0.0);
 
@@ -449,7 +414,7 @@ bool PlanetTile::generate_physics(PlanetTilePath path, double planet_radius, sol
 
 	lua_state.collect_garbage();
 
-	generate_vertices_simple<PHYSICS_SIZE, PlanetTileSimpleVertex>(work_array->data(), model, inverse_model_spheric, heights.data(), xskip, yskip);
+	generate_vertices_simple<PlanetTileSimpleVertex>(work_array->data(), model, inverse_model_spheric, heights.data());
 
 	return errors;
 }

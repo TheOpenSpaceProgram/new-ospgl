@@ -49,6 +49,8 @@
     <None Include="res\core\mat_default.toml" />
     <None Include="res\test_script.lua" />
     <None Include="lua_examples\glm\tests.lua" />
+    <None Include=".gitmodules" />
+    <None Include="settings.toml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\Logger.cpp">
@@ -563,5 +565,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="output.log" />
+    <Text Include="CMakeLists.txt" />
   </ItemGroup>
 </Project>
