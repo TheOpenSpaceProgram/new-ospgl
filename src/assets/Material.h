@@ -6,7 +6,6 @@
 #include "Config.h"
 #include "../util/SerializeUtil.h"
 #include "../renderer/camera/CameraUniforms.h"
-#include "../renderer/lighting/LightingUniforms.h"
 #include <glm/gtx/matrix_decompose.hpp>
 #include <algorithm>
 #include <iostream>
@@ -169,11 +168,13 @@ struct CoreUniforms
 	// - f_coef = "f_coef"
 	// - camera_relative = "camera_relative"
 	// - normal_model = "normal_model"
+	// - deferred_tform = "deferred_tform"
 	// Using camera_tform and the like is not a good idea as the camera usually is very far from the origin
 	// final_tform fixes this as it combines both the model and camera translation, so the end result is
 	// near the origin, or if it's far away, it will be actually fara way from the camera
 	// If any equals "", it's not bound
 	std::string mat4_proj, mat4_view, mat4_camera_model, mat4_proj_view, mat4_camera_tform, mat4_model,
+		mat4_deferred_tform,
 		mat4_final_tform, mat3_normal_model, float_far_plane, float_f_coef, vec3_camera_relative;
 
 	// Lightning core uniforms:
@@ -196,7 +197,7 @@ struct CoreUniforms
 		float_f_coef = "f_coef";
 		mat4_final_tform = "final_tform";
 		vec3_camera_relative = "camera_relative";
-
+		mat4_deferred_tform = "deferred_tform";
 		vec3_sunlight_dir = "sunlight_dir";
 	}
 };
@@ -224,7 +225,7 @@ struct Material
 
 
 	void set(std::vector<AssimpTexture>& assimp_textures);
-	void set_core(const CameraUniforms& cu, const LightingUniforms& lu, glm::dmat4 model);
+	void set_core(const CameraUniforms& cu, glm::dmat4 model);
 
 };
 

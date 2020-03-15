@@ -6,6 +6,7 @@ layout (location = 2) in vec2 aTex;
 
 uniform mat3 normal_model;
 uniform mat4 final_tform;
+uniform mat4 deferred_tform;
 uniform vec3 camera_relative;
 
 
@@ -22,8 +23,8 @@ void main()
 	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * f_coef - 1.0;
 	flogz = 1.0 + gl_Position.w;
 
-	vPos = aPos;
-	vNrm = normal_model * aNrm;
+	vPos = (deferred_tform * vec4(aPos, 1.0f)).xyz;
+	vNrm = aNrm;
 	vTex = aTex;
 
 }

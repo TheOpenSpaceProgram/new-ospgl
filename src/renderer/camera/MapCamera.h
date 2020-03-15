@@ -8,10 +8,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "CameraUniforms.h"
+#include "Camera.h"
 
 // Allows locking the camera on anything, but only
 // on intertial reference frames
-class MapCamera
+class MapCamera : public Camera
 {
 private:
 
@@ -36,7 +37,7 @@ public:
 	// Relative to system, not to center planet
 	std::pair<glm::dvec3, glm::dvec3> get_camera_pos_dir();
 
-	CameraUniforms get_camera_uniforms(int w, int h);
+	virtual CameraUniforms get_camera_uniforms(int w, int h) override;
 
 	MapCamera(SystemPointer ptr);
 	~MapCamera();

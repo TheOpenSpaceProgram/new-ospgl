@@ -1,4 +1,7 @@
 #version 430 core
+layout (location = 0) out vec3 gPosition;
+layout (location = 1) out vec3 gNormal;
+layout (location = 2) out vec4 gAlbedoSpec;
 
 out vec4 FragColor;
 
@@ -167,16 +170,6 @@ void main()
     vec3 nrm = normalize(vNormal + offset);
 
 
-    float diff = max(dot(-light_dir, vNormal + offset * 0.5), atmoc.w * 0.5);
-
-    vec3 viewDir = normalize(camera_pos - vNormal);
-    vec3 reflectDir = reflect(light_dir, nrm);
-
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256);
-    float specular = 1.0 * spec;
-
-    float spec_red = pow(diff, 0.3);
-
     vec3 veryshallowcol = vec3(0.95, 0.95, 1.0);
     vec3 shallowcol = vec3(0.39, 0.62, 0.72);
     vec3 deepcol = vec3(0.24, 0.43, 0.58) * 0.5;
@@ -189,7 +182,9 @@ void main()
     vec3 col = shallowcol * (1.0 - deepfactor) + deepcol * deepfactor + veryshallowcol * (1.0 - veryshallow);
 
 
-    FragColor = vec4((col * diff + speccol * specular * (1.0 - spec_red) + speccolb * specular * spec_red + atmoc.xyz * atmoc.w) * 0.77, min(deepfactor + 0.9, 1.0));
+    gAlbedoSpec = vec4((col + atmoc.xyz * atmoc.w) * 0.77, 1.0);
+    gNormal = nrm;
+    gPosition = vPos;
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets

@@ -1,4 +1,7 @@
 #version 430 core
+layout (location = 0) out vec3 gPosition;
+layout (location = 1) out vec3 gNormal;
+layout (location = 2) out vec4 gAlbedoSpec;
 
 out vec4 FragColor;
 
@@ -121,16 +124,16 @@ void main()
 {
     vec4 atmoc = atmo(light_dir);
 
-    float diff = max(dot(-light_dir, vNormal), atmoc.w * 0.5);
-
     vec3 col = vColor;
    // vec3 col = texture(tex, vTexture).xyz;
 
-    FragColor = vec4((diff * col + atmoc.xyz * atmoc.w) * 0.77, 1.0);
+    gAlbedoSpec = vec4((col + atmoc.xyz * atmoc.w) * 0.77, 1.0);
+    gNormal = vNormal;
+    gPosition = vPos;
     // FragColor = vec4(diff * texture(tex, vTexture).xyz, 1.0);
     // FragColor = vec4(vTexture, 0.0, 1.0);
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets
-   gl_FragDepth = log2(flogz) * f_coef * 0.5;
+    gl_FragDepth = log2(flogz) * f_coef * 0.5;
 }

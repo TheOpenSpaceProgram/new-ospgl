@@ -10,6 +10,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "../renderer/Drawable.h"
+
 // A Vehicle is basically a tree of parts (actually subparts), connected
 // via various links. The root part is always the root node.
 // Parts can be formed by various subparts (physic units),
@@ -25,7 +27,7 @@
 // but this is exactly the same as KSP's mechanic. Maybe the non
 // principal docking ports could simply create a very strong link, while
 // the principal one actually allows welding.
-class Vehicle
+class Vehicle : public Drawable
 {
 private:
 
@@ -74,7 +76,8 @@ public:
 
 	void set_breaking_enabled(bool value);
 
-	void render(CameraUniforms& camera_uniforms, const LightingUniforms& lu);
+	virtual void deferred_pass(glm::ivec2 size, CameraUniforms& camera_uniforms) override;
+	virtual bool needs_deferred_pass() override { return true; }
 
 	Vehicle(btDynamicsWorld* world);
 	~Vehicle();

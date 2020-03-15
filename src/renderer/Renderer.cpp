@@ -4,6 +4,11 @@
 
 void Renderer::resize(int nwidth, int nheight, float nscale)
 {
+	if (gbuffer != nullptr)
+	{
+		delete gbuffer;
+	}
+
 	if (fbuffer != nullptr)
 	{
 		delete fbuffer;
@@ -15,11 +20,15 @@ void Renderer::resize(int nwidth, int nheight, float nscale)
 	swidth = (int)(width * scale);
 	sheight = (int)(height * scale);
 
-	fbuffer = new Framebuffer((size_t)(width * scale), (size_t)(height * scale));
+	gbuffer = new GBuffer((size_t)(width * scale), (size_t)(height * scale));
+	fbuffer = new Framebuffer((size_t)(width * scale), (size_t)(height * scale), gbuffer->rbo);
 }
 
-void Renderer::prepare_draw()
+
+void Renderer::prepare_deferred()
 {
+	glDisable(GL_BLEND);
+
 	if (wireframe)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -55,13 +64,63 @@ void Renderer::prepare_draw()
 			resize(nwidth, nheight, scale);
 		}
 
-		fbuffer->bind();
-		doing_fbuffer = true;
-		glViewport(0, 0, swidth, sheight);
+		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer->g_buffer);
 
+		glViewport(0, 0, swidth, sheight);
+		doing_deferred = true;
+		doing_forward = false;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
+}
+
+void Renderer::prepare_forward()
+{
+	glEnable(GL_BLEND);
+
+	if (render_enabled)
+	{
+
+		glBindFramebuffer(GL_FRAMEBUFFER, fbuffer->fbuffer);
+
+
+		doing_deferred = false;
+		doing_forward = true;
+
+		fullscreen->use();
+		// Draw the gbuffer and copy depth 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, gbuffer->g_pos);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, gbuffer->g_nrm);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, gbuffer->g_col);
+		fullscreen->setInt("gPosition", 0);
+		fullscreen->setInt("gNormal", 1);
+		fullscreen->setInt("gAlbedoSpec", 2);
+		// Set lights to the screen shader
+
+
+		// Draw
+		if (wireframe)
+		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
+
+
+		glDepthFunc(GL_ALWAYS);
+		glDepthMask(GL_FALSE);
+		texture_drawer->issue_fullscreen_rectangle();
+		glDepthFunc(GL_LESS);
+		glDepthMask(GL_TRUE);
+
+		if (wireframe)
+		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		}
+
+
+	}
 }
 
 void Renderer::prepare_gui()
@@ -74,23 +133,34 @@ void Renderer::prepare_gui()
 
 	if (render_enabled)
 	{
-		fbuffer->unbind();
-		doing_fbuffer = false;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		doing_deferred = false;
+		doing_forward = false;
 
 		glViewport(0, 0, width, height);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// TODO: Add support for post-processing
+		glDepthFunc(GL_ALWAYS);
 		texture_drawer->draw(fbuffer->tex_color_buffer,
 			glm::vec2(0, 0),
 			glm::vec2(width, height),
-			glm::vec2(width, height), fullscreen, true);
+			glm::vec2(width, height), true);
+		glDepthFunc(GL_LESS);
 	}
+}
+
+void Renderer::do_debug(CameraUniforms &cu)
+{
+	glm::dmat4 proj_view = cu.proj_view;
+	glm::dmat4 c_model = cu.c_model;
+	float far_plane = cu.far_plane;
+
+	// Don't forget to draw the debug shapes!
+	debug_drawer->render(proj_view, c_model, far_plane);
 }
 
 void Renderer::finish()
 {
-
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -99,6 +169,150 @@ void Renderer::finish()
 	glfwSwapBuffers(window);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+}
+
+void Renderer::render()
+{
+	prepare_deferred();
+
+	CameraUniforms c_uniforms = cam->get_camera_uniforms(swidth, sheight);
+
+	if (render_enabled)
+	{
+		for (Drawable* d : deferred)
+		{
+			d->deferred_pass(glm::ivec2(swidth, sheight), c_uniforms);
+		}
+
+		prepare_forward();
+
+		for (Drawable* d : forward)
+		{
+			d->forward_pass(glm::ivec2(swidth, sheight), c_uniforms);
+		}
+
+		if (debug_drawer->debug_enabled)
+		{
+			do_debug(c_uniforms);
+		}
+
+		prepare_gui();
+
+		for (Drawable* d : gui)
+		{
+			d->gui_pass(glm::ivec2(swidth, sheight), c_uniforms);
+		}
+	}
+
+	finish();
+}
+
+
+void Renderer::add_drawable(Drawable* d, const std::string& cat)
+{
+	if (cat_ids.find(cat) == cat_ids.end())
+	{
+		cat_ids[cat] = 0;
+	}
+
+	std::string nid = "[" + cat + "]" + std::to_string(cat_ids[cat]);
+
+	cat_ids[cat]++;
+
+	add_drawable(nid, d);
+}
+
+void Renderer::add_drawable(std::string id, Drawable* d)
+{
+	logger->check_important(!d->is_added(), "Tried to add a drawable which was already present");
+	d->set_id(id);
+
+	if (d->needs_deferred_pass())
+	{
+		deferred.push_back(d);
+	}
+
+	if (d->needs_forward_pass())
+	{
+		forward.push_back(d);
+	}
+
+	if (d->needs_gui_pass())
+	{
+		gui.push_back(d);
+	}
+
+	all_drawables.push_back(d);
+}
+
+void Renderer::remove_drawable(std::string id)
+{
+	Drawable* d = nullptr;
+	for (auto it = all_drawables.begin(); it != all_drawables.end();)
+	{
+		if ((*it)->get_id() == id)
+		{
+			d = *it;
+			it = all_drawables.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
+
+	if (d == nullptr)
+	{
+		logger->warn("Tried to remove a drawable which was not present");
+	}
+
+	if (d->needs_deferred_pass())
+	{
+		for (auto it = deferred.begin(); it != deferred.end();)
+		{
+			if (*it == d)
+			{
+				it = deferred.erase(it);
+			}
+			else
+			{
+				it++;
+			}
+		}
+	}
+
+	if (d->needs_forward_pass())
+	{
+		for (auto it = forward.begin(); it != forward.end();)
+		{
+			if (*it == d)
+			{
+				it = forward.erase(it);
+			}
+			else
+			{
+				it++;
+			}
+		}
+	}
+
+	if (d->needs_gui_pass())
+	{
+		for (auto it = gui.begin(); it != gui.end();)
+		{
+			if (*it == d)
+			{
+				it = gui.erase(it);
+			}
+			else
+			{
+				it++;
+			}
+		}
+	}
+
+	d->set_id("");
 
 }
 
@@ -114,7 +328,7 @@ int Renderer::get_height()
 
 glm::ivec2 Renderer::get_size()
 {
-	if (doing_fbuffer)
+	if (doing_forward || doing_deferred)
 	{
 		return glm::dvec2(swidth, sheight);
 	}
@@ -127,7 +341,7 @@ glm::ivec2 Renderer::get_size()
 Renderer::Renderer(cpptoml::table& settings)
 {
 	render_enabled = true;
-	fbuffer = nullptr;
+	gbuffer = nullptr;
 
 	std::string type = "windowed";
 
@@ -195,9 +409,9 @@ Renderer::Renderer(cpptoml::table& settings)
 
 Renderer::~Renderer()
 {
-	if (fbuffer != nullptr)
+	if (gbuffer != nullptr)
 	{
-		delete fbuffer;
+		delete gbuffer;
 	}
 
 	glfwDestroyWindow(window);

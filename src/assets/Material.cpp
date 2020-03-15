@@ -116,7 +116,7 @@ void Material::set(std::vector<AssimpTexture>& assimp_textures)
 
 }
 
-void Material::set_core(const CameraUniforms& cu, const LightingUniforms& lu, glm::dmat4 model)
+void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
 {
 
 	if (core_uniforms.mat4_proj != "")
@@ -175,16 +175,13 @@ void Material::set_core(const CameraUniforms& cu, const LightingUniforms& lu, gl
 		shader->setVec3(core_uniforms.vec3_camera_relative, cu.cam_pos);
 	}
 
-	if (core_uniforms.vec3_sunlight_dir != "")
+	if (core_uniforms.mat4_deferred_tform != "")
 	{
-		// Wherever (0, 0, 0) ends up after applying "model" is our new position
-		glm::dvec3 our_pos = glm::dvec3(model * glm::dvec4(0.0, 0.0, 0.0, 1.0));
-		glm::dvec3 sunlight_dir = lu.sun_pos - our_pos;
-		sunlight_dir = glm::normalize(sunlight_dir);
-
-		shader->setVec3(core_uniforms.vec3_sunlight_dir, sunlight_dir);
+		// This transform simply brings the vertices to camera coordinates, and also applies the model
+		// but not view or projection
+		glm::dmat4 final_mat = cu.c_model * model;
+		shader->setMat4(core_uniforms.mat4_deferred_tform, (glm::mat4)final_mat);
 	}
-	
 
 }
 

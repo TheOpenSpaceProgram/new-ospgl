@@ -209,8 +209,9 @@ void PlanetEditor::render(int width, int height)
 
 	glm::dmat4 rot = glm::rotate(planet_rotation, glm::dvec3(0.0, 1.0, 0.0));
 
-	renderer.render(proj_view, model * rot, rot, far_plane, camera.pos, config, glfwGetTime(), 
-		-glm::normalize(glm::vec3(1.0, 0.0, 0.0)), 0.0f);
+	// TODO: Write rendering in the PlanetEditor
+	/*renderer.render(proj_view, model * rot, rot, far_plane, camera.pos, config, glfwGetTime(), 
+		-glm::normalize(glm::vec3(1.0, 0.0, 0.0)), 0.0f);*/
 
 
 	debug_drawer->render(proj_view, glm::translate(glm::dmat4(1.0f), -camera.pos), far_plane);

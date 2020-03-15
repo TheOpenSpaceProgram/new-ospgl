@@ -28,7 +28,7 @@ glm::ivec2 Framebuffer::get_size()
 	return glm::ivec2(width, height);
 }
 
-Framebuffer::Framebuffer(size_t width, size_t height)
+Framebuffer::Framebuffer(size_t width, size_t height, GLuint rbo_override)
 {
 	this->width = width;
 	this->height = height;
@@ -44,13 +44,19 @@ Framebuffer::Framebuffer(size_t width, size_t height)
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex_color_buffer, 0);
 
-	unsigned int rbo;
-	glGenRenderbuffers(1, &rbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, (GLsizei)width, (GLsizei)height);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	if (rbo_override == 0)
+	{
+		glGenRenderbuffers(1, &rbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, (GLsizei)width, (GLsizei)height);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	}
+	else
+	{
+		rbo = rbo_override;
+	}
 
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{

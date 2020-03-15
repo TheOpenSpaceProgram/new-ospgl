@@ -40,10 +40,13 @@ public:
 	AtmosphereRenderer* atmo;
 
 
-	void render(glm::dmat4 proj_view, glm::dmat4 model, 
+	void deferred(glm::dmat4 proj_view, glm::dmat4 model, 
 		glm::dmat4 rotation_matrix, double far_plane,
 		glm::dvec3 camera_pos, PlanetConfig& config, double time, glm::vec3 light_dir,
 		float dot_factor);
+
+	void forward(glm::dmat4 proj_view, glm::dvec3 camera_pos,
+		PlanetConfig& config, double far_plane, glm::vec3 light_dir);
 
 	void draw_debug(double t, CartesianState state, SystemElement* elem);
 

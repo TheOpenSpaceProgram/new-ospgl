@@ -31,13 +31,18 @@
 
 InputUtil* input;
 
-void update_vehicles(std::vector<Vehicle*>& vehicles)
+void update_vehicles(std::vector<Vehicle*>& vehicles, Renderer& render)
 {
 	for (Vehicle* v : vehicles)
 	{
 		v->draw_debug();
 		auto n = v->update();
 		vehicles.insert(vehicles.end(), n.begin(), n.end());
+
+		if (!v->is_added())
+		{
+			render.add_drawable(v, "vehicle");
+		}
 	}
 }
 
@@ -105,11 +110,12 @@ int main(void)
 
 		double AU = 149597900000.0;
 
-		SimpleCamera camera = SimpleCamera();
-		camera.speed = 100.0;
+		SimpleCamera* camera = new SimpleCamera();
+		renderer.cam = camera;
+		camera->speed = 100.0;
 		glm::dvec3 cam_offset = glm::dvec3(-10.0, 0.0f, 0.0f);
-		camera.fw = glm::normalize(glm::dvec3(1.0f, 0.0f, 0.0));
-		camera.pos = cam_offset;
+		camera->fw = glm::normalize(glm::dvec3(1.0f, 0.0f, 0.0));
+		camera->pos = cam_offset;
 
 		btDefaultCollisionConfiguration* collision_config = new btDefaultCollisionConfiguration();
 		btCollisionDispatcher* dispatcher = new btCollisionDispatcher(collision_config);
@@ -162,11 +168,13 @@ int main(void)
 		v->dirty = true;
 
 
-		update_vehicles(vehicles);
+		update_vehicles(vehicles, renderer);
 
 
 		PlanetarySystem system;
 		assets->get_from_path<Config>("debug_system:systems/system.toml")->read_to(system);
+
+		renderer.add_drawable("system", &system);
 
 		system.compute_sois(0.0);
 		debug_drawer->debug_enabled = true;
@@ -273,42 +281,14 @@ int main(void)
 
 			v->set_breaking_enabled(t > 0.0);
 
-			camera.center = to_dvec3(p_engine.get_global_transform().getOrigin());
-			camera.update(dt);
+			camera->center = to_dvec3(p_engine.get_global_transform().getOrigin());
+			camera->update(dt);
 
 			std::vector<Vehicle*> n_vehicles;
 
-			update_vehicles(vehicles);
+			update_vehicles(vehicles, renderer);
 
-			renderer.prepare_draw();
-
-
-			CameraUniforms c_uniforms = camera.get_camera_uniforms(renderer.get_width(), renderer.get_height());
-
-			glm::dmat4 proj_view = c_uniforms.proj_view;
-			glm::dmat4 c_model = c_uniforms.c_model;
-			float far_plane = c_uniforms.far_plane;
-
-			if (renderer.render_enabled)
-			{
-				world->debugDrawWorld();
-
-				system.render(renderer.get_width(), renderer.get_height(), c_uniforms);
-
-				for (Vehicle* v : vehicles)
-				{
-					v->render(c_uniforms, LightingUniforms());
-				}
-
-				system.render_debug(renderer.get_width(), renderer.get_height(), c_uniforms);
-
-				debug_drawer->render(proj_view, c_model, far_plane);
-
-				renderer.prepare_gui();
-
-			}
-
-			renderer.finish();
+			renderer.render();
 
 			dt = dtt.restart();
 

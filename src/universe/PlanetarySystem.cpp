@@ -113,9 +113,6 @@ void PlanetarySystem::compute_sois(double t)
 void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm::dvec3 camera_pos, double t, 
 	glm::dmat4 proj_view, float far_plane)
 {
-	double M_TO_AU = 1.0 / 149597900000.0;
-
-
 
 	glm::dvec3 camera_pos_relative = camera_pos - state.pos;
 	glm::dvec3 light_dir = glm::normalize(state.pos);
@@ -127,7 +124,7 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 
 		glm::dmat4 rot_matrix = body->as_body->build_rotation_matrix(t);
 
-		body->as_body->renderer.render(proj_view, model * rot_matrix, rot_matrix, far_plane, camera_pos_relative,
+		body->as_body->renderer.deferred(proj_view, model * rot_matrix, rot_matrix, far_plane, camera_pos_relative,
 			body->as_body->config, t, light_dir, body->as_body->dot_factor);
 	}
 
@@ -137,41 +134,38 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 	}
 }
 
+void PlanetarySystem::render_body_atmosphere(CartesianState state, SystemElement * body, glm::dvec3 camera_pos, double t, glm::dmat4 proj_view, float far_plane)
+{
+	glm::dvec3 camera_pos_relative = camera_pos - state.pos;
+	glm::dvec3 light_dir = glm::normalize(state.pos);
+
+	if (body->type == SystemElement::BODY)
+	{
+		body->as_body->renderer.forward(proj_view, camera_pos_relative, body->as_body->config, far_plane, light_dir);
+	}
+}
+
 #include "../util/InputUtil.h"
 
 static double zoom = 1.0;
 
-void PlanetarySystem::render(int width, int height, CameraUniforms& camera_uniforms)
+
+void PlanetarySystem::deferred_pass(glm::ivec2 size, CameraUniforms & cu)
 {
 	float fov = glm::radians(60.0f);
 
-	glm::dvec3 camera_pos = camera_uniforms.cam_pos;
+	glm::dvec3 camera_pos = cu.cam_pos;
 
 	update_render(camera_pos, fov, t);
 
 
-	glm::dmat4 proj_view = camera_uniforms.proj_view;
-	glm::dmat4 c_model = camera_uniforms.c_model;
-	float far_plane = camera_uniforms.far_plane;
-
-	using BodyPositionPair = std::pair<SystemElement*, CartesianState>;
-
-	// Sort bodies by distance to camera to avoid weird atmospheres
-	std::vector<BodyPositionPair> sorted;
+	glm::dmat4 proj_view = cu.proj_view;
+	glm::dmat4 c_model = cu.c_model;
+	float far_plane = cu.far_plane;
 
 	for (size_t i = 0; i < elements.size(); i++)
 	{
-		sorted.push_back(std::make_pair(&elements[i], states_now[i]));
-	}
-
-	std::sort(sorted.begin(), sorted.end(), [camera_pos](BodyPositionPair a, BodyPositionPair b)
-	{
-		return glm::distance2(camera_pos, a.second.pos) > glm::distance2(camera_pos, b.second.pos);
-	});
-
-	for (size_t i = 0; i < sorted.size(); i++)
-	{
-		render_body(sorted[i].second, sorted[i].first, camera_pos, t, proj_view, far_plane);
+		render_body(states_now[i], &elements[i], camera_pos, t, proj_view, far_plane);
 	}
 
 	if (debug_drawer->debug_enabled)
@@ -205,7 +199,7 @@ void PlanetarySystem::render(int width, int height, CameraUniforms& camera_unifo
 			{
 				col = elements[i].as_body->config.far_color;
 			}
-			
+
 			bool striped = false;
 			if (elements[i].is_primary)
 			{
@@ -215,18 +209,34 @@ void PlanetarySystem::render(int width, int height, CameraUniforms& camera_unifo
 			debug_drawer->add_orbit(origin, elements[i].orbit.to_orbit_at(t), col, striped, verts);
 		}
 	}
-
 }
 
-void PlanetarySystem::render_debug(int width, int height, CameraUniforms& camera_uniforms)
+void PlanetarySystem::forward_pass(glm::ivec2 size, CameraUniforms & cu)
 {
-	glm::dmat4 proj_view = camera_uniforms.proj_view;
-	glm::dmat4 c_model = camera_uniforms.c_model;
-	float far_plane = camera_uniforms.far_plane;
+	glm::dvec3 camera_pos = cu.cam_pos;
+	glm::dmat4 proj_view = cu.proj_view;
+	glm::dmat4 c_model = cu.c_model;
+	float far_plane = cu.far_plane;
 
-	// Don't forget to draw the debug shapes!
-	debug_drawer->render(proj_view, c_model, far_plane);
+	using BodyPositionPair = std::pair<SystemElement*, CartesianState>;
 
+	// Sort bodies by distance to camera to avoid weird atmospheres
+	std::vector<BodyPositionPair> sorted;
+
+	for (size_t i = 0; i < elements.size(); i++)
+	{
+		sorted.push_back(std::make_pair(&elements[i], states_now[i]));
+	}
+
+	std::sort(sorted.begin(), sorted.end(), [camera_pos](BodyPositionPair a, BodyPositionPair b)
+	{
+		return glm::distance2(camera_pos, a.second.pos) > glm::distance2(camera_pos, b.second.pos);
+	});
+
+	for (size_t i = 0; i < sorted.size(); i++)
+	{
+		render_body_atmosphere(sorted[i].second, sorted[i].first, camera_pos, t, proj_view, far_plane);
+	}
 }
 
 static double pt;

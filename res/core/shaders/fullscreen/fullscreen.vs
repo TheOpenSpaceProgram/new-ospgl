@@ -1,13 +1,12 @@
-#version 330
+#version 330 core
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec2 aTex;
+layout (location = 1) in vec2 aTexCoords;
 
-out vec2 vTex;
-
-uniform mat4 tform;
+out vec2 TexCoords;
 
 void main()
 {
-	vTex = aTex;
-	gl_Position = tform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    TexCoords = aTexCoords;
+    gl_Position = vec4(aPos, 1.0);
 }
+

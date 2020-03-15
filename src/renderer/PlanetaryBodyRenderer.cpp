@@ -3,11 +3,26 @@
 #include "../universe/element/SystemElement.h"
 
 
-void PlanetaryBodyRenderer::render(glm::dmat4 proj_view, glm::dmat4 model, glm::dmat4 rotation_matrix,
+void PlanetaryBodyRenderer::deferred(glm::dmat4 proj_view, glm::dmat4 model, glm::dmat4 rotation_matrix,
 	double far_plane, glm::dvec3 camera_pos, 
 	PlanetConfig & config, double time, glm::vec3 light_dir, float dot_factor)
 {
 
+	if (rocky != nullptr)
+	{
+		// Normal matrix is used to transform normals
+		glm::dmat4 normal_matrix = glm::transpose(glm::inverse(rotation_matrix));
+
+		// We have to give the renderer the rotation matrix so atmosphere
+		// can be rendered properly
+		rocky->renderer.render(*rocky->server, rocky->qtree, proj_view, model, 
+			rotation_matrix, normal_matrix, (float)far_plane, camera_pos, config, time, light_dir);
+	}
+}
+
+void PlanetaryBodyRenderer::forward(glm::dmat4 proj_view, glm::dvec3 camera_pos, 
+	PlanetConfig& config, double far_plane, glm::vec3 light_dir)
+{
 	if (atmo != nullptr)
 	{
 		glm::dmat4 amodel = glm::translate(glm::dmat4(1.0f), -camera_pos);
@@ -17,15 +32,6 @@ void PlanetaryBodyRenderer::render(glm::dmat4 proj_view, glm::dmat4 model, glm::
 
 
 		atmo->do_pass(proj_view, amodel, (float)far_plane, cam_pos_relative, config, light_dir);
-	}
-	if (rocky != nullptr)
-	{
-		// Normal matrix is used to transform normals
-		glm::dmat4 normal_matrix = glm::transpose(glm::inverse(rotation_matrix));
-
-		// We have to give the renderer the rotation matrix so atmosphere
-		// can be rendered properly
-		rocky->renderer.render(*rocky->server, rocky->qtree, proj_view, model, rotation_matrix, normal_matrix, (float)far_plane, camera_pos, config, time, light_dir);
 	}
 }
 

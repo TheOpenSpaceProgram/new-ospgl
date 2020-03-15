@@ -6,7 +6,7 @@ layout (location = 2) in float aDepth;
 layout (location = 3) in vec2 aTexture;
 
 uniform mat4 tform;
-uniform mat4 tform_scaled;
+uniform mat4 deferred_tform;
 uniform mat4 normal_tform;
 uniform mat4 rotm_tform;
 
@@ -33,7 +33,7 @@ void main()
 {
 	vTexture = get_real_uv();
 
-	vec4 wPos = tform_scaled * vec4(aPos, 1.0);
+	vec4 wPos = deferred_tform * vec4(aPos, 1.0);
 
     gl_Position = tform * vec4(aPos, 1.0);
 	gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * f_coef - 1.0;

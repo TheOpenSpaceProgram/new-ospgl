@@ -3,9 +3,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <tuple>
 #include "CameraUniforms.h"
+#include "Camera.h"
 
-
-class SimpleCamera
+class SimpleCamera : public Camera
 {
 private:
 	glm::dmat4 get_proj_view(int w, int h);
@@ -32,7 +32,7 @@ public:
 	// Relative to system, not to center planet
 	std::pair<glm::dvec3, glm::dvec3> get_camera_pos_dir();
 
-	CameraUniforms get_camera_uniforms(int w, int h);
+	virtual CameraUniforms get_camera_uniforms(int w, int h) override;
 
 	void forwards(double dt)
 	{

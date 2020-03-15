@@ -55,8 +55,8 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 			auto path = it->first;
 
 			glm::dmat4 model = path.get_model_spheric_matrix();
-
-
+			// We also apply the camera tform, used by the deferred renderer
+			glm::dmat4 deferred_model = wmodel * model;
 
 			if (!tile->is_uploaded())
 			{
@@ -78,7 +78,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 
 			shader->setMat4("tform", (glm::mat4)(proj_view * wmodel * model));
-			shader->setMat4("m_tform", (glm::mat4)(model));
+			shader->setMat4("m_tform", (glm::mat4)(deferred_model));
 			shader->setMat4("rotm_tform", (glm::mat4)(rot_tform * model));
 
 			glm::vec3 tile_i = glm::vec3(path.get_min(), (float)path.get_depth());
@@ -124,6 +124,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 				auto path = it->first;
 
 				glm::dmat4 model = path.get_model_spheric_matrix();
+				glm::dmat4 deferred_model = wmodel * model;
 
 				if (tile->water_vbo == 0)
 				{
@@ -149,7 +150,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 				t_model = glm::scale(t_model, glm::dvec3(sfactor, sfactor, sfactor));
 
 				water_shader->setMat4("tform", (glm::mat4)(proj_view * wmodel * t_model * model));
-				water_shader->setMat4("tform_scaled", (glm::mat4)(model));
+				water_shader->setMat4("deferred_tform", (glm::mat4)(deferred_model));
 				water_shader->setMat4("rotm_tform", (glm::mat4)(rot_tform * model));
 				water_shader->setInt("clockwise", tile->clockwise ? 1 : 0);
 			

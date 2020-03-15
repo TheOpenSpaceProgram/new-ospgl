@@ -11,6 +11,7 @@ class TextureDrawer
 private:
 
 	GLuint vao, vbo;
+	GLuint full_vao, full_vbo;
 
 	Shader* shader;
 
@@ -20,7 +21,8 @@ public:
 	// (We use ortographic projection)
 	void draw(GLuint tex, glm::vec2 pos, glm::vec2 size, glm::ivec2 screen_size, bool vflip = true);
 	void draw(GLuint tex, glm::vec2 pos, glm::vec2 size, glm::ivec2 screen_size, Shader* cshader, bool vflip = true);
-		
+	void issue_fullscreen_rectangle();
+
 	TextureDrawer();
 	~TextureDrawer();
 };

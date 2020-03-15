@@ -7,6 +7,7 @@
 #include "propagator/SystemPropagator.h"
 
 #include "../renderer/camera/MapCamera.h"
+#include "../renderer/Drawable.h"
 
 #pragma warning(push, 0)
 #include <btBulletDynamicsCommon.h>
@@ -16,7 +17,7 @@ struct SystemPointer;
 
 // A system holds a central star, origin of the coordinate system, and
 // many planets orbiting it using keplerian orbits
-class PlanetarySystem
+class PlanetarySystem : public Drawable
 {
 private:
 
@@ -24,6 +25,9 @@ private:
 	PosVector physics_pos;
 
 	void render_body(CartesianState state, SystemElement* body, glm::dvec3 camera_pos, double t,
+		glm::dmat4 proj_view, float far_plane);
+
+	void render_body_atmosphere(CartesianState state, SystemElement* body, glm::dvec3 camera_pos, double t,
 		glm::dmat4 proj_view, float far_plane);
 
 	void update_render_body_rocky(PlanetaryBody* body, glm::dvec3 body_pos, glm::dvec3 camera_pos, double t);
@@ -77,8 +81,10 @@ public:
 	// semi-major axis it's not really important which t you choose.
 	void compute_sois(double t);
 
-	void render(int width, int height, CameraUniforms& cu);
-	void render_debug(int width, int height, CameraUniforms& cu);
+	virtual void deferred_pass(glm::ivec2 size, CameraUniforms& cu) override;
+	virtual bool needs_deferred_pass() override { return true; }
+	virtual void forward_pass(glm::ivec2 size, CameraUniforms& cu) override;
+	virtual bool needs_forward_pass() override { return true; }
 
 	void update(double dt, btDynamicsWorld* world, bool bullet);
 

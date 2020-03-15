@@ -641,16 +641,17 @@ void Vehicle::set_breaking_enabled(bool value)
 	this->breaking_enabled = value;
 }
 
-void Vehicle::render(CameraUniforms& camera_uniforms, const LightingUniforms& lu)
+void Vehicle::deferred_pass(glm::ivec2 size, CameraUniforms & camera_uniforms)
 {
 	for (Piece* p : all_pieces)
 	{
 		glm::dmat4 tform = glm::inverse(p->collider_offset) * to_dmat4(p->get_global_transform());
-		p->model_node->draw(camera_uniforms, lu, tform, true);
+		p->model_node->draw(camera_uniforms, tform, true);
 	}
 }
 
-Vehicle::Vehicle(btDynamicsWorld* world)
+
+Vehicle::Vehicle(btDynamicsWorld* world) : Drawable()
 {
 	this->world = world;
 	this->breaking_enabled = false;

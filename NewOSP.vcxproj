@@ -244,10 +244,11 @@
     <ClCompile Include="src\vehicle\part\Piece.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\renderer\camera\Camera.h" />
+    <ClInclude Include="src\renderer\Drawable.h" />
     <ClInclude Include="src\renderer\GBuffer.h" />
     <ClInclude Include="src\physics\ground\GroundShapeServer.h" />
     <ClInclude Include="src\physics\ground\GroundShape.h" />
-    <ClInclude Include="src\renderer\lighting\LightingUniforms.h" />
     <ClInclude Include="src\util\LuaUtil.h" />
     <ClInclude Include="src\vehicle\part\link\SimpleLink.h" />
     <ClInclude Include="src\assets\PartPrototype.h" />

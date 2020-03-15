@@ -24,15 +24,14 @@ public:
 	// Binds the framebuffer for rendering to it
 	void bind();
 
-	// Unbinds the framebuffer, returning it to
-	// 0 (not to the previous framebuffer)
+	// Unbinds the framebuffer
 	void unbind();
 
 	void set_viewport();
 
 	glm::ivec2 get_size();
 
-	Framebuffer(size_t width, size_t height);
+	Framebuffer(size_t width, size_t height, GLuint rbo_override = 0);
 	~Framebuffer();
 };
 

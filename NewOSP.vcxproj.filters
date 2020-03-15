@@ -555,9 +555,6 @@
     <ClInclude Include="src\vehicle\part\link\SimpleLink.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\lighting\LightingUniforms.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\physics\ground\GroundShape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -568,6 +565,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\GBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\camera\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\Drawable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
