@@ -231,10 +231,10 @@ int main(void)
 
 		const double step = 1.0 / 30.0;
 		const int max_steps = 1;
-
+		/*
 		p_engine.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
 		p_capsule.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
-
+		*/
 		SunLight sun = SunLight();
 		renderer.add_light(&sun);
 

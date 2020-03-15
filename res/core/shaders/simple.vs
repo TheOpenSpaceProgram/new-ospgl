@@ -24,7 +24,7 @@ void main()
 	flogz = 1.0 + gl_Position.w;
 
 	vPos = (deferred_tform * vec4(aPos, 1.0f)).xyz;
-	vNrm = aNrm;
+	vNrm = normal_model * aNrm;
 	vTex = aTex;
 
 }

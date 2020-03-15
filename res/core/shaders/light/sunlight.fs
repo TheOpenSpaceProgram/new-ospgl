@@ -28,7 +28,7 @@ void main()
 
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 128) * Specular;
 
-    float total = max(diff, Emissive);
+    float total = max(diff + spec, Emissive);
 
     FragColor = vec4(total * Albedo, 1.0);
 }  

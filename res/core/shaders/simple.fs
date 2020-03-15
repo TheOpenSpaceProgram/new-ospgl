@@ -17,7 +17,7 @@ void main()
     gPosition = vPos;
     gNormal = normalize(vNrm);
     gAlbedoSpec.rgb = texture(diffuse, vTex).rgb;
-    gAlbedoSpec.a = 1.0;
+    gAlbedoSpec.a = 0.2;
 
     gl_FragDepth = log2(flogz) * f_coef * 0.5;
 }

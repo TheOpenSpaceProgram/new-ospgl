@@ -170,6 +170,15 @@ void main()
 
     vec3 nrm = normalize(vNormal + offset);
 
+    float diff = max(dot(-light_dir, vNormal + offset * 0.5), atmoc.w * 0.5);
+
+    vec3 viewDir = normalize(camera_pos - vNormal);
+    vec3 reflectDir = reflect(light_dir, nrm);
+
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256);
+    float specular = 1.0 * spec;
+
+    float spec_red = pow(diff, 0.3);
 
     vec3 veryshallowcol = vec3(0.95, 0.95, 1.0);
     vec3 shallowcol = vec3(0.39, 0.62, 0.72);
@@ -181,12 +190,13 @@ void main()
     float veryshallow = max(min(pow(vDepth, 0.44 + min(wave * 0.05, 0.0)) * 500.0, 1.0), 0.0);
 
     vec3 col = shallowcol * (1.0 - deepfactor) + deepcol * deepfactor + veryshallowcol * (1.0 - veryshallow);
-
-
-    gAlbedoSpec = vec4((col + atmoc.xyz * atmoc.w) * 0.77, 1.0);
+    // We use 0 specular as it doesn't really work for the planet renderer 
+    // (Float imprecision), so we instead do specular on the emissive and diffuse
+    // We also need the specular red color, which is not possible on the deferred shader
+    gAlbedoSpec = vec4((col + speccol * specular * (1.0 - spec_red) + speccolb * specular * spec_red + atmoc.xyz * atmoc.w) * 0.77, 0.0);
     gNormal = nrm;
     gPosition = vPos;
-    gEmissive = atmoc.w * 0.5;
+    gEmissive = atmoc.w * 0.5 + spec;
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets

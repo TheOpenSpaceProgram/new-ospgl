@@ -128,7 +128,7 @@ void main()
     vec3 col = vColor;
    // vec3 col = texture(tex, vTexture).xyz;
 
-    gAlbedoSpec = vec4((col + atmoc.xyz * atmoc.w) * 0.77, 1.0);
+    gAlbedoSpec = vec4((col + atmoc.xyz * atmoc.w) * 0.77, 0.0);
     gNormal = vNormal;
     gPosition = vPos;
     gEmissive = atmoc.w * 0.5;
