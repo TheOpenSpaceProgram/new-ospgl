@@ -9,6 +9,12 @@ private:
 	Shader* shader;
 
 public:
+
+	glm::vec3 color;
+	glm::vec3 spec_color;
+	glm::vec3 ambient_color;
+
+
 	SunLight();
 	~SunLight();
 

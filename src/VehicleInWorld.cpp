@@ -28,6 +28,7 @@
 #include "physics/ground/GroundShape.h"
 #include "physics/debug/BulletDebugDrawer.h"
 #include "renderer/lighting/SunLight.h"
+#include "renderer/lighting/PointLight.h"
 
 InputUtil* input;
 
@@ -231,12 +232,17 @@ int main(void)
 
 		const double step = 1.0 / 30.0;
 		const int max_steps = 1;
-		/*
+		
 		p_engine.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
 		p_capsule.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
-		*/
+	
 		SunLight sun = SunLight();
 		renderer.add_light(&sun);
+
+		PointLight point = PointLight();
+		point.linear = 0.01f;
+		point.quadratic = 0.0000001f;
+		renderer.add_light(&point);
 
 		while (!glfwWindowShouldClose(renderer.window))
 		{
@@ -284,6 +290,8 @@ int main(void)
 			v->set_breaking_enabled(t > 0.0);
 
 			camera->center = to_dvec3(p_engine.get_global_transform().getOrigin());
+			point.pos = to_dvec3(p_engine.get_global_transform().getOrigin()) + glm::dvec3(3.0, 0.0, 0.0);
+
 			camera->update(dt);
 
 			std::vector<Vehicle*> n_vehicles;

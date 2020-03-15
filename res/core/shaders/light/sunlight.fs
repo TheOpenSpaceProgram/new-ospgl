@@ -9,6 +9,9 @@ uniform sampler2D gAlbedoSpec;
 uniform sampler2D gEmissive;
 
 uniform vec3 sun_pos;
+uniform vec3 color;
+uniform vec3 ambient_color;
+uniform vec3 spec_color;
 
 void main()
 {             
@@ -20,15 +23,14 @@ void main()
     float Emissive = texture(gEmissive, TexCoords).r;
 
     vec3 sun_dir = normalize(sun_pos - FragPos);
-    float diff = max(dot(Normal, sun_dir), 0.0);
+    vec3 diff = max(dot(Normal, sun_dir), 0.0) * color * Albedo;
 
     // Specular is super simple as the camera is always on (0, 0, 0)
     vec3 view_dir = normalize(-FragPos);
     vec3 reflect_dir = reflect(-sun_dir, Normal);
 
-    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 128) * Specular;
+    vec3 spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64) * Specular * spec_color;
+    vec3 ambient = ambient_color * Albedo;
 
-    float total = max(diff + spec, Emissive);
-
-    FragColor = vec4(total * Albedo, 1.0);
+    FragColor = vec4(diff + spec + ambient, 1.0);
 }  

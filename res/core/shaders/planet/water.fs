@@ -190,10 +190,8 @@ void main()
     float veryshallow = max(min(pow(vDepth, 0.44 + min(wave * 0.05, 0.0)) * 500.0, 1.0), 0.0);
 
     vec3 col = shallowcol * (1.0 - deepfactor) + deepcol * deepfactor + veryshallowcol * (1.0 - veryshallow);
-    // We use 0 specular as it doesn't really work for the planet renderer 
-    // (Float imprecision), so we instead do specular on the emissive and diffuse
-    // We also need the specular red color, which is not possible on the deferred shader
-    gAlbedoSpec = vec4((col + speccol * specular * (1.0 - spec_red) + speccolb * specular * spec_red + atmoc.xyz * atmoc.w) * 0.77, 0.0);
+
+    gAlbedoSpec = vec4((col + atmoc.xyz * atmoc.w) * 0.77, 1.0);
     gNormal = nrm;
     gPosition = vPos;
     gEmissive = atmoc.w * 0.5 + spec;

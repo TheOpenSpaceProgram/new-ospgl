@@ -93,6 +93,7 @@ void Renderer::prepare_forward(glm::dvec3 cam_pos)
 		}
 		glDepthMask(GL_FALSE);
 		glDepthFunc(GL_ALWAYS);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 		// Do a pass for every light
 		for (Light* l : lights)
@@ -100,6 +101,7 @@ void Renderer::prepare_forward(glm::dvec3 cam_pos)
 			l->do_pass(cam_pos, gbuffer);
 		}
 
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
 		if (wireframe)

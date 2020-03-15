@@ -53,6 +53,8 @@
     <None Include="settings.toml" />
     <None Include="res\core\shaders\light\sunlight.fs" />
     <None Include="res\core\shaders\light\sunlight.vs" />
+    <None Include="res\core\shaders\light\point.fs" />
+    <None Include="res\core\shaders\light\point.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\Logger.cpp">
@@ -263,6 +265,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\renderer\lighting\SunLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\lighting\PointLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -580,6 +585,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\lighting\SunLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\lighting\PointLight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

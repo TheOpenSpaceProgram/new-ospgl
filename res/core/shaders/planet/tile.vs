@@ -45,8 +45,7 @@ void main()
 	vNormal = vec3(normal_tform * vec4(aNormal, 1.0));
 	vPosNrm = vec3(rotm_tform * vec4(aPos, 1.0));
 
-	//vTexture = get_real_uv();
-	vPos = vec3(m_tform * vec4(aPos, 1.0));
+	vPos = (m_tform * vec4(aPos, 1.0)).xyz;
 
 	vTexture =  get_projected_uv(normalize(vPos));
 }
