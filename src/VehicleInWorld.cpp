@@ -27,7 +27,7 @@
 
 #include "physics/ground/GroundShape.h"
 #include "physics/debug/BulletDebugDrawer.h"
-
+#include "renderer/lighting/SunLight.h"
 
 InputUtil* input;
 
@@ -39,7 +39,7 @@ void update_vehicles(std::vector<Vehicle*>& vehicles, Renderer& render)
 		auto n = v->update();
 		vehicles.insert(vehicles.end(), n.begin(), n.end());
 
-		if (!v->is_added())
+		if (!v->is_in_renderer())
 		{
 			render.add_drawable(v, "vehicle");
 		}
@@ -174,7 +174,7 @@ int main(void)
 		PlanetarySystem system;
 		assets->get_from_path<Config>("debug_system:systems/system.toml")->read_to(system);
 
-		renderer.add_drawable("system", &system);
+		renderer.add_drawable(&system, "system");
 
 		system.compute_sois(0.0);
 		debug_drawer->debug_enabled = true;
@@ -235,6 +235,8 @@ int main(void)
 		p_engine.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
 		p_capsule.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
 
+		SunLight sun = SunLight();
+		renderer.add_light(&sun);
 
 		while (!glfwWindowShouldClose(renderer.window))
 		{

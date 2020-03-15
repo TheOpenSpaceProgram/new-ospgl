@@ -2,6 +2,7 @@
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec4 gAlbedoSpec;
+layout (location = 3) out float gEmissive;
 
 out vec4 FragColor;
 
@@ -130,6 +131,8 @@ void main()
     gAlbedoSpec = vec4((col + atmoc.xyz * atmoc.w) * 0.77, 1.0);
     gNormal = vNormal;
     gPosition = vPos;
+    gEmissive = atmoc.w * 0.5;
+
     // FragColor = vec4(diff * texture(tex, vTexture).xyz, 1.0);
     // FragColor = vec4(vTexture, 0.0, 1.0);
 

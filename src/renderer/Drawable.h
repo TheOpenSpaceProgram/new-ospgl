@@ -7,7 +7,8 @@ class Drawable
 {
 private:
 
-	std::string id;
+	bool added;
+	std::string drawable_id;
 
 public:
 
@@ -19,23 +20,33 @@ public:
 	virtual bool needs_forward_pass() { return false; }
 	virtual bool needs_gui_pass() { return false; }
 
-	bool is_added()
+	bool is_in_renderer() 
 	{
-		return this->id != "";
+		return added;
 	}
 
-	void set_id(const std::string& id)
+	void notify_add_to_renderer()
 	{
-		this->id = id;
+		added = true;
 	}
 
-	std::string get_id()
+	void notify_remove_from_renderer()
 	{
-		return this->id;
+		added = false;
+	}
+	
+	void set_drawable_id(const std::string& id)
+	{
+		drawable_id = id;
+	}
+
+	std::string get_drawable_id()
+	{
+		return drawable_id;
 	}
 
 	Drawable()
 	{
-		id = "";
+		added = false;
 	}
 };

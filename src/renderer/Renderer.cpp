@@ -74,7 +74,7 @@ void Renderer::prepare_deferred()
 
 }
 
-void Renderer::prepare_forward()
+void Renderer::prepare_forward(glm::dvec3 cam_pos)
 {
 	glEnable(GL_BLEND);
 
@@ -82,38 +82,26 @@ void Renderer::prepare_forward()
 	{
 
 		glBindFramebuffer(GL_FRAMEBUFFER, fbuffer->fbuffer);
-
+		glClear(GL_COLOR_BUFFER_BIT); //< Don't clear the depth buffer!
 
 		doing_deferred = false;
 		doing_forward = true;
 
-		fullscreen->use();
-		// Draw the gbuffer and copy depth 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, gbuffer->g_pos);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, gbuffer->g_nrm);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, gbuffer->g_col);
-		fullscreen->setInt("gPosition", 0);
-		fullscreen->setInt("gNormal", 1);
-		fullscreen->setInt("gAlbedoSpec", 2);
-		// Set lights to the screen shader
-
-
-		// Draw
 		if (wireframe)
 		{
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
-
-
-		glDepthFunc(GL_ALWAYS);
 		glDepthMask(GL_FALSE);
-		texture_drawer->issue_fullscreen_rectangle();
-		glDepthFunc(GL_LESS);
-		glDepthMask(GL_TRUE);
+		glDepthFunc(GL_ALWAYS);
 
+		// Do a pass for every light
+		for (Light* l : lights)
+		{
+			l->do_pass(cam_pos, gbuffer);
+		}
+
+		glDepthMask(GL_TRUE);
+		glDepthFunc(GL_LESS);
 		if (wireframe)
 		{
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -185,7 +173,7 @@ void Renderer::render()
 			d->deferred_pass(glm::ivec2(swidth, sheight), c_uniforms);
 		}
 
-		prepare_forward();
+		prepare_forward(c_uniforms.cam_pos);
 
 		for (Drawable* d : forward)
 		{
@@ -209,24 +197,16 @@ void Renderer::render()
 }
 
 
-void Renderer::add_drawable(Drawable* d, const std::string& cat)
+void Renderer::add_drawable(Drawable* d, std::string n_id)
 {
-	if (cat_ids.find(cat) == cat_ids.end())
+	logger->check_important(!d->is_in_renderer(), "Tried to add an already added drawable");
+
+	d->notify_add_to_renderer();
+
+	if (n_id != "")
 	{
-		cat_ids[cat] = 0;
+		d->set_drawable_id(n_id);
 	}
-
-	std::string nid = "[" + cat + "]" + std::to_string(cat_ids[cat]);
-
-	cat_ids[cat]++;
-
-	add_drawable(nid, d);
-}
-
-void Renderer::add_drawable(std::string id, Drawable* d)
-{
-	logger->check_important(!d->is_added(), "Tried to add a drawable which was already present");
-	d->set_id(id);
 
 	if (d->needs_deferred_pass())
 	{
@@ -246,14 +226,17 @@ void Renderer::add_drawable(std::string id, Drawable* d)
 	all_drawables.push_back(d);
 }
 
-void Renderer::remove_drawable(std::string id)
+
+void Renderer::remove_drawable(Drawable* drawable)
 {
-	Drawable* d = nullptr;
+	logger->check_important(drawable->is_in_renderer(), "Tried to remove a non-present drawable");
+
+	drawable->notify_remove_from_renderer();
+
 	for (auto it = all_drawables.begin(); it != all_drawables.end();)
 	{
-		if ((*it)->get_id() == id)
+		if ((*it) == drawable)
 		{
-			d = *it;
 			it = all_drawables.erase(it);
 		}
 		else
@@ -262,16 +245,11 @@ void Renderer::remove_drawable(std::string id)
 		}
 	}
 
-	if (d == nullptr)
-	{
-		logger->warn("Tried to remove a drawable which was not present");
-	}
-
-	if (d->needs_deferred_pass())
+	if (drawable->needs_deferred_pass())
 	{
 		for (auto it = deferred.begin(); it != deferred.end();)
 		{
-			if (*it == d)
+			if ((*it) == drawable)
 			{
 				it = deferred.erase(it);
 			}
@@ -282,11 +260,11 @@ void Renderer::remove_drawable(std::string id)
 		}
 	}
 
-	if (d->needs_forward_pass())
+	if (drawable->needs_forward_pass())
 	{
 		for (auto it = forward.begin(); it != forward.end();)
 		{
-			if (*it == d)
+			if ((*it) == drawable)
 			{
 				it = forward.erase(it);
 			}
@@ -297,11 +275,11 @@ void Renderer::remove_drawable(std::string id)
 		}
 	}
 
-	if (d->needs_gui_pass())
+	if (drawable->needs_gui_pass())
 	{
 		for (auto it = gui.begin(); it != gui.end();)
 		{
-			if (*it == d)
+			if ((*it) == drawable)
 			{
 				it = gui.erase(it);
 			}
@@ -312,8 +290,32 @@ void Renderer::remove_drawable(std::string id)
 		}
 	}
 
-	d->set_id("");
+}
 
+void Renderer::add_light(Light* light)
+{
+	logger->check_important(!light->is_added_to_renderer(), "Tried to add an already added light");
+	light->set_added(true);
+	
+	lights.push_back(light);
+}
+
+void Renderer::remove_light(Light* light)
+{
+	logger->check_important(light->is_added_to_renderer(), "Tried to remove a non-added light");
+	light->set_added(false);
+
+	for (auto it = lights.begin(); it != lights.end(); )
+	{
+		if (*it == light)
+		{
+			it = lights.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
 }
 
 int Renderer::get_width()
@@ -402,8 +404,6 @@ Renderer::Renderer(cpptoml::table& settings)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	resize(width, height, scale);
-
-	fullscreen = assets->get<Shader>("core", "shaders/fullscreen/fullscreen.vs");
 
 }
 

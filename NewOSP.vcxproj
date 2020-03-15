@@ -143,8 +143,8 @@
     <None Include="res\core\default_gas.toml" />
     <None Include="res\core\mat_default.toml" />
     <None Include="res\core\package.toml" />
-    <None Include="res\core\shaders\fullscreen\fullscreen.fs" />
-    <None Include="res\core\shaders\fullscreen\fullscreen.vs" />
+    <None Include="res\core\shaders\light\sunlight.fs" />
+    <None Include="res\core\shaders\light\sunlight.vs" />
     <None Include="res\navball\navball.toml" />
     <None Include="res\rss\package.toml" />
     <None Include="res\rss\planets\earth\config.toml" />
@@ -242,8 +242,10 @@
     <ClCompile Include="src\util\render\TextDrawer.cpp" />
     <ClCompile Include="src\vehicle\Vehicle.cpp" />
     <ClCompile Include="src\vehicle\part\Piece.cpp" />
+    <ClCompile Include="src\renderer\lighting\SunLight.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\renderer\lighting\Light.h" />
     <ClInclude Include="src\renderer\camera\Camera.h" />
     <ClInclude Include="src\renderer\Drawable.h" />
     <ClInclude Include="src\renderer\GBuffer.h" />
@@ -347,6 +349,7 @@
     <ClInclude Include="src\util\render\TextDrawer.h" />
     <ClInclude Include="src\vehicle\Vehicle.h" />
     <ClInclude Include="src\vehicle\part\Piece.h" />
+    <ClInclude Include="src\renderer\lighting\SunLight.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
