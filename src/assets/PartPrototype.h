@@ -84,22 +84,7 @@ class PartPrototype
 {
 private:
 
-	// Simple checks
-	void single_collider_common(Node* n);
-
-	//        min        max
-	std::pair<glm::vec3, glm::vec3> obtain_bounds(Mesh* m);
-
-	void load_collider_compound(btCollisionShape** target, Node* n);
-	void load_collider_box(btCollisionShape** target, Node* n);
-	void load_collider_sphere(btCollisionShape** target, Node* n);
-	void load_collider_cylinder(btCollisionShape** target, Node* n);
-	void load_collider_cone(btCollisionShape** target, Node* n);
-	void load_collider_capsule(btCollisionShape** target, Node* n);
-	void load_collider_concave(btCollisionShape** target, Node* n);
-	void load_collider_convex(btCollisionShape** target, Node* n);
-
-	void load_collider(btCollisionShape** target, Node* n);
+	
 
 	void load_piece(const cpptoml::table& toml, GPUModelNodePointer&& n);
 

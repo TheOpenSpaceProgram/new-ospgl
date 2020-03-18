@@ -24,9 +24,9 @@
 // that can be broken on user command. 
 // ---
 // Does not allow circular dependencies, so docking may be a bit tricky,
-// but this is exactly the same as KSP's mechanic. Maybe the non
-// principal docking ports could simply create a very strong link, while
-// the principal one actually allows welding.
+// but this is exactly the same as KSP's mechanic. Maybe the
+// non-main docking ports could simply create a very strong link, while
+// the main one actually allows welding.
 class Vehicle : public Drawable
 {
 private:
@@ -76,7 +76,7 @@ public:
 
 	void set_breaking_enabled(bool value);
 
-	virtual void deferred_pass(glm::ivec2 size, CameraUniforms& camera_uniforms) override;
+	virtual void deferred_pass(CameraUniforms& camera_uniforms) override;
 	virtual bool needs_deferred_pass() override { return true; }
 
 	Vehicle(btDynamicsWorld* world);

@@ -34,7 +34,7 @@ public:
 	
 	virtual void initialize(PlanetarySystem* system, size_t body_count) override;
 	virtual void prepare(double t0, double tstep, PosVector& out_pos) override;
-	virtual size_t propagate(Vessel* v) override;
+	virtual size_t propagate(CartesianState* state) override;
 
 
 };

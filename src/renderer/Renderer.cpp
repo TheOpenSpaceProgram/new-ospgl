@@ -74,7 +74,7 @@ void Renderer::prepare_deferred()
 
 }
 
-void Renderer::prepare_forward(glm::dvec3 cam_pos)
+void Renderer::prepare_forward(CameraUniforms& cu)
 {
 	glEnable(GL_BLEND);
 
@@ -98,7 +98,7 @@ void Renderer::prepare_forward(glm::dvec3 cam_pos)
 		// Do a pass for every light
 		for (Light* l : lights)
 		{
-			l->do_pass(cam_pos, gbuffer);
+			l->do_pass(cu, gbuffer);
 		}
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -172,14 +172,14 @@ void Renderer::render()
 	{
 		for (Drawable* d : deferred)
 		{
-			d->deferred_pass(glm::ivec2(swidth, sheight), c_uniforms);
+			d->deferred_pass(c_uniforms);
 		}
 
-		prepare_forward(c_uniforms.cam_pos);
+		prepare_forward(c_uniforms);
 
 		for (Drawable* d : forward)
 		{
-			d->forward_pass(glm::ivec2(swidth, sheight), c_uniforms);
+			d->forward_pass(c_uniforms);
 		}
 
 		if (debug_drawer->debug_enabled)
@@ -191,7 +191,7 @@ void Renderer::render()
 
 		for (Drawable* d : gui)
 		{
-			d->gui_pass(glm::ivec2(swidth, sheight), c_uniforms);
+			d->gui_pass(c_uniforms);
 		}
 	}
 

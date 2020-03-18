@@ -150,7 +150,7 @@ void PlanetarySystem::render_body_atmosphere(CartesianState state, SystemElement
 static double zoom = 1.0;
 
 
-void PlanetarySystem::deferred_pass(glm::ivec2 size, CameraUniforms & cu)
+void PlanetarySystem::deferred_pass(CameraUniforms & cu)
 {
 	float fov = glm::radians(60.0f);
 
@@ -211,7 +211,7 @@ void PlanetarySystem::deferred_pass(glm::ivec2 size, CameraUniforms & cu)
 	}
 }
 
-void PlanetarySystem::forward_pass(glm::ivec2 size, CameraUniforms & cu)
+void PlanetarySystem::forward_pass(CameraUniforms & cu)
 {
 	glm::dvec3 camera_pos = cu.cam_pos;
 	glm::dmat4 proj_view = cu.proj_view;
@@ -324,12 +324,18 @@ void PlanetarySystem::init_physics(btDynamicsWorld* world)
 
 }
 
+size_t PlanetarySystem::get_element_index_from_name(const std::string& name)
+{
+	auto it = name_to_index.find(name);
+	// TODO: Maybe make this not important?
+	logger->check_important(it != name_to_index.end(), "Tried to access by name a element which does not exist");
+	
+	return it->second;
+}
+
 
 void PlanetarySystem::update(double dt, btDynamicsWorld* world, bool bullet)
 {
-	// Wooooops:
-	//dt = 0.01;
-
 	if (bullet_states.size() == 0)
 	{
 		bullet_states.resize(elements.size());

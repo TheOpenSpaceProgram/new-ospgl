@@ -3,7 +3,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include "../../util/SerializeUtil.h"
 #include "../../util/Logger.h"
-
+#include "../CartesianState.h"
 
 
 // Units are, always, meters (m), degrees (º), kilograms (kg)
@@ -40,14 +40,6 @@ struct KeplerOrbit
 	glm::dvec3 get_plane_normal();
 };
 
-struct CartesianState
-{
-	glm::dvec3 pos;
-	glm::dvec3 vel;
-
-	CartesianState() {}
-	CartesianState(glm::dvec3 p, glm::dvec3 v) : pos(p), vel(v) {};
-};
 
 struct KeplerElements
 {

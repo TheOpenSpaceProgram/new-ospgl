@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 #include "../GBuffer.h"
 #include "../../assets/Shader.h"
+#include "../camera/CameraUniforms.h"
+
 // The GBuffer is always in camera relative space
 // (in order to have high-quality floats near the origin)
 // So all lights must keep that in mind
@@ -14,7 +16,7 @@ private:
 public:
 
 
-	virtual void do_pass(glm::dvec3 cam_pos, GBuffer* gbuf) = 0;
+	virtual void do_pass(CameraUniforms& cu, GBuffer* gbuf) = 0;
 
 	// Useful function as this code is present on all lights
 	void prepare_shader(Shader* shader, GBuffer* gbuffer)

@@ -4,7 +4,8 @@
 #include "Shader.h"
 #include "Material.h"
 #include "../renderer/camera/CameraUniforms.h"
-
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include "../physics/glm/BulletGlmCompat.h"
 
 
 struct aiScene;
@@ -91,7 +92,7 @@ struct Node
 
 // Models allow loading 3d models using the assimp library
 // For now we support (and have tested):
-// - .blend (Blender files)
+// - .fbx (Easy to export from blender, make sure custom-properties are enabled for collision to work!)
 // It supports a full hierarchy of meshes, each with a subtransform.
 // An empty mesh is a node, it contains only a transform
 class Model
@@ -257,4 +258,28 @@ struct GPUModelNodePointer
 	}
 
 
+};
+
+
+// Used to easily extract colliders from any model
+class ModelColliderExtractor
+{
+public:
+
+	// Simple checks
+	static void single_collider_common(Node* n);
+
+	//        min        max
+	static std::pair<glm::vec3, glm::vec3> obtain_bounds(Mesh* m);
+
+	static void load_collider_compound(btCollisionShape** target, Node* n);
+	static void load_collider_box(btCollisionShape** target, Node* n);
+	static void load_collider_sphere(btCollisionShape** target, Node* n);
+	static void load_collider_cylinder(btCollisionShape** target, Node* n);
+	static void load_collider_cone(btCollisionShape** target, Node* n);
+	static void load_collider_capsule(btCollisionShape** target, Node* n);
+	static void load_collider_concave(btCollisionShape** target, Node* n);
+	static void load_collider_convex(btCollisionShape** target, Node* n);
+
+	static void load_collider(btCollisionShape** target, Node* n);
 };

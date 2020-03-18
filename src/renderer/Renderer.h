@@ -42,7 +42,7 @@ private:
 	// Setups OpenGL to draw to the normal fullscreen fbuffer
 	// and draws the gbuffer to the screen (also updating depth buffer
 	// for the forward rendering stuff)
-	void prepare_forward(glm::dvec3 cam_pos);
+	void prepare_forward(CameraUniforms& cu);
 
 	// Draws the framebuffer to screen and prepares OpenGL
 	// to draw directly to backbuffer

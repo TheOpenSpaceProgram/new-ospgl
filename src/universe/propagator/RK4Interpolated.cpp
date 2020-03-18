@@ -94,12 +94,12 @@ void RK4Interpolated::prepare(double t0, double tstep, PosVector& out_pos)
 	out_pos = this->t0_pos;
 }
 
-size_t RK4Interpolated::propagate(Vessel* v)
+size_t RK4Interpolated::propagate(CartesianState* state)
 {
 	Derivative zero = Derivative();
 	zero.dx = glm::dvec3(0.0); zero.dv = glm::dvec3(0.0);
 
-	CartesianState s0 = v->state;
+	CartesianState s0 = *state;
 	Derivative k1, k2, k3, k4;
 	
 	size_t closest;
@@ -112,8 +112,8 @@ size_t RK4Interpolated::propagate(Vessel* v)
 	glm::dvec3 dxdt = (1.0 / 6.0) * (k1.dx + 2.0 * k2.dx + 2.0 * k3.dx + k4.dx);
 	glm::dvec3 dvdt = (1.0 / 6.0) * (k1.dv + 2.0 * k2.dv + 2.0 * k3.dv + k4.dv);
 
-	v->state.pos += dxdt * tstep;
-	v->state.vel += dvdt * tstep;
+	state->pos += dxdt * tstep;
+	state->vel += dvdt * tstep;
 
 	return closest;
 }

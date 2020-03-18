@@ -239,11 +239,6 @@ int main(void)
 		SunLight sun = SunLight();
 		renderer.add_light(&sun);
 
-		PointLight point = PointLight();
-		point.linear = 0.01f;
-		point.quadratic = 0.0000001f;
-		renderer.add_light(&point);
-
 		while (!glfwWindowShouldClose(renderer.window))
 		{
 			input->update(renderer.window);
@@ -290,7 +285,6 @@ int main(void)
 			v->set_breaking_enabled(t > 0.0);
 
 			camera->center = to_dvec3(p_engine.get_global_transform().getOrigin());
-			point.pos = to_dvec3(p_engine.get_global_transform().getOrigin()) + glm::dvec3(3.0, 0.0, 0.0);
 
 			camera->update(dt);
 

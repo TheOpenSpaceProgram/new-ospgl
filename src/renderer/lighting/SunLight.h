@@ -19,6 +19,6 @@ public:
 	~SunLight();
 
 	// Inherited via Light
-	virtual void do_pass(glm::dvec3 cam_pos, GBuffer * gbuf) override;
+	virtual void do_pass(CameraUniforms& cu, GBuffer * gbuf) override;
 };
 

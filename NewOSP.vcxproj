@@ -143,8 +143,10 @@
     <None Include="res\core\default_gas.toml" />
     <None Include="res\core\mat_default.toml" />
     <None Include="res\core\package.toml" />
-    <None Include="res\core\shaders\light\point.fs" />
-    <None Include="res\core\shaders\light\point.vs" />
+    <None Include="res\core\shaders\light\point_fullscreen.fs" />
+    <None Include="res\core\shaders\light\point_fullscreen.vs" />
+    <None Include="res\core\shaders\light\point_sphere.fs" />
+    <None Include="res\core\shaders\light\point_sphere.vs" />
     <None Include="res\core\shaders\light\sunlight.fs" />
     <None Include="res\core\shaders\light\sunlight.vs" />
     <None Include="res\navball\navball.toml" />
@@ -172,6 +174,9 @@
     <None Include="settings.toml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\universe\entity\building\BuildingEntity.cpp" />
+    <ClCompile Include="src\universe\entity\trajectory\LandedTrajectory.cpp" />
+    <ClCompile Include="src\universe\entity\trajectory\IntegratedOrbitTrajectory.cpp" />
     <ClCompile Include="src\renderer\lighting\PointLight.cpp" />
     <ClCompile Include="src\renderer\GBuffer.cpp" />
     <ClCompile Include="src\EditorMain.cpp" />
@@ -248,6 +253,9 @@
     <ClCompile Include="src\renderer\lighting\SunLight.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\universe\entity\building\BuildingEntity.h" />
+    <ClInclude Include="src\universe\entity\trajectory\LandedTrajectory.h" />
+    <ClInclude Include="src\universe\entity\trajectory\IntegratedOrbitTrajectory.h" />
     <ClInclude Include="src\renderer\lighting\PointLight.h" />
     <ClInclude Include="src\renderer\lighting\Light.h" />
     <ClInclude Include="src\renderer\camera\Camera.h" />
@@ -255,6 +263,9 @@
     <ClInclude Include="src\renderer\GBuffer.h" />
     <ClInclude Include="src\physics\ground\GroundShapeServer.h" />
     <ClInclude Include="src\physics\ground\GroundShape.h" />
+    <ClInclude Include="src\universe\entity\Entity.h" />
+    <ClInclude Include="src\universe\entity\Trajectory.h" />
+    <ClInclude Include="src\universe\CartesianState.h" />
     <ClInclude Include="src\util\LuaUtil.h" />
     <ClInclude Include="src\vehicle\part\link\SimpleLink.h" />
     <ClInclude Include="src\assets\PartPrototype.h" />

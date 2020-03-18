@@ -641,7 +641,7 @@ void Vehicle::set_breaking_enabled(bool value)
 	this->breaking_enabled = value;
 }
 
-void Vehicle::deferred_pass(glm::ivec2 size, CameraUniforms & camera_uniforms)
+void Vehicle::deferred_pass(CameraUniforms & camera_uniforms)
 {
 	for (Piece* p : all_pieces)
 	{

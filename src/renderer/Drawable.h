@@ -12,9 +12,9 @@ private:
 
 public:
 
-	virtual void deferred_pass(glm::ivec2 size, CameraUniforms& cu){}
-	virtual void forward_pass(glm::ivec2 size, CameraUniforms& cu){}
-	virtual void gui_pass(glm::ivec2 size, CameraUniforms& cu) {}
+	virtual void deferred_pass(CameraUniforms& cu){}
+	virtual void forward_pass(CameraUniforms& cu){}
+	virtual void gui_pass(CameraUniforms& cu) {}
 	
 	virtual bool needs_deferred_pass() { return false; }
 	virtual bool needs_forward_pass() { return false; }

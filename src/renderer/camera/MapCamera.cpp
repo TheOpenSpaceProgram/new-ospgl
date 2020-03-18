@@ -79,6 +79,9 @@ CameraUniforms MapCamera::get_camera_uniforms(int w, int h)
 	out.far_plane = 10e16f;
 	out.cam_pos = camera_pos;
 
+	out.screen_size = glm::vec2((float)w, (float)h);
+	out.iscreen_size = glm::ivec2(w, h);
+
 	return out;
 }
 

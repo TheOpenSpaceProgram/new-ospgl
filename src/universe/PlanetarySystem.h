@@ -13,6 +13,8 @@
 #include <btBulletDynamicsCommon.h>
 #pragma warning(pop)
 
+#include "../util/Logger.h"
+
 struct SystemPointer;
 
 // A system holds a central star, origin of the coordinate system, and
@@ -41,6 +43,9 @@ public:
 
 	std::unordered_map<std::string, size_t> name_to_index;
 	
+	// Safer than directly indexing the array
+	size_t get_element_index_from_name(const std::string& name);
+
 	StateVector states_now;
 	// Updates with bullet physics dt instead of normal dt
 	// TODO: Maybe the visual and physics states could
@@ -81,9 +86,9 @@ public:
 	// semi-major axis it's not really important which t you choose.
 	void compute_sois(double t);
 
-	virtual void deferred_pass(glm::ivec2 size, CameraUniforms& cu) override;
+	virtual void deferred_pass(CameraUniforms& cu) override;
 	virtual bool needs_deferred_pass() override { return true; }
-	virtual void forward_pass(glm::ivec2 size, CameraUniforms& cu) override;
+	virtual void forward_pass(CameraUniforms& cu) override;
 	virtual bool needs_forward_pass() override { return true; }
 
 	void update(double dt, btDynamicsWorld* world, bool bullet);

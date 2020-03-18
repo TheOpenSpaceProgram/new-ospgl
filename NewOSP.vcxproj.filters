@@ -53,8 +53,10 @@
     <None Include="settings.toml" />
     <None Include="res\core\shaders\light\sunlight.fs" />
     <None Include="res\core\shaders\light\sunlight.vs" />
-    <None Include="res\core\shaders\light\point.fs" />
-    <None Include="res\core\shaders\light\point.vs" />
+    <None Include="res\core\shaders\light\point_fullscreen.fs" />
+    <None Include="res\core\shaders\light\point_fullscreen.vs" />
+    <None Include="res\core\shaders\light\point_sphere.fs" />
+    <None Include="res\core\shaders\light\point_sphere.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\Logger.cpp">
@@ -124,9 +126,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\atmosphere\AtmosphereRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\universe\PlanetarySystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\universe\kepler\KeplerElements.cpp">
@@ -268,6 +267,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\renderer\lighting\PointLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\entity\trajectory\IntegratedOrbitTrajectory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\entity\trajectory\LandedTrajectory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\entity\building\BuildingEntity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\PlanetarySystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -588,6 +599,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\lighting\PointLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\entity\Entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\entity\Trajectory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\CartesianState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\entity\trajectory\IntegratedOrbitTrajectory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\entity\trajectory\LandedTrajectory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\entity\building\BuildingEntity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

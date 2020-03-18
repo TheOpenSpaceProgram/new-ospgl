@@ -14,4 +14,7 @@ struct CameraUniforms
 	float far_plane;
 
 	glm::dvec3 cam_pos;
+
+	glm::vec2 screen_size;
+	glm::ivec2 iscreen_size;
 };
