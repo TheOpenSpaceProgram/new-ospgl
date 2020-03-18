@@ -281,6 +281,12 @@
     <ClCompile Include="src\universe\PlanetarySystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\universe\entity\Entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universe\entity\vehicle\VehicleEntity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dep\sol.hpp">
@@ -617,6 +623,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\universe\entity\building\BuildingEntity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universe\entity\vehicle\VehicleEntity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

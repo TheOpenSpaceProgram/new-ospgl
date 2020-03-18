@@ -164,7 +164,7 @@ int main(void)
 		p_engine.link_to = btVector3(0.0, 0.0, -2.0 / 2.0);
 
 		p_engine.link = std::make_unique<SimpleLink>(world);
-		p_engine.welded = true;
+		p_engine.welded = false;
 		
 		v->dirty = true;
 
@@ -233,15 +233,16 @@ int main(void)
 		const double step = 1.0 / 30.0;
 		const int max_steps = 1;
 		
-		p_engine.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
-		p_capsule.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
-	
+
 		SunLight sun = SunLight();
 		renderer.add_light(&sun);
 
 		while (!glfwWindowShouldClose(renderer.window))
 		{
 			input->update(renderer.window);
+
+			p_engine.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
+			p_capsule.rigid_body->setGravity(btVector3(-9.0, 0.0, 0.0));
 
 
 			glfwPollEvents();
@@ -276,6 +277,8 @@ int main(void)
 			}
 			
 
+			update_vehicles(vehicles, renderer);
+
 			ssystem->update(dt, world, false);
 
 			double sub_steps = (double)world->stepSimulation(dt, max_steps, btScalar(step));
@@ -290,7 +293,6 @@ int main(void)
 
 			std::vector<Vehicle*> n_vehicles;
 
-			update_vehicles(vehicles, renderer);
 
 			renderer.render();
 

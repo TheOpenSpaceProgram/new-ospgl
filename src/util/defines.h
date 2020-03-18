@@ -1,5 +1,9 @@
 #pragma once
 #include <functional>
+#include <vector>
+#include <any>
+
+using VectorOfAny = std::vector<std::any>;
 
 template <class T>
 inline void hash_combine(std::size_t& seed, const T& v)

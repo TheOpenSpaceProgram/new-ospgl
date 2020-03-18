@@ -5,6 +5,8 @@
 #pragma warning(pop)
 
 #include "../../renderer/Drawable.h"
+#include "../../util/defines.h"
+#include <set>
 
 // An entity is something which exists on the world, 
 // it has graphics, and can exists on the bullet physics
@@ -30,6 +32,8 @@ private:
 	Universe* universe;
 	bool bullet_enabled;
 
+	std::set<std::string> signed_up_events;
+
 public:
 
 	virtual Trajectory* get_trajectory() = 0;
@@ -45,6 +49,11 @@ public:
 	// Ticks alongside bullet (bullet tick callback)
 	virtual void physics_update(double pdt) {};
 
+	// Called when the entity is added into the universe
+	// Universe is already initialized
+	virtual void init() {};
+
+
 	// Return true if the physics have stabilized enough for timewarp
 	// Vehicles should return false when they are close enough to surfaces
 	// or in atmospheric flight
@@ -53,6 +62,8 @@ public:
 	void setup(Universe* universe)
 	{
 		this->universe = universe;
+
+		init();
 	}
 
 	void enable_bullet_wrapper(bool value, btDynamicsWorld* world)
@@ -68,4 +79,13 @@ public:
 			disable_bullet(world);
 		}
 	}
+
+	virtual void receive_event(Entity* emitter, const std::string& event_id, VectorOfAny args = VectorOfAny()) {}
+
+	// Note: You don't need to manually drop out of events before destruction, the destructor will do it for you
+	void emit_event(const std::string& event_id, VectorOfAny args = VectorOfAny());
+	void sign_up_for_event(const std::string& event_id);
+	void drop_out_of_event(const std::string& event_id);
+
+	~Entity();
 };

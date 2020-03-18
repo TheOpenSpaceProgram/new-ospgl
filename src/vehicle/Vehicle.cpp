@@ -15,8 +15,8 @@ struct PieceState
 static PieceState obtain_piece_state(Piece* piece)
 {
 	PieceState st;
-	st.transform = piece->get_global_transform();
-	st.linear = piece->get_linear_velocity();
+	st.transform = piece->get_global_transform(false);
+	st.linear = piece->get_linear_velocity(true);
 	st.angular = piece->get_angular_velocity();
 	return st;
 }
@@ -226,11 +226,14 @@ static void create_new_welded_group(
 
 			rigid_body->applyCentralImpulse(states_at_start[p].linear * p->mass);
 			total_angvel += states_at_start[p].angular;
+			//total_impulse += states_at_start[p].linear;
 		}
 
 		// TODO: Is this stuff correct?
 		total_angvel /= (btScalar)wg.first.size();
+	//	total_impulse /= (btScalar)wg.first.size();
 
+		//rigid_body->applyCentralImpulse(total_impulse * tot_mass);
 		rigid_body->setAngularVelocity(total_angvel);
 
 		n_group->rigid_body = rigid_body;
@@ -251,7 +254,8 @@ static void add_piece_physics(Piece* piece, btTransform tform, btDynamicsWorld* 
 
 	rigid_body->setActivationState(DISABLE_DEACTIVATION);
 
-
+	rigid_body->setFriction(piece->friction);
+	rigid_body->setRestitution(piece->restitution);
 
 	world->addRigidBody(rigid_body);
 
@@ -273,6 +277,7 @@ static void create_piece_physics(Piece* piece, std::unordered_map<Piece*, PieceS
 
 	rigid_body->setFriction(piece->friction);
 	rigid_body->setRestitution(piece->restitution);
+	rigid_body->setWorldTransform(states_at_start[piece].transform);
 
 	world->addRigidBody(rigid_body);
 

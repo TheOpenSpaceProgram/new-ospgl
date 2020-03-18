@@ -175,6 +175,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\universe\entity\building\BuildingEntity.cpp" />
+    <ClCompile Include="src\universe\entity\Entity.cpp" />
     <ClCompile Include="src\universe\entity\trajectory\LandedTrajectory.cpp" />
     <ClCompile Include="src\universe\entity\trajectory\IntegratedOrbitTrajectory.cpp" />
     <ClCompile Include="src\renderer\lighting\PointLight.cpp" />
@@ -251,6 +252,7 @@
     <ClCompile Include="src\vehicle\Vehicle.cpp" />
     <ClCompile Include="src\vehicle\part\Piece.cpp" />
     <ClCompile Include="src\renderer\lighting\SunLight.cpp" />
+    <ClCompile Include="src\universe\entity\vehicle\VehicleEntity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\universe\entity\building\BuildingEntity.h" />
@@ -365,6 +367,7 @@
     <ClInclude Include="src\vehicle\Vehicle.h" />
     <ClInclude Include="src\vehicle\part\Piece.h" />
     <ClInclude Include="src\renderer\lighting\SunLight.h" />
+    <ClInclude Include="src\universe\entity\vehicle\VehicleEntity.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

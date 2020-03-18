@@ -7,14 +7,20 @@ bool Piece::is_welded()
 	return in_group != nullptr;
 }
 
-btTransform Piece::get_global_transform()
+btTransform Piece::get_global_transform(bool use_mstate)
 {
 	logger->check(rigid_body != nullptr, "Part is not added to a vessel");
 
 	btTransform tform;
 
-	motion_state->getWorldTransform(tform);
-	//tform = rigid_body->getWorldTransform();
+	if (use_mstate)
+	{
+		motion_state->getWorldTransform(tform);
+	}
+	else
+	{
+		tform = rigid_body->getWorldTransform();
+	}
 
 	if (is_welded())
 	{
@@ -39,12 +45,12 @@ btTransform Piece::get_local_transform()
 	
 }
 
-btVector3 Piece::get_linear_velocity()
+btVector3 Piece::get_linear_velocity(bool ignore_tangential)
 {
 	logger->check(rigid_body != nullptr, "Part is not added to a vessel");
 
 	btVector3 base = rigid_body->getLinearVelocity();
-	if (is_welded())
+	if (is_welded() && !ignore_tangential)
 	{
 		base += get_tangential_velocity();
 	}

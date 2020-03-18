@@ -12,7 +12,6 @@ void SimpleLink::activate(btRigidBody* from, btTransform from_frame, btRigidBody
 		constraint->enableSpring(2, true);
 		constraint->setStiffness(2, 10000.0);
 		constraint->setDamping(2, 0.000005);
-		constraint->setBreakingImpulseThreshold(30.0);
 		constraint->setLinearUpperLimit(btVector3(0., 0., 10.5));
 		constraint->setLinearLowerLimit(btVector3(0., 0., -10.5));
 
@@ -53,7 +52,7 @@ void SimpleLink::set_breaking_enabled(bool value)
 {
 	if (constraint)
 	{
-		constraint->setBreakingImpulseThreshold(value ? 30.0 : 100000000.0);
+		constraint->setBreakingImpulseThreshold(value ? 10000.0 : 100000000.0);
 	}
 }
 

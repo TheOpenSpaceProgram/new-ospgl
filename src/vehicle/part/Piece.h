@@ -100,9 +100,9 @@ public:
 	// user sets "welded" to false and "build_physics" has not
 	// yet been called. Mostly used internally
 	bool is_welded();
-	btTransform get_global_transform();
+	btTransform get_global_transform(bool use_mstate = true);
 	btTransform get_local_transform();
-	btVector3 get_linear_velocity();
+	btVector3 get_linear_velocity(bool ignore_tangential = false);
 	btVector3 get_angular_velocity();
 	// Returns zero on non-welded pieces
 	btVector3 get_tangential_velocity();
