@@ -47,6 +47,7 @@ public:
 	virtual void update(double dt) {};
 
 	// Ticks alongside bullet (bullet tick callback)
+	// Note: Ticks before bullet update! (pretick)
 	virtual void physics_update(double pdt) {};
 
 	// Called when the entity is added into the universe
@@ -64,6 +65,11 @@ public:
 		this->universe = universe;
 
 		init();
+	}
+
+	Universe* get_universe()
+	{
+		return universe;
 	}
 
 	void enable_bullet_wrapper(bool value, btDynamicsWorld* world)

@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 #include "camera/CameraUniforms.h"
 
+class Renderer;
+
 // Base class for all stuff that can be drawn
 class Drawable
 {
@@ -9,6 +11,7 @@ private:
 
 	bool added;
 	std::string drawable_id;
+
 
 public:
 
@@ -44,6 +47,7 @@ public:
 	{
 		return drawable_id;
 	}
+
 
 	Drawable()
 	{

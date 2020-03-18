@@ -23,7 +23,7 @@ void main()
     float Emissive = texture(gEmissive, TexCoords).r;
 
     vec3 sun_dir = normalize(sun_pos - FragPos);
-    vec3 diff = max(dot(Normal, sun_dir), 0.0) * color * Albedo;
+    vec3 diff = max(dot(Normal, sun_dir), 0.0f) * color * Albedo;
 
     // Specular is super simple as the camera is always on (0, 0, 0)
     vec3 view_dir = normalize(-FragPos);
@@ -32,5 +32,7 @@ void main()
     vec3 spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64) * Specular * spec_color;
     vec3 ambient = ambient_color * Albedo;
 
-    FragColor = vec4(diff + spec + ambient, 1.0);
+    vec3 emit = Emissive * Albedo;
+
+    FragColor = vec4(diff + spec + ambient + emit, 1.0);
 }  

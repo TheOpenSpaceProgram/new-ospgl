@@ -2,6 +2,14 @@
 #include "PlanetarySystem.h"
 #include "entity/Entity.h"
 #include <any>
+#include "../renderer/Renderer.h"
+
+#pragma warning(push, 0)
+#include <btBulletDynamicsCommon.h>
+#include <BulletDynamics/ConstraintSolver/btNNCGConstraintSolver.h>
+#pragma warning(pop)
+
+#include "../physics/debug/BulletDebugDrawer.h"
 
 // The Universe is the central class of the game. It stores both the system
 // and everything else in the system (buildings and vehicles).
@@ -14,7 +22,7 @@
 // It's up to the event how are these arguments handled.
 // Global events have "emitter" set to nullptr
 // Event naming:
-// - OSPGL events are prefixed with 'osp:'
+// - OSPGL events are prefixed with 'core:'
 // - Mod events should be prefixed with the mod's id and ':', for example interstellar:start_hyperspace
 // This will hopefully avoid event name clashing.
 class Universe
@@ -29,9 +37,23 @@ private:
 	void drop_out_of_event(const std::string& event_id, Entity* id);
 	void emit_event(Entity* emitter, const std::string& event_id, VectorOfAny args = VectorOfAny());
 
+	btDefaultCollisionConfiguration* bt_collision_config;
+	btCollisionDispatcher* bt_dispatcher;
+	btBroadphaseInterface* bt_brf_interface;
+	btSequentialImpulseConstraintSolver* bt_solver;
+
+	BulletDebugDrawer* bt_debug;
+
 
 
 public:
+
+	static constexpr double PHYSICS_STEPSIZE = 1.0 / 30.0;
+	static constexpr int MAX_PHYSICS_STEPS = 1;
+
+
+	Renderer* renderer;
+	btDiscreteDynamicsWorld* bt_world;
 
 	friend class Entity;
 
@@ -45,7 +67,11 @@ public:
 	void remove_entity(T* ent);
 
 
-	Universe();
+	// Note: This is automatically called from bullet
+	void physics_update(double pdt);
+	void update(double dt);
+
+	Universe(Renderer* renderer);
 	~Universe();
 };
 
@@ -58,7 +84,9 @@ inline T* Universe::create_entity(Args... args)
 	Entity* as_ent = (Entity*)n_ent;
 	entities.push_back((Entity*)n_ent);
 	
-	emit_event(nullptr, "osp:new_entity", { as_ent });
+	emit_event(nullptr, "core:new_entity", { as_ent });
+
+	renderer->add_drawable((Drawable*)as_ent);
 
 	as_ent->setup(this);
 
@@ -80,7 +108,9 @@ inline void Universe::remove_entity(T* ent)
 		}
 	}
 
-	emit_event(nullptr, "osp:remove_entity", { as_ent });
+	renderer->remove_drawable((Drawable*)as_ent);
+
+	emit_event(nullptr, "core:remove_entity", { as_ent });
 
 	// Actually destroy the entity
 	delete ent;
