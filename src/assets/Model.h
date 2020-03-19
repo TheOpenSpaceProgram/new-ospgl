@@ -118,7 +118,7 @@ private:
 
 public:
 
-	static constexpr char* COLLIDER_PREFIX = "col_";
+	static constexpr const char* COLLIDER_PREFIX = "col_";
 
 	std::unordered_map<std::string, Node*> node_by_name;
 

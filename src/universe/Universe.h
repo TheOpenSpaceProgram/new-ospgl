@@ -61,7 +61,7 @@ public:
 	std::vector<Entity*> entities;
 
 	template<typename T, typename... Args> 
-	T* create_entity(Args... args);
+	T* create_entity(Args&&... args);
 
 	template<typename T>
 	void remove_entity(T* ent);
@@ -76,11 +76,11 @@ public:
 };
 
 template<typename T, typename ...Args>
-inline T* Universe::create_entity(Args... args)
+inline T* Universe::create_entity(Args&&... args)
 {
 	static_assert(std::is_base_of<Entity, T>::value, "Entities must inherit from the Entity class");
 
-	T* n_ent = new T(args);
+	T* n_ent = new T(std::forward<Args>(args)...);
 	Entity* as_ent = (Entity*)n_ent;
 	entities.push_back((Entity*)n_ent);
 	

@@ -91,8 +91,8 @@ private:
 public:
 
 
-	static constexpr char* PIECE_PREFIX = "p_";
-	static constexpr char* ROOT_NAME = "p_root";
+	static constexpr const char* PIECE_PREFIX = "p_";
+	static constexpr const char* ROOT_NAME = "p_root";
 
 	// First one is always root
 	std::unordered_map<std::string, PiecePrototype> pieces;

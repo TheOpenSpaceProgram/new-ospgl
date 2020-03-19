@@ -11,7 +11,7 @@ VehicleEntity::~VehicleEntity()
 {
 }
 
-Trajectory * VehicleEntity::get_trajectory()
+Trajectory* VehicleEntity::get_trajectory()
 {
 	return nullptr;
 }

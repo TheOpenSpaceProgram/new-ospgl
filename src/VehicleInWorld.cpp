@@ -65,6 +65,7 @@ int main(void)
 		glm::dvec3 cam_offset = glm::dvec3(-10.0, 0.0f, 0.0f);
 		camera->fw = glm::normalize(glm::dvec3(1.0f, 0.0f, 0.0));
 		camera->pos = cam_offset;
+		camera->fov = 60.0f;
 
 		Universe universe = Universe(&renderer);
 		assets->get_from_path<Config>("debug_system:systems/system.toml")->read_to(universe.system);
