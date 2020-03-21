@@ -1,5 +1,5 @@
 #version 330 core
-layout (location = 0) out vec3 gPosition;
+layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec4 gAlbedoSpec;
 
@@ -14,7 +14,7 @@ uniform sampler2D diffuse;
 
 void main()
 {    
-    gPosition = vPos;
+    gPosition = vec4(vPos, 1.0f);
     gNormal = normalize(vNrm);
     gAlbedoSpec.rgb = texture(diffuse, vTex).rgb;
     gAlbedoSpec.a = 0.2;

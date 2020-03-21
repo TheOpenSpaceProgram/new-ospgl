@@ -1,8 +1,7 @@
 #version 430 core
-layout (location = 0) out vec3 gPosition;
+layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec4 gAlbedoSpec;
-layout (location = 3) out float gEmissive;
 
 out vec4 FragColor;
 
@@ -193,8 +192,7 @@ void main()
 
     gAlbedoSpec = vec4((col + atmoc.xyz * atmoc.w) * 0.77, 1.0);
     gNormal = nrm;
-    gPosition = vPos;
-    gEmissive = atmoc.w * 0.5 + spec;
+    gPosition = vec4(vPos, atmoc.w * 0.5 + spec);
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets

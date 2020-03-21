@@ -16,7 +16,10 @@ void GBuffer::create(size_t width, size_t height)
 	// render properly on a lot of cases.
 	glGenTextures(1, &g_pos);
 	glBindTexture(GL_TEXTURE_2D, g_pos);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, (int)width, (int)height, 0, GL_RGB, GL_FLOAT, 0);
+	// Turns out GL_RGB32F is not widely supported, but GL_RGBA32F is
+	// So we have to use it for the thing to work in MESA drivers. 
+	// No perfomance hit as we use the alpha for emissive. It's just a bit confusing...
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, (int)width, (int)height, 0, GL_RGB, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, g_pos, 0);
@@ -37,17 +40,9 @@ void GBuffer::create(size_t width, size_t height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, g_col, 0);
 
-	// Emissive buffer
-	glGenTextures(1, &g_emit);
-	glBindTexture(GL_TEXTURE_2D, g_emit);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, (int)width, (int)height, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, g_emit, 0);
 
-	unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
-		GL_COLOR_ATTACHMENT3 };
-	glDrawBuffers(4, attachments);
+	unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+	glDrawBuffers(3, attachments);
 
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);

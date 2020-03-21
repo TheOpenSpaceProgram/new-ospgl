@@ -16,11 +16,12 @@ uniform vec3 spec_color;
 void main()
 {             
     // retrieve data from G-buffer
-    vec3 FragPos = texture(gPosition, TexCoords).rgb;
+    vec4 FragPosEmit = texture(gPosition, TexCoords).rgba;
+	vec3 FragPos = FragPosEmit.rgb;
     vec3 Normal = texture(gNormal, TexCoords).rgb;
     vec3 Albedo = texture(gAlbedoSpec, TexCoords).rgb;
     float Specular = texture(gAlbedoSpec, TexCoords).a;
-    float Emissive = texture(gEmissive, TexCoords).r;
+    float Emissive = FragPosEmit.a;
 
     vec3 sun_dir = normalize(sun_pos - FragPos);
     vec3 diff = max(dot(Normal, sun_dir), 0.0f) * color * Albedo;

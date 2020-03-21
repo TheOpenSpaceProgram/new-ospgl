@@ -18,9 +18,8 @@ private:
 public:
 
 	GLuint g_buffer;
-	// Position, normal and albedo (rgb) + specular (alpha)
-	// G_emit is a single float that contains emissive factor
-	GLuint g_pos, g_nrm, g_col, g_emit;
+	// Position (alpha is emissive), normal and albedo (rgb) + specular (alpha)
+	GLuint g_pos, g_nrm, g_col;
 	// Depth buffer
 	GLuint rbo;
 
