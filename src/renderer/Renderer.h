@@ -14,6 +14,8 @@
 #include "Drawable.h"
 #include "lighting/Light.h"
 
+#define ENABLE_GL_DEBUG
+
 // Allows scaled rendering of the 3D scene to a framebuffer
 // and then UI drawing (in real resolution) over it
 // It first does a deferred rendering pass, and then a

@@ -7,6 +7,7 @@ OPTION(OSP_BUILD_SANATIZER          "Build with the address sanatizer" OFF)
 OPTION(OSP_WARNINGS_ARE_ERRORS      "Build with the flag -Werror" OFF)
 OPTION(OSP_ENABLE_COMPILER_WARNINGS "Build with the majority of compiler warnings enabled" OFF)
 
+set(CMAKE_CXX_FLAGS "-g")
 set (CMAKE_CXX_STANDARD 17)
 
 file(GLOB_RECURSE OSP_SOURCES "src/*.cpp")

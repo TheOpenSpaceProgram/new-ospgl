@@ -90,7 +90,6 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 			glBindVertexBuffer(1, uv_bo, 0, sizeof(glm::vec2));
 			glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_SHORT, (void*)0);
 			glBindVertexArray(0);
-			glBindBuffer(GL_VERTEX_ARRAY, 0);
 
 
 
@@ -163,7 +162,6 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 				glBindVertexBuffer(1, uv_bo, 0, sizeof(glm::vec2));
 				glDrawElements(GL_TRIANGLES, (GLsizei)bulk_index_count, GL_UNSIGNED_SHORT, (void*)0);
 				glBindVertexArray(0);
-				glBindBuffer(GL_VERTEX_ARRAY, 0);
 
 
 

@@ -342,10 +342,38 @@ glm::ivec2 Renderer::get_size()
 	}
 }
 
+static void open_gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* msg, const void* user_param)
+{
+	std::string str_msg;
+	for(size_t i = 0; i < length; i++)
+	{
+		str_msg.push_back(msg[i]);
+	}
+
+	if(severity == GL_DEBUG_SEVERITY_LOW)
+	{
+		logger->info("{}", str_msg);
+	}
+	else if(severity == GL_DEBUG_SEVERITY_MEDIUM)
+	{
+		logger->warn("{}", str_msg);
+	}
+	else if(severity == GL_DEBUG_SEVERITY_HIGH)
+	{
+		logger->fatal("{}", str_msg);
+	}
+	else
+	{
+		logger->debug("{}", str_msg);
+	}
+}
+
 Renderer::Renderer(cpptoml::table& settings)
 {
 	render_enabled = true;
 	gbuffer = nullptr;
+	fbuffer = nullptr;
+	wireframe = false;
 
 	std::string type = "windowed";
 
@@ -388,6 +416,13 @@ Renderer::Renderer(cpptoml::table& settings)
 		logger->fatal("Could not initialize glad");
 	}
 
+	// Print context info
+	logger->info("OpenGL Version: {}", glGetString(GL_VERSION));
+	logger->info("GLSL Version: {}", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	logger->info("OpenGL Vendor: {}",  glGetString(GL_VENDOR));
+	logger->info("OpenGL Renderer: {}", glGetString(GL_RENDERER));
+	
+
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -403,6 +438,10 @@ Renderer::Renderer(cpptoml::table& settings)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_CLAMP);
+#ifdef ENABLE_GL_DEBUG
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(open_gl_debug_callback, (void*)0);
+#endif
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	resize(width, height, scale);
