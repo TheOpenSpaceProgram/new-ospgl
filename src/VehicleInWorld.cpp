@@ -43,14 +43,12 @@ int main(void)
 	}
 
 	create_global_asset_manager();
-
 	Renderer renderer = Renderer(*config);
-
 	create_global_debug_drawer();
 	create_global_texture_drawer();
 	create_global_text_drawer();
 	create_global_lua_core();
-
+	
 	{
 		Timer dtt = Timer();
 		double dt = 0.0;
