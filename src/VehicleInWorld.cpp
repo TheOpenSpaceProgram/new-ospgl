@@ -24,10 +24,6 @@ int main(int argc, char** argv)
 	OSP osp = OSP();
 	osp.init(argc, argv);
 
-	Timer dtt = Timer();
-	double dt = 0.0;
-	double t = 0.0;
-
 
 	SimpleCamera* camera = new SimpleCamera();
 	osp.renderer->cam = camera;
@@ -57,34 +53,15 @@ int main(int argc, char** argv)
 	SunLight sun = SunLight();
 	osp.renderer->add_light(&sun);
 
-	while (!glfwWindowShouldClose(osp.renderer->window))
+	while (osp.should_loop())
 	{
-		input->update(osp.renderer->window);
+		osp.start_frame();
 
-		glfwPollEvents();
-
-
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
-		camera->update(dt);
+		camera->update(osp.dt);
 
 		osp.renderer->render();
 
-		dt = dtt.restart();
-
-		double max_dt = (double)(universe.MAX_PHYSICS_STEPS) * universe.PHYSICS_STEPSIZE;
-		if (dt > max_dt)
-		{
-			logger->warn("Delta-time too high ({})/({}), slowing down", dt, max_dt);
-			dt = max_dt;
-		}
-
-		dt = max_dt;
-		t += dt;
-
-
+		osp.finish_frame(universe.MAX_PHYSICS_STEPS * universe.PHYSICS_STEPSIZE);
 	}
 
 	osp.finish();

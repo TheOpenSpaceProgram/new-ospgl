@@ -12,6 +12,7 @@
 *.userprefs
 .vimrc
 .clangd
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

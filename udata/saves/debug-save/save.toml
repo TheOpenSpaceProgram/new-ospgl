@@ -1,0 +1,16 @@
+packages = [
+	"core",
+	"navball",
+	"debug_system",
+	"test_parts"
+]
+
+[player]
+	in_control = "vehicle_0"
+	in_focus = "vehicle_0"
+
+[universe]
+	t = 0.0
+	[[entities]]
+		name = "vehicle_0"
+

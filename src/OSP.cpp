@@ -29,9 +29,10 @@ static void help_menu()
 
 	std::cout << std::endl;
 	std::cout << "OSPGL " << OSP::OSP_VERSION << " help:" << std::endl;
-	menu_item("settings", "path/to/settings.toml", "./settings.toml", "What file to load as the configuration file");	
-	menu_item("res_path", "path/to/res/folder", "./res/", "Path to the resource folder you want to use. End it with a \"/\"");
-	std::cout << rang::fgB::gray << "You can override any of the settings in the settings.toml file using this syntax: " << std::endl;
+	menu_item("settings", "path/to/settings.toml", "settings.toml", "What file to load as the configuration file, relative to the set udata folder");	
+	menu_item("res_path", "path/to/res/folder/", "./res/", "Path to the resource folder you want to use. End it with a \"/\"");
+	menu_item("udata_path", "path/to/udata/", "./udata/", "Path to the user data folder, ended with a \"/\"");
+	std::cout << rang::fgB::gray << "You can override any of the settings in the loaded settings file using this syntax: " << std::endl;
 	std::cout << rang::fgB::gray << "-" << rang::fgB::blue << "toml.path" << rang::fg::reset <<
 		   	"=" << rang::fgB::blue << "toml-value" << rang::fg::reset << std::endl;
 	std::cout << "For example, to change the resolution you could write: " << std::endl;
@@ -65,6 +66,8 @@ void OSP::init(int argc, char** argv)
 	{
 		std::string settings_path = "settings.toml";
 		std::string res_path = "./res/";
+		std::string udata_path = "./udata/";
+
 		std::vector<std::pair<std::string, std::string>> toml_pairs;
 		
 		for(auto& param : args.params())
@@ -76,6 +79,10 @@ void OSP::init(int argc, char** argv)
 			else if(param.first == "res_path")
 			{
 				res_path = param.second;
+			}
+			else if(param.first == "udata_path")
+			{
+				udata_path = param.second;
 			}
 			else
 			{
@@ -98,7 +105,7 @@ void OSP::init(int argc, char** argv)
 		logger->info("Starting OSP with settings = \"{}\" and resource path = \"{}\"", settings_path, res_path);
 		
 		// Load settings
-		std::string settings_file = AssetManager::load_string_raw(settings_path);
+		std::string settings_file = AssetManager::load_string_raw(udata_path + settings_path);
 		std::shared_ptr<cpptoml::table> config = SerializeUtil::load_string(settings_file);
 		if(!config)
 		{
@@ -152,6 +159,10 @@ void OSP::init(int argc, char** argv)
 
 		input = new InputUtil();	
 		input->setup(renderer->window);
+
+		dt = 0.0;
+		game_t = 0.0;
+		Timer dtt = Timer();
 	}	
 }
 
@@ -166,3 +177,32 @@ void OSP::finish()
 	delete renderer;
 	destroy_global_asset_manager();	
 }
+
+bool OSP::should_loop()
+{
+	return !glfwWindowShouldClose(renderer->window);
+}
+
+void OSP::start_frame()
+{
+	input->update(renderer->window);
+	glfwPollEvents();
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+}
+
+void OSP::finish_frame(double max_dt)
+{
+	dt = dtt.restart();
+
+	if(dt > max_dt)
+	{
+		logger->warn("Delta-time too high ({})/({}), slowing down", dt, max_dt);
+		dt = max_dt;
+	}
+
+	game_t += dt;
+
+}
+
