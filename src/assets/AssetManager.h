@@ -153,9 +153,12 @@ public:
 	// Creates all packages
 	void preload();
 
-	AssetManager()
+	std::string res_path;
+
+	AssetManager(const std::string& res_path)
 	{
 		current_package = "core";
+		this->res_path = res_path;
 	}
 };
 
@@ -275,7 +278,7 @@ inline bool AssetManager::load(const std::string& package, const std::string& na
 
 	LoadAssetPtr<T> fptr = (LoadAssetPtr<T>)(it->second.first.loadPtr);
 
-	std::string full_path = "./res/" + package + "/" + name;
+	std::string full_path = res_path + package + "/" + name;
 	std::string full_folder = full_path.substr(0, full_path.find_last_of('/') + 1);
 
 	// Load config
@@ -345,7 +348,7 @@ extern AssetManager* assets;
 
 // Creates the default asset manager, with all 
 // asset types loaded 
-void create_global_asset_manager();
+void create_global_asset_manager(std::string& res_path);
 
 void destroy_global_asset_manager();
 
