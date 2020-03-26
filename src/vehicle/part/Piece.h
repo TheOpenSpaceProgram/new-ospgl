@@ -40,6 +40,13 @@ private:
 	bool dirty;
 	
 public:
+	
+	// Transform used while the piece is packed
+	// (aka, physics simulation is off)
+	// They are absolute coordinates
+	btTransform packed_tform;
+
+	int64_t id;
 
 	GPUModelNodePointer model_node;
 	// We have to keep it loaded! This is the easiest way
@@ -123,7 +130,7 @@ public:
 	// What axis should be the link's forward? In part relative coordinates
 	btVector3 link_forward;
 
-	Piece(AssetHandle<PartPrototype>&& part_proto, std::string piece_name);
+	Piece(Part* in_part, std::string piece_name);
 	~Piece();
 
 	// Pieces cannot be copied, nor moved

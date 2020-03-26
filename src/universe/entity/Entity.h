@@ -34,6 +34,8 @@ private:
 
 	std::set<std::string> signed_up_events;
 
+	int64_t uid;
+
 public:
 
 	virtual Trajectory* get_trajectory() = 0;
@@ -60,14 +62,14 @@ public:
 	// or in atmospheric flight
 	virtual bool timewarp_safe() { return true; }
 
-	void setup(Universe* universe)
-	{
-		this->universe = universe;
+	void setup(Universe* universe);
 
-		init();
+	inline int64_t get_uid()
+	{
+		return uid;
 	}
 
-	Universe* get_universe()
+	inline Universe* get_universe()
 	{
 		return universe;
 	}

@@ -2,8 +2,9 @@
 
 
 
-Part::Part()
+Part::Part(AssetHandle<PartPrototype>& part_proto)
 {
+	this->part_proto = part_proto.duplicate();
 }
 
 

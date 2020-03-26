@@ -531,8 +531,9 @@ std::vector<Vehicle*> Vehicle::handle_separation()
 	for (auto& n_vessel_pieces : n_pieces)
 	{
 
-		Vehicle* n_vehicle = new Vehicle(world);
-
+		Vehicle* n_vehicle = new Vehicle();
+		n_vehicle->set_world(world);
+	
 		n_vehicle->all_pieces = n_vessel_pieces;
 		n_vehicle->root = n_vessel_pieces[0];
 
@@ -656,9 +657,8 @@ void Vehicle::deferred_pass(CameraUniforms & camera_uniforms)
 }
 
 
-Vehicle::Vehicle(btDynamicsWorld* world) : Drawable()
+Vehicle::Vehicle() : Drawable()
 {
-	this->world = world;
 	this->breaking_enabled = false;
 }
 

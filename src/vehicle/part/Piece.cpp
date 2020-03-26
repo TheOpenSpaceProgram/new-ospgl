@@ -103,8 +103,8 @@ void Piece::set_dirty()
 }
 
 
-Piece::Piece(AssetHandle<PartPrototype>&& part_proto, std::string piece_name) 
-	: model_node(part_proto->pieces[piece_name].model_node.duplicate())
+Piece::Piece(Part* in_part, std::string piece_name) 
+	: model_node(in_part->part_proto->pieces[piece_name].model_node.duplicate())
 {
 	attached_to = nullptr;
 	part = nullptr;
@@ -114,12 +114,14 @@ Piece::Piece(AssetHandle<PartPrototype>&& part_proto, std::string piece_name)
 	in_group = nullptr;
 	welded = false;
 
-	mass = part_proto->pieces[piece_name].mass;
-	friction = part_proto->pieces[piece_name].friction;
-	restitution = part_proto->pieces[piece_name].restitution;
+	part = in_part;
 
-	collider = part_proto->pieces[piece_name].collider;
-	collider_offset = part_proto->pieces[piece_name].render_offset;
+	mass = part->part_proto->pieces[piece_name].mass;
+	friction = part->part_proto->pieces[piece_name].friction;
+	restitution = part->part_proto->pieces[piece_name].restitution;
+
+	collider = part->part_proto->pieces[piece_name].collider;
+	collider_offset = part->part_proto->pieces[piece_name].render_offset;
 }
 
 Piece::~Piece()

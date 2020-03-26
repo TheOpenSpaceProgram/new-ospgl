@@ -10,7 +10,8 @@ packages = [
 	in_focus = "vehicle_0"
 
 [universe]
+	uid = 2
 	t = 0.0
 	[[entities]]
-		name = "vehicle_0"
+		uid = 1
 

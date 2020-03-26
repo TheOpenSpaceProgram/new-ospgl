@@ -67,8 +67,17 @@ void Universe::update(double dt)
 	}
 }
 
+int64_t Universe::get_uid()
+{
+	// Increase BEFORE, uid=0 is the "nullptr" of ids
+	uid++;
+	return uid;
+}
+
 Universe::Universe(Renderer* renderer)
 {
+	uid = 0;
+
 	this->renderer = renderer;
 	renderer->add_drawable(&system);
 

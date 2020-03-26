@@ -18,6 +18,13 @@ void Entity::drop_out_of_event(const std::string& event_id)
 	universe->drop_out_of_event(event_id, this);
 }
 
+void Entity::setup(Universe* universe)
+{
+	this->universe = universe;
+	this->uid = universe->get_uid();
+	init();
+}
+
 Entity::~Entity()
 {
 	for (const std::string& ev : signed_up_events)

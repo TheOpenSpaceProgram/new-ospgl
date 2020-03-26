@@ -10,7 +10,9 @@ class Part
 {
 public:
 
-	//AssetHandle<PartPrototype> proto;
+	int64_t id;
+
+	AssetHandle<PartPrototype> part_proto;
 
 	std::vector<Machine> machines;
 
@@ -18,7 +20,8 @@ public:
 	// When a piece goes missing, it turns to null, but the map entry stays
 	std::unordered_map<std::string, Piece*> pieces;
 
-	Part();
+	// We duplicate the asset handle
+	Part(AssetHandle<PartPrototype>& part_proto);
 	~Part();
 };
 

@@ -20,7 +20,7 @@ class World
 //
 // You always have access to these global objects:
 //	- part: The part this machine is inside of (other pieces, physics, wiring, config...)
-//	- world: The world this machine is inside of (solar system, other vehicles...)
+//	- universe: The world this machine is inside of (solar system, other vehicles...)
 //	- machine: This machine, and its config
 //	- To access vehicle, use machine.vehicle, as it may change
 //

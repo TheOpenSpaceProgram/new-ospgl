@@ -44,7 +44,7 @@ private:
 
 	BulletDebugDrawer* bt_debug;
 
-
+	int64_t uid;
 
 public:
 
@@ -70,6 +70,8 @@ public:
 	// Note: This is automatically called from bullet
 	void physics_update(double pdt);
 	void update(double dt);
+	
+	int64_t get_uid();
 
 	Universe(Renderer* renderer);
 	~Universe();

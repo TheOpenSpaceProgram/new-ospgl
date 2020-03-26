@@ -1,0 +1,58 @@
+[vehicle_prototype]
+	description = "A very cool testing vehicle"
+	packages = ["test_parts"]
+	part_id = 2
+	piece_id = 2
+	
+	[[parts]]	
+		id = 1
+		proto = "test_parts:parts/capsule/part_capsule.toml"
+	[[parts]]
+		id = 2
+		proto = "test_parts:parts/engine/part_engine.toml" 		
+
+	# On a vehicle prototype, pieces without parts are impossible
+	# these only exist on real vehicles in the world
+	[[pieces]]
+		root = true
+		id = 1		
+		part = 1
+		node = "p_root"
+		[transform]
+			[pos]
+				x = 0.0
+				y = 0.0
+				z = 0.0
+			[rot]
+				x = 0.0
+				y = 0.0
+				z = 0.0
+				w = 1.0 		
+	[[pieces]]
+		id = 2
+		part = 2
+		node = "p_root"
+		[transform]
+			[pos]
+				x = 0.0
+				y = 0.0
+				z = -2.0
+			[rot]
+				x = 0.0
+				y = 0.0
+				z = 0.0
+				w = 0.0
+		[attachment]
+			to = 1
+			welded = false
+			[link]
+				type = "core:simple_link"
+				[from]
+					x = 0.0
+					y = 0.0
+					z = 1.0
+				[to]
+					x = 0.0
+					y = 0.0
+					z = -1.0	
+	
