@@ -115,7 +115,7 @@ void OSP::init(int argc, char** argv)
 		// Override with commandline arguments
 		for(auto[key, value] : toml_pairs)
 		{
-			// Parse the value
+			// Parse the value (this method is a bit hacky, but works fine)
 			const std::string fix_key = "_IKEY";
 			auto n_parse = SerializeUtil::load_string(fix_key + "=" + value);
 			auto value_toml = n_parse->get_qualified(fix_key);

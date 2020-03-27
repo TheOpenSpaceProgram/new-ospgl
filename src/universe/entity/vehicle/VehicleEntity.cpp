@@ -1,9 +1,22 @@
 #include "VehicleEntity.h"
 
+#include "../../../renderer/Renderer.h"
+#include "../../Universe.h"
 
-
-VehicleEntity::VehicleEntity()
+void VehicleEntity::init()
 {
+	get_universe()->renderer->add_drawable(this->vehicle);
+	this->vehicle->set_world(get_universe()->bt_world);
+}
+
+void VehicleEntity::update(double dt)
+{
+	vehicle->update(dt);
+}
+
+VehicleEntity::VehicleEntity(Vehicle* vehicle)
+{
+	this->vehicle = vehicle;
 }
 
 

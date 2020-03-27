@@ -14,11 +14,11 @@ uniform sampler2D diffuse;
 
 void main()
 {    
-    gPosition = vec4(vPos, 1.0f);
+    gPosition = vec4(vPos, 0.0f);
     gNormal = normalize(vNrm);
     gAlbedoSpec.rgb = texture(diffuse, vTex).rgb;
     gAlbedoSpec.a = 0.2;
 
-    gl_FragDepth = log2(flogz) * f_coef * 0.5;
+   	gl_FragDepth = log2(flogz) * f_coef * 0.5;
 }
 

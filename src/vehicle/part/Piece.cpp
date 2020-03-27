@@ -9,26 +9,33 @@ bool Piece::is_welded()
 
 btTransform Piece::get_global_transform(bool use_mstate)
 {
-	logger->check(rigid_body != nullptr, "Part is not added to a vessel");
-
-	btTransform tform;
-
-	if (use_mstate)
+	if(in_vehicle->is_packed())
 	{
-		motion_state->getWorldTransform(tform);
+		return packed_tform;
 	}
-	else
+	else 
 	{
-		tform = rigid_body->getWorldTransform();
-	}
+		btTransform tform;
 
-	if (is_welded())
-	{
-		return tform * welded_tform;
-	}
-	else
-	{
-		return tform;
+		if (use_mstate)
+		{
+			motion_state->getWorldTransform(tform);
+		}
+		else
+		{
+			tform = rigid_body->getWorldTransform();
+		}
+
+		logger->info("Pos {} {} {}", tform.getOrigin().x(), tform.getOrigin().y(), tform.getOrigin().z());
+
+		if (is_welded())
+		{
+			return tform * welded_tform;
+		}
+		else
+		{
+			return tform;
+		}
 	}
 }
 
@@ -47,46 +54,69 @@ btTransform Piece::get_local_transform()
 
 btVector3 Piece::get_linear_velocity(bool ignore_tangential)
 {
-	logger->check(rigid_body != nullptr, "Part is not added to a vessel");
-
-	btVector3 base = rigid_body->getLinearVelocity();
-	if (is_welded() && !ignore_tangential)
+	if(in_vehicle->is_packed())
 	{
-		base += get_tangential_velocity();
+		return to_btVector3(in_vehicle->packed_veh.root_state.cartesian.vel);
 	}
+	else
+	{
+		btVector3 base = rigid_body->getLinearVelocity();
+		if (is_welded() && !ignore_tangential)
+		{
+			base += get_tangential_velocity();
+		}
 
-	return base;
+		return base;
+	}
 }
 
 btVector3 Piece::get_angular_velocity()
 {
-	logger->check(rigid_body != nullptr, "Part is not added to a vessel");
-
-	return rigid_body->getAngularVelocity();
-
+	if(in_vehicle->is_packed())
+	{
+		// TODO
+		return btVector3(0, 0, 0);	
+	}
+	else 
+	{
+		return rigid_body->getAngularVelocity();
+	}
 }
 
 btVector3 Piece::get_tangential_velocity()
 {
-	logger->check(rigid_body != nullptr, "Part is not added to a vessel");
 
-	if (!is_welded())
+	if(in_vehicle->is_packed())
 	{
 		return btVector3(0.0, 0.0, 0.0);
 	}
+	else 
+	{
 
-	btVector3 r = get_relative_position();
-	btVector3 tangential = rigid_body->getAngularVelocity().cross(r);
+		if (!is_welded())
+		{
+			return btVector3(0.0, 0.0, 0.0);
+		}
+
+		btVector3 r = get_relative_position();
+		btVector3 tangential = rigid_body->getAngularVelocity().cross(r);
 	
-	return tangential;
+		return tangential;
+	}
 }
 
 btVector3 Piece::get_relative_position()
 {
-	logger->check(rigid_body != nullptr, "Part is not added to a vessel");
-
-	return get_global_transform().getOrigin() - rigid_body->getWorldTransform().getOrigin();
-}
+	if(in_vehicle->is_packed())
+	{
+		//TODO:
+		return btVector3(0, 0, 0);
+	}
+	else
+	{		
+		return get_global_transform().getOrigin() - rigid_body->getWorldTransform().getOrigin();
+	}
+}	
 
 void Piece::set_dirty()
 {
@@ -99,7 +129,7 @@ void Piece::set_dirty()
 		dirty = true;
 	}
 
-	in_vehicle->dirty = true;
+	in_vehicle->unpacked_veh.dirty = true;
 }
 
 

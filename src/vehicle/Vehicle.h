@@ -13,6 +13,11 @@
 
 #include "../renderer/Drawable.h"
 
+#include "UnpackedVehicle.h"
+#include "PackedVehicle.h"
+
+class VehicleLoader;
+
 // A Vehicle is basically a tree of parts (actually pieces), connected
 // via various links. The root piece is always the root node.
 // Parts are made of one or multiple pieces (physic units),
@@ -46,74 +51,43 @@ class Vehicle : public Drawable
 {
 private:
 
-	bool breaking_enabled;
 	bool packed;
+	
+
 public:
+	UnpackedVehicle unpacked_veh;
+	PackedVehicle packed_veh;
+	
+	friend class UnpackedVehicle;
+	friend class PackedVehicle;
+	friend class VehicleLoader;
+	friend class Piece;
+	friend class Part;
 
 	int64_t part_id;
 	int64_t piece_id;	
 
-	btDynamicsWorld* world;
-
-	bool dirty;
-
-	std::vector<WeldedGroup*> welded;
-
 	Piece* root;
-
 	std::vector<Piece*> all_pieces;
-	std::vector<Piece*> single_pieces;
 	
 	// Parts whose root piece is contained in this vehicle
 	std::vector<Part*> parts;
 
-	// Call every frame, it checks the dirty flag
-	// Can create new vehicles if parts separate
-	std::vector<Vehicle*> update();
-
-	// Called automatically by update to rebuild the physics
-	// whenever the dirty flag is set
-	void build_physics();
-
-	// Piece gets 0 velocity and angular momentum
-	// Use only while building the vehicle, all at once
-	void add_piece(Piece* piece, btTransform pos);
-
-	// Creates new vehicles from any separated pieces
-	// (that cannot reach the root piece)
-	// It automatically assigns Parts, pieces, ids...
-	std::vector<Vehicle*> handle_separation();
-
-	void draw_debug();
-
-	// The root part ends up in the given position, other parts
-	// keep their relative position
-	void set_position(glm::dvec3 pos);
-	// Relative velocities are properly kept
-	void set_linear_velocity(glm::dvec3 vel);
-
-	// Orders the all_pieces array so that parts are ordered
-	// from (tree) distance to root
-	void sort();
-
-	void set_breaking_enabled(bool value);
-
 	virtual void deferred_pass(CameraUniforms& camera_uniforms) override;
 	virtual bool needs_deferred_pass() override { return true; }
 
-	void set_world(btDynamicsWorld* n_world)
-	{
-		this->world = n_world;
-	}
-
-	// Unloads physics, you must keep updating the vehicle via a Trajectory
 	void pack();
-	// Reloads physics, starting from the last received position and packed positions
 	void unpack();
+	bool is_packed() { return packed; }
 
-	bool is_packed()
-	{
-		return packed;
+	void set_position(glm::dvec3 pos);
+	void set_linear_velocity(glm::dvec3 vel);
+
+	void update(double dt);	
+
+	void set_world(btDynamicsWorld* world)
+	{	
+		unpacked_veh.world = world;
 	}
 
 	Vehicle();

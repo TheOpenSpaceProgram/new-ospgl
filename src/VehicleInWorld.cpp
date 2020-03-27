@@ -17,6 +17,9 @@
 #include "universe/Universe.h"
 #include "OSP.h"
 
+#include "vehicle/VehicleLoader.h"
+#include "universe/entity/vehicle/VehicleEntity.h" 
+
 
 
 int main(int argc, char** argv)
@@ -27,7 +30,7 @@ int main(int argc, char** argv)
 
 	SimpleCamera* camera = new SimpleCamera();
 	osp.renderer->cam = camera;
-	camera->speed = 10000000000.0;
+	camera->speed = 10.0;
 	glm::dvec3 cam_offset = glm::dvec3(-10.0, 0.0f, 0.0f);
 	camera->fw = glm::normalize(glm::dvec3(1.0f, 0.0f, 0.0));
 	camera->pos = cam_offset;
@@ -53,12 +56,21 @@ int main(int argc, char** argv)
 	SunLight sun = SunLight();
 	osp.renderer->add_light(&sun);
 
+	// Create a vehicle
+	auto vehicle_toml = SerializeUtil::load_file("udata/vehicles/Test Vehicle.toml");
+	Vehicle* n_vehicle = VehicleLoader::load_vehicle(*vehicle_toml);
+
+	universe.create_entity<VehicleEntity>(n_vehicle);	
+
+	n_vehicle->unpack();
+
 	while (osp.should_loop())
 	{
 		osp.start_frame();
 
 		camera->update(osp.dt);
-
+		universe.update(osp.dt);
+		
 		osp.renderer->render();
 
 		osp.finish_frame(universe.MAX_PHYSICS_STEPS * universe.PHYSICS_STEPSIZE);

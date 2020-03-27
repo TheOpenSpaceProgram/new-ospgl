@@ -16,7 +16,10 @@ public:
 	virtual void disable_bullet(btDynamicsWorld * world) override;
 	virtual double get_physics_radius() override;
 
-	VehicleEntity();
+	virtual void init();
+	virtual void update(double dt);
+
+	VehicleEntity(Vehicle* vehicle);
 	~VehicleEntity();
 };
 
