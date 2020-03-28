@@ -13,3 +13,6 @@
 [submodule "dep/osp"]
 	path = dep/osp
 	url = https://github.com/TheOpenSpaceProgram/osp.git
+[submodule "dep/glfw"]
+	path = dep/glfw
+	url = https://github.com/glfw/glfw.git
