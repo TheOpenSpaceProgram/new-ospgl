@@ -386,8 +386,9 @@ void UnpackedVehicle::build_physics()
 			btTransform from_tform = btTransform::getIdentity();
 			btTransform to_tform = btTransform::getIdentity();
 
-			from_tform.setOrigin(piece->link_from);
-			to_tform.setOrigin(piece->link_to);
+			from_tform.setOrigin(to_btVector3(piece->link_from));
+			from_tform.setRotation(to_btQuaternion(piece->link_rot));
+			to_tform.setOrigin(to_btVector3(piece->link_to));
 
 			btTransform real_from = piece->get_local_transform() * from_tform;
 			btTransform real_to = piece->attached_to->get_local_transform() * to_tform;

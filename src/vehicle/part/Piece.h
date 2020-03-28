@@ -124,11 +124,11 @@ public:
 	// The piece OWNS the link, which can be null
 	std::unique_ptr<Link> link;
 	// The point in our collider where the link originates
-	btVector3 link_from;
+	glm::dvec3 link_from;
 	// The point in the other collider where the link arrives
-	btVector3 link_to;
+	glm::dvec3 link_to;
 	// What axis should be the link's forward? In part relative coordinates
-	btVector3 link_forward;
+	glm::dquat link_rot;
 
 	Piece(Part* in_part, std::string piece_name);
 	~Piece();
