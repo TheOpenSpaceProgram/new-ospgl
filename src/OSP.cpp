@@ -157,6 +157,9 @@ void OSP::init(int argc, char** argv)
 		create_global_text_drawer();
 		create_global_lua_core();
 
+		// Load packages now so they register all scripts...
+		assets->load_packages(lua_core);
+
 		input = new InputUtil();	
 		input->setup(renderer->window);
 

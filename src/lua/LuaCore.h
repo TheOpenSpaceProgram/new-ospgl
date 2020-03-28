@@ -31,6 +31,7 @@ public:
 		GLM,		// LuaGlm
 		NOISE,		// LuaNoise
 		ASSETS,		// LuaAssets
+		BULLET,		// LuaBullet
 
 		COUNT
 	};

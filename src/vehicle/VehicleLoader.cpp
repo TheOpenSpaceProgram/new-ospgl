@@ -99,7 +99,19 @@ Vehicle* VehicleLoader::load_vehicle(cpptoml::table& root)
 			bool welded = link->get_qualified_as<bool>("welded").value_or(false);
 			p->welded = welded;
 
+			std::string link_type = link->get_qualified_as<std::string>("type").value_or("none");
+			if(link_type != "none")
+			{
+				// Load the physical link
+				p->link = std::make_unique<Link>(assets->load_script(link_type));	
 
+				glm::dvec3 link_from, link_to;
+				deserialize(link_from, *link->get_table_qualified("pfrom"));	
+				deserialize(link_to, *link->get_table_qualified("pto"));
+
+				p->link_from = to_btVector3(link_from);
+				p->link_to = to_btVector3(link_to);	
+			}
 		}
 	}
 

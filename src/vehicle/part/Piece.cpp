@@ -26,8 +26,6 @@ btTransform Piece::get_global_transform(bool use_mstate)
 			tform = rigid_body->getWorldTransform();
 		}
 
-		logger->info("Pos {} {} {}", tform.getOrigin().x(), tform.getOrigin().y(), tform.getOrigin().z());
-
 		if (is_welded())
 		{
 			return tform * welded_tform;

@@ -54,6 +54,8 @@ public:
 	// Relative velocities are properly kept
 	void set_linear_velocity(glm::dvec3 vel);
 
+	glm::dvec3 get_center_of_mass();
+
 	// Orders the all_pieces array so that parts are ordered
 	// from (tree) distance to root
 	void sort();

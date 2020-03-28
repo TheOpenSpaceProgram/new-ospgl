@@ -6,6 +6,7 @@
 #include "Model.h"
 #include "Material.h"
 #include "PartPrototype.h"
+#include "sol.hpp"
 
 
 #include <istream>
@@ -121,7 +122,7 @@ std::string AssetManager::resolve_path(const std::string& full_path, const std::
 {
 	auto[pkg, name] = get_package_and_name(full_path, def);
 
-	return "./res/" + pkg + "/" + name;
+	return this->res_path + pkg + "/" + name;
 }
 
 void AssetManager::check_packages()
@@ -144,7 +145,7 @@ void AssetManager::check_packages()
 void AssetManager::preload()
 {
 	using directory_iterator = std::filesystem::directory_iterator;
-	for (const auto& dirEntry : directory_iterator("./res"))
+	for (const auto& dirEntry : directory_iterator(this->res_path))
 	{
 		if (dirEntry.is_directory())
 		{
@@ -161,4 +162,67 @@ void AssetManager::preload()
 		}
 	}
 	
+}
+
+#include "../util/LuaUtil.h"
+
+void AssetManager::load_packages(LuaCore* lua_core)
+{
+	// TODO: Think of a package loading system
+	// to allow behaviour similar to ModuleManager
+	
+	// TODO: Maybe error handling, but a bad package
+	// is pretty much a full game crash
+
+	// Pre-init, create all lua files
+	for(auto& pkg_pair : packages)
+	{
+		std::string pkg_lua_path = res_path + pkg_pair.first + "/" + pkg_pair.second.pkg_script_path;
+
+		if(file_exists(pkg_lua_path))
+		{
+			pkg_pair.second.pkg_lua = new sol::state();
+			lua_core->load(*pkg_pair.second.pkg_lua, pkg_pair.first);
+			pkg_pair.second.pkg_lua->script_file(pkg_lua_path);
+		}	
+		else
+		{
+			pkg_pair.second.pkg_lua = nullptr;
+		}
+	}	
+
+
+	for(auto& pkg_pair : packages)
+	{
+		sol::state* lua = pkg_pair.second.pkg_lua;
+
+		if(lua)
+		{
+			sol::function load_fnc = lua->get<sol::function>("load");
+			load_fnc();	
+		}
+
+	}
+
+}
+
+sol::state AssetManager::load_script(const std::string& pkg, const std::string& path)
+{
+	sol::state out;
+
+	std::string full_path = res_path + pkg + "/" + path;	
+	logger->check_important(file_exists(full_path), "Tried to load an script which does not exist");
+
+	lua_core->load(out, pkg);
+
+	// Scripts MUST load, failure to do so will crash the game
+	out.script_file(full_path);
+
+	return out;
+}
+
+sol::state AssetManager::load_script(const std::string& full_path)
+{
+	auto[pkg, name] = get_package_and_name(full_path, "core");
+	return load_script(pkg, name);
 }

@@ -391,7 +391,7 @@ void UnpackedVehicle::build_physics()
 
 			btTransform real_from = piece->get_local_transform() * from_tform;
 			btTransform real_to = piece->attached_to->get_local_transform() * to_tform;
-			piece->link->activate(piece->rigid_body, real_from, piece->attached_to->rigid_body, real_to);
+			piece->link->activate(piece->rigid_body, real_from, piece->attached_to->rigid_body, real_to, world);
 		}
 	}
 
@@ -559,6 +559,7 @@ std::vector<Vehicle*> UnpackedVehicle::handle_separation()
 		n_vehicle->unpacked_veh.sort();
 		n_vehicle->unpacked_veh.build_physics();
 
+		logger->info("Separated new vehicle");
 		n_vehicles.push_back(n_vehicle);
 	}
 
@@ -701,6 +702,21 @@ void UnpackedVehicle::deactivate()
 
 	single_pieces.clear();
 	welded.clear();	
+}
+
+glm::dvec3 UnpackedVehicle::get_center_of_mass()
+{
+	double tot_mass;
+	glm::dvec3 out;
+	for(Piece* p : vehicle->all_pieces)
+	{
+		tot_mass += p->mass;
+		out += to_dvec3(p->get_global_transform().getOrigin()) * p->mass;
+	}
+
+	out /= tot_mass;
+
+	return out;
 }
 
 void UnpackedVehicle::activate()

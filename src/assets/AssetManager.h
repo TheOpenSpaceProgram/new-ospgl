@@ -9,7 +9,7 @@
 #include <iostream>
 #include "../util/Logger.h"
 #include "../util/SerializeUtil.h"
-
+#include "../lua/LuaCore.h"
 
 // Pointer to a function which looks like:
 // T* loadAsset(const std::string& path)
@@ -20,6 +20,7 @@ using LoadAssetPtr = T*(*)(const std::string&, const std::string&, const std::st
 
 template<typename T>
 struct AssetHandle;
+
 
 // Organizes all assets into "packages", which are arbitrary
 // folders, and "directories", folders inside those packages
@@ -64,6 +65,9 @@ private:
 		std::string version;
 		std::vector<std::string> dependencies;
 
+		std::string pkg_script_path;
+		sol::state* pkg_lua;
+
 		Package(std::string path)
 		{
 			std::string package_file_path = path + "/package.toml";
@@ -73,6 +77,9 @@ private:
 			author = *file->get_qualified_as<std::string>("author");
 			version = *file->get_qualified_as<std::string>("version");
 			id = *file->get_qualified_as<std::string>("id");
+		
+			// We use a default here because it's rarely needed to be changed	
+			pkg_script_path = file->get_qualified_as<std::string>("pkg_script").value_or("package.lua");
 
 			// By default the folder is the id
 			folder = file->get_qualified_as<std::string>("folder").value_or(id);
@@ -152,6 +159,15 @@ public:
 
 	// Creates all packages
 	void preload();
+
+	// Executes the package init lua file of all packages
+	// which have one
+	void load_packages(LuaCore* lua_core);
+
+	// Scripts are a very special asset as they must be instantiated, you 
+	// cannot store a Script as a normal asset
+	sol::state load_script(const std::string& pkg, const std::string& path);
+	sol::state load_script(const std::string& full_path);
 
 	std::string res_path;
 

@@ -1,4 +1,4 @@
-id = "rss"
+id = "debug_system"
 name = "Debug Solar System"
 description = "A simple, fast-loading, solar system"
 author = "Tatjam"

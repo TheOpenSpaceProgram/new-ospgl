@@ -5,6 +5,7 @@
 #include "libs/LuaGlm.h"
 #include "libs/LuaNoise.h"
 #include "libs/LuaAssets.h"
+#include "libs/LuaBullet.h"
 
 LuaCore* lua_core;
 
@@ -81,6 +82,10 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::ASSETS;
 	}
+	else if(name == "bullet")
+	{
+		return LibraryID::BULLET;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -115,6 +120,7 @@ LuaCore::LuaCore()
 	libraries[LibraryID::GLM] = new LuaGlm();
 	libraries[LibraryID::NOISE] = new LuaNoise();
 	libraries[LibraryID::ASSETS] = new LuaAssets();
+	libraries[LibraryID::BULLET] = new LuaBullet();
 }
 
 LuaCore::~LuaCore()

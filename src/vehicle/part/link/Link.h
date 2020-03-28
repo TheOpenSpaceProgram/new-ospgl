@@ -5,27 +5,67 @@
 #include <btBulletDynamicsCommon.h>
 #pragma warning(pop)
 
+#include <sol.hpp>
+#include "../../../util/LuaUtil.h"
+#include "../../../lua/libs/LuaBullet.h"
+#include <cpptoml.h>
+
 // Base class for any link, which can be as simple as
 // a bullet3 constraint, or as complex as a soft-body rope
 class Link
 {
 public:
 
+	sol::state lua_state;
+
+	// Called during loading of the link to give it its 
+	// toml serialized data
+	void load_toml(std::shared_ptr<cpptoml::table> data)
+	{
+		LuaUtil::safe_call_function(lua_state,
+				"load_toml", "link load_toml", 
+				data);
+	}
+
 	// Called when the pieces are unwelded, or first created
-	virtual void activate(
+	void activate(
 		btRigidBody* from, btTransform from_frame,
-		btRigidBody* to, btTransform to_frame
-	) = 0;
+		btRigidBody* to, btTransform to_frame,
+		btDynamicsWorld* world
+	)
+	{
+		LuaUtil::safe_call_function(lua_state,
+				"activate", "link activate",
+				from, BulletTransform(from_frame), to, BulletTransform(to_frame), world);
+	}
 
 	// Called when the pieces are welded
 	// Keep in mind special links may have to implement some custom
 	// functionality to keep the previous state if they are reactivated,
 	// for example, ropes or motors which must remember their last position
-	virtual void deactivate() = 0;
+	void deactivate()
+	{
+		LuaUtil::safe_call_function(lua_state, 
+				"deactivate", "link deactivate");
+	}
 
 	// Return true if the link has broken and should be deleted
-	virtual bool is_broken() = 0;
+	bool is_broken()
+	{
+		return LuaUtil::safe_call_function(lua_state,
+				"is_broken", "link is_broken");
+	}
 
-	virtual void set_breaking_enabled(bool value) = 0;
+	void set_breaking_enabled(bool value)
+	{
+		LuaUtil::safe_call_function(lua_state,
+				"set_breaking_enabled", "link set_breaking_enabled",
+				value);
+	}
+
+	Link(sol::state&& st)
+	{
+		this->lua_state = std::move(st);
+	}
 };
 

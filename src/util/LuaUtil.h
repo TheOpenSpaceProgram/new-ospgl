@@ -22,4 +22,39 @@ public:
 		}, script_path);
 	}
 
+	// Handles errors
+	template<typename... Args>
+	static sol::safe_function_result call_function(sol::state& st, 
+			const std::string& fname, const std::string& context, Args&&... args)
+	{
+		sol::safe_function fnc = st[fname];
+		
+		auto result = fnc(std::forward<Args>(args)...);
+
+		if(!result.valid())
+		{
+			sol::error as_error = result;
+			logger->error("Lua Error in {}:\n{}", context, as_error.what());
+		}	
+
+		return result;	
+	}
+
+	// Crashes on error
+	template<typename... Args>
+	static sol::safe_function_result safe_call_function(sol::state& st, 
+			const std::string& fname, const std::string& context, Args&&... args)
+	{
+		sol::safe_function fnc = st[fname];
+		
+		auto result = fnc(std::forward<Args>(args)...);
+
+		if(!result.valid())
+		{
+			sol::error as_error = result;
+			logger->fatal("Lua Error in {}:\n{}", context, as_error.what());
+		}	
+
+		return result;	
+	}
 };

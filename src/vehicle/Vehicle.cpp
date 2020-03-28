@@ -27,21 +27,21 @@ void Vehicle::pack()
 	unpacked_veh.deactivate();
 }
 
-void Vehicle::update(double dt)
+std::vector<Vehicle*> Vehicle::update(double dt)
 {
 	if(packed)
 	{
-
+		return std::vector<Vehicle*>();
 	}
 	else
 	{
 		auto n_vehicles = unpacked_veh.update();
+		return n_vehicles;
 	}	
 }
 
 Vehicle::Vehicle() : Drawable(), unpacked_veh(this), packed_veh(this)
 {
-
 }
 
 Vehicle::~Vehicle() 

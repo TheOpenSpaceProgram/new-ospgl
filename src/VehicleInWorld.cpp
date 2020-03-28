@@ -7,7 +7,6 @@
 #include "universe/Date.h"
 
 #include "vehicle/Vehicle.h"
-#include "vehicle/part/link/SimpleLink.h"
 #include "assets/Model.h"
 
 #include "physics/ground/GroundShape.h"
@@ -68,8 +67,11 @@ int main(int argc, char** argv)
 	{
 		osp.start_frame();
 
+		
 		camera->update(osp.dt);
 		universe.update(osp.dt);
+
+		camera->center = n_vehicle->unpacked_veh.get_center_of_mass();
 		
 		osp.renderer->render();
 

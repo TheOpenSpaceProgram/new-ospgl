@@ -83,7 +83,7 @@ public:
 	void set_position(glm::dvec3 pos);
 	void set_linear_velocity(glm::dvec3 vel);
 
-	void update(double dt);	
+	std::vector<Vehicle*> update(double dt);	
 
 	void set_world(btDynamicsWorld* world)
 	{	
