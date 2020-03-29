@@ -49,10 +49,13 @@ add_subdirectory(dep/bullet3)
 # Note: Double precision is defined on our custom bullet source, no need to define it here again
 add_subdirectory(dep/fmt)
 add_subdirectory(dep/assimp)
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "" FORCE)
 
 include_directories(OSPGL PUBLIC dep/assimp/include)   
 include_directories(OSPGL PUBLIC dep/bullet3/src)
