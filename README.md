@@ -23,8 +23,10 @@ If your executable is not in the root directory, move it there as the game requi
 
 ## Windows
 
-(Not done yet, you can use the visual studio project and manually change include directories and libraries, but it's not recommended)
-We will use CMake on Windows too.
+Open the CMakeLists.txt using Visual Studio. You may need to copy the `launch.vs.json` to the `.vs` folder so
+the debugger launches the executable on the correct working directory.
+
+Set target to OSPGL.exe and build.
 
 ###MacOS
 

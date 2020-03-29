@@ -707,8 +707,8 @@ void UnpackedVehicle::deactivate()
 
 glm::dvec3 UnpackedVehicle::get_center_of_mass()
 {
-	double tot_mass;
-	glm::dvec3 out;
+	double tot_mass = 0.0;
+	glm::dvec3 out = glm::dvec3(0.0, 0.0, 0.0);
 	for(Piece* p : vehicle->all_pieces)
 	{
 		tot_mass += p->mass;
