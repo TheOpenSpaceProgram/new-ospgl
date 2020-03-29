@@ -1,7 +1,7 @@
 # OSPGL
 This repo contains all code for the OSPGL program, despite being called 'new-ospgl', as the original ospgl is now legacy code.
 ## Collaborating
-The project has a pretty big scope, so collaboration of all kinds is needed, from planning to codind and artistic work. 
+The project has a pretty big scope, so collaboration of all kinds is needed, from planning to coding and artistic work. 
 You can check what's needed on the Issues and Projects. Feel free to create new entries with ideas!
 
 ---
@@ -19,7 +19,7 @@ cmake .
 cmake --build . 
 ```
 **Note**: If you run cmake in a subdirectory (for example, `build`), then you may want to copy the `compile_commands.json` file to the root directory for code completion in VIM and other tools. 
-If your executable is not in the root directory, move it there as the game requires the `res` folder, the `settings.toml` file, and any dynamically linked library (none on Linux, `lua51.dll` on Windows).
+If your executable is not in the root directory, move it there as the game requires the `res` folder and the `settings.toml` file
 
 ## Windows
 
@@ -28,13 +28,13 @@ the debugger launches the executable on the correct working directory.
 
 Set target to OSPGL.exe and build.
 
-###MacOS
+## MacOS
 
 (Not done yet, I guess CMake will work fine, too)
 
 # Packaging
 
-TODO
+TODO (We will probably include a python script or something like that to simplify the process)
 
 # Code Style
 We don't have a very strict coding-style, but these rules must be followed:
