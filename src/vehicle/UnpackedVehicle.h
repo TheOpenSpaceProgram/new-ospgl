@@ -56,10 +56,6 @@ public:
 
 	glm::dvec3 get_center_of_mass();
 
-	// Orders the all_pieces array so that parts are ordered
-	// from (tree) distance to root
-	void sort();
-
 	void set_breaking_enabled(bool value);
 
 	void set_world(btDynamicsWorld* n_world)

@@ -90,6 +90,8 @@ public:
 		unpacked_veh.world = world;
 	}
 
+	void sort();
+
 	Vehicle();
 	~Vehicle();
 };

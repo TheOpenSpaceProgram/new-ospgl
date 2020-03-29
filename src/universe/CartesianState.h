@@ -16,5 +16,5 @@ struct WorldState
 {
 	CartesianState cartesian;
 	glm::dquat rotation;
-	glm::dvec3 angular_momentum;
+	glm::dvec3 angular_velocity;
 };

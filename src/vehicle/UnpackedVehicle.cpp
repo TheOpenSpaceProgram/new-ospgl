@@ -17,7 +17,7 @@ static PieceState obtain_piece_state(Piece* piece)
 {
 	PieceState st;
 	st.transform = piece->get_global_transform(false);
-	st.linear = piece->get_linear_velocity(true);
+	st.linear = piece->get_linear_velocity(true); // < TODO: Maybe that should be false and not true!
 	st.angular = piece->get_angular_velocity();
 	return st;
 }
@@ -286,7 +286,7 @@ static void create_piece_physics(Piece* piece, std::unordered_map<Piece*, PieceS
 	piece->motion_state = motion_state;
 
 	// Apply old impulses
-	rigid_body->applyImpulse(states_at_start[piece].linear * piece->mass, piece->get_relative_position());
+	rigid_body->applyCentralImpulse(states_at_start[piece].linear * piece->mass);
 	rigid_body->setAngularVelocity(states_at_start[piece].angular);
 }
 
@@ -311,7 +311,7 @@ std::vector<Vehicle*> UnpackedVehicle::update()
 	{
 		n_vehicles = handle_separation();
 
-		sort(); //< Not sure if needed
+		vehicle->sort(); //< Not sure if needed
 
 		build_physics();
 
@@ -557,7 +557,7 @@ std::vector<Vehicle*> UnpackedVehicle::handle_separation()
 		}
 
 		n_vehicle->packed = false;
-		n_vehicle->unpacked_veh.sort();
+		n_vehicle->sort();
 		n_vehicle->unpacked_veh.build_physics();
 
 		logger->info("Separated new vehicle");
@@ -605,41 +605,6 @@ void UnpackedVehicle::set_linear_velocity(glm::dvec3 vel)
 		btVector3 off = p->rigid_body->getLinearVelocity() - root_vel;
 		p->rigid_body->setLinearVelocity(bt + off);
 	}
-}
-
-void UnpackedVehicle::sort()
-{
-	std::unordered_set<Piece*> open;
-
-	open.insert(vehicle->root);
-
-	std::vector<Piece*> sorted;
-	sorted.push_back(vehicle->root);
-
-	while (!open.empty())
-	{
-		std::unordered_set<Piece*> new_open;
-
-		for (Piece* o : open)
-		{
-
-			for (Piece* p : vehicle->all_pieces)
-			{
-				if (p->attached_to == o)
-				{
-					new_open.insert(p);
-					sorted.push_back(p);
-				}
-			}
-		}
-
-		open = new_open;
-		
-	}
-
-	logger->check(sorted.size() == vehicle->all_pieces.size(), "Vehicle was sorted while some pieces were not attached!");
-
-	vehicle->all_pieces = sorted;
 }
 
 void UnpackedVehicle::set_breaking_enabled(bool value)
@@ -723,6 +688,7 @@ glm::dvec3 UnpackedVehicle::get_center_of_mass()
 void UnpackedVehicle::activate()
 {
 	vehicle->packed = true;
+	// sort() 				// TODO: Sorting may not be neccesary here as pieces won't change while packed
 	build_physics();
 	vehicle->packed = false;
 }

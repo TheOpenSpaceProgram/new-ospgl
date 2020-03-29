@@ -11,7 +11,7 @@ btTransform Piece::get_global_transform(bool use_mstate)
 {
 	if(in_vehicle->is_packed())
 	{
-		return packed_tform;
+		return in_vehicle->packed_veh.get_root_transform() * packed_tform;
 	}
 	else 
 	{
@@ -54,7 +54,11 @@ btVector3 Piece::get_linear_velocity(bool ignore_tangential)
 {
 	if(in_vehicle->is_packed())
 	{
-		return to_btVector3(in_vehicle->packed_veh.root_state.cartesian.vel);
+		btVector3 base = to_btVector3(in_vehicle->packed_veh.get_root_state().cartesian.vel);
+	
+		base += get_tangential_velocity();
+
+		return base;
 	}
 	else
 	{
@@ -73,7 +77,7 @@ btVector3 Piece::get_angular_velocity()
 	if(in_vehicle->is_packed())
 	{
 		// TODO
-		return btVector3(0, 0, 0);	
+		return to_btVector3(in_vehicle->packed_veh.get_root_state().angular_velocity);
 	}
 	else 
 	{
@@ -86,7 +90,9 @@ btVector3 Piece::get_tangential_velocity()
 
 	if(in_vehicle->is_packed())
 	{
-		return btVector3(0.0, 0.0, 0.0);
+		btVector3 r = packed_tform.getOrigin();
+		btVector3 tangential = r.cross(get_angular_velocity());
+		return tangential;
 	}
 	else 
 	{
@@ -97,7 +103,7 @@ btVector3 Piece::get_tangential_velocity()
 		}
 
 		btVector3 r = get_relative_position();
-		btVector3 tangential = rigid_body->getAngularVelocity().cross(r);
+		btVector3 tangential = r.cross(rigid_body->getAngularVelocity());
 	
 		return tangential;
 	}

@@ -48,3 +48,4 @@ inline btQuaternion to_btQuaternion(glm::tquat<T> d)
 {
 	return btQuaternion((btScalar)d.x, (btScalar)d.y, (btScalar)d.z, (btScalar)d.w);
 }
+

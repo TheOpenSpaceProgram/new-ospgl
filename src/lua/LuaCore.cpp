@@ -6,6 +6,8 @@
 #include "libs/LuaNoise.h"
 #include "libs/LuaAssets.h"
 #include "libs/LuaBullet.h"
+#include "libs/LuaToml.h"
+
 
 LuaCore* lua_core;
 
@@ -86,6 +88,10 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::BULLET;
 	}
+	else if(name == "toml")
+	{
+		return LibraryID::TOML;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -121,6 +127,7 @@ LuaCore::LuaCore()
 	libraries[LibraryID::NOISE] = new LuaNoise();
 	libraries[LibraryID::ASSETS] = new LuaAssets();
 	libraries[LibraryID::BULLET] = new LuaBullet();
+	libraries[LibraryID::TOML] = new LuaToml();
 }
 
 LuaCore::~LuaCore()

@@ -113,7 +113,17 @@ Vehicle* VehicleLoader::load_vehicle(cpptoml::table& root)
 		}
 	}
 
-	n_vehicle->packed = true;	
+
+	WorldState n_state;
+	n_state.cartesian.pos = glm::dvec3(0.0, 0.0, 0.0);
+	n_state.rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
+	n_state.angular_velocity = glm::dvec3(0.0, 0.0, 0.0);
+	n_state.cartesian.vel = glm::dvec3(0.0, 0.0, 0.0);
+	n_vehicle->packed_veh.set_world_state(n_state);
+
+	n_vehicle->packed = true;
+	n_vehicle->sort();
+
 	// It's up to the caller to properly place the vehicle in the world
 	return n_vehicle;			
 }

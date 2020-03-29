@@ -43,7 +43,7 @@ public:
 	
 	// Transform used while the piece is packed
 	// (aka, physics simulation is off)
-	// They are absolute coordinates
+	// They are root relative coordinates
 	btTransform packed_tform;
 
 	int64_t id;

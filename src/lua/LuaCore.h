@@ -32,7 +32,7 @@ public:
 		NOISE,		// LuaNoise
 		ASSETS,		// LuaAssets
 		BULLET,		// LuaBullet
-
+		TOML,		// LuaToml
 		COUNT
 	};
 
