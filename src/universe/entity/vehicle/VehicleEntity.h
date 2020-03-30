@@ -18,6 +18,7 @@ public:
 
 	virtual void init();
 	virtual void update(double dt);
+	virtual void physics_update(double pdt);
 
 	VehicleEntity(Vehicle* vehicle);
 	~VehicleEntity();

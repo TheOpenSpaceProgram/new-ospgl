@@ -65,6 +65,8 @@ void Universe::update(double dt)
 	{
 		e->update(dt);
 	}
+
+	bt_world->debugDrawWorld();
 }
 
 int64_t Universe::get_uid()

@@ -33,6 +33,11 @@ struct BulletTransform
 		out.setRotation(to_btQuaternion(rot));
 		return out;
 	}
+
+	glm::dmat4 to_dmat4()
+	{
+		return ::to_dmat4(to_btTransform());
+	}
 };
 
 // 

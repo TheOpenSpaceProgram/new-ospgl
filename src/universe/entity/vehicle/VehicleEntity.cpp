@@ -7,6 +7,7 @@ void VehicleEntity::init()
 {
 	get_universe()->renderer->add_drawable(this->vehicle);
 	this->vehicle->set_world(get_universe()->bt_world);
+	this->vehicle->init(get_universe());
 }
 
 void VehicleEntity::update(double dt)
@@ -16,6 +17,11 @@ void VehicleEntity::update(double dt)
 	{
 		get_universe()->create_entity<VehicleEntity>(n_vehicle);
 	}
+}
+
+void VehicleEntity::physics_update(double pdt)
+{
+
 }
 
 VehicleEntity::VehicleEntity(Vehicle* vehicle)

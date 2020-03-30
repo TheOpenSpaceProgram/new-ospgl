@@ -191,4 +191,42 @@ public:
 			write_to_file(*root, path);
 		}
 	}
+
+	// Overrides target with source, overwriting any entry when needed
+	static void override(cpptoml::table& target, cpptoml::table& source)
+	{
+		for(auto children : source)
+		{
+			if(target.get(children.first))
+			{
+				if(children.second->is_table())
+				{
+					// Recurse
+					override(*target.get_table(children.first), *children.second->as_table());	
+				}
+				else if(children.second->is_table_array())
+				{
+					logger->fatal("Not implemented TODO"); 
+					// TODO: We can either insert the new items or overwrite the whole thing
+				}
+				else if(children.second->is_array())
+				{
+					// Overwrite value (the whole array)
+					target.erase(children.first);
+					target.insert(children.first, children.second);
+				}
+				else if(children.second->is_value())
+				{
+					// Overwrite value
+					target.erase(children.first);
+					target.insert(children.first, children.second);
+				}
+			}
+			else
+			{
+				// Not present in target table, simply insert it
+				target.insert(children.first, children.second);
+			}
+		}
+	}
 };

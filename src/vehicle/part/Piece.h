@@ -8,7 +8,7 @@
 #include <any>
 #include <memory>
 
-#include "link/Link.h"
+#include "Link.h"
 #include "../../assets/PartPrototype.h"
 
 
@@ -33,6 +33,8 @@ struct WeldedGroup
 // are separated from our root), physics and model 
 // Note that it may or may not have its own rigid body
 // as it may be joined with other pieces into a single one
+// A lot of functions return bullet vectors as they are mostly
+// used there.
 class Piece
 {
 private:
@@ -114,10 +116,20 @@ public:
 	// Returns zero on non-welded pieces
 	btVector3 get_tangential_velocity();
 
-	// If welded, returns the position of the part
-	// relative to its rigid body, otherwise it
-	// always returns (0, 0, 0)
+	// This returns relative position in root centered, but not rotated,
+	// space. Used for bullet physics
 	btVector3 get_relative_position();
+
+	glm::dvec3 transform_axis(glm::dvec3 axis);
+
+	// Returns the Z axis transformed
+	glm::dvec3 get_forward();
+
+	// Returns the Y axis transformed
+	glm::dvec3 get_up();
+
+	// Returns the X axis transformed
+	glm::dvec3 get_right();
 
 	void set_dirty();
 

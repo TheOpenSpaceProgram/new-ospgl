@@ -33,7 +33,8 @@ public:
 		ASSETS,		// LuaAssets
 		BULLET,		// LuaBullet
 		TOML,		// LuaToml
-		COUNT
+		VEHICLE,	// LuaVehicle (Vehicle, Part, Piece, Machine)
+		COUNT,
 	};
 
 	static LibraryID name_to_id(const std::string& name);

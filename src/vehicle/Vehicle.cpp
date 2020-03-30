@@ -28,6 +28,11 @@ void Vehicle::pack()
 
 std::vector<Vehicle*> Vehicle::update(double dt)
 {
+	for(Part* part : parts)
+	{
+		part->update(dt);
+	}
+
 	if(packed)
 	{
 		return std::vector<Vehicle*>();
@@ -37,6 +42,15 @@ std::vector<Vehicle*> Vehicle::update(double dt)
 		auto n_vehicles = unpacked_veh.update();
 		return n_vehicles;
 	}	
+
+}
+
+void Vehicle::init(Universe* in_universe)
+{
+	for(Part* part : parts)
+	{
+		part->init(in_universe, this);
+	}
 }
 
 

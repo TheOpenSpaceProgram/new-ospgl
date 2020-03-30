@@ -9,7 +9,10 @@
 		proto = "test_parts:parts/capsule/part_capsule.toml"
 	[[part]]
 		id = 2
-		proto = "test_parts:parts/engine/part_engine.toml" 		
+		proto = "test_parts:parts/engine/part_engine.toml" 	
+		[part.main_engine]
+			thrust = 500.0
+
 	[[part]]
 		id = 3
 		proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"

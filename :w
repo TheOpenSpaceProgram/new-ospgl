@@ -120,7 +120,7 @@ btVector3 Piece::get_relative_position()
 
 		btVector3 final = mul.getOrigin() - global.getOrigin();
 
-		return final;
+		return -final;
 	}
 	else
 	{

@@ -90,6 +90,14 @@ void PartPrototype::load(const cpptoml::table& from)
 		}
 	}
 
+	auto machines = from.get_table_array("machine");
+	if(machines)
+	{
+		for(auto machine : *machines)
+		{
+			this->machines.push_back(machine);
+		}
+	}
 }
 
 PartPrototype::PartPrototype() : model(std::move(AssetHandle<Model>()))
@@ -113,6 +121,7 @@ PartPrototype* loadPartPrototype(const std::string& path, const std::string& nam
 	std::shared_ptr<cpptoml::table> toml = SerializeUtil::load_file(path);
 
 	PartPrototype* proto = new PartPrototype();
+	proto->in_package = pkg;
 
 	SerializeUtil::read_to(*toml, *proto);
 

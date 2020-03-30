@@ -7,7 +7,7 @@
 #include "libs/LuaAssets.h"
 #include "libs/LuaBullet.h"
 #include "libs/LuaToml.h"
-
+#include "libs/LuaVehicle.h"
 
 LuaCore* lua_core;
 
@@ -92,6 +92,10 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::TOML;
 	}
+	else if(name == "vehicle")
+	{
+		return LibraryID::VEHICLE;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -128,6 +132,7 @@ LuaCore::LuaCore()
 	libraries[LibraryID::ASSETS] = new LuaAssets();
 	libraries[LibraryID::BULLET] = new LuaBullet();
 	libraries[LibraryID::TOML] = new LuaToml();
+	libraries[LibraryID::VEHICLE] = new LuaVehicle();
 }
 
 LuaCore::~LuaCore()

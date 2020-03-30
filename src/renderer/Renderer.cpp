@@ -458,7 +458,7 @@ Renderer::Renderer(cpptoml::table& settings)
 
 	// Create the nanoVG context
 	vg = nvgCreateGL3(NVG_ANTIALIAS);
-
+	//vg = nvgCreateGL3(0);
 	resize(width, height, scale);
 
 }

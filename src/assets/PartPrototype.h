@@ -61,6 +61,7 @@ struct PiecePrototype
 	}
 };
 
+
 // Part prototypes store everything that's shared across any spawned 
 // part of this type such as the config or the model.
 // It's an asset and can be loaded as one 
@@ -96,12 +97,15 @@ public:
 
 	// First one is always root
 	std::unordered_map<std::string, PiecePrototype> pieces;
+	std::vector<std::shared_ptr<cpptoml::table>> machines;
 
 	GPUModelPointer model;
 	std::string name;
 	std::string country;
 	std::string manufacturer;
 	std::string description;
+
+	std::string in_package;
 
 	void load(const cpptoml::table& from);
 

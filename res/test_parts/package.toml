@@ -3,4 +3,4 @@ name = "Test Parts"
 description = "Test parts for early OSP"
 author = "Tatjam"
 version = "0.0.1"
-dependencies = []
+dependencies = ["core"]
