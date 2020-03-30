@@ -7,7 +7,7 @@ OPTION(OSP_BUILD_SANATIZER          "Build with the address sanatizer" OFF)
 OPTION(OSP_WARNINGS_ARE_ERRORS      "Build with the flag -Werror" OFF)
 OPTION(OSP_ENABLE_COMPILER_WARNINGS "Build with the majority of compiler warnings enabled" OFF)
 
-if(!MSVC)
+if(NOT MSVC)
 	set (CMAKE_CXX_FLAGS "-g")
 endif()
 
@@ -65,6 +65,6 @@ include_directories(OSPGL PUBLIC dep/bullet3/src)
 
 target_link_libraries(OSPGL fmt liblua-static assimp BulletSoftBody BulletDynamics BulletCollision LinearMath ${CMAKE_DL_LIBS})
 
-if(!MSVC)
+if(NOT MSVC)
 	target_link_libraries(OSPGL stdc++fs)
 endif()

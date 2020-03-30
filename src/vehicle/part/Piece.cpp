@@ -147,9 +147,6 @@ glm::dvec3 Piece::transform_axis(glm::dvec3 axis)
 	btQuaternion rot = get_global_transform().getRotation();
 	glm::dvec3 result = glm::toMat4(to_dquat(rot)) * glm::dvec4(axis, 1.0);
 
-	glm::dvec3 pos = to_dvec3(get_global_transform().getOrigin());
-	debug_drawer->add_line(pos, pos + result * 10.0, glm::vec3(1.0, 0.0, 1.0));
-
 	return result;	
 }
 

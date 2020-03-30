@@ -11,7 +11,7 @@
 		id = 2
 		proto = "test_parts:parts/engine/part_engine.toml" 	
 		[part.main_engine]
-			thrust = 500.0
+			thrust = 200
 
 	[[part]]
 		id = 3

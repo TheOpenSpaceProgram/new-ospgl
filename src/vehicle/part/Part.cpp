@@ -18,7 +18,9 @@ Part::Part(AssetHandle<PartPrototype>& part_proto, cpptoml::table& our_table)
 			SerializeUtil::override(*config_toml, *override_toml);
 		}		
 
-		machines.emplace(std::make_pair(id, config_toml));
+		std::string cur_pkg = part_proto.pkg;
+
+		machines.emplace(std::piecewise_construct, std::make_tuple(id), std::make_tuple(config_toml, cur_pkg));
 	}
 }
 

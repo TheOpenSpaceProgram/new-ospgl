@@ -210,19 +210,38 @@ sol::state AssetManager::load_script(const std::string& pkg, const std::string& 
 {
 	sol::state out;
 
-	std::string full_path = res_path + pkg + "/" + path;	
-	logger->check_important(file_exists(full_path), "Tried to load an script which does not exist");
-
-	lua_core->load(out, pkg);
-
-	// Scripts MUST load, failure to do so will crash the game
-	out.script_file(full_path);
+	load_script_to(out, pkg, path);
 
 	return out;
 }
 
 sol::state AssetManager::load_script(const std::string& full_path)
 {
-	auto[pkg, name] = get_package_and_name(full_path, "core");
+	auto[pkg, name] = get_package_and_name(full_path, get_current_package());
 	return load_script(pkg, name);
+}
+
+void AssetManager::load_script_to(sol::state& target, const std::string& full_path)
+{
+	auto[pkg, name] = get_package_and_name(full_path, get_current_package());
+	return load_script_to(target, pkg, name);
+}
+
+void AssetManager::load_script_to(sol::state& target, const std::string& pkg, const std::string& path)
+{
+	std::string full_path = res_path + pkg + "/" + path;	
+	logger->check_important(file_exists(full_path), "Tried to load an script which does not exist");
+
+	lua_core->load(target, pkg);
+
+	// Scripts MUST load, failure to do so will crash the game
+	//out.script_file(full_path);
+	sol::protected_function_result result = target.safe_script_file(full_path);
+
+	if(!result.valid())
+	{
+		sol::error err = result;
+		logger->fatal("Error while loading script {}:{}:\n{}", pkg, path, err.what());
+	}	
+
 }

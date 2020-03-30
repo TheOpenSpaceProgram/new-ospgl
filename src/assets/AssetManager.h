@@ -168,6 +168,8 @@ public:
 	// cannot store a Script as a normal asset
 	sol::state load_script(const std::string& pkg, const std::string& path);
 	sol::state load_script(const std::string& full_path);
+	void load_script_to(sol::state& target, const std::string& pkg, const std::string& path);
+	void load_script_to(sol::state& target, const std::string& full_path);
 
 	std::string res_path;
 

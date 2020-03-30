@@ -40,5 +40,6 @@ void LuaVehicle::load_to(sol::table& table)
 	table.new_usertype<Part>("part",
 		"get_piece", &Part::get_piece);
 
-	table.new_usertype<Machine>("machine");
+	table.new_usertype<Machine>("machine",
+			"init_toml", &Machine::init_toml);
 }

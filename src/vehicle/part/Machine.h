@@ -24,6 +24,7 @@ private:
 
 public:
 
+	std::shared_ptr<cpptoml::table> init_toml;
 
 	void update(double dt);
 	//void wire_receive(std::string wire_id, );
@@ -32,7 +33,7 @@ public:
 
 	// Make sure AssetManager's correct current package is set,
 	// otherwise script loading MAY fail!
-	Machine(std::shared_ptr<cpptoml::table> init_toml);
+	Machine(std::shared_ptr<cpptoml::table> init_toml, std::string pkg);
 	~Machine();
 };
 
