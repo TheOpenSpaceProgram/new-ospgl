@@ -13,6 +13,7 @@
 #include "camera/Camera.h"
 #include "Drawable.h"
 #include "lighting/Light.h"
+#include <nanovg/nanovg.h>
 
 //#define ENABLE_GL_DEBUG
 
@@ -61,6 +62,9 @@ private:
 
 public:
 
+	// NanoVG is used to draw GUIs in a similar way to ImGui
+	// but for final GUIs (not debug interfaces)
+	NVGcontext* vg;
 
 	Camera* cam;
 

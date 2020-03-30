@@ -23,8 +23,9 @@ file(GLOB BULLET_SOURCES "dep/bullet3/src/bt*.cpp")
 set(GLAD_SOURCES "dep/glad/glad.c")
 set(STB_SOURCES "dep/stb/stb_impl.cpp")
 set(FASTNOISE_SOURCES "dep/FastNoise/FastNoise.cpp")
+set(NANOVG_SOURCES "dep/nanovg/nanovg.c")
 
-add_executable(OSPGL ${OSP_SOURCES} ${IMGUI_SOURCES} ${GLAD_SOURCES} ${BULLET_SOURCES} ${FASTNOISE_SOURCES} ${STB_SOURCES})
+add_executable(OSPGL ${OSP_SOURCES} ${IMGUI_SOURCES} ${GLAD_SOURCES} ${BULLET_SOURCES} ${FASTNOISE_SOURCES} ${STB_SOURCES} ${NANOVG_SOURCES})
 
 include_directories(dep)
 

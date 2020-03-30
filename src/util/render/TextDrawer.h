@@ -11,7 +11,10 @@
 // Bitmap fonts use https://www.angelcode.com/products/bmfont/ format
 // Freetype fonts are yet to be implemented
 //
-
+// For GUI code use NanoVG, this is meant to be used for 3D text
+// TODO: Maybe NanoVG allows us to fully remove this class, think about it
+// TODO: Add TrueType (FreeType?) font support
+//
 class TextDrawer
 {
 private:

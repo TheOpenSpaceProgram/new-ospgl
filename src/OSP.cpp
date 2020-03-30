@@ -193,6 +193,10 @@ void OSP::start_frame()
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+
+	float w = (float)renderer->get_width();
+	float h = (float)renderer->get_height();
+	nvgBeginFrame(renderer->vg, w, h, w / h);
 }
 
 void OSP::finish_frame(double max_dt)

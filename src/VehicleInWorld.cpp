@@ -65,7 +65,7 @@ int main(int argc, char** argv)
 	st.rotation = glm::dquat(0.0, 1.0, 0.0, 0.0);
 	st.cartesian.pos = glm::dvec3(10.0, 0.0, 0.0);
 	st.cartesian.vel = glm::dvec3(10.0, 0.0, 0.0);
-	st.angular_velocity = glm::dvec3(0.0, 0.0, 0.0);
+	st.angular_velocity = glm::dvec3(0.0, .0, 0.0);
 
 
 	n_vehicle->packed_veh.set_world_state(st);
@@ -75,7 +75,6 @@ int main(int argc, char** argv)
 	{
 		osp.start_frame();
 
-		
 		camera->update(osp.dt);
 		universe.update(osp.dt);
 

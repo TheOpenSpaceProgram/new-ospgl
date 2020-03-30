@@ -1,6 +1,8 @@
 #include "Renderer.h"
 #include "../assets/AssetManager.h"
 
+#define NANOVG_GL3_IMPLEMENTATION
+#include <nanovg/nanovg_gl.h>
 
 void Renderer::resize(int nwidth, int nheight, float nscale)
 {
@@ -193,6 +195,17 @@ void Renderer::render()
 		{
 			d->gui_pass(c_uniforms);
 		}
+
+		// Draw nanoVG 
+		nvgEndFrame(vg);
+
+		// Sanitize OpenGL after nanoVG call
+		glEnable(GL_DEPTH_TEST);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glEnable(GL_CULL_FACE);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	finish();
@@ -442,6 +455,9 @@ Renderer::Renderer(cpptoml::table& settings)
 	glDebugMessageCallback(open_gl_debug_callback, (void*)0);
 #endif
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// Create the nanoVG context
+	vg = nvgCreateGL3(NVG_ANTIALIAS);
 
 	resize(width, height, scale);
 
