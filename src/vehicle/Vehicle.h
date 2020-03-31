@@ -55,6 +55,9 @@ private:
 	
 
 public:
+
+	Universe* in_universe;
+
 	UnpackedVehicle unpacked_veh;
 	PackedVehicle packed_veh;
 	
@@ -83,11 +86,11 @@ public:
 	void set_position(glm::dvec3 pos);
 	void set_linear_velocity(glm::dvec3 vel);
 
-	// Called regardless of loading state
-	// The return is only populated when the vehicle is
-	// unpacked and something has separated
-	std::vector<Vehicle*> update(double dt);	
+	void update(double dt);	
 
+	// The return is only populated if something separated
+	std::vector<Vehicle*> physics_update(double pdt);
+	
 	// Called when the vehicle is added to the world
 	void init(Universe* into_universe);
 

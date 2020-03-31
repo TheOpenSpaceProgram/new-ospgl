@@ -66,6 +66,8 @@ public:
 	void deactivate();
 	void activate();
 
+	void apply_gravity(btVector3 direction);
+
 	UnpackedVehicle(Vehicle* v);
 
 };

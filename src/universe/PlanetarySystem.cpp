@@ -2,6 +2,31 @@
 #include "../util/DebugDrawer.h"
 #include <imgui/imgui.h>
 #include "ReferenceFrame.h"
+#include "../physics/glm/BulletGlmCompat.h"
+#include "../physics/ground/GroundShape.h"
+
+glm::dvec3 PlanetarySystem::get_gravity_vector(glm::dvec3 p, StateVector* states)
+{
+	glm::dvec3 result = glm::dvec3(0, 0, 0);
+	for(size_t i = 0; i < states->size(); i++)
+	{
+		double mass = elements[i].get_mass();
+		
+		if(mass > 0)
+		{
+			glm::dvec3 pos = states->at(i).pos;
+			glm::dvec3 diff = pos - p;
+
+			double dist2 = glm::length2(diff);
+
+			glm::dvec3 diffn = diff / glm::sqrt(dist2);
+			double am = (G * mass) / dist2;
+			result += diffn * am;
+		}		
+	}	
+
+	return result;
+}
 
 CartesianState compute_state(double t, double tol, 
 	SystemElement* body, std::vector<CartesianState>* other_states)
@@ -260,53 +285,29 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 	compute_states(tnow + dt * timewarp, *v, 1e-6);
 
 
-	if (!bullet)
-	{
-		// TODO: Fix this mess
-		//int factor = 10000;
-		/*double sub_dt = dt * factor;
-		if (timewarp < factor)
-		{
-			sub_dt = dt * timewarp;
-		}
-
-		bool prev_debug = debug_drawer->debug_enabled;
-
-		int it = 0;
-		for (double sub_t = t; sub_t < t + dt * timewarp; sub_t += sub_dt)
-		{
-			// We only draw debug at sub_t = 0
-			if (it != 0)
-			{
-				debug_drawer->debug_enabled = false;
-			}
-
-			// Propagate vessels
-			//propagator->prepare(sub_t, sub_dt, physics_pos);
-			//size_t closest = propagator->propagate(&vessels[0]);
-
-			//vessels[0].simulate(elements, physics_pos, closest, sub_dt);
-
-
-			it++;
-		}
-
-		debug_drawer->debug_enabled = prev_debug;
-
-		pt -= dt * timewarp;
-
-
-		glm::dvec3 pp;
-
-
-
-		//vessels[0].draw_debug();
-		*/
-	}
-
 	if (bullet)
 	{
 		bt += dt * timewarp;
+
+		// Give data to colliders
+		for(size_t i = 0; i < elements.size(); i++)
+		{
+			SystemElement& elem = elements[i];
+
+			if(elem.type == SystemElement::BODY)
+			{
+				PlanetaryBody* as_body = elem.as_body;
+			
+				btTransform tform = btTransform::getIdentity();
+				tform.setOrigin(to_btVector3(bullet_states[i].pos));
+				glm::dmat4 mat = as_body->build_rotation_matrix(bt);
+				glm::dquat quat = glm::dquat(mat);
+
+				tform.setRotation(to_btQuaternion(quat));
+
+				as_body->rigid_body->setWorldTransform(tform);	
+			}	
+		}
 	}
 	else
 	{ 
@@ -318,6 +319,28 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 void PlanetarySystem::init_physics(btDynamicsWorld* world)
 {
 	bt = t;
+	
+	// Create the colliders and rigidbodies
+
+	for(size_t i = 0; i < elements.size(); i++)
+	{
+		SystemElement& elem = elements[i];
+
+		if(elem.type == SystemElement::BODY)
+		{
+			PlanetaryBody* as_body = elem.as_body;
+
+			as_body->ground_shape = new GroundShape(as_body);
+			as_body->rigid_body = new btRigidBody(1000000000.0, nullptr, as_body->ground_shape, btVector3(0, 0, 0));
+			as_body->rigid_body->setCollisionFlags(as_body->rigid_body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+			as_body->rigid_body->setFriction(1.0);
+			as_body->rigid_body->setRestitution(1.0);
+			as_body->ground_shape->setMargin(2.0);
+			as_body->rigid_body->setActivationState(DISABLE_DEACTIVATION);
+
+			world->addRigidBody(as_body->rigid_body);
+		}
+	}
 
 	pt = 0;
 	factor = 1000;
@@ -495,4 +518,18 @@ PlanetarySystem::PlanetarySystem()
 PlanetarySystem::~PlanetarySystem()
 {
 	delete propagator;
+
+	// Remove physics stuff
+	
+	for(size_t i = 0; i < elements.size(); i++)
+	{
+		SystemElement& elem = elements[i];
+
+		if(elem.type == SystemElement::BODY)
+		{
+			PlanetaryBody* as_body = elem.as_body;
+			delete as_body->rigid_body;
+			delete as_body->ground_shape;
+		}
+	}
 }

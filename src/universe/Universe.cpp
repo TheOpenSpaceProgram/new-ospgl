@@ -58,6 +58,7 @@ void Universe::physics_update(double pdt)
 
 void Universe::update(double dt)
 {
+	system.update(dt, bt_world, false);
 
 	bt_world->stepSimulation(dt, MAX_PHYSICS_STEPS, btScalar(PHYSICS_STEPSIZE));
 

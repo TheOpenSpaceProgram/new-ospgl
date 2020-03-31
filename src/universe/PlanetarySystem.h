@@ -74,17 +74,9 @@ public:
 	// Same as before but with positions
 	void compute_positions(double t, std::vector<glm::dvec3>& out, double tol = 1.0e-8);
 
-	// Computes state of planets which can have a noticeable effect on our vehicle
-	// It takes the index of the planet whose SOI we are inside, so moons of other
-	// planets are ignored, and instead add to the central mass, so many of the return 
-	// values in out are (0, 0) (with mass 0). These can be ignored!
-	// SOI changes should be done as often as possible, but they are not required every
-	// single step
-	void compute_states_fast(double t, size_t soi_index, std::vector<CartesianState>& out, std::vector<glm::dvec3>& out_masses, double tol = 1.0e-8);
-
-	// Computes SOIs for all bodies at a given time, as it only depends on the 
-	// semi-major axis it's not really important which t you choose.
 	void compute_sois(double t);
+
+	glm::dvec3 get_gravity_vector(glm::dvec3 point, StateVector* states);
 
 	virtual void deferred_pass(CameraUniforms& cu) override;
 	virtual bool needs_deferred_pass() override { return true; }

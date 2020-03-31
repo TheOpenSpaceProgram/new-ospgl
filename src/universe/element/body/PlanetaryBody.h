@@ -6,6 +6,9 @@
 #include <glm/gtx/rotate_vector.hpp>
 
 
+class GroundShape;
+class btRigidBody;
+
 class PlanetaryBody
 {
 public:
@@ -14,6 +17,11 @@ public:
 	PlanetConfig config;
 
 	PlanetaryBodyRenderer renderer;
+
+	// Externally managed
+	GroundShape* ground_shape;
+	btRigidBody* rigid_body;
+
 
 	// 0 = no dot, 1 = only dot
 	// Used to save resources when rendering planets which are far away

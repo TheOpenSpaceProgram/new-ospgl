@@ -72,6 +72,23 @@ public:
 		}
 	}
 
+	// Returns 0 for barycenters
+	double get_real_mass()
+	{
+		if(type == STAR)
+		{
+			return as_star->mass;
+		}
+		else if(type == BARYCENTER)
+		{
+			return 0.0;
+		}
+		else
+		{
+			return as_body->config.mass;
+		}
+	}
+
 	SystemElement();
 	~SystemElement();
 };

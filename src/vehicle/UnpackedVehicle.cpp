@@ -708,3 +708,11 @@ UnpackedVehicle::UnpackedVehicle(Vehicle* v)
 {
 	this->vehicle = v;
 }
+
+void UnpackedVehicle::apply_gravity(btVector3 dir)
+{
+	for(Piece* p : vehicle->all_pieces)
+	{
+		p->rigid_body->setGravity(dir);
+	}
+}

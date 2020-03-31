@@ -28,19 +28,29 @@ void Vehicle::pack()
 	packed_veh.calculate_com();
 }
 
-std::vector<Vehicle*> Vehicle::update(double dt)
+void Vehicle::update(double dt)
 {
 	for(Part* part : parts)
 	{
 		part->update(dt);
 	}
 
-	if(packed)
+}
+
+std::vector<Vehicle*> Vehicle::physics_update(double dt)
+{
+	if(packed)	
 	{
 		return std::vector<Vehicle*>();
 	}
 	else
 	{
+		// Generate the gravity vector
+		// glm::dvec3 pos = unpacked_veh.get_center_of_mass(); 	//< Not neccesary, in-vehicle distances are minimal
+		glm::dvec3 pos = to_dvec3(root->get_global_transform().getOrigin());
+		glm::dvec3 grav = in_universe->system.get_gravity_vector(pos, &in_universe->system.bullet_states);
+
+		unpacked_veh.apply_gravity(to_btVector3(grav));
 		auto n_vehicles = unpacked_veh.update();
 		return n_vehicles;
 	}	
@@ -53,6 +63,8 @@ void Vehicle::init(Universe* in_universe)
 	{
 		part->init(in_universe, this);
 	}
+
+	this->in_universe = in_universe;
 }
 
 

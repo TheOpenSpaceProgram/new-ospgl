@@ -63,14 +63,16 @@ int main(int argc, char** argv)
 
 	WorldState st = WorldState();
 	st.rotation = glm::dquat(1.0, 0.0, 0.0, 0.0f);
-	st.cartesian.pos = glm::dvec3(0.0, 0.0, 0.0);
-	st.cartesian.vel = glm::dvec3(0.0, 0.0, 0.0);
-	st.angular_velocity = glm::dvec3(1.0, 0.0, 0.0);
 
-
+	st.cartesian.pos = universe.system.states_now[3].pos;
+	st.cartesian.vel = universe.system.bullet_states[3].vel;
+	st.cartesian.pos.x += universe.system.elements[3].as_body->config.radius;
+	st.cartesian.pos.x += 1200.0;
+	st.angular_velocity = glm::dvec3(0, 0, 0);
 	n_vehicle->packed_veh.set_world_state(st);
 	n_vehicle->unpack();
-	
+
+	logger->info("EEEEEEEE: {}", universe.system.elements[3].name);	
 
 	while (osp.should_loop())
 	{
@@ -94,23 +96,6 @@ int main(int argc, char** argv)
 			}
 
 			n_vehicle->unpacked_veh.dirty = true;
-		}
-
-		for(Piece* p : n_vehicle->all_pieces)
-		{
-			glm::dvec3 pos = to_dvec3(p->get_global_transform().getOrigin());
-			glm::dvec3 tvel = to_dvec3(p->get_tangential_velocity());
-			glm::dvec3 avel = to_dvec3(p->get_angular_velocity());
-			glm::dvec3 lvel = to_dvec3(p->get_linear_velocity());
-			glm::dvec3 rpos = to_dvec3(p->get_relative_position());
-
-			debug_drawer->add_line(pos, pos + tvel * 10.0, glm::vec3(1.0, 0.0, 1.0));
-			debug_drawer->add_line(pos, pos + avel * 10.0, glm::vec3(0.0, 0.0, 1.0));	
-			debug_drawer->add_line(pos, pos + lvel * 10.0, glm::vec3(1.0, 1.0, 0.0));
-			if(p->id == 2)
-			{
-				debug_drawer->add_point(rpos, glm::vec3(1.0, 1.0, 1.0));
-			}
 		}
 
 		camera->update(osp.dt);
