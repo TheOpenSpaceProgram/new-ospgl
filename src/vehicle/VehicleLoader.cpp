@@ -44,7 +44,8 @@ Vehicle* VehicleLoader::load_vehicle(cpptoml::table& root)
 		int64_t piece_id = *piece->get_qualified_as<int64_t>("id");
 		
 		Piece* n_piece = new Piece(parts_by_id[part_id], node);
-	
+		n_piece->id = piece_id;
+
 		// Add ourselves to the part
 		logger->check_important(parts_by_id.find(part_id) != parts_by_id.end(), "Invalid part ID");
 		Part* part = parts_by_id[part_id];
@@ -122,6 +123,8 @@ Vehicle* VehicleLoader::load_vehicle(cpptoml::table& root)
 	n_vehicle->packed_veh.set_world_state(n_state);
 
 	n_vehicle->packed = true;
+
+	n_vehicle->packed_veh.calculate_com();
 	n_vehicle->sort();
 
 	// It's up to the caller to properly place the vehicle in the world

@@ -10,6 +10,7 @@ struct PieceState
 {
 	btTransform transform;
 	btVector3 linear;
+	btVector3 linear_tang;
 	btVector3 angular;
 };
 
@@ -17,7 +18,8 @@ static PieceState obtain_piece_state(Piece* piece)
 {
 	PieceState st;
 	st.transform = piece->get_global_transform(false);
-	st.linear = piece->get_linear_velocity(true); // < TODO: Maybe that should be false and not true!
+	st.linear = piece->get_linear_velocity(true);
+	st.linear_tang = piece->get_linear_velocity(false);
 	st.angular = piece->get_angular_velocity();
 	return st;
 }
@@ -45,7 +47,7 @@ static void add_to_welded_groups(std::vector<WeldedGroupCreation>& welded_groups
 		// whatever it's welded to (Note: individual parts get a lone welded group)
 		welded_groups.push_back(std::make_pair(std::unordered_set<Piece*>(), false));
 		welded_groups[welded_groups.size() - 1].first.insert(piece);
-		if (piece->welded)
+		if (piece->welded && piece->attached_to != nullptr)
 		{
 			welded_groups[welded_groups.size() - 1].first.insert(piece->attached_to);
 		}
@@ -184,7 +186,7 @@ static void create_new_welded_group(
 		}
 
 
-		//collider->calculateLocalInertia(tot_mass, local_inertia);
+		collider->calculateLocalInertia(tot_mass, local_inertia);
 
 		btMotionState* motion_state = new btDefaultMotionState(principal);
 		btRigidBody::btRigidBodyConstructionInfo info(tot_mass, motion_state, collider, local_inertia);
@@ -198,8 +200,7 @@ static void create_new_welded_group(
 
 		world->addRigidBody(rigid_body);
 
-		btVector3 total_impulse = btVector3(0.0, 0.0, 0.0);
-		btVector3 total_angvel = btVector3(0.0, 0.0, 0.0);
+		btVector3 total_angvel = btVector3(0, 0, 0);
 
 		for (Piece* p : wg.first)
 		{
@@ -225,17 +226,18 @@ static void create_new_welded_group(
 			p->motion_state = motion_state;
 			p->welded_tform = principal_inverse * p->welded_tform;
 
-			rigid_body->applyCentralImpulse(states_at_start[p].linear * p->mass);
+			//rigid_body->applyCentralImpulse(states_at_start[p].linear * p->mass);
+			rigid_body->applyImpulse(states_at_start[p].linear * p->mass, p->get_local_transform().getOrigin());
+			//rigid_body->applyImpulse(states_at_start[p].linear * p->mass, p->get_relative_position()); 
 			total_angvel += states_at_start[p].angular;
-			//total_impulse += states_at_start[p].linear;
 		}
 
-		// TODO: Is this stuff correct?
-		total_angvel /= (btScalar)wg.first.size();
-	//	total_impulse /= (btScalar)wg.first.size();
 
-		//rigid_body->applyCentralImpulse(total_impulse * tot_mass);
-		rigid_body->setAngularVelocity(total_angvel);
+		// Angular momentum is conserved, we need to get angular velocity back
+		// from total_angmom
+		glm::dvec3 ang_veld = to_dvec3(total_angvel) / (double)wg.first.size();
+		btVector3 ang_vel = to_btVector3(ang_veld);
+		rigid_body->setAngularVelocity(ang_vel);
 
 		n_group->rigid_body = rigid_body;
 		n_group->motion_state = motion_state;
@@ -280,14 +282,16 @@ static void create_piece_physics(Piece* piece, std::unordered_map<Piece*, PieceS
 	rigid_body->setRestitution(piece->restitution);
 	rigid_body->setWorldTransform(states_at_start[piece].transform);
 
+
+	// Apply old impulses
+	rigid_body->setLinearVelocity(states_at_start[piece].linear_tang);
+	rigid_body->setAngularVelocity(states_at_start[piece].angular);
+
 	world->addRigidBody(rigid_body);
 
 	piece->rigid_body = rigid_body;
 	piece->motion_state = motion_state;
 
-	// Apply old impulses
-	rigid_body->applyCentralImpulse(states_at_start[piece].linear * piece->mass);
-	rigid_body->setAngularVelocity(states_at_start[piece].angular);
 }
 
 std::vector<Vehicle*> UnpackedVehicle::update()
@@ -295,17 +299,23 @@ std::vector<Vehicle*> UnpackedVehicle::update()
 	std::vector<Vehicle*> n_vehicles;
 	// Check for any broken links, they instantly set the dirty flags,
 	// but they cannot set it themselves
-	for (Piece* p : vehicle->all_pieces)
+	if(!dirty)
 	{
-		if (p->link != nullptr && p->attached_to != nullptr)
+		for (Piece* p : vehicle->all_pieces)
 		{
-			if (p->link->is_broken())
+			if (p->link != nullptr && p->attached_to != nullptr && !p->welded)
 			{
-				dirty = true;
-				break;
+				if (p->link->is_broken())
+				{
+					logger->info("Link {}", p->id);
+					dirty = true;
+					logger->info("BREIK!");
+					break;
+				}
 			}
 		}
 	}
+
 
 	if (dirty)
 	{
@@ -559,7 +569,7 @@ std::vector<Vehicle*> UnpackedVehicle::handle_separation()
 		n_vehicle->packed = false;
 		n_vehicle->sort();
 		n_vehicle->unpacked_veh.build_physics();
-
+		
 		logger->info("Separated new vehicle");
 		n_vehicles.push_back(n_vehicle);
 	}
@@ -687,6 +697,7 @@ glm::dvec3 UnpackedVehicle::get_center_of_mass()
 
 void UnpackedVehicle::activate()
 {
+	dirty = true;
 	vehicle->packed = true;
 	// sort() 				// TODO: Sorting may not be neccesary here as pieces won't change while packed
 	build_physics();

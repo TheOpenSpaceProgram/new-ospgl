@@ -24,6 +24,8 @@ void Vehicle::pack()
 	packed = true;
 
 	unpacked_veh.deactivate();
+
+	packed_veh.calculate_com();
 }
 
 std::vector<Vehicle*> Vehicle::update(double dt)

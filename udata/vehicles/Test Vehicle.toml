@@ -46,7 +46,7 @@
 			w = 1.0
 		[piece.link]
 			to = 3
-			welded = true
+			welded = false
 			type = "core:links/simple_link.lua"
 			[piece.link.pfrom]
 				x = 0.0

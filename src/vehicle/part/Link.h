@@ -16,6 +16,7 @@ class Link
 {
 public:
 
+	bool is_initialized;
 	sol::state lua_state;
 
 	// Called during loading of the link to give it its 
@@ -34,6 +35,8 @@ public:
 		btDynamicsWorld* world
 	)
 	{
+		is_initialized = true;
+
 		LuaUtil::safe_call_function(lua_state,
 				"activate", "link activate",
 				from, BulletTransform(from_frame), to, BulletTransform(to_frame), world);
@@ -45,6 +48,8 @@ public:
 	// for example, ropes or motors which must remember their last position
 	void deactivate()
 	{
+		is_initialized = false;
+
 		LuaUtil::safe_call_function(lua_state, 
 				"deactivate", "link deactivate");
 	}
@@ -52,8 +57,15 @@ public:
 	// Return true if the link has broken and should be deleted
 	bool is_broken()
 	{
-		return LuaUtil::safe_call_function(lua_state,
-				"is_broken", "link is_broken");
+		if(!is_initialized)
+		{
+			return false;
+		}
+		else
+		{
+			return LuaUtil::safe_call_function(lua_state,
+				"is_broken", "link is_broken").get<bool>();
+		}
 	}
 
 	void set_breaking_enabled(bool value)
@@ -66,6 +78,7 @@ public:
 	Link(sol::state&& st)
 	{
 		this->lua_state = std::move(st);
+		is_initialized = false;
 	}
 };
 

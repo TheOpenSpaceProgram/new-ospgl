@@ -5,11 +5,12 @@ local logger = require("logger")
 local toml = require("toml")
 
 local thrust = machine.init_toml:get_number("thrust")
+thrust = 0.0
 
 function update(dt)
 
 	local p_root = part:get_piece("p_root")
-	local dir = glm.vec3.new(0.0, 0.0, 1.0)
+	local dir = glm.vec3.new(1.0, 0.0, 0.0)
 	dir = p_root:transform_axis(dir)
 	local pos = p_root:get_relative_position()
 

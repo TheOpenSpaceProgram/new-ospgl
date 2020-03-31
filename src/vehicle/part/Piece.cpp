@@ -76,7 +76,6 @@ btVector3 Piece::get_angular_velocity()
 {
 	if(in_vehicle->is_packed())
 	{
-		// TODO
 		return to_btVector3(in_vehicle->packed_veh.get_root_state().angular_velocity);
 	}
 	else 
@@ -85,13 +84,24 @@ btVector3 Piece::get_angular_velocity()
 	}
 }
 
+btVector3 Piece::get_angular_momentum()
+{
+	double r2 = get_relative_position().length2();
+	double m = mass;
+	return get_angular_velocity() * r2 * m;
+}
+
 btVector3 Piece::get_tangential_velocity()
 {
 
 	if(in_vehicle->is_packed())
 	{
 		btVector3 r = packed_tform.getOrigin();
-		btVector3 tangential = r.cross(get_angular_velocity());
+		// We need to correct r to the center of mass
+		btVector3 com = in_vehicle->packed_veh.get_com_root_relative();
+		r -= com;
+		logger->info("COM: {} {} {}", com.x(), com.y(), com.z());
+		btVector3 tangential = get_angular_velocity().cross(r);
 		return tangential;
 	}
 	else 
@@ -103,7 +113,7 @@ btVector3 Piece::get_tangential_velocity()
 		}
 
 		btVector3 r = get_relative_position();
-		btVector3 tangential = r.cross(rigid_body->getAngularVelocity());
+		btVector3 tangential = rigid_body->getAngularVelocity().cross(r);
 	
 		return tangential;
 	}
@@ -111,10 +121,12 @@ btVector3 Piece::get_tangential_velocity()
 
 btVector3 Piece::get_relative_position()
 {
+	// TODO: Check this stuff
+	//return get_local_transform().getOrigin();
 	if(is_welded())
 	{
-
-		btTransform global = get_global_transform();
+		// Not get_global_transform() as that already includes get_local_transform()
+		btTransform global = rigid_body->getWorldTransform();
 		btTransform local = get_local_transform();
 		btTransform mul = global * local; //< This is final position
 
@@ -184,6 +196,7 @@ Piece::Piece(Part* in_part, std::string piece_name)
 
 	collider = part->part_proto->pieces[piece_name].collider;
 	collider_offset = part->part_proto->pieces[piece_name].render_offset;
+
 }
 
 Piece::~Piece()

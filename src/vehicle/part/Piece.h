@@ -116,8 +116,8 @@ public:
 	// Returns zero on non-welded pieces
 	btVector3 get_tangential_velocity();
 
-	// This returns relative position in root centered, but not rotated,
-	// space. Used for bullet physics
+	btVector3 get_angular_momentum();
+
 	btVector3 get_relative_position();
 
 	glm::dvec3 transform_axis(glm::dvec3 axis);
