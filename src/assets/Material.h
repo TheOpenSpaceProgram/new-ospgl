@@ -208,6 +208,7 @@ struct Material
 	MeshConfig cfg;
 
 	Shader* shader;
+	Shader* shadow_shader;
 
 	std::unordered_map<std::string, Uniform> uniforms;
 
@@ -316,7 +317,7 @@ public:
 		SAFE_TOML_GET(str, "shader", std::string);
 
 		to.shader = assets->get_from_path<Shader>(str);
-
+		to.shadow_shader = assets->get_from_path<Shader>("core:shaders/shadow.vs"); //< TODO: Maybe allow the user to choose a shader?
 		auto cfg_toml = from.get_table_qualified("config");
 		if (cfg_toml)
 		{

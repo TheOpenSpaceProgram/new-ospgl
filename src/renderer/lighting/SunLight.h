@@ -2,6 +2,13 @@
 #include "Light.h"
 // Simplest thing, always at (0, 0, 0). It's actually a point-light
 // but renders a fullscreen quad. It also allows setting ambient light
+//
+// Shadows:
+// 	We need to render two shadow maps.
+// 	- FAR: Renders just the closest planetary surface to the camera,
+// 		it casts landscape shadows. Projection depends on distance to surface
+//	- NEAR: Renders the closest planetary surface and vehicles,
+//		uses a way smaller frustrum
 class SunLight : public Light
 {
 private:
@@ -14,11 +21,31 @@ public:
 	glm::vec3 spec_color;
 	glm::vec3 ambient_color;
 
+	constexpr static int FAR_SHADOW_SIZE = 512;
+	constexpr static int NEAR_SHADOW_SIZE = 512;
+
+	GLuint far_shadow_fbo;
+	GLuint near_shadow_fbo;
+	GLuint far_shadow_tex;
+	GLuint near_shadow_tex;
+
+	// User set
+	double near_shadow_span;
+	// Set by the renderer
+	double far_shadow_span;
+
+	ShadowCamera near_shadow_cam;
+	ShadowCamera far_shadow_cam;
 
 	SunLight();
 	~SunLight();
 
-	// Inherited via Light
+	virtual LightType get_type(){ return SUN; } 
+
 	virtual void do_pass(CameraUniforms& cu, GBuffer * gbuf) override;
+	virtual ShadowCamera get_shadow_camera(glm::dvec3 camera_pos) override;
+
+	virtual bool casts_shadows() { return true; }
+
 };
 

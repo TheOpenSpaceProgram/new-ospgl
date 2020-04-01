@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include "camera/CameraUniforms.h"
+#include "lighting/ShadowCamera.h"
 #include <string>
 
 class Renderer;
@@ -19,10 +20,14 @@ public:
 	virtual void deferred_pass(CameraUniforms& cu){}
 	virtual void forward_pass(CameraUniforms& cu){}
 	virtual void gui_pass(CameraUniforms& cu) {}
-	
+	virtual void shadow_pass(ShadowCamera& cu) {}
+	virtual void far_shadow_pass(ShadowCamera& cu) {}
+
 	virtual bool needs_deferred_pass() { return false; }
 	virtual bool needs_forward_pass() { return false; }
 	virtual bool needs_gui_pass() { return false; }
+	virtual bool needs_shadow_pass() { return false; }
+	virtual bool needs_far_shadow_pass() { return false; }
 
 	bool is_in_renderer() 
 	{

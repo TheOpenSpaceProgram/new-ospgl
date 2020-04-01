@@ -4,6 +4,8 @@
 #define NANOVG_GL3_IMPLEMENTATION
 #include <nanovg/nanovg_gl.h>
 
+#include "../universe/PlanetarySystem.h"
+
 void Renderer::resize(int nwidth, int nheight, float nscale)
 {
 	if (gbuffer != nullptr)
@@ -76,6 +78,39 @@ void Renderer::prepare_deferred()
 
 }
 
+void Renderer::do_shadows(PlanetarySystem* system, glm::dvec3 camera_pos)
+{
+	glCullFace(GL_FRONT);
+	for(Light* light : lights)
+	{
+		if(light->casts_shadows())
+		{
+			ShadowCamera shadow_cam = light->get_shadow_camera(camera_pos);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, shadow_cam.fbuffer);
+			glViewport(0, 0, shadow_cam.size, shadow_cam.size);
+			glClear(GL_DEPTH_BUFFER_BIT);
+
+
+			for(Drawable* d : shadow)
+			{
+				d->shadow_pass(shadow_cam);
+			}
+
+			if(light->get_type() == Light::SUN)
+			{
+				if(system != nullptr)
+				{
+					// Far shadow (TODO)
+				}	
+			}
+
+		}
+	
+	}
+	glCullFace(GL_BACK);
+}
+
 void Renderer::prepare_forward(CameraUniforms& cu)
 {
 	glEnable(GL_BLEND);
@@ -84,6 +119,7 @@ void Renderer::prepare_forward(CameraUniforms& cu)
 	{
 
 		glBindFramebuffer(GL_FRAMEBUFFER, fbuffer->fbuffer);
+		glViewport(0, 0, swidth, sheight);
 		glClear(GL_COLOR_BUFFER_BIT); //< Don't clear the depth buffer!
 
 		doing_deferred = false;
@@ -164,7 +200,7 @@ void Renderer::finish()
 
 }
 
-void Renderer::render()
+void Renderer::render(PlanetarySystem* system)
 {
 	prepare_deferred();
 
@@ -177,6 +213,7 @@ void Renderer::render()
 			d->deferred_pass(c_uniforms);
 		}
 
+		do_shadows(system, c_uniforms.cam_pos);
 		prepare_forward(c_uniforms);
 
 		for (Drawable* d : forward)
@@ -238,9 +275,32 @@ void Renderer::add_drawable(Drawable* d, std::string n_id)
 		gui.push_back(d);
 	}
 
+	if(d->needs_shadow_pass())
+	{
+		shadow.push_back(d);
+	}
+
+	if(d->needs_far_shadow_pass())
+	{
+		far_shadow.push_back(d);
+	}
+
 	all_drawables.push_back(d);
 }
-
+static void remove_from(std::vector<Drawable*>& array, Drawable* d)
+{
+	for (auto it = array.begin(); it != array.end();)
+	{
+		if ((*it) == d)
+		{
+			it = array.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
+}
 
 void Renderer::remove_drawable(Drawable* drawable)
 {
@@ -248,63 +308,32 @@ void Renderer::remove_drawable(Drawable* drawable)
 
 	drawable->notify_remove_from_renderer();
 
-	for (auto it = all_drawables.begin(); it != all_drawables.end();)
-	{
-		if ((*it) == drawable)
-		{
-			it = all_drawables.erase(it);
-		}
-		else
-		{
-			it++;
-		}
-	}
+	remove_from(all_drawables, drawable);
 
 	if (drawable->needs_deferred_pass())
 	{
-		for (auto it = deferred.begin(); it != deferred.end();)
-		{
-			if ((*it) == drawable)
-			{
-				it = deferred.erase(it);
-			}
-			else
-			{
-				it++;
-			}
-		}
+		remove_from(deferred,  drawable);
 	}
 
 	if (drawable->needs_forward_pass())
 	{
-		for (auto it = forward.begin(); it != forward.end();)
-		{
-			if ((*it) == drawable)
-			{
-				it = forward.erase(it);
-			}
-			else
-			{
-				it++;
-			}
-		}
+		remove_from(forward, drawable);
 	}
 
 	if (drawable->needs_gui_pass())
 	{
-		for (auto it = gui.begin(); it != gui.end();)
-		{
-			if ((*it) == drawable)
-			{
-				it = gui.erase(it);
-			}
-			else
-			{
-				it++;
-			}
-		}
+		remove_from(gui, drawable);
 	}
 
+	if (drawable->needs_shadow_pass())
+	{
+		remove_from(shadow, drawable);
+	}
+
+	if(drawable->needs_far_shadow_pass())
+	{
+		remove_from(far_shadow, drawable);
+	}
 }
 
 void Renderer::add_light(Light* light)

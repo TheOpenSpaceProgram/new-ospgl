@@ -67,12 +67,10 @@ int main(int argc, char** argv)
 	st.cartesian.pos = universe.system.states_now[3].pos;
 	st.cartesian.vel = universe.system.bullet_states[3].vel;
 	st.cartesian.pos.x += universe.system.elements[3].as_body->config.radius;
-	st.cartesian.pos.x += 1200.0;
+	st.cartesian.pos.x += 1000.0;
 	st.angular_velocity = glm::dvec3(0, 0, 0);
 	n_vehicle->packed_veh.set_world_state(st);
 	n_vehicle->unpack();
-
-	logger->info("EEEEEEEE: {}", universe.system.elements[3].name);	
 
 	while (osp.should_loop())
 	{
@@ -103,7 +101,7 @@ int main(int argc, char** argv)
 
 		camera->center = n_vehicle->unpacked_veh.get_center_of_mass();
 		
-		osp.renderer->render();
+		osp.renderer->render(&universe.system);
 
 		osp.finish_frame(universe.MAX_PHYSICS_STEPS * universe.PHYSICS_STEPSIZE);
 	}

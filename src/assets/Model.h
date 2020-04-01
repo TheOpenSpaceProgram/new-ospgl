@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include "Material.h"
 #include "../renderer/camera/CameraUniforms.h"
+#include "../renderer/lighting/ShadowCamera.h"
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include "../physics/glm/BulletGlmCompat.h"
 
@@ -16,7 +17,6 @@ class Mesh
 {
 private:
 
-	friend class Model;
 
 	GLuint vbo, vao, ebo;
 
@@ -30,6 +30,9 @@ private:
 	bool drawable;
 
 public:
+
+	friend class Model;
+	friend class Node;
 
 	size_t data_size;
 	size_t index_count;
@@ -82,12 +85,14 @@ struct Node
 	std::unordered_map<std::string, std::string> properties;
 
 	void draw_all_meshes(const CameraUniforms& uniforms, glm::dmat4 model);
+	void draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model);
 
 	// Draws all meshes, and call sthe same on all children,
 	// accumulating sub transforms
 	// The ignore_our_subtform flag is useful specially for stuff like parts
 	// where the piece transform is ignored during game rendering
 	void draw(const CameraUniforms& uniforms, glm::dmat4 model, bool ignore_our_subtform = false);
+	void draw_shadow(const ShadowCamera& sh_cam, glm::dmat4 model, bool ignore_our_subtform = false);
 };
 
 // Models allow loading 3d models using the assimp library

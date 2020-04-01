@@ -79,6 +79,9 @@ public:
 	virtual void deferred_pass(CameraUniforms& camera_uniforms) override;
 	virtual bool needs_deferred_pass() override { return true; }
 
+	virtual void shadow_pass(ShadowCamera& sh_camera) override;
+	virtual bool needs_shadow_pass() override { return true; }
+
 	void pack();
 	void unpack();
 	bool is_packed() { return packed; }

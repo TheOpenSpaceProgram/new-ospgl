@@ -33,6 +33,9 @@ public:
 
 	void set_shader_uniforms(Shader* sh, GBuffer* gbuffer, glm::dvec3 rel_pos);
 
+	virtual LightType get_type(){ return POINT; }
+
+
 	PointLight();
 	~PointLight();
 	

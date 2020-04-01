@@ -595,6 +595,23 @@ void Node::draw_all_meshes(const CameraUniforms & uniforms, glm::dmat4 model)
 
 }
 
+void Node::draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model)
+{
+	for(Mesh& mesh : meshes)
+	{
+		if(mesh.is_drawable())
+		{
+			glm::dmat4 tform = sh_cam.tform * model;
+
+			Shader* sh = mesh.material->shadow_shader;
+			sh->use();
+			sh->setMat4("tform", tform);
+
+			mesh.draw_command();
+		}
+	}
+}
+
 void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, bool ignore_our_subtform)
 {
 	glm::dmat4 n_model;
@@ -612,6 +629,26 @@ void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, bool ignore_ou
 	for (Node* node : children)
 	{
 		node->draw(uniforms, n_model, false);
+	}
+}
+
+void Node::draw_shadow(const ShadowCamera& sh_cam, glm::dmat4 model, bool ignore_our_subtform)
+{
+	glm::dmat4 n_model;
+	if(ignore_our_subtform)
+	{
+		n_model = model;
+	}
+	else
+	{
+		n_model = sub_transform * model;
+	}
+
+	draw_all_meshes_shadow(sh_cam, n_model);
+
+	for(Node* node : children)
+	{
+		node->draw_shadow(sh_cam, model, false);
 	}
 }
 

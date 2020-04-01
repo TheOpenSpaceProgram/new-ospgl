@@ -9,6 +9,15 @@ void Vehicle::deferred_pass(CameraUniforms & camera_uniforms)
 	}
 }
 
+void Vehicle::shadow_pass(ShadowCamera& sh_cam)
+{
+	for(Piece* p : all_pieces)
+	{
+		glm::dmat4 tform = glm::inverse(p->collider_offset) * to_dmat4(p->get_global_transform());
+		p->model_node->draw_shadow(sh_cam, tform, true);
+	}
+}
+
 void Vehicle::unpack()
 {
 	logger->check_important(packed, "Tried to unpack an unpacked vehicle");
@@ -46,7 +55,7 @@ std::vector<Vehicle*> Vehicle::physics_update(double dt)
 	else
 	{
 		// Generate the gravity vector
-		// glm::dvec3 pos = unpacked_veh.get_center_of_mass(); 	//< Not neccesary, in-vehicle distances are minimal
+		// glm::dvec3 pos = unpacked_veh.get_center_of_mass(); 
 		glm::dvec3 pos = to_dvec3(root->get_global_transform().getOrigin());
 		glm::dvec3 grav = in_universe->system.get_gravity_vector(pos, &in_universe->system.bullet_states);
 

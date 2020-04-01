@@ -3,6 +3,7 @@
 #include "../GBuffer.h"
 #include "../../assets/Shader.h"
 #include "../camera/CameraUniforms.h"
+#include "ShadowCamera.h"
 
 // The GBuffer is always in camera relative space
 // (in order to have high-quality floats near the origin)
@@ -14,6 +15,12 @@ private:
 	bool is_added;
 
 public:
+
+	enum LightType
+	{
+		POINT,
+		SUN
+	};
 
 
 	virtual void do_pass(CameraUniforms& cu, GBuffer* gbuf) = 0;
@@ -45,6 +52,13 @@ public:
 	{
 		return is_added;
 	}
+
+	virtual LightType get_type() = 0;
+
+	virtual ShadowCamera get_shadow_camera(glm::dvec3 camera_pos) { return ShadowCamera(); };
+	virtual ShadowCamera get_far_shadow_camera() { return ShadowCamera(); }; //< Only on SunLight
+	virtual bool casts_shadows() { return false; }
+
 
 	Light()
 	{
