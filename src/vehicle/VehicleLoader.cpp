@@ -10,7 +10,7 @@ Vehicle* VehicleLoader::load_vehicle(cpptoml::table& root)
 
 	n_vehicle->part_id = *root.get_qualified_as<int64_t>("part_id");
 	n_vehicle->piece_id = *root.get_qualified_as<int64_t>("piece_id");
-	
+
 	// Obtain parts
 	auto parts = root.get_table_array_qualified("part");	
 	std::unordered_map<int64_t, Part*> parts_by_id;
@@ -114,6 +114,11 @@ Vehicle* VehicleLoader::load_vehicle(cpptoml::table& root)
 		}
 	}
 
+	auto wires = root.get_table_array("wire");
+	n_vehicle->wires_init = wires;
+
+	n_vehicle->id_to_part = parts_by_id;
+	n_vehicle->id_to_piece = pieces_by_id;
 
 	WorldState n_state;
 	n_state.cartesian.pos = glm::dvec3(0.0, 0.0, 0.0);

@@ -74,6 +74,40 @@ void Vehicle::init(Universe* in_universe)
 	}
 
 	this->in_universe = in_universe;
+
+	// Init wires
+	if(wires_init)
+	{
+		// Load wires
+		for(auto wire : *wires_init)
+		{
+			int64_t from_id = *wire->get_as<int64_t>("from");
+			int64_t to_id = *wire->get_as<int64_t>("to");
+			std::string from_machine = *wire->get_as<std::string>("fmachine");
+			std::string to_machine = *wire->get_as<std::string>("tmachine");
+			std::string from_port = *wire->get_as<std::string>("fport");
+			std::string to_port = *wire->get_as<std::string>("tport");
+
+			Part* from = get_part(from_id);
+			Part* to = get_part(to_id);
+
+			Machine* from_mach = from->get_machine(from_machine);
+			Machine* to_mach = to->get_machine(to_machine);
+
+			Port* from_prt = from_mach->get_output_port(from_port);
+			Port* to_prt = to_mach->get_input_port(to_port);
+			
+			Wire n_wire = Wire();
+			n_wire.from = from_prt;
+			n_wire.to = to_prt;
+
+			wires.push_back(n_wire);
+		}
+
+		wires_init = nullptr;
+
+		check_wires();
+	}
 }
 
 
@@ -111,6 +145,56 @@ void Vehicle::sort()
 	logger->check(sorted.size() == all_pieces.size(), "Vehicle was sorted while some pieces were not attached!");
 
 	all_pieces = sorted;
+}
+
+void Vehicle::check_wires()
+{
+	for(auto wire_it = wires.begin(); wire_it != wires.end(); )
+	{
+		bool bad = false;
+		Wire& wire = *wire_it;
+		if(wire.to->is_output)
+		{
+			logger->error("Vehicle has wire with output set to an output port.");
+			bad = true;
+		}
+
+		if(!wire.from->is_output)
+		{
+			logger->error("Vehicle has wire with input set to an input port.");
+			bad = true;
+		}
+
+		if(wire.to->type != wire.from->type)
+		{
+			logger->error("Vehicle wire type mismatch");
+			bad = true;
+		}
+
+		if(bad)
+		{
+			wire_it = wires.erase(wire_it);
+			logger->warn("Wire removed");
+		}
+		else
+		{
+			wire_it++;
+		}
+	}
+}
+
+Piece* Vehicle::get_piece(int64_t id)
+{
+	auto it = id_to_piece.find(id);
+	logger->check_important(it != id_to_piece.end(), "Wrong piece id");
+	return it->second;
+}
+
+Part* Vehicle::get_part(int64_t id)
+{
+	auto it = id_to_part.find(id);
+	logger->check_important(it != id_to_part.end(), "Wrong piece id");
+	return it->second;
 }
 
 Vehicle::Vehicle() : Drawable(), unpacked_veh(this), packed_veh(this)

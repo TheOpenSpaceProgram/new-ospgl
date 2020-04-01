@@ -15,6 +15,8 @@
 
 #include "UnpackedVehicle.h"
 #include "PackedVehicle.h"
+#include "wire/Wire.h"
+
 
 class VehicleLoader;
 
@@ -53,6 +55,11 @@ private:
 
 	bool packed;
 	
+	// Initialized on the call to init, is deleted afterwards
+	std::shared_ptr<cpptoml::table_array> wires_init;
+
+	std::unordered_map<int64_t, Piece*> id_to_piece;
+	std::unordered_map<int64_t, Part*> id_to_part;
 
 public:
 
@@ -69,12 +76,14 @@ public:
 
 	int64_t part_id;
 	int64_t piece_id;	
-
-	Piece* root;
-	std::vector<Piece*> all_pieces;
 	
+	std::vector<Piece*> all_pieces;
+	Piece* root;
+
 	// Parts whose root piece is contained in this vehicle
 	std::vector<Part*> parts;
+
+	std::vector<Wire> wires;
 
 	virtual void deferred_pass(CameraUniforms& camera_uniforms) override;
 	virtual bool needs_deferred_pass() override { return true; }
@@ -103,6 +112,12 @@ public:
 	}
 
 	void sort();
+
+	// Removes and reports any wrong wires (as an error)
+	void check_wires();
+
+	Piece* get_piece(int64_t id);
+	Part* get_part(int64_t id);
 
 	Vehicle();
 	~Vehicle();

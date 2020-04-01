@@ -41,5 +41,14 @@ void LuaVehicle::load_to(sol::table& table)
 		"get_piece", &Part::get_piece);
 
 	table.new_usertype<Machine>("machine",
-			"init_toml", &Machine::init_toml);
+		"init_toml", &Machine::init_toml,
+		"add_output_port", [](Machine& self, const std::string& name, const std::string& type)
+		{
+			self.add_port(name, type, true);	
+		},
+		"add_input_port", [](Machine& self, const std::string& name, const std::string& type)
+		{
+			self.add_port(name, type, false);
+		}
+	);
 }

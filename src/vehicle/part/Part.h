@@ -16,7 +16,7 @@ public:
 
 	AssetHandle<PartPrototype> part_proto;
 
-	std::unordered_map<std::string, Machine> machines;
+	std::unordered_map<std::string, Machine*> machines;
 
 	// "p_root" is always the root, and is always present
 	// When a piece goes missing, it turns to null, but the map entry stays
@@ -29,6 +29,8 @@ public:
 	// Throws an error on the case of an invalid name,
 	// return null if piece exists but is not present
 	Piece* get_piece(const std::string& name);
+
+	Machine* get_machine(const std::string& id);
 
 	// We duplicate the asset handle
 	// our_table must contain any extra arguments to machines

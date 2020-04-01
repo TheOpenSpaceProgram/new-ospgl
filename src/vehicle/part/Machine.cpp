@@ -34,8 +34,137 @@ void Machine::init(Part* in_part, Universe* in_universe)
 {
 	lua_state["part"] = in_part;
 	lua_state["universe"] = in_part;
-	lua_state["vehicle"] = in_part->vehicle;	
+	lua_state["vehicle"] = in_part->vehicle;
+
+	this->in_part = in_part;	
 }
+
+void Machine::define_ports()
+{
+	is_defining_ports = true;
+
+	LuaUtil::call_function(lua_state, "define_ports", "machine define_ports");
+
+	while(new_ports.size() > 0)
+	{
+		// We pop from the front until the array is empty
+		PortDefinition& port_def = new_ports.front();
+		new_ports.pop_back();
+
+		bool found = false;
+		bool same_type;
+		for(auto port_it = ports.begin(); port_it != ports.end(); )
+		{
+			Port* port = *port_it;
+			// Find a port with the same name and that is the same IO type
+			if(	port->name == port_def.name &&
+				port->is_output == port_def.output)
+			{
+				// Remove the port
+				ports.erase(port_it);
+
+				// Remove any wires that had that port
+				
+				Vehicle* in_vehicle = in_part->vehicle;
+				std::vector<Wire>& wires = in_vehicle->wires;
+
+				for(auto wire_it = wires.begin(); wire_it != wires.end(); )
+				{
+					if(wire_it->from == port || wire_it->to == port)
+					{
+						wire_it = wires.erase(wire_it);
+					}	
+					else
+					{
+						wire_it++;
+					}
+				}
+
+				delete port;	
+				found = true;
+				same_type = port->type == Port::get_type(port_def.type);
+				break;
+			}
+			else
+			{
+				port_it++;
+			}
+		}
+
+		bool add_new = false;
+
+		if(found)
+		{
+			if(same_type)
+			{
+				// Do nothing
+			}
+			else
+			{
+				add_new = true;
+			}
+		}	
+		else
+		{
+			// Add new port
+			add_new = true;
+		}
+
+		if(add_new)
+		{
+			Port* port_new = new Port();
+			port_new->in_machine = this;
+			port_new->is_output = port_def.output;
+			port_new->name = port_def.name;
+			ports.push_back(port_new);
+		}
+
+	}
+
+
+	new_ports.clear();
+	is_defining_ports = false;
+}
+
+void Machine::add_port(const std::string& name, const std::string& type, bool output)
+{
+	logger->check_important(is_defining_ports, "Tried to change a port while the machine was not changing ports");
+
+	PortDefinition port_def = PortDefinition();
+	port_def.name = name;
+	port_def.type = type;
+	port_def.output = output;
+
+	new_ports.push_back(port_def);
+}
+
+Port* Machine::get_input_port(const std::string& name)
+{
+	for(Port* p : ports)
+	{
+		if(p->name == name && p->is_output == false)
+		{
+			return p;
+		}
+	}
+
+	logger->fatal("Tried to get a input port named '{}' which did not exist", name);
+}
+
+Port* Machine::get_output_port(const std::string& name)
+{
+	for(Port* p : ports)
+	{
+		if(p->name == name && p->is_output == true)
+		{
+			return p;
+		}
+	}
+
+	logger->fatal("Tried to get a output port named '{}' which did not exist", name);
+
+}
+
 
 Machine::~Machine()
 {

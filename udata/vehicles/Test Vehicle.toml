@@ -3,6 +3,15 @@
 	packages = ["test_parts"]
 	part_id = 3
 	piece_id = 3
+	port_id = 1
+
+	[[wire]]
+		from = 1
+		fmachine = "capsule"
+		fport = "Throttle"
+		to = 2
+		tmachine = "main_engine"
+		tport = "Throttle"
 	
 	[[part]]	
 		id = 1
