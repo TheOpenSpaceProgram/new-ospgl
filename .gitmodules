@@ -9,7 +9,7 @@
 	url = https://github.com/Titaniumtown/LuaJIT-cmake.git
 [submodule "dep/assimp"]
 	path = dep/assimp
-	url = https://github.com/assimp/assimp.git
+	url = https://github.com/TheOpenSpaceProgram/assimp
 [submodule "dep/osp"]
 	path = dep/osp
 	url = https://github.com/TheOpenSpaceProgram/osp.git
