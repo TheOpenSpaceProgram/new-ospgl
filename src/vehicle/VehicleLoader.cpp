@@ -22,7 +22,7 @@ Vehicle* VehicleLoader::load_vehicle(cpptoml::table& root)
 		Part* n_part = new Part(part_proto, *part);
 
 		n_part->id = *part->get_qualified_as<int64_t>("id");
-		logger->check_important(n_part->id > n_vehicle->part_id, "Malformed vehicle, part ID too big");
+		logger->check_important(n_part->id <= n_vehicle->part_id, "Malformed vehicle, part ID too big");
 
 		n_vehicle->parts.push_back(n_part);
 		parts_by_id[n_part->id] = n_part;
