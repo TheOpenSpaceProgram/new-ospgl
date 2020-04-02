@@ -48,7 +48,7 @@ void Machine::define_ports()
 	while(new_ports.size() > 0)
 	{
 		// We pop from the front until the array is empty
-		PortDefinition& port_def = new_ports.front();
+		PortDefinition port_def = new_ports.front();
 		new_ports.pop_back();
 
 		bool found = false;
@@ -149,6 +149,7 @@ Port* Machine::get_input_port(const std::string& name)
 	}
 
 	logger->fatal("Tried to get a input port named '{}' which did not exist", name);
+	return nullptr;
 }
 
 Port* Machine::get_output_port(const std::string& name)
@@ -162,7 +163,7 @@ Port* Machine::get_output_port(const std::string& name)
 	}
 
 	logger->fatal("Tried to get a output port named '{}' which did not exist", name);
-
+	return nullptr;
 }
 
 

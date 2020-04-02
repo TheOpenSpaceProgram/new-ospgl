@@ -6,7 +6,7 @@
       "type": "default",
       "project": "CMakeLists.txt",
       "projectTarget": "OSPGL.exe",
-      "name": "OSPGL.exe",
+      "name": "OSPGL executable",
       "currentDir": "${workspaceRoot}"
     }
   ]

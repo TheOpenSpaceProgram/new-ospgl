@@ -69,8 +69,8 @@ void SunLight::do_pass(CameraUniforms& cu, GBuffer* gbuf)
 
 ShadowCamera SunLight::get_shadow_camera(glm::dvec3 camera_pos)
 {
-	double far_plane = near_shadow_span * 4.0;
-	near_shadow_cam.proj = glm::ortho(-near_shadow_span, near_shadow_span, -near_shadow_span, near_shadow_span, 1.0, far_plane);
+	float far_plane = near_shadow_span * 4.0;
+	near_shadow_cam.proj = glm::ortho(-near_shadow_span, near_shadow_span, -near_shadow_span, near_shadow_span, 1.0, (double)far_plane);
 	// TODO: Maybe a fix for when the camera is on the positive y position? Rare but could happen!
 	near_shadow_cam.view = glm::lookAt(glm::dvec3(0, 0, 0), camera_pos, glm::dvec3(0.0, 1.0, 0.0));
 	glm::dvec3 sun_pos = camera_pos - glm::normalize(camera_pos) * near_shadow_span * 2.0;

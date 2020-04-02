@@ -32,7 +32,7 @@ private:
 public:
 
 	friend class Model;
-	friend class Node;
+	friend struct Node;
 
 	size_t data_size;
 	size_t index_count;
