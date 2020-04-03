@@ -7,8 +7,14 @@ local toml = require("toml")
 local thrust = machine.init_toml:get_number("thrust")
 thrust = 0.1
 
+function set_throttle(port, value)
+	
+	logger.info("Setting throttle to " .. value)
+
+end 
+
 function define_ports()
-	machine:add_input_port("Throttle", "number") 
+	machine:add_input_port("Throttle", "number", set_throttle) 
 end
 
 function update(dt)

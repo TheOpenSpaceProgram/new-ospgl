@@ -42,13 +42,31 @@ void LuaVehicle::load_to(sol::table& table)
 
 	table.new_usertype<Machine>("machine",
 		"init_toml", &Machine::init_toml,
-		"add_output_port", [](Machine& self, const std::string& name, const std::string& type)
-		{
-			self.add_port(name, type, true);	
-		},
-		"add_input_port", [](Machine& self, const std::string& name, const std::string& type)
-		{
-			self.add_port(name, type, false);
-		}
+		"add_output_port", &Machine::add_output_port,
+		"add_input_port", &Machine::add_input_port,
+		"write_to_port", sol::overload(
+			[](Machine& self, const std::string& name, double v)
+			{
+				self.write_to_port(name, PortValue(v));
+			}
+		)
 	);
+
+	table.new_usertype<PortResult>("port_result",
+		"good", [](PortResult& self)
+		{
+			return self.result == PortResult::GOOD;
+		},
+		"failed", [](PortResult& self)
+		{
+			return self.result != PortResult::GOOD;
+		},
+		"result", &PortResult::result
+		);
+
+	table.new_enum("port_result_type",
+		"GOOD", PortResult::GOOD,
+		"INVALID_TYPE", PortResult::INVALID_TYPE,
+		"PORT_BLOCKED", PortResult::PORT_BLOCKED,
+		"PORT_NOT_FOUND", PortResult::PORT_NOT_FOUND);
 }

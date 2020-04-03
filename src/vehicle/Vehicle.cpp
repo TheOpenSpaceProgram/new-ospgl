@@ -44,6 +44,11 @@ void Vehicle::update(double dt)
 		part->update(dt);
 	}
 
+	// Clear blocked ports
+	for (Port* p : all_ports)
+	{
+		p->blocked = false;
+	}
 }
 
 std::vector<Vehicle*> Vehicle::physics_update(double dt)
@@ -97,11 +102,7 @@ void Vehicle::init(Universe* in_universe)
 			Port* from_prt = from_mach->get_output_port(from_port);
 			Port* to_prt = to_mach->get_input_port(to_port);
 			
-			Wire n_wire = Wire();
-			n_wire.from = from_prt;
-			n_wire.to = to_prt;
-
-			wires.push_back(n_wire);
+			from_prt->to.push_back(to_prt);
 		}
 
 		wires_init = nullptr;
@@ -149,36 +150,54 @@ void Vehicle::sort()
 
 void Vehicle::check_wires()
 {
-	for(auto wire_it = wires.begin(); wire_it != wires.end(); )
+	std::unordered_set<Port*> seen_targets;
+	for(auto port_it = all_ports.begin(); port_it != all_ports.end(); )
 	{
 		bool bad = false;
-		Wire& wire = *wire_it;
-		if(wire.to->is_output)
-		{
-			logger->error("Vehicle has wire with output set to an output port.");
-			bad = true;
-		}
+		Port* port = *port_it;
 
-		if(!wire.from->is_output)
+		if (port->is_output)
 		{
-			logger->error("Vehicle has wire with input set to an input port.");
-			bad = true;
-		}
+			for (Port* target : port->to)
+			{
+				if (target->is_output)
+				{
+					logger->error("Vehicle has wire with output set to an output port");
+					bad = true;
+				}
 
-		if(wire.to->type != wire.from->type)
+				if (target->type != port->type)
+				{
+					logger->error("Vehicle has wire with mismatching types");
+					bad = true;
+				}
+
+				if (seen_targets.find(target) != seen_targets.end())
+				{
+					logger->error("A port has multiple inputs");
+					bad = true;
+				}
+
+				seen_targets.insert(target);
+			}
+		}
+		else
 		{
-			logger->error("Vehicle wire type mismatch");
-			bad = true;
+			if(!port->to.empty())
+			{ 
+				logger->error("Input port has ports set to its output");
+				bad = true;
+			}
 		}
 
 		if(bad)
 		{
-			wire_it = wires.erase(wire_it);
-			logger->warn("Wire removed");
+			logger->fatal("Malformed vehicle wires");
+			return;
 		}
 		else
 		{
-			wire_it++;
+			port_it++;
 		}
 	}
 }

@@ -20,7 +20,7 @@ float calculate_shadow(vec4 FragPosLightSpace, float diff_fac)
 	vec3 shadow_proj = FragPosLightSpace.xyz / FragPosLightSpace.w;
 	shadow_proj = shadow_proj * 0.5 + 0.5;
 	
-	float bias = max(0.0020 * (1.0 - diff_fac), 0.00005);  
+	float bias = max(0.01 * (1.0 - diff_fac), 0.005);  
 
 	if(shadow_proj.z > 1.0)
 	{	

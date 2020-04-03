@@ -31,6 +31,9 @@ private:
 		std::string type;
 		bool output;
 
+		// Only on input ports
+		sol::safe_function callback;
+
 	};
 
 	std::vector<PortDefinition> new_ports;
@@ -41,6 +44,9 @@ public:
 	std::shared_ptr<cpptoml::table> init_toml;
 
 	std::vector<Port*> ports;
+	// Only outputs because inputs cannot be read unless on
+	// the port set value callback
+	std::unordered_map<std::string, Port*> outputs;
 
 	void update(double dt);
 	//void wire_receive(std::string wire_id, );
@@ -56,9 +62,12 @@ public:
 	// so adding new ports will not require re-wiring
 	void define_ports();
 
-	void add_port(const std::string& name, const std::string& type, bool output);
+	void add_input_port(const std::string& name, const std::string& type, sol::safe_function callback);
+	void add_output_port(const std::string& name, const std::string& type);
 
 	Port* get_input_port(const std::string& name);
 	Port* get_output_port(const std::string& name);
+
+	PortResult write_to_port(const std::string& name, PortValue val);
 };
 

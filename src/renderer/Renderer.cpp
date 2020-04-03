@@ -80,7 +80,7 @@ void Renderer::prepare_deferred()
 
 void Renderer::do_shadows(PlanetarySystem* system, glm::dvec3 camera_pos)
 {
-	glCullFace(GL_FRONT);
+	//glCullFace(GL_FRONT);
 	for(Light* light : lights)
 	{
 		if(light->casts_shadows())
@@ -108,7 +108,7 @@ void Renderer::do_shadows(PlanetarySystem* system, glm::dvec3 camera_pos)
 		}
 	
 	}
-	glCullFace(GL_BACK);
+	//glCullFace(GL_BACK);
 }
 
 void Renderer::prepare_forward(CameraUniforms& cu)

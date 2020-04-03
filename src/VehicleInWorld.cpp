@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 
 	SimpleCamera* camera = new SimpleCamera();
 	osp.renderer->cam = camera;
-	camera->speed = 10.0;
+	camera->speed = 40.0;
 	glm::dvec3 cam_offset = glm::dvec3(-10.0, 0.0f, 0.0f);
 	camera->fw = glm::normalize(glm::dvec3(1.0f, 0.0f, 0.0));
 	camera->pos = cam_offset;
@@ -67,7 +67,8 @@ int main(int argc, char** argv)
 	st.cartesian.pos = universe.system.states_now[3].pos;
 	st.cartesian.vel = universe.system.bullet_states[3].vel;
 	st.cartesian.pos.x += universe.system.elements[3].as_body->config.radius;
-	st.cartesian.pos.x += 1000.0;
+	st.cartesian.pos.x += 100000.0;
+	st.cartesian.vel.z = 10000.0;
 	st.angular_velocity = glm::dvec3(0, 0, 0);
 	n_vehicle->packed_veh.set_world_state(st);
 	n_vehicle->unpack();

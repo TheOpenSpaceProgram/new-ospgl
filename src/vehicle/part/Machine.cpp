@@ -63,26 +63,36 @@ void Machine::define_ports()
 				// Remove the port
 				ports.erase(port_it);
 
-				// Remove any wires that had that port
-				
 				Vehicle* in_vehicle = in_part->vehicle;
-				std::vector<Wire>& wires = in_vehicle->wires;
+				std::vector<Port*>& ports = in_vehicle->all_ports;
 
-				for(auto wire_it = wires.begin(); wire_it != wires.end(); )
+				// Remove ourselves from the port list
+				// TODO: Think of using an unordered_set for this
+				for(auto port_it = ports.begin(); port_it != ports.end(); port_it++)
 				{
-					if(wire_it->from == port || wire_it->to == port)
+					Port* iport = *port_it;
+					// Remove ourselves from any port that outputs to us
+					if (!port->is_output && iport->is_output)
 					{
-						wire_it = wires.erase(wire_it);
-					}	
+						std::remove_if(port->to.begin(), port->to.end(), [port](Port* aval)
+						{
+							return aval == port;
+						});
+					}
+
+					if (iport == port)
+					{
+						port_it = ports.erase(port_it);
+					}
 					else
 					{
-						wire_it++;
+						port_it++;
 					}
 				}
 
 				delete port;	
 				found = true;
-				same_type = port->type == Port::get_type(port_def.type);
+				same_type = port->type == PortValue::get_type(port_def.type);
 				break;
 			}
 			else
@@ -116,6 +126,14 @@ void Machine::define_ports()
 			port_new->in_machine = this;
 			port_new->is_output = port_def.output;
 			port_new->name = port_def.name;
+			port_new->callback = port_def.callback;
+
+			if (port_new->is_output)
+			{
+				outputs[port_new->name] = port_new;
+			}
+
+			in_part->vehicle->all_ports.push_back(port_new);
 			ports.push_back(port_new);
 		}
 
@@ -126,17 +144,32 @@ void Machine::define_ports()
 	is_defining_ports = false;
 }
 
-void Machine::add_port(const std::string& name, const std::string& type, bool output)
+void Machine::add_input_port(const std::string & name, const std::string & type, sol::safe_function callback)
 {
 	logger->check_important(is_defining_ports, "Tried to change a port while the machine was not changing ports");
 
 	PortDefinition port_def = PortDefinition();
 	port_def.name = name;
 	port_def.type = type;
-	port_def.output = output;
+	port_def.output = false;
+	port_def.callback = callback;
 
 	new_ports.push_back(port_def);
 }
+
+void Machine::add_output_port(const std::string & name, const std::string & type)
+{
+	logger->check_important(is_defining_ports, "Tried to change a port while the machine was not changing ports");
+
+	PortDefinition port_def = PortDefinition();
+	port_def.name = name;
+	port_def.type = type;
+	port_def.output = true;
+	port_def.callback = sol::nil;
+
+	new_ports.push_back(port_def);
+}
+
 
 Port* Machine::get_input_port(const std::string& name)
 {
@@ -164,6 +197,41 @@ Port* Machine::get_output_port(const std::string& name)
 
 	logger->fatal("Tried to get a output port named '{}' which did not exist", name);
 	return nullptr;
+}
+
+PortResult Machine::write_to_port(const std::string& name, PortValue val)
+{
+	PortResult out; out.result = PortResult::GOOD;
+
+	auto it = outputs.find(name);
+	if (it == outputs.end())
+	{
+		out.result = PortResult::PORT_NOT_FOUND;
+		return out;
+	}
+
+	if (it->second->blocked)
+	{
+		out.result = PortResult::PORT_BLOCKED;
+		return out;
+	}
+
+	if (it->second->type != val.type)
+	{
+		out.result = PortResult::INVALID_TYPE;
+		return out;
+	}
+
+	// Write the value and block the port
+	for (Port* o : it->second->to)
+	{
+		o->receive(val);
+	}
+	
+	it->second->blocked = true;
+	
+
+	return out;
 }
 
 

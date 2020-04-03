@@ -29,7 +29,7 @@ SunLight::SunLight()
 	shader = assets->get<Shader>("core", "shaders/light/sunlight.vs");
 	color = glm::vec3(1.0f, 0.9f, 0.9f);
 	spec_color = glm::vec3(1.0f, 0.8f, 0.8f);
-	ambient_color = glm::vec3(0.0f, 0.0f, 0.0f);
+	ambient_color = glm::vec3(0.1f, 0.1f, 0.1f);
 
 	// Create the shadow framebuffers
 	make_shadow_fbuffer(far_shadow_fbo, far_shadow_tex, FAR_SHADOW_SIZE);

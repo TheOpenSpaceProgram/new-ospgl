@@ -67,7 +67,7 @@ void Universe::update(double dt)
 		e->update(dt);
 	}
 
-	bt_world->debugDrawWorld();
+	//bt_world->debugDrawWorld();
 }
 
 int64_t Universe::get_uid()
@@ -96,13 +96,13 @@ Universe::Universe(Renderer* renderer)
 	bt_world->setDebugDrawer(bt_debug);
 
 
-	/*bt_debug->setDebugMode(
+	bt_debug->setDebugMode(
 		btIDebugDraw::DBG_DrawConstraints |
 		btIDebugDraw::DBG_DrawWireframe |
 		btIDebugDraw::DBG_DrawFrames |
 		btIDebugDraw::DBG_DrawConstraintLimits |
 		btIDebugDraw::DBG_DrawAabb);
-	*/
+	
 
 	bt_world->setInternalTickCallback(bullet_tick, this, true);
 

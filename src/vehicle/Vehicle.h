@@ -15,7 +15,6 @@
 
 #include "UnpackedVehicle.h"
 #include "PackedVehicle.h"
-#include "wire/Wire.h"
 
 
 class VehicleLoader;
@@ -82,8 +81,8 @@ public:
 
 	// Parts whose root piece is contained in this vehicle
 	std::vector<Part*> parts;
-
-	std::vector<Wire> wires;
+	// Keep up to date by the machines themselves
+	std::vector<Port*> all_ports;
 
 	virtual void deferred_pass(CameraUniforms& camera_uniforms) override;
 	virtual bool needs_deferred_pass() override { return true; }
