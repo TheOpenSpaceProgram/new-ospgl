@@ -54,7 +54,8 @@ public:
 	// Relative velocities are properly kept
 	void set_linear_velocity(glm::dvec3 vel);
 
-	glm::dvec3 get_center_of_mass();
+	// Optionally returns rendering center of mass, for camera focusing
+	glm::dvec3 get_center_of_mass(bool renderer = false);
 
 	void set_breaking_enabled(bool value);
 

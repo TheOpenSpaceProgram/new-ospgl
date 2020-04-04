@@ -8,6 +8,8 @@
 #include "libs/LuaBullet.h"
 #include "libs/LuaToml.h"
 #include "libs/LuaVehicle.h"
+#include "libs/LuaDebugDrawer.h"
+
 
 LuaCore* lua_core;
 
@@ -72,6 +74,10 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::LOGGER;
 	}
+	else if (name == "debug_drawer")
+	{
+		return LibraryID::DEBUG_DRAWER;
+	}
 	else if (name == "glm")
 	{
 		return LibraryID::GLM;
@@ -127,6 +133,7 @@ LuaCore::LuaCore()
 {
 	libraries[LibraryID::UNKNOWN] = nullptr;
 	libraries[LibraryID::LOGGER] = new LuaLogger();
+	libraries[LibraryID::DEBUG_DRAWER] = new LuaDebugDrawer();
 	libraries[LibraryID::GLM] = new LuaGlm();
 	libraries[LibraryID::NOISE] = new LuaNoise();
 	libraries[LibraryID::ASSETS] = new LuaAssets();

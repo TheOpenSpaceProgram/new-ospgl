@@ -63,6 +63,25 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 			}
 			
 		}
+		else if (child->name.rfind(PiecePrototype::MARKER_PREFIX, 0) == 0)
+		{
+			// Load a marker
+			Marker n_marker;
+
+			n_marker.transform = child->sub_transform;
+
+			glm::dvec3 scale, translate, skew;
+			glm::dquat orient;
+			glm::dvec4 persp;
+			glm::decompose(child->sub_transform, scale, orient, translate, skew, persp);
+
+
+			n_marker.origin = translate;
+			n_marker.rotation = orient;
+			n_marker.forward = orient * glm::dvec3(0.0, 0.0, 1.0);
+
+			proto.markers[child->name] = n_marker;
+		}
 	}
 
 

@@ -7,7 +7,17 @@ bool Piece::is_welded()
 	return in_group != nullptr;
 }
 
-btTransform Piece::get_global_transform(bool use_mstate)
+btTransform Piece::get_graphics_transform()
+{
+	return get_global_transform_internal(true);
+}
+
+btTransform Piece::get_global_transform()
+{
+	return get_global_transform_internal(false);
+}
+
+btTransform Piece::get_global_transform_internal(bool use_mstate)
 {
 	if(in_vehicle->is_packed())
 	{
@@ -84,13 +94,6 @@ btVector3 Piece::get_angular_velocity()
 	}
 }
 
-btVector3 Piece::get_angular_momentum()
-{
-	double r2 = get_relative_position().length2();
-	double m = mass;
-	return get_angular_velocity() * r2 * m;
-}
-
 btVector3 Piece::get_tangential_velocity()
 {
 
@@ -100,7 +103,6 @@ btVector3 Piece::get_tangential_velocity()
 		// We need to correct r to the center of mass
 		btVector3 com = in_vehicle->packed_veh.get_com_root_relative();
 		r -= com;
-		logger->info("COM: {} {} {}", com.x(), com.y(), com.z());
 		btVector3 tangential = get_angular_velocity().cross(r);
 		return tangential;
 	}
@@ -177,7 +179,42 @@ glm::dvec3 Piece::get_right()
 	return transform_axis(glm::dvec3(1, 0, 0));
 }
 
-Piece::Piece(Part* in_part, std::string piece_name) 
+Marker& Piece::get_marker(const std::string & marker_name)
+{
+	auto it = markers.find(marker_name);
+	logger->check_important(it != markers.end(), "Could not find marker");
+	return it->second;
+}
+
+glm::dvec3 Piece::get_marker_position(const std::string & marker_name)
+{
+	return get_marker(marker_name).origin;
+}
+
+glm::dquat Piece::get_marker_rotation(const std::string& marker_name)
+{
+	return get_marker(marker_name).rotation;
+}
+
+glm::dmat4 Piece::get_marker_transform(const std::string & marker_name)
+{
+	return get_marker(marker_name).transform;
+}
+
+glm::dvec3 Piece::get_marker_forward(const std::string & marker_name)
+{
+	return get_marker(marker_name).forward;
+}
+
+glm::dvec3 Piece::transform_point_to_rigidbody(glm::dvec3 p)
+{
+	glm::dvec3 f = glm::dvec3(to_dmat4(get_global_transform()) * glm::dvec4(p, 1.0));
+	f -= to_dvec3(rigid_body->getCenterOfMassPosition());
+	
+	return f;
+}
+
+Piece::Piece(Part* in_part, std::string piece_name)
 	: model_node(in_part->part_proto->pieces[piece_name].model_node.duplicate())
 {
 	attached_to = nullptr;
@@ -197,6 +234,7 @@ Piece::Piece(Part* in_part, std::string piece_name)
 	collider = part->part_proto->pieces[piece_name].collider;
 	collider_offset = part->part_proto->pieces[piece_name].render_offset;
 
+	markers = part->part_proto->pieces[piece_name].markers;
 }
 
 Piece::~Piece()

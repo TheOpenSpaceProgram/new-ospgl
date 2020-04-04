@@ -1,18 +1,17 @@
-model = "parts/engine/engine.fbx"
+model = "parts/mini_engine/mini_engine.fbx"
 
-name = "Fire Tube Mk. 1"
+name = "Mini Tube Mk. 1"
 country = "United States"
 manufacturer = "Rocket Factory"
-description = "Generates thrust"
+description = "Generates a bit of thrust"
 
 
 [p_root]
-	mass = 400.0
+	mass = 100.0
 
 
 [[machine]]
 	id = "main_engine"
 	script = "core:machines/engine.lua"
-	thrust = 100000.0
+	thrust = 10.0
 	nozzle = "m_nozzle"
-

@@ -12,6 +12,10 @@ void LuaVehicle::load_to(sol::table& table)
 		{
 			return BulletTransform(self.get_global_transform());
 		},
+		"get_graphics_transform", [](Piece& self)
+		{
+			return BulletTransform(self.get_graphics_transform());
+		},
 		"get_local_transform", [](Piece& self)
 		{
 			return BulletTransform(self.get_local_transform());
@@ -32,10 +36,20 @@ void LuaVehicle::load_to(sol::table& table)
 		{
 			return to_dvec3(self.get_relative_position());
 		},
+		"get_global_position", [](Piece& self)
+		{
+			return to_dvec3(self.get_global_transform().getOrigin());
+		},
 		"get_forward", &Piece::get_forward,
 		"get_up", &Piece::get_up,
 		"get_right", &Piece::get_right,
-		"transform_axis", &Piece::transform_axis);
+		"transform_axis", &Piece::transform_axis,
+			
+		"get_marker_position", &Piece::get_marker_position,
+		"get_marker_rotation", &Piece::get_marker_rotation,
+		"get_marker_transform", &Piece::get_marker_transform,
+		"get_marker_forward", &Piece::get_marker_forward,
+		"transform_point_to_rigidbody", &Piece::transform_point_to_rigidbody);
 
 	table.new_usertype<Part>("part",
 		"get_piece", &Part::get_piece);

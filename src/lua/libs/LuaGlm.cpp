@@ -72,6 +72,7 @@ void LuaGlm::load_to(sol::table& table)
 			sol::resolve<glm::dvec2(const glm::dvec2&, double)>(glm::operator/),
 			sol::resolve<glm::dvec2(double, const glm::dvec2&)>(glm::operator/)
 		),
+		sol::meta_function::unary_minus, sol::resolve<glm::dvec2(const glm::dvec2&)>(&glm::operator-),
 		sol::meta_function::to_string, &glm_vec2_to_string,
 		"x", &glm::dvec2::x, "y", &glm::dvec2::y,
 		"unpack", [](glm::dvec2 v) {return std::make_tuple(v.x, v.y); });
@@ -101,6 +102,7 @@ void LuaGlm::load_to(sol::table& table)
 			sol::resolve<glm::dvec3(double, const glm::dvec3&)>(glm::operator/),
 			sol::resolve<glm::dvec3(const glm::dvec3&, const glm::dmat3&)>(glm::operator/) 
 		),
+		sol::meta_function::unary_minus, sol::resolve<glm::dvec3(const glm::dvec3&)>(&glm::operator-),
 		sol::meta_function::to_string, &glm_vec3_to_string,
 		"x", &glm::dvec3::x, "y", &glm::dvec3::y, "z", &glm::dvec3::z,
 		"to_vec2", [](glm::dvec3 v) {return glm::dvec2(v); },
@@ -133,6 +135,7 @@ void LuaGlm::load_to(sol::table& table)
 			sol::resolve<glm::dvec4(const glm::dmat4&, const glm::dvec4&)>(glm::operator/),
 			sol::resolve<glm::dvec4(const glm::dvec4&, const glm::dmat4&)>(glm::operator/)
 		),
+		sol::meta_function::unary_minus, sol::resolve<glm::dvec4(const glm::dvec4&)>(&glm::operator-),
 		sol::meta_function::to_string, &glm_vec4_to_string,
 		"x", &glm::dvec4::x, "y", &glm::dvec4::y, "z", &glm::dvec4::z, "w", &glm::dvec4::w,
 		"to_vec2", [](glm::dvec4 v) {return glm::dvec2(v); },

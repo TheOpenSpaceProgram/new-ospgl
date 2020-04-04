@@ -18,8 +18,6 @@ piece_id = 3
 [[part]]
 	id = 2
 	proto = "test_parts:parts/engine/part_engine.toml" 	
-	[part.main_engine]
-		thrust = 200
 
 [[part]]
 	id = 3

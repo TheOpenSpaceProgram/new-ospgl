@@ -17,7 +17,7 @@ struct PieceState
 static PieceState obtain_piece_state(Piece* piece)
 {
 	PieceState st;
-	st.transform = piece->get_global_transform(false);
+	st.transform = piece->get_global_transform();
 	st.linear = piece->get_linear_velocity(true);
 	st.linear_tang = piece->get_linear_velocity(false);
 	st.angular = piece->get_angular_velocity();
@@ -639,13 +639,13 @@ void UnpackedVehicle::draw_debug()
 			color = glm::vec3(1.0, 0.7, 1.0);
 		}
 
-		glm::dvec3 ppos = to_dvec3(p->get_global_transform().getOrigin());
+		glm::dvec3 ppos = to_dvec3(p->get_graphics_transform().getOrigin());
 
 		debug_drawer->add_point(ppos, color);
 
 		if (link != nullptr)
 		{
-			glm::dvec3 dpos = to_dvec3(link->get_global_transform().getOrigin());
+			glm::dvec3 dpos = to_dvec3(link->get_graphics_transform().getOrigin());
 
 			if (p->welded)
 			{
@@ -680,14 +680,22 @@ void UnpackedVehicle::deactivate()
 	welded.clear();	
 }
 
-glm::dvec3 UnpackedVehicle::get_center_of_mass()
+glm::dvec3 UnpackedVehicle::get_center_of_mass(bool renderer)
 {
 	double tot_mass = 0.0;
 	glm::dvec3 out = glm::dvec3(0.0, 0.0, 0.0);
 	for(Piece* p : vehicle->all_pieces)
 	{
 		tot_mass += p->mass;
-		out += to_dvec3(p->get_global_transform().getOrigin()) * p->mass;
+		if (renderer)
+		{
+			out += to_dvec3(p->get_graphics_transform().getOrigin()) * p->mass;
+		}
+		else
+		{
+			out += to_dvec3(p->get_global_transform().getOrigin()) * p->mass;
+		}
+		
 	}
 
 	out /= tot_mass;

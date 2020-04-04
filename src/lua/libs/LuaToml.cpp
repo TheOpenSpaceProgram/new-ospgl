@@ -1,5 +1,8 @@
 #include "LuaToml.h"
 #include <cpptoml.h>
+#include <glm/glm.hpp>
+#include "../../util/SerializeUtil.h"
+#include "../../util/serializers/glm.h"
 
 void LuaToml::load_to(sol::table& table)
 {
@@ -26,6 +29,12 @@ void LuaToml::load_to(sol::table& table)
 		"insert_bool", [](table_ptr self, const std::string& key, bool val)
 		{
 			self->insert(key, val);
+		},
+		"insert_vec3", [](table_ptr self, const std::string key, glm::dvec3 val)
+		{
+			table_ptr n_table = cpptoml::make_table();
+			serialize(val, *n_table);
+			self->insert(key, n_table);
 		},
 		"get_table", [](table_ptr self, const std::string& key)
 		{
@@ -54,6 +63,24 @@ void LuaToml::load_to(sol::table& table)
 		"get_bool_or", [](table_ptr self, const std::string& key, bool def_val)
 		{
 			return self->get_qualified_as<bool>(key).value_or(def_val);
+		},
+		"get_vec3", [](table_ptr self, const std::string& key)
+		{
+			glm::dvec3 v; deserialize(v, *self->get_table(key));
+			return v;
+		},
+		"get_vec3_or", [](table_ptr self, const std::string& key, glm::dvec3 def_val)
+		{
+			table_ptr tbl = self->get_table(key);
+			if (tbl)
+			{
+				glm::dvec3 v; deserialize(v, *tbl);
+				return v;
+			}
+			else
+			{
+				return def_val;
+			}
 		},
 		"erase", [](table_ptr self, const std::string& key)
 		{

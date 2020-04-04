@@ -1,15 +1,20 @@
-require("vehicle") 					-- We don't assign it to anything, it just defines user types
+require("vehicle") 
 local bullet = require("bullet")
 local glm = require("glm")
 local logger = require("logger")
 local toml = require("toml")
+local debug_drawer = require("debug_drawer")
 
 local thrust = machine.init_toml:get_number("thrust")
-thrust = 0.1
+local throttle = 0.0
+local nozzle = machine.init_toml:get_string("nozzle")
+
+local nozzle_dir = nil
+local nozzle_pos = nil
 
 function set_throttle(port, value)
 	
-	logger.info("Setting throttle to " .. value)
+	throttle = math.max(math.min(value, 1.0), 0.0)
 
 end 
 
@@ -18,12 +23,28 @@ function define_ports()
 end
 
 function update(dt)
+	local f_thrust = thrust * throttle 
 
-	local p_root = part:get_piece("p_root")
-	local dir = glm.vec3.new(0.0, 0.0, 1.0)
-	dir = p_root:transform_axis(dir)
-	local pos = p_root:get_relative_position()
+	if nozzle_dir == nil then 
+		nozzle_dir = part:get_piece("p_root"):get_marker_forward(nozzle)
+		nozzle_pos = part:get_piece("p_root"):get_marker_position(nozzle)
+	end 
 
-	p_root.rigid_body:apply_impulse(dir * thrust, pos)
+	if f_thrust > 0 then
+
+		local p_root = part:get_piece("p_root")
+		-- Direction is on world coordinates
+		local rdir = -p_root:transform_axis(nozzle_dir)
+		-- Position is relative to the center of mass of the rigidbody
+		local rpos = p_root:transform_point_to_rigidbody(nozzle_pos)
+
+		p_root.rigid_body:apply_force(rdir * thrust * throttle, rpos)
+
+		-- Draw flame
+		local fpos = glm.vec3.new(p_root:get_graphics_transform():to_mat4() * glm.vec4.new(nozzle_pos, 1.0))
+		debug_drawer.add_cone(fpos, fpos - rdir * 10.0 * throttle, 0.5, glm.vec3.new(1.0, 1.0, 0.0))
+
+	end
+
 end
 	

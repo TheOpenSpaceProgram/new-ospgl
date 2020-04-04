@@ -15,7 +15,8 @@ void LuaBullet::load_to(sol::table& table)
 	sol::usertype<BulletTransform> transform_ut = table.new_usertype<BulletTransform>("tranform",
 		sol::constructors<BulletTransform(glm::dvec3&), BulletTransform(glm::dvec3&, glm::dquat&)>(),
 		"pos", &BulletTransform::pos,
-		"rot", &BulletTransform::rot);
+		"rot", &BulletTransform::rot,
+		"to_mat4", &BulletTransform::to_dmat4);
 
 	// Rigidbody
 	sol::usertype<btRigidBody> rigidbody_ut = table.new_usertype<btRigidBody>("rigidbody",

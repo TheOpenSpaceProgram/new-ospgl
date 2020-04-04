@@ -41,6 +41,8 @@ private:
 
 	bool dirty;
 	
+	btTransform get_global_transform_internal(bool use_mstate);
+
 public:
 	
 	// Transform used while the piece is packed
@@ -109,14 +111,15 @@ public:
 	// user sets "welded" to false and "build_physics" has not
 	// yet been called. Mostly used internally
 	bool is_welded();
-	btTransform get_global_transform(bool use_mstate = true);
+
+	// This function uses the motion state, unlike get_global_transform
+	btTransform get_graphics_transform();
+	btTransform get_global_transform();
 	btTransform get_local_transform();
 	btVector3 get_linear_velocity(bool ignore_tangential = false);
 	btVector3 get_angular_velocity();
 	// Returns zero on non-welded pieces
 	btVector3 get_tangential_velocity();
-
-	btVector3 get_angular_momentum();
 
 	btVector3 get_relative_position();
 
@@ -141,6 +144,19 @@ public:
 	glm::dvec3 link_to;
 	// What axis should be the link's forward? In part relative coordinates
 	glm::dquat link_rot;
+
+	std::unordered_map<std::string, Marker> markers;
+
+	Marker& get_marker(const std::string& marker_name);
+
+	glm::dvec3 get_marker_position(const std::string& marker_name);
+	glm::dquat get_marker_rotation(const std::string& marker_name);
+	glm::dmat4 get_marker_transform(const std::string& marker_name);
+	glm::dvec3 get_marker_forward(const std::string& marker_name);
+
+	// Transforms a point into rigidbody relative coordinates (But not rotated!)
+	// Useful for applying forces
+	glm::dvec3 transform_point_to_rigidbody(glm::dvec3 p);
 
 	Piece(Part* in_part, std::string piece_name);
 	~Piece();

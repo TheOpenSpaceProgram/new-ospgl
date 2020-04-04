@@ -27,13 +27,14 @@ public:
 	enum LibraryID
 	{
 		UNKNOWN,
-		LOGGER,		// LuaLogger
-		GLM,		// LuaGlm
-		NOISE,		// LuaNoise
-		ASSETS,		// LuaAssets
-		BULLET,		// LuaBullet
-		TOML,		// LuaToml
-		VEHICLE,	// LuaVehicle (Vehicle, Part, Piece, Machine)
+		LOGGER,			// LuaLogger
+		DEBUG_DRAWER,	// LuaDebugDrawer
+		GLM,			// LuaGlm
+		NOISE,			// LuaNoise
+		ASSETS,			// LuaAssets
+		BULLET,			// LuaBullet
+		TOML,			// LuaToml
+		VEHICLE,		// LuaVehicle (Vehicle, Part, Piece, Machine)
 		COUNT,
 	};
 

@@ -6,6 +6,14 @@
 #define PIECE_DEFAULT_FRICTION 0.7
 #define PIECE_DEFAULT_RESTITUTION 0.1
 
+struct Marker
+{
+	glm::dmat4 transform;
+	glm::dvec3 origin;
+	glm::dquat rotation;
+	glm::dvec3 forward;
+};
+
 // NOTE: PartPrototype handles the lifetime of collider
 // NOTE: Colliders are always Z axis is up (same as blender!)
 struct PiecePrototype
@@ -15,6 +23,9 @@ struct PiecePrototype
 	btCollisionShape* collider;
 	glm::dmat4 render_offset; //< Offset inside of the part, for rendering
 	btTransform collider_offset;
+
+	static constexpr const char* MARKER_PREFIX = "m_";
+	std::unordered_map<std::string, Marker> markers;
 
 	double mass;
 	double friction;
@@ -39,6 +50,7 @@ struct PiecePrototype
 		this->mass = b.mass;
 		this->restitution = b.restitution;
 		this->friction = b.friction;
+		this->markers = b.markers;
 	}
 
 	// Copy, used for std containers
@@ -51,6 +63,7 @@ struct PiecePrototype
 		this->mass = b.mass;
 		this->restitution = b.restitution;
 		this->friction = b.friction;
+		this->markers = b.markers;
 
 		return *this;
 	}
@@ -94,6 +107,7 @@ public:
 
 	static constexpr const char* PIECE_PREFIX = "p_";
 	static constexpr const char* ROOT_NAME = "p_root";
+
 
 	// First one is always root
 	std::unordered_map<std::string, PiecePrototype> pieces;
