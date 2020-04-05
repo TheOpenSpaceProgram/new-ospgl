@@ -200,8 +200,11 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 		new PlanetTile::VertexArray<PlanetTileVertex, PlanetTile::TILE_SIZE>();
 	while (server->threads_run)
 	{
-		std::unique_lock<std::mutex> lock(server->condition_mtx);
-		server->condition_var.wait(lock);
+		{
+			// Needs a block so the lock is free once the wait is over
+			std::unique_lock<std::mutex> lock(server->condition_mtx);
+			server->condition_var.wait(lock);
+		}
 
 		while (server->work_list.get_unsafe()->size() != 0)
 		{
@@ -223,6 +226,9 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 				
 				
 			}
+
+
+			logger->info("Thread {} working", (void*)thread->thread);
 
 			// Work on the target
 			PlanetTile* ntile = new PlanetTile();

@@ -35,7 +35,7 @@ private:
 
 	bool dirty;
 
-	static const size_t WORKER_THREAD_COUNT = 2;
+	static const size_t WORKER_THREAD_COUNT = 4;
 
 	int depth_for_unload;
 

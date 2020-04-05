@@ -1,14 +1,17 @@
 #pragma once
 #include "Model.h"
 
+
 // A building can have many functionalities, one collider
 // and a model (Use compound colliders for advanced shapes)
 class BuildingPrototype
 {
 public:
 
-	GPUModelPointer model;
+	AssetHandle<Model> model;
 	btCollisionShape* collider;
+
+	BuildingPrototype(std::shared_ptr<cpptoml::table> table);
 };
 
 
