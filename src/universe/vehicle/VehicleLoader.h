@@ -1,8 +1,8 @@
 #pragma once
 #include "Vehicle.h"
-#include "../util/SerializeUtil.h"
-#include "../util/serializers/glm.h"
-#include "../physics/glm/BulletGlmCompat.h"
+#include <util/SerializeUtil.h>
+#include <util/serializers/glm.h>
+#include <physics/glm/BulletGlmCompat.h>
 
 class VehicleLoader
 {

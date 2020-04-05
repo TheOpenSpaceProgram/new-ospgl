@@ -23,8 +23,6 @@ struct PiecePrototype
 	btCollisionShape* collider;
 	glm::dmat4 render_offset; //< Offset inside of the part, for rendering
 	btTransform collider_offset;
-
-	static constexpr const char* MARKER_PREFIX = "m_";
 	std::unordered_map<std::string, Marker> markers;
 
 	double mass;
@@ -127,7 +125,7 @@ public:
 	~PartPrototype();
 };
 
-PartPrototype* loadPartPrototype(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
+PartPrototype* load_part_prototype(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
 
 
 // We do a bare minimum here, PartPrototype actually does the heavy work

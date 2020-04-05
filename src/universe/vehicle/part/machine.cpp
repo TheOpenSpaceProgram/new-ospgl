@@ -1,7 +1,7 @@
 #include "Machine.h"
-#include "../../util/Logger.h"
-#include "../../util/SerializeUtil.h"
-#include "../../assets/AssetManager.h"
+#include <util/Logger.h>
+#include <util/SerializeUtil.h>
+#include <assets/AssetManager.h>
 
 #include "../Vehicle.h"
 #include "sol.hpp"

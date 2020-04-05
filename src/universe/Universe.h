@@ -2,14 +2,14 @@
 #include "PlanetarySystem.h"
 #include "entity/Entity.h"
 #include <any>
-#include "../renderer/Renderer.h"
+#include <renderer/Renderer.h>
 
 #pragma warning(push, 0)
 #include <btBulletDynamicsCommon.h>
 #include <BulletDynamics/ConstraintSolver/btNNCGConstraintSolver.h>
 #pragma warning(pop)
 
-#include "../physics/debug/BulletDebugDrawer.h"
+#include <physics/debug/BulletDebugDrawer.h>
 
 // The Universe is the central class of the game. It stores both the system
 // and everything else in the system (buildings and vehicles).

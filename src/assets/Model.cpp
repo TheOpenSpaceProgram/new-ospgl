@@ -48,7 +48,8 @@ void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool draw
 
 	bool drawable = drawable_parent;
 
-	if (n_node->name.rfind(Model::COLLIDER_PREFIX, 0) == 0) 
+	if (n_node->name.rfind(Model::COLLIDER_PREFIX, 0) == 0
+		|| n_node->name.rfind(Model::MARK_PREFIX, 0) == 0) 
 	{
 		drawable = false;
 	}
@@ -536,7 +537,7 @@ Model::~Model()
 {
 }
 
-Model* loadModel(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
+Model* load_model(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
 {
 	unsigned int flags = 
 		aiProcess_Triangulate | aiProcess_JoinIdenticalVertices |

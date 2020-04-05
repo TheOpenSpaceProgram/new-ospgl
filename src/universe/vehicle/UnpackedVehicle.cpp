@@ -1,7 +1,7 @@
 #include "UnpackedVehicle.h"
 #include <glm/glm.hpp>
-#include "../util/DebugDrawer.h"
-#include "../physics/glm/BulletGlmCompat.h"
+#include "../../util/DebugDrawer.h"
+#include "../../physics/glm/BulletGlmCompat.h"
 #include "Vehicle.h"
 
 using WeldedGroupCreation = std::pair<std::unordered_set<Piece*>, bool>;

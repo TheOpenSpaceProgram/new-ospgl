@@ -1,6 +1,6 @@
 #pragma once
 #include "../LuaLib.h"
-#include "../../util/Logger.h"
+#include <util/Logger.h>
 
 /*
 	Alternatives to lua's "print", these functions work with the Logger

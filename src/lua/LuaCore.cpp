@@ -1,5 +1,5 @@
 #include "LuaCore.h"
-#include "../assets/AssetManager.h"
+#include <assets/AssetManager.h>
 
 #include "libs/LuaLogger.h"
 #include "libs/LuaGlm.h"

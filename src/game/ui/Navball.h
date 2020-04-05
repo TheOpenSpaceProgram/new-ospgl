@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 #include "../../assets/Image.h"
 #include "../../assets/Shader.h"
 #include "../../assets/AssetManager.h"
@@ -81,5 +81,6 @@ public:
 		to.speed_font = assets->get_from_path<BitmapFont>(speed_font_path);
 	}
 };
+*/
 
 

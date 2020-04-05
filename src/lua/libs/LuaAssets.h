@@ -1,7 +1,7 @@
 #pragma once
 #include "../LuaLib.h"
-#include "../../util/Logger.h"
-#include "../../assets/AssetManager.h"
+#include <util/Logger.h>
+#include <assets/AssetManager.h>
 /*
 	Lua functions to interact with the AssetManager subsystem,
 	allows loading of resource types which have a lua lib:

@@ -1,7 +1,7 @@
 #pragma once
 #include "../LuaLib.h"
-#include "../../util/Logger.h"
-#include "../../physics/glm/BulletGlmCompat.h"
+#include <util/Logger.h>
+#include <physics/glm/BulletGlmCompat.h>
 
 struct BulletTransform
 {

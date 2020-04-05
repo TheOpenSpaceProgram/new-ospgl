@@ -1,8 +1,8 @@
 #pragma once
 #include "../../kepler/KeplerElements.h"
 #include "config/PlanetConfig.h"
-#include "../../../assets/Config.h"
-#include "../../../renderer/PlanetaryBodyRenderer.h"
+#include <assets/Config.h>
+#include <renderer/PlanetaryBodyRenderer.h>
 #include <glm/gtx/rotate_vector.hpp>
 
 

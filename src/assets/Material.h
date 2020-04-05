@@ -4,8 +4,9 @@
 #include "Shader.h"
 #include "Image.h"
 #include "Config.h"
-#include "../util/SerializeUtil.h"
-#include "../renderer/camera/CameraUniforms.h"
+#include <util/SerializeUtil.h>
+#include <renderer/camera/CameraUniforms.h>
+
 #include <glm/gtx/matrix_decompose.hpp>
 #include <algorithm>
 #include <iostream>
@@ -230,7 +231,7 @@ struct Material
 
 };
 
-Material* loadMaterial(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
+Material* load_material(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
 
 template<>
 class GenericSerializer<Material>

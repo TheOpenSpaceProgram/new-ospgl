@@ -1,6 +1,6 @@
 #pragma once
 #include "../Entity.h"
-#include "../../../vehicle/Vehicle.h"
+#include "../../vehicle/Vehicle.h"
 
 class VehicleEntity : public Entity
 {

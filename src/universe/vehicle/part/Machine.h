@@ -1,9 +1,9 @@
 #pragma once
 #include <sol.hpp>
 #include <cpptoml.h>
-#include "../../universe/Universe.h"
-#include "../../util/LuaUtil.h"
-#include "../../lua/LuaCore.h"
+#include <universe/Universe.h>
+#include <util/LuaUtil.h>
+#include <lua/LuaCore.h>
 
 #include "../wire/Port.h"
 

@@ -1,6 +1,6 @@
 #include "Piece.h"
 #include "../Vehicle.h"
-#include "../../util/Logger.h"
+#include <util/Logger.h>
 
 bool Piece::is_welded()
 {

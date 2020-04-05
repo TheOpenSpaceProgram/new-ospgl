@@ -1,10 +1,10 @@
 #pragma once 
 
-#include "../universe/CartesianState.h"
+#include "../CartesianState.h"
 #pragma warning(push, 0)
 #include <btBulletDynamicsCommon.h>
 #pragma warning(pop)
-#include "../physics/glm/BulletGlmCompat.h"
+#include <physics/glm/BulletGlmCompat.h>
 
 class Vehicle;
 

@@ -10,8 +10,8 @@ local t = 0.0
 
 function update(dt)
 
-	machine:write_to_port("Throttle", math.abs(math.sin(t)))
-
+	--machine:write_to_port("Throttle", math.abs(math.sin(t)))
+	machine:write_to_port("Throttle", 0.0)
 
 	t = t + dt
 end

@@ -1,13 +1,17 @@
 #pragma once
 #include "../Entity.h"
 #include "../trajectory/LandedTrajectory.h"
-// A Building is something fixed to the ground that also has a
-// 3d model attached (that model will have physics).
+#include <assets/BuildingPrototype.h>
+
+// A Building is something fixed to the ground
 class BuildingEntity : public Entity
 {
 private:
 
 	LandedTrajectory traj;
+
+	btRigidBody* rigid;
+	AssetHandle<BuildingPrototype> proto;
 
 public:
 	BuildingEntity(std::string in_planet);

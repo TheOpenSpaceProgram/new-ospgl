@@ -6,7 +6,7 @@
 
 #include "universe/Date.h"
 
-#include "vehicle/Vehicle.h"
+#include "universe/vehicle/Vehicle.h"
 #include "assets/Model.h"
 
 #include "physics/ground/GroundShape.h"
@@ -16,7 +16,7 @@
 #include "universe/Universe.h"
 #include "OSP.h"
 
-#include "vehicle/VehicleLoader.h"
+#include "universe/vehicle/VehicleLoader.h"
 #include "universe/entity/vehicle/VehicleEntity.h" 
 
 

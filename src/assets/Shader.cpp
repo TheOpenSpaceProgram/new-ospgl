@@ -69,7 +69,7 @@ Shader::~Shader()
 {
 }
 
-Shader* loadShader(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
+Shader* load_shader(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
 {
 	
 	// We get the path to the vertex shader

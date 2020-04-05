@@ -63,7 +63,7 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 			}
 			
 		}
-		else if (child->name.rfind(PiecePrototype::MARKER_PREFIX, 0) == 0)
+		else if (child->name.rfind(Model::MARK_PREFIX, 0) == 0)
 		{
 			// Load a marker
 			Marker n_marker;
@@ -135,7 +135,7 @@ PartPrototype::~PartPrototype()
 	}
 }
 
-PartPrototype* loadPartPrototype(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
+PartPrototype* load_part_prototype(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
 {
 	std::shared_ptr<cpptoml::table> toml = SerializeUtil::load_file(path);
 

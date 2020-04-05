@@ -121,7 +121,7 @@ BitmapFont::~BitmapFont()
 {
 }
 
-BitmapFont* loadBitmapFont(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
+BitmapFont* load_bitmap_font(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
 {
 	std::vector<uint8_t> font = assets->load_binary_raw(path);
 

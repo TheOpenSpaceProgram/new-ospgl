@@ -6,8 +6,8 @@
 #include <glm/gtx/normal.hpp>
 #include <sol.hpp>
 #include <functional>
-#include "../../lua/LuaCore.h"
-#include "../../assets/AssetManager.h"
+#include <lua/LuaCore.h>
+#include <assets/AssetManager.h>
 
 // TODO: Tile vertex structure
 // We may not even use colors

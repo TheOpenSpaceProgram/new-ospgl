@@ -1,8 +1,8 @@
 #pragma once
-#include "../../planet_mesher/quadtree/QuadTreeDefines.h"
-#include "../../planet_mesher/quadtree/QuadTreeNode.h"
-#include "../../planet_mesher/mesher/PlanetTile.h"
-#include "../../universe/element/body/PlanetaryBody.h"
+#include <planet_mesher/quadtree/QuadTreeDefines.h>
+#include <planet_mesher/quadtree/QuadTreeNode.h>
+#include <planet_mesher/mesher/PlanetTile.h>
+#include <universe/element/body/PlanetaryBody.h>
 #include "../glm/BulletGlmCompat.h"
 #include <glm/glm.hpp>
 #include <unordered_map>

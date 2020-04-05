@@ -4,8 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include "../quadtree/QuadTreeDefines.h"
-#include "../../util/defines.h"
-#include "../../util/MathUtil.h"
+#include <util/defines.h>
+#include <util/MathUtil.h>
 
 struct PlanetTilePath
 {

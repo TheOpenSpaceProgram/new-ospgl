@@ -4,8 +4,8 @@
 #include <btBulletDynamicsCommon.h>
 #pragma warning(pop)
 
-#include "../../renderer/Drawable.h"
-#include "../../util/defines.h"
+#include <renderer/Drawable.h>
+#include <util/defines.h>
 #include <set>
 
 // An entity is something which exists on the world, 

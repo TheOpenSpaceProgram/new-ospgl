@@ -1,5 +1,5 @@
 #pragma once
-#include "../lua/LuaCore.h"
+#include <lua/LuaCore.h>
 #include "Logger.h"
 
 class LuaUtil

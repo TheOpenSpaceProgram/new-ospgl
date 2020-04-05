@@ -2,18 +2,16 @@
 #include <vector>
 #include <cpptoml.h>
 #include "../util/SerializeUtil.h"
-#include "vessel/Vessel.h"
 #include "element/SystemElement.h"
 #include "propagator/SystemPropagator.h"
 
-#include "../renderer/camera/MapCamera.h"
-#include "../renderer/Drawable.h"
+#include <renderer/Drawable.h>
 
 #pragma warning(push, 0)
 #include <btBulletDynamicsCommon.h>
 #pragma warning(pop)
 
-#include "../util/Logger.h"
+#include <util/Logger.h>
 
 struct SystemPointer;
 
@@ -60,8 +58,6 @@ public:
 	// Guaranteed to be ordered so that the last planets to appear
 	// are moons, or moons of moons (etc...)
 	ElementVector elements;
-	
-	std::vector<Vessel> vessels;
 
 	SystemPropagator* propagator;
 	

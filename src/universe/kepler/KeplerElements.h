@@ -1,8 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "../../util/SerializeUtil.h"
-#include "../../util/Logger.h"
+#include <util/SerializeUtil.h>
+#include <util/Logger.h>
 #include "../CartesianState.h"
 
 

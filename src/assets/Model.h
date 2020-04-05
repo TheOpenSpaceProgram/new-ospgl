@@ -3,10 +3,10 @@
 #include "AssetManager.h"
 #include "Shader.h"
 #include "Material.h"
-#include "../renderer/camera/CameraUniforms.h"
-#include "../renderer/lighting/ShadowCamera.h"
+#include <renderer/camera/CameraUniforms.h>
+#include <renderer/lighting/ShadowCamera.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
-#include "../physics/glm/BulletGlmCompat.h"
+#include <physics/glm/BulletGlmCompat.h>
 
 
 struct aiScene;
@@ -124,6 +124,7 @@ private:
 public:
 
 	static constexpr const char* COLLIDER_PREFIX = "col_";
+	static constexpr const char* MARK_PREFIX = "m_";
 
 	std::unordered_map<std::string, Node*> node_by_name;
 
@@ -134,7 +135,7 @@ public:
 	~Model();
 };
 
-Model* loadModel(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
+Model* load_model(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
 
 // As models CAN BE pretty heavy on the GPU memory there is 
 // code to allow you to upload and unload them using the

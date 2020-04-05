@@ -6,7 +6,10 @@
 #include "Model.h"
 #include "Material.h"
 #include "PartPrototype.h"
+#include "BuildingPrototype.h"
+
 #include "sol.hpp"
+
 
 
 #include <istream>
@@ -21,13 +24,14 @@ void create_global_asset_manager(std::string& res_path)
 
 	assets->preload();
 
-	assets->create_asset_type<Shader>("Shader", loadShader);
-	assets->create_asset_type<Image>("Image", loadImage);
-	assets->create_asset_type<Config>("Config", loadConfig);
-	assets->create_asset_type<BitmapFont>("Bitmap Font", loadBitmapFont);
-	assets->create_asset_type<Model>("Model", loadModel);
-	assets->create_asset_type<Material>("Material", loadMaterial);
-	assets->create_asset_type<PartPrototype>("Part Prototype", loadPartPrototype);
+	assets->create_asset_type<Shader>("Shader", load_shader);
+	assets->create_asset_type<Image>("Image", load_image);
+	assets->create_asset_type<Config>("Config", load_config);
+	assets->create_asset_type<BitmapFont>("Bitmap Font", load_bitmap_font);
+	assets->create_asset_type<Model>("Model", load_model);
+	assets->create_asset_type<Material>("Material", load_material);
+	assets->create_asset_type<PartPrototype>("Part Prototype", load_part_prototype);
+	assets->create_asset_type<BuildingPrototype>("Building Prototype", load_building_prototype);
 
 	assets->check_packages();
 }

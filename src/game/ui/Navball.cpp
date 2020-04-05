@@ -1,4 +1,4 @@
-#include <cmath>
+/*#include <cmath>
 
 #include "Navball.h"
 
@@ -155,3 +155,4 @@ Navball::Navball() : fbuffer(256, 256)
 Navball::~Navball()
 {
 }
+*/

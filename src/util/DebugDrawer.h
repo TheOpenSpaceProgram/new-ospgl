@@ -3,10 +3,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include <glad/glad.h>
-#include "../assets/Shader.h"
-#include "../assets/AssetManager.h"
+#include <assets/Shader.h>
+#include <assets/AssetManager.h>
 #include "MathUtil.h"
-#include "../universe/kepler/KeplerElements.h"
+#include <universe/kepler/KeplerElements.h>
 
 class DebugDrawer
 {

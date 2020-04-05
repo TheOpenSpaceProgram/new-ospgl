@@ -1,7 +1,7 @@
 #pragma once 
 #include <stdint.h>
 #include <string>
-#include "../../util/Logger.h"
+#include "../../../util/Logger.h"
 #include <sol.hpp>
 
 class Machine;

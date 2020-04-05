@@ -1,8 +1,8 @@
 #pragma once
-#include "../assets/Shader.h"
-#include "../assets/AssetManager.h"
-#include "../universe/element/body/config/PlanetConfig.h"
-#include "../util/geometry/SphereGeometry.h"
+#include <assets/Shader.h>
+#include <assets/AssetManager.h>
+#include <universe/element/body/config/PlanetConfig.h>
+#include <util/geometry/SphereGeometry.h>
 
 class AtmosphereRenderer
 {

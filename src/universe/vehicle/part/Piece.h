@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "Link.h"
-#include "../../assets/PartPrototype.h"
+#include <assets/PartPrototype.h>
 
 
 

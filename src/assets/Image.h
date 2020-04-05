@@ -1,8 +1,8 @@
 #pragma once
 #include <glad/glad.h>
 #include <string>
-#include "../util/Logger.h"
-#include "../util/SerializeUtil.h"
+#include <util/Logger.h>
+#include <util/SerializeUtil.h>
 
 
 struct ImageConfig
@@ -53,7 +53,7 @@ public:
 	~Image();
 };
 
-Image* loadImage(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
+Image* load_image(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
 
 
 

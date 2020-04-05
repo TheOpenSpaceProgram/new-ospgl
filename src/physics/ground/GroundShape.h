@@ -4,9 +4,9 @@
 #include <btBulletCollisionCommon.h>
 #pragma warning(pop)
 
-#include "../../universe/element/body/PlanetaryBody.h"
+#include <universe/element/body/PlanetaryBody.h>
 #include "../glm/BulletGlmCompat.h"
-#include "../../util/DebugDrawer.h"
+#include <util/DebugDrawer.h>
 #include "GroundShapeServer.h"
 class GroundShape : public btConcaveShape
 {

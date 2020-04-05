@@ -2,7 +2,7 @@
 #include "QuadTreeDefines.h"
 #include "QuadTreeNode.h"
 #include "../mesher/PlanetTilePath.h"
-#include "../../util/MathUtil.h"
+#include <util/MathUtil.h>
 
 class PlanetTileServer;
 

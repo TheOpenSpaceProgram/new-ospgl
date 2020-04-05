@@ -185,7 +185,7 @@ void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
 
 }
 
-Material* loadMaterial(const std::string & path, const std::string & name, const std::string & pkg, const cpptoml::table& cfg)
+Material* load_material(const std::string & path, const std::string & name, const std::string & pkg, const cpptoml::table& cfg)
 {
 	// Config makes the package magic work
 	Config* c = assets->get<Config>(pkg, name);

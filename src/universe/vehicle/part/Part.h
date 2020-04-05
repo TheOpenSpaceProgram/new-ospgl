@@ -2,7 +2,7 @@
 #include "Piece.h"
 #include "Machine.h"
 #include <vector>
-#include "../../assets/PartPrototype.h"
+#include <assets/PartPrototype.h>
 
 // The vessel has many pieces, out of which some are "root"
 // Those root pieces point to a Part which stores data and behaviour

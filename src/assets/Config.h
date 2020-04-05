@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "../util/SerializeUtil.h"
+#include <util/SerializeUtil.h>
 #include "AssetManager.h"
 
 class Config
@@ -20,7 +20,7 @@ public:
 
 };
 
-Config* loadConfig(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
+Config* load_config(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
 
 template<typename T>
 inline void Config::read_to(T& target, const std::string& sub_path)

@@ -34,6 +34,7 @@ endif()
 include_directories(dep)
 include_directories(OSPGL PUBLIC dep/assimp/include)   
 include_directories(OSPGL PUBLIC dep/bullet3/src)
+include_directories(OSPGL PUBLIC src)
 
 # Include CMake dependencies
 

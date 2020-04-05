@@ -6,8 +6,8 @@
 #pragma warning(pop)
 
 #include <sol.hpp>
-#include "../../util/LuaUtil.h"
-#include "../../lua/libs/LuaBullet.h"
+#include "../../../util/LuaUtil.h"
+#include "../../../lua/libs/LuaBullet.h"
 #include <cpptoml.h>
 
 // Base class for any link, which can be as simple as

@@ -7,13 +7,13 @@
 #include <thread>
 #include <FastNoise/FastNoise.h>
 
-#include "../../util/LuaUtil.h"
-#include "../../lua/LuaCore.h"
-#include "../../universe/element/body/config/PlanetConfig.h"
+#include <util/LuaUtil.h>
+#include <lua/LuaCore.h>
+#include <universe/element/body/config/PlanetConfig.h>
 #include "PlanetTilePath.h"
 #include "PlanetTile.h"
 #include "../quadtree/QuadTreePlanet.h"
-#include "../../util/ThreadUtil.h"
+#include <util/ThreadUtil.h>
 
 
 

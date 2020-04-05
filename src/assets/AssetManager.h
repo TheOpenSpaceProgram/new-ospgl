@@ -7,9 +7,10 @@
 #include <regex>
 #include <filesystem>
 #include <iostream>
-#include "../util/Logger.h"
-#include "../util/SerializeUtil.h"
-#include "../lua/LuaCore.h"
+
+#include <util/Logger.h>
+#include <util/SerializeUtil.h>
+#include <lua/LuaCore.h>
 
 // Pointer to a function which looks like:
 // T* loadAsset(const std::string& path)

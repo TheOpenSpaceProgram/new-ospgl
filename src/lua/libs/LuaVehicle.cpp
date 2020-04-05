@@ -1,5 +1,5 @@
 #include "LuaVehicle.h"
-#include "../../vehicle/Vehicle.h"
+#include "../../universe/vehicle/Vehicle.h"
 
 void LuaVehicle::load_to(sol::table& table)
 {

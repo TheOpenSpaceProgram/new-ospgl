@@ -1,7 +1,6 @@
 #include "PlanetarySystem.h"
 #include "../util/DebugDrawer.h"
 #include <imgui/imgui.h>
-#include "ReferenceFrame.h"
 #include "../physics/glm/BulletGlmCompat.h"
 #include "../physics/ground/GroundShape.h"
 

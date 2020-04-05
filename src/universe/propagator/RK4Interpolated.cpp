@@ -1,6 +1,5 @@
 #include "RK4Interpolated.h"
 #include "../PlanetarySystem.h"
-#include "../vessel/Vessel.h"
 
 template<bool get_closest>
 RK4Interpolated::Derivative RK4Interpolated::sample(CartesianState s0, Derivative d, double dt, PosVector& vec, size_t* closest)
