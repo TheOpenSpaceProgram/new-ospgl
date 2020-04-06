@@ -9,7 +9,7 @@ glm::dvec3 PlanetarySystem::get_gravity_vector(glm::dvec3 p, StateVector* states
 	glm::dvec3 result = glm::dvec3(0, 0, 0);
 	for(size_t i = 0; i < states->size(); i++)
 	{
-		double mass = elements[i].get_mass();
+		double mass = elements[i].get_real_mass();
 		
 		if(mass > 0)
 		{
@@ -305,7 +305,7 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 				tform.setRotation(to_btQuaternion(quat));
 
 				as_body->rigid_body->setWorldTransform(tform);	
-			}	
+			}
 		}
 	}
 	else
@@ -333,6 +333,7 @@ void PlanetarySystem::init_physics(btDynamicsWorld* world)
 			as_body->rigid_body = new btRigidBody(1000000000.0, nullptr, as_body->ground_shape, btVector3(0, 0, 0));
 			as_body->rigid_body->setCollisionFlags(as_body->rigid_body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 			as_body->rigid_body->setFriction(1.0);
+
 			as_body->rigid_body->setRestitution(1.0);
 			as_body->ground_shape->setMargin(2.0);
 			as_body->rigid_body->setActivationState(DISABLE_DEACTIVATION);

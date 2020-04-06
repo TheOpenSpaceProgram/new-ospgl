@@ -17,7 +17,7 @@
 
 #include "universe/vehicle/VehicleLoader.h"
 #include "universe/entity/entities/VehicleEntity.h" 
-
+#include "universe/entity/entities/BuildingEntity.h"
 
 
 int main(int argc, char** argv)
@@ -42,34 +42,51 @@ int main(int argc, char** argv)
 	SunLight sun = SunLight();
 	osp.renderer->add_light(&sun);
 
+	std::vector<PointLight> lights;
+
 	// Create a vehicle
-	auto vehicle_toml = SerializeUtil::load_file("udata/vehicles/Test Vehicle.toml");
-	Vehicle* n_vehicle = VehicleLoader::load_vehicle(*vehicle_toml);
+	Vehicle* n_vehicle;
 
-	save.universe.create_entity<VehicleEntity>(n_vehicle);	
-
-	WorldState st = WorldState();
-	st.rotation = glm::dquat(1.0, 0.0, 0.0, 0.0f);
-
-	st.cartesian.pos = save.universe.system.states_now[3].pos;
-	st.cartesian.vel = save.universe.system.bullet_states[3].vel;
-	st.cartesian.pos.x += save.universe.system.elements[3].as_body->config.radius;
-	st.cartesian.pos.x += 200.0;
-	st.cartesian.pos.y += 100.0;
-	st.cartesian.pos.z += 880.0;
-	//st.cartesian.vel.z = 10000.0;
-	st.angular_velocity = glm::dvec3(0, 0.0, 0);
-	n_vehicle->packed_veh.set_world_state(st);
-	n_vehicle->unpack();
-
+	bool first_frame = true;
 
 	while (osp.should_loop())
 	{
 		osp.start_frame();
 
-		if(glfwGetKey(osp.renderer->window, GLFW_KEY_K))
+
+
+		camera->update(osp.dt);
+		save.universe.update(osp.dt);
+
+		if (first_frame)
 		{
-			for(Piece* p : n_vehicle->all_pieces)
+			auto vehicle_toml = SerializeUtil::load_file("udata/vehicles/Test Vehicle.toml");
+			n_vehicle = VehicleLoader::load_vehicle(*vehicle_toml);
+
+			save.universe.create_entity<VehicleEntity>(n_vehicle);
+
+			WorldState st = WorldState();
+			st.rotation = glm::dquat(0.0, 0.707, 0.0, 0.707);
+
+
+			BuildingEntity* lpad_ent = (BuildingEntity*)save.universe.entities[0];
+			WorldState stt = lpad_ent->traj.get_state(0.0, true);
+
+
+			st.cartesian.pos = stt.cartesian.pos;
+			st.cartesian.pos += glm::dvec3(glm::toMat4(stt.rotation) * glm::dvec4(0.0, 0.0, 1.0, 1.0)) * -780.0;
+			st.cartesian.vel = stt.cartesian.vel;
+			//st.cartesian.vel.z = 10000.0;
+			st.angular_velocity = glm::dvec3(0, 0.0, 0);
+			n_vehicle->packed_veh.set_world_state(st);
+			n_vehicle->unpack();
+
+			first_frame = false;
+		}
+
+		if (glfwGetKey(osp.renderer->window, GLFW_KEY_K))
+		{
+			for (Piece* p : n_vehicle->all_pieces)
 			{
 				p->welded = false;
 			}
@@ -77,9 +94,9 @@ int main(int argc, char** argv)
 			n_vehicle->unpacked_veh.dirty = true;
 		}
 
-		if(glfwGetKey(osp.renderer->window, GLFW_KEY_J))
+		if (glfwGetKey(osp.renderer->window, GLFW_KEY_J))
 		{
-			for(Piece* p : n_vehicle->all_pieces)
+			for (Piece* p : n_vehicle->all_pieces)
 			{
 				p->welded = true;
 			}
@@ -87,8 +104,6 @@ int main(int argc, char** argv)
 			n_vehicle->unpacked_veh.dirty = true;
 		}
 
-		camera->update(osp.dt);
-		save.universe.update(osp.dt);
 
 		camera->center = n_vehicle->unpacked_veh.get_center_of_mass(true);
 		

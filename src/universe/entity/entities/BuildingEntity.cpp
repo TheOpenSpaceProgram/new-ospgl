@@ -6,12 +6,12 @@ glm::dmat4 BuildingEntity::get_model_matrix(bool bullet)
 {
 	glm::dmat4 mat = glm::dmat4();
 
-	WorldState now = traj.get_state(get_universe()->system.t, bullet);
+	WorldState now = traj.get_state(0, bullet);
 
 	glm::dvec3 pos = now.cartesian.pos;
 	glm::dquat rot = now.rotation;
 
-	//debug_drawer->add_line(glm::dvec3(0, 0, 0), pos, glm::vec3(1.0, 1.0, 0.5));
+	debug_drawer->add_line(glm::dvec3(0, 0, 0), pos, glm::vec3(1.0, 1.0, 0.5));
 
 	mat = glm::translate(mat, pos) * glm::toMat4(rot);
 

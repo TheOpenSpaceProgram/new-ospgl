@@ -8,7 +8,6 @@ class BuildingEntity : public Entity
 {
 private:
 
-	LandedTrajectory traj;
 
 	btRigidBody* rigid;
 	AssetHandle<BuildingPrototype> proto;
@@ -16,6 +15,9 @@ private:
 	glm::dmat4 get_model_matrix(bool bullet);
 
 public:
+
+
+	LandedTrajectory traj;
 
 	BuildingEntity(AssetHandle<BuildingPrototype>&& proto);
 	BuildingEntity(cpptoml::table& toml);

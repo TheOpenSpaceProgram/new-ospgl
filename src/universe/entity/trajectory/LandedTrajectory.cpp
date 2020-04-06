@@ -13,7 +13,7 @@ LandedTrajectory::~LandedTrajectory()
 {
 }
 
-WorldState LandedTrajectory::get_state(double t_now, bool use_bullet)
+WorldState LandedTrajectory::get_state(double _unused, bool use_bullet)
 {
 	if (changed)
 	{
@@ -30,11 +30,11 @@ WorldState LandedTrajectory::get_state(double t_now, bool use_bullet)
 	double tnow;
 	if (use_bullet)
 	{
-		get_universe()->system.bt;
+		tnow = get_universe()->system.bt;
 	}
 	else
 	{
-		get_universe()->system.t;
+		tnow = get_universe()->system.t;
 	}
 
 	glm::dmat4 rot_matrix = body->build_rotation_matrix(tnow, false);
@@ -48,14 +48,20 @@ WorldState LandedTrajectory::get_state(double t_now, bool use_bullet)
 		body_pos = get_universe()->system.states_now[elem_index].pos;
 	}
 
-	glm::dmat4 full_matrix = glm::translate(glm::dmat4(1.0), body_pos) * rot_matrix;
+	glm::dmat4 body_matrix = glm::translate(glm::dmat4(1.0), body_pos);
 
-	glm::dvec3 tform_pos = glm::dvec3(full_matrix * glm::dvec4(initial_relative_pos, 1.0));
+	glm::dvec3 rel_pos = glm::dvec3(rot_matrix * glm::dvec4(initial_relative_pos, 1.0));
+	glm::dvec3 tform_pos = glm::dvec3(body_matrix * glm::dvec4(rel_pos, 1.0));
 	glm::dquat tform_rot = glm::dquat(rot_matrix * glm::toMat4(initial_rotation));
 
 	out.cartesian.pos = tform_pos;
-	out.cartesian.vel = glm::dvec3(0, 0, 0);
 	out.rotation = tform_rot;
+
+	// Tangential velocity
+	glm::dvec3 tang = body->get_rotation_speed(rel_pos);
+
+	out.cartesian.vel = get_universe()->system.bullet_states[elem_index].vel + tang;
+
 	out.angular_velocity = glm::dvec3(0, 0, 0);
 
 	return out;

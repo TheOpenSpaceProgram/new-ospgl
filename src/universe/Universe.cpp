@@ -89,7 +89,7 @@ Universe::Universe(Renderer* renderer) : system(this)
 	bt_brf_interface = new btDbvtBroadphase();
 	bt_solver = new btSequentialImpulseConstraintSolver();
 	bt_world = new btDiscreteDynamicsWorld(bt_dispatcher, bt_brf_interface, bt_solver, bt_collision_config);
-
+	
 	bt_world->setGravity({ 0.0, 0.0, 0.0 });
 
 	bt_debug = new BulletDebugDrawer();
