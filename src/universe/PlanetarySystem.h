@@ -13,7 +13,7 @@
 
 #include <util/Logger.h>
 
-struct SystemPointer;
+class Universe;
 
 // A system holds a central star, origin of the coordinate system, and
 // many planets orbiting it using keplerian orbits
@@ -38,6 +38,8 @@ private:
 	std::vector<glm::dvec3> pts;
 
 public:
+
+	Universe* universe;
 
 	std::unordered_map<std::string, size_t> name_to_index;
 	
@@ -87,7 +89,10 @@ public:
 	// FOV in radians
 	void update_render(glm::dvec3 camera_pos, float fov, double t);
 
-	PlanetarySystem();
+	// Does the heavy loading
+	void load(const cpptoml::table& root);
+
+	PlanetarySystem(Universe* universe);
 	~PlanetarySystem();
 };
 

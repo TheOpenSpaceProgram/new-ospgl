@@ -36,7 +36,6 @@
 	north_pole_declination = 90.0
 	north_pole_right_ascension = 0.0
 
-
 [[element]]
 	name = "Moon"
 	parent = "Earth-Moon"
@@ -53,3 +52,17 @@
 	rotation_at_epoch = 135.0
 	north_pole_declination = 65.64
 	north_pole_right_ascension = 266.86
+
+[[building]]
+	body = "Earth"
+	building = "buildings/launchpad.toml"
+	name = "Space Center"
+	[building.pos]
+		x = 6360_000.0
+		y = 0.0
+		z = 0.0 
+	[building.rot]
+		x = 0.0
+		y = 0.0
+		z = 0.0
+		w = 1.0

@@ -4,7 +4,7 @@
 
 #include <imgui/imgui.h>
 
-#include "universe/Date.h"
+
 
 #include "universe/vehicle/Vehicle.h"
 #include "assets/Model.h"
@@ -13,11 +13,10 @@
 #include "renderer/lighting/SunLight.h"
 #include "renderer/lighting/PointLight.h"
 
-#include "universe/Universe.h"
-#include "OSP.h"
+#include "game/Save.h"
 
 #include "universe/vehicle/VehicleLoader.h"
-#include "universe/entity/vehicle/VehicleEntity.h" 
+#include "universe/entity/entities/VehicleEntity.h" 
 
 
 
@@ -35,22 +34,10 @@ int main(int argc, char** argv)
 	camera->pos = cam_offset;
 	camera->fov = 60.0f;
 
-	Universe universe = Universe(osp.renderer);
-	assets->get_from_path<Config>("debug_system:systems/system.toml")->read_to(universe.system);
+	Save save = Save(&osp);
+	SerializeUtil::read_file_to("udata/saves/debug-save/save.toml", save);
 
 	debug_drawer->debug_enabled = true;
-
-	//Date start_date = Date(2000, Date::MAY, 31);
-	Date start_date = Date(2030, Date::AUGUST, 21);
-
-
-	universe.system.t = start_date.to_seconds();
-	logger->info("Starting at: {}", start_date.to_string());
-
-	universe.system.init(universe.bt_world);
-
-	universe.system.update(0.0, universe.bt_world, false);
-	universe.system.update(0.0, universe.bt_world, true);
 
 	SunLight sun = SunLight();
 	osp.renderer->add_light(&sun);
@@ -59,19 +46,22 @@ int main(int argc, char** argv)
 	auto vehicle_toml = SerializeUtil::load_file("udata/vehicles/Test Vehicle.toml");
 	Vehicle* n_vehicle = VehicleLoader::load_vehicle(*vehicle_toml);
 
-	universe.create_entity<VehicleEntity>(n_vehicle);	
+	save.universe.create_entity<VehicleEntity>(n_vehicle);	
 
 	WorldState st = WorldState();
 	st.rotation = glm::dquat(1.0, 0.0, 0.0, 0.0f);
 
-	st.cartesian.pos = universe.system.states_now[3].pos;
-	st.cartesian.vel = universe.system.bullet_states[3].vel;
-	st.cartesian.pos.x += universe.system.elements[3].as_body->config.radius;
-	st.cartesian.pos.x += 500.0;
+	st.cartesian.pos = save.universe.system.states_now[3].pos;
+	st.cartesian.vel = save.universe.system.bullet_states[3].vel;
+	st.cartesian.pos.x += save.universe.system.elements[3].as_body->config.radius;
+	st.cartesian.pos.x += 200.0;
+	st.cartesian.pos.y += 100.0;
+	st.cartesian.pos.z += 880.0;
 	//st.cartesian.vel.z = 10000.0;
 	st.angular_velocity = glm::dvec3(0, 0.0, 0);
 	n_vehicle->packed_veh.set_world_state(st);
 	n_vehicle->unpack();
+
 
 	while (osp.should_loop())
 	{
@@ -98,13 +88,13 @@ int main(int argc, char** argv)
 		}
 
 		camera->update(osp.dt);
-		universe.update(osp.dt);
+		save.universe.update(osp.dt);
 
 		camera->center = n_vehicle->unpacked_veh.get_center_of_mass(true);
 		
-		osp.renderer->render(&universe.system);
+		osp.renderer->render(&save.universe.system);
 
-		osp.finish_frame(universe.MAX_PHYSICS_STEPS * universe.PHYSICS_STEPSIZE);
+		osp.finish_frame(save.universe.MAX_PHYSICS_STEPS * save.universe.PHYSICS_STEPSIZE);
 	}
 
 	osp.finish();

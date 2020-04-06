@@ -19,12 +19,21 @@ class Trajectory
 {
 private:
 
+	Universe* universe = nullptr;
+
 public:
+	
+	// Some trajectories may also be used while bullet is loaded, 
+	// that's what the optional flag is for
+	virtual WorldState get_state(double t_now, bool use_bullet = false) = 0;
 
-	virtual WorldState get_state(double t_now) = 0;
-	// You may not want to use this if you are a non-integrated trajectory
-	// (for example, landed vehicles can be determined from time directly)
-	virtual void update(double dt) = 0;
+	virtual void init() {}
 
-	virtual void start(WorldState s0, double t0, Universe* universe) = 0;
+	void setup(Universe* universe)
+	{
+		this->universe = universe;
+		init();
+	}
+
+	Universe* get_universe() { return universe; }
 };

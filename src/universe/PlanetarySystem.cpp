@@ -505,8 +505,10 @@ void PlanetarySystem::update_render(glm::dvec3 camera_pos, float fov, double t)
 
 #include "propagator/RK4Interpolated.h"
 
-PlanetarySystem::PlanetarySystem()
+PlanetarySystem::PlanetarySystem(Universe* universe)
 {
+	this->universe = universe;
+
 	states_now.resize(0);
 	propagator = new RK4Interpolated();
 	timewarp = 1.0;

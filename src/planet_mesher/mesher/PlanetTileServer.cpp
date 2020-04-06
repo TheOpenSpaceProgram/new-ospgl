@@ -227,9 +227,6 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 				
 			}
 
-
-			logger->info("Thread {} working", (void*)thread->thread);
-
 			// Work on the target
 			PlanetTile* ntile = new PlanetTile();
 			bool has_errors = ntile->generate(target, server->config->radius, 

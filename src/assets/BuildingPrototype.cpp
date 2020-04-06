@@ -14,7 +14,7 @@ BuildingPrototype::BuildingPrototype(std::shared_ptr<cpptoml::table> table)
 {
 	std::string model_path = *table->get_as<std::string>("model");
 
-	model = AssetHandle<Model>(model_path);
+	model = GPUModelPointer(AssetHandle<Model>(model_path));
 
 	Node* building = model->node_by_name["building"];
 	collider = nullptr;
@@ -32,6 +32,7 @@ BuildingPrototype::BuildingPrototype(std::shared_ptr<cpptoml::table> table)
 			}
 
 			ModelColliderExtractor::load_collider(&collider, child);
+			collider->setMargin(0.005);
 		}
 	}
 

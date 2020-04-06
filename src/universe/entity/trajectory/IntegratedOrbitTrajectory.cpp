@@ -12,7 +12,7 @@ IntegratedOrbitTrajectory::~IntegratedOrbitTrajectory()
 {
 }
 
-WorldState IntegratedOrbitTrajectory::get_state(double t_now)
+WorldState IntegratedOrbitTrajectory::get_state(double t_now, bool use_bullet)
 {
 	logger->check(this->t_now = t_now, "IntegratedOrbitTrajectory is out of sync");
 

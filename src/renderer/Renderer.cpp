@@ -80,6 +80,8 @@ void Renderer::prepare_deferred()
 
 void Renderer::do_shadows(PlanetarySystem* system, glm::dvec3 camera_pos)
 {
+	// We disable depth clamping so that objects behind the lights are culled
+	glDisable(GL_DEPTH_CLAMP);
 	//glCullFace(GL_FRONT);
 	for(Light* light : lights)
 	{
@@ -108,6 +110,7 @@ void Renderer::do_shadows(PlanetarySystem* system, glm::dvec3 camera_pos)
 		}
 	
 	}
+	glEnable(GL_DEPTH_CLAMP);
 	//glCullFace(GL_BACK);
 }
 

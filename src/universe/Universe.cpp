@@ -77,7 +77,7 @@ int64_t Universe::get_uid()
 	return uid;
 }
 
-Universe::Universe(Renderer* renderer)
+Universe::Universe(Renderer* renderer) : system(this)
 {
 	uid = 0;
 

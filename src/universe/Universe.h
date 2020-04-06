@@ -25,6 +25,9 @@
 // - OSPGL events are prefixed with 'core:'
 // - Mod events should be prefixed with the mod's id and ':', for example interstellar:start_hyperspace
 // This will hopefully avoid event name clashing.
+
+class Save;
+
 class Universe
 {
 private:
@@ -48,14 +51,15 @@ private:
 
 public:
 
+	friend class Entity;
+	friend class Save;
+
 	static constexpr double PHYSICS_STEPSIZE = 1.0 / 30.0;
 	static constexpr int MAX_PHYSICS_STEPS = 1;
 
 
 	Renderer* renderer;
 	btDiscreteDynamicsWorld* bt_world;
-
-	friend class Entity;
 
 	PlanetarySystem system;
 	std::vector<Entity*> entities;

@@ -11,16 +11,17 @@ public:
 	Vehicle* vehicle;
 
 
-	virtual Trajectory* get_trajectory() override;
 	virtual void enable_bullet(btDynamicsWorld * world) override;
 	virtual void disable_bullet(btDynamicsWorld * world) override;
-	virtual double get_physics_radius() override;
 
 	virtual void init();
 	virtual void update(double dt);
 	virtual void physics_update(double pdt);
 
 	VehicleEntity(Vehicle* vehicle);
+	VehicleEntity(cpptoml::table& toml);
 	~VehicleEntity();
+
+	virtual std::string get_type() override { return "vehicle"; }
 };
 

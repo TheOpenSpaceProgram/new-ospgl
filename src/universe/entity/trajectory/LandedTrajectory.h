@@ -3,23 +3,30 @@
 #include "../Trajectory.h"
 #include "../../Universe.h"
 
+// Coordinates are relative to the non-rotated planet,
+// this means t = 0 without the rotation at epoch applied
 class LandedTrajectory : public Trajectory
 {
 private:
 
+
+	size_t elem_index;
+
+	std::string elem_name;
 	glm::dvec3 initial_relative_pos;
 	glm::dquat initial_rotation;
 
-	std::string in_planet;
-	size_t elem_index;
+	bool changed;
+
+	Universe* universe;
 
 public:
 
-	virtual WorldState get_state(double t_now) override;
-	virtual void update(double dt) override;
-	virtual void start(WorldState s0, double t0, Universe* universe) override;
 
-	LandedTrajectory(std::string in_planet);
+	virtual WorldState get_state(double t_now, bool use_bullet = false) override;
+	void set_parameters(std::string body_name, glm::dvec3 rel_pos, glm::dquat rel_rot);
+
+	LandedTrajectory();
 	~LandedTrajectory();
 
 

@@ -8,6 +8,8 @@
 #include <util/defines.h>
 #include <set>
 
+#include <cpptoml.h>
+
 // An entity is something which exists on the world, 
 // it has graphics, and can exists on the bullet physics
 // world.
@@ -38,12 +40,21 @@ private:
 
 public:
 
-	virtual Trajectory* get_trajectory() = 0;
-	virtual void enable_bullet(btDynamicsWorld* world) = 0;
-	virtual void disable_bullet(btDynamicsWorld* world) = 0;
+	// You should start simulating bullet physics here
+	virtual void enable_bullet(btDynamicsWorld* world) {}
+	// You must stop simulating bullet physics here
+	virtual void disable_bullet(btDynamicsWorld* world) {}
+
+	// Return our position to be used by physics loading
+	virtual glm::dvec3 get_physics_origin() { return glm::dvec3(0, 0, 0); }
 
 	// An approximation of our size, try to go higher than the real number
-	virtual double get_physics_radius() = 0;
+	// Values of 0.0 means that we don't have a limit for physics loading
+	virtual double get_physics_radius() { return  0.0; }
+
+	// Return true if physics are required around this entity
+	// (This entity will also be loaded)
+	virtual bool is_physics_loader() { return false; }
 
 	// Visual update, always realtime
 	virtual void update(double dt) {};
@@ -55,7 +66,6 @@ public:
 	// Called when the entity is added into the universe
 	// Universe is already initialized
 	virtual void init() {};
-
 
 	// Return true if the physics have stabilized enough for timewarp
 	// Vehicles should return false when they are close enough to surfaces
@@ -94,6 +104,11 @@ public:
 	void emit_event(const std::string& event_id, VectorOfAny args = VectorOfAny());
 	void sign_up_for_event(const std::string& event_id);
 	void drop_out_of_event(const std::string& event_id);
+
+	virtual std::string get_type() = 0;
+
+	// Used while loading saves 
+	static Entity* load_entity(int64_t uid, std::string type, cpptoml::table& toml);
 
 	~Entity();
 };

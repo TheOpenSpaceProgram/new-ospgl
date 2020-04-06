@@ -8,7 +8,7 @@ class BuildingPrototype
 {
 public:
 
-	AssetHandle<Model> model;
+	GPUModelPointer model;
 	btCollisionShape* collider;
 
 	BuildingPrototype(std::shared_ptr<cpptoml::table> table);

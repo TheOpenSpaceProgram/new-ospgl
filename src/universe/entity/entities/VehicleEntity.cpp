@@ -29,14 +29,14 @@ VehicleEntity::VehicleEntity(Vehicle* vehicle)
 	this->vehicle = vehicle;
 }
 
+VehicleEntity::VehicleEntity(cpptoml::table& toml)
+{
+
+}
+
 
 VehicleEntity::~VehicleEntity()
 {
-}
-
-Trajectory* VehicleEntity::get_trajectory()
-{
-	return nullptr;
 }
 
 void VehicleEntity::enable_bullet(btDynamicsWorld * world)
@@ -45,9 +45,4 @@ void VehicleEntity::enable_bullet(btDynamicsWorld * world)
 
 void VehicleEntity::disable_bullet(btDynamicsWorld * world)
 {
-}
-
-double VehicleEntity::get_physics_radius()
-{
-	return 0.0;
 }

@@ -29,6 +29,8 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 				proto.render_offset = child->sub_transform;
 				ModelColliderExtractor::load_collider(&proto.collider, child);
 
+				proto.collider->setMargin(0.005);
+
 				auto mass_toml = node_toml->get_as<double>("mass");
 
 				if (!mass_toml)
