@@ -142,7 +142,7 @@ double MathUtil::distance_to_line(glm::dvec3 a, glm::dvec3 b, glm::dvec3 p)
 	glm::dvec3 ab = b - a;
 	glm::dvec3 ap = p - a;
 
-	if (glm::dot(ap, ab) <= 0.0)
+	/*if (glm::dot(ap, ab) <= 0.0)
 	{
 		return glm::length(ap);
 	}
@@ -152,9 +152,9 @@ double MathUtil::distance_to_line(glm::dvec3 a, glm::dvec3 b, glm::dvec3 p)
 	if (glm::dot(bp, ab) >= 0.0)
 	{
 		return glm::length(bp);
-	}
+	}*/
 
-	return glm::length(glm::cross(ab, ap)) / glm::length(ab);
+	return glm::length(glm::cross(ap, ab)) / glm::length(ab);
 }
 
 int MathUtil::int_repeat(int v, int max)

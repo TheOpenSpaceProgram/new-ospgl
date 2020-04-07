@@ -58,11 +58,13 @@ WorldState LandedTrajectory::get_state(double _unused, bool use_bullet)
 	out.rotation = tform_rot;
 
 	// Tangential velocity
-	glm::dvec3 tang = body->get_rotation_speed(rel_pos);
+	glm::dvec3 tang = body->get_tangential_speed(rel_pos);
 
 	out.cartesian.vel = get_universe()->system.bullet_states[elem_index].vel + tang;
 
 	out.angular_velocity = glm::dvec3(0, 0, 0);
+
+	debug_drawer->add_line(out.cartesian.pos, out.cartesian.pos + tang, glm::vec3(1.0, 0.0, 1.0));
 
 	return out;
 }

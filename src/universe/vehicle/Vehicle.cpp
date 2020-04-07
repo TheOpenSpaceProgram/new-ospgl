@@ -72,7 +72,7 @@ std::vector<Vehicle*> Vehicle::physics_update(double dt)
 		glm::dvec3 pos = to_dvec3(root->get_global_transform().getOrigin());
 		glm::dvec3 grav = in_universe->system.get_gravity_vector(pos, &in_universe->system.bullet_states);
 
-		unpacked_veh.apply_gravity(to_btVector3(grav));
+		unpacked_veh.apply_gravity(to_btVector3(grav)); 
 		auto n_vehicles = unpacked_veh.update();
 		return n_vehicles;
 	}	

@@ -1,0 +1,67 @@
+[star]
+	name = "Sun"
+	mass = 1.98847e30
+	radius = 695_508_000.0
+
+[[element]]
+	name = "Earth-Moon"
+	is_barycenter = true
+
+	is_nasa_data = true
+	smajor_axis = 149598290450.51898
+	smajor_axis_var = -0.00000003
+	eccentricity = 0.01671123
+	eccentricity_var = -0.00003661
+	inclination = 0.0
+	inclination_var = -0.01337178
+	mean_longitude = 100.46457166
+	mean_longitude_var = 35999.37306329
+	periapsis_longitude = 102.93768193
+	periapsis_longitude_var = 0.31795260
+	asc_node_longitude = 0.0
+	asc_node_longitude_var = -0.24123856
+
+
+[[element]]
+	name = "Earth"
+	parent = "Earth-Moon"
+	config = "planets/earth/config.toml"
+
+	is_primary = true
+	
+	rotation_period = 100000000000.0
+	#rotation_period = 23.9344696
+	rotation_at_epoch = 800.0
+	north_pole_declination = 90.0
+	north_pole_right_ascension = 0.0
+
+[[element]]
+	name = "Moon"
+	parent = "Earth-Moon"
+	config = "planets/moon/config.toml"
+
+	smajor_axis = 384308437.7707066
+	eccentricity = 0.0549
+	inclination = 5.145
+	periapsis_argument = 318.15
+	asc_node_longitude = 125.08
+	mean_at_epoch = 135.27
+
+	rotation_period = 655.719864
+	rotation_at_epoch = 135.0
+	north_pole_declination = 65.64
+	north_pole_right_ascension = 266.86
+
+[[building]]
+	body = "Earth"
+	building = "buildings/launchpad.toml"
+	name = "Space Center"
+	[building.pos]
+		x = 6360_000.0
+		y = 0.0
+		z = 0.0 
+	[building.rot]
+		x = 0.0
+		y = 0.0
+		z = 0.0
+		w = 1.0

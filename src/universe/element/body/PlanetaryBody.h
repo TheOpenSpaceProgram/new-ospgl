@@ -43,7 +43,10 @@ public:
 	glm::dvec3 rotation_axis;
 
 	glm::dmat4 build_rotation_matrix(double t, bool include_rot_at_epoch = true) const;
-	glm::dvec3 get_rotation_speed(glm::dvec3 at_relative);
+
+	// Coordimates are given relative to the rotated body
+	// (Real rotation axis)
+	glm::dvec3 get_tangential_speed(glm::dvec3 at_relative);
 
 	PlanetaryBody();
 	~PlanetaryBody();
@@ -92,7 +95,7 @@ public:
 		::deserialize(to.config, *config_toml);
 
 		static constexpr double REVS_PER_HOUR_TO_DEGREES_PER_SECOND = 0.1;
-		//e
+
 		SAFE_TOML_GET(to.rotation_at_epoch, "rotation_at_epoch", double);
 		double rotation_period;
 		SAFE_TOML_GET(rotation_period, "rotation_period", double);

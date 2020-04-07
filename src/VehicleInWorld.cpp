@@ -19,6 +19,7 @@
 #include "universe/entity/entities/VehicleEntity.h" 
 #include "universe/entity/entities/BuildingEntity.h"
 
+#include <util/fmt/glm.h>
 
 int main(int argc, char** argv)
 {
@@ -67,19 +68,14 @@ int main(int argc, char** argv)
 			save.universe.create_entity<VehicleEntity>(n_vehicle);
 
 			WorldState st = WorldState();
-			st.rotation = glm::dquat(0.0, 0.707, 0.0, 0.707);
-
-
 			BuildingEntity* lpad_ent = (BuildingEntity*)save.universe.entities[0];
 			WorldState stt = lpad_ent->traj.get_state(0.0, true);
-
 
 			st.cartesian.pos = stt.cartesian.pos;
 			st.cartesian.vel = stt.cartesian.vel;
 			st.rotation = stt.rotation;
+			st.cartesian.pos += stt.rotation * glm::dvec3(0, 0, 1) * 100.0;
 
-			st.cartesian.pos += stt.rotation * glm::dvec3(0, 0, 1) * 20.0;
-			st.angular_velocity = glm::dvec3(0, 0.0, 0);
 			n_vehicle->packed_veh.set_world_state(st);
 			n_vehicle->unpack();
 
@@ -106,13 +102,10 @@ int main(int argc, char** argv)
 			n_vehicle->unpacked_veh.dirty = true;
 		}
 
-
 		camera->center = n_vehicle->unpacked_veh.get_center_of_mass(true);
-		
+
 		osp.renderer->render(&save.universe.system);
-
 		osp.finish_frame(save.universe.MAX_PHYSICS_STEPS * save.universe.PHYSICS_STEPSIZE);
-
 	}
 
 	osp.finish();

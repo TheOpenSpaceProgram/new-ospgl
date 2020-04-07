@@ -40,11 +40,11 @@ glm::dmat4 PlanetaryBody::build_rotation_matrix(double t, bool include_at_epoch)
 	return rot_matrix;
 }
 
-glm::dvec3 PlanetaryBody::get_rotation_speed(glm::dvec3 relative)
-{
-	glm::dvec3 rp = relative;
+#include <glm/gtx/vector_angle.hpp>
 
-	double dist_to_axis = MathUtil::distance_to_line(-rotation_axis, rotation_axis, rp);
+glm::dvec3 PlanetaryBody::get_tangential_speed(glm::dvec3 relative)
+{
+	double dist_to_axis = MathUtil::distance_to_line(-rotation_axis, rotation_axis, relative);
 
 	double speed_mod = dist_to_axis * glm::radians(rotation_speed);
 
