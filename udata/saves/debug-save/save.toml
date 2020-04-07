@@ -9,7 +9,7 @@ packages = [
 in_control = "vehicle_0"
 in_focus = "vehicle_0"
 
-system = "debug_system:systems/system.toml"
+system = "debug_system:systems/real.toml"
 uid = 2
 t = 966772800.0
 

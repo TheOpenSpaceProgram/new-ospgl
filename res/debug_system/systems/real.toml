@@ -29,8 +29,7 @@
 
 	is_primary = true
 	
-	rotation_period = 100000000000.0
-	#rotation_period = 23.9344696
+	rotation_period = 23.9344696
 	rotation_at_epoch = 800.0
 	north_pole_declination = 90.0
 	north_pole_right_ascension = 0.0

@@ -47,12 +47,24 @@ CartesianState compute_state(double t, double tol,
 	{
 		CartesianState moon = (*other_states)[body->parent->as_barycenter->secondary->index];
 		// Invert it across the barycenter
+
+		double moon_radius = glm::length(moon.pos - offset);
+
 		glm::dvec3 ov = glm::normalize(moon.pos - offset);
 		moon.pos = offset - ov * body->barycenter_radius;
-		// Scale velocity
-		moon.vel = -glm::normalize(moon.vel - vel_offset) * body->barycenter_radius + vel_offset;
 
-		moon.vel = vel_offset;
+		// Angular velocity is the same, so linear velocity scales 
+		// lin_vel = radius * ang_vel
+		// lin_vel' = radius' * ang_vel
+		// lin_vel' = lin_vel * (radius' / radius) (Dividing the two)
+		double lin_vel = glm::length(moon.vel - vel_offset);
+		double radius = moon_radius;
+		double radius_p = glm::length(body->barycenter_radius);
+
+		double lin_vel_p = lin_vel * (radius_p / radius);
+
+		// Opposite direction, scaled velocity
+		moon.vel = -glm::normalize(moon.vel - vel_offset) * lin_vel_p + vel_offset;
 
 		return moon;
 	}
