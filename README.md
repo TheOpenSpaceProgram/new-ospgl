@@ -8,6 +8,12 @@ You can check what's needed on the Issues and Projects. Feel free to create new 
 
 # Building
 We use CMake for building, so the procedure should be similar on all systems.
+
+First of all, the repo uses Git LFS to store binary files such as images or 3D models, so you need to install it.
+https://git-lfs.github.com/
+
+Once it's installed, all git operations will work normally.
+
 ```
 git clone --recurse-submodules https://github.com/TheOpenSpaceProgram/new-ospgl.git
 cd new-ospgl
