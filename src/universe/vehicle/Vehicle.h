@@ -91,6 +91,7 @@ public:
 	virtual bool needs_shadow_pass() override { return true; }
 
 	void pack();
+
 	void unpack();
 	bool is_packed() { return packed; }
 

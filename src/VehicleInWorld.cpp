@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 	std::vector<PointLight> lights;
 
 	// Create a vehicle
-	Vehicle* n_vehicle;
+	Vehicle* n_vehicle = nullptr;
 
 	bool first_frame = true;
 
@@ -57,6 +57,7 @@ int main(int argc, char** argv)
 
 		camera->update(osp.dt);
 		save.universe.update(osp.dt);
+
 
 		if (first_frame)
 		{
@@ -74,9 +75,10 @@ int main(int argc, char** argv)
 
 
 			st.cartesian.pos = stt.cartesian.pos;
-			st.cartesian.pos += glm::dvec3(glm::toMat4(stt.rotation) * glm::dvec4(0.0, 0.0, 1.0, 1.0)) * -780.0;
 			st.cartesian.vel = stt.cartesian.vel;
-			//st.cartesian.vel.z = 10000.0;
+			st.rotation = stt.rotation;
+
+			st.cartesian.pos += stt.rotation * glm::dvec3(0, 0, 1) * 20.0;
 			st.angular_velocity = glm::dvec3(0, 0.0, 0);
 			n_vehicle->packed_veh.set_world_state(st);
 			n_vehicle->unpack();
@@ -88,7 +90,7 @@ int main(int argc, char** argv)
 		{
 			for (Piece* p : n_vehicle->all_pieces)
 			{
-				p->welded = false;
+				p->welded = false; 
 			}
 
 			n_vehicle->unpacked_veh.dirty = true;
@@ -110,6 +112,7 @@ int main(int argc, char** argv)
 		osp.renderer->render(&save.universe.system);
 
 		osp.finish_frame(save.universe.MAX_PHYSICS_STEPS * save.universe.PHYSICS_STEPSIZE);
+
 	}
 
 	osp.finish();

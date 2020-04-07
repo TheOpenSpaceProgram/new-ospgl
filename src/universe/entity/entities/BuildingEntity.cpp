@@ -11,7 +11,7 @@ glm::dmat4 BuildingEntity::get_model_matrix(bool bullet)
 	glm::dvec3 pos = now.cartesian.pos;
 	glm::dquat rot = now.rotation;
 
-	debug_drawer->add_line(glm::dvec3(0, 0, 0), pos, glm::vec3(1.0, 1.0, 0.5));
+	//debug_drawer->add_line(glm::dvec3(0, 0, 0), pos, glm::vec3(1.0, 1.0, 0.5));
 
 	mat = glm::translate(mat, pos) * glm::toMat4(rot);
 

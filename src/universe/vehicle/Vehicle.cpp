@@ -23,6 +23,14 @@ void Vehicle::unpack()
 	logger->check_important(packed, "Tried to unpack an unpacked vehicle");
 	
 	packed = false;
+
+	// Apply immediate velocity so physics don't start delayed
+	WorldState st = packed_veh.get_world_state();
+	double bdt = in_universe->PHYSICS_STEPSIZE; // TODO: in_universe->MAX_PHYSICS_STEPS * in_universe->PHYSICS_STEPSIZE ?
+	st.cartesian.pos += st.cartesian.vel * bdt;
+	//st.rotation *= st.angular_velocity * bdt;
+	packed_veh.set_world_state(st);
+
 	unpacked_veh.activate();	
 }
 

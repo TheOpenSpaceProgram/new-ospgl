@@ -30,6 +30,7 @@ public:
 	Vehicle* vehicle;
 
 	void set_world_state(WorldState n_state);
+	WorldState get_world_state() { return root_state; }
 
 	PackedVehicle(Vehicle* v);
 	btTransform get_root_transform(){ return root_transform; }

@@ -12,7 +12,7 @@ function generate(info, out)
 	local noise0 = ngen:get_perlin_fractal((info.coord_3d * 1000.0):unpack())
 
 
-	out.height = noise0 * 200.0 * glm.abs(noisyness);
+	out.height = noise0 * 5000.0 * glm.abs(noisyness);
 	out.color = glm.vec3.new(0.3, 0.3, 0.3);
 end
 
