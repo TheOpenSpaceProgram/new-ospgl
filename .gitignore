@@ -14,13 +14,6 @@
 .clangd
 
 # Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
@@ -276,3 +269,9 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+# Resource directory
+res/ 
+
+# User-data directory 
+udata/

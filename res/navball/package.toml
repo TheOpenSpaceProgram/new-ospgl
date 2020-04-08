@@ -1,7 +1,0 @@
-id = "default_navball"
-folder = "navball"
-name = "OSP Default Navball"
-description = "Provides a default navball"
-author = "Tatjam. Ball texture by tygoo (Check CREDITS.txt)"
-version = "0.0.1"
-dependencies = []

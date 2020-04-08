@@ -1,9 +1,0 @@
-shader = "shader/simple.vs"
-
-[uniforms]
-	diffuse = "core:notex.png"
-
-[config]
-	has_pos = true
-	has_nrm = true
-	has_tex = true

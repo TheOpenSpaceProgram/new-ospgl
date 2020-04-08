@@ -1,6 +1,0 @@
-id = "debug_system"
-name = "Debug Solar System"
-description = "A simple, fast-loading, solar system"
-author = "Tatjam"
-version = "0.0.1"
-dependencies = [""]

@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 			st.cartesian.pos = stt.cartesian.pos;
 			st.cartesian.vel = stt.cartesian.vel;
 			st.rotation = stt.rotation;
-			st.cartesian.pos += stt.rotation * glm::dvec3(0, 0, 1) * 100.0;
+			st.cartesian.pos += stt.rotation * glm::dvec3(0, 0, 1) * 10.0;
 
 			n_vehicle->packed_veh.set_world_state(st);
 			n_vehicle->unpack();
@@ -106,6 +106,8 @@ int main(int argc, char** argv)
 
 		osp.renderer->render(&save.universe.system);
 		osp.finish_frame(save.universe.MAX_PHYSICS_STEPS * save.universe.PHYSICS_STEPSIZE);
+
+		//osp.dt = save.universe.MAX_PHYSICS_STEPS * save.universe.PHYSICS_STEPSIZE;
 	}
 
 	osp.finish();

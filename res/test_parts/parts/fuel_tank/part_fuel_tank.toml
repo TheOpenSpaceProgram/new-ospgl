@@ -1,9 +1,0 @@
-model = "parts/fuel_tank/fuel_tank.fbx"
-
-name = "Oil Tube Mk. 1"
-country = "United States"
-manufacturer = "Rocket Factory"
-description = "Gives fuel to the engines"
-
-[p_root]
-	mass = 400.0

@@ -1,7 +1,0 @@
-model = "buildings/launchpad.fbx"
-
-[launchpad]
-	subname = "Launchpad"
-	bounds = "m_vehicle_bounds"
-	type = "rocket"
-
