@@ -1,0 +1,100 @@
+
+description = "A very cool testing vehicle"
+packages = ["test_parts"]
+part_id = 3
+piece_id = 3
+
+[[wire]]
+	from = 1
+	fmachine = "capsule"
+	fport = "Throttle"
+	to = 2
+	tmachine = "main_engine"
+	tport = "Throttle"
+	
+[[part]]	
+	id = 1
+	proto = "test_parts:parts/capsule/part_capsule.toml"
+[[part]]
+	id = 2
+	proto = "test_parts:parts/engine/part_engine.toml" 	
+
+[[part]]
+	id = 3
+	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
+
+[[piece]]
+	root = true
+	id = 1		
+	part = 1
+	node = "p_root"
+	[piece.pos]
+		x = 0.0
+		y = 0.0
+		z = 0.0
+	[piece.rot]
+		x = 0.0
+		y = 0.0
+		z = 0.0
+		w = 1.0 		
+[[piece]]
+	id = 2
+	part = 2
+	node = "p_root"
+	[piece.pos]
+		x = 0.0
+		y = 0.0
+		z = -4.0
+	[piece.rot]
+		x = 0.0
+		y = 0.0
+		z = 0.0
+		w = 1.0
+	[piece.link]
+		to = 3
+		welded = true
+		type = "core:links/simple_link.lua"
+		[piece.link.pfrom]
+			x = 0.0
+			y = 0.0
+			z = 1.0
+		[piece.link.pto]
+			x = 0.0
+			y = 0.0
+			z = -1.0
+		[piece.link.rot]
+			x = 0.0
+			y = 0.0
+			z = 0.0
+			w = 1.0
+
+[[piece]]
+	id = 3
+	part = 3
+	node = "p_root"
+	[piece.pos]
+		x = 0.0
+		y = 0.0
+		z = -2.0
+	[piece.rot]
+		x = 0.0
+		y = 0.0
+		z = 0.0
+		w = 1.0
+	[piece.link]
+		to = 1
+		welded = true
+		type = "core:links/simple_link.lua"
+		[piece.link.pfrom]
+			x = 0.0
+			y = 0.0
+			z = 1.0
+		[piece.link.pto]
+			x = 0.0
+			y = 0.0
+			z = -1.0
+		[piece.link.rot]
+			x = 0.0
+			y = 0.0
+			z = 0.0
+			w = 1.0

@@ -1,0 +1,13 @@
+shader = "shaders/simple.vs"
+
+[uniforms]
+	diffuse = "core:notex.png"
+
+[assimp_textures]
+	diffuse = "diffuse"
+
+[config]
+	has_pos = true
+	has_nrm = true
+	has_tex = true
+	flip_uv = true

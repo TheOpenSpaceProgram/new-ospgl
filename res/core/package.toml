@@ -1,0 +1,7 @@
+id = "core"
+name = "OSP Core"
+description = "All files needed to run the most bare-bones OSP"
+author = "Tatjam"
+version = "0.0.1"
+version_num = 1
+dependencies = ["navball"]

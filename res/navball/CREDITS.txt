@@ -1,0 +1,3 @@
+The default navball (as of now) is a slightly modified version of the navball by tygoo on the KSP forums: https://forum.kerbalspaceprogram.com/index.php?/topic/63113-making-high-contrast-nav-ball/&
+
+YOU CAN USE KSP NAVBALLS ON OSP

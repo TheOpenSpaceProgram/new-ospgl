@@ -271,7 +271,16 @@ __pycache__/
 *.pyc
 
 # Resource directory
-res/ 
+res/**
+# Except for small core files
+!res/core
+!res/navball
+!res/core/*
+!res/navball/*
 
 # User-data directory 
-udata/
+#udata/*
+# Except the setting file
+#!udata/settings.toml
+# And the debug save
+#!udata/saves
