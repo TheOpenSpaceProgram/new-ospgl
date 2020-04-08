@@ -2,6 +2,9 @@
 #include "dep/httplib.h"
 #include <sstream>
 #include <cpptoml.h>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 std::string Fetch::download(const std::string & url)
 {
@@ -86,7 +89,7 @@ std::string Fetch::download(const std::string & url)
 	return "";
 }
 
-bool Fetch::fetch(const std::string& url, OverwriteMode ow_mode, bool force)
+bool Fetch::fetch(const std::string& url, OverwriteMode ow_mode, bool updating)
 {
 	std::string data = download(url);
 
@@ -152,16 +155,127 @@ bool Fetch::fetch(const std::string& url, OverwriteMode ow_mode, bool force)
 		// Parse the metadata file (what we need)
 		try
 		{
-			std::stringstream ss = std::stringstream(metadata_file);
-			table_ptr root = cpptoml::parser(ss).parse();
+			PkgInfo pkg; pkg.load_from_memory(metadata_file);
 
-			std::string id = *root->get_as<std::string>("id");
-			std::string name = *root->get_as<std::string>("name");
-			std::string version = *root->get_as<std::string>("version");
-			std::string folder = root->get_as<std::string>("folder").value_or(id);
-
-
+	
+			std::string final_path = res_folder + "/" + pkg.folder + "/";
 			
+			// Is a package already there?
+			if (fs::exists(final_path))
+			{
+				if (fs::exists(final_path + "package.toml"))
+				{
+					PkgInfo opkg; opkg.load_from_file(final_path + "package.toml");
+
+					bool overwrite = false;
+
+					// Check versions
+					if (pkg.version_num > opkg.version_num && updating &&
+						pkg.id == opkg.id)
+					{
+						// We only update on bigger new version and same package id
+
+						std::cout << "Updating package" << std::endl;
+						overwrite = true;
+					}
+					else
+					{
+						std::cout << "A package already exists at " + final_path << std::endl;
+					
+						std::cout << "Installing (" << pkg.id << ")" << " version: " << 
+							pkg.version << " (" << pkg.version_num << ")" << std::endl;
+
+						std::cout << "On disk    (" << opkg.id << ")" << " version: " <<
+							opkg.version << " (" << opkg.version_num << ")" << std::endl;
+
+						if (ow_mode == YES)
+						{
+							overwrite = true;
+						}
+						else if (ow_mode == NO)
+						{
+							overwrite = false;
+						}
+						else
+						{
+							std::cout << rang::fgB::yellow << "Would you like to overwrite it? ";
+							overwrite = yn_prompt();
+
+							if (overwrite)
+							{
+								std::cout << rang::fg::reset << "Overwriting" << std::endl;
+							}
+							else
+							{
+								std::cout << rang::fg::reset << "Ignoring package" << std::endl;
+							}
+						}
+					}
+
+					if (overwrite)
+					{
+						// Delete the old folder
+						fs::remove_all(final_path);
+					}
+					else
+					{
+						return true;
+					}
+				}
+				else
+				{
+					// We don't know what to do in this case, so error
+					COUT_ERROR << "Folder " << final_path << " exists but is not a package!" << std::endl;
+					return false;
+				}
+			}
+
+			// If we reach here, we must write the data
+			int written_files = 0;
+			int written_bytes = 0;
+			for (int i = 0; i < (int)mz_zip_reader_get_num_files(&zip_archive); i++)
+			{
+				mz_zip_archive_file_stat file_stat;
+				if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat))
+				{
+					COUT_ERROR << "Miniz could not understand the ZIP file, it may be corrupted" << std::endl;
+					mz_zip_reader_end(&zip_archive);
+					return false;
+				}
+
+				if (!file_stat.m_is_directory)
+				{
+					std::string sub_path = file_stat.m_filename;
+					std::string full_path = res_folder + "/" + pkg.folder + "/" + sub_path;
+
+					//std::cout << "Writing file " << sub_path << " to " << full_path << std::endl;
+
+					char* file_buffer = (char*)malloc(file_stat.m_uncomp_size);
+					mz_zip_reader_extract_file_to_mem(&zip_archive, file_stat.m_filename, file_buffer, file_stat.m_uncomp_size, 0);
+
+					// Cut out the last piece of the path so that we don't create a folder named as the file
+					std::string dir_path = full_path.substr(0, full_path.find_last_of('/'));
+					fs::create_directories(dir_path);
+
+					std::fstream out(full_path, std::ios::out | std::ios::binary);
+					if (out.bad())
+					{
+						COUT_ERROR << "Could not write file " << full_path << std::endl;
+						free(file_buffer);
+						return false;
+					}
+
+					out.write(file_buffer, file_stat.m_uncomp_size);
+					out.close();
+					free(file_buffer);
+
+					written_files++;
+					written_bytes += file_stat.m_uncomp_size;
+				}
+			}
+
+			std::cout << "Written " << written_files << " files taking " << written_bytes << " bytes" << std::endl;
+
 		}
 		catch (cpptoml::parse_exception excp)
 		{
@@ -170,14 +284,13 @@ bool Fetch::fetch(const std::string& url, OverwriteMode ow_mode, bool force)
 		}
 		catch (...)
 		{
-			COUT_ERROR << "Error parsing metadata file" << std::endl;
+			COUT_ERROR << "Unknown error parsing metadata file" << std::endl;
 			return false;
 		}
 
 
 		// Close it
 		mz_zip_reader_end(&zip_archive);
-		std::cin.get();
 
 		return true;
 	}

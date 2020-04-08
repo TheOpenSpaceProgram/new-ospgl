@@ -6,18 +6,19 @@
 
 namespace fs = std::filesystem;
 
+std::string res_folder;
+
 int main(int argc, char** argv)
 {
 	argh::parser args(argc, argv);
 
-	Sleep(5000);
-
-	Fetch::fetch("https://github.com/TheOpenSpaceProgram/new-ospgl/releases/download/ospm-test/test_parts.zip", Fetch::PROMPT, false);
+	// TODO: Allow other resource folders
+	res_folder = "./res";
 
 	// Check that we are running inside of a valid OSP directory
-	if (!fs::exists("./res"))
+	if (!fs::exists(res_folder))
 	{
-		COUT_ERROR << "You are running ospm outside of a OSP install, this is not allowed!" << std::endl;
+		COUT_ERROR << "Resource folder not found, make sure you run OSPM inside your OSP install" << std::endl;
 		abort();
 	}
 

@@ -33,7 +33,7 @@ public:
 		show_title("Repository operations");
 		show_command("search", "[-name x] [-osp_version x] [-tags x,y,z] [-author x] [-folder x]",
 			"Searches for packages which satisfy the search query");
-		show_command("install", "pkg-id [-overwrite (prompt/yes/no)] [-force]",
+		show_command("install", "pkg-id [-overwrite (prompt/yes/no)]",
 			"Installs a package given its id. It will also install all dependencies (from the same repository).");
 		show_command("remove", "pkg-id",
 			"Removes a package given its id");
@@ -41,7 +41,7 @@ public:
 		std::cout << std::endl;
 
 		show_title("Direct installation from URLs");
-		show_command("fetch", "url-of-pkg-zip [-overwrite (prompt/yes/no)] [-force]",
+		show_command("fetch", "url-of-pkg-zip [-overwrite (prompt/yes/no)]",
 			"Same as install but from the direct URL to a package, or the path to it on disk. It will only check dependencies.");
 
 
