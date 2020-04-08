@@ -92,8 +92,8 @@ target_link_libraries(OSPGL fmt liblua-static assimp BulletSoftBody BulletDynami
 
 project(ospm)
 
-file(GLOB_RECURSE OSPM_SOURCES "ospm/*.cpp")
-set(MINIZ_SOURCES "ospm/dep/miniz.c")
+file(GLOB_RECURSE OSPM_SOURCES "ospm_src/*.cpp")
+set(MINIZ_SOURCES "ospm_src/dep/miniz.c")
 
 add_executable(ospm ${OSPM_SOURCES} ${MINIZ_SOURCES})
 

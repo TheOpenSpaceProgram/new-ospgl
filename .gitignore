@@ -29,6 +29,8 @@ OSPGL
 Makefile
 OSPGL 
 OSPGL.exe
+ospm
+ospm.exe
 *.exe
 *.dll
 *.so

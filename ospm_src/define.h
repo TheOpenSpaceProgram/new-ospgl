@@ -10,7 +10,7 @@ extern std::string res_folder;
 
 static bool yn_prompt()
 {
-	std::cout << "(y/n - Default: n) ";
+	std::cout << "(y/n) ";
 	
 	std::string input;
 	std::cin >> input;
