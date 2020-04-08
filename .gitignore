@@ -276,7 +276,9 @@ res/**
 !res/core
 !res/navball
 !res/core/*
+!res/core/**
 !res/navball/*
+!res/navball/**
 
 # User-data directory 
 #udata/*

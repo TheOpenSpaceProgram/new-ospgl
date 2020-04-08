@@ -1,0 +1,7 @@
+dont_unload = true
+
+[image]
+	channels = 1
+	bitdepth = 8
+	upload = true
+	in_memory = false
