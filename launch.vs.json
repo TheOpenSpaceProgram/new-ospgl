@@ -1,13 +1,20 @@
 {
   "version": "0.2.1",
   "defaults": {},
-  "configurations": [
-    {
-      "type": "default",
-      "project": "CMakeLists.txt",
-      "projectTarget": "OSPGL.exe",
-      "name": "OSPGL executable",
-      "currentDir": "${workspaceRoot}"
-    }
-  ]
+    "configurations": [
+        {
+            "type": "default",
+            "project": "CMakeLists.txt",
+            "projectTarget": "OSPGL.exe",
+            "name": "OSPGL executable",
+            "currentDir": "${workspaceRoot}"
+        },
+        {
+            "type": "default",
+            "project": "CMakeLists.txt",
+            "projectTarget": "ospm.exe",
+            "name": "Package Manager",
+            "currentDir": "${workspaceRoot}"
+        }
+    ]
 }

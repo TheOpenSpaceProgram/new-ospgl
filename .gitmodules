@@ -16,6 +16,3 @@
 [submodule "dep/glfw"]
 	path = dep/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "ospm/dep/openssl-cmake"]
-	path = ospm/dep/openssl-cmake
-	url = https://github.com/viaduck/openssl-cmake

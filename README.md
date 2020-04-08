@@ -9,6 +9,9 @@ You can check what's needed on the Issues and Projects. Feel free to create new 
 # Building
 We use CMake for building, so the procedure should be similar on all systems.
 
+OpenSSL is a dependency (for ospm), on most linux distributions it's probably available on the package manager (it will probably come preinstalled),
+on windows it needs to be manually downloaded (Here's a good binary compilation: https://slproweb.com/download/Win64OpenSSL-1_1_1f.exe)
+
 ```
 git clone --recurse-submodules https://github.com/TheOpenSpaceProgram/new-ospgl.git
 cd new-ospgl

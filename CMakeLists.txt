@@ -1,11 +1,15 @@
-project(OSPGL)
-
 cmake_minimum_required (VERSION 3.2.3)
 
 # Define basic compiler and CMake configuration
 
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+
+##################################################################################
+# OSPGL - The game engine
+##################################################################################
+project(OSPGL)
 
 # Define source files for OSP and non-cmake dependencies
 
@@ -82,3 +86,31 @@ set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "" FORCE)
 
 target_link_libraries(OSPGL fmt liblua-static assimp BulletSoftBody BulletDynamics BulletCollision LinearMath ${CMAKE_DL_LIBS})
 
+##################################################################################
+# ospm - The package manager for OSPGL (Open Space Program Manager)
+##################################################################################
+
+project(ospm)
+
+file(GLOB_RECURSE OSPM_SOURCES "ospm/*.cpp")
+set(MINIZ_SOURCES "ospm/dep/miniz.c")
+
+add_executable(ospm ${OSPM_SOURCES} ${MINIZ_SOURCES})
+
+if(MSVC)
+	add_definitions(-DWIN32_LEAN_AND_MEAN)
+	add_definitions(-DNOMINMAX)
+else()
+    target_compile_options(OSPGL PUBLIC -g -Werror)
+endif()
+
+add_definitions(-DCPPHTTPLIB_OPENSSL_SUPPORT)
+
+find_package(OpenSSL REQUIRED)
+message(STATUS "OpenSSL Version: " ${OPENSSL_VERSION})
+message(STATUS "OpenSSL Include: " ${OPENSSL_INCLUDE_DIR})
+
+include_directories(dep)
+include_directories(${OPENSSL_INCLUDE_DIR})
+
+target_link_libraries(ospm ${OPENSSL_LIBRARIES} ${CMAKE_DL_LIBS})
