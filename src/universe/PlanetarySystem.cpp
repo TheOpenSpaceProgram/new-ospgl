@@ -458,14 +458,25 @@ void PlanetarySystem::update_render_body_rocky(PlanetaryBody* body, glm::dvec3 b
 		double height = std::max(glm::length(rel_camera_pos) - body->config.radius - altitude, 1.0);
 
 		height /= body->config.radius;
-		double depthf = (body->config.surface.coef_a - (body->config.surface.coef_a * glm::log(height)
-			/ ((glm::pow(height, 0.15) * body->config.surface.coef_b))) - 0.3 * height) * 0.4;
 
-		size_t depth = (size_t)round(std::max(std::min(depthf, (double)body->config.surface.max_depth - 1.0), -1.0) + 1.0);
+		// Simple formula that allows a great deal of customization
+		double M = (double)body->config.surface.max_depth;
+		double m = (double)body->config.surface.depth_for_unload;
+		m = 0.0;			// TODO: Think this out
+		double A = body->config.surface.coef_a;
+		double B = body->config.surface.coef_b;
+		double C = body->config.surface.coef_c;
+		double x = height;
 
-		// 2 takes about 120Mb of memory so it's not too high
-		// and it's the usual orbital level of detail
-		body->renderer.rocky->server->set_depth_for_unload(2);
+		// Formula: https://www.desmos.com/calculator/5xvcucqbrx
+		double depthf = (M-1.0) * glm::exp(- (A * x) / C) + glm::pow(A, -glm::pow(x, B));
+
+		int depthi = (int)std::round(depthf);
+		size_t depth = glm::max(glm::min(depthi, body->config.surface.max_depth), 0);
+
+		logger->info("Cur depth: {} - {}", depth, depthf);
+
+		body->renderer.rocky->server->set_depth_for_unload(body->config.surface.depth_for_unload);
 
 		body->renderer.rocky->qtree.set_wanted_subdivide(offset, side, depth);
 		body->renderer.rocky->qtree.dirty = true;

@@ -15,6 +15,8 @@ struct SurfaceConfig
 	int max_depth;
 	double coef_a;
 	double coef_b;
+	double coef_c;
+	int depth_for_unload;
 
 	bool has_water;
 
@@ -47,7 +49,7 @@ public:
 		lod->insert("max_depth", what.max_depth);
 		lod->insert("coef_a", what.coef_a);
 		lod->insert("coef_b", what.coef_b);
-
+		
 		target.insert("lod", lod);
 
 	}
@@ -59,6 +61,8 @@ public:
 		SAFE_TOML_GET(to.max_depth, "lod.max_depth", int);
 		SAFE_TOML_GET(to.coef_a, "lod.coef_a", double);
 		SAFE_TOML_GET(to.coef_b, "lod.coef_b", double);
+		SAFE_TOML_GET(to.coef_c, "lod.coef_c", double);
+		SAFE_TOML_GET(to.depth_for_unload, "lod.depth_for_unload", int)
 
 		SAFE_TOML_GET(to.max_height, "max_height", double);
 

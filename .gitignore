@@ -23,12 +23,11 @@ CMakeCache.txt
 *.cmake
 dna.txt
 compile_commands.json
-OSPGL
+ospgl
+ospgl.exe
 /bin
 /lib
-Makefile
-OSPGL 
-OSPGL.exe
+Makefile 
 ospm
 ospm.exe
 *.exe

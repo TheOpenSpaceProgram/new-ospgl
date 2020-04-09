@@ -11,6 +11,8 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 ##################################################################################
 project(OSPGL)
 
+
+
 # Define source files for OSP and non-cmake dependencies
 
 file(GLOB_RECURSE OSP_SOURCES "src/*.cpp")
@@ -25,6 +27,9 @@ set(NANOVG_SOURCES "dep/nanovg/nanovg.c")
 
 add_executable(OSPGL ${OSP_SOURCES} ${IMGUI_SOURCES} ${GLAD_SOURCES} ${FASTNOISE_SOURCES} ${STB_SOURCES} ${NANOVG_SOURCES})
 
+# Name it ospgl (lowercase)
+set_target_properties(OSPGL PROPERTIES OUTPUT_NAME "ospgl")
+
 # Set compiler options for OSPGL
 
 if(MSVC)
@@ -32,7 +37,7 @@ if(MSVC)
 	add_definitions(-D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
 	target_compile_options(OSPGL PUBLIC /bigobj)
 else()
-    target_compile_options(OSPGL PUBLIC -g -Werror)
+	target_compile_options(OSPGL PUBLIC -g -Werror)
 endif()
 
 include_directories(dep)
