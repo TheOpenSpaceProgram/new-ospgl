@@ -9,12 +9,12 @@ static void bullet_tick(btDynamicsWorld* world, btScalar tstep)
 }
 
 
-std::set<Entity*>& Universe::index_event_receivers(const std::string & str)
+std::unordered_set<EventHandler, EventHandlerHasher>& Universe::index_event_receivers(const std::string& str)
 {
 	auto it = event_receivers.find(str);
 	if (it == event_receivers.end())
 	{
-		event_receivers[str] = std::set<Entity*>();
+		event_receivers[str] = std::unordered_set<EventHandler, EventHandlerHasher>();
 		return event_receivers[str];
 	}
 	else
@@ -23,25 +23,26 @@ std::set<Entity*>& Universe::index_event_receivers(const std::string & str)
 	}
 }
 
-void Universe::emit_event(Entity* emitter, const std::string& event_id, VectorOfAny args)
+void Universe::emit_event(const std::string& event_id, EventArguments args)
 {
-	std::set<Entity*>& rc = index_event_receivers(event_id);
+	auto& rc = index_event_receivers(event_id);
 
-	for (Entity* e : rc)
+	for (EventHandler ev : rc)
 	{
-		e->receive_event(emitter, event_id, args);
+		logger->info("Sending event");
+		ev.fnc(args, ev.lua_fnc);
 	}
 }
 
-void Universe::sign_up_for_event(const std::string& event_id, Entity* id)
+void Universe::sign_up_for_event(const std::string& event_id, EventHandler id)
 {
-	std::set<Entity*>& rc = index_event_receivers(event_id);
+	auto& rc = index_event_receivers(event_id);
 	rc.insert(id);
 }
 
-void Universe::drop_out_of_event(const std::string& event_id, Entity* id)
+void Universe::drop_out_of_event(const std::string& event_id, EventHandler id)
 {
-	std::set<Entity*>& rc = index_event_receivers(event_id);
+	auto& rc = index_event_receivers(event_id);
 	rc.erase(id);
 }
 
@@ -111,4 +112,8 @@ Universe::Universe(Renderer* renderer) : system(this)
 
 Universe::~Universe()
 {
+	for(Entity* ent : entities)
+	{
+		delete ent;
+	}
 }

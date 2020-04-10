@@ -35,6 +35,7 @@ public:
 		BULLET,			// LuaBullet
 		TOML,			// LuaToml
 		VEHICLE,		// LuaVehicle (Vehicle, Part, Piece, Machine)
+		UNIVERSE,		// LuaUniverse (Events, entity creation...)
 		COUNT,
 	};
 

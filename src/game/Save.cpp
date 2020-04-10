@@ -62,3 +62,4 @@ void Save::write(cpptoml::table& target) const
 {
 
 }
+

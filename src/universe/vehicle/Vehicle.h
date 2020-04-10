@@ -48,6 +48,9 @@ class VehicleLoader;
 // 	is only possible when the vehicle is relatively estabilized, without very big
 // 	inter-part interactions. A similar situation happens in the vehicle editor.
 //
+// Takes ownership of all pieces, parts, machines...
+// They must be allocated in the heap because we delete them
+//
 class Vehicle : public Drawable
 {
 private:

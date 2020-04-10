@@ -12,6 +12,9 @@ public:
 	OSP* osp;
 	Universe universe;
 
+	// Can be nullptr, will receive all input commands
+	Entity* under_control;
+
 	void load(const cpptoml::table& from);
 	void write(cpptoml::table& target) const;
 

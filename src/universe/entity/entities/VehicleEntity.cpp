@@ -37,6 +37,7 @@ VehicleEntity::VehicleEntity(cpptoml::table& toml)
 
 VehicleEntity::~VehicleEntity()
 {
+	delete vehicle;
 }
 
 void VehicleEntity::enable_bullet(btDynamicsWorld * world)

@@ -33,7 +33,7 @@ void Machine::update(double dt)
 void Machine::init(Part* in_part, Universe* in_universe)
 {
 	lua_state["part"] = in_part;
-	lua_state["universe"] = in_part;
+	lua_state["universe"] = in_universe;
 	lua_state["vehicle"] = in_part->vehicle;
 
 	this->in_part = in_part;	
@@ -237,4 +237,12 @@ PortResult Machine::write_to_port(const std::string& name, PortValue val)
 
 Machine::~Machine()
 {
+	logger->info("Ending machine");
+	lua_state.collect_garbage();
+
+	// Delete all ports
+	for(Port* port : ports)
+	{
+		delete port;
+	}
 }

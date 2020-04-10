@@ -2,6 +2,8 @@
 #include "../Entity.h"
 #include "../../vehicle/Vehicle.h"
 
+// We take ownership of the vehicle pointer (we will delete it)
+// so make sure it's heap allocated
 class VehicleEntity : public Entity
 {
 public:
@@ -14,9 +16,9 @@ public:
 	virtual void enable_bullet(btDynamicsWorld * world) override;
 	virtual void disable_bullet(btDynamicsWorld * world) override;
 
-	virtual void init();
-	virtual void update(double dt);
-	virtual void physics_update(double pdt);
+	virtual void init() override;
+	virtual void update(double dt) override;
+	virtual void physics_update(double pdt) override;
 
 	VehicleEntity(Vehicle* vehicle);
 	VehicleEntity(cpptoml::table& toml);

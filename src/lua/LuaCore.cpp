@@ -9,7 +9,7 @@
 #include "libs/LuaToml.h"
 #include "libs/LuaVehicle.h"
 #include "libs/LuaDebugDrawer.h"
-
+#include "libs/LuaUniverse.h"
 
 LuaCore* lua_core;
 
@@ -102,6 +102,10 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::VEHICLE;
 	}
+	else if(name == "universe")
+	{
+		return LibraryID::UNIVERSE;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -140,6 +144,7 @@ LuaCore::LuaCore()
 	libraries[LibraryID::BULLET] = new LuaBullet();
 	libraries[LibraryID::TOML] = new LuaToml();
 	libraries[LibraryID::VEHICLE] = new LuaVehicle();
+	libraries[LibraryID::UNIVERSE] = new LuaUniverse();
 }
 
 LuaCore::~LuaCore()

@@ -34,8 +34,6 @@ private:
 	Universe* universe;
 	bool bullet_enabled;
 
-	std::set<std::string> signed_up_events;
-
 	int64_t uid;
 
 public:
@@ -97,18 +95,11 @@ public:
 			disable_bullet(world);
 		}
 	}
-
-	virtual void receive_event(Entity* emitter, const std::string& event_id, VectorOfAny args = VectorOfAny()) {}
-
-	// Note: You don't need to manually drop out of events before destruction, the destructor will do it for you
-	void emit_event(const std::string& event_id, VectorOfAny args = VectorOfAny());
-	void sign_up_for_event(const std::string& event_id);
-	void drop_out_of_event(const std::string& event_id);
-
+	
 	virtual std::string get_type() = 0;
 
 	// Used while loading saves 
 	static Entity* load_entity(int64_t uid, std::string type, cpptoml::table& toml);
 
-	~Entity();
+	virtual ~Entity();
 };

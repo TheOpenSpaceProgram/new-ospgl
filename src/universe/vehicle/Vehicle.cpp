@@ -230,4 +230,15 @@ Vehicle::Vehicle() : Drawable(), unpacked_veh(this), packed_veh(this)
 
 Vehicle::~Vehicle() 
 {
+	for(Part* p : parts)
+	{
+		delete p;
+	}
+
+	for(Piece* p : all_pieces)
+	{
+		delete p;
+	}
+
+	// Ports are deleted by the machines
 }

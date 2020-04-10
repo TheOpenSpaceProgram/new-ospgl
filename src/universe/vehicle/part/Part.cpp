@@ -61,4 +61,8 @@ Machine* Part::get_machine(const std::string& id)
 
 Part::~Part()
 {
+	for(auto& machine_pair : machines)
+	{
+		delete machine_pair.second;
+	}
 }

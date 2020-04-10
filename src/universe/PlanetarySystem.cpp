@@ -474,7 +474,6 @@ void PlanetarySystem::update_render_body_rocky(PlanetaryBody* body, glm::dvec3 b
 		int depthi = (int)std::round(depthf);
 		size_t depth = glm::max(glm::min(depthi, body->config.surface.max_depth), 0);
 
-		logger->info("Cur depth: {} - {}", depth, depthf);
 
 		body->renderer.rocky->server->set_depth_for_unload(body->config.surface.depth_for_unload);
 

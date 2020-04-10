@@ -19,7 +19,7 @@ t = 966772800.0
 	building = "debug_system:buildings/launchpad.toml"
 	in_body = "Earth"
 	[entity.rel_pos]
-		x = 6360_690.0
+		x = 6361_528.0
 		y = 100.0
 		z = 0.0 
 	[entity.rel_rot]
