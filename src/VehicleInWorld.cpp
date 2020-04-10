@@ -51,6 +51,8 @@ int main(int argc, char** argv)
 
 		bool first_frame = true;
 
+		
+
 		while (osp.should_loop())
 		{
 			osp.start_frame();

@@ -3,6 +3,8 @@
 #include <OSP.h>
 #include <util/SerializeUtil.h>
 #include "universe/Date.h"
+#include "input/Input.h"
+
 
 // Loads, runs, and stores a game state
 class Save
@@ -11,6 +13,8 @@ public:
 
 	OSP* osp;
 	Universe universe;
+	Input input;
+
 
 	// Can be nullptr, will receive all input commands
 	Entity* under_control;
