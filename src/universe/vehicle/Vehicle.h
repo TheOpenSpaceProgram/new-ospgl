@@ -51,7 +51,7 @@ class VehicleLoader;
 // Takes ownership of all pieces, parts, machines...
 // They must be allocated in the heap because we delete them
 //
-class Vehicle : public Drawable
+class Vehicle
 {
 private:
 
@@ -87,11 +87,6 @@ public:
 	// Keep up to date by the machines themselves
 	std::vector<Port*> all_ports;
 
-	virtual void deferred_pass(CameraUniforms& camera_uniforms) override;
-	virtual bool needs_deferred_pass() override { return true; }
-
-	virtual void shadow_pass(ShadowCamera& sh_camera) override;
-	virtual bool needs_shadow_pass() override { return true; }
 
 	void pack();
 

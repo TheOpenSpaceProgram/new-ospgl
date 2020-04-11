@@ -1,11 +1,12 @@
-#include "Save.h"
+#include "GameState.h"
+#include <OSP.h>
 
-Save::Save(OSP* n_osp) : universe(n_osp->renderer)
+GameState::GameState(OSP* n_osp) : universe()
 {
 	osp = n_osp;
 }
 
-void Save::load(const cpptoml::table& from)
+void GameState::load(const cpptoml::table& from)
 {
 	std::string system_path = *from.get_as<std::string>("system");
 	assets->get_from_path<Config>(system_path)->read_to(universe.system);
@@ -50,21 +51,56 @@ void Save::load(const cpptoml::table& from)
 		return a->get_uid() < b->get_uid();
 	});
 
-	for (size_t i = 0; i < universe.entities.size(); i++)
+	for(Entity* ent : universe.entities)
 	{
-		universe.renderer->add_drawable((Drawable*)universe.entities[i]);
-		universe.entities[i]->setup(&universe);
+		ent->setup(&universe);
 	}
 
+	scene = nullptr;
+	to_delete = nullptr;
+
 }
 
-void Save::write(cpptoml::table& target) const
+void GameState::write(cpptoml::table& target) const
 {
 
 }
 
-void Save::update(double dt)
+void GameState::update()
 {
-	input.update(universe.renderer->window, dt);
-	universe.update(dt);
+	if(to_delete != nullptr)
+	{
+		delete to_delete;
+		to_delete = nullptr;
+	}
+
+	universe.update(osp->dt);
+
+	if(scene)
+	{
+		scene->update();
+	}
 }
+
+void GameState::render()
+{
+	if(scene)
+	{
+		scene->render();
+	}
+}
+
+
+void GameState::load_scene(Scene* n_scene)
+{
+	if(scene != nullptr)
+	{
+		scene->unload();
+		to_delete = scene;
+	}
+
+	scene = n_scene;
+	scene->setup(osp);
+	scene->load();
+}
+

@@ -40,12 +40,12 @@ public:
 	SunLight();
 	~SunLight();
 
-	virtual LightType get_type(){ return SUN; } 
+	virtual LightType get_type () override { return SUN; }
 
 	virtual void do_pass(CameraUniforms& cu, GBuffer * gbuf) override;
 	virtual ShadowCamera get_shadow_camera(glm::dvec3 camera_pos) override;
 
-	virtual bool casts_shadows() { return true; }
+	virtual bool casts_shadows () override { return true; }
 
 };
 

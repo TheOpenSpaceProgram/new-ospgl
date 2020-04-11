@@ -190,13 +190,14 @@ void Renderer::do_debug(CameraUniforms &cu)
 	debug_drawer->render(proj_view, c_model, far_plane);
 }
 
-void Renderer::finish()
+void Renderer::do_imgui()
 {
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
 
-
-
+void Renderer::finish()
+{
 	glfwSwapBuffers(window);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -248,7 +249,6 @@ void Renderer::render(PlanetarySystem* system)
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	finish();
 }
 
 

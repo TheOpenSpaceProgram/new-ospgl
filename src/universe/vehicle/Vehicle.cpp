@@ -1,23 +1,5 @@
 #include "Vehicle.h"
 
-void Vehicle::deferred_pass(CameraUniforms & camera_uniforms)
-{
-	for (Piece* p : all_pieces)
-	{
-		glm::dmat4 tform = glm::inverse(p->collider_offset) * to_dmat4(p->get_graphics_transform());
-		p->model_node->draw(camera_uniforms, tform, true);
-	}
-}
-
-void Vehicle::shadow_pass(ShadowCamera& sh_cam)
-{
-	for(Piece* p : all_pieces)
-	{
-		glm::dmat4 tform = glm::inverse(p->collider_offset) * to_dmat4(p->get_graphics_transform());
-		p->model_node->draw_shadow(sh_cam, tform, true);
-	}
-}
-
 void Vehicle::unpack()
 {
 	logger->check_important(packed, "Tried to unpack an unpacked vehicle");
@@ -224,7 +206,7 @@ Part* Vehicle::get_part(int64_t id)
 	return it->second;
 }
 
-Vehicle::Vehicle() : Drawable(), unpacked_veh(this), packed_veh(this)
+Vehicle::Vehicle() : unpacked_veh(this), packed_veh(this)
 {
 }
 

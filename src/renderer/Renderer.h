@@ -100,6 +100,10 @@ public:
 	// complex shadows (landscape shadows)
 	void render(PlanetarySystem* system);
 
+	// Must always be called (except on headless), even if nothing
+	// is rendering to the screen
+	void do_imgui();
+
 	void finish();
 
 

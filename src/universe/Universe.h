@@ -28,7 +28,7 @@
 // This will hopefully avoid event name clashing.
 // 
 // It's the responsability of the event receiver to remove the handler once it's deleted / not needed!
-class Save;
+class GameState;
 
 class Universe
 {
@@ -51,7 +51,7 @@ private:
 public:
 
 	friend class Entity;
-	friend class Save;
+	friend class GameState;
 
 	static constexpr double PHYSICS_STEPSIZE = 1.0 / 30.0;
 	static constexpr int MAX_PHYSICS_STEPS = 1;
@@ -68,7 +68,6 @@ public:
 	}
 
 
-	Renderer* renderer;
 	btDiscreteDynamicsWorld* bt_world;
 
 	PlanetarySystem system;
@@ -87,7 +86,7 @@ public:
 	
 	int64_t get_uid();
 
-	Universe(Renderer* renderer);
+	Universe();
 	~Universe();
 };
 
@@ -101,8 +100,6 @@ inline T* Universe::create_entity(Args&&... args)
 	entities.push_back((Entity*)n_ent);
 
 	emit_event("core:new_entity", n_ent->get_uid());
-
-	renderer->add_drawable((Drawable*)as_ent);
 
 	as_ent->setup(this);
 
@@ -123,8 +120,6 @@ inline void Universe::remove_entity(T* ent)
 			break;
 		}
 	}
-
-	renderer->remove_drawable((Drawable*)as_ent);
 
 	emit_event("core:remove_entity", as_ent->get_uid());
 

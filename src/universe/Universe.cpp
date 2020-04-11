@@ -30,15 +30,17 @@ void Universe::emit_event(const std::string& event_id, EventArguments args)
 	for (EventHandler ev : rc)
 	{
 		logger->info("Sending event");
-		ev.fnc(args, ev.lua_fnc);
+		ev.fnc(args, ev.user_data);
 	}
 }
+
 
 void Universe::sign_up_for_event(const std::string& event_id, EventHandler id)
 {
 	auto& rc = index_event_receivers(event_id);
 	rc.insert(id);
 }
+
 
 void Universe::drop_out_of_event(const std::string& event_id, EventHandler id)
 {
@@ -78,12 +80,9 @@ int64_t Universe::get_uid()
 	return uid;
 }
 
-Universe::Universe(Renderer* renderer) : system(this)
+Universe::Universe() : system(this)
 {
 	uid = 0;
-
-	this->renderer = renderer;
-	renderer->add_drawable(&system);
 
 	bt_collision_config = new btDefaultCollisionConfiguration();
 	bt_dispatcher = new btCollisionDispatcher(bt_collision_config);

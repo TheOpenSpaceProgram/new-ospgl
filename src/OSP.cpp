@@ -164,7 +164,6 @@ void OSP::init(int argc, char** argv)
 		input->setup(renderer->window);
 
 		dt = 0.0;
-		game_t = 0.0;
 		Timer dtt = Timer();
 	}	
 }
@@ -188,28 +187,51 @@ bool OSP::should_loop()
 
 void OSP::start_frame()
 {
-	input->update(renderer->window);
-	glfwPollEvents();
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
+	if(renderer != nullptr)
+	{
+		input->update(renderer->window);
+		glfwPollEvents();
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 
-	float w = (float)renderer->get_width();
-	float h = (float)renderer->get_height();
-	nvgBeginFrame(renderer->vg, w, h, w / h);
+		float w = (float)renderer->get_width();
+		float h = (float)renderer->get_height();
+		nvgBeginFrame(renderer->vg, w, h, w / h);
+	}
 }
 
-void OSP::finish_frame(double max_dt)
+void OSP::update()
 {
+	game_state.update();
+}
+
+void OSP::render()
+{
+	if(renderer != nullptr)
+	{
+		game_state.render();
+		// It's the responsability of the Scene to call renderer render
+	
+		renderer->do_imgui();
+		renderer->finish();
+	}
+}
+
+void OSP::finish_frame()
+{
+	double max_dt = game_state.universe.MAX_PHYSICS_STEPS * game_state.universe.PHYSICS_STEPSIZE;
 	dt = dtt.restart();
+	game_dt = dt;
 
 	if(dt > max_dt)
 	{
 		logger->warn("Delta-time too high ({})/({}), slowing down", dt, max_dt);
 		dt = max_dt;
 	}
-
-	game_t += dt;
-
 }
 
+OSP::OSP() : game_state(this)
+{
+
+}

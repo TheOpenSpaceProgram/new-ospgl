@@ -5,7 +5,6 @@
 
 void VehicleEntity::init()
 {
-	get_universe()->renderer->add_drawable(this->vehicle);
 	this->vehicle->set_world(get_universe()->bt_world);
 	this->vehicle->init(get_universe());
 }
@@ -46,4 +45,22 @@ void VehicleEntity::enable_bullet(btDynamicsWorld * world)
 
 void VehicleEntity::disable_bullet(btDynamicsWorld * world)
 {
+}
+
+void VehicleEntity::deferred_pass(CameraUniforms & camera_uniforms)
+{
+	for (Piece* p : vehicle->all_pieces)
+	{
+		glm::dmat4 tform = glm::inverse(p->collider_offset) * to_dmat4(p->get_graphics_transform());
+		p->model_node->draw(camera_uniforms, tform, true);
+	}
+}
+
+void VehicleEntity::shadow_pass(ShadowCamera& sh_cam)
+{
+	for(Piece* p : vehicle->all_pieces)
+	{
+		glm::dmat4 tform = glm::inverse(p->collider_offset) * to_dmat4(p->get_graphics_transform());
+		p->model_node->draw_shadow(sh_cam, tform, true);
+	}
 }

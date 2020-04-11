@@ -20,6 +20,12 @@ public:
 	virtual void update(double dt) override;
 	virtual void physics_update(double pdt) override;
 
+	virtual void deferred_pass(CameraUniforms& camera_uniforms) override;
+	virtual bool needs_deferred_pass() override { return true; }
+
+	virtual void shadow_pass(ShadowCamera& sh_camera) override;
+	virtual bool needs_shadow_pass() override { return true; }
+
 	VehicleEntity(Vehicle* vehicle);
 	VehicleEntity(cpptoml::table& toml);
 	~VehicleEntity();
