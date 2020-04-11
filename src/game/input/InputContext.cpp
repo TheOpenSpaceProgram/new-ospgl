@@ -1,6 +1,12 @@
 #include "InputContext.h"
 #include <GLFW/glfw3.h>
 #include <util/Logger.h>
+#include "Input.h"
+#include <cpptoml.h>
+#include <util/SerializeUtil.h>
+#include <assets/AssetManager.h>
+#include <assets/Config.h>
+#include <filesystem>
 
 double InputContext::get_axis(const std::string& name)
 {
@@ -157,3 +163,36 @@ void InputContext::update(GLFWwindow* window, double dt)
 	}
 	
 }
+
+InputContext::~InputContext()
+{
+	if(input != nullptr)
+	{
+		input->set_ctx(nullptr);
+	}
+}
+
+void InputContext::load_from_file(const std::string& path)
+{
+	using table_ptr = std::shared_ptr<cpptoml::table>;
+	Config* cfg = assets->get_from_path<Config>(path);
+
+	// All input configs are stored in udata/input/ so it's 
+	// easy to find them
+	std::string config_path = assets->udata_path + "input/" + *cfg->root->get_as<std::string>("config");
+
+	if(!std::filesystem::exists(config_path))
+	{
+		// Copy the file
+		std::string real_path = assets->res_path + cfg->in_package + "/" + cfg->path;
+		//std::filesystem::copy(real_path, config_path);
+		std::string dir_path = config_path.substr(config_path.find_last_of('/'));
+		std::filesystem::create_directories(dir_path);
+		logger->info("Copying input config from {} to {}", real_path, config_path);
+	}
+
+	// Read the config file
+	table_ptr root = SerializeUtil::load_file(config_path);
+
+}
+

@@ -7,11 +7,19 @@
 // The input system is divided into InputContexts which define:
 // 	- Axes: Analogic input (but can be controlled by digital inputs) from -1 to 1
 // 	- Actions: Digital input (you can detect when the button was pressed, released...)
-// InputContexts are defined in lua, every controllable thing should define one.
-// For easy user configuration mods should define a configuration page where their keybindings
-// and axe-mappings can be changed for wathever InputContexts they implement.
+// InputContexts are defined in a config, controllable machines have a function named
+// get_input_context which returns the context to use so the user can select which machine
+// to control
 //
 class Input
 {
+private:
 
+	InputContext* cur_ctx;
+
+public:
+
+	void set_ctx(InputContext* ctx);
+
+	void update(GLFWwindow* window, double dt);
 };

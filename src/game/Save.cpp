@@ -63,3 +63,8 @@ void Save::write(cpptoml::table& target) const
 
 }
 
+void Save::update(double dt)
+{
+	input.update(universe.renderer->window, dt);
+	universe.update(dt);
+}

@@ -1,0 +1,26 @@
+config = "core_rocket.toml"
+
+[[input]]
+	type = "axis"
+	name = "throttle"
+	[[input.default]]
+		type = "key"
+		up = 340 			# Left shift
+		down = 341			# Left control
+		speed = 0.25 
+		attenuation = 0.0
+
+[[input]]
+	type = "action"
+	name = "cut_throttle"
+	[[input.default]]
+		type = "key"
+		key = 88			# X
+
+
+[[input]]
+	type = "action"
+	name = "full_throttle"
+	[[input.default]]
+		type = "key"
+		key = 90			# Z

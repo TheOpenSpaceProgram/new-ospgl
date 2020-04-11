@@ -18,9 +18,9 @@
 AssetManager* assets;
 
 
-void create_global_asset_manager(std::string& res_path)
+void create_global_asset_manager(std::string& res_path, std::string& udata_path)
 {
-	assets = new AssetManager(res_path);
+	assets = new AssetManager(res_path, udata_path);
 
 	assets->preload();
 

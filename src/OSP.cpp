@@ -102,7 +102,7 @@ void OSP::init(int argc, char** argv)
 		// Initialize subsystems
 		create_global_logger();
 
-		logger->info("Starting OSP with settings = \"{}\" and resource path = \"{}\"", settings_path, res_path);
+		logger->info("Starting OSP with settings = \"{}\", resource path = \"{}\", user data path = \"{}\"", settings_path, res_path, udata_path);
 		
 		// Load settings
 		std::string settings_file = AssetManager::load_string_raw(udata_path + settings_path);
@@ -150,7 +150,7 @@ void OSP::init(int argc, char** argv)
 
 		std::cout << *config << std::endl;
 
-		create_global_asset_manager(res_path);	
+		create_global_asset_manager(res_path, udata_path);
 		renderer = new Renderer(*config);
 		create_global_debug_drawer();
 		create_global_texture_drawer();

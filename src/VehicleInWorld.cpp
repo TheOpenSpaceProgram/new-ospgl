@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 {
 	OSP osp = OSP();
 	osp.init(argc, argv);
-
+	
 
 	{
 		SimpleCamera* camera = new SimpleCamera();
@@ -60,8 +60,7 @@ int main(int argc, char** argv)
 
 
 			camera->update(osp.dt);
-			save.universe.update(osp.dt);
-
+			save.update(dt);
 
 			if (first_frame)
 			{

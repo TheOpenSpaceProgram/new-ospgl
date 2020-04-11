@@ -172,12 +172,16 @@ public:
 	void load_script_to(sol::state& target, const std::string& pkg, const std::string& path);
 	void load_script_to(sol::state& target, const std::string& full_path);
 
-	std::string res_path;
+	void get_config_path(const std::string& pkg);
 
-	AssetManager(const std::string& res_path)
+	std::string res_path;
+	std::string udata_path;
+
+	AssetManager(const std::string& res_path, const std::string& udata_path)
 	{
 		current_package = "core";
 		this->res_path = res_path;
+		this->udata_path = udata_path;
 	}
 };
 
@@ -367,7 +371,7 @@ extern AssetManager* assets;
 
 // Creates the default asset manager, with all 
 // asset types loaded 
-void create_global_asset_manager(std::string& res_path);
+void create_global_asset_manager(std::string& res_path, std::string& udata_path);
 
 void destroy_global_asset_manager();
 

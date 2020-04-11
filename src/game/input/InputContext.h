@@ -2,9 +2,10 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <cpptoml.h>
 
 class GLFWwindow;
-
+class Input;
 
 // All invalid names will result in an error, not default values
 // Once something is mapped it cannot be unmapped, you need to 
@@ -73,8 +74,14 @@ private:
 	std::array<JoystickState, 16> joystick_states;
 
 	void obtain_joystick_states();
+	
+	void init_config(cpptoml::table& base, cpptoml::table& target);
+
+	Input* input;
 
 public:
+
+	friend class Input;
 
 	double get_axis(const std::string& name);
 
@@ -96,4 +103,12 @@ public:
 
 	// Reads all inputs, make sure you call it before everything that needs inputs
 	void update(GLFWwindow* window, double dt);
+
+	bool is_active(){ return input != nullptr; }
+
+	void load_from_file(const std::string& path);
+
+	InputContext() { input = nullptr; } 
+	~InputContext();
+
 };
