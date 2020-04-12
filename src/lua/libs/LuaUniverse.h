@@ -9,6 +9,7 @@ struct LuaEventHandler
 	Universe* universe;
 	EventHandler handler;
 	std::string event_id;
+	sol::reference* ref;
 
 	bool signed_up;
 
@@ -16,15 +17,14 @@ struct LuaEventHandler
 	{
 		if(signed_up)
 		{
-			logger->info("Signed out");
 			signed_up = false;
 			universe->drop_out_of_event(event_id, handler);
+			delete ref;
 		}
 	}
 
 	~LuaEventHandler()
 	{
-		logger->info("Destructor called");
 		sign_out();
 	}
 
@@ -39,6 +39,7 @@ struct LuaEventHandler
 		handler = other.handler;
 		event_id = other.event_id;
 		signed_up = other.signed_up;
+		ref = other.ref;
 		other.signed_up = false;
 	}
 
@@ -48,6 +49,7 @@ struct LuaEventHandler
 		handler = other.handler;
 		event_id = other.event_id;
 		signed_up = other.signed_up;
+		ref = other.ref;
 		other.signed_up = false;
 		return *this;
 	}	

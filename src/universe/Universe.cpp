@@ -29,7 +29,6 @@ void Universe::emit_event(const std::string& event_id, EventArguments args)
 
 	for (EventHandler ev : rc)
 	{
-		logger->info("Sending event");
 		ev.fnc(args, ev.user_data);
 	}
 }
@@ -79,6 +78,18 @@ int64_t Universe::get_uid()
 	uid++;
 	return uid;
 }
+
+Entity* Universe::get_entity(int64_t uid)
+{
+	auto it = entities_by_id.find(uid);
+	if(it == entities_by_id.end())
+	{
+		return nullptr;
+	}
+
+	return it->second;
+}
+
 
 Universe::Universe() : system(this)
 {

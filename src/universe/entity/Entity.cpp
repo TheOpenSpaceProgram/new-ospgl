@@ -4,10 +4,10 @@
 #include "entities/BuildingEntity.h"
 
 
-void Entity::setup(Universe* universe)
+void Entity::setup(Universe* universe, int64_t uid)
 {
 	this->universe = universe;
-	this->uid = universe->get_uid();
+	this->uid = uid;
 	init();
 }
 
@@ -15,7 +15,7 @@ Entity::~Entity()
 {
 }
 
-Entity* Entity::load_entity(int64_t uid, std::string type, cpptoml::table& toml)
+Entity* Entity::load_entity(std::string type, cpptoml::table& toml)
 {
 	Entity* n_ent = nullptr;
 

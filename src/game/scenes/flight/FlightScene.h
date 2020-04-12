@@ -8,6 +8,9 @@ class FlightScene : public Scene
 private:
 
 	SimpleCamera camera;
+	Universe* universe;
+	GameState* game_state;
+	
 
 public:
 

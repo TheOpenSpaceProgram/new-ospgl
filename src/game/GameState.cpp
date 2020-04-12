@@ -24,9 +24,11 @@ void GameState::load(const cpptoml::table& from)
 
 	// Load entities
 	int64_t last_uid = *from.get_as<int64_t>("uid");
-	universe.uid = last_uid;
+
 
 	auto entities = from.get_table_array("entity");
+	std::unordered_map<Entity*, int64_t> ent_to_id;
+
 	if (entities)
 	{
 		for (auto entity : *entities)
@@ -38,23 +40,29 @@ void GameState::load(const cpptoml::table& from)
 			}
 			std::string type = *entity->get_as<std::string>("type");
 
-			Entity* n_ent = Entity::load_entity(id, type, *entity);
+			Entity* n_ent = Entity::load_entity(type, *entity);
 			universe.entities.push_back(n_ent);
+
+			ent_to_id[n_ent] = id;
 		}
 	}
 
 	// Init the universe entities (We have added them through special
 	// code)
 
-	std::sort(universe.entities.begin(), universe.entities.end(), [](Entity* a, Entity* b)
-	{
-		return a->get_uid() < b->get_uid();
-	});
-
+	// Init the hashtable
 	for(Entity* ent : universe.entities)
 	{
-		ent->setup(&universe);
+		universe.entities_by_id[ent_to_id[ent]] = ent;
 	}
+
+	// Init the entities
+	for(Entity* ent : universe.entities)
+	{
+		ent->setup(&universe, ent_to_id[ent]);
+	}
+
+	universe.uid = last_uid;
 
 	scene = nullptr;
 	to_delete = nullptr;

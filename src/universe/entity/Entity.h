@@ -70,7 +70,7 @@ public:
 	// or in atmospheric flight
 	virtual bool timewarp_safe() { return true; }
 
-	void setup(Universe* universe);
+	void setup(Universe* universe, int64_t uid);
 
 	inline int64_t get_uid()
 	{
@@ -99,7 +99,7 @@ public:
 	virtual std::string get_type() = 0;
 
 	// Used while loading saves 
-	static Entity* load_entity(int64_t uid, std::string type, cpptoml::table& toml);
+	static Entity* load_entity(std::string type, cpptoml::table& toml);
 
 	virtual ~Entity();
 };

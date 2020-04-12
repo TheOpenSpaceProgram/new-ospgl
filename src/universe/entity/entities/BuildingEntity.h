@@ -36,7 +36,7 @@ public:
 	virtual void deferred_pass(CameraUniforms& cu) override;
 	virtual void shadow_pass(ShadowCamera& cu) override;
 
-	virtual bool needs_deferred_pass() { return true; }
-	virtual bool needs_shadow_pass() { return true; }
+	virtual bool needs_deferred_pass() override { return true; }
+	virtual bool needs_shadow_pass() override { return true; }
 };
 

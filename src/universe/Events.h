@@ -7,12 +7,12 @@ using EventArgument = std::variant<int, double, int64_t, std::string>;
 
 using EventArguments = std::vector<EventArgument>;
 
-typedef void(*EventHandlerFnc)(EventArguments&, void* user_data);
+typedef void(*EventHandlerFnc)(EventArguments&, const void* user_data);
 
 struct EventHandler
 {
 	EventHandlerFnc fnc;
-	void* user_data; 
+	const void* user_data; 
 
 	EventHandler() : fnc(nullptr), user_data(nullptr) {}
 

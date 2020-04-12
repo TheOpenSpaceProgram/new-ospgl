@@ -10,7 +10,7 @@ in_control = "vehicle_0"
 in_focus = "vehicle_0"
 
 system = "debug_system:systems/real.toml"
-uid = 2
+uid = 1
 t = 966772800.0
 
 [[entity]]

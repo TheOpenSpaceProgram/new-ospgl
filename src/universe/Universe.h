@@ -72,6 +72,7 @@ public:
 
 	PlanetarySystem system;
 	std::vector<Entity*> entities;
+	std::unordered_map<int64_t, Entity*> entities_by_id;
 
 	template<typename T, typename... Args> 
 	T* create_entity(Args&&... args);
@@ -79,6 +80,11 @@ public:
 	template<typename T>
 	void remove_entity(T* ent);
 
+	// Returns nullptr if not found
+	Entity* get_entity(int64_t id);
+
+	template<typename T> 
+	T* get_entity_as(int64_t id);
 
 	// Note: This is automatically called from bullet
 	void physics_update(double pdt);
@@ -97,11 +103,15 @@ inline T* Universe::create_entity(Args&&... args)
 
 	T* n_ent = new T(std::forward<Args>(args)...);
 	Entity* as_ent = (Entity*)n_ent;
+
+	int64_t id = get_uid();
+
 	entities.push_back((Entity*)n_ent);
+	entities_by_id[id] =  as_ent;
 
-	emit_event("core:new_entity", n_ent->get_uid());
-
-	as_ent->setup(this);
+	emit_event("core:new_entity", id);
+	
+	as_ent->setup(this, id);
 
 	return n_ent;
 }
@@ -123,6 +133,18 @@ inline void Universe::remove_entity(T* ent)
 
 	emit_event("core:remove_entity", as_ent->get_uid());
 
+	// Remove from entities by id
+	entities_by_id.erase(as_ent->get_uid());
+	
 	// Actually destroy the entity
 	delete ent;
 }
+
+template<typename T>
+inline T* Universe::get_entity_as(int64_t id)
+{
+	static_assert(std::is_base_of<Entity, T>::value, "Entities must inherit from the Entity class");
+	Entity* ent = get_entity(id);
+	return dynamic_cast<T*>(ent);
+}
+

@@ -7,28 +7,29 @@ void LuaUniverse::load_to(sol::table& table)
 	);
 
 	table.new_usertype<Universe>("universe",
-		"sign_up_for_event", [](Universe* self, const std::string& event_id, sol::function* fnc)
+		"sign_up_for_event", [](Universe* self, const std::string& event_id, sol::function fnc)
 		{
 			LuaEventHandler ev = LuaEventHandler();
 
 			ev.event_id = event_id;
 
-			EventHandlerFnc wrapper = [](EventArguments& vec, void* udata)
+			EventHandlerFnc wrapper = [](EventArguments& vec, const void* udata)
 			{
 				// Convert to lua values
-				sol::function& fnc = *(sol::function*)udata;
+				const sol::reference* ref = (sol::reference*)udata;
+				sol::function fnc = (sol::function)(*ref);
 				fnc(sol::as_args(vec));
 			};
 
 			ev.handler = EventHandler();
 			ev.handler.fnc = wrapper;
-			ev.handler.user_data = (void*)fnc;
+			auto ref = new sol::reference(fnc);
+			ev.handler.user_data = (const void*)ref;
 			ev.universe = self;
 			ev.signed_up = true;
-
+			ev.ref = ref;
 			self->sign_up_for_event(event_id, ev.handler);
 
-			logger->info("Signed up for event");
 
 			return std::move(ev);
 		},

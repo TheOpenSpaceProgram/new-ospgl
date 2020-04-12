@@ -2,31 +2,64 @@
 #include <OSP.h>
 #include <universe/Universe.h>
 
+#include <universe/vehicle/Vehicle.h>
+#include <universe/vehicle/VehicleLoader.h>
+#include <universe/entity/entities/VehicleEntity.h>
+#include <universe/entity/entities/BuildingEntity.h>
+
 void FlightScene::load()
 {
-	Universe& universe = get_osp()->game_state.universe;
-
+	game_state = &get_osp()->game_state;
+	universe = &game_state->universe;
+	
 	debug_drawer->debug_enabled = true;
 
 	// Add all entities and system to the renderer
-	get_osp()->renderer->add_drawable(&universe.system);
+	get_osp()->renderer->add_drawable(&universe->system);
 	
-	for(Entity* ent : universe.entities)
+	for(Entity* ent : universe->entities)
 	{
 		get_osp()->renderer->add_drawable(ent);
 	}
 
 	// Sign up for new entities to automatically add them to the renderer
-	universe.sign_up_for_event("core:new_entity", EventHandler([](EventArguments& args, void* self)
+	universe->sign_up_for_event("core:new_entity", EventHandler([](EventArguments& args, const void* self)
 	{
 		FlightScene* self_s = (FlightScene*)self;
+		int64_t id = std::get<int64_t>(args[0]);
+		self_s->get_osp()->renderer->add_drawable(self_s->universe->get_entity(id));	
 
-		logger->info("!");
+	}, this));
+
+	// And automatically remove them when they die
+	universe->sign_up_for_event("core:remove_entity", EventHandler([](EventArguments& args, const void* self)
+	{
+		FlightScene* self_s = (FlightScene*)self;
+		int64_t id = std::get<int64_t>(args[0]);
+		self_s->get_osp()->renderer->remove_drawable(self_s->universe->get_entity(id));
 
 	}, this));
 
 	get_osp()->renderer->cam = &camera;
+	camera.speed = 20.0;
 
+
+	auto vehicle_toml = SerializeUtil::load_file("udata/vehicles/Test Vehicle.toml");
+	Vehicle* n_vehicle = VehicleLoader::load_vehicle(*vehicle_toml);
+
+	get_osp()->game_state.universe.create_entity<VehicleEntity>(n_vehicle);
+
+	WorldState st = WorldState();
+	BuildingEntity* lpad_ent = (BuildingEntity*)get_osp()->game_state.universe.entities[0];
+	WorldState stt = lpad_ent->traj.get_state(0.0, true);
+
+	st.cartesian.pos = stt.cartesian.pos;
+	st.cartesian.vel = stt.cartesian.vel;
+	st.rotation = stt.rotation;
+	st.cartesian.pos += stt.rotation * glm::dvec3(0, 0, 1) * 10.0;
+
+	n_vehicle->packed_veh.set_world_state(st);
+																																							n_vehicle->unpack();
 
 }
 
@@ -37,6 +70,10 @@ void FlightScene::unload()
 
 void FlightScene::update()
 {
+	VehicleEntity* v_ent =  universe->get_entity_as<VehicleEntity>(2);	
+	
+	camera.center = v_ent->vehicle->unpacked_veh.get_center_of_mass(true);
+	
 	camera.update(get_osp()->game_dt);
 
 }
