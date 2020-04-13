@@ -10,7 +10,7 @@
 #include "libs/LuaVehicle.h"
 #include "libs/LuaDebugDrawer.h"
 #include "libs/LuaUniverse.h"
-#include "libs/LuaInput.h"
+#include "libs/LuaFlightInput.h"
 
 
 LuaCore* lua_core;
@@ -108,9 +108,9 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::UNIVERSE;
 	}
-	else if(name == "input")
+	else if(name == "flight_input")
 	{
-		return LibraryID::INPUT;
+		return LibraryID::FLIGHT_INPUT;
 	}
 	else
 	{
@@ -151,7 +151,7 @@ LuaCore::LuaCore()
 	libraries[LibraryID::TOML] = new LuaToml();
 	libraries[LibraryID::VEHICLE] = new LuaVehicle();
 	libraries[LibraryID::UNIVERSE] = new LuaUniverse();
-	libraries[LibraryID::INPUT] =  new LuaInput();
+	libraries[LibraryID::FLIGHT_INPUT] =  new LuaFlightInput();
 }
 
 LuaCore::~LuaCore()

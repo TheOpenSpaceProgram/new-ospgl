@@ -57,4 +57,21 @@ public:
 
 		return result;	
 	}
+
+	// Same as call_function but only does it if function is present
+	template<typename... Args>
+	static sol::safe_function_result call_function_if_present(sol::state& st,
+			const std::string& fname, const std::string& context, Args&&... args)
+	{
+		sol::safe_function fnc = st[fname];
+		if(fnc)
+		{
+			return call_function(st, fname, context, args...);
+		}
+		else
+		{
+			// This makes the error clearer, but may cause a perfomance hit
+			return fnc(std::forward<Args>(args)...);
+		}
+	}
 };

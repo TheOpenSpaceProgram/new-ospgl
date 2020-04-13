@@ -6,8 +6,9 @@ Config* load_config(const std::string& path, const std::string& name, const std:
 
 	Config* cfg = new Config();
 	cfg->root = SerializeUtil::load_file(path);
-	cfg->path = path;
-	cfg->in_package = pkg;
+	cfg->path = name;
+	cfg->pkg = pkg;
+	cfg->real_path = path;
 
 	return cfg;
 }

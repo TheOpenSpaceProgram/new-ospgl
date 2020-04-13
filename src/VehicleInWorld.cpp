@@ -19,6 +19,8 @@
 
 #include <util/fmt/glm.h>
 
+#include <game/input/JoystickDebug.h>
+
 int main(int argc, char** argv)
 {
 	OSP osp = OSP();
@@ -40,6 +42,8 @@ int main(int argc, char** argv)
 
 			osp.update();
 			
+			JoystickDebug::do_imgui();
+
 			osp.render();
 			osp.finish_frame();
 		}

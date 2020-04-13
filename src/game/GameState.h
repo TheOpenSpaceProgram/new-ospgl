@@ -2,7 +2,6 @@
 #include <universe/Universe.h>
 #include <util/SerializeUtil.h>
 #include "universe/Date.h"
-#include "input/Input.h"
 #include "scenes/Scene.h"
 
 class OSP;

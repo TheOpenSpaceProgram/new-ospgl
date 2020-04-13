@@ -21,7 +21,6 @@ private:
 
 
 
-	sol::state lua_state;
 	Part* in_part;
 	bool is_defining_ports;
 
@@ -40,6 +39,7 @@ private:
 
 public:
 
+	sol::state lua_state;
 
 	std::shared_ptr<cpptoml::table> init_toml;
 

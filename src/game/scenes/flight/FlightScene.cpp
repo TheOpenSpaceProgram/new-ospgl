@@ -59,8 +59,16 @@ void FlightScene::load()
 	st.cartesian.pos += stt.rotation * glm::dvec3(0, 0, 1) * 10.0;
 
 	n_vehicle->packed_veh.set_world_state(st);
-																																							n_vehicle->unpack();
+	n_vehicle->unpack();
 
+	// Pass control to the capsule (root)
+	Machine* capsule = n_vehicle->root->part->get_machine("capsule");	
+	auto result = LuaUtil::call_function_if_present(capsule->lua_state, "get_input_context", "Flight Scene obtain input context");
+	if(result.valid())
+	{
+		logger->info("?");
+		input.set_ctx(result.get<InputContext*>());		
+	}	
 }
 
 void FlightScene::unload()
@@ -70,6 +78,8 @@ void FlightScene::unload()
 
 void FlightScene::update()
 {
+	input.update(get_osp()->renderer->window, get_osp()->game_dt);
+
 	VehicleEntity* v_ent =  universe->get_entity_as<VehicleEntity>(2);	
 	
 	camera.center = v_ent->vehicle->unpacked_veh.get_center_of_mass(true);

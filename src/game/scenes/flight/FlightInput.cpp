@@ -1,8 +1,8 @@
-#include "Input.h"
+#include "FlightInput.h"
 
 
 
-void Input::set_ctx(InputContext* ctx)
+void FlightInput::set_ctx(InputContext* ctx)
 {
 	if(cur_ctx != nullptr)
 	{
@@ -13,7 +13,7 @@ void Input::set_ctx(InputContext* ctx)
 	cur_ctx->input = this;
 }
 
-void Input::update(GLFWwindow* window, double dt)
+void FlightInput::update(GLFWwindow* window, double dt)
 {
 	if(cur_ctx != nullptr)
 	{

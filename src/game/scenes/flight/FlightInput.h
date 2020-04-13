@@ -11,7 +11,8 @@
 // get_input_context which returns the context to use so the user can select which machine
 // to control
 //
-class Input
+// This is only used in the Flight scene (it controls machines)
+class FlightInput
 {
 private:
 

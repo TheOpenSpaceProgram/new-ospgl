@@ -2,6 +2,8 @@
 #include "../Scene.h"
 #include <universe/Universe.h>
 #include <renderer/camera/SimpleCamera.h>
+#include "FlightInput.h"
+
 
 class FlightScene : public Scene
 {
@@ -13,6 +15,8 @@ private:
 	
 
 public:
+
+	FlightInput input;
 
 	virtual void load() override;
 	virtual void update() override;

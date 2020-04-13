@@ -8,8 +8,10 @@ class Config
 private:
 
 public:
+	// Full resolved path to the config
+	std::string real_path;
 	std::string path;
-	std::string in_package;
+	std::string pkg;
 
 	std::shared_ptr<cpptoml::table> root;
 
@@ -27,7 +29,7 @@ inline void Config::read_to(T& target, const std::string& sub_path)
 {
 	std::string old_pkg = assets->get_current_package();
 
-	assets->set_current_package(in_package);
+	assets->set_current_package(pkg);
 	SerializeUtil::read_to(*root, target, sub_path);
 	assets->set_current_package(old_pkg);
 }

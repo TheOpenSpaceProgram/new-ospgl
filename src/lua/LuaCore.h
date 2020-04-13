@@ -36,7 +36,7 @@ public:
 		TOML,			// LuaToml
 		VEHICLE,		// LuaVehicle (Vehicle, Part, Piece, Machine)
 		UNIVERSE,		// LuaUniverse (Events, entity creation...)
-		INPUT,			// LuaInput (InputContext)
+		FLIGHT_INPUT,	// LuaFlightInput (InputContext)
 		COUNT,
 	};
 

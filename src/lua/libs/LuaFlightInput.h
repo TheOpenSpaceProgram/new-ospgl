@@ -1,7 +1,7 @@
 #pragma once
 #include "../LuaLib.h"
 
-class LuaInput : public LuaLib
+class LuaFlightInput : public LuaLib
 {
 public:
 
