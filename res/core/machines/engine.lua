@@ -33,7 +33,7 @@ function update(dt)
 	if f_thrust > 0 then
 
 		local p_root = part:get_piece("p_root")
-		-- Direction is on world coordinates
+		-- Direction is on world coordinates, the nozzle indicates "fire" direction, not thrust direction
 		local rdir = -p_root:transform_axis(nozzle_dir)
 		-- Position is relative to the center of mass of the rigidbody
 		local rpos = p_root:transform_point_to_rigidbody(nozzle_pos)
@@ -45,6 +45,7 @@ function update(dt)
 		debug_drawer.add_cone(fpos, fpos - rdir * 10.0 * throttle, 0.5, glm.vec3.new(1.0, 1.0, 0.0))
 
 	end
+	
 
 end
 	

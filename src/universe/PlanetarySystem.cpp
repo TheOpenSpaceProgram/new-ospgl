@@ -181,6 +181,7 @@ void PlanetarySystem::render_body_atmosphere(CartesianState state, SystemElement
 	}
 }
 
+
 #include "../util/InputUtil.h"
 
 static double zoom = 1.0;

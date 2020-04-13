@@ -40,6 +40,10 @@ void LuaVehicle::load_to(sol::table& table)
 		{
 			return to_dvec3(self.get_global_transform().getOrigin());
 		},
+		"get_graphics_position", [](Piece& self)
+		{
+			return to_dvec3(self.get_graphics_transform().getOrigin());
+		},
 		"get_forward", &Piece::get_forward,
 		"get_up", &Piece::get_up,
 		"get_right", &Piece::get_right,

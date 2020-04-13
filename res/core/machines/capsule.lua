@@ -32,7 +32,7 @@ function update(dt)
 
 	-- Axis goes from -1 to 1
 	local in_throttle = (input_ctx:get_axis("throttle") + 1.0) * 0.5
-	logger.info("Throttle set to: " .. in_throttle)
+	--logger.info("Throttle set to: " .. in_throttle)
 	machine:write_to_port("Throttle", in_throttle)
 
 	t = t + dt

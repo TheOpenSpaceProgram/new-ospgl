@@ -9,6 +9,20 @@
 #include "btBulletCollisionCommon.h"
 #pragma warning(pop)
 
+inline glm::dmat4 aiMatrix4x4ToGlm(const aiMatrix4x4* from)
+{
+    glm::dmat4 to;
+
+
+    to[0][0] = (double)from->a1; to[0][1] = (double)from->b1;  to[0][2] = (double)from->c1; to[0][3] = (double)from->d1;
+    to[1][0] = (double)from->a2; to[1][1] = (double)from->b2;  to[1][2] = (double)from->c2; to[1][3] = (double)from->d2;
+    to[2][0] = (double)from->a3; to[2][1] = (double)from->b3;  to[2][2] = (double)from->c3; to[2][3] = (double)from->d3;
+    to[3][0] = (double)from->a4; to[3][1] = (double)from->b4;  to[3][2] = (double)from->c4; to[3][3] = (double)from->d4;
+
+    return to;
+}
+
+
 void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool drawable_parent)
 {
 	Node* n_node = new Node();
@@ -31,15 +45,8 @@ void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool draw
 		}
 	}
 
-	aiVector3D scaling, pos;
-	aiQuaternion rot;
-	node->mTransformation.Decompose(scaling, rot, pos);
+	n_node->sub_transform = aiMatrix4x4ToGlm(&node->mTransformation);
 
-	n_node->sub_transform = glm::dmat4(1.0);
-	n_node->sub_transform = glm::translate(n_node->sub_transform, glm::dvec3(pos.x, pos.y, pos.z));
-	n_node->sub_transform = glm::scale(n_node->sub_transform, glm::dvec3(scaling.x, scaling.y, scaling.z));
-	n_node->sub_transform = n_node->sub_transform * glm::toMat4(glm::dquat(rot.w, rot.x, rot.y, rot.z));
-	
 	n_node->name = node->mName.C_Str();
 
 	logger->check(node_by_name.find(n_node->name) == node_by_name.end(), "We don't support non-unique node names");
@@ -622,7 +629,7 @@ void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, bool ignore_ou
 	}
 	else
 	{
-		n_model = sub_transform * model;
+		n_model = model * sub_transform; //< Transformations apply in reverse
 	}
 
 	draw_all_meshes(uniforms, n_model);
