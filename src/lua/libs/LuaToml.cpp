@@ -82,6 +82,14 @@ void LuaToml::load_to(sol::table& table)
 				return def_val;
 			}
 		},
+		"get_array_of_string", [](table_ptr self, const std::string& key)
+		{
+			return sol::as_table(*self->get_array_of<std::string>(key));	
+		},
+		"get_array_of_number", [](table_ptr self, const std::string& key)
+		{
+			return sol::as_table(*self->get_array_of<double>(key));
+		},
 		"erase", [](table_ptr self, const std::string& key)
 		{
 			self->erase(key);	

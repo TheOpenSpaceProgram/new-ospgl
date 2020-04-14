@@ -51,7 +51,7 @@ void Logger::log(int level, const char* format, fmt::format_args args)
 		flushCounter = 0;
 	}
 
-	onLog();
+	onLog(level >= 2);
 
 	if (level == 4)
 	{
@@ -78,11 +78,11 @@ void Logger::check_important(bool condition, const char * text, bool ftal)
 	}
 }
 
-void Logger::onLog()
+void Logger::onLog(bool important)
 {
 	flushCounter--;
 
-	if (flushCounter <= 0)
+	if (flushCounter <= 0 || important)
 	{
 		std::ofstream outfile;
 

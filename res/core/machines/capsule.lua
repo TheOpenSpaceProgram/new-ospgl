@@ -14,13 +14,16 @@ end
 
 function define_ports()
 	machine:add_output_port("Throttle", "number")
-
+	machine:add_output_port("Pitch", "number")
+	machine:add_output_port("Yaw", "number")
+	machine:add_output_port("Roll", "number")
 end
 
 local t = 0.0
 
 
-function update(dt)
+-- pre_update is used because we manage inputs
+function pre_update(dt)
 
 	if input_ctx:get_action_down("cut_throttle") then 
 		input_ctx:set_axis("throttle", -1.0, 0.0)
@@ -30,10 +33,13 @@ function update(dt)
 		input_ctx:set_axis("throttle", 1.0, 0.0)
 	end
 
-	-- Axis goes from -1 to 1
+	-- Axis goes from -1 to 1, we need to go from 0 to 1
 	local in_throttle = (input_ctx:get_axis("throttle") + 1.0) * 0.5
-	--logger.info("Throttle set to: " .. in_throttle)
 	machine:write_to_port("Throttle", in_throttle)
+
+	machine:write_to_port("Pitch", input_ctx:get_axis("pitch"))
+	machine:write_to_port("Yaw", input_ctx:get_axis("yaw"))
+	machine:write_to_port("Roll", input_ctx:get_axis("roll"))
 
 	t = t + dt
 end

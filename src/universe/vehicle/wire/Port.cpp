@@ -32,7 +32,7 @@ void PortValue::call_lua(sol::safe_function& func, Port* port)
 {
 	if (type == NUMBER)
 	{
-		func(port, as_number);
+		func(port->name, as_number);
 	}
 }
 
@@ -45,6 +45,8 @@ PortValue::PortValue(double v)
 
 void Port::receive(PortValue& val)
 {
+	blocked = true;
+
 	// This should really never happen
 	logger->check(!is_output, "Received on an output port");
 

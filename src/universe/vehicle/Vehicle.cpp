@@ -29,16 +29,22 @@ void Vehicle::pack()
 
 void Vehicle::update(double dt)
 {
-	for(Part* part : parts)
-	{
-		part->update(dt);
-	}
-
 	// Clear blocked ports
 	for (Port* p : all_ports)
 	{
 		p->blocked = false;
 	}
+
+	for(Part* part : parts)
+	{
+		part->pre_update(dt);
+	}
+
+	for(Part* part : parts)
+	{
+		part->update(dt);
+	}
+
 }
 
 std::vector<Vehicle*> Vehicle::physics_update(double dt)

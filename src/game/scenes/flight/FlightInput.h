@@ -20,7 +20,10 @@ private:
 
 public:
 
+	bool keyboard_blocked = false;
+
 	void set_ctx(InputContext* ctx);
 
 	void update(GLFWwindow* window, double dt);
+
 };

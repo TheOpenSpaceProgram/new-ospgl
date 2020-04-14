@@ -58,7 +58,7 @@ public:
 	// Checks even on Release mode
 	void check_important(bool condition, const char* text = "", bool fatal = true);
 
-	void onLog();
+	void onLog(bool important = false);
 
 	Logger();
 	~Logger();

@@ -45,7 +45,23 @@ function update(dt)
 		debug_drawer.add_cone(fpos, fpos - rdir * 10.0 * throttle, 0.5, glm.vec3.new(1.0, 1.0, 0.0))
 
 	end
-	
 
 end
-	
+
+-- Implement the functions required for a generic engine
+
+function engine_get_max_thrust()
+	return thrust
+end
+
+-- World coordinates, direction of fire, not force
+function engine_get_nozzle_dir()
+	local p_root = part:get_piece("p_root")
+	return p_root:transform_axis(nozzle_dir)
+end 
+
+-- World coordinates
+function engine_get_nozzle_pos() 
+	local p_root = part:get_piece("p_root")
+	return glm.vec3.new(p_root:get_global_transform():to_mat4() * glm.vec4.new(nozzle_pos, 1.0))
+end 

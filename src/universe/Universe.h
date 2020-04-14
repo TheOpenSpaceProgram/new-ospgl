@@ -50,6 +50,9 @@ private:
 
 public:
 
+	// Should updates run?
+	bool paused;
+
 	friend class Entity;
 	friend class GameState;
 

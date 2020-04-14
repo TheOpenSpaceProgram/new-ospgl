@@ -60,16 +60,18 @@ void Universe::physics_update(double pdt)
 
 void Universe::update(double dt)
 {
-	system.update(dt, bt_world, false);
-
-	bt_world->stepSimulation(dt, MAX_PHYSICS_STEPS, btScalar(PHYSICS_STEPSIZE));
-
-	for (Entity* e : entities)
+	if(!paused)
 	{
-		e->update(dt);
+		system.update(dt, bt_world, false);
+
+		bt_world->stepSimulation(dt, MAX_PHYSICS_STEPS, btScalar(PHYSICS_STEPSIZE));
+
+		for (Entity* e : entities)
+		{
+			e->update(dt);
+		}
 	}
 
-	//bt_world->debugDrawWorld();
 }
 
 int64_t Universe::get_uid()
@@ -94,6 +96,7 @@ Entity* Universe::get_entity(int64_t uid)
 Universe::Universe() : system(this)
 {
 	uid = 0;
+	paused = false;
 
 	bt_collision_config = new btDefaultCollisionConfiguration();
 	bt_dispatcher = new btCollisionDispatcher(bt_collision_config);

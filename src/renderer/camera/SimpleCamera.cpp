@@ -4,60 +4,64 @@
 
 void SimpleCamera::update(double dt)
 {
+	keyboard_blocked = false;
+
 	if (!ImGui::IsAnyItemFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsAnyWindowFocused())
 	{
 		bool moved = false;
-
 		// Motion
-		if (glfwGetKey(input->window, GLFW_KEY_W) == GLFW_PRESS)
-		{
-			forwards(dt);
-			moved = true;
-		}
-
-		if (glfwGetKey(input->window, GLFW_KEY_S) == GLFW_PRESS)
-		{
-			backwards(dt);
-			moved = true;
-		}
-
-		if (glfwGetKey(input->window, GLFW_KEY_A) == GLFW_PRESS)
-		{
-			leftwards(dt);
-			moved = true;
-		}
-
-		if (glfwGetKey(input->window, GLFW_KEY_D) == GLFW_PRESS)
-		{
-			rightwards(dt);
-			moved = true;
-		}
-
-		if (glfwGetKey(input->window, GLFW_KEY_R) == GLFW_PRESS)
-		{
-			upwards(dt);
-			moved = true;
-		}
-
-		if (glfwGetKey(input->window, GLFW_KEY_F) == GLFW_PRESS)
-		{
-			downwards(dt);
-			moved = true;
-		}
-
-		if (glfwGetKey(input->window, GLFW_KEY_Q) == GLFW_PRESS)
-		{
-			tilt(dt, -1.0f);
-		}
-
-		if (glfwGetKey(input->window, GLFW_KEY_E) == GLFW_PRESS)
-		{
-			tilt(dt, 1.0f);
-		}
 
 
 		if (glfwGetMouseButton(input->window, GLFW_MOUSE_BUTTON_2))
 		{
+			keyboard_blocked = true;
+
+			if (glfwGetKey(input->window, GLFW_KEY_W) == GLFW_PRESS)
+			{
+				forwards(dt);
+				moved = true;
+			}
+
+			if (glfwGetKey(input->window, GLFW_KEY_S) == GLFW_PRESS)
+			{
+				backwards(dt);
+				moved = true;
+			}
+
+			if (glfwGetKey(input->window, GLFW_KEY_A) == GLFW_PRESS)
+			{
+				leftwards(dt);
+				moved = true;
+			}
+
+			if (glfwGetKey(input->window, GLFW_KEY_D) == GLFW_PRESS)
+			{
+				rightwards(dt);
+				moved = true;
+			}
+
+			if (glfwGetKey(input->window, GLFW_KEY_R) == GLFW_PRESS)
+			{
+				upwards(dt);
+				moved = true;
+			}
+
+			if (glfwGetKey(input->window, GLFW_KEY_F) == GLFW_PRESS)
+			{
+				downwards(dt);
+				moved = true;
+			}
+
+			if (glfwGetKey(input->window, GLFW_KEY_Q) == GLFW_PRESS)
+			{
+				tilt(dt, -1.0f);
+			}
+
+			if (glfwGetKey(input->window, GLFW_KEY_E) == GLFW_PRESS)
+			{
+				tilt(dt, 1.0f);
+			}
+			
 			glfwSetInputMode(input->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			if (input->mouse_delta != glm::dvec2(0.0, 0.0))
 			{
@@ -77,6 +81,7 @@ void SimpleCamera::update(double dt)
 	}
 	else
 	{
+		keyboard_blocked = true;
 		glfwSetInputMode(input->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 }

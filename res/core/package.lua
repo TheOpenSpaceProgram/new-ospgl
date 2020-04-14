@@ -1,4 +1,3 @@
-print("Pre-init");
 
 function load() 
 		

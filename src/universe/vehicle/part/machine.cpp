@@ -25,9 +25,14 @@ Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg)
 
 }
 
+void Machine::pre_update(double dt)
+{
+	LuaUtil::call_function_if_present(lua_state, "pre_update", "machine pre_update", dt);
+}
+
 void Machine::update(double dt)
 {
-	LuaUtil::call_function(lua_state, "update", "machine update", dt);
+	LuaUtil::call_function_if_present(lua_state, "update", "machine update", dt);
 }
 
 void Machine::init(Part* in_part, Universe* in_universe)
@@ -36,7 +41,10 @@ void Machine::init(Part* in_part, Universe* in_universe)
 	lua_state["universe"] = in_universe;
 	lua_state["vehicle"] = in_part->vehicle;
 
-	this->in_part = in_part;	
+	this->in_part = in_part;
+
+	LuaUtil::call_function_if_present(lua_state, "init", "machine init");
+	
 }
 
 void Machine::define_ports()
@@ -48,7 +56,7 @@ void Machine::define_ports()
 	while(new_ports.size() > 0)
 	{
 		// We pop from the front until the array is empty
-		PortDefinition port_def = new_ports.front();
+		PortDefinition port_def = new_ports.back();
 		new_ports.pop_back();
 
 		bool found = false;
@@ -232,6 +240,22 @@ PortResult Machine::write_to_port(const std::string& name, PortValue val)
 	
 
 	return out;
+}
+
+bool Machine::all_inputs_ready()
+{
+	for(size_t i = 0; i < ports.size(); i++)
+	{
+		if(!ports[i]->is_output)
+		{
+			if(ports[i]->blocked == false)
+			{
+				return false;
+			}
+		}
+	}	
+
+	return true;
 }
 
 

@@ -25,6 +25,14 @@ Part::Part(AssetHandle<PartPrototype>& part_proto, cpptoml::table& our_table)
 	}
 }
 
+void Part::pre_update(double dt)
+{
+	for(auto& machine_pair : machines)
+	{
+		machine_pair.second->pre_update(dt);
+	}
+}
+
 void Part::update(double dt)
 {
 	for(auto& machine_pair : machines)
@@ -32,6 +40,7 @@ void Part::update(double dt)
 		machine_pair.second->update(dt);
 	}
 }
+
 
 void Part::init(Universe* in_universe, Vehicle* in_vehicle)
 {

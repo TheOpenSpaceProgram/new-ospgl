@@ -173,12 +173,15 @@ void InputContext::update(GLFWwindow* window, double dt)
 		actions_previous[pair.first] = pair.second;
 		actions[pair.first] = false;
 	}
-		
-	for(auto& map : key_action_mappings)
-	{
-		if(glfwGetKey(window, map.key) == GLFW_PRESS)
+	
+	if(!input->keyboard_blocked)
+	{	
+		for(auto& map : key_action_mappings)
 		{
-			actions[map.to_action] = true;
+			if(glfwGetKey(window, map.key) == GLFW_PRESS)
+			{
+				actions[map.to_action] = true;
+			}
 		}
 	}
 
@@ -208,14 +211,17 @@ void InputContext::update(GLFWwindow* window, double dt)
 		// Update current value
 		double change = 0.0;
 
-		if(glfwGetKey(window, map.plus_key) == GLFW_PRESS)
+		if(!input->keyboard_blocked)
 		{
-			change += 1.0;
-		}
+			if(glfwGetKey(window, map.plus_key) == GLFW_PRESS)
+			{
+				change += 1.0;
+			}
 
-		if(glfwGetKey(window, map.minus_key) == GLFW_PRESS)
-		{
-			change -= 1.0;
+			if(glfwGetKey(window, map.minus_key) == GLFW_PRESS)
+			{
+				change -= 1.0;
+			}
 		}
 
 		change *= map.speed;
@@ -224,9 +230,26 @@ void InputContext::update(GLFWwindow* window, double dt)
 		if(change == 0.0)
 		{
 			// Attenuation
+			double sign = glm::sign(map.origin - map.cur_value);
+			
+			double next = map.cur_value + sign * map.attenuation * dt;
+			double nsign = glm::sign(map.origin - next);
+
+			if(nsign != sign)
+			{
+				// Overshoot
+				map.cur_value = map.origin;
+			}
+			else
+			{
+				map.cur_value = next;
+			}
+		}
+		else
+		{
+			map.cur_value += change * dt;
 		}
 
-		map.cur_value += change * dt;
 		if(map.cur_value > 1.0)
 		{
 			map.cur_value = 1.0;

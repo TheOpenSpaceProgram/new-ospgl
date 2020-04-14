@@ -15,6 +15,8 @@ public:
 
 	constexpr static double NEAR_PLANE = 1e-6;
 
+	bool keyboard_blocked;
+
 	// In degrees
 	double fov;
 

@@ -84,9 +84,10 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 			n_marker.rotation = orient;
 			n_marker.forward = glm::dvec3(glm::dvec4(0.0, 0.0, 1.0, 0.0) * glm::toMat4(orient));
 
-			logger->info("Maker {} has quaternion  {} {} {} {} and forward {} {} {}",
+			/*logger->info("Maker {} has quaternion  {} {} {} {} and forward {} {} {}",
 					child->name, orient.w, orient.x, orient.y, orient.z, 
 					n_marker.forward.x, n_marker.forward.y, n_marker.forward.z); 
+			*/
 			
 			proto.markers[child->name] = n_marker;
 		}

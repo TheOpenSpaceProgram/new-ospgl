@@ -46,13 +46,18 @@ private:
 	Framebuffer* fbuffer;
 	GBuffer* gbuffer;
 
+	// Real size of the window
 	int width, height;
+	// Size of the scaled rendering (may be less than 100%)
 	int swidth, sheight;
+	// Size of the current scaled viewport, including override_viewport
+	int rswidth, rsheight;
 	float scale;
 
 	bool doing_forward;
 	bool doing_deferred;
 
+	glm::ivec4 viewport;
 
 	// Setups OpenGL to draw to the gbuffer
 	void prepare_deferred();
@@ -81,6 +86,12 @@ private:
 
 public:
 
+	// If values are positive, it will apply a glViewport
+	// to forward and deferred (GUI is always full) adjusted
+	// for these coeficitents
+	// You should specify a rectangle, (x,y) being min and (z,w) max
+	glm::dvec4 override_viewport;
+	
 	// NanoVG is used to draw GUIs in a similar way to ImGui
 	// but for final GUIs (not debug interfaces)
 	NVGcontext* vg;
@@ -114,10 +125,11 @@ public:
 	void add_light(Light* light);
 	void remove_light(Light* light);
 
-	int get_width();
-	int get_height();
+	int get_width(bool gui = false);
+	int get_height(bool gui = false);
 
-	glm::ivec2 get_size();
+	glm::ivec2 get_size(bool gui = false);
+
 
 	// Initializes OpenGL. Don't forget to set the camera afterwards
 	Renderer(cpptoml::table& settings);

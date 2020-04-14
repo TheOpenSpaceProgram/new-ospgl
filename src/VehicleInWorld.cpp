@@ -16,6 +16,7 @@
 
 #include "universe/vehicle/VehicleLoader.h"
 #include "game/scenes/flight/FlightScene.h"
+#include "game/scenes/editor/EditorScene.h"
 
 #include <util/fmt/glm.h>
 
@@ -29,7 +30,7 @@ int main(int argc, char** argv)
 	SerializeUtil::read_file_to("udata/saves/debug-save/save.toml", osp.game_state);
 
 
-	osp.game_state.load_scene(new FlightScene());
+	osp.game_state.load_scene(new EditorScene());
 
 	{
 
@@ -42,8 +43,6 @@ int main(int argc, char** argv)
 
 			osp.update();
 			
-			JoystickDebug::do_imgui();
-
 			osp.render();
 			osp.finish_frame();
 		}

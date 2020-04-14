@@ -8,10 +8,34 @@ piece_id = 4
 	from = 1
 	fmachine = "capsule"
 	fport = "Throttle"
-	to = 4
-	tmachine = "rcs_0nx"
+	to = 2
+	tmachine = "main_engine"
 	tport = "Throttle"
+
+[[wire]]
+	from = 1
+	fmachine = "capsule"
+	fport = "Roll"
+	to = 4
+	tmachine = "rcs_controller"
+	tport = "Roll"
 	
+[[wire]]
+	from = 1
+	fmachine = "capsule"
+	fport = "Yaw"
+	to = 4
+	tmachine = "rcs_controller"
+	tport = "Yaw"
+
+[[wire]]
+	from = 1
+	fmachine = "capsule"
+	fport = "Pitch"
+	to = 4
+	tmachine = "rcs_controller"
+	tport = "Pitch"
+
 [[part]]	
 	id = 1
 	proto = "test_parts:parts/capsule/part_capsule.toml"

@@ -70,7 +70,7 @@ void Renderer::prepare_deferred()
 
 		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer->g_buffer);
 
-		glViewport(0, 0, swidth, sheight);
+		glViewport(viewport.x, viewport.y, viewport.z, viewport.w);
 		doing_deferred = true;
 		doing_forward = false;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -122,7 +122,7 @@ void Renderer::prepare_forward(CameraUniforms& cu)
 	{
 
 		glBindFramebuffer(GL_FRAMEBUFFER, fbuffer->fbuffer);
-		glViewport(0, 0, swidth, sheight);
+		glViewport(viewport.x, viewport.y, viewport.z, viewport.w);
 		glClear(GL_COLOR_BUFFER_BIT); //< Don't clear the depth buffer!
 
 		doing_deferred = false;
@@ -206,9 +206,37 @@ void Renderer::finish()
 
 void Renderer::render(PlanetarySystem* system)
 {
+	if(!cam)
+	{
+		logger->warn("No camera attached to renderer"); 
+		return;
+	}
+
+	// Calculate viewport and widths
+	if(override_viewport.x >= 0.0)
+	{
+		double xdiff = override_viewport.z - override_viewport.x;
+		double ydiff = override_viewport.w - override_viewport.y;
+		
+		rswidth = (int)(swidth * xdiff);
+		rsheight = (int)(sheight * ydiff);
+	
+		int x0 = (int)(swidth * override_viewport.x);
+		int y0 = (int)(sheight * override_viewport.y);
+
+		viewport = glm::ivec4(x0, y0, rswidth, rsheight);	
+	}
+	else
+	{
+		// Fullscreen
+		rswidth = swidth;
+		rsheight = sheight;
+		viewport = glm::ivec4(0, 0, swidth, sheight);
+	}
+
 	prepare_deferred();
 
-	CameraUniforms c_uniforms = cam->get_camera_uniforms(swidth, sheight);
+	CameraUniforms c_uniforms = cam->get_camera_uniforms(rswidth, rsheight);
 
 	if (render_enabled)
 	{
@@ -365,21 +393,26 @@ void Renderer::remove_light(Light* light)
 	}
 }
 
-int Renderer::get_width()
+int Renderer::get_width(bool gui)
 {
-	return get_size().x;
+	return get_size(gui).x;
 }
 
-int Renderer::get_height()
+int Renderer::get_height(bool gui)
 {
-	return get_size().y;
+	return get_size(gui).y;
 }
 
-glm::ivec2 Renderer::get_size()
+glm::ivec2 Renderer::get_size(bool gui)
 {
+	if(gui)
+	{
+		return glm::dvec2(width, height);
+	}
+
 	if (doing_forward || doing_deferred)
 	{
-		return glm::dvec2(swidth, sheight);
+		return glm::dvec2(rswidth, rsheight);
 	}
 	else
 	{
@@ -415,6 +448,10 @@ static void open_gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum
 
 Renderer::Renderer(cpptoml::table& settings)
 {
+	cam = nullptr;
+
+	override_viewport = glm::dvec4(-1.0, -1.0, -1.0, -1.0);
+
 	render_enabled = true;
 	gbuffer = nullptr;
 	fbuffer = nullptr;

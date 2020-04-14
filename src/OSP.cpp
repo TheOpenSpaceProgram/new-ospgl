@@ -178,6 +178,7 @@ void OSP::finish()
 	destroy_global_debug_drawer();
 	delete renderer;
 	destroy_global_asset_manager();	
+	destroy_global_logger();
 }
 
 bool OSP::should_loop()

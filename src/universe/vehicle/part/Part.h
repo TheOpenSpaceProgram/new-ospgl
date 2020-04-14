@@ -22,6 +22,7 @@ public:
 	// When a piece goes missing, it turns to null, but the map entry stays
 	std::unordered_map<std::string, Piece*> pieces;
 
+	void pre_update(double dt);
 	void update(double dt);
 
 	void init(Universe* in_universe, Vehicle* in_vehicle);

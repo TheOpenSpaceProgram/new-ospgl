@@ -48,6 +48,9 @@ class Port
 
 public:
 
+	// On both, on output ports it's used for blocking writing, 
+	// on receiving ports it's used for handling written to ports
+	// (Zero-latency input)
 	bool blocked;
 
 

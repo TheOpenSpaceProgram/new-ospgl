@@ -56,18 +56,29 @@ void LuaVehicle::load_to(sol::table& table)
 		"transform_point_to_rigidbody", &Piece::transform_point_to_rigidbody);
 
 	table.new_usertype<Part>("part",
-		"get_piece", &Part::get_piece);
+		"get_piece", &Part::get_piece,
+		"get_machine", &Part::get_machine);
 
 	table.new_usertype<Machine>("machine",
 		"init_toml", &Machine::init_toml,
 		"add_output_port", &Machine::add_output_port,
 		"add_input_port", &Machine::add_input_port,
 		"write_to_port", sol::overload(
-			[](Machine& self, const std::string& name, double v)
-			{
-				self.write_to_port(name, PortValue(v));
-			}
-		)
+		[](Machine& self, const std::string& name, double v)
+		{
+			self.write_to_port(name, PortValue(v));
+		}),
+
+		"all_inputs_ready", &Machine::all_inputs_ready,
+		// TODO: Maybe there is a more efficient way to handle this?
+		"call", [](Machine& self, const std::string& fname, sol::variadic_args args)
+		{
+			auto result = LuaUtil::safe_call_function(self.lua_state, fname, "machine->machine call", args);	
+			// safe_call_function only returns valid results so
+			sol::reference as_ref = result;
+			return as_ref;
+		}
+		
 	);
 
 	table.new_usertype<PortResult>("port_result",

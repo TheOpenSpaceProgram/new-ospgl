@@ -26,10 +26,45 @@ config = "core_rocket.toml"
 		type = "key"
 		key = 88			# X
 
-
 [[input]]
 	type = "action"
 	name = "full_throttle"
 	[[input.mapping]]
 		type = "key"
 		key = 90			# Z
+
+[[input]]
+	type = "axis"
+	name = "pitch"
+	[[input.mapping]]
+		type = "key"
+		up = 87				# W
+		down = 83			# S
+		speed = 2.0
+		attenuation = 2.0
+		origin = 0.0
+	
+
+[[input]]
+	type = "axis"
+	name = "yaw"
+	[[input.mapping]]
+		type = "key"
+		up = 65				# W
+		down = 68			# S
+		speed = 2.0
+		attenuation = 2.0
+		origin = 0.0
+	
+[[input]]
+	type = "axis"
+	name = "roll"
+	[[input.mapping]]
+		type = "key"
+		up = 81				# Q
+		down = 69			# E
+		speed = 2.0
+		attenuation = 2.0
+		origin = 0.0
+
+

@@ -48,8 +48,9 @@ public:
 	// the port set value callback
 	std::unordered_map<std::string, Port*> outputs;
 
+	// pre_update is mostly used for input
+	void pre_update(double dt);
 	void update(double dt);
-	//void wire_receive(std::string wire_id, );
 
 	void init(Part* in_part, Universe* in_universe);
 
@@ -68,6 +69,11 @@ public:
 	Port* get_input_port(const std::string& name);
 	Port* get_output_port(const std::string& name);
 
+	// Returns true once all input ports have received a value
+	// (Disconnected ports act like if they have no value!)
+	bool all_inputs_ready();
+
 	PortResult write_to_port(const std::string& name, PortValue val);
+
 };
 
