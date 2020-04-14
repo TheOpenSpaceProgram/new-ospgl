@@ -40,8 +40,8 @@ EditorGUI::EditorGUI()
 
 	GUICanvas* sub = def_panel.divide_v(0.5f);
 	sub->divide_v(0.5f);
-	def_panel.child_1->divide_v(0.5f);
-
+	GUICanvas* subsub = def_panel.child_1->divide_v(0.5f);
+	subsub->divide_h(0.5f);
 
 }
 
