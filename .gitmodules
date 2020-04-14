@@ -7,12 +7,12 @@
 [submodule "dep/LuaJIT-cmake"]
 	path = dep/LuaJIT-cmake
 	url = https://github.com/Titaniumtown/LuaJIT-cmake.git
-[submodule "dep/assimp"]
-	path = dep/assimp
-	url = https://github.com/TheOpenSpaceProgram/ospgl-assimp.git
 [submodule "dep/osp"]
 	path = dep/osp
 	url = https://github.com/TheOpenSpaceProgram/osp.git
 [submodule "dep/glfw"]
 	path = dep/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "dep/ospgl-assimp"]
+	path = dep/ospgl-assimp
+	url = https://github.com/TheOpenSpaceProgram/ospgl-assimp.git

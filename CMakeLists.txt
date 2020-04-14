@@ -41,7 +41,7 @@ else()
 endif()
 
 include_directories(dep)
-include_directories(OSPGL PUBLIC dep/assimp/include)   
+include_directories(OSPGL PUBLIC dep/ospgl-assimp/include)   
 include_directories(OSPGL PUBLIC dep/bullet3/src)
 include_directories(OSPGL PUBLIC src)
 
@@ -78,7 +78,7 @@ add_subdirectory(dep/fmt)
 
 # Assimp
 
-add_subdirectory(dep/assimp)
+add_subdirectory(dep/ospgl-assimp)
 set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
