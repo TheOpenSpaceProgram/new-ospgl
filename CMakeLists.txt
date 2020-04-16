@@ -70,7 +70,11 @@ add_subdirectory(dep/LuaJIT-cmake)
 
 # Bullet3
 add_subdirectory(dep/bullet3)
-# Note: Double precision is defined on our custom bullet source, no need to define it here again
+# Make sure we use double precision, and it's enabled for
+# the bullet compilation
+set(USE_DOUBLE_PRECISION ON CACHE BOOL "" FORCE)
+ADD_DEFINITIONS( -DBT_USE_DOUBLE_PRECISION)
+set(BUILD_BULLET3 OFF CACHE BOOL "" FORCE) #< Bullet3 is incomplete and uses only floats
 
 # fmt
 

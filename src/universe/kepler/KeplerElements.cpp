@@ -3,29 +3,67 @@
 #define ORBIT_COS cos
 #define ORBIT_SIN sin
 
-KeplerOrbit NASAKeplerOrbit::to_kepler_at(double time, double& mean_anomaly_out) const
+
+// Stuff that changes measurably over the course of days, not centuries
+// (For example, mean longitude)
+// Otherwise we will lose too much precise on advanced values of t
+static void calculate_fast_changing(double t,
+		double mean_longitude, double mean_longitude_var,
+		double periapsis_longitude, double periapsis_longitude_var, 
+		double asc_node_longitude_now,
+		double* out_mean_anomaly, double* out_periapsis_argument)
+{
+	double mean_longitude_now = mean_longitude + t * mean_longitude_var;
+	double periapsis_longitude_now = periapsis_longitude + t * periapsis_longitude_var;
+
+	*out_mean_anomaly = glm::mod(mean_longitude_now - periapsis_longitude_now, glm::two_pi<double>());
+	*out_periapsis_argument = glm::mod(periapsis_longitude_now - asc_node_longitude_now, glm::two_pi<double>());
+
+}	
+
+
+KeplerOrbit NASAKeplerOrbit::to_kepler_at(double t0, double t, double& mean_anomaly_out) const
 {
 	// Centuries since J2000.0
 	
 	constexpr double DAYS_PER_CENTURY = 36525.0;
-	constexpr double SECONDS_PER_DAY = 86400;
-	double t = (time / SECONDS_PER_DAY) / DAYS_PER_CENTURY;
+	constexpr double SECONDS_PER_DAY = 86400.0;
+	double bigt = (t0 / SECONDS_PER_DAY) / DAYS_PER_CENTURY;
+	double smallt = (t / SECONDS_PER_DAY) / DAYS_PER_CENTURY;
+	double rt = bigt + smallt;
 
 	// Compute orbital elements now
 
-	double smajor_axis_now = smajor_axis + t * smajor_axis_var;
-	double eccentricity_now = eccentricity + t * eccentricity_var;
-	double inclination_now = inclination + t * inclination_var;
-	double mean_longitude_now = mean_longitude + t * mean_longitude_var;
-	double periapsis_longitude_now = periapsis_longitude + t * periapsis_longitude_var;
-	double asc_node_longitude_now = asc_node_longitude + t * asc_node_longitude;
+	double smajor_axis_now = smajor_axis + rt * smajor_axis_var;
+	double eccentricity_now = eccentricity + rt * eccentricity_var;
+	double inclination_now = inclination + rt * inclination_var;
+	double asc_node_longitude_now = asc_node_longitude + rt * asc_node_longitude_var;
+	
+	// We have to do this to avoid floating point imprecision when adding two big numbers
+	double small_mean_anomaly, big_mean_anomaly;
+	double small_periapsis_argument, big_periapsis_argument;
+	
+	calculate_fast_changing(bigt, 
+			mean_longitude, mean_longitude_var, 
+			periapsis_longitude, periapsis_longitude_var,
+			asc_node_longitude_now, 
+			&big_mean_anomaly, &big_periapsis_argument);
 
-	// Compute argument of periapsis and mean anomaly, include extra parameters if needed
-	double periapsis_argument_now = periapsis_longitude_now - asc_node_longitude_now;
-	double mean_anomaly_now = mean_longitude_now - periapsis_longitude_now;
+	calculate_fast_changing(smallt, 
+			mean_longitude, mean_longitude_var, 
+			periapsis_longitude, periapsis_longitude_var,
+			asc_node_longitude_now, 
+			&small_mean_anomaly, &small_periapsis_argument);
+
+
+
+	double mean_anomaly_now = small_mean_anomaly + big_mean_anomaly;
+	double periapsis_argument_now = small_periapsis_argument + big_periapsis_argument;
+
+	// TODO: Maybe this is needed inside of the helper functions, too?
 	if (has_extra)
 	{
-		mean_anomaly_now += b * t * t + c * ORBIT_COS(f * t) + s * ORBIT_SIN(f * t);
+		mean_anomaly_now += b * rt * rt + c * ORBIT_COS(f * rt) + s * ORBIT_SIN(f * rt);
 	}
 
 	// Contain mean anomaly in [-180, +180]
@@ -48,12 +86,12 @@ KeplerOrbit NASAKeplerOrbit::to_kepler_at(double time, double& mean_anomaly_out)
 	return out;
 }
 
-KeplerElements NASAKeplerOrbit::to_elements_at(double time, double tol) const
+KeplerElements NASAKeplerOrbit::to_elements_at(double t0, double t, double tol) const
 {
 	KeplerElements elems;
 
 	double mean_anom;
-	KeplerOrbit orbit = to_kepler_at(time, mean_anom);
+	KeplerOrbit orbit = to_kepler_at(t0, t, mean_anom);
 
 	double ecc_anom = orbit.mean_to_eccentric(mean_anom, tol);
 	double true_anom = orbit.eccentric_to_true(ecc_anom);
@@ -148,7 +186,7 @@ double KeplerOrbit::eccentric_to_true(double eccentric) const
 	}
 }
 
-double KeplerOrbit::time_to_mean(double time, double our_mass, double parent_mass) const
+double KeplerOrbit::time_to_mean(double t0, double t, double our_mass, double parent_mass) const
 {
 	double sm = std::abs(smajor_axis);
 	if (sm == 0)
@@ -157,8 +195,10 @@ double KeplerOrbit::time_to_mean(double time, double our_mass, double parent_mas
 	}
 
 
-	double n = sqrt((G * (our_mass + parent_mass)) / (sm * sm * sm));
-	return glm::degrees(n) * time + mean_at_epoch;
+	double n = glm::degrees(sqrt((G * (our_mass + parent_mass)) / (sm * sm * sm)));
+	double t0n = glm::mod(n * t0, glm::two_pi<double>());
+	double tn = glm::mod(n * t, glm::two_pi<double>());
+	return t0n + tn + mean_at_epoch;
 }
 
 double KeplerOrbit::get_period(double our_mass, double parent_mass) const
@@ -190,11 +230,11 @@ glm::dvec3 KeplerOrbit::get_plane_normal()
 	return glm::triangleNormal(a.get_position(), b.get_position(), c.get_position());
 }
 
-KeplerElements ArbitraryKeplerOrbit::to_elements_at(double time, double our_mass, double center_mass, double tol) const
+KeplerElements ArbitraryKeplerOrbit::to_elements_at(double t0, double t, double our_mass, double center_mass, double tol) const
 {
 	if (is_nasa_data)
 	{
-		return data.nasa_data.to_elements_at(time, tol);
+		return data.nasa_data.to_elements_at(t0, t, tol);
 	}
 	else
 	{
@@ -202,7 +242,7 @@ KeplerElements ArbitraryKeplerOrbit::to_elements_at(double time, double our_mass
 
 		elems.orbit = data.normal_data;
 
-		double mean = data.normal_data.time_to_mean(time, our_mass, center_mass);
+		double mean = data.normal_data.time_to_mean(t0, t, our_mass, center_mass);
 		double ecc = data.normal_data.mean_to_eccentric(mean, tol);
 		elems.true_anomaly = data.normal_data.eccentric_to_true(ecc);
 		elems.eccentric_anomaly = ecc;
@@ -212,12 +252,12 @@ KeplerElements ArbitraryKeplerOrbit::to_elements_at(double time, double our_mass
 	}
 }
 
-KeplerOrbit ArbitraryKeplerOrbit::to_orbit_at(double time)
+KeplerOrbit ArbitraryKeplerOrbit::to_orbit_at(double t0, double t)
 {
 	if (is_nasa_data)
 	{
 		double mean;
-		return data.nasa_data.to_kepler_at(time, mean);
+		return data.nasa_data.to_kepler_at(t0, t, mean);
 	}
 	else
 	{

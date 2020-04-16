@@ -27,7 +27,7 @@ glm::dvec3 PlanetarySystem::get_gravity_vector(glm::dvec3 p, StateVector* states
 	return result;
 }
 
-CartesianState compute_state(double t, double tol, 
+CartesianState compute_state(double t0, double t, double tol, 
 	SystemElement* body, std::vector<CartesianState>* other_states)
 {
 	if (body->type == SystemElement::STAR)
@@ -71,7 +71,7 @@ CartesianState compute_state(double t, double tol,
 	else
 	{
 
-		KeplerElements elems = body->orbit.to_elements_at(t, body->get_mass(), parent_mass, tol);
+		KeplerElements elems = body->orbit.to_elements_at(t0, t, body->get_mass(), parent_mass, tol);
 		CartesianState st = elems.get_cartesian(parent_mass, body->get_mass());
 
 		st.pos += offset;
@@ -82,7 +82,7 @@ CartesianState compute_state(double t, double tol,
 
 }
 
-glm::dvec3 compute_pos(double t, double tol,
+glm::dvec3 compute_pos(double t0, double t, double tol,
 	SystemElement* body, std::vector<glm::dvec3>* other_positions)
 {
 	if (body->type == SystemElement::STAR)
@@ -106,7 +106,7 @@ glm::dvec3 compute_pos(double t, double tol,
 	else
 	{
 
-		KeplerElements elems = body->orbit.to_elements_at(t, body->get_mass(), parent_mass, tol);
+		KeplerElements elems = body->orbit.to_elements_at(t0, t, body->get_mass(), parent_mass, tol);
 		glm::dvec3 st = elems.get_position();
 		st += offset;
 
@@ -115,30 +115,30 @@ glm::dvec3 compute_pos(double t, double tol,
 }
 
 
-void PlanetarySystem::compute_states(double t, std::vector<CartesianState>& out, double tol)
+void PlanetarySystem::compute_states(double t0, double t, std::vector<CartesianState>& out, double tol)
 {
 	for (size_t i = 0; i < out.size(); i++)
 	{
-		out[i] = compute_state(t, tol, &elements[i], &out);
+		out[i] = compute_state(t0, t, tol, &elements[i], &out);
 	}
 }
 
-void PlanetarySystem::compute_positions(double t, std::vector<glm::dvec3>& out, double tol)
+void PlanetarySystem::compute_positions(double t0, double t, std::vector<glm::dvec3>& out, double tol)
 {
 	for (size_t i = 0; i < out.size(); i++)
 	{
-		out[i] = compute_pos(t, tol, &elements[i], &out);
+		out[i] = compute_pos(t0, t, tol, &elements[i], &out);
 	}
 }
 
 
-void PlanetarySystem::compute_sois(double t)
+void PlanetarySystem::compute_sois(double t0, double t)
 {
 	elements[0].soi_radius = std::numeric_limits<double>::infinity();
 
 	for (size_t i = 1; i < elements.size(); i++)
 	{
-		double smajor_axis = elements[i].orbit.to_orbit_at(t).smajor_axis;
+		double smajor_axis = elements[i].orbit.to_orbit_at(t0, t).smajor_axis;
 
 		double parent_mass = elements[i].parent->get_mass();
 
@@ -158,7 +158,7 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 		glm::dmat4 model = glm::translate(glm::dmat4(1.0), -camera_pos + state.pos);
 		model = glm::scale(model, glm::dvec3(body->as_body->config.radius));
 
-		glm::dmat4 rot_matrix = body->as_body->build_rotation_matrix(t);
+		glm::dmat4 rot_matrix = body->as_body->build_rotation_matrix(t0, t);
 
 		body->as_body->renderer.deferred(proj_view, model * rot_matrix, rot_matrix, far_plane, camera_pos_relative,
 			body->as_body->config, t, light_dir, body->as_body->dot_factor);
@@ -166,7 +166,7 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 
 	if (debug_drawer->debug_enabled)
 	{
-		body->as_body->renderer.draw_debug(t, state, body);
+		body->as_body->renderer.draw_debug(t0, t, state, body);
 	}
 }
 
@@ -243,7 +243,7 @@ void PlanetarySystem::deferred_pass(CameraUniforms & cu)
 				striped = true;
 			}
 
-			debug_drawer->add_orbit(origin, elements[i].orbit.to_orbit_at(t), col, striped, verts);
+			debug_drawer->add_orbit(origin, elements[i].orbit.to_orbit_at(t0, t), col, striped, verts);
 		}
 	}
 }
@@ -276,8 +276,6 @@ void PlanetarySystem::forward_pass(CameraUniforms & cu)
 	}
 }
 
-static double pt;
-static int factor;
 
 void PlanetarySystem::update_physics(double dt, bool bullet)
 {
@@ -294,13 +292,12 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 		v = &states_now;
 	}
 
-	compute_states(tnow + dt * timewarp, *v, 1e-6);
+	compute_states(t0, tnow + dt * timewarp, *v, 1e-12);
 
 
 	if (bullet)
 	{
 		bt += dt * timewarp;
-
 		// Give data to colliders
 		for(size_t i = 0; i < elements.size(); i++)
 		{
@@ -312,7 +309,7 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 			
 				btTransform tform = btTransform::getIdentity();
 				tform.setOrigin(to_btVector3(bullet_states[i].pos));
-				glm::dmat4 mat = as_body->build_rotation_matrix(bt);
+				glm::dmat4 mat = as_body->build_rotation_matrix(t0, bt);
 				glm::dquat quat = glm::dquat(mat);
 
 				tform.setRotation(to_btQuaternion(quat));
@@ -320,6 +317,7 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 				as_body->rigid_body->setWorldTransform(tform);	
 			}
 		}
+
 	}
 	else
 	{ 
@@ -355,8 +353,6 @@ void PlanetarySystem::init_physics(btDynamicsWorld* world)
 		}
 	}
 
-	pt = 0;
-	factor = 1000;
 
 }
 
@@ -443,7 +439,7 @@ void PlanetarySystem::update_render_body_rocky(PlanetaryBody* body, glm::dvec3 b
 	{
 		// Build camera transform matrix, to get the relative camera pos
 		glm::dmat4 rel_matrix = glm::dmat4(1.0);
-		rel_matrix = rel_matrix * glm::inverse(body->build_rotation_matrix(t));
+		rel_matrix = rel_matrix * glm::inverse(body->build_rotation_matrix(t0, t));
 		rel_matrix = glm::translate(rel_matrix, -body_pos);
 
 		glm::dvec3 rel_camera_pos = rel_matrix * glm::dvec4(camera_pos, 1.0);

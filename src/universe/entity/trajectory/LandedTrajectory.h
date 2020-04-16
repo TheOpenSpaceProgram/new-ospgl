@@ -23,7 +23,7 @@ private:
 public:
 
 
-	virtual WorldState get_state(double t_now, bool use_bullet = false) override;
+	virtual WorldState get_state(double t0, double t, bool use_bullet = false) override;
 	void set_parameters(std::string body_name, glm::dvec3 rel_pos, glm::dquat rel_rot);
 
 	LandedTrajectory();

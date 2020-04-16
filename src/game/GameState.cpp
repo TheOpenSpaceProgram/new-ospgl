@@ -12,7 +12,7 @@ void GameState::load(const cpptoml::table& from)
 	assets->get_from_path<Config>(system_path)->read_to(universe.system);
 
 	double t0 = *from.get_as<double>("t");
-	universe.system.t = t0;
+	universe.system.t0 = t0;
 	Date start_date = Date(t0);
 	logger->info("Starting at: {}", start_date.to_string());
 

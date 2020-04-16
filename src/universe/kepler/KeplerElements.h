@@ -33,7 +33,7 @@ struct KeplerOrbit
 
 	double mean_to_eccentric(double mean, double tol = 1.0e-14) const;
 	double eccentric_to_true(double eccentric) const;
-	double time_to_mean(double time, double our_mass, double parent_mass) const;
+	double time_to_mean(double t0, double t, double our_mass, double parent_mass) const;
 
 	double get_period(double our_mass, double parent_mass) const;
 
@@ -89,9 +89,9 @@ struct NASAKeplerOrbit
 	double b, c, s, f;
 
 	// Time in seconds since J2000 epoch
-	KeplerOrbit to_kepler_at(double t, double& mean_anomaly_out) const;
+	KeplerOrbit to_kepler_at(double t0, double t, double& mean_anomaly_out) const;
 
-	KeplerElements to_elements_at(double time, double tol = 1.0e-14) const;
+	KeplerElements to_elements_at(double t0, double t, double tol = 1.0e-14) const;
 };
 
 
@@ -106,8 +106,8 @@ struct ArbitraryKeplerOrbit
 
 	Data data;
 
-	KeplerElements to_elements_at(double time, double our_mass, double center_mass, double tol = 1.0e-14) const;
-	KeplerOrbit to_orbit_at(double time);
+	KeplerElements to_elements_at(double t0, double t, double our_mass, double center_mass, double tol = 1.0e-14) const;
+	KeplerOrbit to_orbit_at(double t0, double t);
 };
 
 template<>

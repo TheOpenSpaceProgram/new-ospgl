@@ -48,7 +48,7 @@ public:
 	void forward(glm::dmat4 proj_view, glm::dvec3 camera_pos,
 		PlanetConfig& config, double far_plane, glm::vec3 light_dir);
 
-	void draw_debug(double t, CartesianState state, SystemElement* elem);
+	void draw_debug(double t0, double t, CartesianState state, SystemElement* elem);
 
 	PlanetaryBodyRenderer();
 	~PlanetaryBodyRenderer();

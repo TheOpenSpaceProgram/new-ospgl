@@ -36,7 +36,7 @@ void PlanetaryBodyRenderer::forward(glm::dmat4 proj_view, glm::dvec3 camera_pos,
 }
 
 
-void PlanetaryBodyRenderer::draw_debug(double t, CartesianState st, SystemElement* elem)
+void PlanetaryBodyRenderer::draw_debug(double t0, double t, CartesianState st, SystemElement* elem)
 {
 	if (elem->type == SystemElement::BARYCENTER)
 	{ 
@@ -51,7 +51,7 @@ void PlanetaryBodyRenderer::draw_debug(double t, CartesianState st, SystemElemen
 		}
 		else
 		{
-			glm::dvec3 orbit_plane = elem->orbit.to_orbit_at(t).get_plane_normal();
+			glm::dvec3 orbit_plane = elem->orbit.to_orbit_at(t0, t).get_plane_normal();
 			glm::dvec3 prograde = glm::normalize(st.vel);
 			glm::dvec3 normal = glm::cross(prograde, orbit_plane);
 

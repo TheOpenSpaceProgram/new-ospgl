@@ -13,7 +13,7 @@ LandedTrajectory::~LandedTrajectory()
 {
 }
 
-WorldState LandedTrajectory::get_state(double _unused, bool use_bullet)
+WorldState LandedTrajectory::get_state(double _unused, double _unused2, bool use_bullet)
 {
 	if (changed)
 	{
@@ -37,7 +37,7 @@ WorldState LandedTrajectory::get_state(double _unused, bool use_bullet)
 		tnow = get_universe()->system.t;
 	}
 
-	glm::dmat4 rot_matrix = body->build_rotation_matrix(tnow, false);
+	glm::dmat4 rot_matrix = body->build_rotation_matrix(get_universe()->system.t0, tnow, false);
 	glm::dvec3 body_pos;
 	if (use_bullet)
 	{

@@ -25,14 +25,15 @@ float PlanetaryBody::get_dot_factor(float distance, float fov)
 	return 1.0f - glm::smoothstep(MIN_APERTURE, START_FADE_APERTURE, takes);
 }
 
-glm::dmat4 PlanetaryBody::build_rotation_matrix(double t, bool include_at_epoch) const
+glm::dmat4 PlanetaryBody::build_rotation_matrix(double t0, double t, bool include_at_epoch) const
 {
-	glm::dmat4 rot_matrix = glm::mat4(1.0);
+	glm::dmat4 rot_matrix = glm::dmat4(1.0);
 
 	double offset = include_at_epoch ? rotation_at_epoch : 0.0;
 
-	double rot_angle = glm::radians(offset + t * rotation_speed);
-	rot_matrix = glm::rotate(rot_matrix, rot_angle, rotation_axis);
+	double rot_angle = glm::mod(glm::radians(offset + t * rotation_speed), glm::two_pi<double>());
+	double big_rot_angle = glm::mod(glm::radians(offset + t0 * rotation_speed), glm::two_pi<double>());
+	rot_matrix = glm::rotate(rot_matrix, rot_angle + big_rot_angle, rotation_axis);
 	// Align pole to rotation axis
 	rot_matrix = rot_matrix * MathUtil::rotate_from_to(glm::dvec3(0.0, 1.0, 0.0), rotation_axis);
 

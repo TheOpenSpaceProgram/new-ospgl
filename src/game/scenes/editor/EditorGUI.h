@@ -20,8 +20,6 @@ public:
 
 	void do_gui(int width, int height);
 	
-	void prepare_def_panel(int width, int height);
-
 	GUICanvas def_panel;
 
 	EditorGUI();

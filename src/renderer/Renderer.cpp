@@ -8,6 +8,12 @@
 
 void Renderer::resize(int nwidth, int nheight, float nscale)
 {
+	if(nwidth <= 1 || nheight <= 1 || nscale <= 0.0f)
+	{
+		logger->warn("Invalid size for renderer, ignoring! ({}x{} (x{}))", nwidth, nheight, nscale);
+		return;
+	}
+
 	if (gbuffer != nullptr)
 	{
 		delete gbuffer;
@@ -165,6 +171,10 @@ void Renderer::prepare_gui()
 	if (render_enabled)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// Clear the stencil buffer for nanovg
+		
+		glClear(GL_STENCIL_BUFFER_BIT);
 
 		doing_deferred = false;
 		doing_forward = false;

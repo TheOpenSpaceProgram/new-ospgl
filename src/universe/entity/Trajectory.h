@@ -25,7 +25,7 @@ public:
 	
 	// Some trajectories may also be used while bullet is loaded, 
 	// that's what the optional flag is for
-	virtual WorldState get_state(double t_now, bool use_bullet = false) = 0;
+	virtual WorldState get_state(double t0, double t, bool use_bullet = false) = 0;
 
 	virtual void init() {}
 

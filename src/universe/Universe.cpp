@@ -47,6 +47,7 @@ void Universe::drop_out_of_event(const std::string& event_id, EventHandler id)
 	rc.erase(id);
 }
 
+
 void Universe::physics_update(double pdt)
 {
 	// Do the physics update on the system
@@ -64,7 +65,7 @@ void Universe::update(double dt)
 	{
 		system.update(dt, bt_world, false);
 
-		bt_world->stepSimulation(dt, MAX_PHYSICS_STEPS, btScalar(PHYSICS_STEPSIZE));
+		bt_world->stepSimulation(dt, MAX_PHYSICS_STEPS, PHYSICS_STEPSIZE);
 
 		for (Entity* e : entities)
 		{

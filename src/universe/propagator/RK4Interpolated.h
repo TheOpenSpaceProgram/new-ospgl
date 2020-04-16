@@ -23,7 +23,7 @@ private:
 	PosVector t1_pos;
 	MassVector masses;
 
-	double t0, t1, tstep;
+	double t_0, t0, t1, tstep;
 
 	template<bool get_closest>
 	Derivative sample(CartesianState s0, Derivative d, double dt, PosVector& vec, size_t* closest);
@@ -33,7 +33,7 @@ private:
 public:
 	
 	virtual void initialize(PlanetarySystem* system, size_t body_count) override;
-	virtual void prepare(double t0, double tstep, PosVector& out_pos) override;
+	virtual void prepare(double t0, double t, double tstep, PosVector& out_pos) override;
 	virtual size_t propagate(CartesianState* state) override;
 
 

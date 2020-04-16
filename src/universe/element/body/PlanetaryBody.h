@@ -42,7 +42,7 @@ public:
 	// in the config so the user does not need to touch this
 	glm::dvec3 rotation_axis;
 
-	glm::dmat4 build_rotation_matrix(double t, bool include_rot_at_epoch = true) const;
+	glm::dmat4 build_rotation_matrix(double t0, double t, bool include_rot_at_epoch = true) const;
 
 	// Coordimates are given relative to the rotated body
 	// (Real rotation axis)

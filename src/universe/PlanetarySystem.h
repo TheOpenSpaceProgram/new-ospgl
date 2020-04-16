@@ -17,6 +17,8 @@ class Universe;
 
 // A system holds a central star, origin of the coordinate system, and
 // many planets orbiting it using keplerian orbits
+// TODO: If t (and bt) grow too big (around 10 years or so), reset them to 0 and update t0 to avoid
+// physics-graphics desynchronization due to floating point arithmetic
 class PlanetarySystem : public Drawable
 {
 private:
@@ -54,6 +56,7 @@ public:
 	// span of a few milliseconds
 	StateVector bullet_states;
 
+	double t0;
 	double t, timewarp;
 	double bt;
 
@@ -67,12 +70,12 @@ public:
 	// at a given time
 	// We avoid allocating so you have to give a vector that's appropiately
 	// sized (same as bodies.size() + 1), 0 is always the star
-	void compute_states(double t, std::vector<CartesianState>& out, double tol = 1.0e-8);
+	void compute_states(double t0, double t, std::vector<CartesianState>& out, double tol = 1.0e-9);
 
 	// Same as before but with positions
-	void compute_positions(double t, std::vector<glm::dvec3>& out, double tol = 1.0e-8);
+	void compute_positions(double t0, double t, std::vector<glm::dvec3>& out, double tol = 1.0e-9);
 
-	void compute_sois(double t);
+	void compute_sois(double t0, double t);
 
 	glm::dvec3 get_gravity_vector(glm::dvec3 point, StateVector* states);
 

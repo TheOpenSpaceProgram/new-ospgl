@@ -73,14 +73,15 @@ void RK4Interpolated::initialize(PlanetarySystem* system, size_t body_count)
 	}
 }
 
-void RK4Interpolated::prepare(double t0, double tstep, PosVector& out_pos)
+void RK4Interpolated::prepare(double t0, double t, double tstep, PosVector& out_pos)
 {
-	this->t0 = t0;
-	this->t1 = t0 + tstep;
+	this->t_0 = t0;
+	this->t0 = t;
+	this->t1 = t + tstep;
 	this->tstep = tstep;
 
-	sys->compute_positions(t0, t0_pos, 1e-6);
-	sys->compute_positions(t1, t1_pos, 1e-6);
+	sys->compute_positions(t0, t, t0_pos, 1e-6);
+	sys->compute_positions(t0, t + tstep, t1_pos, 1e-6);
 
 	for (size_t i = 0; i < t0_pos.size(); i++)
 	{

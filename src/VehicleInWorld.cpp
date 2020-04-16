@@ -22,6 +22,9 @@
 
 #include <game/input/JoystickDebug.h>
 
+static int iteration = 0;
+
+
 int main(int argc, char** argv)
 {
 	OSP osp = OSP();
@@ -29,8 +32,10 @@ int main(int argc, char** argv)
 
 	SerializeUtil::read_file_to("udata/saves/debug-save/save.toml", osp.game_state);
 
+	double fps_t = 0.0;
+	double dt_avg = 0.0;
 
-	osp.game_state.load_scene(new EditorScene());
+	osp.game_state.load_scene(new FlightScene());
 
 	{
 
@@ -42,9 +47,13 @@ int main(int argc, char** argv)
 			osp.start_frame();
 
 			osp.update();
-			
+		
+			osp.game_state.universe.bt_world->debugDrawWorld();
+
 			osp.render();
 			osp.finish_frame();
+
+			//osp.dt = osp.game_state.universe.PHYSICS_STEPSIZE;
 		}
 	}
 

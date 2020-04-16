@@ -141,7 +141,7 @@ void PlanetarySystem::load(const cpptoml::table& from)
 			// always opposite of its secondary)
 			// TODO: Add this to the docs, variable smajor axis is not 
 			// updated in barycenters
-			auto elems = elements[i].as_barycenter->secondary->orbit.to_orbit_at(0.0);
+			auto elems = elements[i].as_barycenter->secondary->orbit.to_orbit_at(0.0, 0.0);
 			double smajor = elems.smajor_axis;
 
 			double mc = elements[i].as_barycenter->primary->get_mass() / elements[i].as_barycenter->secondary->get_mass();

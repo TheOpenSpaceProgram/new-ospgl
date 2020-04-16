@@ -6,7 +6,7 @@ glm::dmat4 BuildingEntity::get_model_matrix(bool bullet)
 {
 	glm::dmat4 mat = glm::dmat4();
 
-	WorldState now = traj.get_state(0, bullet);
+	WorldState now = traj.get_state(0, 0, bullet);
 
 	glm::dvec3 pos = now.cartesian.pos;
 	glm::dquat rot = now.rotation;
@@ -66,7 +66,7 @@ void BuildingEntity::init()
 
 void BuildingEntity::physics_update(double pdt)
 {
-	WorldState now = traj.get_state(get_universe()->system.bt, true);
+	WorldState now = traj.get_state(get_universe()->system.bt, 0, true);
 	btTransform trans = btTransform::getIdentity();
 	
 	trans.setOrigin(to_btVector3(now.cartesian.pos));

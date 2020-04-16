@@ -12,7 +12,7 @@ public:
 
 
 	virtual void initialize(PlanetarySystem* system, size_t body_count) = 0;
-	virtual void prepare(double t0, double tstep, PosVector& out_pos) = 0;
+	virtual void prepare(double t0, double t, double tstep, PosVector& out_pos) = 0;
 	// Must return the index of the closest body
 	virtual size_t propagate(CartesianState* state) = 0;
 };
