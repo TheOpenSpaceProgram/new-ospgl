@@ -1,6 +1,7 @@
 #pragma once
 #include <nanovg/nanovg.h>
-#include <ui/GUICanvas.h>
+#include <gui/GUICanvas.h>
+#include <gui/GUIInput.h>
 
 // The side-pane can display a lot of stuff, but usually it displays
 // the C++ implemented part list and editor controls. Parts can draw a
@@ -15,10 +16,10 @@ private:
 public:
 	NVGcontext* vg;
 
-	float side_width = 0.22f;
-	int minimum_side = 300;
+	float side_width = 0.18f;
+	int minimum_side = 256;
 
-	void do_gui(int width, int height);
+	void do_gui(int width, int height, GUIInput* gui_input);
 	
 	GUICanvas def_panel;
 

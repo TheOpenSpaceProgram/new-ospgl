@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <nanovg/nanovg.h>
+#include "GUIInput.h"
 
 // A layout contains widgets, which are rendered
 // in appropiate positions
@@ -17,9 +18,11 @@
 // that's their responsability
 class GUILayout
 {
-private:
+protected:
 
 	std::vector<GUIWidget*> widgets;
+	
+	glm::ivec2 pos, size;
 
 public:
 
@@ -38,8 +41,14 @@ public:
 	// Will report an error if a not present widget is given
 	void remove_widget(GUIWidget* widget);
 
-	// You can use glScissor as it will be reset later 
-	virtual void draw(glm::ivec2 pos, glm::ivec2 size, NVGcontext* vg) = 0;
+	// By default, the layout will glScissor its area
+	virtual void draw(NVGcontext* vg);
+	void prepare_wrapper(glm::ivec2 pos, glm::ivec2 size, GUIInput* gui_input);
+	virtual void prepare(GUIInput* gui_input) = 0;
+
+	// These two are meant to be called from "draw" or "prepare"
+	glm::ivec2 get_pos(){ return pos; }
+	glm::ivec2 get_size(){ return size; }
 
 	size_t get_widget_count();
 };

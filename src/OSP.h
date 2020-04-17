@@ -13,6 +13,7 @@
 #include "util/defines.h"
 #include "util/Timer.h"
 #include <game/GameState.h>
+#include <game/database/GameDatabase.h>
 
 // Initializes the different subsystems OSP has
 class OSP
@@ -30,6 +31,7 @@ public:
 
 	Renderer* renderer;
 	GameState game_state;
+	GameDatabase game_database;
 
 	constexpr static const char* OSP_VERSION = "PRE-RELEASE";
 	void init(int argc, char** argv);

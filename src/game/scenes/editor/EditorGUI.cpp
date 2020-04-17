@@ -1,9 +1,10 @@
 #include "EditorGUI.h"
 #include <glm/glm.hpp>
 
-#include <ui/layouts/GUIVerticalLayout.h>
+#include <gui/layouts/GUIVerticalLayout.h>
+#include <gui/widgets/ImageButton.h>
 
-void EditorGUI::do_gui(int width, int height)
+void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 {
 	float w = (float)width; float h = (float)height;
 
@@ -14,8 +15,8 @@ void EditorGUI::do_gui(int width, int height)
 	nvgFillColor(vg, nvgRGB(30, 35, 40));
 	nvgFill(vg);
 
-	def_panel.prepare(glm::ivec2(0, 0), glm::ivec2(swidth, height));	
-	def_panel.draw(glm::ivec2(0, 0), glm::ivec2(swidth, height), vg, glm::ivec4(0, 0, width, height));
+	def_panel.prepare(glm::ivec2(0, 0), glm::ivec2(swidth, height), gui_input);	
+	def_panel.draw(vg, glm::ivec4(0, 0, width, height));
 	def_panel.debug(glm::ivec2(0, 0), glm::ivec2(swidth, height), vg);
 
 	prev_width = width;
@@ -31,5 +32,9 @@ EditorGUI::EditorGUI()
 
 	def_panel.divide_v(0.05);
 	def_panel.child_0_pixels = 32;
+	def_panel.child_1->layout = new GUIVerticalLayout();
+	def_panel.child_1->layout->add_widget(new ImageButton());
+	def_panel.child_1->layout->add_widget(new ImageButton());
+	def_panel.child_1->layout->add_widget(new ImageButton());
 }
 

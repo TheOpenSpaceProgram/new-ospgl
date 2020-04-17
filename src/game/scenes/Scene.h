@@ -1,4 +1,5 @@
 #pragma once
+#include <gui/GUIInput.h>
 
 class OSP;
 
@@ -12,6 +13,7 @@ private:
 
 public:
 
+	GUIInput gui_input;
 
 	// Called the frame the scene is loaded
 	virtual void load() = 0;

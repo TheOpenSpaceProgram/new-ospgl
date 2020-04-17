@@ -12,6 +12,8 @@
 #include <util/SerializeUtil.h>
 #include <lua/LuaCore.h>
 
+#include <PackageMetadata.h>
+
 // Pointer to a function which looks like:
 // T* loadAsset(const std::string& path)
 // You must allocate the new asset!
@@ -22,6 +24,7 @@ using LoadAssetPtr = T*(*)(const std::string&, const std::string&, const std::st
 template<typename T>
 struct AssetHandle;
 
+class GameDatabase;
 
 // Organizes all assets into "packages", which are arbitrary
 // folders, and "directories", folders inside those packages
@@ -46,62 +49,19 @@ private:
 	};
 
 
+
 	// Every asset inside a package
 	using PackageAssets = std::unordered_map<std::string, Asset>;
 	// Pairs every AssetTypeData with packages
 	using AssetTypeAndAssets = std::pair<AssetTypeData, PackageAssets>;
 
-
 	struct Package
 	{
-
-		// Maps every type to a AssetTypeData and packages
+		PackageMetadata metadata;
 		std::unordered_map<std::type_index, AssetTypeAndAssets> assets;
-
-		std::string id;
-		std::string folder;
-		std::string name;
-		std::string desc;
-		std::string author;
-		std::string version;
-		std::vector<std::string> dependencies;
-
-		std::string pkg_script_path;
 		sol::state* pkg_lua;
-
-		Package(std::string path)
-		{
-			std::string package_file_path = path + "/package.toml";
-			auto file = SerializeUtil::load_file(package_file_path);
-			name = *file->get_qualified_as<std::string>("name");
-			desc = *file->get_qualified_as<std::string>("description");
-			author = *file->get_qualified_as<std::string>("author");
-			version = *file->get_qualified_as<std::string>("version");
-			id = *file->get_qualified_as<std::string>("id");
-		
-			// We use a default here because it's rarely needed to be changed	
-			pkg_script_path = file->get_qualified_as<std::string>("pkg_script").value_or("package.lua");
-
-			// By default the folder is the id
-			folder = file->get_qualified_as<std::string>("folder").value_or(id);
-
-			dependencies = std::vector<std::string>();
-
-			auto deps = *file->get_qualified_array_of<std::string>("dependencies");
-			for (auto dep : deps)
-			{
-				dependencies.push_back(dep);
-			}
-		}
-
-		Package()
-		{
-			// Shall not be used
-			name = "Invalid";
-		}
 	};
-
-
+	
 	std::unordered_map<std::string, Package> packages;
 
 	template<typename T>
@@ -163,7 +123,7 @@ public:
 
 	// Executes the package init lua file of all packages
 	// which have one
-	void load_packages(LuaCore* lua_core);
+	void load_packages(LuaCore* lua_core, GameDatabase* game_database);
 
 	// Scripts are a very special asset as they must be instantiated, you 
 	// cannot store a Script as a normal asset

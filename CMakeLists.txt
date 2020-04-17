@@ -44,6 +44,7 @@ include_directories(dep)
 include_directories(OSPGL PUBLIC dep/ospgl-assimp/include)   
 include_directories(OSPGL PUBLIC dep/bullet3/src)
 include_directories(OSPGL PUBLIC src)
+include_directories(OSPGL PUBLIC pkg)
 
 # Include CMake dependencies
 
@@ -120,6 +121,7 @@ message(STATUS "OpenSSL Version: " ${OPENSSL_VERSION})
 message(STATUS "OpenSSL Include: " ${OPENSSL_INCLUDE_DIR})
 
 include_directories(dep)
+include_directories(pkg)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
 target_link_libraries(ospm ${OPENSSL_LIBRARIES} ${CMAKE_DL_LIBS})

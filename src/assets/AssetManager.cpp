@@ -8,6 +8,8 @@
 #include "PartPrototype.h"
 #include "BuildingPrototype.h"
 
+#include <game/database/GameDatabase.h>
+
 #include "sol.hpp"
 
 
@@ -133,13 +135,14 @@ void AssetManager::check_packages()
 {
 	for (auto it = packages.begin(); it != packages.end(); it++)
 	{
-		logger->info("Package '{} {}' ('{}' loaded as '{}')", it->second.name, it->second.version, it->second.id, it->first);
+		logger->info("Package '{} {}' ('{}' initialized as '{}')", 
+				it->second.metadata.name, it->second.metadata.version, it->second.metadata.id, it->first);
 
-		for (size_t i = 0; i < it->second.dependencies.size(); i++)
+		for (size_t i = 0; i < it->second.metadata.dependencies.size(); i++)
 		{
-			if (packages.find(it->second.dependencies[i]) == packages.end())
+			if (packages.find(it->second.metadata.dependencies[i]) == packages.end())
 			{
-				logger->warn("  Lacks dependency '{}'", it->second.dependencies[i]);
+				logger->warn("  Lacks dependency '{}'", it->second.metadata.dependencies[i]);
 			}
 		}
 
@@ -160,9 +163,9 @@ void AssetManager::preload()
 
 			std::string sstr = as_str.substr(as_str.find_last_of('/') + 1);
 
-			Package pkg(as_str);
-
-			packages[sstr] = pkg;
+			PackageMetadata pkg_meta(SerializeUtil::load_file(as_str + "/package.toml"));
+			packages[sstr] = Package();
+			packages[sstr].metadata = pkg_meta;
 		}
 	}
 	
@@ -170,7 +173,7 @@ void AssetManager::preload()
 
 #include "../util/LuaUtil.h"
 
-void AssetManager::load_packages(LuaCore* lua_core)
+void AssetManager::load_packages(LuaCore* lua_core, GameDatabase* game_database)
 {
 	// TODO: Think of a package loading system
 	// to allow behaviour similar to ModuleManager
@@ -181,7 +184,7 @@ void AssetManager::load_packages(LuaCore* lua_core)
 	// Pre-init, create all lua files
 	for(auto& pkg_pair : packages)
 	{
-		std::string pkg_lua_path = res_path + pkg_pair.first + "/" + pkg_pair.second.pkg_script_path;
+		std::string pkg_lua_path = res_path + pkg_pair.first + "/" + pkg_pair.second.metadata.pkg_script_path;
 
 		if(file_exists(pkg_lua_path))
 		{
@@ -200,10 +203,12 @@ void AssetManager::load_packages(LuaCore* lua_core)
 	{
 		sol::state* lua = pkg_pair.second.pkg_lua;
 
+		logger->info("Loading package {}", pkg_pair.first);
+
 		if(lua)
 		{
 			sol::function load_fnc = lua->get<sol::function>("load");
-			load_fnc();	
+			load_fnc(game_database);	
 		}
 
 	}

@@ -11,7 +11,7 @@
 #include "libs/LuaDebugDrawer.h"
 #include "libs/LuaUniverse.h"
 #include "libs/LuaFlightInput.h"
-
+#include "libs/LuaGameDatabase.h"
 
 LuaCore* lua_core;
 
@@ -112,6 +112,10 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::FLIGHT_INPUT;
 	}
+	else if(name == "game_database")
+	{
+		return LibraryID::GAME_DATABASE;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -152,6 +156,7 @@ LuaCore::LuaCore()
 	libraries[LibraryID::VEHICLE] = new LuaVehicle();
 	libraries[LibraryID::UNIVERSE] = new LuaUniverse();
 	libraries[LibraryID::FLIGHT_INPUT] =  new LuaFlightInput();
+	libraries[LibraryID::GAME_DATABASE] = new LuaGameDatabase();
 }
 
 LuaCore::~LuaCore()

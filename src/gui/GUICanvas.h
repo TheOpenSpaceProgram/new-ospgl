@@ -3,6 +3,7 @@
 #include "GUILayout.h"
 #include <nanovg/nanovg.h>
 #include <tuple>
+#include "GUIInput.h"
 
 // A canvas can contain more canvases
 // A canvas with children cannot contain layouts
@@ -40,7 +41,7 @@ public:
 	std::pair<GUICanvas*, GUICanvas*> divide_v(float factor);
 
 	// Prepares all controls for the update, including resizing fixed-size canvases
-	void prepare(glm::ivec2 pos, glm::ivec2 size);
+	void prepare(glm::ivec2 pos, glm::ivec2 size, GUIInput* gui_input);
 
 	// Resizes children space distribution appropiately
 	void resize(float n_factor);
@@ -49,7 +50,7 @@ public:
 
 	void debug(glm::ivec2 real_position, glm::ivec2 real_size, NVGcontext* vg);
 
-	void draw(glm::ivec2 pos, glm::ivec2 size, NVGcontext* vg, glm::ivec4 def_scissor);
+	void draw(NVGcontext* vg, glm::ivec4 def_scissor);
 
 	GUICanvas()
 	{

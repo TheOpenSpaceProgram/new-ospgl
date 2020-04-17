@@ -78,7 +78,11 @@ void FlightScene::unload()
 
 void FlightScene::update()
 {
-	input.keyboard_blocked = camera.keyboard_blocked;
+	gui_input.update();
+
+	// GUI preparation goes here
+	
+	input.keyboard_blocked = camera.keyboard_blocked || gui_input.keyboard_blocked;
 	input.update(get_osp()->renderer->window, get_osp()->game_dt);
 
 	VehicleEntity* v_ent =  universe->get_entity_as<VehicleEntity>(2);	

@@ -27,3 +27,23 @@ size_t GUILayout::get_widget_count()
 {
 	return widgets.size();
 }
+
+void GUILayout::draw(NVGcontext* ctx)
+{
+	glm::ivec2 pos = get_pos();
+	glm::ivec2 size = get_size();
+
+	nvgScissor(ctx, pos.x, pos.y, size.x, size.y);	
+
+	for(auto widget : widgets)
+	{
+		widget->draw(ctx);
+	}
+}
+
+void GUILayout::prepare_wrapper(glm::ivec2 pos, glm::ivec2 size, GUIInput* gui_input)
+{
+	this->pos = pos;
+	this->size = size;
+	prepare(gui_input);
+}

@@ -1,5 +1,6 @@
+require("game_database")
 
-function load() 
+function load(database) 
 		
 
 end 
