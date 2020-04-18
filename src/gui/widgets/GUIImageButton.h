@@ -48,11 +48,16 @@ public:
 		}
 		nvgFill(vg);
 
+		nvgFontSize(vg, 16.0f);
+		nvgFontFace(vg, "bold");
+		nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+		nvgFillColor(vg, nvgRGB(0, 0, 0));
+		nvgText(vg, x + floor(w / 2), y + floor(h / 4) + 5.0f, name.c_str(), nullptr);
 		nvgFontSize(vg, 12.0f);
 		nvgFontFace(vg, "regular");
 		nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 		nvgFillColor(vg, nvgRGB(0, 0, 0));
-		nvgText(vg, x + floor(w / 2), y + floor(h / 2), name.c_str(), nullptr);
+		nvgText(vg, x + floor(w / 2), y + floor(h / 1.4f) + 5.0f, "My very cool header", nullptr);
 	}
 
 };

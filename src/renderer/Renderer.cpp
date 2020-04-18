@@ -539,7 +539,11 @@ Renderer::Renderer(cpptoml::table& settings)
 	//vg = nvgCreateGL3(0);
 
 	// Load the default NVG fonts (TODO: Use generic names for this or move it over to package.lua)
-	nvgCreateFont(vg, "regular", (assets->res_path + "core/fonts/Xolonium-Regular.ttf").c_str()); 
+	nvgCreateFont(vg, "regular", (assets->res_path + "core/fonts/Roboto-Regular.ttf").c_str()); 
+	nvgCreateFont(vg, "bold", (assets->res_path + "core/fonts/Roboto-Bold.ttf").c_str()); 
+	nvgCreateFont(vg, "light", (assets->res_path + "core/fonts/Roboto-Light.ttf").c_str()); 
+	nvgCreateFont(vg, "medium", (assets->res_path + "core/fonts/Roboto-Medium.ttf").c_str()); 
+
 	resize(width, height, scale);
 
 }
