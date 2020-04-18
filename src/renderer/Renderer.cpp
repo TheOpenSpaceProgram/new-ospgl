@@ -519,9 +519,9 @@ Renderer::Renderer(cpptoml::table& settings)
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 130");
 	ImGui::StyleColorsDark();
-	// Font for the code editor
+	
 	ImFont* font_default = io.Fonts->AddFontDefault();
-	ImFont* font_code = io.Fonts->AddFontFromFileTTF("./res/core/FiraCode-Regular.ttf", 16.0f);
+	ImFont* font_code = io.Fonts->AddFontFromFileTTF("./res/core/fonts/FiraCode-Regular.ttf", 16.0f);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -538,6 +538,9 @@ Renderer::Renderer(cpptoml::table& settings)
 	// Create the nanoVG context
 	vg = nvgCreateGL3(NVG_ANTIALIAS);
 	//vg = nvgCreateGL3(0);
+
+	// Load the default NVG fonts (TODO: Use generic names for this or move it over to package.lua)
+	nvgCreateFont(vg, "regular", (assets->res_path + "core/fonts/FiraCode-Regular.ttf").c_str()); 
 	resize(width, height, scale);
 
 }

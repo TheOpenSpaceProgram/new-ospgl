@@ -16,7 +16,7 @@ private:
 public:
 	NVGcontext* vg;
 
-	float side_width = 0.18f;
+	float side_width = 0.15f;
 	int minimum_side = 256;
 
 	void do_gui(int width, int height, GUIInput* gui_input);

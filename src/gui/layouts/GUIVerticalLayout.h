@@ -4,7 +4,6 @@ class GUIVerticalLayout : public GUILayout
 {
 private:
 
-	glm::ivec4 margins;
 	int element_margin;
 
 public:
@@ -12,10 +11,17 @@ public:
 
 	virtual void prepare(GUIInput* gui_input) override;
 
-	// Margins are in pixels and are (left, right, up, down)
-	GUIVerticalLayout(int element_margin = 4, glm::ivec4 margins = glm::ivec4(4, 4, 4, 4))
+	GUIVerticalLayout(int element_margin = 4)
 	{
-		this->margins = margins;
 		this->element_margin = element_margin;
+		// Set some sane defaults
+		vscrollbar.color = nvgRGB(100, 100, 100);
+		vscrollbar.scroller_color = nvgRGB(180, 180, 180);
+		vscrollbar.scroller_sel_color = nvgRGB(240, 240, 240);
+		vscrollbar.width = 4;
+		vscrollbar.positive_pos = true;
+		vscrollbar.scroll = 0.0;
+		vscrollbar.draw = true;
+		vscrollbar.enabled = true;
 	}
 };

@@ -15,7 +15,9 @@ protected:
 	glm::ivec2 size;
 
 public:
-	
+
+	// Set by the Layout during prepare
+	bool is_visible;	
 
 	// Return the size you used
 	// 'size' may have negative coordinates, these mean you are free to take
@@ -24,6 +26,5 @@ public:
 	// pos and size variables, but you must write to them!
 	virtual glm::ivec2 prepare(glm::ivec2 wpos, glm::ivec2 wsize, GUIInput* gui_input) = 0;
 	virtual void draw(NVGcontext* ctx) = 0;
-
 
 };

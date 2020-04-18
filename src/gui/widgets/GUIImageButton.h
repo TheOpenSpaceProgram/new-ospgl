@@ -1,11 +1,14 @@
 #pragma once 
 #include "../GUIWidget.h"
 
-class ImageButton : public GUIWidget
+#include <string>
+
+class GUIImageButton : public GUIWidget
 {
 public:
 
 	bool hlight = false;
+	std::string name;
 
 	virtual glm::ivec2 prepare(glm::ivec2 wpos, glm::ivec2 wsize, GUIInput* ipt) override
 	{	
@@ -43,6 +46,12 @@ public:
 			nvgFillColor(vg, nvgRGB(64, 128, 64));
 		}
 		nvgFill(vg);
+
+		nvgFontSize(vg, 16.0f);
+		nvgFontFace(vg, "regular");
+		nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+		nvgFillColor(vg, nvgRGB(0, 0, 0));
+		nvgText(vg, x + w / 2, y + h / 2, name.c_str(), nullptr);
 	}
 
 };
