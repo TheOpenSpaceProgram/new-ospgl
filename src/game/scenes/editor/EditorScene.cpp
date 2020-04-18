@@ -3,6 +3,8 @@
 
 void EditorScene::load()
 {
+	gui.init(this);
+
 	get_osp()->game_state.universe.paused = true;
 	
 	// The GUI takes a big portion of the screen and it's opaque
@@ -38,3 +40,5 @@ void EditorScene::unload()
 	get_osp()->renderer->override_viewport = glm::dvec4(0.0, 0.0, 1.0, 1.0);
 	get_osp()->game_state.universe.paused = false;	
 }
+
+

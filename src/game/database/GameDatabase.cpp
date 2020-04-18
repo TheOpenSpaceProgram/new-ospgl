@@ -15,3 +15,7 @@ void GameDatabase::add_part(const std::string& path, const std::string& pkg)
 
 }
 
+GameDatabase::GameDatabase()
+{
+	
+}

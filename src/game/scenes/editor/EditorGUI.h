@@ -3,6 +3,8 @@
 #include <gui/GUICanvas.h>
 #include <gui/GUIInput.h>
 
+class EditorScene;
+
 // The side-pane can display a lot of stuff, but usually it displays
 // the C++ implemented part list and editor controls. Parts can draw a
 // custom interface there, use their context menu, or pop up a full
@@ -23,5 +25,6 @@ public:
 	
 	GUICanvas def_panel;
 
-	EditorGUI();
+	void init(EditorScene* scene);
+
 };

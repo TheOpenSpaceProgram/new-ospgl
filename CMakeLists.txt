@@ -62,7 +62,7 @@ include_directories(OSPGL PUBLIC ${OPENGL_INCLUDE_DIR})
 
 # Threads
 
-find_package(Threads)
+find_package(Threads REQUIRED)
 target_link_libraries(OSPGL ${CMAKE_THREAD_LIBS_INIT})
 
 # LuaJIT 
@@ -91,6 +91,11 @@ set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "" FORCE)
+
+# FreeType
+find_package(Freetype REQUIRED)
+target_link_Libraries(OSPGL ${FREETYPE_LIBRARIES})
+include_directories(OSPGL ${FREETYPE_INCLUDE_DIRS})
 
 # Link libraries
 

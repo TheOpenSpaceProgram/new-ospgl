@@ -21,6 +21,8 @@
 
 #define FONS_INVALID -1
 
+#define FONS_USE_FREETYPE
+
 enum FONSflags {
 	FONS_ZERO_TOPLEFT = 1,
 	FONS_ZERO_BOTTOMLEFT = 2,

@@ -3,6 +3,8 @@
 
 #include <gui/layouts/GUIVerticalLayout.h>
 #include <gui/widgets/GUIImageButton.h>
+#include "EditorScene.h"
+#include <OSP.h>
 
 void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 {
@@ -25,7 +27,7 @@ void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 
 
 
-EditorGUI::EditorGUI()
+void EditorGUI::init(EditorScene* sc)
 {
 	prev_width = 0;
 	prev_height = 0;
@@ -33,11 +35,14 @@ EditorGUI::EditorGUI()
 	def_panel.divide_v(0.05);
 	def_panel.child_0_pixels = 32;
 	def_panel.child_1->layout = new GUIVerticalLayout();
-	for(int i = 0; i < 40; i++)
+
+	GameDatabase* gdb = &sc->get_osp()->game_database;
+
+	for(int i = 0; i < gdb->parts.size(); i++)
 	{
 		GUIImageButton* btn = new GUIImageButton();
 		def_panel.child_1->layout->add_widget(btn);
-		btn->name = "Button: " + std::to_string(i);
+		btn->name = gdb->parts[i];
 	}
 }
 
