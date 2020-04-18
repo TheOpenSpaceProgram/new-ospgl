@@ -19,7 +19,7 @@
 //#define ENABLE_GL_DEBUG
 
 class PlanetarySystem;
-
+// ?
 
 // Allows scaled rendering of the 3D scene to a framebuffer
 // and then UI drawing (in real resolution) over it
@@ -92,10 +92,6 @@ public:
 	// You should specify a rectangle, (x,y) being min and (z,w) max
 	glm::dvec4 override_viewport;
 	
-	// NanoVG is used to draw GUIs in a similar way to ImGui
-	// but for final GUIs (not debug interfaces)
-	NVGcontext* vg;
-
 	Camera* cam;
 
 	bool wireframe;
@@ -103,6 +99,8 @@ public:
 	bool render_enabled;
 
 	GLFWwindow* window;
+
+	NVGcontext* vg;
 
 	void resize(int nwidth, int nheight, float scale);
 

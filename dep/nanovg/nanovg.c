@@ -20,10 +20,11 @@
 #include <stdio.h>
 #include <math.h>
 #include <memory.h>
+
 #include "nanovg.h"
 #define FONTSTASH_IMPLEMENTATION
 #include "fontstash.h"
-#include "../stb/stb_image.h"
+#include <stb/stb_image.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4100)  // unreferenced formal parameter
@@ -54,7 +55,6 @@ enum NVGcommands {
 	NVG_CLOSE = 3,
 	NVG_WINDING = 4,
 };
-
 enum NVGpointFlags
 {
 	NVG_PT_CORNER = 0x01,
@@ -2472,9 +2472,9 @@ float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char*
 	cverts = nvg__maxi(2, (int)(end - string)) * 6; // conservative estimate.
 	verts = nvg__allocTempVerts(ctx, cverts);
 	if (verts == NULL) return x;
-
 	fonsTextIterInit(ctx->fs, &iter, x*scale, y*scale, string, end, FONS_GLYPH_BITMAP_REQUIRED);
 	prevIter = iter;
+	// 
 	while (fonsTextIterNext(ctx->fs, &iter, &q)) {
 		float c[4*2];
 		if (iter.prevGlyphIndex == -1) { // can not retrieve glyph?

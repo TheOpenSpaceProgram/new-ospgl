@@ -46,6 +46,10 @@ int main(int argc, char** argv)
 		{
 			osp.start_frame();
 
+			ImGui::Begin("LOL");
+			ImGui::Text("Button: 10");
+			ImGui::End();
+
 			osp.update();
 		
 			osp.render();

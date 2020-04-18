@@ -402,7 +402,7 @@ NVGpaint nvgLinearGradient(NVGcontext* ctx, float sx, float sy, float ex, float 
 
 // Creates and returns a box gradient. Box gradient is a feathered rounded rectangle, it is useful for rendering
 // drop shadows or highlights for boxes. Parameters (x,y) define the top-left corner of the rectangle,
-// (w,h) define the size of the rectangle, r defines the corner radius, and f feather. Feather defines how blurry
+// (w,h) define the size of the rectangle, r defines the corner radius, and f feather. Feather defines how lurry
 // the border of the rectangle is. Parameter icol specifies the inner color and ocol the outer color of the gradient.
 // The gradient is transformed by the current transform when it is passed to nvgFillPaint() or nvgStrokePaint().
 NVGpaint nvgBoxGradient(NVGcontext* ctx, float x, float y, float w, float h,

@@ -6,6 +6,7 @@
 class GUIImageButton : public GUIWidget
 {
 public:
+	
 
 	bool hlight = false;
 	std::string name;
@@ -47,11 +48,11 @@ public:
 		}
 		nvgFill(vg);
 
-		nvgFontSize(vg, 16.0f);
+		nvgFontSize(vg, 12.0f);
 		nvgFontFace(vg, "regular");
 		nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 		nvgFillColor(vg, nvgRGB(0, 0, 0));
-		nvgText(vg, x + w / 2, y + h / 2, name.c_str(), nullptr);
+		nvgText(vg, x + floor(w / 2), y + floor(h / 2), name.c_str(), nullptr);
 	}
 
 };

@@ -3,7 +3,7 @@
 
 #define NANOVG_GL3_IMPLEMENTATION
 #include <nanovg/nanovg_gl.h>
-
+//?
 #include "../universe/PlanetarySystem.h"
 
 void Renderer::resize(int nwidth, int nheight, float nscale)
@@ -521,7 +521,6 @@ Renderer::Renderer(cpptoml::table& settings)
 	ImGui::StyleColorsDark();
 	
 	ImFont* font_default = io.Fonts->AddFontDefault();
-	ImFont* font_code = io.Fonts->AddFontFromFileTTF("./res/core/fonts/FiraCode-Regular.ttf", 16.0f);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -540,7 +539,7 @@ Renderer::Renderer(cpptoml::table& settings)
 	//vg = nvgCreateGL3(0);
 
 	// Load the default NVG fonts (TODO: Use generic names for this or move it over to package.lua)
-	nvgCreateFont(vg, "regular", (assets->res_path + "core/fonts/FiraCode-Regular.ttf").c_str()); 
+	nvgCreateFont(vg, "regular", (assets->res_path + "core/fonts/Xolonium-Regular.ttf").c_str()); 
 	resize(width, height, scale);
 
 }
