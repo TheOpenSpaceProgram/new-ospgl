@@ -2,6 +2,7 @@
 #include <nanovg/nanovg.h>
 #include <gui/GUICanvas.h>
 #include <gui/GUIInput.h>
+#include <gui/widgets/GUIImageButton.h>
 
 class EditorScene;
 
@@ -14,6 +15,7 @@ class EditorGUI
 private:
 
 	int prev_width, prev_height;
+	std::vector<GUIImageButton*> buttons;
 
 public:
 	NVGcontext* vg;
