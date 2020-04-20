@@ -6,6 +6,7 @@
 #include <vector>
 #include <nanovg/nanovg.h>
 #include "GUIInput.h"
+#include "GUIScrollbar.h"
 
 // A layout contains widgets, which are rendered
 // in appropiate positions
@@ -24,33 +25,14 @@ protected:
 	
 	glm::ivec2 pos, size;
 
-	// To disable a scrollbar set max_scroll to 0 or a negative number
-	// Scrollbars will otherwise always show, even if there is nowhere
-	// to scroll
-	// draw Disables the graphics of the scrollbar, but not function
-	// enabled Disables the function and graphics
-	struct Scrollbar
-	{
-		bool draw;
-		bool enabled;
 
-		int scroll;
-		int max_scroll;
-		// Positive pos changes the scrollbar from the left or top to the right or bottom
-		bool positive_pos; 
-		int width;
-		NVGcolor color = nvgRGBA(100, 100, 100, 255);
-		NVGcolor scroller_color = nvgRGBA(170, 170, 170, 255);
-		NVGcolor scroller_sel_color = nvgRGBA(255, 255, 255, 255);
 
-	};
+public:
 
-	Scrollbar vscrollbar;
+	GUIScrollbar vscrollbar;
 
 	// (left, right, top, down)
 	glm::ivec4 margins = glm::ivec4(4.0, 6.0, 4.0, 4.0);
-
-public:
 
 	// Blocks the mouse if it's over the layout
 	bool block_mouse;
@@ -69,6 +51,8 @@ public:
 	// to another layout
 	// Will report an error if a not present widget is given
 	void remove_widget(GUIWidget* widget);
+
+	void remove_all_widgets();
 
 	void draw_vscrollbar(NVGcontext* vg);
 	void prepare_vscrollbar(GUIInput* gui_input);

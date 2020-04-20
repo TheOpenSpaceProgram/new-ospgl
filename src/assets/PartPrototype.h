@@ -116,6 +116,7 @@ public:
 	std::string country;
 	std::string manufacturer;
 	std::string description;
+	std::vector<std::string> categories;
 
 	std::string in_package;
 
@@ -145,6 +146,9 @@ public:
 		SAFE_TOML_GET_OR(to.country, "country", std::string, "Unknown");
 		SAFE_TOML_GET_OR(to.manufacturer, "manufacturer", std::string, "Unknown");
 		SAFE_TOML_GET(to.description, "description", std::string);
+
+		to.categories = *from.get_array_of<std::string>("categories");
+		to.categories.push_back("all");
 
 		std::string model_path;
 		SAFE_TOML_GET(model_path, "model", std::string);

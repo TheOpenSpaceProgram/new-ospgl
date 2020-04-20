@@ -3,6 +3,8 @@
 #include <nanovg/nanovg.h>
 #include "EditorCamera.h"
 #include "EditorGUI.h"
+#include "EditorVehicle.h"
+
 
 class EditorScene : public Scene
 {
@@ -10,6 +12,7 @@ private:
 
 	EditorCamera cam;
 	EditorGUI gui;
+	EditorVehicle vehicle;
 
 	void do_gui();
 

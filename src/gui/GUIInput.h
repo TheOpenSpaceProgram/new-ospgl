@@ -27,4 +27,9 @@ public:
 	}
 
 	bool is_mouse_inside(glm::ivec2 pos, glm::ivec2 size);
+
+	// 0 = left
+	// 1 = right
+	// 2 = middle (try not to use as it may not be supported on some laptops)
+	bool is_mouse_clicked(int button = 0);
 };

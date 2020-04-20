@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   sodipodi:docname="command.svg"
+   inkscape:export-filename="/home/tatjam/code/osp/new-ospgl/res/core/categories/command.png"
+   inkscape:export-xdpi="50.783939"
+   inkscape:export-ydpi="50.783939">
+  <defs
+     id="defs2">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 148.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="210 : 148.5 : 1"
+       inkscape:persp3d-origin="105 : 99 : 1"
+       id="perspective3723" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="4.5571092"
+     inkscape:cx="42.961377"
+     inkscape:cy="29.236659"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1014"
+     inkscape:window-x="1920"
+     inkscape:window-y="1080"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <ellipse
+       ry="11.064968"
+       rx="11.061173"
+       inkscape:export-ydpi="50.783939"
+       inkscape:export-xdpi="50.783939"
+       style="fill:#bababa;fill-opacity:1;stroke:none;stroke-width:1.87765384;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       cy="284.53439"
+       cx="11.530585"
+       id="ellipse2056" />
+    <ellipse
+       id="path3725"
+       cx="11.530585"
+       cy="284.53439"
+       style="fill:none;stroke:#000000;stroke-width:1.63691115;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       inkscape:export-xdpi="50.783939"
+       inkscape:export-ydpi="50.783939"
+       rx="9.6429691"
+       ry="9.6462774" />
+    <path
+       style="fill:#000004;fill-opacity:1;stroke:none;stroke-width:1.63691115;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 2.390749,282.92251 v 2.37998 c 2.5542066,-0.49311 7.526933,-1.57533 7.877396,0.78369 0.691428,3.98138 -0.8580388,5.17075 -0.8822296,8.28137 h 4.4326396 c -0.139692,-3.0688 -1.542527,-4.29712 -0.88077,-8.28137 0.414936,-2.25484 4.648004,-1.44288 7.732637,-0.78369 v -2.37998 c -6.3769,-0.83079 -12.4441529,-0.71544 -18.279673,0 z"
+       id="rect4532"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccccccc"
+       inkscape:export-xdpi="50.783939"
+       inkscape:export-ydpi="50.783939" />
+  </g>
+</svg>

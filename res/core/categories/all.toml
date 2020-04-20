@@ -1,0 +1,7 @@
+name = "All Parts"
+id = "all"
+description = "All parts, regardless of category"
+icon = "categories/all.png"
+
+# We are really low, this is rarely used
+priority = 9999

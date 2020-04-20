@@ -34,6 +34,7 @@ enum NVGcreateFlags {
 	NVG_DEBUG 			= 1<<2,
 };
 
+
 #if defined NANOVG_GL2_IMPLEMENTATION
 #  define NANOVG_GL2 1
 #  define NANOVG_GL_IMPLEMENTATION 1
@@ -50,6 +51,11 @@ enum NVGcreateFlags {
 #endif
 
 #define NANOVG_GL_USE_STATE_FILTER (1)
+
+// [OSPGL] SO we don't need to write this everywhere
+#ifndef NANOVG_GL3
+#define NANOVG_GL3
+#endif 
 
 // Creates NanoVG contexts for different OpenGL (ES) versions.
 // Flags should be combination of the create flags above.

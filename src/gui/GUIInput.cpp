@@ -16,3 +16,9 @@ bool GUIInput::is_mouse_inside(glm::ivec2 pos, glm::ivec2 size)
 		return false;
 	}
 }
+
+
+bool GUIInput::is_mouse_clicked(int btn)
+{
+	return glfwGetMouseButton(input->window, btn) == GLFW_PRESS; 
+}

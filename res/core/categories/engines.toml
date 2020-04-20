@@ -1,0 +1,6 @@
+name = "Engines"
+id = "engines"
+description = "A wide variety of thrust-generating devices"
+icon = "categories/engines.png"
+
+priority = -9998

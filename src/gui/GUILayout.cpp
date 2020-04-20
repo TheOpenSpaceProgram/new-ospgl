@@ -14,8 +14,8 @@ void GUILayout::remove_widget(GUIWidget* widget)
 	{
 		if(*it == widget)
 		{
-			widgets.erase(it);
 			on_remove_widget(widget);
+			widgets.erase(it);
 			return;
 		}
 	}
@@ -61,6 +61,16 @@ void GUILayout::prepare_wrapper(glm::ivec2 pos, glm::ivec2 size, GUIInput* gui_i
 	prepare(gui_input);
 
 	prepare_vscrollbar(gui_input);
+}
+
+void GUILayout::remove_all_widgets()
+{
+	for(GUIWidget* w : widgets)
+	{
+		on_remove_widget(w);
+	}
+
+	widgets.clear();
 }
 
 #include <util/InputUtil.h>

@@ -1,4 +1,6 @@
+#pragma once
 #include "../GUILayout.h"
+
 
 class GUIVerticalLayout : public GUILayout
 {

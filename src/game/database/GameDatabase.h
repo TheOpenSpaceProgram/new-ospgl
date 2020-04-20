@@ -17,8 +17,10 @@ public:
 
 	std::vector<std::string> parts;	
 	std::vector<std::string> systems;
+	std::vector<std::string> part_categories;
 
 	void add_part(const std::string& path, const std::string& pkg);
+	void add_part_category(const std::string& path, const std::string& pkg);
 
 	GameDatabase();
 };

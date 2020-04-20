@@ -1,0 +1,13 @@
+name = "Command Pods"
+id = "command"
+description = "These modules allow controlling a vehicle using different methods"
+icon = "categories/command.png"
+
+# Used for ordering the categories in a reasonable manner
+# Mods should let it undefined (or equal to 0)
+# The lower the number, the earlier it appears
+priority = -9999
+
+# add_parts = ["path_of_parts_to_force_add"]
+# add_parts_with_machine = ["name_of_machines"]
+
