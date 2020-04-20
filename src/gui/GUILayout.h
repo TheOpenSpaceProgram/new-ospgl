@@ -59,7 +59,7 @@ public:
 
 	// By default, the layout will glScissor its area
 	// and draw scrollbars if needed
-	virtual void draw(NVGcontext* vg);
+	virtual void draw(NVGcontext* vg, GUISkin* skin);
 	void prepare_wrapper(glm::ivec2 pos, glm::ivec2 size, GUIInput* gui_input);
 	virtual void prepare(GUIInput* gui_input) = 0;
 

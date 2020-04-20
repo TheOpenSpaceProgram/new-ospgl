@@ -50,7 +50,7 @@ public:
 
 	void debug(glm::ivec2 real_position, glm::ivec2 real_size, NVGcontext* vg);
 
-	void draw(NVGcontext* vg, glm::ivec4 def_scissor);
+	void draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor);
 
 	GUICanvas()
 	{

@@ -28,47 +28,29 @@ public:
 		return size;
 	}
 
-	virtual void draw(NVGcontext* vg) override
+	virtual void draw(NVGcontext* vg, GUISkin* skin) override
 	{
-		float x = (float)pos.x;
-		float y = (float)pos.y;
-		float w = (float)size.x;
-		float h = (float)size.y;
-
-		nvgBeginPath(vg);
-		nvgRect(vg, x, y, w, h);
-		if(hover)
-		{
-			nvgFillColor(vg, nvgRGB(128, 255, 128));
-		}
-		else
-		{
-			nvgFillColor(vg, nvgRGB(64, 128, 64));
-		}
-		nvgFill(vg);
+		skin->draw_button(vg, pos, size, "", GUISkin::ButtonState::NORMAL, GUISkin::ButtonStyle::SYMMETRIC);
 
 		if(image > 0)
 		{
 			
-			NVGpaint img_fill = nvgImagePattern(vg, x, y, size.x, size.y, 0.0f, image, 1.0f);
+			NVGpaint img_fill = nvgImagePattern(vg, pos.x, pos.y, size.x, size.y, 0.0f, image, 1.0f);
 			nvgBeginPath(vg);
 			nvgFillPaint(vg, img_fill);
-			nvgRect(vg, x, y, w, h);
+			nvgRect(vg, pos.x, pos.y, size.x, size.y);
 			nvgFill(vg);
-		}
-		else
-		{
-			nvgFontSize(vg, 14.0f);
-			nvgFontFace(vg, "bold");
-			nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-			nvgFillColor(vg, nvgRGB(0, 0, 0));
-			nvgText(vg, x + floor(w / 2), y + floor(h / 2), name.c_str(), nullptr);
 		}
 	}
 
 	void set_image(NVGcontext* vg, Image* to)
 	{
 		image = nvglCreateImageFromHandleGL3(vg, to->id, to->get_width(), to->get_height(), 0);
+	}
+
+	void set_image(NVGcontext* vg, GLuint handle, glm::ivec2 size)
+	{
+		image = nvglCreateImageFromHandleGL3(vg, handle, size.x, size.y, 0);
 	}
 
 };

@@ -81,7 +81,7 @@ void GBuffer::bind()
 void GBuffer::unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)unbind_to);
-	glViewport(0, 0, unbind_viewport[2], unbind_viewport[3]);
+	glViewport(unbind_viewport[0], unbind_viewport[1], unbind_viewport[2], unbind_viewport[3]);
 }
 
 void GBuffer::set_viewport()

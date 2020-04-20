@@ -19,7 +19,8 @@ public:
 	enum LightType
 	{
 		POINT,
-		SUN
+		SUN, 
+		PART_ICON
 	};
 
 

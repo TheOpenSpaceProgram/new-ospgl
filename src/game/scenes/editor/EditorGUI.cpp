@@ -33,7 +33,7 @@ void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 
 	// Draw the side pane
 	float swidth = float(
-		(part_icon_size + part_margin) * parts_per_row + 	// < Icons take one margin per part
+		(part_icon_size.x + part_margin) * parts_per_row + 	// < Icons take one margin per part
 		category_icon_size + part_margin * 2 + 3);			// < Margins of the part list + category margins
 
 
@@ -44,7 +44,7 @@ void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 
 
 	def_panel.prepare(glm::ivec2(0, 0), glm::ivec2(swidth, height), gui_input);	
-	def_panel.draw(vg, glm::ivec4(0, 0, width, height));
+	def_panel.draw(vg, &skin, glm::ivec4(0, 0, width, height));
 	//def_panel.debug(glm::ivec2(0, 0), glm::ivec2(swidth, height), vg);
 
 	prev_width = width;
@@ -55,13 +55,19 @@ void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 
 void EditorGUI::init(EditorScene* sc)
 {
+	icon_renderer = new PartIconRenderer(part_icon_size);
+	
 	prev_width = 0;
 	prev_height = 0;
 
 	// Load all exposed via the database parts
 	for(const std::string& path : sc->get_osp()->game_database.parts)
 	{
-		all_parts.emplace_back(path);
+		all_parts.emplace_back();
+		all_parts.back().proto = AssetHandle<PartPrototype>(path);
+		all_parts.back().angle = 0.0;
+		all_parts.back().icon = 0;
+		all_parts.back().render(icon_renderer);		
 	}	
 
 	// Load categories
@@ -117,6 +123,7 @@ void EditorGUI::init(EditorScene* sc)
 	current_category = "command";
 	update_part_list();
 
+
 }
 
 
@@ -124,15 +131,39 @@ void EditorGUI::update_part_list()
 {
 	part_list->remove_all_widgets();
 
-	for(AssetHandle<PartPrototype>& proto : all_parts)
+	for(auto& p : all_parts)
 	{
+		PartPrototype* proto = p.proto.data;
 		auto it = std::find(proto->categories.begin(), proto->categories.end(), current_category);
 		if(it != proto->categories.end())
 		{
 			GUIImageButton* btn = new GUIImageButton();
-			btn->force_image_size = glm::ivec2(part_icon_size);
+			btn->force_image_size = part_icon_size;
 			btn->name = proto->name;
+			btn->set_image(vg, p.icon, icon_renderer->size);
 			part_list->add_widget(btn);
+
+			btn->during_hover.add_handler([&p, this]()
+					{
+						p.angle += 0.04;
+						p.render(this->icon_renderer);
+					});
+
+			btn->on_leave_hover.add_handler([&p, this]()
+					{
+						p.angle = 0.0;
+						p.render(this->icon_renderer);
+					});
 		}	
 	}
+}
+
+void EditorPart::render(PartIconRenderer* render)
+{
+	if(icon == 0)
+	{
+		icon = render->create_texture();
+	}
+
+	render->render(proto.data, angle, icon);
 }

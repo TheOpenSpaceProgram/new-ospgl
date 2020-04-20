@@ -28,7 +28,7 @@ size_t GUILayout::get_widget_count()
 	return widgets.size();
 }
 
-void GUILayout::draw(NVGcontext* ctx)
+void GUILayout::draw(NVGcontext* ctx, GUISkin* skin)
 {
 	glm::ivec2 pos = get_pos();
 	glm::ivec2 size = get_size();
@@ -40,7 +40,7 @@ void GUILayout::draw(NVGcontext* ctx)
 	{
 		if(widget->is_visible)
 		{
-			widget->draw(ctx);
+			widget->draw(ctx, skin);
 			count++;
 		}
 	}

@@ -119,11 +119,11 @@ void GUICanvas::debug(glm::ivec2 real_pos, glm::ivec2 real_size, NVGcontext* vg)
 
 }
 
-void GUICanvas::draw(NVGcontext* vg, glm::ivec4 def_scissor)
+void GUICanvas::draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor)
 {
 	if(layout)
 	{
-		layout->draw(vg);
+		layout->draw(vg, skin);
 		// Reset scissor test, the layout most likely used it
 		nvgScissor(vg, def_scissor.x, def_scissor.y, def_scissor.z, def_scissor.w);	
 	}
@@ -131,8 +131,8 @@ void GUICanvas::draw(NVGcontext* vg, glm::ivec4 def_scissor)
 	// Draw children
 	if(child_0 || child_1)
 	{
-		child_0->draw(vg, def_scissor);
-		child_1->draw(vg, def_scissor);
+		child_0->draw(vg, skin, def_scissor);
+		child_1->draw(vg, skin, def_scissor);
 	}
 }
 

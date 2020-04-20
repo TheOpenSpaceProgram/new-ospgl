@@ -4,6 +4,7 @@
 #include <nanovg/nanovg.h>
 #include "GUIInput.h"
 #include "Signal.h"
+#include "GUISkin.h"
 
 // Base class for GUIWidgets, which are contained
 // (and managed) by a GUILayout
@@ -29,6 +30,6 @@ public:
 	// pos and size variables, but you must write to them!
 	// This may be called multiple times in the same frame on some cases!
 	virtual glm::ivec2 prepare(glm::ivec2 wpos, glm::ivec2 wsize, GUIInput* gui_input) = 0;
-	virtual void draw(NVGcontext* ctx) = 0;
+	virtual void draw(NVGcontext* ctx, GUISkin* skin) = 0;
 
 };
