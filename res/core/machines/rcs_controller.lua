@@ -2,7 +2,7 @@
 require("vehicle")
 require("universe")
 local logger = require("logger")
-local toml = require("toml")
+require("toml")
 
 local pitch = 0.0
 local yaw = 0.0
@@ -15,7 +15,7 @@ function init()
 	engines = load_engines(machine.init_toml)
 end 
 
-function in_axis(axis, value)
+local function in_axis(axis, value)
 	if axis == "Pitch" then
 		pitch = value 
 	elseif axis == "Yaw" then
@@ -40,11 +40,11 @@ end
 
 -- Quite complex, we "simulate" the effect each engine has on the
 -- vessel, if it's wanted we turn on that engine, otherwise we turn if off
-function write_to_engines()
+local function write_to_engines()
 
 end
 
-function load_engines(toml)
+local function load_engines(toml)
 	local list = toml:get_array_of_string("engines")
 
 	local engines = {}

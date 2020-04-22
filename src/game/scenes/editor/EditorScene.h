@@ -2,7 +2,7 @@
 #include "../Scene.h"
 #include <nanovg/nanovg.h>
 #include "EditorCamera.h"
-#include "EditorGUI.h"
+#include "gui/EditorGUI.h"
 #include "EditorVehicle.h"
 
 

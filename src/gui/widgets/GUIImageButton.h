@@ -30,7 +30,7 @@ public:
 
 	virtual void draw(NVGcontext* vg, GUISkin* skin) override
 	{
-		skin->draw_button(vg, pos, size, "", GUISkin::ButtonState::NORMAL, GUISkin::ButtonStyle::SYMMETRIC);
+		skin->draw_button(vg, pos, size, "", get_button_state(), GUISkin::ButtonStyle::SYMMETRIC);
 
 		if(image > 0)
 		{

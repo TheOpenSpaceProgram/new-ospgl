@@ -52,8 +52,26 @@ void SimpleSkin::draw_button(NVGcontext* v, glm::ivec2 pos, glm::ivec2 size, con
 	}
 	else
 	{
-		nvgFillColor(v, nvgRGB(21, 21, 21));
-		nvgStrokeColor(v, nvgRGB(73, 73, 73));
+		if(state == ButtonState::CLICKED)
+		{
+			nvgFillColor(v, nvgRGB(73, 73, 73));
+			nvgStrokeColor(v, nvgRGB(142, 142, 142));
+		}
+		else if(state == ButtonState::DISABLED)
+		{
+			nvgFillColor(v, nvgRGB(21, 21, 21));
+			nvgStrokeColor(v, nvgRGB(41, 41, 41));
+		}
+		else if(state == ButtonState::HOVERED)
+		{
+			nvgFillColor(v, nvgRGB(41, 41, 41));
+			nvgStrokeColor(v, nvgRGB(73, 73, 73));
+		}
+		else
+		{
+			nvgFillColor(v, nvgRGB(21, 21, 21));
+			nvgStrokeColor(v, nvgRGB(73, 73, 73));
+		}
 	}
 
 	nvgFill(v);

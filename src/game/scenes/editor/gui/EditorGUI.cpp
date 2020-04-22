@@ -4,7 +4,7 @@
 #include <gui/layouts/GUIVerticalLayout.h>
 #include <gui/layouts/GUIListLayout.h>
 #include <gui/widgets/GUIImageButton.h>
-#include "EditorScene.h"
+#include "../EditorScene.h"
 #include <OSP.h>
 
 
@@ -103,20 +103,31 @@ void EditorGUI::init(EditorScene* sc)
 	for(int i = 0; i < categories.size(); i++)
 	{
 		GUIImageButton* btn = new GUIImageButton();
+		if(i == 0)
+		{
+			btn->toggled = true;
+			old_category_toggled = btn;
+		}
+
 		btn->force_image_size = glm::ivec2(category_icon_size);
 		btn->set_image(vg, categories[i].icon.data);
 		category_list->add_widget(btn);
 		std::string id = categories[i].id;
 
-		btn->on_clicked.add_handler([id, this](int btn)
+		btn->on_clicked.add_handler([id, this, btn](int _)
 		{
 			std::string old_id = this->current_category;
 			this->current_category = id;
+
+			// Toggle off every other button
+			this->old_category_toggled->toggled = false;
+			this->old_category_toggled = btn;
+			btn->toggled = true;
+
 			if(old_id != id)
 			{
 				this->update_part_list();
 			}
-			logger->info("Clicked with id: {}", id);
 		});
 	}
 

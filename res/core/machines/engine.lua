@@ -1,18 +1,24 @@
 require("vehicle") 
-local bullet = require("bullet")
+require("bullet")
 local glm = require("glm")
-local logger = require("logger")
-local toml = require("toml")
+require("toml")
 local debug_drawer = require("debug_drawer")
 
-local thrust = machine.init_toml:get_number("thrust")
-local throttle = 0.0
-local nozzle = machine.init_toml:get_string("nozzle")
-
+local thrust = nil 
+local throttle = nil 
+local nozzle = nil 
 local nozzle_dir = nil
 local nozzle_pos = nil
 
-function set_throttle(port, value)
+function init()
+
+	thrust = machine.init_toml:get_number("thrust")
+	throttle = 0.0
+	nozzle = machine.init_toml:get_string("nozzle")
+
+end
+
+local function set_throttle(port, value)
 	
 	throttle = math.max(math.min(value, 1.0), 0.0)
 
@@ -48,20 +54,3 @@ function update(dt)
 
 end
 
--- Implement the functions required for a generic engine
-
-function engine_get_max_thrust()
-	return thrust
-end
-
--- World coordinates, direction of fire, not force
-function engine_get_nozzle_dir()
-	local p_root = part:get_piece("p_root")
-	return p_root:transform_axis(nozzle_dir)
-end 
-
--- World coordinates
-function engine_get_nozzle_pos() 
-	local p_root = part:get_piece("p_root")
-	return glm.vec3.new(p_root:get_global_transform():to_mat4() * glm.vec4.new(nozzle_pos, 1.0))
-end 

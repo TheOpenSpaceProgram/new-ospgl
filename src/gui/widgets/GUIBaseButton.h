@@ -12,6 +12,9 @@ protected:
 public:
 
 	bool hover = false;
+	bool disabled = false;
+	bool toggled = false;	//< If true button will always show the clicked variant
+
 	// We only support left and right buttons
 	bool click[2] = {false, false};
 
@@ -24,4 +27,5 @@ public:
 	Signal<void(int)> on_released;		//< Called the frame the button is released (lmb)
 
 	void do_button(glm::ivec2 pos, glm::ivec2 size, GUIInput* ipt);
+	GUISkin::ButtonState get_button_state();
 };

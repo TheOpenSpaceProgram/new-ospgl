@@ -53,6 +53,8 @@ private:
 
 public:
 
+	GUIImageButton* old_category_toggled;
+
 	PartIconRenderer* icon_renderer;
 
 	SimpleSkin skin;

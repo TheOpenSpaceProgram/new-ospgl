@@ -52,7 +52,7 @@ void PartIconRenderer::render(PartPrototype* proto, double angle, GLuint target)
 	model = glm::rotate(model, angle, glm::dvec3(0.0, 0.0, 1.0));
 
 	glm::dmat4 c_model = glm::translate(glm::dmat4(1.0), -cam_pos);
-	light.sun_dir = glm::dvec3(1.0, 0.0, 0.0);
+	light.sun_dir = glm::normalize(glm::dvec3(1.0, 0.5, 0.0));
 
 	CameraUniforms cu;
 	cu.cam_pos = cam_pos;

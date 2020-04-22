@@ -21,8 +21,7 @@ void GUIBaseButton::set_hover(bool nhover)
 	hover = nhover;
 }
 
-void GUIBaseButton::set_click(int btn, bool value)
-	
+void GUIBaseButton::set_click(int btn, bool value)	
 {
 	if(value)
 	{
@@ -50,8 +49,16 @@ void GUIBaseButton::do_button(glm::ivec2 pos, glm::ivec2 size, GUIInput* ipt)
 		{
 			ipt->mouse_blocked = true;
 
-			set_click(0, ipt->is_mouse_clicked(0));
-			set_click(1, ipt->is_mouse_clicked(1));
+			if(disabled)
+			{
+				set_click(0, false);
+				set_click(1, false);
+			}
+			else
+			{
+				set_click(0, ipt->is_mouse_clicked(0));
+				set_click(1, ipt->is_mouse_clicked(1));
+			}
 
 			set_hover(true);
 			during_hover();
@@ -64,5 +71,30 @@ void GUIBaseButton::do_button(glm::ivec2 pos, glm::ivec2 size, GUIInput* ipt)
 			set_hover(false);
 		}
 	}
+}
 
+
+GUISkin::ButtonState GUIBaseButton::get_button_state()
+{
+	if(toggled)
+	{
+		return GUISkin::ButtonState::CLICKED;
+	}
+
+	if(disabled)
+	{
+		return GUISkin::ButtonState::DISABLED;
+	}
+
+	if(click[0] || click[1])
+	{
+		return GUISkin::ButtonState::CLICKED;
+	}
+
+	if(hover)
+	{
+		return GUISkin::ButtonState::HOVERED;
+	}
+
+	return GUISkin::ButtonState::NORMAL;	
 }

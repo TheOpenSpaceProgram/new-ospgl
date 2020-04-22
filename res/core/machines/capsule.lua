@@ -1,12 +1,8 @@
 require("vehicle")
 require("universe")
 local flight_input = require("flight_input")
-local logger = require("logger")
-local toml = require("toml")
 
 local input_ctx = flight_input.context.new("input/rocket.toml")
-
-local throttle
 
 function get_input_context()
 	return input_ctx
