@@ -57,6 +57,10 @@ private:
 	bool doing_forward;
 	bool doing_deferred;
 
+	// Everytime a drawable is added the number increases, even if the
+	// drawable was added before
+	GLint drawable_uid;
+
 	glm::ivec4 viewport;
 
 	// Setups OpenGL to draw to the gbuffer

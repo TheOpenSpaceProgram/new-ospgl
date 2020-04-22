@@ -102,6 +102,28 @@ void replace_all(std::string& data, const std::string& search, const std::string
 	}
 }
 
+
+std::vector<Mesh*> Node::get_all_meshes_recursive(bool include_ours)
+{
+	std::vector<Mesh*> out;
+
+	if(include_ours)
+	{
+		for(int i = 0; i < meshes.size(); i++)
+		{	
+			out.push_back(&meshes[i]);
+		}
+	}
+
+	for(int i = 0; i < children.size(); i++)
+	{
+		std::vector<Mesh*> from_child = children[i]->get_all_meshes_recursive(true);
+		out.insert(out.end(), from_child.begin(), from_child.end());
+	}
+
+	return out;
+}
+
 void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool drawable)
 {
 	
@@ -462,15 +484,14 @@ void Mesh::unload()
 	}
 }
 
-void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model)
+void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model, GLint did)
 {
 	logger->check(drawable != false, "Cannot draw a non-drawable mesh!");
 
-	// TODO
 	material->shader->use();
 
-	material->set(textures);
-	material->set_core(uniforms, model);
+	material->set(textures, mat_override);
+	material->set_core(uniforms, model, did);
 }
 
 void Mesh::draw_command()
@@ -590,13 +611,13 @@ GPUModelPointer::~GPUModelPointer()
 	}
 }
 
-void Node::draw_all_meshes(const CameraUniforms & uniforms, glm::dmat4 model)
+void Node::draw_all_meshes(const CameraUniforms& uniforms, GLint did, glm::dmat4 model)
 {
 	for (Mesh& mesh : meshes)
 	{
 		if (mesh.is_drawable())
 		{
-			mesh.bind_uniforms(uniforms, model);
+			mesh.bind_uniforms(uniforms, model, did);
 			mesh.draw_command();
 		}
 	}
@@ -620,7 +641,7 @@ void Node::draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model)
 	}
 }
 
-void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, bool ignore_our_subtform)
+void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, GLint did, bool ignore_our_subtform, bool increase_did)
 {
 	glm::dmat4 n_model;
 	if (ignore_our_subtform)
@@ -632,11 +653,16 @@ void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, bool ignore_ou
 		n_model = model * sub_transform; //< Transformations apply in reverse
 	}
 
-	draw_all_meshes(uniforms, n_model);
+	draw_all_meshes(uniforms, did, n_model);
 
 	for (Node* node : children)
 	{
-		node->draw(uniforms, n_model, false);
+		if(increase_did)
+		{
+			// We increase the drawable id
+			did++;
+		}
+		node->draw(uniforms, n_model, did, false);
 	}
 }
 

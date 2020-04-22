@@ -14,6 +14,9 @@ private:
 	bool added;
 	std::string drawable_id;
 
+protected:
+
+	GLint drawable_uid;
 
 public:
 
@@ -34,9 +37,10 @@ public:
 		return added;
 	}
 
-	void notify_add_to_renderer()
+	void notify_add_to_renderer(GLint uid)
 	{
 		added = true;
+		drawable_uid = uid;
 	}
 
 	void notify_remove_from_renderer()

@@ -294,7 +294,8 @@ void Renderer::add_drawable(Drawable* d, std::string n_id)
 {
 	logger->check_important(!d->is_in_renderer(), "Tried to add an already added drawable");
 
-	d->notify_add_to_renderer();
+	drawable_uid++,
+	d->notify_add_to_renderer(drawable_uid);
 
 	if (n_id != "")
 	{
@@ -458,6 +459,7 @@ static void open_gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum
 
 Renderer::Renderer(cpptoml::table& settings)
 {
+	drawable_uid = 0;
 	cam = nullptr;
 
 	override_viewport = glm::dvec4(-1.0, -1.0, -1.0, -1.0);

@@ -77,7 +77,7 @@ void BuildingEntity::physics_update(double pdt)
 
 void BuildingEntity::deferred_pass(CameraUniforms& cu)
 {
-	proto->model->node_by_name["building"]->draw(cu, get_model_matrix(false), true);
+	proto->model->node_by_name["building"]->draw(cu, get_model_matrix(false), drawable_uid, true);
 }
 
 void BuildingEntity::shadow_pass(ShadowCamera& cu)

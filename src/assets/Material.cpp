@@ -3,7 +3,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-void Uniform::set(Shader* sh, const std::string& name, int* gl_tex)
+void Uniform::set(Shader* sh, const std::string& name, int* gl_tex) const
 {
 	if (type == FLOAT)
 	{
@@ -86,13 +86,29 @@ Uniform::~Uniform()
 	}
 }
 
-void Material::set(std::vector<AssimpTexture>& assimp_textures)
+void Material::set(std::vector<AssimpTexture>& assimp_textures, const MaterialOverride& over)
 {
 	int gl_tex = 0;
 
-	for (auto it = uniforms.begin(); it != uniforms.end(); it++)
+	std::unordered_map<std::string, const Uniform*> final_uniforms;
+
+	for(auto it = uniforms.begin(); it != uniforms.end(); it++)
 	{
-		it->second.set(shader, it->first, &gl_tex);
+		final_uniforms[it->first] = &it->second;
+	}
+
+	for(auto it = over.uniforms.begin(); it != over.uniforms.end(); it++)
+	{
+		auto pos = final_uniforms.find(it->first);
+		if(pos != final_uniforms.end())
+		{
+			pos->second = &it->second;
+		}
+	}
+
+	for (auto it = final_uniforms.begin(); it != final_uniforms.end(); it++)
+	{
+		it->second->set(shader, it->first, &gl_tex);
 	}
 
 	for (auto it = assimp_textures.begin(); it != assimp_textures.end(); it++)
@@ -116,7 +132,7 @@ void Material::set(std::vector<AssimpTexture>& assimp_textures)
 
 }
 
-void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
+void Material::set_core(const CameraUniforms& cu, glm::dmat4 model, GLint drawable_id)
 {
 
 	if (core_uniforms.mat4_proj != "")
@@ -181,6 +197,11 @@ void Material::set_core(const CameraUniforms& cu, glm::dmat4 model)
 		// but not view or projection
 		glm::dmat4 final_mat = cu.c_model * model;
 		shader->setMat4(core_uniforms.mat4_deferred_tform, (glm::mat4)final_mat);
+	}
+
+	if(core_uniforms.int_drawable_id != "")
+	{
+		shader->setInt(core_uniforms.int_drawable_id, drawable_id);
 	}
 
 }

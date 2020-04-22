@@ -24,7 +24,6 @@ private:
 
 	// It's only loaded while we are uploaded
 	AssetHandle<Material> material;
-
 	std::vector<AssimpTexture> textures;
 
 	bool drawable;
@@ -37,6 +36,8 @@ public:
 	size_t data_size;
 	size_t index_count;
 
+	MaterialOverride mat_override;
+	
 	// Only present on non drawable meshes! Used internally
 	std::vector<glm::vec3> verts;
 
@@ -56,7 +57,7 @@ public:
 
 
 	// Binds core uniforms and material uniforms
-	void bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model);
+	void bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model, GLint drawable_id);
 
 	// Only issues the draw command, does absolutely nothing else
 	void draw_command();
@@ -84,14 +85,16 @@ struct Node
 
 	std::unordered_map<std::string, std::string> properties;
 
-	void draw_all_meshes(const CameraUniforms& uniforms, glm::dmat4 model);
+	std::vector<Mesh*> get_all_meshes_recursive(bool include_ours = true);
+
+	void draw_all_meshes(const CameraUniforms& uniforms, GLint drawable_id, glm::dmat4 model);
 	void draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model);
 
 	// Draws all meshes, and call sthe same on all children,
 	// accumulating sub transforms
 	// The ignore_our_subtform flag is useful specially for stuff like parts
 	// where the piece transform is ignored during game rendering
-	void draw(const CameraUniforms& uniforms, glm::dmat4 model, bool ignore_our_subtform = false);
+	void draw(const CameraUniforms& uniforms, glm::dmat4 model, GLint drawable_id, bool ignore_our_subtform, bool increase_did = false);
 	void draw_shadow(const ShadowCamera& sh_cam, glm::dmat4 model, bool ignore_our_subtform = false);
 };
 

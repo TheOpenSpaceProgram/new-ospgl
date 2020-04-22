@@ -80,7 +80,7 @@ private:
 
 public:
 
-	void set(Shader* sh, const std::string& name, int* gl_tex);
+	void set(Shader* sh, const std::string& name, int* gl_tex) const;
 
 	Uniform(float v);
 	Uniform(int v);
@@ -176,7 +176,8 @@ struct CoreUniforms
 	// If any equals "", it's not bound
 	std::string mat4_proj, mat4_view, mat4_camera_model, mat4_proj_view, mat4_camera_tform, mat4_model,
 		mat4_deferred_tform,
-		mat4_final_tform, mat3_normal_model, float_far_plane, float_f_coef, vec3_camera_relative;
+		mat4_final_tform, mat3_normal_model, float_far_plane, float_f_coef, vec3_camera_relative,
+		int_drawable_id;
 
 	// Lightning core uniforms:
 
@@ -200,8 +201,15 @@ struct CoreUniforms
 		vec3_camera_relative = "camera_relative";
 		mat4_deferred_tform = "deferred_tform";
 		vec3_sunlight_dir = "sunlight_dir";
+		int_drawable_id = "";
 	}
 };
+
+struct MaterialOverride
+{
+	std::unordered_map<std::string, Uniform> uniforms;
+};
+
 
 struct Material
 {
@@ -226,12 +234,13 @@ struct Material
 	CoreUniforms core_uniforms;
 
 
-	void set(std::vector<AssimpTexture>& assimp_textures);
-	void set_core(const CameraUniforms& cu, glm::dmat4 model);
+	void set(std::vector<AssimpTexture>& assimp_textures, const MaterialOverride& over);
+	void set_core(const CameraUniforms& cu, glm::dmat4 model, GLint drawable_id);
 
 };
 
 Material* load_material(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
+
 
 template<>
 class GenericSerializer<Material>
@@ -456,6 +465,7 @@ public:
 		SAFE_TOML_GET_OR(to.float_far_plane, "far_plane", std::string, "");
 		SAFE_TOML_GET_OR(to.float_f_coef, "f_coef", std::string, "");
 		SAFE_TOML_GET_OR(to.vec3_camera_relative, "camera_relative", std::string, "");
+		SAFE_TOML_GET_OR(to.int_drawable_id, "drawable_id", std::string, "");
 	}
 };
 

@@ -1,3 +1,4 @@
+
 #version 330 core
 
 layout (location = 0) in vec3 aPos;
@@ -8,9 +9,6 @@ uniform mat3 normal_model;
 uniform mat4 final_tform;
 uniform mat4 deferred_tform;
 uniform vec3 camera_relative;
-
-#include <test.sh>
-#include "../testing/test.sh"
 
 uniform float f_coef;
 

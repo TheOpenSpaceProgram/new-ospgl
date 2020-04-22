@@ -1,3 +1,6 @@
+// Implements common atmosphere functionality for stuff inside atmospheres,
+// the atmosphere shader itself is cheap.fs
+
 const int ATMO_STEPS = 4;
 const float ATMO_STEPS_INVERSE = 1.0 / float(ATMO_STEPS);
 
