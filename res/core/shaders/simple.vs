@@ -9,6 +9,8 @@ uniform mat4 final_tform;
 uniform mat4 deferred_tform;
 uniform vec3 camera_relative;
 
+#include <test.sh>
+#include "../testing/test.sh"
 
 uniform float f_coef;
 

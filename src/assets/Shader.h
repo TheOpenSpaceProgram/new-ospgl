@@ -12,7 +12,18 @@ class Shader
 {
 private:
 
+
+	// For the preprocessor
+	std::string pkg;
+	std::string name;
+	
 	// Run basic preprocessing on shader
+	// We allow:
+	// #include <absolute_path>		(Allows packages)
+	// #include "relative_path"		(Doesn't allow packages, just relative paths)
+	// (#define is already done by the GLSL compiler)
+	// There MUST be an space after the macro name (#include<test> is INVALID) 
+	// Relative paths are very strict, always use ../ for going back, etc...
 	std::string preprocessor(const std::string& file);
 
 
@@ -62,7 +73,7 @@ public:
 		glUniformMatrix3fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
 	}
 
-	Shader(const std::string& vertexData, const std::string& fragmentData);
+	Shader(const std::string& vertexData, const std::string& fragmentData, const std::string& pkg, const std::string& path);
 	~Shader();
 };
 
