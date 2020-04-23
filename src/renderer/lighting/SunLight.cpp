@@ -24,19 +24,23 @@ static void make_shadow_fbuffer(GLuint& fbo, GLuint& tex, int SIZE)
 }
 
 
-SunLight::SunLight()
+SunLight::SunLight(int far_size, int near_size)
 {
+	near_shadow_size = near_size;
+	far_shadow_size = far_size;
+
 	shader = assets->get<Shader>("core", "shaders/light/sunlight.vs");
 	color = glm::vec3(1.0f, 0.9f, 0.9f);
 	spec_color = glm::vec3(1.0f, 0.8f, 0.8f);
 	ambient_color = glm::vec3(0.1f, 0.1f, 0.1f);
 
 	// Create the shadow framebuffers
-	make_shadow_fbuffer(far_shadow_fbo, far_shadow_tex, FAR_SHADOW_SIZE);
-	make_shadow_fbuffer(near_shadow_fbo, near_shadow_tex, NEAR_SHADOW_SIZE);
+	make_shadow_fbuffer(far_shadow_fbo, far_shadow_tex, far_size);
+	make_shadow_fbuffer(near_shadow_fbo, near_shadow_tex, near_size);
 
 	// Reasonable value 
 	near_shadow_span = 50.0;	
+	position = glm::dvec3(0, 0, 0);
 }
 
 
@@ -49,13 +53,16 @@ void SunLight::do_pass(CameraUniforms& cu, GBuffer* gbuf)
 	prepare_shader(shader, gbuf);
 
 	// Sun pso relative to the camera
-	glm::dvec3 sun_pos = glm::dvec3(0, 0, 0) - cu.cam_pos;
+	glm::dvec3 sun_pos = position - cu.cam_pos;
 	shader->setVec3("sun_pos", sun_pos);
 	shader->setVec3("color", color);
 	shader->setVec3("spec_color", spec_color);
 	shader->setVec3("ambient_color", ambient_color);
 
-	glm::dmat4 near_shadow_tform = near_shadow_cam.tform * glm::inverse(cu.c_model);
+//	glm::dmat4 pos_mat = glm::translate(glm::dmat4(1.0), -position);
+	glm::dmat4 pos_mat = glm::dmat4(1.0);
+
+	glm::dmat4 near_shadow_tform = near_shadow_cam.tform * pos_mat * glm::inverse(cu.c_model);
 
 	shader->setMat4("near_shadow_tform", near_shadow_tform);
 	// Keep in mind space used by gbuffer textures
@@ -72,12 +79,13 @@ ShadowCamera SunLight::get_shadow_camera(glm::dvec3 camera_pos)
 	float far_plane = near_shadow_span * 4.0;
 	near_shadow_cam.proj = glm::ortho(-near_shadow_span, near_shadow_span, -near_shadow_span, near_shadow_span, 1.0, (double)far_plane);
 	// TODO: Maybe a fix for when the camera is on the positive y position? Rare but could happen!
-	near_shadow_cam.view = glm::lookAt(glm::dvec3(0, 0, 0), camera_pos, glm::dvec3(0.0, 1.0, 0.0));
-	glm::dvec3 sun_pos = camera_pos - glm::normalize(camera_pos) * near_shadow_span * 2.0;
+	glm::dvec3 dir = glm::normalize(camera_pos - position);
+	glm::dvec3 sun_pos = camera_pos - dir * near_shadow_span * 2.0;
+	near_shadow_cam.view = glm::lookAt(glm::dvec3(0, 0, 0), dir, glm::dvec3(0.0, 1.0, 0.0));
 
 	near_shadow_cam.c_camera = glm::translate(glm::dmat4(1.0), -sun_pos);
 	near_shadow_cam.fbuffer = near_shadow_fbo;
-	near_shadow_cam.size = NEAR_SHADOW_SIZE;
+	near_shadow_cam.size = near_shadow_size;
 	near_shadow_cam.far_plane = far_plane;	
 	near_shadow_cam.cam_pos = sun_pos;
 

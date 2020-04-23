@@ -3,3 +3,8 @@
 	height = 768
 	scale = 0.75
 	type = "windowed"	
+
+[renderer.quality]	
+	sun_shadow_size = 512 
+	sun_terrain_shadow_size = 512
+	secondary_shadow_size = 256

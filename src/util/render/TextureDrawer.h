@@ -22,6 +22,7 @@ public:
 	void draw(GLuint tex, glm::vec2 pos, glm::vec2 size, glm::ivec2 screen_size, bool vflip = true);
 	void draw(GLuint tex, glm::vec2 pos, glm::vec2 size, glm::ivec2 screen_size, Shader* cshader, bool vflip = true);
 	void issue_fullscreen_rectangle();
+	void issue_rectangle(glm::vec2 pos0, glm::vec2 size);
 
 	TextureDrawer();
 	~TextureDrawer();

@@ -3,7 +3,7 @@
 #include <universe/Universe.h>
 #include <renderer/camera/SimpleCamera.h>
 #include "FlightInput.h"
-
+#include <renderer/lighting/SunLight.h>
 
 class FlightScene : public Scene
 {
@@ -13,6 +13,7 @@ private:
 	Universe* universe;
 	GameState* game_state;
 	
+	SunLight sun;
 
 public:
 

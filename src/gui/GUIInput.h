@@ -30,6 +30,8 @@ public:
 
 	// 0 = left
 	// 1 = right
-	// 2 = middle (try not to use as it may not be supported on some laptops)
+	// 2 = middle
+	// Usage of middle button is discouraged because, unlike the scrollbar,
+	// some laptops users may not be able to use a scrollbar click
 	bool is_mouse_clicked(int button = 0);
 };

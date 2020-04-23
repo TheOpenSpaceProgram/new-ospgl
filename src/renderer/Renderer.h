@@ -16,11 +16,11 @@
 #include "lighting/Light.h"
 #include <nanovg/nanovg.h>
 
+#include "RendererQuality.h"
+
 //#define ENABLE_GL_DEBUG
 
 class PlanetarySystem;
-// ?
-
 // Allows scaled rendering of the 3D scene to a framebuffer
 // and then UI drawing (in real resolution) over it
 // It first does a deferred rendering pass, and then a
@@ -34,12 +34,8 @@ class PlanetarySystem;
 // 		SunLights use a special system (they need two cascades, one 
 // 		for landscape shadows (far) and another for vehicle shadows (close))
 // 
-// 		TODO: Other lights
-// 	
 // 		Note: Sunlight is approximated as a directional light,
 // 			eclipses could be slightly different	
-
-
 class Renderer
 {
 private:
@@ -89,6 +85,8 @@ private:
 	std::vector<Light*> lights;
 
 public:
+
+	RendererQuality quality;
 
 	// If values are positive, it will apply a glViewport
 	// to forward and deferred (GUI is always full) adjusted

@@ -5,6 +5,7 @@
 #include "gui/EditorGUI.h"
 #include "EditorVehicle.h"
 
+#include <renderer/lighting/SunLight.h>
 
 class EditorScene : public Scene
 {
@@ -13,6 +14,9 @@ private:
 	EditorCamera cam;
 	EditorGUI gui;
 	EditorVehicle vehicle;
+
+	SunLight sun;
+
 
 	void do_gui();
 

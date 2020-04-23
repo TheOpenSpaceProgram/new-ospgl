@@ -128,7 +128,6 @@ void Renderer::prepare_forward(CameraUniforms& cu)
 	{
 
 		glBindFramebuffer(GL_FRAMEBUFFER, fbuffer->fbuffer);
-		glViewport(viewport.x, viewport.y, viewport.z, viewport.w);
 		glClear(GL_COLOR_BUFFER_BIT); //< Don't clear the depth buffer!
 
 		doing_deferred = false;
@@ -145,7 +144,17 @@ void Renderer::prepare_forward(CameraUniforms& cu)
 		// Do a pass for every light
 		for (Light* l : lights)
 		{
+			if(l->needs_fullscreen_viewport())
+			{
+				glViewport(0, 0, swidth, sheight);
+			}
+			else
+			{
+				glViewport(viewport.x, viewport.y, viewport.z, viewport.w);
+			}
+
 			l->do_pass(cu, gbuffer);
+			
 		}
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -156,6 +165,7 @@ void Renderer::prepare_forward(CameraUniforms& cu)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		}
 
+		glViewport(viewport.x, viewport.y, viewport.z, viewport.w);
 
 	}
 }
@@ -244,9 +254,9 @@ void Renderer::render(PlanetarySystem* system)
 		viewport = glm::ivec4(0, 0, swidth, sheight);
 	}
 
-	prepare_deferred();
-
 	CameraUniforms c_uniforms = cam->get_camera_uniforms(rswidth, rsheight);
+	
+	prepare_deferred();
 
 	if (render_enabled)
 	{
@@ -547,6 +557,9 @@ Renderer::Renderer(cpptoml::table& settings)
 	nvgCreateFont(vg, "medium", (assets->res_path + "core/fonts/Roboto-Medium.ttf").c_str()); 
 
 	resize(width, height, scale);
+
+	auto quality_toml = settings.get_table_qualified("renderer.quality");
+	SerializeUtil::read_to(*quality_toml, quality);
 
 }
 

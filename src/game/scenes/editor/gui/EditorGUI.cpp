@@ -27,15 +27,20 @@ void EditorCategory::load_from_path(const std::string& path)
 	assets->set_current_package(prev_pkg);
 }
 
+
+int EditorGUI::get_panel_width()
+{
+	return
+		(part_icon_size.x + part_margin) * parts_per_row + 	// < Icons take one margin per part
+		category_icon_size + part_margin * 2 + 3;			// < Margins of the part list + category margins
+}
+
 void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 {
 	float w = (float)width; float h = (float)height;
 
 	// Draw the side pane
-	float swidth = float(
-		(part_icon_size.x + part_margin) * parts_per_row + 	// < Icons take one margin per part
-		category_icon_size + part_margin * 2 + 3);			// < Margins of the part list + category margins
-
+	float swidth = (float)get_panel_width();
 
 	nvgBeginPath(vg);
 	nvgRect(vg, 0.0f, 0.0f, swidth, 1.0f * h);

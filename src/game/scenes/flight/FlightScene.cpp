@@ -69,6 +69,11 @@ void FlightScene::load()
 		logger->info("?");
 		input.set_ctx(result.get<InputContext*>());		
 	}	
+
+	Renderer* r = get_osp()->renderer;
+	
+	sun = SunLight(r->quality.sun_terrain_shadow_size, r->quality.sun_shadow_size);
+	r->add_light(&sun);
 }
 
 void FlightScene::unload()

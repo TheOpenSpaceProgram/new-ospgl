@@ -675,7 +675,7 @@ void Node::draw_shadow(const ShadowCamera& sh_cam, glm::dmat4 model, bool ignore
 	}
 	else
 	{
-		n_model = sub_transform * model;
+		n_model = model * sub_transform;
 	}
 
 	draw_all_meshes_shadow(sh_cam, n_model);

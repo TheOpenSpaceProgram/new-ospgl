@@ -1,6 +1,7 @@
 #pragma once
 #include <universe/vehicle/Vehicle.h>
 #include <renderer/Drawable.h>
+#include <universe/vehicle/VehicleLoader.h>
 
 class EditorVehicle : public Drawable
 {
@@ -18,7 +19,8 @@ public:
 
 	EditorVehicle() : Drawable()
 	{
-
+		auto vehicle_toml = SerializeUtil::load_file("udata/vehicles/Test Vehicle.toml");
+		veh = VehicleLoader::load_vehicle(*vehicle_toml);
 	}
 
 };

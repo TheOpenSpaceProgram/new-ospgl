@@ -60,6 +60,7 @@ public:
 	virtual ShadowCamera get_far_shadow_camera() { return ShadowCamera(); }; //< Only on SunLight
 	virtual bool casts_shadows() { return false; }
 
+	virtual bool needs_fullscreen_viewport() { return true; }
 
 	Light()
 	{

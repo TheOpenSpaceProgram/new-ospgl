@@ -78,6 +78,9 @@ void main()
 	diff *= shadow;
 	spec *= shadow;
 
+	//shadow = texture(near_shadow_map, TexCoords).r;
+
+	//FragColor = vec4(shadow, shadow, shadow, 1.0);
     FragColor = vec4(diff + spec + ambient + emit, 1.0);
 
 }  

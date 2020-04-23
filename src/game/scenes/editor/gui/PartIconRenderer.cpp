@@ -40,9 +40,7 @@ void PartIconRenderer::render(PartPrototype* proto, double angle, GLuint target)
 	
 	double cam_distance = radius / glm::sin(fov / 2.0); 
 
-	logger->info("Radius: {} Fov: {} Cam distance: {}", radius, fov, cam_distance);
-
-	cam_distance *= 1.5;
+	cam_distance *= 1.6;
 
 	glm::dvec3 cam_pos = glm::dvec3(cam_distance, 0.0, 0.0);
 	

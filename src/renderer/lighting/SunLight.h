@@ -1,7 +1,6 @@
 #pragma once
 #include "Light.h"
-// Simplest thing, always at (0, 0, 0). It's actually a point-light
-// but renders a fullscreen quad. It also allows setting ambient light
+// It's actually a point-light but renders a fullscreen quad. It also allows setting ambient light
 //
 // Shadows:
 // 	We need to render two shadow maps.
@@ -13,16 +12,19 @@ class SunLight : public Light
 {
 private:
 
+	int near_shadow_size;
+	int far_shadow_size;
+
 	Shader* shader;
 
 public:
+
+	glm::dvec3 position;
 
 	glm::vec3 color;
 	glm::vec3 spec_color;
 	glm::vec3 ambient_color;
 
-	constexpr static int FAR_SHADOW_SIZE = 512;
-	constexpr static int NEAR_SHADOW_SIZE = 512;
 
 	GLuint far_shadow_fbo;
 	GLuint near_shadow_fbo;
@@ -37,7 +39,7 @@ public:
 	ShadowCamera near_shadow_cam;
 	ShadowCamera far_shadow_cam;
 
-	SunLight();
+	SunLight(int far_shadow_size = 512, int near_shadow_size = 512);
 	~SunLight();
 
 	virtual LightType get_type () override { return SUN; }

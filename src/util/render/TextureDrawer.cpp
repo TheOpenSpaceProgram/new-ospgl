@@ -50,6 +50,12 @@ void TextureDrawer::issue_fullscreen_rectangle()
 	glBindVertexArray(0);
 }
 
+void TextureDrawer::issue_rectangle(glm::vec2 pos0, glm::vec2 size)
+{
+
+}
+
+
 TextureDrawer::TextureDrawer()
 {
 	float vertices[] = {

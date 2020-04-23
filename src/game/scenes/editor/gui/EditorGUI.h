@@ -82,4 +82,6 @@ public:
 	// Called when chaning category
 	void update_part_list();
 
+	int get_panel_width();
+
 };
