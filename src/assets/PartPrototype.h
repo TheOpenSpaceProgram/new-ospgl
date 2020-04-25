@@ -14,6 +14,15 @@ struct Marker
 	glm::dvec3 forward;
 };
 
+struct PieceAttachment
+{
+	std::string marker, name;
+	bool radial, stack;
+	double size;	
+
+	void load(const cpptoml::table& toml);
+};
+
 // NOTE: PartPrototype handles the lifetime of collider
 // NOTE: Colliders are always Z axis is up (same as blender!)
 struct PiecePrototype
@@ -24,7 +33,7 @@ struct PiecePrototype
 	glm::dmat4 render_offset; //< Offset inside of the part, for rendering
 	btTransform collider_offset;
 	std::unordered_map<std::string, Marker> markers;
-
+	std::vector<PieceAttachment> attachments;
 	double mass;
 	double friction;
 	double restitution;

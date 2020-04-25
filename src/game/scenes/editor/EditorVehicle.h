@@ -8,6 +8,7 @@ class EditorVehicle : public Drawable
 public:
 
 	Vehicle* veh;
+	bool draw_attachments;
 
 	virtual void deferred_pass(CameraUniforms& cu);
 	virtual void forward_pass(CameraUniforms& cu);

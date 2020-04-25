@@ -7,6 +7,8 @@
 
 #include <renderer/lighting/SunLight.h>
 
+#include <assets/Model.h>
+
 class EditorScene : public Scene
 {
 private:
@@ -15,8 +17,9 @@ private:
 	EditorGUI gui;
 	EditorVehicle vehicle;
 
-	SunLight sun;
+	GPUModelNodePointer stack_model, radial_model, stack_radial_model, receive_model;	
 
+	SunLight sun;
 
 	void do_gui();
 

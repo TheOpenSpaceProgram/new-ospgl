@@ -1,5 +1,5 @@
 #include "Framebuffer.h"
-#include "../Logger.h"
+#include <util/Logger.h>
 
 
 void Framebuffer::bind()

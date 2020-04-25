@@ -1,7 +1,7 @@
 #include "PointLight.h"
 #include "../../assets/AssetManager.h"
-#include "../../util/render/TextureDrawer.h"
-#include "../../util//geometry/SphereGeometry.h"
+#include <renderer/util/TextureDrawer.h>
+#include <renderer/geometry/SphereGeometry.h>
 
 // We use a global object for this
 static GLuint vao = 0, vbo = 0, ebo = 0;

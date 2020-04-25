@@ -555,6 +555,8 @@ void Model::free_gpu()
 
 Model::Model(const aiScene* scene)
 {
+	logger->check_important(scene != nullptr, "Could not load model file, scene is nullptr");
+
 	gpu_users = 0;
 	uploaded = false;
 
@@ -574,7 +576,11 @@ Model* load_model(const std::string& path, const std::string& name, const std::s
 
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, flags);
-
+	if(scene == nullptr)
+	{
+		logger->warn("Error while loading model: {}", importer.GetErrorString());
+	}
+	
 	Model* m = new Model(scene);
 
 	return m;

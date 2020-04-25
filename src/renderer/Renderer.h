@@ -5,10 +5,10 @@
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
-#include <util/render/Framebuffer.h>
-#include <util/render/TextureDrawer.h>
-#include <util/DebugDrawer.h>
-#include "GBuffer.h"
+#include "util/Framebuffer.h"
+#include "util/TextureDrawer.h"
+#include "util/DebugDrawer.h"
+#include "util/GBuffer.h"
 
 #include "camera/Camera.h"
 #include "Drawable.h"

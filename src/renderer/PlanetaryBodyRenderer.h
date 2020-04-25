@@ -2,7 +2,7 @@
 #include "../planet_mesher/quadtree/QuadTreePlanet.h"
 #include "../planet_mesher/mesher/PlanetTileServer.h"
 #include "../planet_mesher/renderer/PlanetRenderer.h"
-#include "../atmosphere/AtmosphereRenderer.h"
+#include "atmosphere/AtmosphereRenderer.h"
 #include "../universe/kepler/KeplerElements.h"
 
 struct RockyPlanetRenderer

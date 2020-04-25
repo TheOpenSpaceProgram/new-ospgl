@@ -2,7 +2,7 @@
 #include <assets/Shader.h>
 #include <assets/AssetManager.h>
 #include <universe/element/body/config/PlanetConfig.h>
-#include <util/geometry/SphereGeometry.h>
+#include "../geometry/SphereGeometry.h"
 
 class AtmosphereRenderer
 {

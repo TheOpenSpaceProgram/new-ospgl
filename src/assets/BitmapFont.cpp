@@ -2,7 +2,7 @@
 #include "AssetManager.h"
 #include <iostream>
 #include <fstream>
-#include "../util/render/TextDrawer.h"
+#include "renderer/util/TextDrawer.h"
 
 // TODO: Not really sure about endianness on this thing?
 

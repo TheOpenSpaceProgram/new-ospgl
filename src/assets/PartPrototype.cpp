@@ -6,6 +6,15 @@
 #pragma warning(pop)
 #include "../physics/glm/BulletGlmCompat.h"
 
+void PieceAttachment::load(const cpptoml::table& from)
+{
+	SAFE_TOML_GET(marker, "marker", std::string);
+	SAFE_TOML_GET(name, "name", std::string);
+	SAFE_TOML_GET_OR(radial, "radial", bool, false);
+	SAFE_TOML_GET_OR(stack, "stack", bool, true);
+	SAFE_TOML_GET(size, "size", double);
+}
+
 
 void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&& n)
 {
@@ -83,7 +92,6 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 			n_marker.origin = translate;
 			n_marker.rotation = orient;
 			n_marker.forward = glm::dvec3(glm::dvec4(0.0, 0.0, 1.0, 0.0) * glm::toMat4(orient));
-
 			/*logger->info("Maker {} has quaternion  {} {} {} {} and forward {} {} {}",
 					child->name, orient.w, orient.x, orient.y, orient.z, 
 					n_marker.forward.x, n_marker.forward.y, n_marker.forward.z); 
@@ -93,6 +101,17 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 		}
 	}
 
+	// Extract attachments if any is present
+	auto attachments_toml = node_toml->get_table_array_qualified("attachment");
+	if(attachments_toml)
+	{
+		for(auto attachment : *attachments_toml)
+		{
+			PieceAttachment attch = PieceAttachment();
+			attch.load(*attachment);
+			proto.attachments.push_back(attch);	
+		}
+	}
 
 	pieces[proto.model_node->name] = proto;
 

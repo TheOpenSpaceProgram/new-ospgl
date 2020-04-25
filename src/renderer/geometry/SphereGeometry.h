@@ -1,7 +1,7 @@
 #pragma once
 #include <cinttypes>
 #include <glm/glm.hpp>
-#include "../MathUtil.h"
+#include <util/MathUtil.h>
 #include <glad/glad.h>
 #include <vector>
 

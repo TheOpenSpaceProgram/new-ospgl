@@ -1,6 +1,6 @@
 #pragma once 
-#include <renderer/GBuffer.h>
-#include <util/render/Framebuffer.h>
+#include <renderer/util/GBuffer.h>
+#include <renderer/util/Framebuffer.h>
 #include <assets/PartPrototype.h>
 #include <renderer/lighting/PartIconLight.h>
 

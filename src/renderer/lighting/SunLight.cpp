@@ -1,6 +1,6 @@
 #include "SunLight.h"
 #include "../../assets/AssetManager.h"
-#include "../../util/render/TextureDrawer.h"
+#include <renderer/util/TextureDrawer.h>
 
 
 static void make_shadow_fbuffer(GLuint& fbo, GLuint& tex, int SIZE)

@@ -1,8 +1,16 @@
 #include "EditorScene.h"
+#include <util/SerializeUtil.h>
+#include <assets/AssetManager.h>
 #include <OSP.h>
 
 void EditorScene::load()
 {
+	// Load the different models
+	std::string model_path = *SerializeUtil::load_file(assets->resolve_path("core:meshes/editor_attachment.toml"))
+		->get_as<std::string>("model");
+
+	AssetHandle<Model> model = AssetHandle<Model>(model_path);
+
 	gui.vg = get_osp()->renderer->vg;
 	gui.init(this);
 

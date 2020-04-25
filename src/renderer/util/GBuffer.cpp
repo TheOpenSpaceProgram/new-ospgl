@@ -1,5 +1,5 @@
 #include "GBuffer.h"
-#include "../util/Logger.h"
+#include <util/Logger.h>
 
 void GBuffer::create(size_t width, size_t height)
 {

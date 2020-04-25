@@ -1,6 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
-#include "../GBuffer.h"
+#include "../util/GBuffer.h"
 #include "../../assets/Shader.h"
 #include "../camera/CameraUniforms.h"
 #include "ShadowCamera.h"

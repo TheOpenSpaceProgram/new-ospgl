@@ -1,6 +1,6 @@
 #include "PartIconLight.h"
 #include <assets/AssetManager.h>
-#include <util/render/TextureDrawer.h>
+#include <renderer/util/TextureDrawer.h>
 
 PartIconLight::PartIconLight()
 {

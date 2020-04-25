@@ -7,7 +7,6 @@
 #include "util/SerializeUtil.h"
 #include "assets/AssetManager.h"
 #include "renderer/Renderer.h"
-#include "util/render/TextDrawer.h"
 #include "util/InputUtil.h"
 #include "lua/LuaCore.h"
 #include "util/defines.h"
