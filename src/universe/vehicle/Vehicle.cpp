@@ -47,6 +47,16 @@ void Vehicle::update(double dt)
 
 }
 
+void Vehicle::editor_update(double dt)
+{
+	for(Part* part : parts)
+	{
+		part->editor_update(dt);
+	}
+
+}
+
+
 std::vector<Vehicle*> Vehicle::physics_update(double dt)
 {
 	if(packed)	

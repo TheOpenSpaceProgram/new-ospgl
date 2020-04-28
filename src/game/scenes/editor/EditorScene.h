@@ -9,6 +9,12 @@
 
 #include <assets/Model.h>
 
+#pragma warning(push, 0)
+#include <btBulletDynamicsCommon.h>
+#include <BulletDynamics/ConstraintSolver/btNNCGConstraintSolver.h>
+#pragma warning(pop)
+#include <physics/debug/BulletDebugDrawer.h>
+
 class EditorScene : public Scene
 {
 private:
@@ -17,13 +23,20 @@ private:
 	EditorGUI gui;
 	EditorVehicle vehicle;
 
-	GPUModelNodePointer stack_model, radial_model, stack_radial_model, receive_model;	
+	// We need a world for the very simple colliders, but we have no 
+	// dynamics, links, or anything like that
+	btDefaultCollisionConfiguration* bt_collision_config;
+	btBroadphaseInterface* bt_brf_interface;
+	btCollisionDispatcher* bt_dispatcher;
+	BulletDebugDrawer* debug_draw;
 
 	SunLight sun;
 
 	void do_gui();
 
 public:
+	
+	btCollisionWorld* bt_world;
 
 	virtual void load() override;
 	virtual void update() override;

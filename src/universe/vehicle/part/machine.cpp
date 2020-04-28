@@ -35,6 +35,12 @@ void Machine::update(double dt)
 	LuaUtil::call_function_if_present(lua_state, "update", "machine update", dt);
 }
 
+void Machine::editor_update(double dt)
+{
+	LuaUtil::call_function_if_present(lua_state, "editor_update", "machine editor_update", dt);
+}
+
+
 void Machine::init(Part* in_part, Universe* in_universe)
 {
 	lua_state["part"] = in_part;

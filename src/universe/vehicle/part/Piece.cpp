@@ -235,6 +235,11 @@ Piece::Piece(Part* in_part, std::string piece_name)
 	collider_offset = part->part_proto->pieces[piece_name].render_offset;
 
 	markers = part->part_proto->pieces[piece_name].markers;
+	for(PieceAttachment atc : part->part_proto->pieces[piece_name].attachments)
+	{
+		attachments.push_back(std::make_pair(atc, false));
+	}
+
 }
 
 Piece::~Piece()

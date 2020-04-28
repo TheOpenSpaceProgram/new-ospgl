@@ -5,12 +5,10 @@
 
 void EditorScene::load()
 {
-	// Load the different models
-	std::string model_path = *SerializeUtil::load_file(assets->resolve_path("core:meshes/editor_attachment.toml"))
-		->get_as<std::string>("model");
 
-	AssetHandle<Model> model = AssetHandle<Model>(model_path);
-
+	debug_drawer->debug_enabled = true;
+	
+	
 	gui.vg = get_osp()->renderer->vg;
 	gui.init(this);
 
@@ -29,6 +27,24 @@ void EditorScene::load()
 	sun.near_shadow_span = 10.0;
 
 	r->add_light(&sun);	
+
+	// Create the bullet physics stuff
+	bt_brf_interface = new btDbvtBroadphase();
+	bt_collision_config = new btDefaultCollisionConfiguration();
+	bt_dispatcher = new btCollisionDispatcher(bt_collision_config);
+	bt_world = new btCollisionWorld(bt_dispatcher, bt_brf_interface, bt_collision_config);	
+	debug_draw = new BulletDebugDrawer();
+	debug_draw->setDebugMode(
+		btIDebugDraw::DBG_DrawConstraints |
+		btIDebugDraw::DBG_DrawWireframe |
+		btIDebugDraw::DBG_DrawFrames |
+		btIDebugDraw::DBG_DrawConstraintLimits |
+		btIDebugDraw::DBG_DrawAabb);
+	bt_world->setDebugDrawer(debug_draw);
+	
+
+	vehicle.scene = this;
+	vehicle.init();
 }
 
 double t = 0.0;
@@ -39,8 +55,16 @@ void EditorScene::update()
 	cam.update(get_osp()->game_dt, &gui_input);
 	gui_input.ext_mouse_blocked |= cam.blocked;
 	gui_input.ext_keyboard_blocked |= cam.blocked;
-	
 	do_gui();
+
+	vehicle.update(get_osp()->game_dt);
+	double rw = get_osp()->renderer->get_width(true) - (double)gui.get_panel_width();
+	double w = (double)gui.get_panel_width() / (double)get_osp()->renderer->get_width(true);
+	glm::dvec4 viewport = glm::dvec4(w, 0.0, 1.0, 1.0);
+	glm::dvec2 real_screen_size = glm::dvec2(get_osp()->renderer->get_width(true), get_osp()->renderer->get_height(true));
+	vehicle.handle_input(cam.get_camera_uniforms(rw, get_osp()->renderer->get_height(true)), viewport, real_screen_size); 
+	
+	bt_world->debugDrawWorld();
 }
 
 void EditorScene::render()
@@ -51,6 +75,7 @@ void EditorScene::render()
 	t += get_osp()->game_dt;
 
 	get_osp()->renderer->render(nullptr);
+
 }
 
 void EditorScene::do_gui()
@@ -66,6 +91,12 @@ void EditorScene::unload()
 	get_osp()->renderer->remove_drawable(&vehicle);
 	get_osp()->renderer->override_viewport = glm::dvec4(0.0, 0.0, 1.0, 1.0);
 	get_osp()->game_state.universe.paused = false;	
+
+	// Destroy the bullet stuff
+	delete bt_world;
+	delete bt_brf_interface;
+	delete bt_dispatcher;
+	delete bt_collision_config;
 }
 
 

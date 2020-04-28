@@ -2,26 +2,64 @@
 #include <universe/vehicle/Vehicle.h>
 #include <renderer/Drawable.h>
 #include <universe/vehicle/VehicleLoader.h>
+#include <gui/GUIInput.h>
 
+class EditorScene;
+
+struct EditorVehicleCollider
+{
+	btRigidBody* rigid;
+};
+
+
+// Only what's needed of a vehicle for the editor, rendering, vehicle data
+// and also the part colliders, but without building welded groups, links,
+// or anything like that (they are used for picking)
 class EditorVehicle : public Drawable
 {
+private:
+
+	void create_collider(Piece* p);
+	void remove_collider(Piece* p);
+
 public:
 
+	EditorScene* scene;
+
+	// The little attachment "handles"
+	// These are drawn in a forward pass as they require transparency
+	GPUModelNodePointer stack_model, radial_model, stack_radial_model, receive_model;	
+
 	Vehicle* veh;
+	std::unordered_map<Piece*, EditorVehicleCollider> colliders; 
+
+	// This allows toggling on all "receive" attachments even if nothing is selected
 	bool draw_attachments;
 
-	virtual void deferred_pass(CameraUniforms& cu);
-	virtual void forward_pass(CameraUniforms& cu);
-	virtual void shadow_pass(ShadowCamera& cu);
+	// The user selects a single piece, but he can use commands to "move"
+	// through all connected pieces to said piece.
+	// Once a piece is selected, it's separated from root if any connection
+	// is present
+	Piece* selected;
 
-	virtual bool needs_deferred_pass() { return true; }
-	virtual bool needs_forward_pass() { return true; }
-	virtual bool needs_shadow_pass() { return true; }
+	virtual void deferred_pass(CameraUniforms& cu) override;
+	virtual void forward_pass(CameraUniforms& cu) override;
+	virtual void shadow_pass(ShadowCamera& cu) override;
 
-	EditorVehicle() : Drawable()
-	{
-		auto vehicle_toml = SerializeUtil::load_file("udata/vehicles/Test Vehicle.toml");
-		veh = VehicleLoader::load_vehicle(*vehicle_toml);
-	}
+	virtual bool needs_deferred_pass() override { return true; }
+	virtual bool needs_forward_pass() override { return true; }
+	virtual bool needs_shadow_pass() override { return true; }
+
+	void init();
+
+	void update(double dt);
+	// Returns true if GUI should be blocked (we have something selected)
+	// Call the function ONLY if key and mouse input is free to use
+	// Clicking ANYWHERE outside viewport results in deletion of the selected
+	// part
+	// Viewport is renderer style, (x0, y0, w, h)
+	bool handle_input(const CameraUniforms& cu, glm::dvec4 viewport, glm::dvec2 real_screen_size);
+
+	EditorVehicle();
 
 };

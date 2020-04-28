@@ -58,6 +58,7 @@ struct PiecePrototype
 		this->restitution = b.restitution;
 		this->friction = b.friction;
 		this->markers = b.markers;
+		this->attachments = b.attachments;
 	}
 
 	// Copy, used for std containers
@@ -71,6 +72,7 @@ struct PiecePrototype
 		this->restitution = b.restitution;
 		this->friction = b.friction;
 		this->markers = b.markers;
+		this->attachments = b.attachments;
 
 		return *this;
 	}

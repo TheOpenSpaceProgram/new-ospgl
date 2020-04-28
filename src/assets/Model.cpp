@@ -135,7 +135,7 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool draw
 
 	size_t pos = ai_mat_name.find_last_of('.');
 
-	if (pos < ai_mat_name.size() && ai_mat_name.substr(pos) == "toml")
+	if (pos < ai_mat_name.size() && ai_mat_name.substr(pos) == ".toml")
 	{
 		mat_ptr = AssetPointer(ai_mat->GetName().C_Str());
 	}
@@ -647,6 +647,28 @@ void Node::draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model)
 	}
 }
 
+void Node::draw_all_meshes_override(const CameraUniforms& uniforms, Material* mat, bool ign, GLint did, glm::dmat4 model)
+{
+	for (Mesh& mesh : meshes)
+	{
+		if (mesh.is_drawable())
+		{
+			mat->shader->use();
+			if(ign)
+			{
+				mat->set(mesh.textures, MaterialOverride());
+			}
+			else
+			{
+				mat->set(mesh.textures, mesh.mat_override);
+			}
+			mat->set_core(uniforms, model, did);
+			mesh.draw_command();
+		}
+	}
+}
+
+
 void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, GLint did, bool ignore_our_subtform, bool increase_did)
 {
 	glm::dmat4 n_model;
@@ -668,9 +690,37 @@ void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, GLint did, boo
 			// We increase the drawable id
 			did++;
 		}
-		node->draw(uniforms, n_model, did, false);
+		node->draw(uniforms, n_model, did, false, increase_did);
 	}
 }
+
+void Node::draw_override(const CameraUniforms& uniforms, Material* mat, glm::dmat4 model, GLint did, 
+			bool ignore_material_override, bool ignore_our_subtform, bool increase_did)
+{
+	glm::dmat4 n_model;
+	if (ignore_our_subtform)
+	{
+		n_model = model;
+	}
+	else
+	{
+		n_model = model * sub_transform; //< Transformations apply in reverse
+	}
+
+	draw_all_meshes_override(uniforms, mat, ignore_material_override, did, n_model);
+
+	for (Node* node : children)
+	{
+		if(increase_did)
+		{
+			// We increase the drawable id
+			did++;
+		}
+		node->draw_override(uniforms, mat, n_model, did, ignore_material_override, false, increase_did);
+	}
+
+}
+
 
 void Node::draw_shadow(const ShadowCamera& sh_cam, glm::dmat4 model, bool ignore_our_subtform)
 {

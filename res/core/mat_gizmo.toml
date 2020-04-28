@@ -1,0 +1,19 @@
+# A material for usage in editor (and potentially, in flight) gizmos
+# Meant for the forward pass
+# Gizmos use a generic lighting direction independent from scene lighting to 
+# showcase their 3D features, but they are emissive by themselves
+
+shader = "core:shaders/gizmo.vs"
+ 
+
+[uniforms]
+	transparency = 0.0
+	[uniforms.color]
+		x = 1.0
+		y = 1.0
+		z = 1.0
+
+[config]
+	has_pos = true
+	has_nrm = true
+

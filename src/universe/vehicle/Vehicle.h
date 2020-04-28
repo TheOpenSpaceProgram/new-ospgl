@@ -97,6 +97,7 @@ public:
 	void set_linear_velocity(glm::dvec3 vel);
 
 	void update(double dt);	
+	void editor_update(double dt);
 
 	// The return is only populated if something separated
 	std::vector<Vehicle*> physics_update(double pdt);

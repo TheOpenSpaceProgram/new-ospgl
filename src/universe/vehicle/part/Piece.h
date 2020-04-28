@@ -146,6 +146,11 @@ public:
 	glm::dquat link_rot;
 
 	std::unordered_map<std::string, Marker> markers;
+	// Attachments don't have any significance in physics, but they are important
+	// for editing vehicles, so we store them, and a bool marking whether they are used 
+	// or not
+	// They are externally managed by the editor (or by wathever changes the vehicle in flight or not)
+	std::vector<std::pair<PieceAttachment, bool>> attachments;	
 
 	Marker& get_marker(const std::string& marker_name);
 

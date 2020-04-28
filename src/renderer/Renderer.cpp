@@ -208,6 +208,7 @@ void Renderer::do_debug(CameraUniforms &cu)
 
 	// Don't forget to draw the debug shapes!
 	debug_drawer->render(proj_view, c_model, far_plane);
+
 }
 
 void Renderer::do_imgui()

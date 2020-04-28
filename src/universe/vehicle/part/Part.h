@@ -24,6 +24,7 @@ public:
 
 	void pre_update(double dt);
 	void update(double dt);
+	void editor_update(double dt);
 
 	void init(Universe* in_universe, Vehicle* in_vehicle);
 

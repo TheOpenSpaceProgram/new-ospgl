@@ -41,6 +41,15 @@ void Part::update(double dt)
 	}
 }
 
+void Part::editor_update(double dt)
+{
+	for(auto& machine_pair : machines)
+	{
+		machine_pair.second->editor_update(dt);
+	}
+
+}
+
 
 void Part::init(Universe* in_universe, Vehicle* in_vehicle)
 {

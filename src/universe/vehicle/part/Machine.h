@@ -51,6 +51,7 @@ public:
 	// pre_update is mostly used for input
 	void pre_update(double dt);
 	void update(double dt);
+	void editor_update(double dt);
 
 	void init(Part* in_part, Universe* in_universe);
 

@@ -20,7 +20,7 @@ uniform float transparency;
 
 void main()
 {    
-	screen_door_transparency(transparency);
+	screen_door_transparency(0.5/*transparency*/);
 
     gPosition = vec4(vPos, 0.0f);
     gNormal = normalize(vNrm);

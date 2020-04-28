@@ -53,7 +53,7 @@ void VehicleEntity::deferred_pass(CameraUniforms & camera_uniforms)
 {
 	for (Piece* p : vehicle->all_pieces)
 	{
-		glm::dmat4 tform = to_dmat4(p->get_graphics_transform());
+		glm::dmat4 tform = to_dmat4(p->get_graphics_transform()) * glm::inverse(p->collider_offset);
 		p->model_node->draw(camera_uniforms, tform, drawable_uid, true);
 	}
 
@@ -63,7 +63,7 @@ void VehicleEntity::shadow_pass(ShadowCamera& sh_cam)
 {
 	for(Piece* p : vehicle->all_pieces)
 	{
-		glm::dmat4 tform = to_dmat4(p->get_graphics_transform());
+		glm::dmat4 tform = to_dmat4(p->get_graphics_transform()) * glm::inverse(p->collider_offset);
 		p->model_node->draw_shadow(sh_cam, tform, true);
 	}
 }
