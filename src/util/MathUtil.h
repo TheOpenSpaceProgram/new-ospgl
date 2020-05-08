@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <tuple>
 
 class MathUtil
 {
@@ -42,6 +43,10 @@ public:
 	static int int_repeat(int v, int max);
 	// Similar to GL_CLAMP
 	static int int_clamp(int v, int max);
+
+	// Generates the start and end (in that order) of a ray given the properties
+	// mouse_pos must be in normalized device coordinates [-1 -> 1], y inverted
+	static std::pair<glm::dvec3, glm::dvec3> screen_raycast(glm::dvec2 mouse_pos, glm::dmat4 inverse_camera, double distance);
 };
 
 class ProjectionUtil

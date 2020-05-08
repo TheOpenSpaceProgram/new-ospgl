@@ -1,0 +1,16 @@
+# A shader used for highlighting pieces
+
+shader = "core:shaders/hover.vs"
+ 
+
+[uniforms]
+	grow = 0.0001	
+	[uniforms.color]
+		x = 1.0
+		y = 1.0
+		z = 1.0
+
+[config]
+	has_pos = true
+	has_nrm = true
+

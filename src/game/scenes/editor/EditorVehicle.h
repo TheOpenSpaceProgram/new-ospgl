@@ -3,12 +3,14 @@
 #include <renderer/Drawable.h>
 #include <universe/vehicle/VehicleLoader.h>
 #include <gui/GUIInput.h>
+#include <physics/RigidBodyUserData.h>
 
 class EditorScene;
 
 struct EditorVehicleCollider
 {
 	btRigidBody* rigid;
+	RigidBodyUserData* udata;
 };
 
 
@@ -19,6 +21,11 @@ class EditorVehicle : public Drawable
 {
 private:
 
+	AssetHandle<Material> mat_hover;
+	// The little attachment "handles"
+	// These are drawn in a forward pass as they require transparency
+	GPUModelNodePointer stack_model, radial_model, stack_radial_model, receive_model;	
+	
 	void create_collider(Piece* p);
 	void remove_collider(Piece* p);
 
@@ -26,9 +33,6 @@ public:
 
 	EditorScene* scene;
 
-	// The little attachment "handles"
-	// These are drawn in a forward pass as they require transparency
-	GPUModelNodePointer stack_model, radial_model, stack_radial_model, receive_model;	
 
 	Vehicle* veh;
 	std::unordered_map<Piece*, EditorVehicleCollider> colliders; 
@@ -41,6 +45,8 @@ public:
 	// Once a piece is selected, it's separated from root if any connection
 	// is present
 	Piece* selected;
+
+	Piece* hovered;
 
 	virtual void deferred_pass(CameraUniforms& cu) override;
 	virtual void forward_pass(CameraUniforms& cu) override;

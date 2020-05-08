@@ -180,3 +180,22 @@ int MathUtil::int_clamp(int v, int max)
 		return glm::min(v, max);
 	}
 }
+
+std::pair<glm::dvec3, glm::dvec3> MathUtil::screen_raycast(glm::dvec2 mouse_pos, 
+		glm::dmat4 inv_tform, double distance)
+{
+	
+	// This is in the near plane
+	glm::dvec4 ray_start_ndc = glm::dvec4(mouse_pos, -1.0, 1.0);
+	// This is in the far plane, potentially very very far away 
+	glm::dvec4 ray_end_ndc = glm::dvec4(mouse_pos, 0.0, 1.0);
+
+	glm::dvec4 ray_start4 = inv_tform * ray_start_ndc; ray_start4 /= ray_start4.w;
+	glm::dvec4 ray_end4 = inv_tform * ray_end_ndc; ray_end4 /= ray_end4.w;
+	glm::dvec3 ray_start = ray_start4, ray_rend = ray_end4;
+	glm::dvec3 direction = glm::normalize(ray_rend - ray_start);
+	glm::dvec3 ray_end = ray_start + direction * distance;
+
+	return std::make_pair(ray_start, ray_end);
+}
+

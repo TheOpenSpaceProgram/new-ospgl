@@ -15,10 +15,15 @@ void EditorVehicle::create_collider(Piece* p)
 	btTransform trans = p->get_graphics_transform();
 	rigid_body->setWorldTransform(trans);
 
+	RigidBodyUserData* udata = new RigidBodyUserData(p);
+
+	rigid_body->setUserPointer((void*)udata);
+
 	scene->bt_world->addCollisionObject(rigid_body);
 
 	colliders[p] = EditorVehicleCollider();
 	colliders[p].rigid = rigid_body;
+	colliders[p].udata = udata;
 }
 
 // Doesn't do anything if not present
@@ -29,6 +34,7 @@ void EditorVehicle::remove_collider(Piece* p)
 	{
 		scene->bt_world->removeCollisionObject(it->second.rigid);
 		delete it->second.rigid;
+		delete it->second.udata;
 		colliders.erase(it);
 	}
 }
@@ -69,6 +75,13 @@ void EditorVehicle::forward_pass(CameraUniforms& cu)
 		}
 	}
 
+	// Draw an overlay over the hovered piece if any
+	if(hovered != nullptr)
+	{		
+		glm::dmat4 tform = to_dmat4(hovered->get_graphics_transform()) * glm::inverse(hovered->collider_offset);
+		hovered->model_node->draw_override(cu, &(*mat_hover), tform, drawable_uid, true, true);
+	}
+
 }
 
 void EditorVehicle::shadow_pass(ShadowCamera& cu)
@@ -82,6 +95,7 @@ void EditorVehicle::shadow_pass(ShadowCamera& cu)
 
 void EditorVehicle::update(double dt)
 {
+	hovered = nullptr;
 	veh->editor_update(dt);
 }
 
@@ -95,36 +109,22 @@ bool EditorVehicle::handle_input(const CameraUniforms& cu, glm::dvec4 viewport, 
 	glm::dvec2 in_subscreen = (((input->mouse_pos - subscreen_pos) / subscreen_size) - 0.5) * 2.0; 
 	in_subscreen.y = -in_subscreen.y;
 
-	// This is in the near plane
-	glm::dvec4 ray_start_ndc = glm::dvec4(in_subscreen, -1.0, 1.0);
-	// This is in the far plane, potentially very very far away 
-	glm::dvec4 ray_end_ndc = glm::dvec4(in_subscreen, 0.0, 1.0);
-
-	glm::dmat4 inv_tform = glm::inverse(cu.proj_view * cu.c_model);
-	glm::dvec4 ray_start4 = inv_tform * ray_start_ndc; ray_start4 /= ray_start4.w;
-	glm::dvec4 ray_end4 = inv_tform * ray_end_ndc; ray_end4 /= ray_end4.w;
-	glm::dvec3 ray_start = ray_start4, ray_rend = ray_end4;
-	glm::dvec3 direction = glm::normalize(ray_rend - ray_start);
-	glm::dvec3 ray_end = ray_start + direction * 100.0;
-
-	logger->info("({} => {})", ray_start_ndc, ray_end_ndc);
-	logger->info("{} -> {}", ray_start, ray_end);
-	
-	logger->info("Cam pos: {}", cu.cam_pos);
+	auto[ray_start, ray_end] = MathUtil::screen_raycast(in_subscreen, glm::inverse(cu.tform), 1000.0);
 
 	btCollisionWorld::ClosestRayResultCallback callback(to_btVector3(ray_start), to_btVector3(ray_end));
 	// We cast the ray using bullet
 	scene->bt_world->rayTest(to_btVector3(ray_start), to_btVector3(ray_end), callback);
 
-	debug_drawer->add_arrow(ray_start, ray_end, glm::vec3(1.0, 0.0, 1.0));
-
 	if(callback.hasHit())
 	{
-		logger->info("YEAH BOY!");
-		glm::dvec3 p = to_dvec3(callback.m_hitPointWorld);
-		glm::dvec3 n = to_dvec3(callback.m_hitNormalWorld);
-		debug_drawer->add_point(p, glm::vec3(1.0, 1.0, 1.0));
-		debug_drawer->add_line(p, p + n * 2.0, glm::vec3(1.0, 0.0, 0.0));
+		RigidBodyUserData* udata = (RigidBodyUserData*)callback.m_collisionObject->getUserPointer();
+		logger->check_important(udata != nullptr, "A rigidbody did not have an user data attached");
+
+		// We only care about PIECE colliders, so ignore everything else 
+		if(udata->type == RigidBodyType::PIECE)
+		{
+			hovered = udata->as_piece;
+		}
 	}
 
 
@@ -157,6 +157,8 @@ EditorVehicle::EditorVehicle() : Drawable()
 	radial_model = GPUModelNodePointer(model.duplicate(), "radial");	
 	stack_radial_model = GPUModelNodePointer(model.duplicate(), "stack_radial");
 	receive_model = GPUModelNodePointer(model.duplicate(), "receive");
+
+	mat_hover = AssetHandle<Material>("core:mat_hover.toml");
 
 	selected = nullptr;
 	draw_attachments = false;

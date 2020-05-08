@@ -1,7 +1,7 @@
 [renderer]
 	width = 1366
 	height = 768
-	scale = 0.75
+	scale = 1.0
 	type = "windowed"	
 
 [renderer.quality]	
