@@ -51,17 +51,17 @@ void EditorVehicle::deferred_pass(CameraUniforms& cu)
 
 void EditorVehicle::forward_pass(CameraUniforms& cu)
 {
-	if(draw_attachments || selected != nullptr)
+	if(draw_attachments || selected != nullptr || true)
 	{
 		// We only draw "receiver" models, that is, attachment
-		// points which are set to stack
+		// points which are set to stack (radial goes anywhere)
 		for(Piece* p : veh->all_pieces)
 		{
 			for(std::pair<PieceAttachment, bool>& pair : p->attachments)
 			{
 				PieceAttachment& attch = pair.first;
-				if(!pair.second && attch.stack == true)
-				{
+				//if(!pair.second && attch.stack == true)
+				//{
 					glm::dvec3 pos = p->get_marker_position(attch.marker);
 					glm::dquat quat = p->get_marker_rotation(attch.marker);
 
@@ -69,8 +69,11 @@ void EditorVehicle::forward_pass(CameraUniforms& cu)
 					model = glm::scale(model, glm::dvec3(attch.size * 0.15));
 					model = model * glm::toMat4(quat); 
 
+					glm::dmat4 piece_model = to_dmat4(p->get_global_transform());
+					model = model * piece_model;
+
 					receive_model->draw(cu, model, drawable_uid, true);	
-				}
+				//}
 			}
 		}
 	}
@@ -78,8 +81,7 @@ void EditorVehicle::forward_pass(CameraUniforms& cu)
 	// Draw an overlay over the hovered piece if any
 	if(hovered != nullptr)
 	{		
-		glm::dmat4 tform = to_dmat4(hovered->get_graphics_transform()) * glm::inverse(hovered->collider_offset);
-		hovered->model_node->draw_override(cu, &(*mat_hover), tform, drawable_uid, true, true);
+		draw_highlight(hovered, glm::vec3(1.0f, 1.0f, 1.0f), cu);
 	}
 
 }
@@ -145,7 +147,7 @@ void EditorVehicle::init()
 EditorVehicle::EditorVehicle() : Drawable()
 {
 	auto vehicle_toml = SerializeUtil::load_file("udata/vehicles/Test Vehicle.toml");
-	veh = VehicleLoader::load_vehicle(*vehicle_toml);
+	veh = VehicleLoader(*vehicle_toml).get_vehicle();
 	
 	// Load the different models
 	std::string model_path = *SerializeUtil::load_file(assets->resolve_path("core:meshes/editor_attachment.toml"))
@@ -166,3 +168,13 @@ EditorVehicle::EditorVehicle() : Drawable()
 }
 
 
+void EditorVehicle::draw_highlight(Piece* p, glm::vec3 color, CameraUniforms& cu)
+{
+	glm::dmat4 tform = to_dmat4(hovered->get_graphics_transform()) * glm::inverse(hovered->collider_offset);
+
+	// Override the hover color
+	MaterialOverride over = MaterialOverride();
+	over.uniforms["color"] = Uniform(color);
+
+	hovered->model_node->draw_override(cu, &(*mat_hover), tform, drawable_uid, &over, true);
+}

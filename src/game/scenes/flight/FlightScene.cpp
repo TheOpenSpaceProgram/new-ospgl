@@ -45,7 +45,7 @@ void FlightScene::load()
 
 
 	auto vehicle_toml = SerializeUtil::load_file("udata/vehicles/Test Vehicle.toml");
-	Vehicle* n_vehicle = VehicleLoader::load_vehicle(*vehicle_toml);
+	Vehicle* n_vehicle = VehicleLoader(*vehicle_toml).get_vehicle();
 
 	get_osp()->game_state.universe.create_entity<VehicleEntity>(n_vehicle);
 

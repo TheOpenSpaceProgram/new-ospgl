@@ -1,19 +1,25 @@
 #include "VehicleLoader.h"
 
-Vehicle* VehicleLoader::load_vehicle(cpptoml::table& root)
+Vehicle* VehicleLoader::get_vehicle()
 {
-	Vehicle* n_vehicle = new Vehicle();
+	Vehicle* to_return = n_vehicle;
+	n_vehicle = nullptr;
+	// We give ownership to whoever takes the pointer, but don't 
+	// use a smart pointer for code simplicity
+	return to_return;
+}
 
-	// We are already inside vehicle_prototype		
-
+void VehicleLoader::load_metadata(cpptoml::table& root)
+{
 	// TODO: Description and package check
-
 	n_vehicle->part_id = *root.get_qualified_as<int64_t>("part_id");
 	n_vehicle->piece_id = *root.get_qualified_as<int64_t>("piece_id");
 
-	// Obtain parts
+}
+
+void VehicleLoader::obtain_parts(cpptoml::table& root)
+{
 	auto parts = root.get_table_array_qualified("part");	
-	std::unordered_map<int64_t, Part*> parts_by_id;
 
 	for(auto part : *parts)
 	{
@@ -28,13 +34,14 @@ Vehicle* VehicleLoader::load_vehicle(cpptoml::table& root)
 		parts_by_id[n_part->id] = n_part;
 	}
 
-	// Obtain pieces into our array, later we copy
-	auto pieces = root.get_table_array_qualified("piece");
-	std::vector<Piece*> all_pieces;
-	Piece* root_piece = nullptr;
 
-	std::unordered_map<Piece*, std::shared_ptr<cpptoml::table>> links_toml;
-	std::unordered_map<int64_t, Piece*> pieces_by_id;
+}
+
+void VehicleLoader::obtain_pieces(cpptoml::table& root)
+{
+	auto pieces = root.get_table_array_qualified("piece");
+	root_piece = nullptr;
+
 	for(auto piece : *pieces)
 	{
 		int64_t part_id = *piece->get_qualified_as<int64_t>("part");
@@ -81,7 +88,10 @@ Vehicle* VehicleLoader::load_vehicle(cpptoml::table& root)
 		n_piece->in_vehicle = n_vehicle;
 	}
 
-	// Copy pieces, first push the root then everything else and we sort
+}
+
+void VehicleLoader::copy_pieces(cpptoml::table& root)
+{
 	n_vehicle->all_pieces.push_back(root_piece);
 	n_vehicle->root = root_piece;
 	for(Piece* p : all_pieces)
@@ -114,24 +124,33 @@ Vehicle* VehicleLoader::load_vehicle(cpptoml::table& root)
 		}
 	}
 
+}
+
+VehicleLoader::VehicleLoader(cpptoml::table& root)
+{
+	n_vehicle = new Vehicle();
+
+	load_metadata(root);
+	obtain_parts(root);
+	obtain_pieces(root);
+	copy_pieces(root);
+
+	// Wires are initialized after this by the vehicle
+	// as machines need to start
 	auto wires = root.get_table_array("wire");
 	n_vehicle->wires_init = wires;
 
 	n_vehicle->id_to_part = parts_by_id;
 	n_vehicle->id_to_piece = pieces_by_id;
 
+	// Initialize the vehicle's physical state to packed and save default values
 	WorldState n_state;
-	n_state.cartesian.pos = glm::dvec3(0.0, 0.0, 0.0);
-	n_state.rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
-	n_state.angular_velocity = glm::dvec3(0.0, 0.0, 0.0);
-	n_state.cartesian.vel = glm::dvec3(0.0, 0.0, 0.0);
 	n_vehicle->packed_veh.set_world_state(n_state);
-
 	n_vehicle->packed = true;
 
+	// Calculate the packed COM
 	n_vehicle->packed_veh.calculate_com();
-	n_vehicle->sort();
 
-	// It's up to the caller to properly place the vehicle in the world
-	return n_vehicle;			
+	// Sort the vehicle so it's ready for physics
+	n_vehicle->sort();
 }

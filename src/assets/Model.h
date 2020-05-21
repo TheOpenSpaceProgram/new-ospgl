@@ -89,17 +89,22 @@ struct Node
 
 	void draw_all_meshes(const CameraUniforms& uniforms, GLint drawable_id, glm::dmat4 model);
 	void draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model);
-	void draw_all_meshes_override(const CameraUniforms& uniforms, Material* mat, bool ignore_override, GLint drawable_id, glm::dmat4 model);
+	void draw_all_meshes_override(const CameraUniforms& uniforms, Material* mat, MaterialOverride* mat_override, 
+		GLint drawable_id, glm::dmat4 model);
 
 	// Draws all meshes, and call sthe same on all children,
 	// accumulating sub transforms
 	// The ignore_our_subtform flag is useful specially for stuff like parts
 	// where the piece transform is ignored during game rendering
-	void draw(const CameraUniforms& uniforms, glm::dmat4 model, GLint drawable_id, bool ignore_our_subtform, bool increase_did = false);
+	void draw(const CameraUniforms& uniforms, glm::dmat4 model, GLint drawable_id, 
+		bool ignore_our_subtform, bool increase_did = false);
+
 	void draw_shadow(const ShadowCamera& sh_cam, glm::dmat4 model, bool ignore_our_subtform = false);
-	// Draws everything using given material, material_override can be ignored or not
+
+	// Draws everything using given material, is mat_override is null, the default material override will be
+	// used, if it's non-null, the given one will be used
 	void draw_override(const CameraUniforms& uniforms, Material* mat, glm::dmat4 model, GLint drawable_id, 
-			bool ignore_material_override, bool ignore_our_subtform, bool increase_did = false);
+		MaterialOverride* mat_over, bool ignore_our_subtform, bool increase_did = false);
 };
 
 // Models allow loading 3d models using the assimp library

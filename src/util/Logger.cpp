@@ -59,25 +59,6 @@ void Logger::log(int level, const char* format, fmt::format_args args)
 	}
 }
 
-void Logger::check(bool condition, const char* text, bool ftal)
-{
-#if defined(_DEBUG) || defined(CHECK_ALWAYS)
-	return check_important(condition, text, ftal);
-#endif
-}
-
-void Logger::check_important(bool condition, const char * text, bool ftal)
-{
-	if (!condition)
-	{
-		std::string str = fmt::format("Condition '{}' failed", text);
-		error("Condition '{}' failed", text);
-		// We throw instead of crashing so lua can handle the checks properly
-		// without crashing the program
-		throw(str);
-	}
-}
-
 void Logger::onLog(bool important)
 {
 	flushCounter--;

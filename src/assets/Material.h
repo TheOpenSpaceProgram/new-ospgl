@@ -210,7 +210,6 @@ struct MaterialOverride
 	std::unordered_map<std::string, Uniform> uniforms;
 };
 
-
 struct Material
 {
 

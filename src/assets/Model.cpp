@@ -647,16 +647,17 @@ void Node::draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model)
 	}
 }
 
-void Node::draw_all_meshes_override(const CameraUniforms& uniforms, Material* mat, bool ign, GLint did, glm::dmat4 model)
+void Node::draw_all_meshes_override(const CameraUniforms& uniforms, Material* mat, MaterialOverride* mat_over, 
+		GLint did, glm::dmat4 model)
 {
 	for (Mesh& mesh : meshes)
 	{
 		if (mesh.is_drawable())
 		{
 			mat->shader->use();
-			if(ign)
+			if(mat_over)
 			{
-				mat->set(mesh.textures, MaterialOverride());
+				mat->set(mesh.textures, *mat_over);
 			}
 			else
 			{
@@ -695,7 +696,7 @@ void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, GLint did, boo
 }
 
 void Node::draw_override(const CameraUniforms& uniforms, Material* mat, glm::dmat4 model, GLint did, 
-			bool ignore_material_override, bool ignore_our_subtform, bool increase_did)
+			MaterialOverride* mat_override, bool ignore_our_subtform, bool increase_did)
 {
 	glm::dmat4 n_model;
 	if (ignore_our_subtform)
@@ -707,7 +708,7 @@ void Node::draw_override(const CameraUniforms& uniforms, Material* mat, glm::dma
 		n_model = model * sub_transform; //< Transformations apply in reverse
 	}
 
-	draw_all_meshes_override(uniforms, mat, ignore_material_override, did, n_model);
+	draw_all_meshes_override(uniforms, mat, mat_override, did, n_model);
 
 	for (Node* node : children)
 	{
@@ -716,7 +717,8 @@ void Node::draw_override(const CameraUniforms& uniforms, Material* mat, glm::dma
 			// We increase the drawable id
 			did++;
 		}
-		node->draw_override(uniforms, mat, n_model, did, ignore_material_override, false, increase_did);
+
+		node->draw_override(uniforms, mat, n_model, did, mat_override, false, increase_did);
 	}
 
 }

@@ -7,6 +7,10 @@ piece_id = 4
 [[part]]	
 	id = 1
 	proto = "test_parts:parts/capsule/part_capsule.toml"
+[[part]]
+	id = 2
+	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
+
 [[piece]]
 	root = true
 	id = 1		
@@ -21,3 +25,25 @@ piece_id = 4
 		y = 0.0
 		z = 0.0
 		w = 1.0 		
+
+	used_attachments = ["m_attach_bottom"]
+
+[[piece]]
+	id = 2
+	part = 2
+	node = "p_root"
+	[piece.link]
+		to = 1
+		welded = true 
+		
+	[piece.pos]
+		x = 0.0
+		y = 0.0
+		z = -2.0
+	[piece.rot]
+		x = 0.0
+		y = 0.0
+		z = 0.0
+		w = 1.0
+
+	used_attachments = ["m_attach_top"]

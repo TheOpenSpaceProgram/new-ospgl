@@ -66,6 +66,8 @@ public:
 	// Viewport is renderer style, (x0, y0, w, h)
 	bool handle_input(const CameraUniforms& cu, glm::dvec4 viewport, glm::dvec2 real_screen_size);
 
+	void draw_highlight(Piece* p, glm::vec3 color, CameraUniforms& cu);
+
 	EditorVehicle();
 
 };

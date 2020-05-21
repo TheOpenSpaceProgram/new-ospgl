@@ -6,17 +6,7 @@
 // REMEMBER TO INCLUDE ANY SERIALIZE YOU USE, OTHERWISE THE AUTOMATIC
 // SERIALIZATION FUNCTIONS WON'T SEE THE APPROPIATE TEMPLATE CLASSES
 
-#define DO_TOML_CHECK_ON_RELEASE
-
-#ifdef DO_TOML_CHECK_ON_RELEASE
-
-#define TOML_CHECK_FUNC logger->check_important
-
-#elif
-
 #define TOML_CHECK_FUNC logger->check
-
-#endif
 
 // IMPORTANT:
 // You must have a cpptoml table named "from" to use these functions

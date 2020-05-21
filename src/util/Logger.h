@@ -53,10 +53,18 @@ public:
 	void log(int level, const char*, fmt::format_args args);
 
 	// Condition MUST be true
-	void check(bool condition, const char* text = "", bool fatal = true);
-
-	// Checks even on Release mode
-	void check_important(bool condition, const char* text = "", bool fatal = true);
+	template <typename... Args>
+	void check(bool condition, const char* text = "", const Args& ... args)
+	{
+		if (!condition)
+		{
+			std::string str = fmt::format("Condition '{}' failed", fmt::format(text, args...));
+			error("Condition '{}' failed", text);
+			// We throw instead of crashing so lua can handle the checks properly
+			// without crashing the program
+			throw(str);
+		}
+	}
 
 	void onLog(bool important = false);
 
