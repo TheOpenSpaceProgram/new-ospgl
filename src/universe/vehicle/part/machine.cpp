@@ -10,7 +10,7 @@
 Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg)
 {	
 	this->init_toml = init_toml;
-	logger->check_important(init_toml != nullptr, "Malformed init_toml");
+	logger->check(init_toml != nullptr, "Malformed init_toml");
 	cpptoml::table& init_toml_p = *init_toml;
 
 	std::string script_path;
@@ -160,7 +160,7 @@ void Machine::define_ports()
 
 void Machine::add_input_port(const std::string & name, const std::string & type, sol::safe_function callback)
 {
-	logger->check_important(is_defining_ports, "Tried to change a port while the machine was not changing ports");
+	logger->check(is_defining_ports, "Tried to change a port while the machine was not changing ports");
 
 	PortDefinition port_def = PortDefinition();
 	port_def.name = name;
@@ -173,7 +173,7 @@ void Machine::add_input_port(const std::string & name, const std::string & type,
 
 void Machine::add_output_port(const std::string & name, const std::string & type)
 {
-	logger->check_important(is_defining_ports, "Tried to change a port while the machine was not changing ports");
+	logger->check(is_defining_ports, "Tried to change a port while the machine was not changing ports");
 
 	PortDefinition port_def = PortDefinition();
 	port_def.name = name;

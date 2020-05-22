@@ -44,8 +44,7 @@ void EditorVehicle::deferred_pass(CameraUniforms& cu)
 {	
 	for (Piece* p : veh->all_pieces)
 	{
-		glm::dmat4 tform = to_dmat4(p->get_graphics_transform()) * glm::inverse(p->collider_offset);
-		p->model_node->draw(cu, tform, drawable_uid, true);
+		p->model_node->draw(cu, p->get_graphics_matrix(), drawable_uid, true);
 	}
 }
 
@@ -69,8 +68,7 @@ void EditorVehicle::forward_pass(CameraUniforms& cu)
 					model = glm::scale(model, glm::dvec3(attch.size * 0.15));
 					model = model * glm::toMat4(quat); 
 
-					glm::dmat4 piece_model = to_dmat4(p->get_global_transform());
-					model = model * piece_model;
+					model = p->get_graphics_matrix() * model;
 
 					receive_model->draw(cu, model, drawable_uid, true);	
 				//}
@@ -90,8 +88,7 @@ void EditorVehicle::shadow_pass(ShadowCamera& cu)
 {
 	for(Piece* p : veh->all_pieces)
 	{
-		glm::dmat4 tform = to_dmat4(p->get_graphics_transform()) * glm::inverse(p->collider_offset);
-		p->model_node->draw_shadow(cu, tform, true);
+		p->model_node->draw_shadow(cu, p->get_graphics_matrix(), true);
 	}
 }
 
@@ -120,7 +117,7 @@ bool EditorVehicle::handle_input(const CameraUniforms& cu, glm::dvec4 viewport, 
 	if(callback.hasHit())
 	{
 		RigidBodyUserData* udata = (RigidBodyUserData*)callback.m_collisionObject->getUserPointer();
-		logger->check_important(udata != nullptr, "A rigidbody did not have an user data attached");
+		logger->check(udata != nullptr, "A rigidbody did not have an user data attached");
 
 		// We only care about PIECE colliders, so ignore everything else 
 		if(udata->type == RigidBodyType::PIECE)
@@ -170,11 +167,9 @@ EditorVehicle::EditorVehicle() : Drawable()
 
 void EditorVehicle::draw_highlight(Piece* p, glm::vec3 color, CameraUniforms& cu)
 {
-	glm::dmat4 tform = to_dmat4(hovered->get_graphics_transform()) * glm::inverse(hovered->collider_offset);
-
 	// Override the hover color
 	MaterialOverride over = MaterialOverride();
 	over.uniforms["color"] = Uniform(color);
 
-	hovered->model_node->draw_override(cu, &(*mat_hover), tform, drawable_uid, &over, true);
+	hovered->model_node->draw_override(cu, &(*mat_hover), p->get_graphics_matrix(), drawable_uid, &over, true);
 }

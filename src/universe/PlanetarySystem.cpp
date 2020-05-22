@@ -360,7 +360,7 @@ size_t PlanetarySystem::get_element_index_from_name(const std::string& name)
 {
 	auto it = name_to_index.find(name);
 	// TODO: Maybe make this not important?
-	logger->check_important(it != name_to_index.end(), "Tried to access by name a element which does not exist");
+	logger->check(it != name_to_index.end(), "Tried to access by name ({}) a element which does not exist", name);
 	
 	return it->second;
 }

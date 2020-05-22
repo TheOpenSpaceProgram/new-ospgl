@@ -239,7 +239,7 @@ void AssetManager::load_script_to(sol::state& target, const std::string& full_pa
 void AssetManager::load_script_to(sol::state& target, const std::string& pkg, const std::string& path)
 {
 	std::string full_path = res_path + pkg + "/" + path;	
-	logger->check_important(file_exists(full_path), "Tried to load an script which does not exist");
+	logger->check(file_exists(full_path), "Tried to load an script which does not exist ({})", path);
 
 	lua_core->load(target, pkg);
 

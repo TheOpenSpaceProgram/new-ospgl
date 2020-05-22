@@ -58,8 +58,9 @@ public:
 	{
 		if (!condition)
 		{
-			std::string str = fmt::format("Condition '{}' failed", fmt::format(text, args...));
-			error("Condition '{}' failed", text);
+			std::string formatted = fmt::format(text, args...);
+			std::string str = fmt::format("Condition '{}' failed", formatted);
+			error(str.c_str());
 			// We throw instead of crashing so lua can handle the checks properly
 			// without crashing the program
 			throw(str);

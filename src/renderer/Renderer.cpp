@@ -303,7 +303,7 @@ void Renderer::render(PlanetarySystem* system)
 
 void Renderer::add_drawable(Drawable* d, std::string n_id)
 {
-	logger->check_important(!d->is_in_renderer(), "Tried to add an already added drawable");
+	logger->check(!d->is_in_renderer(), "Tried to add an already added drawable");
 
 	drawable_uid++,
 	d->notify_add_to_renderer(drawable_uid);
@@ -357,7 +357,7 @@ static void remove_from(std::vector<Drawable*>& array, Drawable* d)
 
 void Renderer::remove_drawable(Drawable* drawable)
 {
-	logger->check_important(drawable->is_in_renderer(), "Tried to remove a non-present drawable");
+	logger->check(drawable->is_in_renderer(), "Tried to remove a non-present drawable");
 
 	drawable->notify_remove_from_renderer();
 
@@ -391,7 +391,7 @@ void Renderer::remove_drawable(Drawable* drawable)
 
 void Renderer::add_light(Light* light)
 {
-	logger->check_important(!light->is_added_to_renderer(), "Tried to add an already added light");
+	logger->check(!light->is_added_to_renderer(), "Tried to add an already added light");
 	light->set_added(true);
 	
 	lights.push_back(light);
@@ -399,7 +399,7 @@ void Renderer::add_light(Light* light)
 
 void Renderer::remove_light(Light* light)
 {
-	logger->check_important(light->is_added_to_renderer(), "Tried to remove a non-added light");
+	logger->check(light->is_added_to_renderer(), "Tried to remove a non-added light");
 	light->set_added(false);
 
 	for (auto it = lights.begin(); it != lights.end(); )

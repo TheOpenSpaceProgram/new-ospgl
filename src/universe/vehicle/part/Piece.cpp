@@ -2,6 +2,11 @@
 #include "../Vehicle.h"
 #include <util/Logger.h>
 
+glm::dmat4 Piece::get_graphics_matrix()
+{
+	return to_dmat4(get_global_transform()) * glm::inverse(collider_offset);
+}
+
 bool Piece::is_welded()
 {
 	return in_group != nullptr;
@@ -182,7 +187,7 @@ glm::dvec3 Piece::get_right()
 Marker& Piece::get_marker(const std::string & marker_name)
 {
 	auto it = markers.find(marker_name);
-	logger->check_important(it != markers.end(), "Could not find marker");
+	logger->check(it != markers.end(), "Could not find marker named '{}'", marker_name);
 	return it->second;
 }
 

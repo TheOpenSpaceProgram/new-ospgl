@@ -66,14 +66,14 @@ void Part::init(Universe* in_universe, Vehicle* in_vehicle)
 Piece* Part::get_piece(const std::string& name)
 {
 	auto it = pieces.find(name);
-	logger->check_important(it != pieces.end(), "Tried to get a piece which does not exist on the part");
+	logger->check(it != pieces.end(), "Tried to get a piece which does not exist on the part ({})", name);
 	return it->second;
 }
 
 Machine* Part::get_machine(const std::string& id)
 {
 	auto it = machines.find(id);
-	logger->check_important(it != machines.end(), "Invalid machine ID");
+	logger->check(it != machines.end(), "Invalid machine ID '{}'", id);
 	return it->second;
 }
 

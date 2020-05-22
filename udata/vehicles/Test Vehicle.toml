@@ -24,7 +24,7 @@ piece_id = 4
 		x = 0.0
 		y = 0.0
 		z = 0.0
-		w = 1.0 		
+		w = 1.0		
 
 	used_attachments = ["m_attach_bottom"]
 

@@ -12,21 +12,21 @@
 double InputContext::get_axis(const std::string& name)
 {
 	auto it = axes.find(name);
-	logger->check_important(it != axes.end(), "Could not find axis");
+	logger->check(it != axes.end(), "Could not find axis '{}'", name);
 	return it->second;
 }
 
 bool InputContext::get_action(const std::string& name)
 {
 	auto it = actions.find(name);
-	logger->check_important(it != actions.end(), "Could not find action");
+	logger->check(it != actions.end(), "Could not find action '{}'", name);
 	return it->second;
 }
 
 bool InputContext::get_action_down(const std::string& name)
 {
 	auto it = actions.find(name);
-	logger->check_important(it != actions.end(), "Could not find action");
+	logger->check(it != actions.end(), "Could not find action '{}'", name);
 	auto it_prev = actions_previous.find(name);
 	// If the first is present, this one is too
 	return it->second && !it_prev->second;	
@@ -35,7 +35,7 @@ bool InputContext::get_action_down(const std::string& name)
 bool InputContext::get_action_up(const std::string& name)
 {
 	auto it = actions.find(name);
-	logger->check_important(it != actions.end(), "Could not find action");
+	logger->check(it != actions.end(), "Could not find action '{}'", name);
 	auto it_prev = actions_previous.find(name);
 	// If the first is present, this one is too
 	return !it->second && it_prev->second;	

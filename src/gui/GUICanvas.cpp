@@ -3,7 +3,7 @@
 
 std::pair<GUICanvas*, GUICanvas*> GUICanvas::divide_h(float nfac)
 {
-	logger->check_important(child_0 == nullptr && child_1 == nullptr, "Tried to split a non-leaf GUICanvas");
+	logger->check(child_0 == nullptr && child_1 == nullptr, "Tried to split a non-leaf GUICanvas");
 
 	fac = nfac;
 
@@ -32,7 +32,7 @@ std::pair<GUICanvas*, GUICanvas*> GUICanvas::divide_h(float nfac)
 
 std::pair<GUICanvas*, GUICanvas*> GUICanvas::divide_v(float nfac)
 {
-	logger->check_important(child_0 == nullptr && child_1 == nullptr, "Tried to split a non-leaf GUICanvas");
+	logger->check(child_0 == nullptr && child_1 == nullptr, "Tried to split a non-leaf GUICanvas");
 
 	fac = nfac;
 

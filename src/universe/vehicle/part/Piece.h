@@ -134,6 +134,8 @@ public:
 	// Returns the X axis transformed
 	glm::dvec3 get_right();
 
+	glm::dmat4 get_graphics_matrix();
+
 	void set_dirty();
 
 	// The piece OWNS the link, which can be null

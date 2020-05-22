@@ -2,7 +2,7 @@
 
 void Vehicle::unpack()
 {
-	logger->check_important(packed, "Tried to unpack an unpacked vehicle");
+	logger->check(packed, "Tried to unpack an unpacked vehicle");
 	
 	packed = false;
 
@@ -18,7 +18,7 @@ void Vehicle::unpack()
 
 void Vehicle::pack()
 {
-	logger->check_important(!packed, "Tried to pack a packed vehicle");
+	logger->check(!packed, "Tried to pack a packed vehicle");
 
 	packed = true;
 
@@ -211,14 +211,14 @@ void Vehicle::check_wires()
 Piece* Vehicle::get_piece(int64_t id)
 {
 	auto it = id_to_piece.find(id);
-	logger->check_important(it != id_to_piece.end(), "Wrong piece id");
+	logger->check(it != id_to_piece.end(), "Wrong piece id ({})", id);
 	return it->second;
 }
 
 Part* Vehicle::get_part(int64_t id)
 {
 	auto it = id_to_part.find(id);
-	logger->check_important(it != id_to_part.end(), "Wrong piece id");
+	logger->check(it != id_to_part.end(), "Wrong piece id ({})", id);
 	return it->second;
 }
 

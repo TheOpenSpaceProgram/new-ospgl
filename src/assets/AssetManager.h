@@ -303,7 +303,7 @@ inline bool AssetManager::load(const std::string& package, const std::string& na
 
 	std::string old_pkg = get_current_package();
 	
-	logger->check_important(file_exists(full_path), ("Asset file must exist (" + full_path + ")").c_str());
+	logger->check(file_exists(full_path), "Asset file must exist ({})", full_path);
 
 	set_current_package(package);
 	T* ndata = fptr(full_path, name, package, *cfg);

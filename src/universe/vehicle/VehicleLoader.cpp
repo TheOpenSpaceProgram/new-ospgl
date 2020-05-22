@@ -28,7 +28,8 @@ void VehicleLoader::obtain_parts(cpptoml::table& root)
 		Part* n_part = new Part(part_proto, *part);
 
 		n_part->id = *part->get_qualified_as<int64_t>("id");
-		logger->check_important(n_part->id <= n_vehicle->part_id, "Malformed vehicle, part ID too big");
+		logger->check(n_part->id <= n_vehicle->part_id, "Malformed vehicle, part ID too big ({}/{})", 
+				n_part->id, n_vehicle->part_id);
 
 		n_vehicle->parts.push_back(n_part);
 		parts_by_id[n_part->id] = n_part;
@@ -54,9 +55,9 @@ void VehicleLoader::obtain_pieces(cpptoml::table& root)
 		n_piece->id = piece_id;
 
 		// Add ourselves to the part
-		logger->check_important(parts_by_id.find(part_id) != parts_by_id.end(), "Invalid part ID");
+		logger->check(parts_by_id.find(part_id) != parts_by_id.end(), "Invalid part ID ({})", part_id);
 		Part* part = parts_by_id[part_id];
-		logger->check_important(part->pieces.find(node) == part->pieces.end(), "Duplicate piece of part");
+		logger->check(part->pieces.find(node) == part->pieces.end(), "Duplicate piece of part");
 		part->pieces[node] = n_piece;
 		n_piece->part = part;
 
@@ -75,7 +76,7 @@ void VehicleLoader::obtain_pieces(cpptoml::table& root)
 		auto root_entry = piece->get_qualified_as<bool>("root");
 		if(root_entry && *root_entry == true)
 		{
-			logger->check_important(root_piece == nullptr, "Multiple root pieces, that's invalid");
+			logger->check(root_piece == nullptr, "Multiple root pieces, that's invalid");
 			root_piece = n_piece;
 		}
 		else
@@ -102,7 +103,7 @@ void VehicleLoader::copy_pieces(cpptoml::table& root)
 		if(link)
 		{
 			int64_t to = *link->get_qualified_as<int64_t>("to");
-			logger->check_important(pieces_by_id.find(to) != pieces_by_id.end(), "Link to a non-existant piece");
+			logger->check(pieces_by_id.find(to) != pieces_by_id.end(), "Link to a non-existant piece {}", to);
 			Piece* to_p = pieces_by_id[to];
 			
 			p->attached_to = to_p;

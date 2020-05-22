@@ -79,7 +79,7 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 			// Load a marker
 			Marker n_marker;
 
-			// TODO: Apply parent's transform? Not neccesary but needs thinking
+			// TODO: Apply parent's transform? Not neccesary but needs thinking,
 			// what do markers represent?
 			n_marker.transform = child->sub_transform;
 
@@ -90,12 +90,17 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 
 
 			n_marker.origin = translate;
-			n_marker.rotation = orient;
 			n_marker.forward = glm::dvec3(glm::dvec4(0.0, 0.0, 1.0, 0.0) * glm::toMat4(orient));
-			/*logger->info("Maker {} has quaternion  {} {} {} {} and forward {} {} {}",
+
+			// We need to change the quaternion so it's Z based (same as forward)
+			// This was found by trial and error but probably makes mathematical sense
+			// (Quaternions are hard)
+			n_marker.rotation = glm::dquat(orient.w, -orient.x, -orient.y, -orient.z);
+			
+			logger->info("Maker {} has quaternion  {} {} {} {} and forward {} {} {}",
 					child->name, orient.w, orient.x, orient.y, orient.z, 
 					n_marker.forward.x, n_marker.forward.y, n_marker.forward.z); 
-			*/
+			
 			
 			proto.markers[child->name] = n_marker;
 		}
@@ -123,7 +128,7 @@ void PartPrototype::load(const cpptoml::table& from)
 	// All "easy" stuff has already been set, we now have to create the PiecePrototypes
 
 	auto it = model->node_by_name.find("part");
-	logger->check_important(it != model->node_by_name.end(), "Part model must have 'part' node");
+	logger->check(it != model->node_by_name.end(), "Part model must have 'part' node");
 
 	Node* part_root = it->second;
 

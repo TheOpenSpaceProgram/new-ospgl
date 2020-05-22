@@ -555,7 +555,7 @@ void Model::free_gpu()
 
 Model::Model(const aiScene* scene)
 {
-	logger->check_important(scene != nullptr, "Could not load model file, scene is nullptr");
+	logger->check(scene != nullptr, "Could not load model file, scene is nullptr");
 
 	gpu_users = 0;
 	uploaded = false;
