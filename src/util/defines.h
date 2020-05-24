@@ -3,6 +3,7 @@
 #include <functional>
 #include <vector>
 #include <any>
+#include <string>
 
 template <class T>
 inline void hash_combine(std::size_t& seed, const T& v)
