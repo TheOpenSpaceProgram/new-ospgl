@@ -7,11 +7,15 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  linux:
 
     runs-on: ubuntu-latest
 
     steps:
+    - name: Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install libxrandr-dev
     - uses: actions/checkout@v2
     - name: Checkout submodules
       uses: textbook/git-checkout-submodule-action@master
