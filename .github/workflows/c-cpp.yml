@@ -22,11 +22,8 @@ jobs:
       with:
         remote: true
     - name: configure twice
-      env:
-        CC: gcc-9
-        CXX: g++-9  
       run: |
-        sudo cmake .
-        sudo cmake .
+        sudo cmake . -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9
+        sudo cmake . -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9
     - name: make
       run: sudo cmake --build .
