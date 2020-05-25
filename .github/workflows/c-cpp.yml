@@ -22,6 +22,6 @@ jobs:
       with:
         remote: true
     - name: configure
-      run: cmake .
+      run: sudo cmake .
     - name: make
-      run: cmake --build .
+      run: sudo cmake --build .
