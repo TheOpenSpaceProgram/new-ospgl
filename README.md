@@ -1,5 +1,9 @@
 # OSPGL
 This repo contains all code for the OSPGL program, despite being called 'new-ospgl', as the original ospgl is now legacy code.
+
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/TheOpenSpaceProgram/new-ospgl/Main%20Build/master?label=master&style=for-the-badge)
+
+
 ## Collaborating
 The project has a pretty big scope, so collaboration of all kinds is needed, from planning to coding and artistic work. 
 You can check what's needed on the Issues and Projects. Feel free to create new entries with ideas!
@@ -12,6 +16,10 @@ We use CMake for building, so the procedure should be similar on all systems.
 OpenSSL is a dependency (for ospm), on most linux distributions it's probably available on the package manager (it will probably come preinstalled),
 on windows it needs to be manually downloaded (Here's a good binary compilation: https://slproweb.com/download/Win64OpenSSL-1_1_1f.exe)
 
+You may also need `libx11-dev`, `xorg-dev` and `libgl-mesa-dev` on linux, but these are usually installed on most systems. 
+
+Run these commands to obtain the source:
+
 ```
 git clone --recurse-submodules https://github.com/TheOpenSpaceProgram/new-ospgl.git
 cd new-ospgl
@@ -20,10 +28,16 @@ cd new-ospgl
 ## Linux
 ```
 cmake .
+cmake .
 cmake --build . 
 ```
+Running CMake twice is needed only the first time you build, otherwise `assimp` will build all importers and make the build time really long
+You may want to speed up the build using `cmake --build . -- -j [Number of CPUs]`
+
 **Note**: If you run cmake in a subdirectory (for example, `build`), then you may want to copy the `compile_commands.json` file to the root directory for code completion in VIM and other tools. 
-If your executable is not in the root directory, move it there as the game requires the `res` folder and the `settings.toml` file
+If your executable is not in the root directory, move it there as the game requires the `res` folder and the `udata` folder. You can always change these running `./osp` with command line arguments (check `OSP.cpp`) if you want to keep the executables on a different folder.
+
+
 
 ## Windows
 
@@ -34,11 +48,28 @@ Set target to OSPGL.exe and build.
 
 ## MacOS
 
-(Not done yet, I guess CMake will work fine, too)
+(Not done yet, I guess the linux procedure will work fine, too)
+
+# Running
+
+During development, you will need some packages which are "directly" linked to the game code.
+The final game will only need the `core` package, but for now you must run these two commands to 
+get the game to properly load:
+
+(`ospm` must be run in the same folder as the `/res` folder)
+
+```
+./ospm fetch https://github.com/TheOpenSpaceProgram/new-ospgl/releases/download/ospm-test/debug_system.zip
+./ospm fetch https://github.com/TheOpenSpaceProgram/new-ospgl/releases/download/ospm-test/test_parts.zip
+```
+
+If there are weird runtime errors, they may be related to outdated assets. First try to update the packages
+running the same commands as before and overwriting. If nothing works, ping `@Tatjam` on the discord
+and tell him to upload the latest files. 
 
 # Packaging
 
-TODO (We will probably include a python script or something like that to simplify the process)
+`ospm` is used for managing packages, but as of now it's only capable of downloading packages from an URL using the command `fetch`. 
 
 # Code Style
 We don't have a very strict coding-style, but these rules must be followed:
