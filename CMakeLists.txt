@@ -117,7 +117,7 @@ if(MSVC)
 	add_definitions(-DWIN32_LEAN_AND_MEAN)
 	add_definitions(-DNOMINMAX)
 else()
-    target_compile_options(OSPGL PUBLIC -g -Werror)
+	target_compile_options(OSPGL PUBLIC -g)
 endif()
 
 add_definitions(-DCPPHTTPLIB_OPENSSL_SUPPORT)

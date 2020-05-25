@@ -26,4 +26,4 @@ jobs:
         sudo cmake . -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9
         sudo cmake . -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9
     - name: make
-      run: sudo cmake --build . -j 2
+      run: sudo cmake --build . -- -j 2
