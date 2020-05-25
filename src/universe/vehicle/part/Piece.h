@@ -146,12 +146,15 @@ public:
 	glm::dvec3 link_to;
 	// What axis should be the link's forward? In part relative coordinates
 	glm::dquat link_rot;
+	// Only present on stacked parts, what attachment of the target part is used for the link
+	std::string to_attachment;
+	// Should be present on all parts
+	std::string from_attachment;
 
 	std::unordered_map<std::string, Marker> markers;
 	// Attachments don't have any significance in physics, but they are important
 	// for editing vehicles, so we store them, and a bool marking whether they are used 
-	// or not
-	// They are externally managed by the editor (or by wathever changes the vehicle in flight or not)
+	// They are externally managed by the editor (or by wathever changes the vehicle in flight)
 	std::vector<std::pair<PieceAttachment, bool>> attachments;	
 
 	Marker& get_marker(const std::string& marker_name);

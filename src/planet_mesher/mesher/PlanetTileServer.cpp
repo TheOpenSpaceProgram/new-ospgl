@@ -190,8 +190,8 @@ void PlanetTileServer::do_imgui()
 {
 	// (Not really unsafe!)
 	size_t tiles_size = tiles.get_unsafe()->size();
-	ImGui::Text("Loaded tiles: %i (%.2fMB)", tiles_size, (float)(tiles_size * sizeof(PlanetTile)) / 1000000.0f);
-	ImGui::Text("Work List: %i", work_list.get_unsafe()->size());
+	ImGui::Text("Loaded tiles: %i (%.2fMB)", (int)tiles_size, (float)(tiles_size * sizeof(PlanetTile)) / 1000000.0f);
+	ImGui::Text("Work List: %i", (int)work_list.get_unsafe()->size());
 }
 
 void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* thread)

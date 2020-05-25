@@ -117,6 +117,44 @@ void Vehicle::init(Universe* in_universe)
 	}
 }
 
+// Helper function for update_attachments
+static std::pair<PieceAttachment, bool>* find_attachment(std::string marker, Piece* p)
+{
+	for(auto& pair : p->attachments)
+	{
+		if(pair.first.marker == marker)
+		{
+			return &pair;	
+		}
+	}	
+
+	return nullptr;
+}
+
+void Vehicle::update_attachments()
+{
+	// First pass, clear used 
+	for(Piece* p : all_pieces)
+	{
+		for(auto& pair : p->attachments)
+		{
+			pair.second = false;
+		}
+	}
+
+	for(Piece* p : all_pieces)
+	{
+		if(p->attached_to)
+		{
+			auto* from = find_attachment(p->from_attachment, p);
+			auto* to = find_attachment(p->to_attachment, p->attached_to);
+
+			// This just sets the values if the pointer is not null, the 0 is useless
+			from ? from->second = true : 0;
+			to ? to->second = true : 0;
+		}
+	}
+}
 
 
 void Vehicle::sort()
@@ -239,4 +277,31 @@ Vehicle::~Vehicle()
 	}
 
 	// Ports are deleted by the machines
+}
+
+std::vector<Piece*> Vehicle::get_children_of(Piece* p)
+{
+	std::vector<Piece*> out;
+
+	// TODO: Think of a better implementation
+	// This one COULD stack overflow, and it's not particularly efficient
+	for(Piece* np : all_pieces)
+	{
+		if(np->attached_to == p)
+		{
+			out.push_back(np);
+		}
+	}
+
+	// Now find all children of every piece in out
+	std::vector<Piece*> sub_children;
+	for(Piece* child : out)
+	{
+		auto nchild = get_children_of(child);
+		sub_children.insert(sub_children.end(), nchild.begin(), nchild.end());
+	}
+
+	out.insert(out.end(), sub_children.begin(), sub_children.end());
+
+	return out;
 }

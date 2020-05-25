@@ -20,6 +20,7 @@ private:
 	void obtain_parts(cpptoml::table& root);
 	void obtain_pieces(cpptoml::table& root);
 	void copy_pieces(cpptoml::table& root);
+	Piece* load_piece(cpptoml::table& piece);
 
 public:
 

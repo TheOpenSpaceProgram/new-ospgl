@@ -105,12 +105,21 @@ public:
 	// Called when the vehicle is added to the world
 	void init(Universe* into_universe);
 
+	// Finds which attachments are used on which parts
+	// (The vehicle doesn't need to be sorted)
+	void update_attachments();
+
 	void set_world(btDynamicsWorld* world)
 	{	
 		unpacked_veh.world = world;
 	}
 
 	void sort();
+
+	// This one doesn't need the array to be sorted
+	// but it's slower (used in the editor)
+	// It allows finding children of separated parts
+	std::vector<Piece*> get_children_of(Piece* p);
 
 	// Removes and reports any wrong wires (as an error)
 	void check_wires();

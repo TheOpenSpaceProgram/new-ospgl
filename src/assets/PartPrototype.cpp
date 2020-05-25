@@ -97,9 +97,9 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 			// (Quaternions are hard)
 			n_marker.rotation = glm::dquat(orient.w, -orient.x, -orient.y, -orient.z);
 			
-			logger->info("Maker {} has quaternion  {} {} {} {} and forward {} {} {}",
-					child->name, orient.w, orient.x, orient.y, orient.z, 
-					n_marker.forward.x, n_marker.forward.y, n_marker.forward.z); 
+			//logger->info("Maker {} has quaternion  {} {} {} {} and forward {} {} {}",
+			//		child->name, orient.w, orient.x, orient.y, orient.z, 
+			//		n_marker.forward.x, n_marker.forward.y, n_marker.forward.z); 
 			
 			
 			proto.markers[child->name] = n_marker;

@@ -3,6 +3,7 @@
 #include "EditorScene.h"
 #include <physics/glm/BulletGlmCompat.h>
 #include <util/fmt/glm.h>
+#include <GLFW/glfw3.h>
 
 void EditorVehicle::create_collider(Piece* p)
 {
@@ -59,8 +60,8 @@ void EditorVehicle::forward_pass(CameraUniforms& cu)
 			for(std::pair<PieceAttachment, bool>& pair : p->attachments)
 			{
 				PieceAttachment& attch = pair.first;
-				//if(!pair.second && attch.stack == true)
-				//{
+				if(!pair.second && attch.stack == true)
+				{
 					glm::dvec3 pos = p->get_marker_position(attch.marker);
 					glm::dquat quat = p->get_marker_rotation(attch.marker);
 
@@ -71,7 +72,7 @@ void EditorVehicle::forward_pass(CameraUniforms& cu)
 					model = p->get_graphics_matrix() * model;
 
 					receive_model->draw(cu, model, drawable_uid, true);	
-				//}
+				}
 			}
 		}
 	}
@@ -96,6 +97,7 @@ void EditorVehicle::update(double dt)
 {
 	hovered = nullptr;
 	veh->editor_update(dt);
+
 }
 
 bool EditorVehicle::handle_input(const CameraUniforms& cu, glm::dvec4 viewport, glm::dvec2 screen_size)
@@ -110,24 +112,84 @@ bool EditorVehicle::handle_input(const CameraUniforms& cu, glm::dvec4 viewport, 
 
 	auto[ray_start, ray_end] = MathUtil::screen_raycast(in_subscreen, glm::inverse(cu.tform), 1000.0);
 
-	btCollisionWorld::ClosestRayResultCallback callback(to_btVector3(ray_start), to_btVector3(ray_end));
-	// We cast the ray using bullet
-	scene->bt_world->rayTest(to_btVector3(ray_start), to_btVector3(ray_end), callback);
-
-	if(callback.hasHit())
+	if(selected == nullptr)
 	{
-		RigidBodyUserData* udata = (RigidBodyUserData*)callback.m_collisionObject->getUserPointer();
-		logger->check(udata != nullptr, "A rigidbody did not have an user data attached");
+		btCollisionWorld::ClosestRayResultCallback callback(to_btVector3(ray_start), to_btVector3(ray_end));
+		// We cast the ray using bullet
+		scene->bt_world->rayTest(to_btVector3(ray_start), to_btVector3(ray_end), callback);
 
-		// We only care about PIECE colliders, so ignore everything else 
-		if(udata->type == RigidBodyType::PIECE)
+		if(callback.hasHit())
 		{
-			hovered = udata->as_piece;
+			RigidBodyUserData* udata = (RigidBodyUserData*)callback.m_collisionObject->getUserPointer();
+			logger->check(udata != nullptr, "A rigidbody did not have an user data attached");
+
+			// We only care about PIECE colliders, so ignore everything else 
+			if(udata->type == RigidBodyType::PIECE)
+			{
+				hovered = udata->as_piece;
+			}
 		}
+
+		if(hovered != nullptr)
+		{
+			if(glfwGetMouseButton(input->window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+			{
+				selected = hovered;
+				hovered = nullptr;
+				on_selection_change(cu);
+			}
+		}
+	}
+	else
+	{
+		glm::dvec3 opos = to_dvec3(selected->packed_tform.getOrigin());
+
+		glm::dvec3 mpos(0, 0, 0);
+
+		if(selected_attachment != "none")
+		{
+			mpos = selected->get_marker_position(selected_attachment);
+		}
+
+		glm::dvec3 npos = glm::normalize(ray_end - ray_start) * selected_distance + ray_start;
+		selected->packed_tform.setOrigin(to_btVector3(npos - mpos));
+
+		// Update all children
+		std::vector<Piece*> children = veh->get_children_of(selected);
+
+		for(Piece* child : children)
+		{
+			glm::dvec3 relative = to_dvec3(child->packed_tform.getOrigin()) - opos;
+			glm::dvec3 final = npos + relative - mpos;
+			child->packed_tform.setOrigin(to_btVector3(final));
+		}
+		
 	}
 
 
 	return false;
+}
+
+void EditorVehicle::on_selection_change(const CameraUniforms& cu)
+{
+	selected->attached_to = nullptr;
+	veh->update_attachments();
+
+	glm::dvec3 diff = cu.cam_pos - to_dvec3(selected->packed_tform.getOrigin()); 
+	selected_distance = glm::length(diff);
+
+	selected_attachment = "none";
+
+	// Find the first free attachment
+	for(int i = 0; i < selected->attachments.size(); i++)
+	{
+		if(!selected->attachments[i].second)
+		{
+			logger->info("Found free: {}", selected->attachments[i].first.marker);
+			selected_attachment = selected->attachments[i].first.marker;
+			break;
+		}
+	}
 }
 
 

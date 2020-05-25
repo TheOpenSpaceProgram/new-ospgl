@@ -38,6 +38,42 @@ void VehicleLoader::obtain_parts(cpptoml::table& root)
 
 }
 
+Piece* VehicleLoader::load_piece(cpptoml::table& piece)
+{
+	int64_t part_id = *piece.get_qualified_as<int64_t>("part");
+	std::string node = *piece.get_qualified_as<std::string>("node");
+	bool is_root_of_part = node == "p_root";
+
+	int64_t piece_id = *piece.get_qualified_as<int64_t>("id");
+	
+	Piece* n_piece = new Piece(parts_by_id[part_id], node);
+	n_piece->id = piece_id;
+
+	// Add ourselves to the part
+	logger->check(parts_by_id.find(part_id) != parts_by_id.end(), "Invalid part ID ({})", part_id);
+	Part* part = parts_by_id[part_id];
+	logger->check(part->pieces.find(node) == part->pieces.end(), "Duplicate piece of part");
+	part->pieces[node] = n_piece;
+	n_piece->part = part;
+
+	// Load transform
+	auto pos = piece.get_table_qualified("pos");
+	auto rot = piece.get_table_qualified("rot");
+	glm::dvec3 pos_d; deserialize(pos_d, *pos);
+	glm::dvec4 rot_d; deserialize(rot_d, *rot);
+	n_piece->packed_tform.setIdentity();
+	n_piece->packed_tform.setOrigin(to_btVector3(pos_d));
+	n_piece->packed_tform.setRotation(to_btQuaternion(glm::dquat(rot_d.w, rot_d.x, rot_d.y, rot_d.z)));
+
+	// Pre-load links (We cannot load them just yet)	
+	auto link = piece.get_table_qualified("link");
+	links_toml[n_piece] = link;
+	
+	pieces_by_id[piece_id] = n_piece;
+
+	return n_piece;
+}
+
 void VehicleLoader::obtain_pieces(cpptoml::table& root)
 {
 	auto pieces = root.get_table_array_qualified("piece");
@@ -45,33 +81,7 @@ void VehicleLoader::obtain_pieces(cpptoml::table& root)
 
 	for(auto piece : *pieces)
 	{
-		int64_t part_id = *piece->get_qualified_as<int64_t>("part");
-		std::string node = *piece->get_qualified_as<std::string>("node");
-		bool is_root_of_part = node == "p_root";
-
-		int64_t piece_id = *piece->get_qualified_as<int64_t>("id");
-		
-		Piece* n_piece = new Piece(parts_by_id[part_id], node);
-		n_piece->id = piece_id;
-
-		// Add ourselves to the part
-		logger->check(parts_by_id.find(part_id) != parts_by_id.end(), "Invalid part ID ({})", part_id);
-		Part* part = parts_by_id[part_id];
-		logger->check(part->pieces.find(node) == part->pieces.end(), "Duplicate piece of part");
-		part->pieces[node] = n_piece;
-		n_piece->part = part;
-
-		// Load transform
-		auto pos = piece->get_table_qualified("pos");
-		auto rot = piece->get_table_qualified("rot");
-		glm::dvec3 pos_d; deserialize(pos_d, *pos);
-		glm::dvec4 rot_d; deserialize(rot_d, *rot);
-		n_piece->packed_tform.setIdentity();
-		n_piece->packed_tform.setOrigin(to_btVector3(pos_d));
-		n_piece->packed_tform.setRotation(to_btQuaternion(glm::dquat(rot_d.w, rot_d.x, rot_d.y, rot_d.z)));
-		// Pre-load links (We cannot load them just yet)	
-		auto link = piece->get_table_qualified("link");
-		links_toml[n_piece] = link;
+		Piece* n_piece = load_piece(*piece);
 
 		auto root_entry = piece->get_qualified_as<bool>("root");
 		if(root_entry && *root_entry == true)
@@ -84,7 +94,6 @@ void VehicleLoader::obtain_pieces(cpptoml::table& root)
 			all_pieces.push_back(n_piece);
 		}
 
-		pieces_by_id[piece_id] = n_piece;
 
 		n_piece->in_vehicle = n_vehicle;
 	}
@@ -107,6 +116,9 @@ void VehicleLoader::copy_pieces(cpptoml::table& root)
 			Piece* to_p = pieces_by_id[to];
 			
 			p->attached_to = to_p;
+			
+			p->to_attachment = link->get_as<std::string>("to_attachment").value_or("");
+			p->from_attachment = link->get_as<std::string>("from_attachment").value_or(""); 
 			
 			bool welded = link->get_qualified_as<bool>("welded").value_or(false);
 			p->welded = welded;
@@ -154,4 +166,6 @@ VehicleLoader::VehicleLoader(cpptoml::table& root)
 
 	// Sort the vehicle so it's ready for physics
 	n_vehicle->sort();
+
+	n_vehicle->update_attachments();
 }

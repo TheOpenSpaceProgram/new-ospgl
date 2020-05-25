@@ -45,6 +45,8 @@ public:
 	// Once a piece is selected, it's separated from root if any connection
 	// is present
 	Piece* selected;
+	std::string selected_attachment;
+	double selected_distance;
 
 	Piece* hovered;
 
@@ -67,6 +69,8 @@ public:
 	bool handle_input(const CameraUniforms& cu, glm::dvec4 viewport, glm::dvec2 real_screen_size);
 
 	void draw_highlight(Piece* p, glm::vec3 color, CameraUniforms& cu);
+
+	void on_selection_change(const CameraUniforms& cu);
 
 	EditorVehicle();
 
