@@ -22,11 +22,11 @@ jobs:
       with:
         remote: true
     - name: configure twice
+      env:
+        CC: gcc-9
+        CXX: g++-9  
       run: |
         sudo cmake .
         sudo cmake .
     - name: make
-      env:
-        CC: gcc-9
-        CXX: g++-9  
       run: sudo cmake --build .
