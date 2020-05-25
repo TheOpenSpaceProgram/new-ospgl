@@ -21,7 +21,12 @@ jobs:
       uses: textbook/git-checkout-submodule-action@master
       with:
         remote: true
-    - name: configure
-      run: sudo cmake .
+    - name: configure twice
+      run: |
+        sudo cmake .
+        sudo cmake.
     - name: make
+      env:
+        CC: gcc-8
+        CXX: g++-8  
       run: sudo cmake --build .
