@@ -24,9 +24,9 @@ jobs:
     - name: configure twice
       run: |
         sudo cmake .
-        sudo cmake.
+        sudo cmake .
     - name: make
       env:
-        CC: gcc-8
-        CXX: g++-8  
+        CC: gcc-9
+        CXX: g++-9  
       run: sudo cmake --build .
