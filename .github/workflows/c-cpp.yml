@@ -15,7 +15,7 @@ jobs:
     - name: Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install libx11-dev xorg-dev
+        sudo apt-get install libx11-dev xorg-dev libgl1-mesa-dev
     - uses: actions/checkout@v2
     - name: Checkout submodules
       uses: textbook/git-checkout-submodule-action@master
