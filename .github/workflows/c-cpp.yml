@@ -15,7 +15,7 @@ jobs:
     - name: Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install libxrandr-dev libxinerama-dev libxcursor1 libxi-dev
+        sudo apt-get install libx11-dev
     - uses: actions/checkout@v2
     - name: Checkout submodules
       uses: textbook/git-checkout-submodule-action@master
