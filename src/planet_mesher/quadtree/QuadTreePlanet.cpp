@@ -444,7 +444,7 @@ void QuadTreePlanet::do_imgui(PlanetTileServer* server)
 	render_sides[NZ].draw_gui(SIZE - 1, server);
 	ImGui::EndChild();
 
-	ImGui::Text("Wanted Depth: %i", wanted_depth);
+	ImGui::Text("Wanted Depth: %i", (int)wanted_depth);
 
 }
 
