@@ -38,6 +38,7 @@ if(MSVC)
 	target_compile_options(OSPGL PUBLIC /bigobj)
 else()
 	target_compile_options(OSPGL PUBLIC -g -Werror)
+	link_libraries(${CMAKE_DL_LIBS})
 endif()
 
 include_directories(dep)
