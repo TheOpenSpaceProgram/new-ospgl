@@ -13,6 +13,21 @@ struct EditorVehicleCollider
 	RigidBodyUserData* udata;
 };
 
+struct EditorVehiclePiece
+{
+	EditorVehicleCollider collider;
+	bool highlight;
+	bool draw_all_attachments;
+
+	EditorVehiclePiece()
+	{
+		collider.rigid = nullptr;
+		collider.udata = nullptr;
+		highlight = false;
+		draw_all_attachments = false;
+	}
+};
+
 
 // Only what's needed of a vehicle for the editor, rendering, vehicle data
 // and also the part colliders, but without building welded groups, links,
@@ -31,24 +46,15 @@ private:
 
 public:
 
+
 	EditorScene* scene;
 
-
 	Vehicle* veh;
-	std::unordered_map<Piece*, EditorVehicleCollider> colliders; 
+	std::unordered_map<Piece*, EditorVehiclePiece> piece_meta; 
 
 	// This allows toggling on all "receive" attachments even if nothing is selected
 	bool draw_attachments;
 
-	// The user selects a single piece, but he can use commands to "move"
-	// through all connected pieces to said piece.
-	// Once a piece is selected, it's separated from root if any connection
-	// is present
-	Piece* selected;
-	std::string selected_attachment;
-	double selected_distance;
-
-	Piece* hovered;
 
 	virtual void deferred_pass(CameraUniforms& cu) override;
 	virtual void forward_pass(CameraUniforms& cu) override;
@@ -61,16 +67,9 @@ public:
 	void init();
 
 	void update(double dt);
-	// Returns true if GUI should be blocked (we have something selected)
-	// Call the function ONLY if key and mouse input is free to use
-	// Clicking ANYWHERE outside viewport results in deletion of the selected
-	// part
-	// Viewport is renderer style, (x0, y0, w, h)
-	bool handle_input(const CameraUniforms& cu, glm::dvec4 viewport, glm::dvec2 real_screen_size);
 
 	void draw_highlight(Piece* p, glm::vec3 color, CameraUniforms& cu);
 
-	void on_selection_change(const CameraUniforms& cu);
 
 	EditorVehicle();
 

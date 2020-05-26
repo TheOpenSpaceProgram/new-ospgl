@@ -49,7 +49,8 @@ void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool draw
 
 	n_node->name = node->mName.C_Str();
 
-	logger->check(node_by_name.find(n_node->name) == node_by_name.end(), "We don't support non-unique node names");
+	logger->check(node_by_name.find(n_node->name) == node_by_name.end(), 
+			"We don't support non-unique node names ('{}')", n_node->name);
 
 	node_by_name[n_node->name] =n_node;
 
@@ -749,7 +750,9 @@ void ModelColliderExtractor::load_collider(btCollisionShape** target, Node* n)
 {
 
 	auto collider_prop = n->properties.find("collider");
-	logger->check(collider_prop != n->properties.end(), "No 'collider' property found in collider! Make sure you add it and you enabled user properties");
+	logger->check(collider_prop != n->properties.end(), 
+			"No 'collider' property found in collider ({})! Make sure you add it and you enabled user properties",
+			n->name);
 
 	std::string collider_prop_s = collider_prop->second;
 
@@ -804,10 +807,13 @@ void ModelColliderExtractor::load_collider(btCollisionShape** target, Node* n)
 
 void ModelColliderExtractor::single_collider_common(Node* n)
 {
-	logger->check(n->meshes.size() == 1, "Number of meshes in simple collider is not 1");
+	logger->check(n->meshes.size() == 1, 
+			"Number of meshes in simple collider ({}) is bigger than 1 ({})", 
+			n->name, n->meshes.size());
 
 	// This kind of enforces modders to optimize their collision shape, so it's cool ;)
-	logger->check(!n->meshes[0].is_drawable(), "Mesh must not be drawable to be a collider!");
+	logger->check(!n->meshes[0].is_drawable(), "Mesh must not be drawable to be a collider ({})!",
+			n->name);
 }
 
 

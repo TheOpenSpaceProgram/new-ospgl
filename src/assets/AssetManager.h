@@ -164,7 +164,7 @@ template<typename T>
 inline T* AssetManager::get(const std::string& package, const std::string& name, bool use)
 {
 	auto pkg = packages.find(package);
-	logger->check(pkg != packages.end(), "Invalid package given");
+	logger->check(pkg != packages.end(), "Invalid package ({}) given", package);
 
 	auto assets = &pkg->second.assets;
 	
@@ -176,7 +176,7 @@ inline T* AssetManager::get(const std::string& package, const std::string& name,
 	if (item == it->second.second.end())
 	{
 		bool result = load<T>(package, name);
-		logger->check(result, "Could not load asset");
+		logger->check(result, "Could not load asset ({}:{})", package, name);
 		item = it->second.second.find(name);
 	}
 
@@ -191,7 +191,7 @@ template<typename T>
 inline T * AssetManager::get_or_null(const std::string & package, const std::string name, bool use)
 {
 	auto pkg = packages.find(package);
-	logger->check(pkg != packages.end(), "Invalid package given");
+	logger->check(pkg != packages.end(), "Invalid package ({}) given", package);
 
 	auto assets = &pkg->second.assets;
 
@@ -221,7 +221,7 @@ template<typename T>
 inline void AssetManager::free(const std::string& package, const std::string& name)
 {
 	auto pkg = packages.find(package);
-	logger->check(pkg != packages.end(), "Invalid package given");
+	logger->check(pkg != packages.end(), "Invalid package ({}) given", package);
 
 	auto assets = &pkg->second.assets;
 
@@ -252,7 +252,7 @@ template<typename T>
 inline bool AssetManager::load(const std::string& package, const std::string& name)
 {
 	auto pkg = packages.find(package);
-	logger->check(pkg != packages.end(), "Invalid package given");
+	logger->check(pkg != packages.end(), "Invalid package ({}) given", package);
 
 	auto assets = &pkg->second.assets;
 

@@ -5,6 +5,7 @@
 #include <LinearMath/btTransform.h>
 #include <LinearMath/btVector3.h>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #pragma warning(pop)
 
 // TODO: Maybe  pass by reference is more perfomant?
@@ -47,5 +48,12 @@ template<typename T>
 inline btQuaternion to_btQuaternion(glm::tquat<T> d)
 {
 	return btQuaternion((btScalar)d.x, (btScalar)d.y, (btScalar)d.z, (btScalar)d.w);
+}
+
+inline btTransform to_btTransform(glm::dmat4 mat)
+{
+	btTransform out = btTransform::getIdentity();
+	out.setFromOpenGLMatrix(glm::value_ptr(mat));
+	return out;
 }
 

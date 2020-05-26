@@ -4,6 +4,7 @@
 #include "EditorCamera.h"
 #include "gui/EditorGUI.h"
 #include "EditorVehicle.h"
+#include "EditorVehicleInterface.h"
 
 #include <renderer/lighting/SunLight.h>
 
@@ -22,6 +23,7 @@ private:
 	EditorCamera cam;
 	EditorGUI gui;
 	EditorVehicle vehicle;
+	EditorVehicleInterface vehicle_int;
 
 	// We need a world for the very simple colliders, but we have no 
 	// dynamics, links, or anything like that

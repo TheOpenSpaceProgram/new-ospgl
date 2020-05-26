@@ -23,7 +23,7 @@ PortValue::Type PortValue::get_type(const std::string& str)
 	}
 	else
 	{
-		logger->fatal("Invalid strin ggiven to PortType::get_type '{}'", str);
+		logger->fatal("Invalid string given to PortType::get_type '{}'", str);
 		return NUMBER; //< To shut up all compiler
 	}
 }

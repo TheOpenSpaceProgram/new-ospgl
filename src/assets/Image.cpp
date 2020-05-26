@@ -6,7 +6,8 @@
 
 int Image::get_index(int x, int y)
 {
-	logger->check(x >= 0 && y >= 0 && x < width && y < height, "Pixel out of bounds");
+	logger->check(x >= 0 && y >= 0 && x < width && y < height, 
+			"Pixel out of bounds ({},{}) / ({},{})", x, y, width, height);
 	return y * width + x;
 }
 

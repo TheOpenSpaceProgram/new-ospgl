@@ -44,6 +44,8 @@ void EditorScene::load()
 	
 
 	vehicle.scene = this;
+	vehicle_int.scene = this;
+	vehicle_int.edveh = &vehicle;
 	vehicle.init();
 }
 
@@ -58,11 +60,16 @@ void EditorScene::update()
 	do_gui();
 
 	vehicle.update(get_osp()->game_dt);
+	vehicle_int.update(get_osp()->game_dt);
+
 	double rw = get_osp()->renderer->get_width(true) - (double)gui.get_panel_width();
 	double w = (double)gui.get_panel_width() / (double)get_osp()->renderer->get_width(true);
 	glm::dvec4 viewport = glm::dvec4(w, 0.0, 1.0, 1.0);
-	glm::dvec2 real_screen_size = glm::dvec2(get_osp()->renderer->get_width(true), get_osp()->renderer->get_height(true));
-	vehicle.handle_input(cam.get_camera_uniforms(rw, get_osp()->renderer->get_height(true)), viewport, real_screen_size); 
+	glm::dvec2 real_screen_size = 
+		glm::dvec2(get_osp()->renderer->get_width(true), get_osp()->renderer->get_height(true));
+
+	vehicle_int.handle_input(
+			cam.get_camera_uniforms(rw, get_osp()->renderer->get_height(true)), viewport, real_screen_size); 
 	
 	//bt_world->debugDrawWorld();
 }
