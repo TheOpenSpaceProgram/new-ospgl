@@ -103,6 +103,7 @@ struct Node
 
 	// Draws everything using given material, is mat_override is null, the default material override will be
 	// used, if it's non-null, the given one will be used
+	// If mat is null then default materials are used, but the material override is applied
 	void draw_override(const CameraUniforms& uniforms, Material* mat, glm::dmat4 model, GLint drawable_id, 
 		MaterialOverride* mat_over, bool ignore_our_subtform, bool increase_did = false);
 };

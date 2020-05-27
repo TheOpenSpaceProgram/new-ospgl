@@ -61,25 +61,53 @@ void EditorVehicle::forward_pass(CameraUniforms& cu)
 			for(std::pair<PieceAttachment, bool>& pair : p->attachments)
 			{
 				PieceAttachment& attch = pair.first;
-				if(!pair.second && attch.stack == true)
+
+				glm::dvec3 pos = p->get_marker_position(attch.marker);
+				glm::dquat quat = p->get_marker_rotation(attch.marker);
+
+				glm::dmat4 model = glm::translate(glm::dmat4(1.0), pos);
+				model = glm::scale(model, glm::dvec3(attch.size * 0.15));
+				model = model * glm::toMat4(quat); 
+
+				model = p->get_graphics_matrix() * model;
+
+				glm::vec4 color = glm::vec4(1.0f);
+				auto it = piece_meta[p].attachment_color.find(pair.first.marker);
+				if(it != piece_meta[p].attachment_color.end())
 				{
-					glm::dvec3 pos = p->get_marker_position(attch.marker);
-					glm::dquat quat = p->get_marker_rotation(attch.marker);
+					color = it->second;
+				}
+				
+				MaterialOverride mat_over;
+				mat_over.uniforms["color"] = glm::vec3(color);
+				mat_over.uniforms["transparency"] = 1.0f - color.a;
 
-					glm::dmat4 model = glm::translate(glm::dmat4(1.0), pos);
-					model = glm::scale(model, glm::dvec3(attch.size * 0.15));
-					model = model * glm::toMat4(quat); 
-
-					model = p->get_graphics_matrix() * model;
-
-					receive_model->draw(cu, model, drawable_uid, true);	
+				if(!pair.second && piece_meta[p].draw_in_attachments && attch.stack == true)
+				{
+					receive_model->draw_override(cu, nullptr, model, drawable_uid, &mat_over, true);
+				}
+				
+				if(!pair.second && piece_meta[p].draw_out_attachments)
+				{
+					if(attch.stack && !attch.radial)
+					{
+						stack_model->draw_override(cu, nullptr, model, drawable_uid, &mat_over, true);
+					}
+					else if(attch.radial && !attch.stack)
+					{
+						radial_model->draw_override(cu, nullptr, model, drawable_uid, &mat_over, true);
+					}
+					else if(attch.radial && attch.stack)
+					{	
+						stack_radial_model->draw_override(cu, nullptr, model, drawable_uid, &mat_over, true);
+					}
 				}
 			}
 		}
 
-		if(piece_meta[p].highlight)
+		if(piece_meta[p].highlight != glm::vec3(0.0f, 0.0f, 0.0f))
 		{
-			draw_highlight(p, glm::vec3(1.0f, 1.0f, 1.0f), cu);
+			draw_highlight(p, piece_meta[p].highlight, cu);
 		}
 	}
 }

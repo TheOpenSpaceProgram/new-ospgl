@@ -6,8 +6,10 @@ void EditorVehicleInterface::update(double dt)
 {
 	for(auto& mp : edveh->piece_meta)
 	{
-		mp.second.highlight = false;
-		mp.second.draw_all_attachments = false;
+		mp.second.highlight = glm::vec3(0.0f);
+		mp.second.draw_out_attachments = false;
+		mp.second.draw_in_attachments = true;
+		mp.second.attachment_color.clear();
 	}
 }
 
@@ -60,7 +62,7 @@ bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 v
 		{
 			if(mp.first == hovered)
 			{
-				mp.second.highlight = true;
+				mp.second.highlight = glm::vec3(1.0f);
 			}
 		}
 	}
@@ -90,16 +92,46 @@ bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 v
 			glm::dmat4 final = tform_new * relative; 
 			child->packed_tform = to_btTransform(final);
 		}
-
+		
 		if(input->key_down(GLFW_KEY_PAGE_UP))
 		{
-			cycle_attachments(-1);
+			if(input->key_pressed(GLFW_KEY_LEFT_CONTROL))
+			{
+				cycle_pieces(-1);
+			}
+			else
+			{
+				cycle_attachments(-1);
+			}
 		}
 
 		if(input->key_down(GLFW_KEY_PAGE_DOWN))
 		{
-			cycle_attachments(1);
+			if(input->key_pressed(GLFW_KEY_LEFT_CONTROL))
+			{
+				cycle_pieces(1);
+			}
+			else
+			{
+				cycle_attachments(1);
+			}
 		}
+
+		// Coloring and visuals
+		for(Piece* child : children)
+		{
+			edveh->piece_meta[child].draw_out_attachments = true;
+			edveh->piece_meta[child].draw_in_attachments = false;
+			edveh->piece_meta[child].highlight = glm::vec3(0.5f);
+			if(child == selected)
+			{
+				edveh->piece_meta[child].highlight = glm::vec3(1.0f);
+
+				edveh->piece_meta[child].attachment_color[selected_attachment] = 
+					glm::vec4(1.0f, 1.0f, 0.5f, 1.0f);
+			}
+		}
+
 		
 	}
 
@@ -115,8 +147,15 @@ void EditorVehicleInterface::on_selection_change(const CameraUniforms& cu)
 	glm::dvec3 diff = cu.cam_pos - to_dvec3(selected->packed_tform.getOrigin()); 
 	selected_distance = glm::length(diff);
 
+	selected_buffer.clear();
+
 	selected_attachment = "none";
 
+	find_free_attachment();
+}
+
+void EditorVehicleInterface::find_free_attachment()
+{
 	// Find the first free attachment
 	for(int i = 0; i < selected->attachments.size(); i++)
 	{
@@ -161,6 +200,105 @@ void EditorVehicleInterface::cycle_attachments(int dir)
 		}
 
 	}
+}
+
+void EditorVehicleInterface::cycle_pieces(int dir)
+{
+	std::vector<Piece*> children = edveh->veh->get_children_of(selected);
+
+	Piece* old = selected;
+
+	if(dir == -1)
+	{
+		// Go back in stack or otherwise go into the last piece of children
+		if(selected_buffer.size() != 0)	
+		{
+			selected = selected_buffer.front();
+		}			
+		else 
+		{
+			if(children.size() != 0)
+			{
+				selected = children[children.size() - 1];
+			}
+			// Otherwise we can't move anywhere
+		}
+	}
+	else if(dir == 1)
+	{
+		// Go into earliest children, for more complex selections a visual
+		// interace is used (stuff with two or more children)
+		if(children.size() != 0)
+		{
+			selected = children[0];	
+		}	
+	}
+
+	if(old != selected)
+	{
+		reroot(old, selected);
+		// We will need to find a new attachment most likely
+		find_free_attachment();
+	}
+}
+
+void EditorVehicleInterface::reroot(Piece* current, Piece* new_root)
+{
+	// We simply change the attached_to, but don't do tree sorting
+	// as it's used only in the editor
+		
+	// Everything which is attached to current, except these before, needs to change
+	std::vector<Piece*> current_children = edveh->veh->get_children_of(current);
+
+	// We have to make the graph flow towards new_root instead of towards current
+	// To do so, we only need to change the pieces on the tree branch that contains
+	// the new root (the other branches are already correct as they have to go
+	// through current to reach new_root)
+
+	// We find the branch that contains new_root
+	
+	std::vector<Piece*> branch;
+	// To do so, we walk up from new_root until we reach current root
+		
+	Piece* ptr = new_root;
+	while(ptr != current)
+	{
+		branch.push_back(ptr);
+		ptr = ptr->attached_to;
+	}
+	branch.push_back(current);
+
+	// We now have all pieces which need to be re-arranged
+	// in the opposite order to the wanted order
+	// We simply have to invert the links traversing the array
+	// in the opposite order
+	
+	for(auto it = branch.rbegin(); it != branch.rend(); it++)
+	{
+		auto next = it + 1;
+		if(next == branch.rend())
+		{
+			// We are the new root, no attachment
+			(*it)->attached_to = nullptr;		
+		}
+		else
+		{
+			// Copy link stuff from next and invert link
+			(*it)->attached_to = (*next);
+			(*it)->link = std::move((*next)->link);
+			// Note the inversion here, very important
+			(*it)->to_attachment = (*next)->from_attachment;
+			(*it)->from_attachment = (*next)->to_attachment;
+
+			(*it)->link_from = (*next)->link_to;
+			(*it)->link_to = (*next)->link_from;
+			// TODO: Invert this too
+			(*it)->link_rot = (*next)->link_rot;
+
+
+		}
+	}	
+
 }
 
 EditorVehicleInterface::EditorVehicleInterface()

@@ -26,8 +26,13 @@ void main()
 
 	float d = dot(normal, eye);
 	float diffuse = max(d, 0.0);
-	float rim = smoothstep(0.0, 1.0, 1.0 - d);
-	FragColor = vec4(color, max(rim, 0.2));
+	
+	float color_intensity = length(color);
+	float gain = 1.73f;
+
+	float rim = pow(smoothstep(0.0, 1.0, 1.0 - d), 1.0f / color_intensity);
+
+	FragColor = vec4(normalize(color) * gain, max(rim, 0.2) * color_intensity);
 
     gl_FragDepth = log2(flogz) * f_coef * 0.5;
 }

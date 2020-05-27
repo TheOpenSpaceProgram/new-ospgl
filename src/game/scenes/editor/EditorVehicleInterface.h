@@ -18,6 +18,8 @@ public:
 	double selected_distance;
 	glm::dquat selected_rotation;
 
+	std::vector<Piece*> selected_buffer;
+
 	// Returns true if GUI should be blocked (we have something selected)
 	// Call the function ONLY if key and mouse input is free to use
 	// Clicking ANYWHERE outside viewport results in deletion of the selected
@@ -29,10 +31,14 @@ public:
 	void on_selection_change(const CameraUniforms& cu);
 	// Called when cycling through attachments in the same piece
 	void on_attachment_change();
-	// Called when cycling through pieces 
-	void on_piece_change();
+
+	void find_free_attachment();
 
 	void cycle_attachments(int dir);
+	void cycle_pieces(int dir);
+
+	// Re-roots assuming selected piece is 'current', and new root is 'new_root'
+	void reroot(Piece* current, Piece* new_root);
 
 	void update(double dt);
 

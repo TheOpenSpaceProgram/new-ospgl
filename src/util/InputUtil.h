@@ -54,6 +54,17 @@ public:
 		{
 			current_key_status[i] = false;
 		}
+
+		auto check_key = [this](int k)
+		{
+			this->current_key_status[k] = glfwGetKey(this->window, k);
+		};
+
+		// Some special key status
+		check_key(GLFW_KEY_LEFT_CONTROL);
+		check_key(GLFW_KEY_RIGHT_CONTROL);
+		
+		// TODO: Add all stuff not reported by glfw's key_callback
 	}
 
 	bool key_pressed(int key)

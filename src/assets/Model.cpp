@@ -655,6 +655,12 @@ void Node::draw_all_meshes_override(const CameraUniforms& uniforms, Material* ma
 	{
 		if (mesh.is_drawable())
 		{
+			Material* def = mat;
+			if(mat == nullptr)
+			{
+				mat = mesh.material.data;
+			}
+
 			mat->shader->use();
 			if(mat_over)
 			{
@@ -666,6 +672,8 @@ void Node::draw_all_meshes_override(const CameraUniforms& uniforms, Material* ma
 			}
 			mat->set_core(uniforms, model, did);
 			mesh.draw_command();
+
+			mat = def;
 		}
 	}
 }

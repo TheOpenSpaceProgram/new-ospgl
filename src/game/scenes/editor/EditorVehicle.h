@@ -13,18 +13,24 @@ struct EditorVehicleCollider
 	RigidBodyUserData* udata;
 };
 
+
+// Not a particularly efficient strategy, but works well
 struct EditorVehiclePiece
 {
 	EditorVehicleCollider collider;
-	bool highlight;
-	bool draw_all_attachments;
+	glm::vec3 highlight;
+	bool draw_out_attachments;
+	bool draw_in_attachments;
+
+	std::unordered_map<std::string, glm::vec4> attachment_color;
 
 	EditorVehiclePiece()
 	{
 		collider.rigid = nullptr;
 		collider.udata = nullptr;
-		highlight = false;
-		draw_all_attachments = false;
+		highlight = glm::vec3(0.0f);
+		draw_out_attachments = false;
+		draw_in_attachments = true;
 	}
 };
 
@@ -52,9 +58,7 @@ public:
 	Vehicle* veh;
 	std::unordered_map<Piece*, EditorVehiclePiece> piece_meta; 
 
-	// This allows toggling on all "receive" attachments even if nothing is selected
 	bool draw_attachments;
-
 
 	virtual void deferred_pass(CameraUniforms& cu) override;
 	virtual void forward_pass(CameraUniforms& cu) override;

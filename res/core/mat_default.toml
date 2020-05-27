@@ -2,7 +2,7 @@ shader = "shaders/vehicle/simple_part.vs"
 
 [uniforms]
 	diffuse = "core:notex.png"
-	transparency = 0.5
+	transparency = 0.0
 
 
 [assimp_textures]
