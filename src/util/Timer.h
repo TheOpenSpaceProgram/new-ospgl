@@ -13,7 +13,7 @@ private:
 	std::string str;
 public:
 
-	double getElapsedTime();
+	double get_elapsed_time();
 	double restart();
 
 	Timer(std::string name);

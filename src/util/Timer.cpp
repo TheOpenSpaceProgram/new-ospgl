@@ -2,7 +2,7 @@
 #include "GLFW/glfw3.h"
 #include "Logger.h"
 
-double Timer::getElapsedTime()
+double Timer::get_elapsed_time()
 {
 	double now = glfwGetTime();
 	double diff = now - t0;

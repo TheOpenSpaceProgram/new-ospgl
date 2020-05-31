@@ -131,7 +131,8 @@ void LuaCore::load(sol::state& to, const std::string& pkg)
 {
 	to.open_libraries(
 		sol::lib::base, sol::lib::package, sol::lib::coroutine,
-		sol::lib::string, sol::lib::math, sol::lib::table, sol::lib::utf8);
+		sol::lib::string, sol::lib::math, sol::lib::table, sol::lib::utf8,
+		sol::lib::jit);
 
 	to["__pkg"] = pkg;
 
