@@ -1,6 +1,7 @@
 #pragma once
 #include <fmt/core.h>
 #include <vector>
+#include <mutex>
 
 // Comment to disable "debug" logging in Release
 #define LOG_DEBUG_ALWAYS
@@ -17,6 +18,9 @@ private:
 	int wantedFlushCounter;
 
 public:
+
+	std::mutex mtx;
+
 
 	template <typename... Args>
 	void debug(const char* format, const Args & ... args)

@@ -40,6 +40,23 @@ public:
 		mtx = NULL;
 	}
 
+	// Move constructor
+	AtomicWrapper(AtomicWrapper&& b)
+	{
+		this->mtx = b.mtx;
+		this->data = b.data;
+		b.mtx = nullptr;
+		b.data = nullptr;
+	}
+
+	AtomicWrapper& operator=(const AtomicWrapper& b)
+	{
+		this->mtx = b.mtx;
+		this->data = b.data;
+		b.mtx = nullptr;
+		b.data = nullptr;
+	}
+
 	~AtomicWrapper()
 	{
 		if (mtx != NULL)
@@ -67,7 +84,7 @@ public:
 	AtomicWrapper<T> get()
 	{
 		mtx.lock();
-		return AtomicWrapper<T>(&data, &mtx);
+		return std::move(AtomicWrapper<T>(&data, &mtx));
 	}
 
 	// Returns null wrapper if mutex is locked
@@ -75,11 +92,11 @@ public:
 	{
 		if (mtx.try_lock())
 		{
-			return AtomicWrapper<T>(&data, &mtx);
+			return std::move(AtomicWrapper<T>(&data, &mtx));
 		}
 		else
 		{
-			return AtomicWrapper<T>();
+			return std::move(AtomicWrapper<T>());
 		}
 	}
 

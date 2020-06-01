@@ -35,11 +35,11 @@ private:
 
 	bool dirty;
 
-	static const size_t WORKER_THREAD_COUNT = 4;
+	size_t worker_thread_count;
 
 	int depth_for_unload;
 
-	std::array<PlanetTileThread, WORKER_THREAD_COUNT> threads;
+	std::vector<PlanetTileThread> threads;
 
 	static void thread_func(PlanetTileServer* server, PlanetTileThread* thread);
 
@@ -100,7 +100,9 @@ public:
 
 	// Make sure you call once a OpenGL context is available
 	// as we will create the index buffer here
-	PlanetTileServer(const std::string& script, const std::string& script_path, PlanetConfig* config, bool has_water);
+	PlanetTileServer(const std::string& script, const std::string& script_path, 
+			PlanetConfig* config, bool has_water, size_t thread_count = 4);
+
 	~PlanetTileServer();
 };
 

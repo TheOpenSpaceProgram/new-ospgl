@@ -167,6 +167,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 			}
 		}
+		
 	}
 
 	glFrontFace(GL_CCW);

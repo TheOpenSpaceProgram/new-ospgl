@@ -68,11 +68,10 @@ void PlanetTileServer::update(QuadTreePlanet& planet)
 			}
 			else
 			{
-
-
 				it++;
 			}
 		}
+		
 
 	}
 
@@ -90,6 +89,7 @@ void PlanetTileServer::update(QuadTreePlanet& planet)
 		{
 			condition_var.notify_all();
 		}
+		
 	}
 
 }
@@ -132,7 +132,7 @@ double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
 }
 
 PlanetTileServer::PlanetTileServer(const std::string& script, const std::string& script_path, 
-	PlanetConfig* config, bool has_water)
+	PlanetConfig* config, bool has_water, size_t thread_count)
 {
 	this->has_water = has_water;
 
@@ -145,6 +145,8 @@ PlanetTileServer::PlanetTileServer(const std::string& script, const std::string&
 
 	PlanetTile::prepare_lua(lua_state);
 	LuaUtil::safe_lua(lua_state, script, wrote_error, script_path);
+
+	threads.resize(thread_count);
 
 	for (size_t i = 0; i < threads.size(); i++)
 	{
@@ -176,7 +178,7 @@ PlanetTileServer::~PlanetTileServer()
 		delete threads[i].thread;
 	}
 
-	// Tiles are now only managed by us
+	// Tiles are now only managed by us so this is actually safe
 	for (auto it = tiles.get_unsafe()->begin(); it != tiles.get_unsafe()->end(); it++)
 	{
 		delete it->second;
@@ -206,7 +208,8 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 			server->condition_var.wait(lock);
 		}
 
-		while (server->work_list.get_unsafe()->size() != 0)
+		// (We break out of this loop)
+		while (true)
 		{
 			PlanetTilePath target = PlanetTilePath(std::vector<QuadTreeQuadrant>(), PX);
 
@@ -215,7 +218,6 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 
 				if (work_list_w->size() == 0)
 				{
-					// This can happen, very unlikely, tough
 					break;
 				}
 			
@@ -252,7 +254,6 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 					delete ntile;
 				}
 				
-
 			}
 
 			server->dirty = true;

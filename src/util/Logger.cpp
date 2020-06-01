@@ -11,6 +11,8 @@
 
 void Logger::log(int level, const char* format, fmt::format_args args)
 {
+	auto mtx_lock = std::unique_lock<std::mutex>(mtx);
+
 	std::string prefix = "";
 	if (level == 0)
 	{

@@ -480,6 +480,9 @@ Renderer::Renderer(cpptoml::table& settings)
 	fbuffer = nullptr;
 	wireframe = false;
 
+	doing_forward = false;
+	doing_deferred = false;
+
 	std::string type = "windowed";
 
 	width = settings.get_qualified_as<int>("renderer.width").value_or(512);
