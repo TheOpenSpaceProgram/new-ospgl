@@ -198,8 +198,8 @@ void PlanetTileServer::do_imgui()
 
 void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* thread)
 {
-	PlanetTile::VertexArray<PlanetTileVertex, PlanetTile::TILE_SIZE>* work_array = 
-		new PlanetTile::VertexArray<PlanetTileVertex, PlanetTile::TILE_SIZE>();
+	PlanetTile::GeneratorArrays arrays;
+
 	while (server->threads_run)
 	{
 		{
@@ -232,7 +232,7 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 			// Work on the target
 			PlanetTile* ntile = new PlanetTile();
 			bool has_errors = ntile->generate(target, server->config->radius, 
-				thread->lua_state, server->has_water, work_array);
+				thread->lua_state, server->has_water, &arrays);
 
 			if (has_errors)
 			{
@@ -260,7 +260,6 @@ void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* t
 		}
 	}
 
-	delete work_array;
 }
 
 void PlanetTileServer::default_lua(sol::state& lua_state)

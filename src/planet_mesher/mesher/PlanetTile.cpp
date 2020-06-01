@@ -199,8 +199,12 @@ void generate_skirt(PlanetTileVertex* target, glm::dmat4 model, glm::dmat4 inver
 #include <util/Timer.h>
 
 bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state& lua_state, bool has_water,
-	VertexArray<PlanetTileVertex, PlanetTile::TILE_SIZE>* work_array)
+	GeneratorArrays* arrays)
 {
+	auto& work_array = arrays->work_array;
+	auto& heights = arrays->heights;
+	auto& colors = arrays->colors;
+
 	Timer benchmark;	
 
 	bool errors = false;
@@ -219,22 +223,18 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	glm::dmat4 inverse_model = glm::inverse(model);
 	glm::dmat4 inverse_model_spheric = glm::inverse(model_spheric);
 
-	std::array<double, (TILE_SIZE + 2) * (TILE_SIZE + 2)> heights;
-	std::array<glm::vec3, (TILE_SIZE + 2) * (TILE_SIZE + 2)> colors;
 
 	size_t depth = path.get_depth();
 
 	// We only need water if there is a tile over the water level (height = 0)
 	bool needs_water = false;
 
-	GeneratorInfo info;
-	info.depth = (int)depth;
-	info.radius = planet_radius;
-	info.needs_color = true;
-
-	sol::protected_function func = lua_state["generate"];
+	std::array<GeneratorInfo, GEN_ARRAY_SIZE> gen_info;
+	std::array<GeneratorOut, GEN_ARRAY_SIZE> gen_out;
 
 
+
+	// Initialize gen_info
 	for (int x = -1; x < TILE_SIZE + 1; x++)
 	{
 		for (int y = -1; y < TILE_SIZE + 1; y++)
@@ -253,64 +253,61 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 
 			size_t i = (y + 1) * (TILE_SIZE + 2) + (x + 1);
 			
-			info.coord_3d = sphere;
-			info.coord_2d = projected;
+			gen_info[i].coord_3d = sphere;
+			gen_info[i].coord_2d = projected;
+			gen_info[i].depth = (int)depth;
+			gen_info[i].radius = planet_radius;
+			gen_info[i].needs_color = true;
 
-			GeneratorOut out;
-			out.height = 1.0;
-			out.color = glm::dvec3(1.0, 0.0, 1.0);
+			// Safe defaults
+			gen_out[i].height = 1.0;
+			gen_out[i].color = glm::vec3(1.0, 0.0, 1.0);
 
-			// TODO: Texture generation
-			// If an error happens, generating will lag 
-			// (exceptions are really slow)
-			// So we instead flatten the whole world
-			if (errors)
+		}
+	}
+
+	sol::protected_function func = lua_state["generate"];
+	auto result = func(std::ref(gen_info), std::ref(gen_out));
+
+	if (!result.valid())
+	{
+		sol::error err = result;
+		logger->error("Lua Error on PlanetTile generation:\n{}", err.what());
+		// We only write one error per tile so we don't overload the log
+		errors = true;
+	}
+
+	// Post-process
+	for(size_t i = 0; i < gen_out.size(); i++)
+	{
+		heights[i] = (gen_out[i].height) / planet_radius;
+		if (!needs_water)
+		{
+			if (heights[i] < 0.0)
 			{
-				heights[i] = 0.0f;
-			}
-			else
-			{
-				auto result = func(info, &out);
-				if (!result.valid())
-				{
-					sol::error err = result;
-					logger->error("Lua Runtime Error:\n{}", err.what());
-					// We only write one error per tile so we don't overload the log
-					errors = true;
-					heights[i] = 0.0;
-				}
-				else
-				{
-					heights[i] = (out.height) / planet_radius;
-					if (!needs_water)
-					{
-						if (heights[i] < 0.0)
-						{
-							needs_water = true;
-						}
-					}
-
-					colors[i] = (glm::vec3)out.color;
-
-				}
+				needs_water = true;
 			}
 		}
+
+		colors[i] = (glm::vec3)gen_out[i].color;
 	}
 
 	lua_state.collect_garbage();
 
-	generate_vertices<TILE_SIZE, PlanetTileVertex, false>(work_array->data(), model, inverse_model_spheric, &heights[0], &colors[0]);
-	generate_normals<TILE_SIZE>(work_array->data(), work_array->size(), model_spheric, clockwise);
-	copy_vertices<TILE_SIZE>(work_array->data(), vertices.data());
+	generate_vertices<TILE_SIZE, PlanetTileVertex, false>(work_array.data(), model, inverse_model_spheric, &heights[0], &colors[0]);
+	generate_normals<TILE_SIZE>(work_array.data(), work_array.size(), model_spheric, clockwise);
+	copy_vertices<TILE_SIZE>(work_array.data(), vertices.data());
 
 	water_vertices = nullptr;
 	water_vbo = 0;
 	if (has_water && needs_water)
 	{
-		generate_vertices<TILE_SIZE, PlanetTileVertex, true>(work_array->data(), model, inverse_model_spheric, &heights[0], nullptr);
-		generate_normals<TILE_SIZE>(work_array->data(), work_array->size(), model_spheric, clockwise);
+		generate_vertices<TILE_SIZE, PlanetTileVertex, true>(work_array.data(), 
+				model, inverse_model_spheric, &heights[0], nullptr);
+
+		generate_normals<TILE_SIZE>(work_array.data(), work_array.size(), model_spheric, clockwise);
 		water_vertices = new std::array<PlanetTileWaterVertex, VERTEX_COUNT>();
-		copy_vertices<TILE_SIZE>(work_array->data(), water_vertices->data());
+		copy_vertices<TILE_SIZE>(work_array.data(), water_vertices->data());
 	}
 
 	std::array<PlanetTileVertex, 4> skirts;
@@ -350,14 +347,14 @@ bool PlanetTile::generate_physics(PlanetTilePath path, double planet_radius, sol
 	glm::dmat4 inverse_model = glm::inverse(model);
 	glm::dmat4 inverse_model_spheric = glm::inverse(model_spheric);
 
-	std::array<double, PHYSICS_SIZE * PHYSICS_SIZE> heights;
+	constexpr size_t ARR_SIZE = PHYSICS_SIZE * PHYSICS_SIZE;
+
+	std::array<double, ARR_SIZE> heights;
 
 	size_t depth = path.get_depth();
 
-	GeneratorInfo info;
-	info.depth = (int)depth;
-	info.radius = planet_radius;
-	info.needs_color = false;
+	std::array<GeneratorInfo, ARR_SIZE> info;
+	std::array<GeneratorOut, ARR_SIZE> out;
 
 	sol::protected_function func = lua_state["generate"];
 
@@ -367,7 +364,6 @@ bool PlanetTile::generate_physics(PlanetTilePath path, double planet_radius, sol
 	{
 		for (int x = 0; x < PlanetTile::PHYSICS_SIZE; x++)
 		{
-
 			size_t r_index = y * PlanetTile::PHYSICS_SIZE + x;
 
 			double tx = (double)x / ((double)PlanetTile::PHYSICS_SIZE - 1.0);
@@ -382,41 +378,33 @@ bool PlanetTile::generate_physics(PlanetTilePath path, double planet_radius, sol
 			glm::dvec2 projected = MathUtil::euclidean_to_spherical_r1(sphere);
 
 
-			info.coord_3d = sphere;
-			info.coord_2d = projected;
-
-			GeneratorOut out;
-			out.height = 1.0;
-			out.color = glm::dvec3(1.0, 0.0, 1.0);
-
-			// If an error happens, generating will lag 
-			// (exceptions are really slow)
-			// So we instead flatten the whole world
-			if (errors)
-			{
-				heights[r_index] = 0.0f;
-			}
-			else
-			{
-				auto result = func(info, &out);
-				if (!result.valid())
-				{
-					sol::error err = result;
-					logger->error("Lua Runtime Error:\n{}", err.what());
-					// We only write one error per tile so we don't overload the log
-					errors = true;
-					heights[r_index] = 0.0;
-				}
-				else
-				{
-					heights[r_index] = (out.height) / planet_radius;
-				}
-			}
+			info[r_index].coord_3d = sphere;
+			info[r_index].coord_2d = projected;
+			info[r_index].depth = (int)depth;
+			info[r_index].radius = planet_radius;
+			info[r_index].needs_color = false;
+			out[r_index].height = 1.0;
+			out[r_index].color = glm::dvec3(1.0, 0.0, 1.0);
 		}
 	}
 
-	lua_state.collect_garbage();
+	auto result = func(std::ref(info), std::ref(out));
 
+
+	if (!result.valid())
+	{
+		sol::error err = result;
+		logger->error("Lua Runtime Error:\n{}", err.what());
+		// We only write one error per tile so we don't overload the log
+		errors = true;
+	}
+
+	for(size_t i = 0; i < out.size(); i++)
+	{
+		heights[i] = (out[i].height) / planet_radius;
+	}
+
+	lua_state.collect_garbage();
 	generate_vertices_simple<PlanetTileSimpleVertex>(work_array->data(), model, inverse_model_spheric, heights.data());
 
 	return errors;

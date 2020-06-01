@@ -57,6 +57,7 @@ struct PlanetTile
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
 	static const int TILE_SIZE = 16;
+	static const size_t GEN_ARRAY_SIZE = (TILE_SIZE + 2) * (TILE_SIZE + 2);
 	// TODO: Make it possible for this number to be different, the whole tile is overkill
 	static const int PHYSICS_SIZE = TILE_SIZE;
 	static const int PHYSICS_GRAPHICS_RELATION = TILE_SIZE / (PHYSICS_SIZE - 1);
@@ -75,9 +76,16 @@ struct PlanetTile
 	// This one is optional, so we only allocate it if needed
 	std::array<PlanetTileWaterVertex, VERTEX_COUNT>* water_vertices;
 
+	struct GeneratorArrays
+	{
+		VertexArray<PlanetTileVertex, PlanetTile::TILE_SIZE> work_array;
+		std::array<double, GEN_ARRAY_SIZE> heights;
+		std::array<glm::vec3, GEN_ARRAY_SIZE> colors;
+	};
+
 	// Return true if errors happened
 	bool generate(PlanetTilePath path, double planet_radius, sol::state& lua_state, bool has_water,
-		VertexArray<PlanetTileVertex, PlanetTile::TILE_SIZE>* work_array);
+		GeneratorArrays* arrays);
 
 	// Simply generates stuff to the output_array, that's it, we can be static 
 	static bool generate_physics(PlanetTilePath path, double planet_radius, sol::state& lua_state,
