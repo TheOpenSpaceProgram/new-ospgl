@@ -55,6 +55,8 @@ public:
 	GPUModelNodePointer model_node;
 	// We have to keep it loaded! This is the easiest way
 	AssetHandle<PartPrototype> part_prototype;
+	// We can store a raw pointer because part_prototype owns the pieces
+	PiecePrototype* piece_prototype;
 
 	Vehicle* in_vehicle;
 

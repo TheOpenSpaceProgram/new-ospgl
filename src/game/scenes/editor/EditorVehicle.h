@@ -47,11 +47,11 @@ private:
 	// These are drawn in a forward pass as they require transparency
 	GPUModelNodePointer stack_model, radial_model, stack_radial_model, receive_model;	
 	
-	void create_collider(Piece* p);
-	void remove_collider(Piece* p);
 
 public:
 
+	void update_collider(Piece* p);
+	void remove_collider(Piece* p);
 
 	EditorScene* scene;
 

@@ -5,7 +5,7 @@
 #include <util/fmt/glm.h>
 #include <GLFW/glfw3.h>
 
-void EditorVehicle::create_collider(Piece* p)
+void EditorVehicle::update_collider(Piece* p)
 {
 	remove_collider(p);
 	// Now create it
@@ -15,6 +15,7 @@ void EditorVehicle::create_collider(Piece* p)
 
 	btTransform trans = p->get_graphics_transform();
 	rigid_body->setWorldTransform(trans);
+	rigid_body->setInterpolationWorldTransform(trans);
 
 	RigidBodyUserData* udata = new RigidBodyUserData(p);
 
@@ -133,7 +134,7 @@ void EditorVehicle::init()
 	for(Piece* p : veh->all_pieces)
 	{
 		piece_meta[p] = EditorVehiclePiece();
-		create_collider(p);
+		update_collider(p);
 	}
 }
 

@@ -37,6 +37,8 @@ struct PiecePrototype
 	double mass;
 	double friction;
 	double restitution;
+	// Can stuff attach radially to this part?
+	bool allows_radial;
 	
 	PiecePrototype(GPUModelNodePointer&& n) : model_node(std::move(n))
 	{
@@ -46,6 +48,7 @@ struct PiecePrototype
 		this->mass = 1.0;
 		this->restitution = PIECE_DEFAULT_RESTITUTION;
 		this->friction = PIECE_DEFAULT_FRICTION;
+		this->allows_radial = true;
 	}
 
 	// We have to declare copy constructor
@@ -59,6 +62,7 @@ struct PiecePrototype
 		this->friction = b.friction;
 		this->markers = b.markers;
 		this->attachments = b.attachments;
+		this->allows_radial = b.allows_radial;
 	}
 
 	// Copy, used for std containers
@@ -73,6 +77,7 @@ struct PiecePrototype
 		this->friction = b.friction;
 		this->markers = b.markers;
 		this->attachments = b.attachments;
+		this->allows_radial = b.allows_radial;
 
 		return *this;
 	}

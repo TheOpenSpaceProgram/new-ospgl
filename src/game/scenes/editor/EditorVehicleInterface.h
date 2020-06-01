@@ -18,6 +18,10 @@ public:
 	double selected_distance;
 	glm::dquat selected_rotation;
 
+	// The editor prioritizes stack over radial
+	bool allow_radial;
+	bool allow_stack;
+
 	std::vector<Piece*> selected_buffer;
 
 	// Returns true if GUI should be blocked (we have something selected)
@@ -32,7 +36,7 @@ public:
 	// Called when cycling through attachments in the same piece
 	void on_attachment_change();
 
-	void find_free_attachment();
+	std::string find_free_attachment();
 
 	void cycle_attachments(int dir);
 	void cycle_pieces(int dir);

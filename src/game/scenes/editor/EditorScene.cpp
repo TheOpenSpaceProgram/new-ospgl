@@ -71,6 +71,8 @@ void EditorScene::update()
 	vehicle_int.handle_input(
 			cam.get_camera_uniforms(rw, get_osp()->renderer->get_height(true)), viewport, real_screen_size); 
 	
+	bt_world->updateAabbs();
+
 	//bt_world->debugDrawWorld();
 }
 

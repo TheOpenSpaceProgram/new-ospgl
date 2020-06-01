@@ -232,15 +232,17 @@ Piece::Piece(Part* in_part, std::string piece_name)
 
 	part = in_part;
 
-	mass = part->part_proto->pieces[piece_name].mass;
-	friction = part->part_proto->pieces[piece_name].friction;
-	restitution = part->part_proto->pieces[piece_name].restitution;
+	piece_prototype = &in_part->part_proto->pieces[piece_name];
 
-	collider = part->part_proto->pieces[piece_name].collider;
-	collider_offset = part->part_proto->pieces[piece_name].render_offset;
+	mass = piece_prototype->mass;
+	friction = piece_prototype->friction;
+	restitution = piece_prototype->restitution;
 
-	markers = part->part_proto->pieces[piece_name].markers;
-	for(PieceAttachment atc : part->part_proto->pieces[piece_name].attachments)
+	collider = piece_prototype->collider;
+	collider_offset = piece_prototype->render_offset;
+
+	markers = piece_prototype->markers;
+	for(PieceAttachment atc : piece_prototype->attachments)
 	{
 		attachments.push_back(std::make_pair(atc, false));
 	}

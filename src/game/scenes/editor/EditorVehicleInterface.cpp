@@ -26,7 +26,7 @@ bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 v
 	auto[ray_start, ray_end] = MathUtil::screen_raycast(in_subscreen, glm::inverse(cu.tform), 1000.0);
 
 
-	Piece* hovered;
+	Piece* hovered = nullptr;
 
 	edveh->draw_attachments = selected != nullptr;
 
@@ -45,12 +45,17 @@ bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 v
 			if(udata->type == RigidBodyType::PIECE)
 			{
 				hovered = udata->as_piece;
+
+				glm::dvec3 hit_point = to_dvec3(callback.m_hitPointWorld);
+				glm::dvec3 hit_normal = to_dvec3(callback.m_hitNormalWorld);
+
+				debug_drawer->add_line(hit_point, hit_point + hit_normal * 10.0, glm::vec3(1.0, 1.0, 0.0));
 			}
 		}
 
 		if(hovered != nullptr)
 		{
-			if(glfwGetMouseButton(input->window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+			if(input->mouse_down(GLFW_MOUSE_BUTTON_LEFT))
 			{
 				selected = hovered;
 				hovered = nullptr;
@@ -74,13 +79,14 @@ bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 v
 
 		if(selected_attachment != "none")
 		{
-			//tform_marker = selected->get_marker_transform(selected_attachment);
-			tform_marker = glm::translate(glm::dmat4(1.0), selected->get_marker_position(selected_attachment));
+			tform_marker = selected->get_marker_transform(selected_attachment);
+			
+			//tform_marker = glm::translate(glm::dmat4(1.0), selected->get_marker_position(selected_attachment));
 		}
 
 		glm::dvec3 npos = glm::normalize(ray_end - ray_start) * selected_distance + ray_start;
 		glm::dmat4 tform_new = glm::translate(glm::dmat4(1.0), npos);
-		tform_new = glm::inverse(tform_marker) * tform_new;
+		tform_new = tform_new * glm::toMat4(selected_rotation) * glm::inverse(tform_marker);
 
 		// Update all children
 		std::vector<Piece*> children = edveh->veh->get_children_of(selected);
@@ -117,24 +123,103 @@ bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 v
 			}
 		}
 
+
+		// Attempt attachment
+		// First do stack (TODO)
+		// Then do radial attachment
+		if(allow_radial)
+		{
+			
+			btCollisionWorld::AllHitsRayResultCallback callback(to_btVector3(ray_start), to_btVector3(ray_end));
+			// We cast the ray using bullet
+			scene->bt_world->rayTest(to_btVector3(ray_start), to_btVector3(ray_end), callback);
+
+			if(callback.hasHit())
+			{
+				// We could choose any member array, we just need the length
+				size_t hit_count = callback.m_hitPointWorld.size();
+
+				double closest_dist = 99999999.0;
+				int closest_index = -1;
+
+				// Find the closest one that isn't a selected part
+				for(size_t i = 0; i < hit_count; i++)
+				{
+					double dist = glm::length(to_dvec3(callback.m_hitPointWorld[i]) - ray_start);
+					RigidBodyUserData* udata = (RigidBodyUserData*)callback.m_collisionObjects[i]->getUserPointer();
+
+					logger->check(udata != nullptr, "A rigidbody did not have an user data attached");
+
+					
+					if(udata->type == RigidBodyType::PIECE)
+					{
+						bool is_selected = false;
+						// We can't simply check against selected, we need to check
+						// all children
+						for(Piece* child : children)
+						{
+							if(child == udata->as_piece)
+							{
+								is_selected = true;
+								break;
+							}
+						}
+
+						if(dist <= closest_dist && !is_selected && 
+							udata->as_piece->piece_prototype->allows_radial)
+						{
+							closest_index = int(i);
+							closest_dist = dist;
+						}
+					}
+				}
+
+				if(closest_index >= 0)
+				{
+					// Position the piece for radial attachment, adjusting distance and rotation
+					glm::dvec3 hit_point = to_dvec3(callback.m_hitPointWorld[closest_index]);
+					glm::dvec3 hit_normal = to_dvec3(callback.m_hitNormalWorld[closest_index]);
+					selected_distance = glm::length(hit_point - ray_start);
+
+					selected_rotation = MathUtil::quat_look_at(glm::vec3(0, 0, 0), hit_normal);
+				
+					debug_drawer->add_line(hit_point, hit_point + hit_normal * 10.0, glm::vec3(1.0, 0.0, 1.0));
+
+					
+					if(input->mouse_down(GLFW_MOUSE_BUTTON_LEFT))
+					{
+						RigidBodyUserData* udata = 
+							(RigidBodyUserData*)callback.m_collisionObjects[closest_index]->getUserPointer();
+
+						selected->attached_to = udata->as_piece;
+						selected = nullptr;
+					}
+				}
+			}	
+
+		}
+
 		// Coloring and visuals
 		for(Piece* child : children)
 		{
-			edveh->piece_meta[child].draw_out_attachments = true;
-			edveh->piece_meta[child].draw_in_attachments = false;
-			edveh->piece_meta[child].highlight = glm::vec3(0.5f);
+			EditorVehiclePiece& piece_meta = edveh->piece_meta[child];
+			piece_meta.draw_out_attachments = true;
+			piece_meta.draw_in_attachments = false;
+			piece_meta.highlight = glm::vec3(0.5f);
+
+			edveh->update_collider(child);
+
 			if(child == selected)
 			{
-				edveh->piece_meta[child].highlight = glm::vec3(1.0f);
+				piece_meta.highlight = glm::vec3(1.0f);
 
-				edveh->piece_meta[child].attachment_color[selected_attachment] = 
+				piece_meta.attachment_color[selected_attachment] = 
 					glm::vec4(1.0f, 1.0f, 0.5f, 1.0f);
 			}
+
 		}
 
-		
 	}
-
 
 	return false;
 }
@@ -154,7 +239,7 @@ void EditorVehicleInterface::on_selection_change(const CameraUniforms& cu)
 	find_free_attachment();
 }
 
-void EditorVehicleInterface::find_free_attachment()
+std::string EditorVehicleInterface::find_free_attachment()
 {
 	// Find the first free attachment
 	for(int i = 0; i < selected->attachments.size(); i++)
@@ -163,9 +248,11 @@ void EditorVehicleInterface::find_free_attachment()
 		{
 			logger->info("Found free: {}", selected->attachments[i].first.marker);
 			selected_attachment = selected->attachments[i].first.marker;
-			break;
+			return selected->attachments[i].first.marker;
 		}
 	}
+
+	return "";
 }
 
 void EditorVehicleInterface::cycle_attachments(int dir)
@@ -208,37 +295,37 @@ void EditorVehicleInterface::cycle_pieces(int dir)
 
 	Piece* old = selected;
 
-	if(dir == -1)
+	if(dir == 1)
 	{
-		// Go back in stack or otherwise go into the last piece of children
-		if(selected_buffer.size() != 0)	
-		{
-			selected = selected_buffer.front();
-		}			
-		else 
-		{
-			if(children.size() != 0)
-			{
-				selected = children[children.size() - 1];
-			}
-			// Otherwise we can't move anywhere
-		}
+		// Width first search for a valid children (TODO)
 	}
-	else if(dir == 1)
+	else
 	{
-		// Go into earliest children, for more complex selections a visual
-		// interace is used (stuff with two or more children)
-		if(children.size() != 0)
+		while(selected_buffer.size() != 0)
 		{
-			selected = children[0];	
-		}	
+			// Go up in the reverse buffer until it's empty
+			if(selected_buffer.size() != 0)
+			{
+				selected = selected_buffer.front();
+				selected_buffer.pop_back();
+				std::string n_attachment = find_free_attachment();
+				if(n_attachment != "")
+				{
+					// We found a valid one! We are done
+					selected_attachment = n_attachment;
+					break;
+				}
+				else
+				{
+					selected = old;
+				}
+			}
+		}
 	}
 
 	if(old != selected)
 	{
 		reroot(old, selected);
-		// We will need to find a new attachment most likely
-		find_free_attachment();
 	}
 }
 
@@ -303,6 +390,8 @@ void EditorVehicleInterface::reroot(Piece* current, Piece* new_root)
 
 EditorVehicleInterface::EditorVehicleInterface()
 {
+	allow_radial = true;
+	allow_stack = true;
 	selected = nullptr;
 }
 
