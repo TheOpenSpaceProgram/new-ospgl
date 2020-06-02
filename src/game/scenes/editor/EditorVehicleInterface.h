@@ -54,6 +54,7 @@ public:
 	std::string selected_attachment;
 	double selected_distance;
 	glm::dquat selected_rotation;
+	glm::dvec3 selected_offset;
 
 	// The editor prioritizes stack over radial
 	bool allow_radial;

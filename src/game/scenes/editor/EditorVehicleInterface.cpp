@@ -16,9 +16,9 @@ void EditorVehicleInterface::update(double dt)
 void EditorVehicleInterface::use_attachment_port(Piece* target, std::string port)
 {
 	bool found = false;
-	for(auto& pair : selected->attachments)
+	for(auto& pair : target->attachments)
 	{
-		if(pair.first.marker == selected_attachment)
+		if(pair.first.marker == port)
 		{
 			logger->check(pair.second == false, "Attachment port is already in use");
 			pair.second = true;
@@ -34,18 +34,20 @@ void EditorVehicleInterface::use_attachment_port(Piece* target, std::string port
 void EditorVehicleInterface::attach(Piece* target, std::string port)
 {
 	selected->attached_to = target;
-	
+	selected->from_attachment = selected_attachment;
+	selected->to_attachment = port;
 
 	use_attachment_port(selected, selected_attachment);
-
 	if(port != "")
 	{
+		logger->info("Using port: {}", port);
 		use_attachment_port(target, port);
 	}
 
 	selected = nullptr;
 	selected_attachment = "";
 
+	edveh->veh->update_attachments();
 }
 
 void EditorVehicleInterface::handle_input_hovering(const CameraUniforms& cu, 
@@ -81,30 +83,10 @@ void EditorVehicleInterface::handle_input_hovering(const CameraUniforms& cu,
 void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu, 
 		glm::dvec3 ray_start, glm::dvec3 ray_end)
 {
-	glm::dmat4 tform_0 = selected->get_graphics_matrix();
-
-	glm::dmat4 tform_marker = glm::dmat4(1.0);
-
-	if(selected_attachment != "none")
-	{
-		tform_marker = selected->get_marker_transform(selected_attachment);
-	}
-
-	glm::dvec3 npos = glm::normalize(ray_end - ray_start) * selected_distance + ray_start;
-	glm::dmat4 tform_new = glm::translate(glm::dmat4(1.0), npos);
-	tform_new = tform_new * glm::toMat4(selected_rotation) * glm::inverse(tform_marker);
-
-	// Update all children
+	
 	std::vector<Piece*> children = edveh->veh->get_children_of(selected);
 	children.push_back(selected);
 
-	for(Piece* child : children)
-	{
-		glm::dmat4 relative = glm::inverse(tform_0) * child->get_graphics_matrix() * child->collider_offset;
-		glm::dmat4 final = tform_new * relative; 
-		child->packed_tform = to_btTransform(final);
-	}
-	
 	if(input->key_down(GLFW_KEY_PAGE_UP))
 	{
 		if(input->key_pressed(GLFW_KEY_LEFT_CONTROL))
@@ -133,8 +115,61 @@ void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu,
 	Piece* attach_to = nullptr;
 	std::string attach_to_marker = "";
 
+	selected_offset = glm::vec3(0);
+
 	// Attempt attachment
-	// First do stack (TODO)
+	// First do stack 
+	if(allow_stack)
+	{
+		// Find closest receiver attachment
+		glm::dvec3 selected_pos = ray_start + glm::normalize(ray_end - ray_start) * selected_distance;
+
+		Piece* closest = nullptr;
+		std::string closest_attch = "";
+		double dist = 99999999.9;
+		glm::dvec3 closest_pos;
+		glm::dvec3 closest_fw;
+
+		for(Piece* p : edveh->veh->all_pieces)
+		{
+			if(std::find(children.begin(), children.end(), p) == children.end())
+			{
+				// Go over all free stack attachment
+				for(auto& pair : p->attachments)
+				{
+					if(pair.first.stack && !pair.second)
+					{
+						glm::dmat4 m_tform = p->get_marker_transform(pair.first.marker);
+						glm::dmat4 p_tform = p->get_graphics_matrix();
+						glm::dvec3 pos = glm::dvec3(p_tform * m_tform * glm::dvec4(0, 0, 0, 1));
+
+						double ndist = glm::distance(selected_pos, pos);
+						if(ndist <= dist)
+						{
+							dist = ndist;
+							closest_attch = pair.first.marker;
+							closest = p;
+							closest_pos = pos;
+							// Note that in the editor +Z = forward
+							closest_fw = glm::dvec3(p_tform * m_tform * glm::dvec4(0, 0, 1, 1)) - closest_pos;
+						}
+					}
+				}
+			}
+		}
+
+		if(dist < 1.0)
+		{
+			debug_drawer->add_line(selected_pos, closest_pos, glm::vec3(1.0, 0.0, 0.0));	
+			debug_drawer->add_line(closest_pos, closest_pos + closest_fw, glm::vec3(0.0, 1.0, 0.0));
+			selected_rotation = MathUtil::quat_look_at(glm::dvec3(0), closest_fw);
+			selected_offset = closest_pos - selected_pos;
+
+			attach_to = closest;
+			attach_to_marker = closest_attch;
+		}
+	}
+
 	// Then do radial attachment
 	if(allow_radial && attach_to == nullptr)
 	{
@@ -175,9 +210,38 @@ void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu,
 
 	}
 	
+	
+	glm::dmat4 tform_0 = selected->get_graphics_matrix();
+
+	glm::dmat4 tform_marker = glm::dmat4(1.0);
+
+	if(selected_attachment != "none")
+	{
+		tform_marker = selected->get_marker_transform(selected_attachment);
+	}
+
+	glm::dvec3 npos = glm::normalize(ray_end - ray_start) * selected_distance + ray_start + selected_offset;
+	glm::dmat4 tform_new = glm::translate(glm::dmat4(1.0), npos);
+	tform_new = tform_new * glm::toMat4(selected_rotation) * glm::inverse(tform_marker);
+
+	// Update all children
+	for(Piece* child : children)
+	{
+		glm::dmat4 relative = glm::inverse(tform_0) * child->get_graphics_matrix() * child->collider_offset;
+		glm::dmat4 final = tform_new * relative; 
+		child->packed_tform = to_btTransform(final);
+	}
+	
 	if(input->mouse_down(GLFW_MOUSE_BUTTON_LEFT))
 	{
-		attach(attach_to, attach_to_marker);
+		if(attach_to == nullptr)
+		{
+			selected = nullptr;
+		}
+		else
+		{
+			attach(attach_to, attach_to_marker);
+		}
 	}
 
 }
@@ -210,6 +274,9 @@ bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 v
 void EditorVehicleInterface::on_selection_change(const CameraUniforms& cu)
 {
 	selected->attached_to = nullptr;
+	selected->to_attachment = "";
+	selected->from_attachment = "";
+
 	edveh->veh->update_attachments();
 
 	glm::dvec3 diff = cu.cam_pos - to_dvec3(selected->packed_tform.getOrigin()); 
