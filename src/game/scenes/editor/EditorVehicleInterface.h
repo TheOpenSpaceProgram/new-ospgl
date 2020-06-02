@@ -4,6 +4,43 @@
 // Handles user interaction with the EditorVehicle
 class EditorVehicleInterface
 {
+private:
+
+	struct RaycastResult
+	{
+		bool has_hit;
+		Piece* p;
+		glm::dvec3 world_pos;
+		glm::dvec3 world_nrm;
+	};
+
+	RaycastResult raycast(glm::dvec3 start, glm::dvec3 end,	bool ignore_non_radial,
+		   	std::vector<Piece*> ignore = std::vector<Piece*>());
+
+	void handle_input_hovering(const CameraUniforms& cu, 
+		glm::dvec3 ray_start, glm::dvec3 ray_end);
+
+	void handle_input_selected(const CameraUniforms& cu, 
+		glm::dvec3 ray_start, glm::dvec3 ray_end);
+
+	// Re-roots assuming selected piece is 'current', and new root is 'new_root'
+	void reroot(Piece* current, Piece* new_root);
+
+	// Called when a selection is started
+	void on_selection_change(const CameraUniforms& cu);
+	// Called when cycling through attachments in the same piece
+	void on_attachment_change();
+
+	// Attaches current selected, using the attachment port
+	void attach(Piece* target, std::string target_port = "");
+
+	void use_attachment_port(Piece* target, std::string port);
+
+	std::string find_free_attachment();
+
+	void cycle_attachments(int dir);
+	void cycle_pieces(int dir);
+
 public:
 
 	EditorVehicle* edveh;
@@ -31,20 +68,10 @@ public:
 	// Viewport is renderer style, (x0, y0, w, h)
 	bool handle_input(const CameraUniforms& cu, glm::dvec4 viewport, glm::dvec2 real_screen_size);
 	
-	// Called when a selection is started
-	void on_selection_change(const CameraUniforms& cu);
-	// Called when cycling through attachments in the same piece
-	void on_attachment_change();
 
-	std::string find_free_attachment();
-
-	void cycle_attachments(int dir);
-	void cycle_pieces(int dir);
-
-	// Re-roots assuming selected piece is 'current', and new root is 'new_root'
-	void reroot(Piece* current, Piece* new_root);
 
 	void update(double dt);
+
 
 	EditorVehicleInterface();
 };

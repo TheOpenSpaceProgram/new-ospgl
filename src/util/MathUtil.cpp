@@ -1,4 +1,5 @@
 #include "MathUtil.h"
+#include "Logger.h"
 
 // http://mathproofs.blogspot.com/2005/07/mapping-cube-to-sphere.html
 glm::dvec3 MathUtil::cube_to_sphere(glm::dvec3 cubic)
@@ -122,18 +123,38 @@ glm::dvec2 MathUtil::euclidean_to_spherical_r1(glm::dvec3 eu)
 	return out;
 }
 
+static glm::dquat quat_look_at_int(glm::dvec3 dir_nrm, glm::dvec3 up)
+{
+	glm::dmat3 res = glm::dmat3();
+
+	// https://github.com/g-truc/glm/pull/659
+	res[2] = -dir_nrm;
+	res[0] = glm::normalize(glm::cross(up, res[2]));
+	res[1] = glm::cross(res[2], res[0]);
+
+	return glm::quat_cast(res);
+}
+
 glm::dquat MathUtil::quat_look_at(glm::dvec3 from, glm::dvec3 to, glm::dvec3 up, glm::dvec3 alt_up)
 {
 	glm::dvec3 dir = to - from;
+	double dir_length = glm::length(dir);
 
-	/// TODO: Not sure if this is correct
+	if(!(dir_length >= 0.000001))
+	{
+		logger->error("Given direction was not correct (too short or NaN)");
+		return glm::dquat(1.0, 0.0, 0.0, 0.0);
+	}
+
+	dir /= dir_length;
+
 	if (glm::abs(glm::dot(dir, up)) > 0.999)
 	{
-		return glm::conjugate(glm::toQuat(glm::lookAt(from, to, up)));
+		return quat_look_at_int(dir, alt_up);
 	}
 	else
 	{
-		return glm::conjugate(glm::toQuat(glm::lookAt(from, to, alt_up)));
+		return quat_look_at_int(dir, up);
 	}
 }
 

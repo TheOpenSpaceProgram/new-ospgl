@@ -35,7 +35,7 @@ public:
 	static glm::dvec2 euclidean_to_spherical_r1(glm::dvec3 euclidean);
 
 	static glm::dquat quat_look_at(glm::dvec3 from, glm::dvec3 to,
-		glm::dvec3 up = glm::dvec3(0, 1, 0), glm::dvec3 alt_up = glm::dvec3(1, 0, 0));
+		glm::dvec3 up = glm::dvec3(0, 1, 0), glm::dvec3 alt_up = glm::dvec3(0, 0, 1));
 
 	static double distance_to_line(glm::dvec3 la, glm::dvec3 lb, glm::dvec3 from);
 
@@ -46,7 +46,8 @@ public:
 
 	// Generates the start and end (in that order) of a ray given the properties
 	// mouse_pos must be in normalized device coordinates [-1 -> 1], y inverted
-	static std::pair<glm::dvec3, glm::dvec3> screen_raycast(glm::dvec2 mouse_pos, glm::dmat4 inverse_camera, double distance);
+	static std::pair<glm::dvec3, glm::dvec3> screen_raycast(glm::dvec2 mouse_pos, glm::dmat4 inverse_camera, 
+			double distance);
 };
 
 class ProjectionUtil
