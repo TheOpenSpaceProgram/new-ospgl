@@ -1,8 +1,10 @@
 #include "OSP.h"
 #include "rang.hpp"
 #include <renderer/util/TextDrawer.h>
+#include "util/Timing.h"
 
 InputUtil* input;
+Timing *timing;
 
 static void menu_item(const std::string& name, const std::string& value, const std::string& def, const std::string& help)
 {
@@ -216,6 +218,7 @@ void OSP::render()
 	
 		renderer->do_imgui();
 		renderer->finish();
+		timing->frameCompleted();
 	}
 }
 
@@ -234,5 +237,5 @@ void OSP::finish_frame()
 
 OSP::OSP() : game_state(this)
 {
-
+	timing=new Timing();
 }
