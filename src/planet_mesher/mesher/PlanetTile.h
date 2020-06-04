@@ -56,7 +56,7 @@ struct PlanetTile
 	GLuint vbo, water_vbo;
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
-	static const int TILE_SIZE = 16;
+	static const int TILE_SIZE = 32;
 	static const size_t GEN_ARRAY_SIZE = (TILE_SIZE + 2) * (TILE_SIZE + 2);
 	// TODO: Make it possible for this number to be different, the whole tile is overkill
 	static const int PHYSICS_SIZE = TILE_SIZE;

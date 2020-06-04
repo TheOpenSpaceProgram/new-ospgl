@@ -134,6 +134,7 @@ void LuaCore::load(sol::state& to, const std::string& pkg)
 		sol::lib::string, sol::lib::math, sol::lib::table, sol::lib::utf8,
 		sol::lib::jit);
 
+
 	to["__pkg"] = pkg;
 
 	// Used by the package loader

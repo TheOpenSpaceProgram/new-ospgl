@@ -205,8 +205,6 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	auto& heights = arrays->heights;
 	auto& colors = arrays->colors;
 
-	Timer benchmark;	
-
 	bool errors = false;
 
 	clockwise = false;
@@ -329,9 +327,6 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 		vertices[i + TILE_SIZE * TILE_SIZE] = skirts[i];
 	}
 
-	double time = benchmark.get_elapsed_time();
-	logger->info("Time took: {}s", time);
-	
 	return errors;
 
 }

@@ -1,198 +1,132 @@
 #include "LuaNoise.h"
-#include <FastNoise/FastNoise.h>
+#include <FastNoiseC/FastNoise.h>
 #include <glm/glm.hpp>
 
 
 void LuaNoise::load_to(sol::table & table)
 {
+	// We need to create a lua context to obtain the FFI stuff,
+	// this is a costly operation but thanksfully is done only once
+	// per script so perfomance is not an issue
 
-	using NUM = FN_DECIMAL;
+	sol::state_view sview(table.lua_state());
 
-	// Enums:
-	table.new_enum("noise_type",
-		"value", FastNoise::NoiseType::Value,
-		"value_fractal", FastNoise::NoiseType::ValueFractal,
-		"perlin", FastNoise::NoiseType::Perlin,
-		"perlin_fractal", FastNoise::NoiseType::PerlinFractal,
-		"simplex", FastNoise::NoiseType::Simplex,
-		"simplex_fractal", FastNoise::NoiseType::SimplexFractal,
-		"cellular", FastNoise::NoiseType::Cellular,
-		"white_noise", FastNoise::NoiseType::WhiteNoise,
-		"cubic", FastNoise::NoiseType::Cubic,
-		"cubic_fractal", FastNoise::NoiseType::CubicFractal);
+	sview.open_libraries(sol::lib::ffi);
+
+	// Load all the FFI stuff
+	sview.script("\
+ffi.cdef[[\
+void fn_set_seed(struct FastNoise* fn, int seed);\
+void fn_set_frequency(struct FastNoise* fn, double freq);\
+void fn_set_fractal_octaves(struct FastNoise* fn, int octaves);\
+void fn_set_fractal_gain(struct FastNoise* fn, double gain);\
+void fn_set_fractal_lacunarity(struct FastNoise* fn, double lacunarity);\
+void fn_set_fractal_type(struct FastNoise* fn, int fractal_type);\
+void fn_set_interp(struct FastNoise* fn, int interp);\
+double fn_value2(struct FastNoise* fn, double x, double y);\
+double fn_value_fractal2(struct FastNoise* fn, double x, double y);\
+double fn_perlin2(struct FastNoise* fn, double x, double y);\
+double fn_perlin_fractal2(struct FastNoise* fn, double x, double y);\
+double fn_simplex2(struct FastNoise* fn, double x, double y);\
+double fn_simplex_fractal2(struct FastNoise* fn, double x, double y);\
+double fn_cellular2(struct FastNoise* fn, double x, double y);\
+double fn_cubic2(struct FastNoise* fn, double x, double y);\
+double fn_cubic_fractal2(struct FastNoise* fn, int x, int y);\
+void fn_gradient_perturb2(struct FastNoise* fn, double* x, double* y);\
+void fn_gradient_perturb_fractal2(struct FastNoise* fn, double* x, double* y);\
+double fn_value3(struct FastNoise* fn, double x, double y, double z);\
+double fn_value_fractal3(struct FastNoise* fn, double x, double y, double z);\
+double fn_perlin3(struct FastNoise* fn, double x, double y, double z);\
+double fn_perlin_fractal3(struct FastNoise* fn, double x, double y, double z);\
+double fn_simplex3(struct FastNoise* fn, double x, double y, double z);\
+double fn_simplex_fractal3(struct FastNoise* fn, double x, double y, double z);\
+double fn_cellular3(struct FastNoise* fn, double x, double y, double z);\
+double fn_cubic3(struct FastNoise* fn, double x, double y, double z);\
+double fn_cubic_fractal3(struct FastNoise* fn, int x, int y, int z);\
+void fn_gradient_perturb3(struct FastNoise* fn, double* x, double* y, double* z);\
+void fn_gradient_perturb_fractal3(struct FastNoise* fn, double* x, double* y, double* z);\
+double fn_simplex4(struct FastNoise* fn, double x, double y, double z, double w);\
+struct FastNoise* fn_new(int seed);\
+]]");
+	// Little macro to shorten a bit the code
+#define EXPORT_FFI(ffi_name, table_name) table[table_name] = sview["ffi"]["C"][ffi_name]
+
+	// Export the functions
+	// (Uncomment as new stuff is ported over)
+	EXPORT_FFI("fn_set_seed", "set_seed");
+	EXPORT_FFI("fn_set_frequency", "set_frequency");
+	EXPORT_FFI("fn_set_fractal_lacunarity", "set_fractal_lacunarity");
+	EXPORT_FFI("fn_set_fractal_type", "set_fractal_type");
+	EXPORT_FFI("fn_set_interp", "set_interp");
+	EXPORT_FFI("fn_set_fractal_octaves", "set_fractal_octaves");
+	EXPORT_FFI("fn_set_fractal_gain", "set_fractal_gain");
+
+	EXPORT_FFI("fn_value2", "value2");
+	EXPORT_FFI("fn_value_fractal2", "value_fractal2");
+	EXPORT_FFI("fn_perlin2", "perlin2");
+	EXPORT_FFI("fn_perlin_fractal2", "perlin_fractal2");
+	EXPORT_FFI("fn_simplex2", "simplex2");
+	EXPORT_FFI("fn_simplex_fractal2", "simplex_fractal2");
+	//EXPORT_FFI("fn_cellular2", "cellular2");
+	//EXPORT_FFI("fn_cubic2", "cubic2");
+	//EXPORT_FFI("fn_cubic_fractal2", "cubic_fractal2");
+	//EXPORT_FFI("fn_gradient_perturb2", "gradient_perturb2");
+	//EXPORT_FFI("fn_gradient_perturb_fractal2", "gradient_perturb_fractal2");
+	EXPORT_FFI("fn_value3", "value3");
+	EXPORT_FFI("fn_value_fractal3", "value_fractal3");
+	EXPORT_FFI("fn_perlin3", "perlin3");
+	EXPORT_FFI("fn_perlin_fractal3", "perlin_fractal3");
+	EXPORT_FFI("fn_simplex3", "simplex3");
+	EXPORT_FFI("fn_simplex_fractal3", "simplex_fractal3");
+	//EXPORT_FFI("fn_cellular3", "cellular3");
+	//EXPORT_FFI("fn_cubic3", "cubic3");
+	//EXPORT_FFI("fn_cubic_fractal3", "cubic_fractal3");
+	//EXPORT_FFI("fn_gradient_perturb3", "gradient_perturb3");
+	//EXPORT_FFI("fn_gradient_perturb_fractal3", "gradient_perturb_fractal3");
+	EXPORT_FFI("fn_simplex4", "simplex4");
+	EXPORT_FFI("fn_new", "new");
+
+	// Unload ffi to avoid security risks 
+	sview["ffi"] = sol::nil;
+
+
+	struct FastNoiseDeleter
+	{
+		void operator()(FastNoise* fn) { fn_delete(fn); }
+	};
+
+	// Set the new function to return a smart pointer which auto-deletes
+	//table.set_function("new", [](int seed)
+	//{
+	//	FastNoise* fn = fn_new(seed);
+	//	return std::unique_ptr<FastNoise, FastNoiseDeleter>(fn);
+	//});	
+
 
 	table.new_enum("interp",
-		"linear", FastNoise::Interp::Linear,
-		"hermite", FastNoise::Interp::Hermite,
-		"quintic", FastNoise::Interp::Quintic);
+		"linear", FN_Linear,
+		"hermite", FN_Hermite,
+		"quintic", FN_Quintic);
 
 	table.new_enum("fractal_type",
-		"fbm", FastNoise::FractalType::FBM,
-		"billow", FastNoise::FractalType::Billow,
-		"rigid_multi", FastNoise::FractalType::RigidMulti);
+		"fbm", FN_FBM,
+		"billow", FN_Billow,
+		"rigid_multi", FN_RigidMulti);
 
 	table.new_enum("cellular_distance", 
-		"euclidean", FastNoise::Euclidean,
-		"manhattan", FastNoise::Manhattan,
-		"natural", FastNoise::Natural);
+		"euclidean", FN_Euclidean,
+		"manhattan", FN_Manhattan,
+		"natural", FN_Natural);
 
 	table.new_enum("cellular_return",
-		"cell_value", FastNoise::CellValue,
-		"noise_lookup", FastNoise::NoiseLookup,
-		"distance", FastNoise::Distance,
-		"distance2", FastNoise::Distance2,
-		"distance2add", FastNoise::Distance2Add,
-		"distance2sub", FastNoise::Distance2Sub,
-		"distance2mul", FastNoise::Distance2Mul,
-		"distance2div", FastNoise::Distance2Div);
-
-
-	sol::usertype<FastNoise> noise_ut = table.new_usertype<FastNoise>("noise",
-		sol::constructors<FastNoise(int)>(),
-		"set_seed", &FastNoise::SetSeed, "get_seed", &FastNoise::GetSeed,
-		"set_frequency", &FastNoise::SetFrequency, "get_frequency", &FastNoise::GetFrequency,
-		"set_interp", &FastNoise::SetInterp, "get_interp", &FastNoise::GetInterp,
-		"set_noise_type", &FastNoise::SetNoiseType, "get_noise_type", &FastNoise::GetNoiseType,
-		"set_fractal_octaves", &FastNoise::SetFractalOctaves, "get_fractal_octaves", &FastNoise::GetFractalOctaves,
-		"set_fractal_lacunarity", &FastNoise::SetFractalLacunarity, "get_fractal_lacunarity", &FastNoise::GetFractalLacunarity,
-		"set_fractal_gain", &FastNoise::SetFractalGain, "get_fractal_gain", &FastNoise::GetFractalGain,
-		"set_fractal_type", &FastNoise::SetFractalType, "get_fractal_type", &FastNoise::GetFractalType,
-		"set_cellular_distance", &FastNoise::SetCellularDistanceFunction, "get_cellular_distance", &FastNoise::GetCellularDistanceFunction,
-		"set_cellular_return", &FastNoise::SetCellularReturnType, "get_cellular_return", &FastNoise::GetCellularReturnType,
-		"set_cellular_distance2_indices", &FastNoise::SetCellularDistance2Indices,
-		"get_cellular_distance2_indices", [](FastNoise& n)
-		{
-			int a, b;
-			n.GetCellularDistance2Indices(a, b);
-			return std::make_tuple(a, b);
-		},
-		"set_cellular_jitter", &FastNoise::SetCellularJitter,
-		"get_cellular_jitter", &FastNoise::GetCellularJitter,
-		"set_gradient_perturb_amp", &FastNoise::SetGradientPerturbAmp,
-		"get_gradient_perturb_amp", &FastNoise::GetGradientPerturbAmp,
-
-		// Noise functions
-		"get_value", sol::overload(
-			sol::resolve<NUM(NUM, NUM) const>(&FastNoise::GetValue),
-			sol::resolve<NUM(NUM, NUM, NUM) const>(&FastNoise::GetValue),
-			[](const FastNoise& n, glm::dvec2 v) {return n.GetValue(v.x, v.y); },
-			[](const FastNoise& n, glm::dvec3 v) {return n.GetValue(v.x, v.y, v.z); }
-		),
-
-		"get_value_fractal", sol::overload(
-			sol::resolve<NUM(NUM, NUM) const>(&FastNoise::GetValueFractal),
-			sol::resolve<NUM(NUM, NUM, NUM) const>(&FastNoise::GetValueFractal),
-			[](const FastNoise& n, glm::dvec2 v) {return n.GetValueFractal(v.x, v.y); },
-			[](const FastNoise& n, glm::dvec3 v) {return n.GetValueFractal(v.x, v.y, v.z); }
-		),
-
-		"get_perlin", sol::overload(
-			sol::resolve<NUM(NUM, NUM) const>(&FastNoise::GetPerlin),
-			sol::resolve<NUM(NUM, NUM, NUM) const>(&FastNoise::GetPerlin),
-			[](const FastNoise& n, glm::dvec2 v) {return n.GetPerlin(v.x, v.y); },
-			[](const FastNoise& n, glm::dvec3 v) {return n.GetPerlin(v.x, v.y, v.z); }
-		),
-
-		"get_perlin_fractal", sol::overload(
-			sol::resolve<NUM(NUM, NUM) const>(&FastNoise::GetPerlinFractal),
-			sol::resolve<NUM(NUM, NUM, NUM) const>(&FastNoise::GetPerlinFractal),
-			[](const FastNoise& n, glm::dvec2 v) {return n.GetPerlinFractal(v.x, v.y); },
-			[](const FastNoise& n, glm::dvec3 v) {return n.GetPerlinFractal(v.x, v.y, v.z); }
-		),
-
-		"get_simplex", sol::overload(
-			sol::resolve<NUM(NUM, NUM) const>(&FastNoise::GetSimplex),
-			sol::resolve<NUM(NUM, NUM, NUM) const>(&FastNoise::GetSimplex),
-			sol::resolve<NUM(NUM, NUM, NUM, NUM) const>(&FastNoise::GetSimplex),
-			[](const FastNoise& n, glm::dvec2 v) {return n.GetSimplex(v.x, v.y); },
-			[](const FastNoise& n, glm::dvec3 v) {return n.GetSimplex(v.x, v.y, v.z); },
-			[](const FastNoise& n, glm::dvec4 v) {return n.GetSimplex(v.x, v.y, v.z, v.w); }
-		),
-
-		"get_simplex_fractal", sol::overload(
-			sol::resolve<NUM(NUM, NUM) const>(&FastNoise::GetSimplexFractal),
-			sol::resolve<NUM(NUM, NUM, NUM) const>(&FastNoise::GetSimplexFractal),
-			[](const FastNoise& n, glm::dvec2 v) {return n.GetSimplexFractal(v.x, v.y); },
-			[](const FastNoise& n, glm::dvec3 v) {return n.GetSimplexFractal(v.x, v.y, v.z); }
-		),
-
-		"get_cellular", sol::overload(
-			sol::resolve<NUM(NUM, NUM) const>(&FastNoise::GetCellular),
-			sol::resolve<NUM(NUM, NUM, NUM) const>(&FastNoise::GetCellular),
-			[](const FastNoise& n, glm::dvec2 v) {return n.GetCellular(v.x, v.y); },
-			[](const FastNoise& n, glm::dvec3 v) {return n.GetCellular(v.x, v.y, v.z); }
-		),
-
-		"get_white_noise", sol::overload(
-			sol::resolve<NUM(NUM, NUM) const>(&FastNoise::GetWhiteNoise),
-			sol::resolve<NUM(NUM, NUM, NUM) const>(&FastNoise::GetWhiteNoise),
-			sol::resolve<NUM(NUM, NUM, NUM, NUM) const>(&FastNoise::GetWhiteNoise),
-			[](const FastNoise& n, glm::dvec2 v) {return n.GetWhiteNoise(v.x, v.y); },
-			[](const FastNoise& n, glm::dvec3 v) {return n.GetWhiteNoise(v.x, v.y, v.z); },
-			[](const FastNoise& n, glm::dvec4 v) {return n.GetWhiteNoise(v.x, v.y, v.z, v.w); }
-		),
-
-		// Lua does not support ints, so it will simply cast the input values
-		"get_white_noise_int", sol::overload(
-			sol::resolve<NUM(int, int) const>(&FastNoise::GetWhiteNoiseInt),
-			sol::resolve<NUM(int, int, int) const>(&FastNoise::GetWhiteNoiseInt),
-			sol::resolve<NUM(int, int, int, int) const>(&FastNoise::GetWhiteNoiseInt),
-			[](const FastNoise& n, glm::dvec2 v) {return n.GetWhiteNoiseInt((int)v.x, (int)v.y); },
-			[](const FastNoise& n, glm::dvec3 v) {return n.GetWhiteNoiseInt((int)v.x, (int)v.y, (int)v.z); },
-			[](const FastNoise& n, glm::dvec4 v) {return n.GetWhiteNoiseInt((int)v.x, (int)v.y, (int)v.z, (int)v.w); }
-		),
-
-		"get_cubic", sol::overload(
-			sol::resolve<NUM(NUM, NUM) const>(&FastNoise::GetCubic),
-			sol::resolve<NUM(NUM, NUM, NUM) const>(&FastNoise::GetCubic),
-			[](const FastNoise& n, glm::dvec2 v) {return n.GetCubic(v.x, v.y); },
-			[](const FastNoise& n, glm::dvec3 v) {return n.GetCubic(v.x, v.y, v.z); }
-		),
-
-		"get_cubic_fractal", sol::overload(
-			sol::resolve<NUM(NUM, NUM) const>(&FastNoise::GetCubicFractal),
-			sol::resolve<NUM(NUM, NUM, NUM) const>(&FastNoise::GetCubicFractal),
-			[](const FastNoise& n, glm::dvec2 v) {return n.GetCubicFractal(v.x, v.y); },
-			[](const FastNoise& n, glm::dvec3 v) {return n.GetCubicFractal(v.x, v.y, v.z); }
-		),
-
-		"get_noise", sol::overload(
-			sol::resolve<NUM(NUM, NUM) const>(&FastNoise::GetNoise),
-			sol::resolve<NUM(NUM, NUM, NUM) const>(&FastNoise::GetNoise),
-			[](const FastNoise& n, glm::dvec2 v) {return n.GetNoise(v.x, v.y); },
-			[](const FastNoise& n, glm::dvec3 v) {return n.GetNoise(v.x, v.y, v.z); }
-		),
-
-		"gradient_perturb", sol::overload(
-
-			[](const FastNoise& n, NUM a, NUM b) 
-			{
-				n.GradientPerturb(a, b);
-				return std::make_tuple(a, b);
-			},
-
-			[](const FastNoise& n, NUM a, NUM b, NUM c)
-			{
-				n.GradientPerturb(a, b, c);
-				return std::make_tuple(a, b, c);
-			},
-
-			[](const FastNoise& n, glm::dvec2 v)
-			{
-				n.GradientPerturb(v.x, v.y);
-				return v;
-			},
-
-			[](const FastNoise& n, glm::dvec3 v)
-			{
-				n.GradientPerturb(v.x, v.y, v.z);
-				return v;
-			}
-		)
-
-		);
-
-	table.set_function("new", table["noise"].get<sol::table>()["new"].get<sol::function>());
+		"cell_value", FN_CellValue,
+		"noise_lookup", FN_NoiseLookup,
+		"distance", FN_Distance,
+		"distance2", FN_Distance2,
+		"distance2add", FN_Distance2Add,
+		"distance2sub", FN_Distance2Sub,
+		"distance2mul", FN_Distance2Mul,
+		"distance2div", FN_Distance2Div);
 	
 }
 

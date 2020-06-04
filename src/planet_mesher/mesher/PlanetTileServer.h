@@ -5,7 +5,6 @@
 #include <set>
 #include <array>
 #include <thread>
-#include <FastNoise/FastNoise.h>
 
 #include <util/LuaUtil.h>
 #include <lua/LuaCore.h>
@@ -49,9 +48,6 @@ private:
 	// We keep a little state to find height and so 
 	// everybody can query to find stuff about the script
 	sol::state lua_state;
-
-	int noise_seed;
-	FastNoise::Interp noise_interp;
 
 public:
 
