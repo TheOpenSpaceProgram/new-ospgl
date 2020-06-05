@@ -63,6 +63,11 @@ glm::dmat4 MathUtil::rotate_from_to(glm::dvec3 from, glm::dvec3 to)
 	glm::dvec3 from_nrm = glm::normalize(from);
 	glm::dvec3 to_nrm = glm::normalize(to);
 
+	if(glm::length(from - to) <= 0.00001)
+	{
+		return glm::dmat4(1);
+	}
+
 	glm::dvec3 axis = glm::normalize(glm::cross(from_nrm, to_nrm));
 	double dot = glm::dot(from_nrm, to_nrm);
 	double angle = glm::acos(dot);

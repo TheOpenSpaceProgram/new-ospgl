@@ -28,11 +28,15 @@ private:
 
 	// Called when a selection is started
 	void on_selection_change(const CameraUniforms& cu);
-	// Called when cycling through attachments in the same piece
+	// Called when the attachment point changes
 	void on_attachment_change();
 
 	// Attaches current selected, using the attachment port
 	void attach(Piece* target, std::string target_port = "");
+
+	glm::dmat4 get_current_tform(glm::dvec3 mpos);
+	// Obtains a good (user-wise) default rotation which makes parts face up
+	glm::dquat get_fixed_rotation();
 
 	void use_attachment_port(Piece* target, std::string port);
 
@@ -40,6 +44,8 @@ private:
 
 	void cycle_attachments(int dir);
 	void cycle_pieces(int dir);
+
+	Piece* try_attach_stack(glm::dvec3 cpos, const std::vector<Piece*>& children, std::string& attach_marker);
 
 public:
 
@@ -52,6 +58,7 @@ public:
 	// is present
 	Piece* selected;
 	std::string selected_attachment;
+	std::string ignore_attachment;
 	double selected_distance;
 	glm::dquat selected_rotation;
 	glm::dvec3 selected_offset;

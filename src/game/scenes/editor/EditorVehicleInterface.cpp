@@ -80,6 +80,106 @@ void EditorVehicleInterface::handle_input_hovering(const CameraUniforms& cu,
 	}
 }
 
+glm::dmat4 EditorVehicleInterface::get_current_tform(glm::dvec3 mpos)
+{
+	glm::dmat4 tform_marker = glm::dmat4(1.0);
+
+	if(selected_attachment != "none")
+	{
+		tform_marker = selected->get_marker_transform(selected_attachment);
+	}
+
+	glm::dvec3 npos = mpos + selected_offset;
+	glm::dmat4 tform_new = glm::translate(glm::dmat4(1.0), npos);
+	tform_new = tform_new * glm::toMat4(selected_rotation) * glm::inverse(tform_marker);
+
+	return tform_new;
+}
+
+glm::dquat EditorVehicleInterface::get_fixed_rotation()
+{
+	// We want to get a rotation that changes current forward to (0, 0, 1)
+	glm::dmat4 mat = selected->get_marker_transform(selected_attachment);
+	mat = glm::inverse(mat);
+
+	glm::dvec3 _; glm::dvec4 __;
+	glm::dquat orient;
+	glm::decompose(mat, _, orient, _, _, __);
+
+	return orient;
+}
+
+void EditorVehicleInterface::on_attachment_change()
+{
+	selected_rotation = get_fixed_rotation();
+}
+
+Piece* EditorVehicleInterface::try_attach_stack(glm::dvec3 selected_pos, const std::vector<Piece*>& children, 
+		std::string& attach_to_marker)
+{
+	// Find closest receiver attachment
+
+	Piece* closest = nullptr;
+	std::string closest_attch = "";
+	double dist = 99999999.9;
+	glm::dvec3 closest_pos;
+	glm::dvec3 closest_fw;
+
+	for(Piece* p : edveh->veh->all_pieces)
+	{
+		if(std::find(children.begin(), children.end(), p) == children.end())
+		{
+			// Go over all free stack attachment
+			for(auto& pair : p->attachments)
+			{
+				if(pair.first.stack && !pair.second)
+				{
+					glm::dmat4 m_tform = p->get_marker_transform(pair.first.marker);
+					glm::dmat4 p_tform = p->get_graphics_matrix();
+					glm::dvec3 pos = glm::dvec3(p_tform * m_tform * glm::dvec4(0, 0, 0, 1));
+
+					double ndist = glm::distance(selected_pos, pos);
+					if(ndist <= dist)
+					{
+						dist = ndist;
+						closest_attch = pair.first.marker;
+						closest = p;
+						closest_pos = pos;
+						// Note that in the editor +Z = forward
+						closest_fw = glm::dvec3(p_tform * m_tform * glm::dvec4(0, 0, 1, 1)) - closest_pos;
+					}
+				}
+			}
+		}
+	}
+
+	if(dist < 1.0)
+	{
+		if(closest_attch != ignore_attachment)
+		{
+
+			debug_drawer->add_line(selected_pos, closest_pos, glm::vec3(1.0, 0.0, 0.0));	
+			debug_drawer->add_line(closest_pos, closest_pos + closest_fw, glm::vec3(0.0, 1.0, 0.0));
+			selected_rotation = MathUtil::quat_look_at(glm::dvec3(0), closest_fw);
+			selected_offset = closest_pos - selected_pos;
+
+			attach_to_marker = closest_attch;
+			ignore_attachment = "";
+			
+			return closest;
+		}
+	}
+	else
+	{
+		// Once we go far away, the ignore is forgotten
+		ignore_attachment = "";
+	}
+
+	attach_to_marker = "";
+	return nullptr;
+
+}
+
 void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu, 
 		glm::dvec3 ray_start, glm::dvec3 ray_end)
 {
@@ -117,57 +217,17 @@ void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu,
 
 	selected_offset = glm::vec3(0);
 
+	glm::dvec3 selected_pos = ray_start + glm::normalize(ray_end - ray_start) * selected_distance;
+
 	// Attempt attachment
 	// First do stack 
 	if(allow_stack)
 	{
-		// Find closest receiver attachment
-		glm::dvec3 selected_pos = ray_start + glm::normalize(ray_end - ray_start) * selected_distance;
-
-		Piece* closest = nullptr;
-		std::string closest_attch = "";
-		double dist = 99999999.9;
-		glm::dvec3 closest_pos;
-		glm::dvec3 closest_fw;
-
-		for(Piece* p : edveh->veh->all_pieces)
-		{
-			if(std::find(children.begin(), children.end(), p) == children.end())
-			{
-				// Go over all free stack attachment
-				for(auto& pair : p->attachments)
-				{
-					if(pair.first.stack && !pair.second)
-					{
-						glm::dmat4 m_tform = p->get_marker_transform(pair.first.marker);
-						glm::dmat4 p_tform = p->get_graphics_matrix();
-						glm::dvec3 pos = glm::dvec3(p_tform * m_tform * glm::dvec4(0, 0, 0, 1));
-
-						double ndist = glm::distance(selected_pos, pos);
-						if(ndist <= dist)
-						{
-							dist = ndist;
-							closest_attch = pair.first.marker;
-							closest = p;
-							closest_pos = pos;
-							// Note that in the editor +Z = forward
-							closest_fw = glm::dvec3(p_tform * m_tform * glm::dvec4(0, 0, 1, 1)) - closest_pos;
-						}
-					}
-				}
-			}
-		}
-
-		if(dist < 1.0)
-		{
-			debug_drawer->add_line(selected_pos, closest_pos, glm::vec3(1.0, 0.0, 0.0));	
-			debug_drawer->add_line(closest_pos, closest_pos + closest_fw, glm::vec3(0.0, 1.0, 0.0));
-			selected_rotation = MathUtil::quat_look_at(glm::dvec3(0), closest_fw);
-			selected_offset = closest_pos - selected_pos;
-
-			attach_to = closest;
-			attach_to_marker = closest_attch;
-		}
+		attach_to = try_attach_stack(selected_pos, children, attach_to_marker);
+	}
+	else
+	{
+		ignore_attachment = "";
 	}
 
 	// Then do radial attachment
@@ -210,19 +270,9 @@ void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu,
 
 	}
 	
-	
+	glm::dvec3 ray_fw = glm::normalize(ray_end - ray_start);
+	glm::dmat4 tform_new = get_current_tform(ray_start + ray_fw * selected_distance);
 	glm::dmat4 tform_0 = selected->get_graphics_matrix();
-
-	glm::dmat4 tform_marker = glm::dmat4(1.0);
-
-	if(selected_attachment != "none")
-	{
-		tform_marker = selected->get_marker_transform(selected_attachment);
-	}
-
-	glm::dvec3 npos = glm::normalize(ray_end - ray_start) * selected_distance + ray_start + selected_offset;
-	glm::dmat4 tform_new = glm::translate(glm::dmat4(1.0), npos);
-	tform_new = tform_new * glm::toMat4(selected_rotation) * glm::inverse(tform_marker);
 
 	// Update all children
 	for(Piece* child : children)
@@ -271,9 +321,13 @@ bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 v
 	return false;
 }
 
+#include <util/fmt/glm.h>
+
 void EditorVehicleInterface::on_selection_change(const CameraUniforms& cu)
 {
 	selected->attached_to = nullptr;
+	// Fix for instant re-attaching
+	ignore_attachment = selected->to_attachment;
 	selected->to_attachment = "";
 	selected->from_attachment = "";
 
@@ -284,10 +338,10 @@ void EditorVehicleInterface::on_selection_change(const CameraUniforms& cu)
 
 	selected_buffer.clear();
 
-	selected_attachment = "none";
-
-	find_free_attachment();
+	selected_attachment = find_free_attachment();
+	on_attachment_change();
 }
+	
 
 std::string EditorVehicleInterface::find_free_attachment()
 {
@@ -334,6 +388,7 @@ void EditorVehicleInterface::cycle_attachments(int dir)
 		{
 			selected_attachment = selected->attachments[cur_index].first.marker;
 			found = true;
+			on_attachment_change();
 		}
 
 	}
@@ -371,6 +426,7 @@ void EditorVehicleInterface::cycle_pieces(int dir)
 				{
 					// Found it
 					selected_attachment = n_attachment;
+					on_attachment_change();
 					break;
 				}	
 				else
@@ -394,6 +450,7 @@ void EditorVehicleInterface::cycle_pieces(int dir)
 				{
 					// We found a valid one! We are done
 					selected_attachment = n_attachment;
+					on_attachment_change();
 					break;
 				}
 				else
