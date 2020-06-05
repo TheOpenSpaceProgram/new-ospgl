@@ -4,6 +4,10 @@
 
 InputUtil* input;
 
+#ifdef DETAILED_TIMING
+extern Timer timing;
+#endif
+
 static void menu_item(const std::string& name, const std::string& value, const std::string& def, const std::string& help)
 {
 	std::cout << rang::fg::reset;
@@ -213,8 +217,13 @@ void OSP::render()
 	{
 		game_state.render();
 		// It's the responsability of the Scene to call renderer render
-	
+#ifdef DETAILED_TIMING
+			timing.checkpoint("render_gui");
+#endif
 		renderer->do_imgui();
+#ifdef DETAILED_TIMING
+			timing.checkpoint("render_finish");
+#endif
 		renderer->finish();
 	}
 }

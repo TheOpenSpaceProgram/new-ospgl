@@ -24,6 +24,9 @@
 
 static int iteration = 0;
 
+#ifdef DETAILED_TIMING
+Timer timing;
+#endif
 
 int main(int argc, char** argv)
 {
@@ -38,16 +41,28 @@ int main(int argc, char** argv)
 	osp.game_state.load_scene(new FlightScene());
 
 	{
-
-
 		while (osp.should_loop())
 		{
+#ifdef DETAILED_TIMING
+			timing.checkpoint("start");
+#endif
 			osp.start_frame();
-
+#ifdef DETAILED_TIMING
+			timing.checkpoint("update");
+#endif
 			osp.update();
-		
+#ifdef DETAILED_TIMING
+			timing.checkpoint("render");
+#endif
 			osp.render();
+#ifdef DETAILED_TIMING
+			timing.checkpoint("finish");
+#endif
 			osp.finish_frame();
+#ifdef DETAILED_TIMING
+			timing.checkpoint("end");
+			timing.compile_results();
+#endif
 		}
 
 	}
