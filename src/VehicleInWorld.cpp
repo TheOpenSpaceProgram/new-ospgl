@@ -41,14 +41,13 @@ int main(int argc, char** argv)
 	{
 		while (osp.should_loop())
 		{
-			PROFILE("frame", 
-			{
-				PROFILE("start_frame", osp.start_frame());
-				PROFILE("update", osp.update());
-				profiler->show_imgui();
-				PROFILE("render", osp.render());
-				PROFILE("finish_frame", osp.finish_frame());
-			});
+			PROFILE_BLOCK("frame");
+
+			PROFILE("start_frame", osp.start_frame());
+			PROFILE("update", osp.update());
+			profiler->show_imgui();
+			PROFILE("render", osp.render());
+			PROFILE("finish_frame", osp.finish_frame());
 		};
 
 	}

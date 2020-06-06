@@ -5,12 +5,15 @@
 
 void Profiler::push(std::string gate)
 {
+#ifdef ENABLE_PROFILER
 	stack.push_back(gate);
 	checkpoints[stack] = glfwGetTime();
+#endif
 }
 
 void Profiler::pop()
 {
+#ifdef ENABLE_PROFILER
 	logger->check(stack.size() > 0, "Tried to pop on an empty profiler stack");
 	
 	// On each pop we add to the results
@@ -30,12 +33,12 @@ void Profiler::pop()
 
 	
 	stack.pop_back();
-
-	
+#endif
 }
 
 void Profiler::show_results()
 {
+#ifdef ENABLE_PROFILER
 	for(auto& pair : results)
 	{
 		std::string full = "";
@@ -51,6 +54,7 @@ void Profiler::show_results()
 		logger->info("{0}: max: {2:.4f}ms min: {3:.4f}ms avg: {1:.4f}ms last: {4:.4f}ms", 
 				full, pair.second.avg*1000.0, pair.second.max*1000.0, pair.second.min*1000.0, pair.second.last*1000.0);
 	}
+#endif
 }
 
 void Profiler::show_imgui()
@@ -58,6 +62,7 @@ void Profiler::show_imgui()
 	// TODO: Think this out, we are showing results while we are generating them
 	ImGui::Begin("Profiler",nullptr,ImGuiWindowFlags_NoFocusOnAppearing|ImGuiWindowFlags_NoInputs);
 
+#ifdef ENABLE_PROFILER
 	for(auto& pair : results)
 	{
 		std::string full = "";
@@ -72,9 +77,17 @@ void Profiler::show_imgui()
 		
 		ImGui::Text("%s -> %fms", full.c_str(), pair.second.avg * 1000.0);
 	}
-
+#else 
+	ImGui::Text("Profiler is compile-time disabled");
+#endif
 
 	ImGui::End();
+}
+
+ProfileBlock Profiler::block(std::string name)
+{
+	push(name);
+	return std::move(ProfileBlock());
 }
 
 Profiler* profiler;
