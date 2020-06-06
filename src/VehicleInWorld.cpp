@@ -36,6 +36,8 @@ int main(int argc, char** argv)
 	double fps_t = 0.0;
 	double dt_avg = 0.0;
 
+	PROFILE_FUNC();
+
 	osp.game_state.load_scene(new EditorScene());
 
 	{

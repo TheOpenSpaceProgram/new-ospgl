@@ -12,8 +12,9 @@
 #define _PROFILER_MERGE(A, B) A##B
 #define _PROFILER_LABEL(A) _PROFILER_MERGE(__profiler_, A)
 
+
 #ifdef ENABLE_PROFILER 
-	#define PROFILE_FUNC() auto _PROFILER_LABEL(__LINE__) = profiler->block(___func___);
+	#define PROFILE_FUNC() auto _PROFILER_LABEL(__LINE__) = profiler->block(__func__);
 #else 
 	#define PROFILE_FUNC() block;
 #endif
