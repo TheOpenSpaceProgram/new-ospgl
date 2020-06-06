@@ -22,11 +22,9 @@
 
 #include <game/input/JoystickDebug.h>
 
-static int iteration = 0;
+#include <util/Profiler.h>
 
-#ifdef DETAILED_TIMING
-Timer timing;
-#endif
+static int iteration = 0;
 
 int main(int argc, char** argv)
 {
@@ -43,27 +41,15 @@ int main(int argc, char** argv)
 	{
 		while (osp.should_loop())
 		{
-#ifdef DETAILED_TIMING
-			timing.checkpoint("start");
-#endif
-			osp.start_frame();
-#ifdef DETAILED_TIMING
-			timing.checkpoint("update");
-#endif
-			osp.update();
-#ifdef DETAILED_TIMING
-			timing.checkpoint("render");
-#endif
-			osp.render();
-#ifdef DETAILED_TIMING
-			timing.checkpoint("finish");
-#endif
-			osp.finish_frame();
-#ifdef DETAILED_TIMING
-			timing.checkpoint("end");
-			timing.compile_results();
-#endif
-		}
+			PROFILE("frame", 
+			{
+				PROFILE("start_frame", osp.start_frame());
+				PROFILE("update", osp.update());
+				profiler->show_imgui();
+				PROFILE("render", osp.render());
+				PROFILE("finish_frame", osp.finish_frame());
+			});
+		};
 
 	}
 

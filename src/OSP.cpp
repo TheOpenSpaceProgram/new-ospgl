@@ -1,6 +1,7 @@
 #include "OSP.h"
 #include "rang.hpp"
 #include <renderer/util/TextDrawer.h>
+#include <util/Profiler.h>
 
 InputUtil* input;
 
@@ -160,6 +161,7 @@ void OSP::init(int argc, char** argv)
 		create_global_texture_drawer();
 		create_global_text_drawer();
 		create_global_lua_core();
+		create_global_profiler();
 
 		// Load packages now so they register all scripts...
 		assets->load_packages(lua_core, &game_database);
@@ -217,13 +219,7 @@ void OSP::render()
 	{
 		game_state.render();
 		// It's the responsability of the Scene to call renderer render
-#ifdef DETAILED_TIMING
-			timing.checkpoint("render_gui");
-#endif
 		renderer->do_imgui();
-#ifdef DETAILED_TIMING
-			timing.checkpoint("render_finish");
-#endif
 		renderer->finish();
 	}
 }
