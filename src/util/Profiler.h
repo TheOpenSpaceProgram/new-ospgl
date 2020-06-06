@@ -12,6 +12,14 @@
 	#define PROFILE(name, block) block;
 #endif
 
+#ifdef ENABLE_PROFILER
+	#define PROFILE_BLOCK(name) auto __profiler_block = profiler->block(name)
+#else 
+	#define PROFILE_BLOCK(name) 
+#endif 
+
+struct ProfileBlock;
+
 class Profiler
 {
 private:
@@ -48,6 +56,8 @@ private:
 
 public:
 
+	ProfileBlock block(std::string name);
+
 	void push(std::string gate);
 	void pop();
 	void show_results();
@@ -59,3 +69,38 @@ extern Profiler* profiler;
 
 void create_global_profiler();
 void destroy_global_profiler();
+
+// Simple RAII class for profiling blocks of code
+class ProfileBlock
+{
+protected:
+	friend class Profiler;
+
+	ProfileBlock()
+	{	
+		invalid = false;
+	}
+
+private:
+	bool invalid;
+
+	// Make non-copyable
+	ProfileBlock(const ProfileBlock& b) = delete;
+	ProfileBlock& operator=(const ProfileBlock& b) = delete;
+
+public:
+	
+	ProfileBlock(ProfileBlock&& b)
+	{
+		invalid = b.invalid;
+		b.invalid = true;
+	}
+
+	~ProfileBlock()
+	{
+		if(!invalid)
+		{
+			profiler->pop();
+		}
+	}
+};
