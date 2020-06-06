@@ -1,5 +1,8 @@
 #pragma once
 #include <string>
+#include <unordered_map>
+#include <vector>
+
 
 // Uses GLFW time to make relatively precise 
 // measurements

@@ -1,6 +1,7 @@
 #include "Timer.h"
 #include "GLFW/glfw3.h"
 #include "Logger.h"
+#include <cfloat>
 
 double Timer::get_elapsed_time()
 {

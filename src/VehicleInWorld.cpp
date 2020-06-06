@@ -22,8 +22,9 @@
 
 #include <game/input/JoystickDebug.h>
 
-static int iteration = 0;
+#include <util/Profiler.h>
 
+static int iteration = 0;
 
 int main(int argc, char** argv)
 {
@@ -38,17 +39,16 @@ int main(int argc, char** argv)
 	osp.game_state.load_scene(new EditorScene());
 
 	{
-
-
 		while (osp.should_loop())
 		{
-			osp.start_frame();
+			PROFILE_BLOCK("frame");
 
+			osp.start_frame();
 			osp.update();
-		
+			profiler->show_imgui();
 			osp.render();
 			osp.finish_frame();
-		}
+		};
 
 	}
 
