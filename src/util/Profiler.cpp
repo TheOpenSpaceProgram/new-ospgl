@@ -60,7 +60,7 @@ void Profiler::show_results()
 void Profiler::show_imgui()
 {
 	// TODO: Think this out, we are showing results while we are generating them
-	ImGui::Begin("Profiler");
+	ImGui::Begin("Profiler",nullptr,ImGuiWindowFlags_NoFocusOnAppearing|ImGuiWindowFlags_NoInputs);
 
 #ifdef ENABLE_PROFILER
 	for(auto& pair : results)
