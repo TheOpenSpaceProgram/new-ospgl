@@ -6,14 +6,20 @@
 
 #define ENABLE_PROFILER
 
+// Helper macros to generate unique* identifier
+// * Limitation: Only one PROFILER_X per line
+// TODO: Use __COUNTER__? It's not standard, but supported on most compilers
+#define _PROFILER_MERGE(A, B) A##B
+#define _PROFILER_LABEL(A) _PROFILER_MERGE(__profiler_, A)
+
 #ifdef ENABLE_PROFILER 
-	#define PROFILE(name, block) profiler->push(name); block; profiler->pop();
+	#define PROFILE_FUNC() auto _PROFILER_LABEL(__LINE__) = profiler->block(___func___);
 #else 
-	#define PROFILE(name, block) block;
+	#define PROFILE_FUNC() block;
 #endif
 
 #ifdef ENABLE_PROFILER
-	#define PROFILE_BLOCK(name) auto __profiler_block = profiler->block(name)
+	#define PROFILE_BLOCK(name) auto _PROFILER_LABEL(__LINE__) = profiler->block(name)
 #else 
 	#define PROFILE_BLOCK(name) 
 #endif 

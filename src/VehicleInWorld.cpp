@@ -43,11 +43,11 @@ int main(int argc, char** argv)
 		{
 			PROFILE_BLOCK("frame");
 
-			PROFILE("start_frame", osp.start_frame());
-			PROFILE("update", osp.update());
+			osp.start_frame();
+			osp.update();
 			profiler->show_imgui();
-			PROFILE("render", osp.render());
-			PROFILE("finish_frame", osp.finish_frame());
+			osp.render();
+			osp.finish_frame();
 		};
 
 	}
