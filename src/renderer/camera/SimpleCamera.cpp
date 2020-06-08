@@ -1,6 +1,7 @@
 #include "SimpleCamera.h"
 #include "../../util/InputUtil.h"
 #include <imgui/imgui.h>
+#include "../../util/Logger.h"
 
 void SimpleCamera::update(double dt)
 {
@@ -10,7 +11,7 @@ void SimpleCamera::update(double dt)
 	{
 		bool moved = false;
 		// Motion
-
+		logger->info("pos {} {} {} fw {} {} {} up {} {} {}",pos.x,pos.y,pos.z,fw.x,fw.y,fw.z,up.x,up.y,up.z);
 
 		if (glfwGetMouseButton(input->window, GLFW_MOUSE_BUTTON_2))
 		{
@@ -61,7 +62,7 @@ void SimpleCamera::update(double dt)
 			{
 				tilt(dt, 1.0f);
 			}
-			
+
 			glfwSetInputMode(input->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			if (input->mouse_delta != glm::dvec2(0.0, 0.0))
 			{
@@ -102,6 +103,7 @@ CameraUniforms SimpleCamera::get_camera_uniforms(int w, int h)
 
 	glm::dmat4 proj = glm::perspective(glm::radians(fov), (double)w / (double)h, NEAR_PLANE, (double)far_plane);
 	glm::dmat4 view = glm::lookAt(glm::dvec3(0.0, 0.0, 0.0), camera_dir, up);
+	//glm::dmat4 view = glm::lookAt(-camera_pos, camera_dir, up);
 	glm::dmat4 proj_view = proj * view;
 
 	out.proj = proj;
@@ -138,12 +140,36 @@ glm::dmat4 SimpleCamera::get_cmodel()
 	return glm::translate(glm::dmat4(1.0), -get_camera_pos_dir().first);
 }
 
+void SimpleCamera::set_mode(unsigned char mode)
+{
+	this->mode=mode;
+}
+
+void SimpleCamera::init()
+{
+	switch(mode)
+	{
+		case(FREE_MODE):
+			fov = 60.0;
+			pos = glm::dvec3(0.0, 0.0, 0.0);
+			fw = glm::dvec3(1.0, 0.0, 0.0);
+			speed = 1.0;
+			up = glm::dvec3(0.0, 1.0, 0.0);
+			break;
+		case(CIRCLE_MODE):
+			fov = 60.0;
+			pos = glm::dvec3(0.0, 8.0, 0.0);
+			fw = glm::normalize(-pos);
+			speed = 1.0;
+			up = glm::dvec3(-1.0, 0.0, 0.0);
+			break;
+	}
+}
+
 SimpleCamera::SimpleCamera()
 {
-	fov = 60.0;
-	pos = glm::dvec3(0.0, 0.0, 0.0);
-	fw = glm::dvec3(1.0, 0.0, 0.0);
-	speed = 1.0;
-	up = glm::dvec3(0.0, 1.0, 0.0);
+	keyboard_blocked=false;
+	set_mode(CIRCLE_MODE);
+	init();
 }
 

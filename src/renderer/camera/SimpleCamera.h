@@ -5,6 +5,9 @@
 #include "CameraUniforms.h"
 #include "Camera.h"
 
+#define FREE_MODE 0
+#define CIRCLE_MODE 1
+
 class SimpleCamera : public Camera
 {
 private:
@@ -16,6 +19,7 @@ public:
 	constexpr static double NEAR_PLANE = 1e-6;
 
 	bool keyboard_blocked;
+	unsigned char mode;
 
 	// In degrees
 	double fov;
@@ -74,6 +78,7 @@ public:
 
 	void mouse(glm::dvec2 deltas, double dt)
 	{
+
 		glm::dvec3 or_forward = fw;
 		glm::dvec3 or_up = up;
 
@@ -87,6 +92,9 @@ public:
 		fw = vert * hor * glm::dvec4(fw, 1.0);
 
 	}
+
+	void set_mode(unsigned char mode);
+	void init();
 
 	SimpleCamera();
 
