@@ -492,6 +492,8 @@ Renderer::Renderer(cpptoml::table& settings)
 
 
 
+	window = nullptr;
+
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -515,6 +517,15 @@ Renderer::Renderer(cpptoml::table& settings)
 		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
 		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 		window = glfwCreateWindow(mode->width, mode->height, "New OSP", monitor, NULL);
+	}
+
+	if(window == nullptr)
+	{
+		const char* description;
+		int code = glfwGetError(&description);
+		
+		logger->error("Error initializing GLFW window: {}", description);
+		logger->fatal("Failed to initialize GLFW");
 	}
 
 	glfwMakeContextCurrent(window);

@@ -36,8 +36,10 @@ if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	add_definitions(-D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
 	target_compile_options(OSPGL PUBLIC /bigobj)
+	set(EXTRA_LINK "")
 else()
 	target_compile_options(OSPGL PUBLIC -g -Werror)
+	set(EXTRA_LINK "stdc++fs")
 	link_libraries(${CMAKE_DL_LIBS})
 endif()
 
@@ -101,7 +103,7 @@ include_directories(OSPGL ${FREETYPE_INCLUDE_DIRS})
 
 # Link libraries
 
-target_link_libraries(OSPGL fmt liblua-static assimp BulletSoftBody BulletDynamics BulletCollision LinearMath ${CMAKE_DL_LIBS})
+target_link_libraries(OSPGL fmt liblua-static assimp BulletSoftBody BulletDynamics BulletCollision LinearMath ${CMAKE_DL_LIBS} ${EXTRA_LINK})
 
 ##################################################################################
 # ospm - The package manager for OSPGL (Open Space Program Manager)
@@ -131,4 +133,4 @@ include_directories(dep)
 include_directories(pkg)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
-target_link_libraries(ospm ${OPENSSL_LIBRARIES} ${CMAKE_DL_LIBS})
+target_link_libraries(ospm ${OPENSSL_LIBRARIES} ${CMAKE_DL_LIBS} ${EXTRA_LINK})

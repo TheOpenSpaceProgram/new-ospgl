@@ -15,7 +15,7 @@ void Profiler::pop()
 {
 #ifdef ENABLE_PROFILER
 	logger->check(stack.size() > 0, "Tried to pop on an empty profiler stack");
-	
+
 	// On each pop we add to the results
 	auto it = results.find(stack);
 	if(it == results.end())
