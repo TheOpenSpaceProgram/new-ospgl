@@ -98,6 +98,12 @@ public:
 
 	void update(double dt);	
 	void editor_update(double dt);
+	
+	// Used when a piece is totally destroyed, the 
+	// piece is not actually memory deleted, so you 
+	// get the pointer back
+	// Remember to update the vehicle if on flight
+	Piece* remove_piece(Piece* p);
 
 	// The return is only populated if something separated
 	std::vector<Vehicle*> physics_update(double pdt);

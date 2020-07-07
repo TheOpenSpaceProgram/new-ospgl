@@ -1,6 +1,7 @@
 #pragma once 
 #include <assets/PartPrototype.h>
 #include "PartIconRenderer.h"
+#include "EditorPanel.h"
 
 #include <gui/widgets/GUIImageButton.h>
 #include <gui/layouts/GUIListLayout.h>
@@ -8,8 +9,6 @@
 #include <gui/skins/SimpleSkin.h>
 #include <gui/GUICanvas.h>
 
-
-class EditorScene;
 
 struct EditorCategory
 {
@@ -36,7 +35,7 @@ struct EditorPart
 	void render(PartIconRenderer* renderer);
 };
 
-class EditorPartList
+class EditorPartList : public EditorPanel
 {
 private:
 
@@ -67,9 +66,9 @@ public:
 	// Called when changing category
 	void update_part_list();
 
-	void init(EditorScene* sc, NVGcontext* vg, GUISkin* skin);
+	virtual void init(EditorScene* sc, NVGcontext* vg, GUISkin* skin) override;
 
-	void do_gui(int width, int panel_width, int height, GUIInput* gui_input);
+	virtual void do_gui(int width, int panel_width, int height, GUIInput* gui_input) override;
 
 	int get_panel_width();
 	

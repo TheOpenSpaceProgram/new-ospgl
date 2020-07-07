@@ -40,12 +40,13 @@ private:
 
 	void use_attachment_port(Piece* target, std::string port);
 
-	std::string find_free_attachment();
+	PieceAttachment* find_free_attachment();
 
 	void cycle_attachments(int dir);
 	void cycle_pieces(int dir);
 
 	Piece* try_attach_stack(glm::dvec3 cpos, const std::vector<Piece*>& children, std::string& attach_marker);
+	Piece* try_attach_radial(glm::dvec3 r0, glm::dvec3 r1, const std::vector<Piece*>& children, std::string& attach_marker);
 
 public:
 
@@ -57,7 +58,7 @@ public:
 	// Once a piece is selected, it's separated from root if any connection
 	// is present
 	Piece* selected;
-	std::string selected_attachment;
+	PieceAttachment* selected_attachment;
 	std::string ignore_attachment;
 	double selected_distance;
 	glm::dquat selected_rotation;

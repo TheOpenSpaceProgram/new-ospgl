@@ -23,6 +23,8 @@ void Renderer::resize(int nwidth, int nheight, float nscale)
 	{
 		delete fbuffer;
 	}
+	
+	
 
 	width = nwidth;
 	height = nheight;
@@ -214,6 +216,7 @@ void Renderer::do_debug(CameraUniforms &cu)
 void Renderer::do_imgui()
 {
 	ImGui::Render();
+
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 

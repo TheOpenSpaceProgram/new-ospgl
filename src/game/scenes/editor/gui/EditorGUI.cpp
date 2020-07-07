@@ -26,7 +26,14 @@ void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 	nvgFill(vg);
 
 	
-	part_list.do_gui(width, get_panel_width(), height, gui_input);
+	if(edveh_int->selected == nullptr)
+	{
+		part_list.do_gui(width, get_panel_width(), height, gui_input);
+	}
+	else
+	{
+		trashcan.do_gui(width, get_panel_width(), height, gui_input);
+	}
 
 	prev_width = width;
 	prev_height = height;
@@ -40,6 +47,10 @@ void EditorGUI::init(EditorScene* sc)
 	prev_height = 0;
 
 	part_list.init(sc, vg, &skin);
+	trashcan.init(sc, vg, &skin);
+
+	// We hold a pointer to interact with the 3D editor
+	this->edveh_int = &sc->vehicle_int;
 }
 
 

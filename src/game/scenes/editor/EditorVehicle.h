@@ -51,6 +51,7 @@ private:
 public:
 
 	void update_collider(Piece* p);
+	// Does not delete the piece_meta
 	void remove_collider(Piece* p);
 
 	EditorScene* scene;

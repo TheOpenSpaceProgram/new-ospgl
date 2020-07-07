@@ -15,7 +15,7 @@ public:
 	bool disabled = false;
 	bool toggled = false;	//< If true button will always show the clicked variant
 
-	// We only support left and right buttons
+	// We only support left and right buttons for compatibility with laptops
 	bool click[2] = {false, false};
 
 	Signal<void()> on_enter_hover; 		//< Called the frame the mouse enters the button
@@ -28,4 +28,5 @@ public:
 
 	void do_button(glm::ivec2 pos, glm::ivec2 size, GUIInput* ipt);
 	GUISkin::ButtonState get_button_state();
+
 };

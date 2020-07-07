@@ -6,7 +6,11 @@
 #include <assets/Image.h>
 #include <assets/AssetManager.h>
 #include <gui/skins/SimpleSkin.h>
+#include "../EditorVehicleInterface.h"
+
 #include "EditorPartList.h"
+#include "EditorTrashcan.h"
+
 
 class EditorScene;
 
@@ -19,15 +23,18 @@ class EditorGUI
 private:
 
 	int prev_width, prev_height;
+	EditorVehicleInterface* edveh_int;
 
 public:
 
+	friend class EditorTrashcan;
 
 	SimpleSkin skin;
 
 	NVGcontext* vg;
 
 	EditorPartList part_list;
+	EditorTrashcan trashcan;
 
 	void do_gui(int width, int height, GUIInput* gui_input);	
 

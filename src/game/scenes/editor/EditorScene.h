@@ -21,7 +21,6 @@ class EditorScene : public Scene
 private:
 
 	EditorCamera cam;
-	EditorGUI gui;
 	EditorVehicle vehicle;
 	EditorVehicleInterface vehicle_int;
 
@@ -37,6 +36,9 @@ private:
 	void do_gui();
 
 public:
+
+	friend class EditorGUI;
+	EditorGUI gui;
 	
 	btCollisionWorld* bt_world;
 

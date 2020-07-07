@@ -33,6 +33,7 @@ int main(int argc, char** argv)
 
 	SerializeUtil::read_file_to("udata/saves/debug-save/save.toml", osp.game_state);
 
+	
 	double fps_t = 0.0;
 	double dt_avg = 0.0;
 
@@ -44,14 +45,12 @@ int main(int argc, char** argv)
 		while (osp.should_loop())
 		{
 			PROFILE_BLOCK("frame");
-
+			
 			osp.start_frame();
 			osp.update();
-			profiler->show_imgui();
 			osp.render();
 			osp.finish_frame();
-		};
-
+		}
 	}
 
 	osp.finish();

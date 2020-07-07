@@ -12,6 +12,10 @@
 *.userprefs
 .vimrc
 .clangd
+.kdev4/
+*.kdev4
+.vscode/
+*.vscode
 
 # Build results
 [Bb]in/

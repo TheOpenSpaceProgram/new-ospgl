@@ -28,6 +28,10 @@ public:
 
 	bool is_mouse_inside(glm::ivec2 pos, glm::ivec2 size);
 
+	// To clear up the code a bit
+	#define GUI_LEFT_BUTTON 0
+	#define GUI_RIGHT_BUTTON 1
+
 	// 0 = left
 	// 1 = right
 	// 2 = middle

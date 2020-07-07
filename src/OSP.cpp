@@ -103,7 +103,7 @@ void OSP::init(int argc, char** argv)
 				
 			}
 		}
-
+		
 		// Initialize subsystems
 		create_global_logger();
 

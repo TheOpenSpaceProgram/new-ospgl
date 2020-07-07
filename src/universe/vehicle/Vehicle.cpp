@@ -27,6 +27,24 @@ void Vehicle::pack()
 	packed_veh.calculate_com();
 }
 
+Piece* Vehicle::remove_piece(Piece* p)
+{
+	// TODO: Check links, attachments, etc...
+	all_pieces.erase(std::remove(all_pieces.begin(), all_pieces.end(), p));
+	if(p == root)
+	{
+		root = nullptr;
+	}
+
+	if(p->part && p->part->pieces["p_root"] == p)
+	{
+		// Remove the part too
+		parts.erase(std::remove(parts.begin(), parts.end(), p->part));
+	}
+
+	return p;
+}
+
 void Vehicle::update(double dt)
 {
 	// Clear blocked ports

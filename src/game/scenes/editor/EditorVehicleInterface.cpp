@@ -34,10 +34,10 @@ void EditorVehicleInterface::use_attachment_port(Piece* target, std::string port
 void EditorVehicleInterface::attach(Piece* target, std::string port)
 {
 	selected->attached_to = target;
-	selected->from_attachment = selected_attachment;
+	selected->from_attachment = selected_attachment->marker;
 	selected->to_attachment = port;
 
-	use_attachment_port(selected, selected_attachment);
+	use_attachment_port(selected, selected_attachment->marker);
 	if(port != "")
 	{
 		logger->info("Using port: {}", port);
@@ -45,7 +45,7 @@ void EditorVehicleInterface::attach(Piece* target, std::string port)
 	}
 
 	selected = nullptr;
-	selected_attachment = "";
+	selected_attachment = nullptr;
 
 	edveh->veh->update_attachments();
 }
@@ -84,9 +84,9 @@ glm::dmat4 EditorVehicleInterface::get_current_tform(glm::dvec3 mpos)
 {
 	glm::dmat4 tform_marker = glm::dmat4(1.0);
 
-	if(selected_attachment != "none")
+	if(selected_attachment)
 	{
-		tform_marker = selected->get_marker_transform(selected_attachment);
+		tform_marker = selected->get_marker_transform(selected_attachment->marker);
 	}
 
 	glm::dvec3 npos = mpos + selected_offset;
@@ -99,7 +99,7 @@ glm::dmat4 EditorVehicleInterface::get_current_tform(glm::dvec3 mpos)
 glm::dquat EditorVehicleInterface::get_fixed_rotation()
 {
 	// We want to get a rotation that changes current forward to (0, 0, 1)
-	glm::dmat4 mat = selected->get_marker_transform(selected_attachment);
+	glm::dmat4 mat = selected->get_marker_transform(selected_attachment->marker);
 	mat = glm::inverse(mat);
 
 	glm::dvec3 _; glm::dvec4 __;
@@ -114,9 +114,39 @@ void EditorVehicleInterface::on_attachment_change()
 	selected_rotation = get_fixed_rotation();
 }
 
+Piece* EditorVehicleInterface::try_attach_radial(glm::dvec3 ray_start, glm::dvec3 ray_end, const std::vector<Piece*>& children,
+		std::string& attach_to_marker)
+{
+	if(!selected_attachment->radial)
+	{
+		return nullptr;
+	}
+
+	RaycastResult rresult = raycast(ray_start, ray_end, true, children);
+
+	if(rresult.has_hit)
+	{
+		// Position the piece for radial attachment, adjusting distance and rotation
+		selected_distance = glm::length(rresult.world_pos - ray_start);
+		// Note that here we use +Z as up, not +Y!
+		selected_rotation = MathUtil::quat_look_at(glm::vec3(0, 0, 0), rresult.world_nrm,
+				glm::dvec3(0, 0, 1), glm::dvec3(0, 1, 0));
+	
+		return rresult.p;
+		attach_to_marker = "";
+	}
+
+	return nullptr;
+}
+
 Piece* EditorVehicleInterface::try_attach_stack(glm::dvec3 selected_pos, const std::vector<Piece*>& children, 
 		std::string& attach_to_marker)
 {
+	if(!selected_attachment->stack)
+	{
+		return nullptr;
+	}
+
 	// Find closest receiver attachment
 
 	Piece* closest = nullptr;
@@ -233,21 +263,7 @@ void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu,
 	// Then do radial attachment
 	if(allow_radial && attach_to == nullptr)
 	{
-		
-		RaycastResult rresult = raycast(ray_start, ray_end, true, children);
-
-		if(rresult.has_hit)
-		{
-			// Position the piece for radial attachment, adjusting distance and rotation
-			selected_distance = glm::length(rresult.world_pos - ray_start);
-			// Note that here we use +Z as up, not +Y!
-			selected_rotation = MathUtil::quat_look_at(glm::vec3(0, 0, 0), rresult.world_nrm,
-					glm::dvec3(0, 0, 1), glm::dvec3(0, 1, 0));
-		
-			attach_to = rresult.p;
-			attach_to_marker = "";
-		}
-
+		attach_to = try_attach_radial(ray_start, ray_end, children, attach_to_marker);
 	}
 
 	// Coloring and visuals
@@ -264,7 +280,7 @@ void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu,
 		{
 			piece_meta.highlight = glm::vec3(1.0f);
 
-			piece_meta.attachment_color[selected_attachment] = 
+			piece_meta.attachment_color[selected_attachment->marker] = 
 				glm::vec4(1.0f, 1.0f, 0.5f, 1.0f);
 		}
 
@@ -343,7 +359,7 @@ void EditorVehicleInterface::on_selection_change(const CameraUniforms& cu)
 }
 	
 
-std::string EditorVehicleInterface::find_free_attachment()
+PieceAttachment* EditorVehicleInterface::find_free_attachment()
 {
 	// Find the first free attachment
 	for(int i = 0; i < selected->attachments.size(); i++)
@@ -351,12 +367,12 @@ std::string EditorVehicleInterface::find_free_attachment()
 		if(!selected->attachments[i].second)
 		{
 			logger->info("Found free: {}", selected->attachments[i].first.marker);
-			selected_attachment = selected->attachments[i].first.marker;
-			return selected->attachments[i].first.marker;
+			//selected_attachment = selected->attachments[i].first.marker;
+			return &selected->attachments[i].first;
 		}
 	}
 
-	return "";
+	return nullptr;
 }
 
 void EditorVehicleInterface::cycle_attachments(int dir)
@@ -364,7 +380,7 @@ void EditorVehicleInterface::cycle_attachments(int dir)
 	int cur_index = -1;
 	for(int i = 0; i < selected->attachments.size(); i++)
 	{
-		if(selected->attachments[i].first.marker == selected_attachment)
+		if(&selected->attachments[i].first == selected_attachment)
 		{
 			cur_index = i;
 		}
@@ -386,7 +402,7 @@ void EditorVehicleInterface::cycle_attachments(int dir)
 		
 		if(!selected->attachments[cur_index].second)
 		{
-			selected_attachment = selected->attachments[cur_index].first.marker;
+			selected_attachment = &selected->attachments[cur_index].first;
 			found = true;
 			on_attachment_change();
 		}
@@ -421,8 +437,8 @@ void EditorVehicleInterface::cycle_pieces(int dir)
 			{
 				// Try attach
 				selected = child;
-				std::string n_attachment = find_free_attachment();
-				if(n_attachment != "")
+				PieceAttachment* n_attachment = find_free_attachment();
+				if(n_attachment != nullptr)
 				{
 					// Found it
 					selected_attachment = n_attachment;
@@ -445,8 +461,8 @@ void EditorVehicleInterface::cycle_pieces(int dir)
 			{
 				selected = selected_buffer.front();
 				selected_buffer.pop_back();
-				std::string n_attachment = find_free_attachment();
-				if(n_attachment != "")
+				PieceAttachment* n_attachment = find_free_attachment();
+				if(n_attachment != nullptr)
 				{
 					// We found a valid one! We are done
 					selected_attachment = n_attachment;

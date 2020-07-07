@@ -9,48 +9,34 @@
 class GUIImageButton : public GUIBaseButton
 {
 public:
-	
+
 	// NanoVG image handle
 	int image = -1;
 	std::string name;
+	glm::ivec2 img_size;
 
-	// Use negative values to let that axis free
+	enum ImageMode
+	{
+		CENTER,
+		STRETCH,
+		TILE
+	};
+
+	// Use negative values to let that axis free, this changes the size of the button
 	glm::ivec2 force_image_size;
+	ImageMode img_mode;
 
-	// TODO: Write these properly and add the image!
-	virtual glm::ivec2 prepare(glm::ivec2 wpos, glm::ivec2 wsize, GUIInput* ipt) override
-	{	
-		pos = wpos;
-		size = force_image_size;
+	virtual glm::ivec2 prepare(glm::ivec2 wpos, glm::ivec2 wsize, GUIInput* ipt) override;
 
-		do_button(pos, size, ipt);
+	virtual void draw(NVGcontext* vg, GUISkin* skin) override;
 
-		return size;
-	}
+	void set_image(NVGcontext* vg, Image* to);
+	void set_image(NVGcontext* vg, GLuint handle, glm::ivec2 size);
 
-	virtual void draw(NVGcontext* vg, GUISkin* skin) override
+	GUIImageButton()
 	{
-		skin->draw_button(vg, pos, size, "", get_button_state(), GUISkin::ButtonStyle::SYMMETRIC);
-
-		if(image > 0)
-		{
-			
-			NVGpaint img_fill = nvgImagePattern(vg, pos.x, pos.y, size.x, size.y, 0.0f, image, 1.0f);
-			nvgBeginPath(vg);
-			nvgFillPaint(vg, img_fill);
-			nvgRect(vg, pos.x, pos.y, size.x, size.y);
-			nvgFill(vg);
-		}
-	}
-
-	void set_image(NVGcontext* vg, Image* to)
-	{
-		image = nvglCreateImageFromHandleGL3(vg, to->id, to->get_width(), to->get_height(), 0);
-	}
-
-	void set_image(NVGcontext* vg, GLuint handle, glm::ivec2 size)
-	{
-		image = nvglCreateImageFromHandleGL3(vg, handle, size.x, size.y, 0);
+		force_image_size = glm::ivec2(-1, -1);
+		img_mode = STRETCH;
 	}
 
 };

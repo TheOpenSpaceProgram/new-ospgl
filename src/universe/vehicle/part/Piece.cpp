@@ -251,4 +251,5 @@ Piece::Piece(Part* in_part, std::string piece_name)
 
 Piece::~Piece()
 {
+	// TODO: Automatic removal of the part if we are root piece
 }
