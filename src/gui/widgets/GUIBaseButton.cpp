@@ -45,7 +45,7 @@ void GUIBaseButton::do_button(glm::ivec2 pos, glm::ivec2 size, GUIInput* ipt)
 {
 	if(!ipt->ext_mouse_blocked)
 	{
-		if(ipt->is_mouse_inside(pos, size))
+		if(ipt->mouse_inside(pos, size))
 		{
 			ipt->mouse_blocked = true;
 
@@ -56,8 +56,8 @@ void GUIBaseButton::do_button(glm::ivec2 pos, glm::ivec2 size, GUIInput* ipt)
 			}
 			else
 			{
-				set_click(0, ipt->is_mouse_clicked(0));
-				set_click(1, ipt->is_mouse_clicked(1));
+				set_click(0, ipt->mouse_pressed(0));
+				set_click(1, ipt->mouse_pressed(1));
 			}
 
 			set_hover(true);

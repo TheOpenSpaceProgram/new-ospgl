@@ -18,15 +18,16 @@ private:
 		   	std::vector<Piece*> ignore = std::vector<Piece*>());
 
 	void handle_input_hovering(const CameraUniforms& cu, 
-		glm::dvec3 ray_start, glm::dvec3 ray_end);
+		glm::dvec3 ray_start, glm::dvec3 ray_end, GUIInput* gui_input);
 
 	void handle_input_selected(const CameraUniforms& cu, 
-		glm::dvec3 ray_start, glm::dvec3 ray_end);
+		glm::dvec3 ray_start, glm::dvec3 ray_end, GUIInput* gui_input);
 
 	// Re-roots assuming selected piece is 'current', and new root is 'new_root'
 	void reroot(Piece* current, Piece* new_root);
 
-	// Called when a selection is started
+
+	// Called when a selection is started (by the editor)
 	void on_selection_change(const CameraUniforms& cu);
 	// Called when the attachment point changes
 	void on_attachment_change();
@@ -50,6 +51,8 @@ private:
 
 public:
 
+	void on_selection_change(double dist = 10.0);
+
 	EditorVehicle* edveh;
 	EditorScene* scene;
 
@@ -58,6 +61,8 @@ public:
 	// Once a piece is selected, it's separated from root if any connection
 	// is present
 	Piece* selected;
+	// If null the piece has no free attachment points and may only
+	// be moved around, not attached
 	PieceAttachment* selected_attachment;
 	std::string ignore_attachment;
 	double selected_distance;
@@ -75,9 +80,8 @@ public:
 	// Clicking ANYWHERE outside viewport results in deletion of the selected
 	// part
 	// Viewport is renderer style, (x0, y0, w, h)
-	bool handle_input(const CameraUniforms& cu, glm::dvec4 viewport, glm::dvec2 real_screen_size);
-	
-
+	bool handle_input(const CameraUniforms& cu, glm::dvec4 viewport, 
+		glm::dvec2 real_screen_size, GUIInput* gui_input);
 
 	void update(double dt);
 

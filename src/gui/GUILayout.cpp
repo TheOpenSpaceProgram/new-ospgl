@@ -53,7 +53,7 @@ void GUILayout::prepare_wrapper(glm::ivec2 pos, glm::ivec2 size, GUIInput* gui_i
 	this->pos = pos;
 	this->size = size;
 
-	if(gui_input->is_mouse_inside(get_pos(), get_size()) && block_mouse)
+	if(gui_input->mouse_inside(get_pos(), get_size()) && block_mouse)
 	{
 		gui_input->mouse_blocked = true;
 	}
@@ -79,7 +79,7 @@ void GUILayout::prepare_vscrollbar(GUIInput* gui_input)
 {
 	if(vscrollbar.enabled)
 	{
-		if(gui_input->is_mouse_inside(get_pos(), get_size()))
+		if(gui_input->mouse_inside(get_pos(), get_size()))
 		{
 			vscrollbar.scroll -= input->mouse_scroll * 40.0;
 

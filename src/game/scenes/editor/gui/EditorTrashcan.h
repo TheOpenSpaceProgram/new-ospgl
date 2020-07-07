@@ -25,6 +25,7 @@ private:
 	GUIImageButton trash_button;
 
 	EditorGUI* edgui;
+	GUIInput* gui_input;
 	
 	void on_trash(int button);
 

@@ -5,6 +5,10 @@
 // the user is using GUIs, and for reducing boilerplate code
 class GUIInput
 {
+private:
+
+	bool mouse_int(int button = 0);
+
 public:
 
 	// Reset every frame, is moused blocked FOR the GUI?
@@ -17,25 +21,26 @@ public:
 	// Reset every frame, is keyboard used by the GUI?
 	bool keyboard_blocked = false;
 
-	// Call this before every frame, before scene update
-	void update()
-	{
-		mouse_blocked = false;
-		keyboard_blocked = false;
-		ext_mouse_blocked = false;
-		ext_keyboard_blocked = false;
-	}
+	// Blocks a mouse button from returning pressed until it's
+	// released. Useful for buttons which change the GUI so additional
+	// clicks aren't recorded
+	bool block_mouse[3];
 
-	bool is_mouse_inside(glm::ivec2 pos, glm::ivec2 size);
+	// Call this before every frame, before scene update
+	void update();
+
+	bool mouse_inside(glm::ivec2 pos, glm::ivec2 size);
 
 	// To clear up the code a bit
-	#define GUI_LEFT_BUTTON 0
-	#define GUI_RIGHT_BUTTON 1
-
 	// 0 = left
 	// 1 = right
 	// 2 = middle
 	// Usage of middle button is discouraged because, unlike the scrollbar,
 	// some laptops users may not be able to use a scrollbar click
-	bool is_mouse_clicked(int button = 0);
+	#define GUI_LEFT_BUTTON 0
+	#define GUI_RIGHT_BUTTON 1
+
+	bool mouse_pressed(int button = 0);
+	bool mouse_down(int button = 0);
+	bool mouse_up(int button = 0);
 };

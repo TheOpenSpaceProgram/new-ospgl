@@ -9,6 +9,7 @@
 #include <gui/skins/SimpleSkin.h>
 #include <gui/GUICanvas.h>
 
+class EditorVehicleInterface;
 
 struct EditorCategory
 {
@@ -43,6 +44,10 @@ private:
 
 	GUISkin* gui_skin;
 	NVGcontext* vg;
+	EditorVehicleInterface* edveh_int;
+	GUIInput* gui_input;
+
+	void create_part(AssetHandle<PartPrototype>& proto);
 
 public:
 

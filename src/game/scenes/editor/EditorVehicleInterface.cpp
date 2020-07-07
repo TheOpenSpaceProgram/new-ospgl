@@ -51,7 +51,7 @@ void EditorVehicleInterface::attach(Piece* target, std::string port)
 }
 
 void EditorVehicleInterface::handle_input_hovering(const CameraUniforms& cu, 
-		glm::dvec3 ray_start, glm::dvec3 ray_end)
+		glm::dvec3 ray_start, glm::dvec3 ray_end, GUIInput* gui_input)
 {
 	RaycastResult rresult = raycast(ray_start, ray_end, false);
 
@@ -98,6 +98,11 @@ glm::dmat4 EditorVehicleInterface::get_current_tform(glm::dvec3 mpos)
 
 glm::dquat EditorVehicleInterface::get_fixed_rotation()
 {
+	if(selected_attachment == nullptr)
+	{
+		return glm::dquat(1.0, 0.0, 0.0, 0.0);
+	}
+
 	// We want to get a rotation that changes current forward to (0, 0, 1)
 	glm::dmat4 mat = selected->get_marker_transform(selected_attachment->marker);
 	mat = glm::inverse(mat);
@@ -137,6 +142,25 @@ Piece* EditorVehicleInterface::try_attach_radial(glm::dvec3 ray_start, glm::dvec
 	}
 
 	return nullptr;
+}
+
+
+void EditorVehicleInterface::on_selection_change(double dist) 
+{
+	selected->attached_to = nullptr;
+	// Fix for instant re-attaching
+	ignore_attachment = selected->to_attachment;
+	selected->to_attachment = "";
+	selected->from_attachment = "";
+
+	edveh->veh->update_attachments();
+
+	selected_distance = dist;
+
+	selected_buffer.clear();
+
+	selected_attachment = find_free_attachment();
+	on_attachment_change();
 }
 
 Piece* EditorVehicleInterface::try_attach_stack(glm::dvec3 selected_pos, const std::vector<Piece*>& children, 
@@ -211,7 +235,7 @@ Piece* EditorVehicleInterface::try_attach_stack(glm::dvec3 selected_pos, const s
 }
 
 void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu, 
-		glm::dvec3 ray_start, glm::dvec3 ray_end)
+		glm::dvec3 ray_start, glm::dvec3 ray_end, GUIInput* gui_input)
 {
 	
 	std::vector<Piece*> children = edveh->veh->get_children_of(selected);
@@ -249,21 +273,22 @@ void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu,
 
 	glm::dvec3 selected_pos = ray_start + glm::normalize(ray_end - ray_start) * selected_distance;
 
-	// Attempt attachment
-	// First do stack 
-	if(allow_stack)
+	if(selected_attachment)
 	{
-		attach_to = try_attach_stack(selected_pos, children, attach_to_marker);
-	}
-	else
-	{
-		ignore_attachment = "";
-	}
+		// Attempt attachment
+		if(allow_stack)
+		{
+			attach_to = try_attach_stack(selected_pos, children, attach_to_marker);
+		}
+		else
+		{
+			ignore_attachment = "";
+		}
 
-	// Then do radial attachment
-	if(allow_radial && attach_to == nullptr)
-	{
-		attach_to = try_attach_radial(ray_start, ray_end, children, attach_to_marker);
+		if(allow_radial && attach_to == nullptr)
+		{
+			attach_to = try_attach_radial(ray_start, ray_end, children, attach_to_marker);
+		}
 	}
 
 	// Coloring and visuals
@@ -280,8 +305,11 @@ void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu,
 		{
 			piece_meta.highlight = glm::vec3(1.0f);
 
-			piece_meta.attachment_color[selected_attachment->marker] = 
-				glm::vec4(1.0f, 1.0f, 0.5f, 1.0f);
+			if(selected_attachment)
+			{
+				piece_meta.attachment_color[selected_attachment->marker] = 
+					glm::vec4(1.0f, 1.0f, 0.5f, 1.0f);
+			}
 		}
 
 	}
@@ -298,7 +326,7 @@ void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu,
 		child->packed_tform = to_btTransform(final);
 	}
 	
-	if(input->mouse_down(GLFW_MOUSE_BUTTON_LEFT))
+	if(gui_input->mouse_down(GUI_LEFT_BUTTON))
 	{
 		if(attach_to == nullptr)
 		{
@@ -313,7 +341,8 @@ void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu,
 }
 
 
-bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 viewport, glm::dvec2 screen_size)
+bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 viewport, 
+	glm::dvec2 screen_size, GUIInput* gui_input)
 {
 	// We are only called if input is free
 	glm::dvec2 subscreen_size = screen_size * glm::dvec2(viewport.z - viewport.x, viewport.w - viewport.y);
@@ -327,11 +356,11 @@ bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 v
 
 	if(selected == nullptr)
 	{
-		handle_input_hovering(cu, ray_start, ray_end);
+		handle_input_hovering(cu, ray_start, ray_end, gui_input);
 	}
 	else
 	{
-		handle_input_selected(cu, ray_start, ray_end);
+		handle_input_selected(cu, ray_start, ray_end, gui_input);
 	}
 
 	return false;
@@ -341,21 +370,8 @@ bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 v
 
 void EditorVehicleInterface::on_selection_change(const CameraUniforms& cu)
 {
-	selected->attached_to = nullptr;
-	// Fix for instant re-attaching
-	ignore_attachment = selected->to_attachment;
-	selected->to_attachment = "";
-	selected->from_attachment = "";
-
-	edveh->veh->update_attachments();
-
 	glm::dvec3 diff = cu.cam_pos - to_dvec3(selected->packed_tform.getOrigin()); 
-	selected_distance = glm::length(diff);
-
-	selected_buffer.clear();
-
-	selected_attachment = find_free_attachment();
-	on_attachment_change();
+	on_selection_change(glm::length(diff));
 }
 	
 
@@ -378,12 +394,23 @@ PieceAttachment* EditorVehicleInterface::find_free_attachment()
 void EditorVehicleInterface::cycle_attachments(int dir)
 {
 	int cur_index = -1;
+	bool any_free = false;
 	for(int i = 0; i < selected->attachments.size(); i++)
 	{
 		if(&selected->attachments[i].first == selected_attachment)
 		{
 			cur_index = i;
 		}
+
+		if(!selected->attachments[i].second)
+		{
+			any_free = true;
+		}
+	}
+
+	if(!any_free)
+	{
+		return;
 	}
 
 	bool found = false;

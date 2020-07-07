@@ -40,6 +40,19 @@ struct PiecePrototype
 	// Can stuff attach radially to this part?
 	bool allows_radial;
 	
+	void copy(const PiecePrototype& b)
+	{
+		this->collider = b.collider;
+		this->collider_offset = b.collider_offset;
+		this->render_offset = b.render_offset;
+		this->mass = b.mass;
+		this->restitution = b.restitution;
+		this->friction = b.friction;
+		this->markers = b.markers;
+		this->attachments = b.attachments;
+		this->allows_radial = b.allows_radial;
+	}
+
 	PiecePrototype(GPUModelNodePointer&& n) : model_node(std::move(n))
 	{
 		this->collider = nullptr;
@@ -54,31 +67,14 @@ struct PiecePrototype
 	// We have to declare copy constructor
 	PiecePrototype(const PiecePrototype& b) : model_node(std::move(b.model_node.duplicate()))
 	{
-		this->collider = b.collider;
-		this->collider_offset = b.collider_offset;
-		this->render_offset = b.render_offset;
-		this->mass = b.mass;
-		this->restitution = b.restitution;
-		this->friction = b.friction;
-		this->markers = b.markers;
-		this->attachments = b.attachments;
-		this->allows_radial = b.allows_radial;
+		copy(b);
 	}
 
 	// Copy, used for std containers
 	PiecePrototype& operator=(const PiecePrototype& b)
 	{
 		this->model_node = b.model_node.duplicate();
-		this->collider = b.collider;
-		this->collider_offset = b.collider_offset;
-		this->render_offset = b.render_offset;
-		this->mass = b.mass;
-		this->restitution = b.restitution;
-		this->friction = b.friction;
-		this->markers = b.markers;
-		this->attachments = b.attachments;
-		this->allows_radial = b.allows_radial;
-
+		copy(b);
 		return *this;
 	}
 

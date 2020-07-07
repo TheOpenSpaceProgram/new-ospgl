@@ -77,6 +77,30 @@ Machine* Part::get_machine(const std::string& id)
 	return it->second;
 }
 
+
+std::vector<Piece*> Part::create_pieces() 
+{
+	std::vector<Piece*> n_pieces;
+
+	for(auto pair : part_proto->pieces)
+	{
+		Piece* p = new Piece(this, pair.first);
+		// TODO: Check this
+		p->packed_tform = p->piece_prototype->collider_offset;
+		p->in_vehicle = vehicle;
+		pieces[pair.first] = p;
+		n_pieces.push_back(p);
+	}			
+
+	// After everything is loaded, parts are responsible for creating
+	// attachments between the different pieces
+	// TODO: Create that functionality
+
+	// TODO: Afterwards check that all pieces are attached so there is a single root
+
+	return n_pieces;
+}
+
 Part::~Part()
 {
 	for(auto& machine_pair : machines)

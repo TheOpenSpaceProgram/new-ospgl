@@ -69,7 +69,9 @@ void EditorScene::update()
 		glm::dvec2(get_osp()->renderer->get_width(true), get_osp()->renderer->get_height(true));
 
 	vehicle_int.handle_input(
-			cam.get_camera_uniforms(rw, get_osp()->renderer->get_height(true)), viewport, real_screen_size); 
+			cam.get_camera_uniforms(rw, get_osp()->renderer->get_height(true)), 
+			viewport, real_screen_size,
+			&gui_input); 
 	
 	bt_world->updateAabbs();
 

@@ -45,12 +45,12 @@ void EditorGUI::init(EditorScene* sc)
 {	
 	prev_width = 0;
 	prev_height = 0;
+	// We hold a pointer to interact with the 3D editor
+	this->edveh_int = &sc->vehicle_int;
 
 	part_list.init(sc, vg, &skin);
 	trashcan.init(sc, vg, &skin);
 
-	// We hold a pointer to interact with the 3D editor
-	this->edveh_int = &sc->vehicle_int;
 }
 
 

@@ -2,7 +2,7 @@
 #include <util/InputUtil.h>
 
 
-bool GUIInput::is_mouse_inside(glm::ivec2 pos, glm::ivec2 size)
+bool GUIInput::mouse_inside(glm::ivec2 pos, glm::ivec2 size)
 {
 	glm::ivec2 mpos = glm::ivec2(input->mouse_pos);
 
@@ -17,8 +17,48 @@ bool GUIInput::is_mouse_inside(glm::ivec2 pos, glm::ivec2 size)
 	}
 }
 
-
-bool GUIInput::is_mouse_clicked(int btn)
+bool GUIInput::mouse_int(int btn)
 {
-	return glfwGetMouseButton(input->window, btn) == GLFW_PRESS; 
+	if(btn < 0 || btn > 2)
+	{
+		return false;
+	}
+
+	if(block_mouse[btn])
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool GUIInput::mouse_pressed(int btn)
+{
+	return mouse_int(btn) && input->mouse_pressed(btn);	
+}
+
+bool GUIInput::mouse_down(int btn)
+{
+	return mouse_int(btn) && input->mouse_down(btn);
+}
+
+bool GUIInput::mouse_up(int btn)
+{
+	return mouse_int(btn) && input->mouse_up(btn);
+}
+
+void GUIInput::update()
+{
+	mouse_blocked = false;
+	keyboard_blocked = false;
+	ext_mouse_blocked = false;
+	ext_keyboard_blocked = false;
+
+	for(int i = 0; i < 3; i++)
+	{
+		if(input->mouse_up(i))
+		{
+			block_mouse[i] = false;
+		}
+	}
 }

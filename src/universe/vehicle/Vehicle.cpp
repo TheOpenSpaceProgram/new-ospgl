@@ -29,7 +29,7 @@ void Vehicle::pack()
 
 Piece* Vehicle::remove_piece(Piece* p)
 {
-	// TODO: Check links, attachments, etc...
+	// TODO: Check links, attachments, etc... So we don't leak memory and create "orphan" stuff
 	all_pieces.erase(std::remove(all_pieces.begin(), all_pieces.end(), p));
 	if(p == root)
 	{

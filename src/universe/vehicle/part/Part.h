@@ -34,6 +34,13 @@ public:
 
 	Machine* get_machine(const std::string& id);
 
+	// Creates all pieces neccesary
+	// Used by the editor as the parts are created from scratch
+	// and not loaded from a file which already contains the pieces
+	// All pieces assume p_root is untransformed for positioning
+	// Must be called in packed mode as we set packed_tform
+	std::vector<Piece*> create_pieces();
+
 	// We duplicate the asset handle
 	// our_table must contain any extra arguments to machines
 	Part(AssetHandle<PartPrototype>& part_proto, cpptoml::table& our_table);

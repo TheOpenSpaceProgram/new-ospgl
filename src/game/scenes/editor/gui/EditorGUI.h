@@ -28,6 +28,7 @@ private:
 public:
 
 	friend class EditorTrashcan;
+	friend class EditorPartList;
 
 	SimpleSkin skin;
 

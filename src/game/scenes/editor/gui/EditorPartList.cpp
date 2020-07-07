@@ -1,5 +1,6 @@
 #include "EditorPartList.h"
 #include "../EditorScene.h"
+#include "../EditorVehicleInterface.h"
 #include <OSP.h>
 
 void EditorCategory::load_from_path(const std::string& path)
@@ -48,6 +49,14 @@ void EditorPartList::update_part_list()
 				p.angle = 0.0;
 				p.render(this->icon_renderer);
 			});
+
+			btn->on_clicked.add_handler([&p, this](int btn)
+			{
+				if(btn == GUI_LEFT_BUTTON)
+				{
+					create_part(p.proto);
+				}
+			});
 		}	
 	}
 }
@@ -63,8 +72,42 @@ void EditorPart::render(PartIconRenderer* render)
 }
 
 
+void EditorPartList::create_part(AssetHandle<PartPrototype>& proto) 
+{
+	Vehicle* veh = edveh_int->edveh->veh;
+	EditorVehicle* edveh = edveh_int->edveh;
+	
+	auto empty_table = cpptoml::make_table();
+	Part* n_part = new Part(proto, *empty_table);
+	n_part->vehicle = veh;
+	std::vector<Piece*> n_pieces = n_part->create_pieces();
+
+
+
+	// Create the pieces and parts
+	veh->all_pieces.insert(veh->all_pieces.end(), n_pieces.begin(), n_pieces.end());
+	veh->parts.push_back(n_part);
+	if(veh->root == nullptr)
+	{
+		veh->root = n_part->pieces["p_root"];
+	}
+
+	// Create the editor vehicle stuff
+	for(Piece* p : n_pieces)
+	{
+		edveh->update_collider(p);
+	}
+
+	edveh_int->selected = n_part->pieces["p_root"];
+	edveh_int->on_selection_change();
+
+	gui_input->block_mouse[GUI_LEFT_BUTTON] = true;
+
+}
+
 void EditorPartList::do_gui(int width, int panel_width, int height, GUIInput* gui_input)
 {
+	this->gui_input = gui_input;
 	def_panel.prepare(glm::ivec2(0, 0), glm::ivec2(panel_width, height), gui_input);	
 	def_panel.draw(vg, gui_skin, glm::ivec4(0, 0, width, height));
 
@@ -75,6 +118,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
 {
 	this->gui_skin = skin;
 	this->vg = vg;
+	this->edveh_int = sc->gui.edveh_int;
 
 	icon_renderer = new PartIconRenderer(part_icon_size);
 	// Load all exposed via the database parts
@@ -117,6 +161,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
 
 	GameDatabase* gdb = &sc->get_osp()->game_database;
 
+	// Category buttons
 	for(int i = 0; i < categories.size(); i++)
 	{
 		GUIImageButton* btn = new GUIImageButton();
