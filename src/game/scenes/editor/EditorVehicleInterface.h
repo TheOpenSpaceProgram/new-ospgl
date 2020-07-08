@@ -46,7 +46,8 @@ private:
 	void cycle_attachments(int dir);
 	void cycle_pieces(int dir);
 
-	Piece* try_attach_stack(glm::dvec3 cpos, const std::vector<Piece*>& children, std::string& attach_marker);
+	Piece* try_attach_stack(glm::dvec3 r0, glm::dvec3 r1, glm::dvec3 selected_pos, 
+		const std::vector<Piece*>& children, std::string& attach_marker);
 	Piece* try_attach_radial(glm::dvec3 r0, glm::dvec3 r1, const std::vector<Piece*>& children, std::string& attach_marker);
 
 public:

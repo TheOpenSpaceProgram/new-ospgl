@@ -163,15 +163,26 @@ void EditorVehicleInterface::on_selection_change(double dist)
 	on_attachment_change();
 }
 
-Piece* EditorVehicleInterface::try_attach_stack(glm::dvec3 selected_pos, const std::vector<Piece*>& children, 
-		std::string& attach_to_marker)
+Piece* EditorVehicleInterface::try_attach_stack(glm::dvec3 r0, glm::dvec3 r1, glm::dvec3 selected_pos, 
+		const std::vector<Piece*>& children, std::string& attach_to_marker)
 {
 	if(!selected_attachment->stack)
 	{
 		return nullptr;
 	}
 
-	// Find closest receiver attachment
+	// Raycast from the camera towards the attachment point and find the closest attachment points
+	// using ray-point distance
+
+
+	// We first find the ray collision point, if any, to avoid attaching to unreachable
+	// points
+	RaycastResult rresult = raycast(r0, r1, false, children);
+	double max_walk = 9999999999.9;
+	if(rresult.has_hit)
+	{
+		max_walk = glm::distance(rresult.world_pos, r0);
+	}
 
 	Piece* closest = nullptr;
 	std::string closest_attch = "";
@@ -179,6 +190,7 @@ Piece* EditorVehicleInterface::try_attach_stack(glm::dvec3 selected_pos, const s
 	glm::dvec3 closest_pos;
 	glm::dvec3 closest_fw;
 
+	glm::dvec3 dir = glm::normalize(r1 - r0);
 	for(Piece* p : edveh->veh->all_pieces)
 	{
 		if(std::find(children.begin(), children.end(), p) == children.end())
@@ -192,7 +204,17 @@ Piece* EditorVehicleInterface::try_attach_stack(glm::dvec3 selected_pos, const s
 					glm::dmat4 p_tform = p->get_graphics_matrix();
 					glm::dvec3 pos = glm::dvec3(p_tform * m_tform * glm::dvec4(0, 0, 0, 1));
 
-					double ndist = glm::distance(selected_pos, pos);
+					// We use the parametric form of r0 + t * dir to obtain the formula for distance
+					// and then calculate the first derivative to find the minimum distance point:
+					// (I used maxima to solve for t and then extracted the vectorial form)
+					double t = glm::dot(pos - r0, dir) / glm::length2(dir);
+					glm::dvec3 rpos = r0 + dir * t;
+					double ndist = glm::distance(rpos, pos);
+					if(t >= max_walk || t <= 0)
+					{
+						ndist = 999999999999.9;
+					}
+
 					if(ndist <= dist)
 					{
 						dist = ndist;
@@ -207,28 +229,22 @@ Piece* EditorVehicleInterface::try_attach_stack(glm::dvec3 selected_pos, const s
 		}
 	}
 
-	if(dist < 1.0)
+	if(dist < 0.6)
 	{
 		if(closest_attch != ignore_attachment)
 		{
-
-			debug_drawer->add_line(selected_pos, closest_pos, glm::vec3(1.0, 0.0, 0.0));	
-			debug_drawer->add_line(closest_pos, closest_pos + closest_fw, glm::vec3(0.0, 1.0, 0.0));
 			selected_rotation = MathUtil::quat_look_at(glm::dvec3(0), closest_fw);
 			selected_offset = closest_pos - selected_pos;
-
-			attach_to_marker = closest_attch;
-			ignore_attachment = "";
-			
+			logger->info("Attach by ray");
 			return closest;
 		}
-	}
-	else
-	{
-		// Once we go far away, the ignore is forgotten
-		ignore_attachment = "";
+		else
+		{
+			return nullptr;
+		}
 	}
 
+	ignore_attachment = "";
 	attach_to_marker = "";
 	return nullptr;
 
@@ -278,7 +294,7 @@ void EditorVehicleInterface::handle_input_selected(const CameraUniforms& cu,
 		// Attempt attachment
 		if(allow_stack)
 		{
-			attach_to = try_attach_stack(selected_pos, children, attach_to_marker);
+			attach_to = try_attach_stack(ray_start, ray_end, selected_pos, children, attach_to_marker);
 		}
 		else
 		{
