@@ -127,10 +127,13 @@ public:
 
 	// Scripts are a very special asset as they must be instantiated, you 
 	// cannot store a Script as a normal asset
-	sol::state load_script(const std::string& pkg, const std::string& path);
-	sol::state load_script(const std::string& full_path);
-	void load_script_to(sol::state& target, const std::string& pkg, const std::string& path);
-	void load_script_to(sol::state& target, const std::string& full_path);
+	// * Be careful with the returned "pfr", if you do anything to the state
+	// * it will go invalid
+	using pfr = sol::protected_function_result;
+	std::pair<sol::state, pfr> load_script(const std::string& pkg, const std::string& path);
+	std::pair<sol::state, pfr> load_script(const std::string& full_path);
+	pfr load_script_to(sol::state& target, const std::string& pkg, const std::string& path);
+	pfr load_script_to(sol::state& target, const std::string& full_path);
 
 	void get_config_path(const std::string& pkg);
 

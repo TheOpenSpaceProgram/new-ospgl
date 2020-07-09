@@ -215,28 +215,29 @@ void AssetManager::load_packages(LuaCore* lua_core, GameDatabase* game_database)
 
 }
 
-sol::state AssetManager::load_script(const std::string& pkg, const std::string& path)
+std::pair<sol::state, AssetManager::pfr> AssetManager::load_script(const std::string& pkg, const std::string& path)
 {
 	sol::state out;
 
-	load_script_to(out, pkg, path);
+	auto pfr = load_script_to(out, pkg, path);
 
-	return out;
+	return std::make_pair<sol::state, AssetManager::pfr>(std::move(out), std::move(pfr));
 }
 
-sol::state AssetManager::load_script(const std::string& full_path)
+std::pair<sol::state, AssetManager::pfr> AssetManager::load_script(const std::string& full_path)
 {
 	auto[pkg, name] = get_package_and_name(full_path, get_current_package());
 	return load_script(pkg, name);
 }
 
-void AssetManager::load_script_to(sol::state& target, const std::string& full_path)
+AssetManager::pfr AssetManager::load_script_to(sol::state& target, const std::string& full_path)
 {
 	auto[pkg, name] = get_package_and_name(full_path, get_current_package());
 	return load_script_to(target, pkg, name);
 }
 
-void AssetManager::load_script_to(sol::state& target, const std::string& pkg, const std::string& path)
+AssetManager::pfr AssetManager::load_script_to(sol::state& target, 
+	const std::string& pkg, const std::string& path)
 {
 	std::string full_path = res_path + pkg + "/" + path;	
 	logger->check(file_exists(full_path), "Tried to load an script which does not exist ({})", path);
@@ -252,5 +253,7 @@ void AssetManager::load_script_to(sol::state& target, const std::string& pkg, co
 		sol::error err = result;
 		logger->fatal("Error while loading script {}:{}:\n{}", pkg, path, err.what());
 	}	
+
+	return std::move(result);
 
 }

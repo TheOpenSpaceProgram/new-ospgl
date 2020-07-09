@@ -67,6 +67,15 @@ void LuaVehicle::load_to(sol::table& table)
 			// safe_call_function only returns valid results so
 			sol::reference as_ref = result;
 			return as_ref;
+		},
+		"load_interface", [](Machine& self, const std::string& iname, sol::this_state st)
+		{
+			sol::state_view sv(st);
+			auto[pkg, name] = assets->get_package_and_name(iname, sv["__pkg"]);
+			std::string sane_name = pkg + ":" + name;
+			self.load_interface(sane_name);
+			auto result = sv.safe_script("return require(\"" + sane_name + "\")");
+			return result.get<sol::table>();
 		}
 		
 	);

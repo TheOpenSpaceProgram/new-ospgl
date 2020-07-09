@@ -48,10 +48,13 @@ public:
 
 	void init(Part* in_part, Universe* in_universe);
 
+	void load_interface(const std::string& name);
+
 	// Make sure AssetManager's correct current package is set,
 	// otherwise script loading MAY fail!
 	Machine(std::shared_ptr<cpptoml::table> init_toml, std::string pkg);
 	~Machine();
 
 };
+
 

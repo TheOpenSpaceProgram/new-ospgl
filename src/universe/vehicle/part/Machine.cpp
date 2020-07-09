@@ -25,6 +25,11 @@ Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg)
 
 }
 
+void Machine::load_interface(const std::string& name) 
+{
+	
+}
+
 void Machine::pre_update(double dt)
 {
 	LuaUtil::call_function_if_present(lua_state, "pre_update", "machine pre_update", dt);
