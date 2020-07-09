@@ -58,7 +58,6 @@ void Part::init(Universe* in_universe, Vehicle* in_vehicle)
 	for(auto& machine_pair : machines)
 	{
 		machine_pair.second->init(this, in_universe);
-		machine_pair.second->define_ports();
 	}
 
 }

@@ -235,7 +235,6 @@ Piece* EditorVehicleInterface::try_attach_stack(glm::dvec3 r0, glm::dvec3 r1, gl
 		{
 			selected_rotation = MathUtil::quat_look_at(glm::dvec3(0), closest_fw);
 			selected_offset = closest_pos - selected_pos;
-			logger->info("Attach by ray");
 			return closest;
 		}
 		else
@@ -398,7 +397,6 @@ PieceAttachment* EditorVehicleInterface::find_free_attachment()
 	{
 		if(!selected->attachments[i].second)
 		{
-			logger->info("Found free: {}", selected->attachments[i].first.marker);
 			//selected_attachment = selected->attachments[i].first.marker;
 			return &selected->attachments[i].first;
 		}

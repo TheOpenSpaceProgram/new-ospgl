@@ -47,12 +47,6 @@ Piece* Vehicle::remove_piece(Piece* p)
 
 void Vehicle::update(double dt)
 {
-	// Clear blocked ports
-	for (Port* p : all_ports)
-	{
-		p->blocked = false;
-	}
-
 	for(Part* part : parts)
 	{
 		part->pre_update(dt);
@@ -103,36 +97,6 @@ void Vehicle::init(Universe* in_universe)
 	}
 
 	this->in_universe = in_universe;
-
-	// Init wires
-	if(wires_init)
-	{
-		// Load wires
-		for(auto wire : *wires_init)
-		{
-			int64_t from_id = *wire->get_as<int64_t>("from");
-			int64_t to_id = *wire->get_as<int64_t>("to");
-			std::string from_machine = *wire->get_as<std::string>("fmachine");
-			std::string to_machine = *wire->get_as<std::string>("tmachine");
-			std::string from_port = *wire->get_as<std::string>("fport");
-			std::string to_port = *wire->get_as<std::string>("tport");
-
-			Part* from = get_part(from_id);
-			Part* to = get_part(to_id);
-
-			Machine* from_mach = from->get_machine(from_machine);
-			Machine* to_mach = to->get_machine(to_machine);
-
-			Port* from_prt = from_mach->get_output_port(from_port);
-			Port* to_prt = to_mach->get_input_port(to_port);
-			
-			from_prt->to.push_back(to_prt);
-		}
-
-		wires_init = nullptr;
-
-		check_wires();
-	}
 }
 
 // Helper function for update_attachments
@@ -208,60 +172,6 @@ void Vehicle::sort()
 	logger->check(sorted.size() == all_pieces.size(), "Vehicle was sorted while some pieces were not attached!");
 
 	all_pieces = sorted;
-}
-
-void Vehicle::check_wires()
-{
-	std::unordered_set<Port*> seen_targets;
-	for(auto port_it = all_ports.begin(); port_it != all_ports.end(); )
-	{
-		bool bad = false;
-		Port* port = *port_it;
-
-		if (port->is_output)
-		{
-			for (Port* target : port->to)
-			{
-				if (target->is_output)
-				{
-					logger->error("Vehicle has wire with output set to an output port");
-					bad = true;
-				}
-
-				if (target->type != port->type)
-				{
-					logger->error("Vehicle has wire with mismatching types");
-					bad = true;
-				}
-
-				if (seen_targets.find(target) != seen_targets.end())
-				{
-					logger->error("A port has multiple inputs");
-					bad = true;
-				}
-
-				seen_targets.insert(target);
-			}
-		}
-		else
-		{
-			if(!port->to.empty())
-			{ 
-				logger->error("Input port has ports set to its output");
-				bad = true;
-			}
-		}
-
-		if(bad)
-		{
-			logger->fatal("Malformed vehicle wires");
-			return;
-		}
-		else
-		{
-			port_it++;
-		}
-	}
 }
 
 Piece* Vehicle::get_piece(int64_t id)

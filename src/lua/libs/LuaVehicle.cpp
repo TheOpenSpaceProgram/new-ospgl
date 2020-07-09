@@ -61,16 +61,6 @@ void LuaVehicle::load_to(sol::table& table)
 
 	table.new_usertype<Machine>("machine",
 		"init_toml", &Machine::init_toml,
-		"add_output_port", &Machine::add_output_port,
-		"add_input_port", &Machine::add_input_port,
-		"write_to_port", sol::overload(
-		[](Machine& self, const std::string& name, double v)
-		{
-			self.write_to_port(name, PortValue(v));
-		}),
-
-		"all_inputs_ready", &Machine::all_inputs_ready,
-		// TODO: Maybe there is a more efficient way to handle this?
 		"call", [](Machine& self, const std::string& fname, sol::variadic_args args)
 		{
 			auto result = LuaUtil::safe_call_function(self.lua_state, fname, "machine->machine call", args);	
@@ -81,21 +71,4 @@ void LuaVehicle::load_to(sol::table& table)
 		
 	);
 
-	table.new_usertype<PortResult>("port_result",
-		"good", [](PortResult& self)
-		{
-			return self.result == PortResult::GOOD;
-		},
-		"failed", [](PortResult& self)
-		{
-			return self.result != PortResult::GOOD;
-		},
-		"result", &PortResult::result
-		);
-
-	table.new_enum("port_result_type",
-		"GOOD", PortResult::GOOD,
-		"INVALID_TYPE", PortResult::INVALID_TYPE,
-		"PORT_BLOCKED", PortResult::PORT_BLOCKED,
-		"PORT_NOT_FOUND", PortResult::PORT_NOT_FOUND);
 }

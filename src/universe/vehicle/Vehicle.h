@@ -56,9 +56,6 @@ class Vehicle
 private:
 
 	bool packed;
-	
-	// Initialized on the call to init, is deleted afterwards
-	std::shared_ptr<cpptoml::table_array> wires_init;
 
 	std::unordered_map<int64_t, Piece*> id_to_piece;
 	std::unordered_map<int64_t, Part*> id_to_part;
@@ -84,9 +81,9 @@ public:
 
 	// Parts whose root piece is contained in this vehicle
 	std::vector<Part*> parts;
-	// Keep up to date by the machines themselves
-	std::vector<Port*> all_ports;
 
+	// Bidirectional wires, so if A is connected to B then B is connected to A
+	std::unordered_multimap<Machine*, Machine*> wires;
 
 	void pack();
 
@@ -126,9 +123,6 @@ public:
 	// but it's slower (used in the editor)
 	// It allows finding children of separated parts
 	std::vector<Piece*> get_children_of(Piece* p);
-
-	// Removes and reports any wrong wires (as an error)
-	void check_wires();
 
 	Piece* get_piece(int64_t id);
 	Part* get_part(int64_t id);

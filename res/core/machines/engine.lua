@@ -1,31 +1,25 @@
 require("vehicle") 
 require("bullet")
-local glm = require("glm")
 require("toml")
+local glm = require("glm")
 local debug_drawer = require("debug_drawer")
 
 local thrust = nil 
-local throttle = nil 
 local nozzle = nil 
 local nozzle_dir = nil
 local nozzle_pos = nil
+local engine = require("core:interfaces/engine.lua")
+
+print(engine.throttle)
 
 function init()
-
 	thrust = machine.init_toml:get_number("thrust")
 	throttle = 0.0
 	nozzle = machine.init_toml:get_string("nozzle")
-
 end
 
-local function set_throttle(port, value)
-	
-	throttle = math.max(math.min(value, 1.0), 0.0)
-
-end 
-
-function define_ports()
-	machine:add_input_port("Throttle", "number", set_throttle) 
+function get_interfaces()
+	return engine
 end
 
 function update(dt)

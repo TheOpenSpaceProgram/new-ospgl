@@ -136,7 +136,66 @@ void VehicleLoader::copy_pieces(cpptoml::table& root)
 			}
 		}
 	}
+}
 
+void VehicleLoader::obtain_wires(cpptoml::table& root)
+{
+	auto wires = root.get_table_array_qualified("wire");
+	if(wires)
+	{
+		for(auto wire_toml : *wires)
+		{
+			int from = *wire_toml->get_as<int>("from");
+			int to = *wire_toml->get_as<int>("to");
+			std::string fmachine = *wire_toml->get_as<std::string>("fmachine");
+			std::string tmachine = *wire_toml->get_as<std::string>("tmachine");
+
+			Part* fromp = parts_by_id[from];
+			Part* top = parts_by_id[to];
+			Machine* fromm = fromp->get_machine(fmachine);
+			Machine* tom = top->get_machine(tmachine);
+
+			// Check if it already exists bidirectionally to emit a warning
+			// TODO: Move this code to a function as it may be reused
+			auto from_it = n_vehicle->wires.equal_range(fromm);
+			bool found_from_to = false;
+			for(auto from_subit = from_it.first; from_subit != from_it.second; from_subit++)
+			{
+				if(from_subit->second == tom)
+				{
+					found_from_to = true;
+					break;
+				}
+			}
+
+			auto to_it = n_vehicle->wires.equal_range(tom);
+			bool found_to_from = false;
+			for(auto to_subit = to_it.first; to_subit != to_it.second; to_subit++)
+			{
+				if(to_subit->second == fromm)
+				{
+					found_to_from = true;
+					break;
+				}
+			}
+
+			if(!found_from_to)
+			{
+				n_vehicle->wires.insert(std::make_pair(fromm, tom));
+			}
+
+			if(!found_to_from)
+			{
+				n_vehicle->wires.insert(std::make_pair(tom, fromm));
+			}
+
+			if(found_from_to || found_to_from)
+			{
+				logger->warn("Found a duplicate wire (from: {} fmachine: {} -> to: {} tmachine: {}), it was ignored", 
+					from, fmachine, to,  tmachine);
+			}
+		}
+	}
 }
 
 VehicleLoader::VehicleLoader(cpptoml::table& root)
@@ -147,11 +206,7 @@ VehicleLoader::VehicleLoader(cpptoml::table& root)
 	obtain_parts(root);
 	obtain_pieces(root);
 	copy_pieces(root);
-
-	// Wires are initialized after this by the vehicle
-	// as machines need to start
-	auto wires = root.get_table_array("wire");
-	n_vehicle->wires_init = wires;
+	obtain_wires(root);
 
 	n_vehicle->id_to_part = parts_by_id;
 	n_vehicle->id_to_piece = pieces_by_id;
