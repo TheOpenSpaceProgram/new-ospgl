@@ -4,6 +4,7 @@
 #include <assets/AssetManager.h>
 
 #include "../Vehicle.h"
+#include "Part.h"
 #include "sol.hpp"
 
 
@@ -25,9 +26,17 @@ Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg)
 
 }
 
-void Machine::load_interface(const std::string& name) 
+void Machine::load_interface(const std::string& name, sol::table n_table) 
 {
-	
+	auto it = interfaces.find(name);	
+	// We do this check anyway to try to keep the code consistent and avoid
+	// multiple interface loads (of the same interface) in the same machine
+	if(it != interfaces.end())
+	{
+		logger->fatal("Tried to load an interface which was already loaded ({})", name);
+	}
+
+	interfaces.insert(std::make_pair(name, n_table));
 }
 
 void Machine::pre_update(double dt)
@@ -58,9 +67,60 @@ void Machine::init(Part* in_part, Universe* in_universe)
 	
 }
 
+std::vector<Machine*> Machine::get_all_connected()
+{
+	// TODO: We could cache this? Could be a small perfomance gain
+	return get_connected_if([](Machine* m){ return true; });
+}
+
+std::vector<Machine*> Machine::get_connected_with(const std::vector<std::string>& interfaces)
+{
+	return get_connected_if([interfaces](Machine* m)
+	{
+		for(const std::string& a : interfaces)
+		{
+			if(m->interfaces.find(a) != m->interfaces.end())
+			{
+				return true;
+			}
+		}
+
+		return false;
+	});
+}
+
+
+sol::table Machine::get_interface(const std::string& name) 
+{
+	auto it = interfaces.find(name);
+	if(it == interfaces.end())
+	{
+		return sol::nil;
+	}
+	else
+	{
+		return it->second;
+	}
+}
 
 Machine::~Machine()
 {
 	logger->info("Ending machine");
 	lua_state.collect_garbage();
+}
+
+std::vector<Machine*> Machine::get_connected_if(std::function<bool(Machine*)> fnc) 
+{
+	std::vector<Machine*> out;
+
+	auto range = in_part->vehicle->wires.equal_range(this);
+	for(auto it = range.first; it != range.second; it++)
+	{
+		if(fnc(it->second))
+		{
+			out.push_back(it->second);
+		}
+	}
+
+	return out;
 }

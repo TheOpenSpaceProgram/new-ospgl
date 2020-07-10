@@ -35,11 +35,15 @@ private:
 
 	std::vector<PortDefinition> new_ports;
 
+	std::vector<Machine*> get_connected_if(std::function<bool(Machine*)> fnc);
+
 public:
 
 	sol::state lua_state;
 
 	std::shared_ptr<cpptoml::table> init_toml;
+
+	std::unordered_map<std::string, sol::table> interfaces;
 
 	// pre_update is mostly used for input
 	void pre_update(double dt);
@@ -48,7 +52,12 @@ public:
 
 	void init(Part* in_part, Universe* in_universe);
 
-	void load_interface(const std::string& name);
+	void load_interface(const std::string& name, sol::table n_table);
+
+	std::vector<Machine*> get_all_connected();
+	std::vector<Machine*> get_connected_with(const std::vector<std::string>& interfaces);
+
+	sol::table get_interface(const std::string& name);
 
 	// Make sure AssetManager's correct current package is set,
 	// otherwise script loading MAY fail!

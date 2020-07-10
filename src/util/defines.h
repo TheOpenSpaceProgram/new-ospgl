@@ -39,4 +39,3 @@ static bool vector_contains(std::vector<T>& vec, T elem)
 	auto it = std::find(vec.begin(), vec.end(), elem);
 	return it != vec.end();
 }
-

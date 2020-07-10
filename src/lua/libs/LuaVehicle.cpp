@@ -73,10 +73,25 @@ void LuaVehicle::load_to(sol::table& table)
 			sol::state_view sv(st);
 			auto[pkg, name] = assets->get_package_and_name(iname, sv["__pkg"]);
 			std::string sane_name = pkg + ":" + name;
-			self.load_interface(sane_name);
 			auto result = sv.safe_script("return require(\"" + sane_name + "\")");
-			return result.get<sol::table>();
-		}
+			sol::table n_table = result.get<sol::table>();
+			// We give this one to the machine
+			self.load_interface(sane_name, n_table);
+			return n_table;
+		},
+		"get_all_connected", &Machine::get_all_connected,
+		"get_connected_with", [](Machine& self, sol::variadic_args args)
+		{
+			// We build the vector, something which sol cannot do automatically
+			std::vector<std::string> vec;
+			for(auto arg : args)
+			{
+				vec.push_back(arg.get<std::string>());
+			}
+
+			return self.get_connected_with(vec);
+		},
+		"get_interface", &Machine::get_interface
 		
 	);
 

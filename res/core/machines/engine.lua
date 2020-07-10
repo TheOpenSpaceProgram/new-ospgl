@@ -11,6 +11,7 @@ local nozzle_pos = nil
 local engine = machine:load_interface("core:interfaces/engine.lua")
 
 
+
 function engine:get_nozzle_position()
 	local p_root = part:get_piece("p_root")
 	-- Position is relative to the center of mass of the rigidbody
@@ -29,10 +30,6 @@ function init()
 	nozzle = machine.init_toml:get_string("nozzle")
 end
 
-function get_interfaces()
-	return engine
-end
-
 function pre_update(dt)
 	if nozzle_dir == nil then 
 		nozzle_dir = part:get_piece("p_root"):get_marker_forward(nozzle)
@@ -42,7 +39,6 @@ end
 
 function update(dt)
 	local f_thrust = thrust * engine.throttle 
-
 
 	if f_thrust > 0 then
 
