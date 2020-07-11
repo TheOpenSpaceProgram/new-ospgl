@@ -93,7 +93,7 @@ void Vehicle::init(Universe* in_universe)
 {
 	for(Part* part : parts)
 	{
-		part->init(in_universe, this);
+		part->init(&in_universe->lua_state, this);
 	}
 
 	this->in_universe = in_universe;

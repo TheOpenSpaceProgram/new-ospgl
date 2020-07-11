@@ -18,7 +18,6 @@ LuaCore* lua_core;
 int LoadFileRequire(lua_State* L) 
 {
 	sol::state_view sview = sol::state_view(L);
-
 	std::string path = sol::stack::get<std::string>(L, 1);
 
 	bool was_module = false;
@@ -31,6 +30,7 @@ int LoadFileRequire(lua_State* L)
 		was_module = true;
 		lua_core->load_library(module_table, id);
 	}
+
 
 	if (was_module)
 	{
@@ -134,15 +134,17 @@ void LuaCore::load(sol::state& to, const std::string& pkg)
 		sol::lib::string, sol::lib::math, sol::lib::table, sol::lib::utf8,
 		sol::lib::jit);
 
-
-	to["__pkg"] = pkg;
-
-	// Used by the package loader
 	to.create_named_table("__loaded_modules");
+	load((sol::table&)to.globals(), pkg);
 
 	to.add_package_loader(LoadFileRequire, true);
 
+}
 
+
+void LuaCore::load(sol::table& to, const std::string& pkg)
+{
+	to["__pkg"] = pkg;
 }
 
 LuaCore::LuaCore()

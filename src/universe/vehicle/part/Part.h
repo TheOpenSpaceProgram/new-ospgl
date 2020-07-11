@@ -8,6 +8,11 @@
 // Those root pieces point to a Part which stores data and behaviour
 class Part
 {
+private:
+
+	// We keep it for initizalition
+	std::shared_ptr<cpptoml::table> our_table;
+
 public:
 
 	Vehicle* vehicle;
@@ -26,7 +31,7 @@ public:
 	void update(double dt);
 	void editor_update(double dt);
 
-	void init(Universe* in_universe, Vehicle* in_vehicle);
+	void init(sol::state* st, Vehicle* in_vehicle);
 
 	// Throws an error on the case of an invalid name,
 	// return null if piece exists but is not present
@@ -43,7 +48,7 @@ public:
 
 	// We duplicate the asset handle
 	// our_table must contain any extra arguments to machines
-	Part(AssetHandle<PartPrototype>& part_proto, cpptoml::table& our_table);
+	Part(AssetHandle<PartPrototype>& part_proto, std::shared_ptr<cpptoml::table> our_table);
 	~Part();
 };
 

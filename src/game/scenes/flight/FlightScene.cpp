@@ -63,7 +63,7 @@ void FlightScene::load()
 
 	// Pass control to the capsule (root)
 	Machine* capsule = n_vehicle->root->part->get_machine("capsule");	
-	auto result = LuaUtil::call_function_if_present(capsule->lua_state, "get_input_context", "Flight Scene obtain input context");
+	auto result = LuaUtil::call_function_if_present(capsule->env, "get_input_context", "Flight Scene obtain input context");
 	if(result.valid())
 	{
 		logger->info("?");

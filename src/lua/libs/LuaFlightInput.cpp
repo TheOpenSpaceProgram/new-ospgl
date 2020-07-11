@@ -5,9 +5,9 @@
 void LuaFlightInput::load_to(sol::table& table)
 {	
 	table.new_usertype<InputContext>("context",
-		"new", [](const std::string& resource_path, sol::this_state this_state)
+		"new", [](const std::string& resource_path, sol::this_environment this_env)
 		{
-			sol::state_view st = sol::state_view(this_state);
+			sol::environment& st = this_env;
 			InputContext out = InputContext();
 
 			// We load an asset, so set the current package to the script's package

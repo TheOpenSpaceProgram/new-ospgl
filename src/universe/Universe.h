@@ -11,6 +11,7 @@
 #pragma warning(pop)
 
 #include <physics/debug/BulletDebugDrawer.h>
+#include <sol.hpp>
 
 // The Universe is the central class of the game. It stores both the system
 // and everything else in the system (buildings and vehicles).
@@ -59,6 +60,11 @@ public:
 	static constexpr double PHYSICS_STEPSIZE = 1.0 / 30.0;
 	static constexpr int MAX_PHYSICS_STEPS = 1;
 
+	// We use a global state for everything in the universe so data can 
+	// be shared between lua scripts without "hacks"
+	// Planet surfaces are independent, and other stuff, as they are not sharing
+	// any data with the rest of the universe
+	sol::state lua_state;
 
 	void sign_up_for_event(const std::string& event_id, EventHandler id);
 	void drop_out_of_event(const std::string& event_id, EventHandler id);

@@ -51,6 +51,9 @@ public:
 	// package loader internally ("_pkg" value)
 	void load(sol::state& to, const std::string& pkg);
 
+	// This does everything except open the libraries
+	void load(sol::table& to, const std::string& pkg);
+
 	LuaCore();
 	~LuaCore();
 };

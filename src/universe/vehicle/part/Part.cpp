@@ -1,18 +1,19 @@
 #include "Part.h"
 #include <string>
 
-Part::Part(AssetHandle<PartPrototype>& part_proto, cpptoml::table& our_table)
+Part::Part(AssetHandle<PartPrototype>& part_proto, std::shared_ptr<cpptoml::table> our_table)
 {
 	this->part_proto = part_proto.duplicate();
+	this->our_table = our_table;
 
-	// Load machines
+	// Pre-load machines (everything but lua)
 	for(auto machine_toml : part_proto->machines)
 	{
 		std::string id = *machine_toml->get_as<std::string>("id");
 		std::string script = *machine_toml->get_as<std::string>("script");
 
 		auto config_toml = machine_toml;
-		auto override_toml = our_table.get_table(id);
+		auto override_toml = our_table->get_table(id);
 		if(override_toml)
 		{
 			SerializeUtil::override(*config_toml, *override_toml);
@@ -51,13 +52,15 @@ void Part::editor_update(double dt)
 }
 
 
-void Part::init(Universe* in_universe, Vehicle* in_vehicle)
+void Part::init(sol::state* st, Vehicle* in_vehicle)
 {
 	this->vehicle = in_vehicle;
 
+	// Load machines
+
 	for(auto& machine_pair : machines)
 	{
-		machine_pair.second->init(this, in_universe);
+		machine_pair.second->init(st, this);
 	}
 
 }

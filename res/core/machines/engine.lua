@@ -4,13 +4,14 @@ require("toml")
 local glm = require("glm")
 local debug_drawer = require("debug_drawer")
 
-local thrust = nil 
-local nozzle = nil 
+local thrust = machine.init_toml:get_number("thrust")
+local throttle = 0.0
+local nozzle = machine.init_toml:get_string("nozzle")
 local nozzle_dir = nil
 local nozzle_pos = nil
 local engine = machine:load_interface("core:interfaces/engine.lua")
 
-
+engine.wow = "WOw"
 
 function engine:get_nozzle_position()
 	local p_root = part:get_piece("p_root")
@@ -24,17 +25,12 @@ function engine:get_nozzle_forward()
 	return -p_root:transform_axis(nozzle_dir)
 end
 
-function init()
-	thrust = machine.init_toml:get_number("thrust")
-	throttle = 0.0
-	nozzle = machine.init_toml:get_string("nozzle")
-end
-
 function pre_update(dt)
 	if nozzle_dir == nil then 
 		nozzle_dir = part:get_piece("p_root"):get_marker_forward(nozzle)
 		nozzle_pos = part:get_piece("p_root"):get_marker_position(nozzle)
 	end 
+	engine:say_wow();
 end
 
 function update(dt)

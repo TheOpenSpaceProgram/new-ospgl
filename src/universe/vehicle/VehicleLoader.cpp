@@ -25,7 +25,7 @@ void VehicleLoader::obtain_parts(cpptoml::table& root)
 	{
 		std::string proto_path = *part->get_qualified_as<std::string>("proto");
 		AssetHandle<PartPrototype> part_proto = AssetHandle<PartPrototype>(proto_path);
-		Part* n_part = new Part(part_proto, *part);
+		Part* n_part = new Part(part_proto, part);
 
 		n_part->id = *part->get_qualified_as<int64_t>("id");
 		logger->check(n_part->id <= n_vehicle->part_id, "Malformed vehicle, part ID too big ({}/{})", 

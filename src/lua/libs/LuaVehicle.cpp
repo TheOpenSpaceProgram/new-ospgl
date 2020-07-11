@@ -61,13 +61,6 @@ void LuaVehicle::load_to(sol::table& table)
 
 	table.new_usertype<Machine>("machine",
 		"init_toml", &Machine::init_toml,
-		"call", [](Machine& self, const std::string& fname, sol::variadic_args args)
-		{
-			auto result = LuaUtil::safe_call_function(self.lua_state, fname, "machine->machine call", args);	
-			// safe_call_function only returns valid results so
-			sol::reference as_ref = result;
-			return as_ref;
-		},
 		"load_interface", [](Machine& self, const std::string& iname, sol::this_state st)
 		{
 			sol::state_view sv(st);
@@ -79,7 +72,10 @@ void LuaVehicle::load_to(sol::table& table)
 			self.load_interface(sane_name, n_table);
 			return n_table;
 		},
-		"get_all_connected", &Machine::get_all_connected,
+		"get_all_connected", [](Machine& self)
+		{
+			return self.get_all_connected();
+		},
 		"get_connected_with", [](Machine& self, sol::variadic_args args)
 		{
 			// We build the vector, something which sol cannot do automatically

@@ -11,19 +11,7 @@
 Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg)
 {	
 	this->init_toml = init_toml;
-	logger->check(init_toml != nullptr, "Malformed init_toml");
-	cpptoml::table& init_toml_p = *init_toml;
-
-	std::string script_path;
-	SAFE_TOML_GET_FROM(init_toml_p, script_path, "script", std::string);
-
-	lua_state["machine"] = this;
-
-	std::string old = assets->get_current_package();
-	assets->set_current_package(cur_pkg);
-	assets->load_script_to(lua_state, script_path);
-	assets->set_current_package(old);
-
+	this->in_pkg = cur_pkg;
 }
 
 void Machine::load_interface(const std::string& name, sol::table n_table) 
@@ -41,30 +29,45 @@ void Machine::load_interface(const std::string& name, sol::table n_table)
 
 void Machine::pre_update(double dt)
 {
-	LuaUtil::call_function_if_present(lua_state, "pre_update", "machine pre_update", dt);
+	LuaUtil::call_function_if_present(env, "pre_update", "machine pre_update", dt);
 }
 
 void Machine::update(double dt)
 {
-	LuaUtil::call_function_if_present(lua_state, "update", "machine update", dt);
+	LuaUtil::call_function_if_present(env, "update", "machine update", dt);
 }
 
 void Machine::editor_update(double dt)
 {
-	LuaUtil::call_function_if_present(lua_state, "editor_update", "machine editor_update", dt);
+	LuaUtil::call_function_if_present(env, "editor_update", "machine editor_update", dt);
 }
 
-
-void Machine::init(Part* in_part, Universe* in_universe)
+void Machine::init(sol::state* lua_state, Part* in_part) 
 {
-	lua_state["part"] = in_part;
-	lua_state["universe"] = in_universe;
-	lua_state["vehicle"] = in_part->vehicle;
+	logger->check(init_toml != nullptr, "Malformed init_toml");
+	cpptoml::table& init_toml_p = *init_toml;
+
+	std::string script_path;
+	SAFE_TOML_GET_FROM(init_toml_p, script_path, "script", std::string);
+
+	// We create a new environment for our script
+	env = sol::environment(*lua_state, sol::create, lua_state->globals());
+	// We need to load LuaCore to it
+	lua_core->load((sol::table&)env, in_pkg);	
+	env["machine"] = this;
+	env["part"] = in_part;
+	env["universe"] = in_part->vehicle->in_universe;
+	env["vehicle"] = in_part->vehicle;
 
 	this->in_part = in_part;
 
-	LuaUtil::call_function_if_present(lua_state, "init", "machine init");
-	
+	std::string old = assets->get_current_package();
+	auto[pkg, name] = assets->get_package_and_name(script_path, in_pkg);
+	std::string full_path = assets->res_path + pkg + "/" + name;	
+	auto result = (*lua_state).safe_script_file(full_path, env);
+
+	// Then we simply move over the environment to an entry in the global lua_state
+	(*lua_state)[this] = env;
 }
 
 std::vector<Machine*> Machine::get_all_connected()
@@ -106,7 +109,7 @@ sol::table Machine::get_interface(const std::string& name)
 Machine::~Machine()
 {
 	logger->info("Ending machine");
-	lua_state.collect_garbage();
+	lua_state->collect_garbage();
 }
 
 std::vector<Machine*> Machine::get_connected_if(std::function<bool(Machine*)> fnc) 

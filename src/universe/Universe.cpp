@@ -121,6 +121,8 @@ Universe::Universe() : system(this)
 
 	bt_world->setInternalTickCallback(bullet_tick, this, true);
 
+	lua_core->load(lua_state, "__UNDEFINED__");
+
 }
 
 

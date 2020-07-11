@@ -1,8 +1,11 @@
+print(__pkg)
+print("Requiring vehicle")
 require("vehicle")
+print("Requiring universe")
 require("universe")
 local flight_input = require("flight_input")
 
-local input_ctx = flight_input.context.new("input/rocket.toml")
+local input_ctx = flight_input.context.new("core:input/rocket.toml")
 
 function get_input_context()
 	return input_ctx
@@ -23,11 +26,13 @@ function pre_update(dt)
 
 	-- Axis goes from -1 to 1, we need to go from 0 to 1
 	local in_throttle = (input_ctx:get_axis("throttle") + 1.0) * 0.5
-	--machine:write_to_port("Throttle", in_throttle)
 
-	--machine:write_to_port("Pitch", input_ctx:get_axis("pitch"))
-	--machine:write_to_port("Yaw", input_ctx:get_axis("yaw"))
-	--machine:write_to_port("Roll", input_ctx:get_axis("roll"))
+	local all_engines = machine:get_connected_with("core:interfaces/engine.lua")
+	for _, machine in all_engines:pairs() do
+		local engine = machine:get_interface("core:interfaces/engine.lua")
+		engine.throttle = in_throttle
+
+	end
 
 	t = t + dt
 end

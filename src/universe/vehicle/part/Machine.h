@@ -18,28 +18,16 @@ class Machine
 private:
 
 
-
 	Part* in_part;
-	bool is_defining_ports;
-
-	struct PortDefinition
-	{
-		std::string name;
-		std::string type;
-		bool output;
-
-		// Only on input ports
-		sol::safe_function callback;
-
-	};
-
-	std::vector<PortDefinition> new_ports;
-
 	std::vector<Machine*> get_connected_if(std::function<bool(Machine*)> fnc);
+
+	std::string in_pkg;
 
 public:
 
-	sol::state lua_state;
+	// All Machines share the same lua_state to allow sharing data
+	sol::state* lua_state;
+	sol::environment env;
 
 	std::shared_ptr<cpptoml::table> init_toml;
 
@@ -50,7 +38,7 @@ public:
 	void update(double dt);
 	void editor_update(double dt);
 
-	void init(Part* in_part, Universe* in_universe);
+	void init(sol::state* lua_state, Part* in_part);
 
 	void load_interface(const std::string& name, sol::table n_table);
 

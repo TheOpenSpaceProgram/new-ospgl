@@ -1,3 +1,4 @@
+print("Requiring game_database")
 require("game_database")
 
 function load(database) 
