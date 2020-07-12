@@ -81,7 +81,7 @@ void EditorPartList::create_part(AssetHandle<PartPrototype>& proto)
 	Part* n_part = new Part(proto, empty_table);
 	n_part->vehicle = veh;
 	std::vector<Piece*> n_pieces = n_part->create_pieces();
-
+	n_part->init(&scene->lua_state, veh);
 
 
 	// Create the pieces and parts
@@ -119,6 +119,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
 	this->gui_skin = skin;
 	this->vg = vg;
 	this->edveh_int = sc->gui.edveh_int;
+	this->scene = sc;
 
 	icon_renderer = new PartIconRenderer(part_icon_size);
 	// Load all exposed via the database parts

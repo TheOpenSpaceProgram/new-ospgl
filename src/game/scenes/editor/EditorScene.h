@@ -24,6 +24,7 @@ private:
 	EditorVehicle vehicle;
 	EditorVehicleInterface vehicle_int;
 
+
 	// We need a world for the very simple colliders, but we have no 
 	// dynamics, links, or anything like that
 	btDefaultCollisionConfiguration* bt_collision_config;
@@ -39,6 +40,9 @@ public:
 
 	friend class EditorGUI;
 	EditorGUI gui;
+	
+	// We hold a non-universe lua_state for all machines to interact
+	sol::state lua_state;
 	
 	btCollisionWorld* bt_world;
 

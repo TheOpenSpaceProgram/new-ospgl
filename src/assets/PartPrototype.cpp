@@ -22,6 +22,8 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 	
 	auto node_toml = toml.get_table(n->name);
 
+	proto.piece_offset = n->sub_transform;
+
 	bool loaded = false;
 	// Extract collider, the hardest part
 	for (Node* child : n->children)
@@ -67,6 +69,23 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 				proto.collider->setLocalScaling(to_btVector3(scale));
 
 				proto.collider_offset = tform;
+
+				if(n->name != ROOT_NAME)
+				{
+					// A link MUST be present
+					auto link_toml = node_toml->get_table("link");
+					logger->check(link_toml != nullptr, "A link is not present on a non root piece");
+					proto.attached_to = *link_toml->get_as<std::string>("attached_to");
+					proto.welded = link_toml->get_as<bool>("welded").value_or(false);
+					proto.editor_dettachable = link_toml->get_as<bool>("editor_dettachable").value_or(false);
+					// TODO: Link stuff
+					// TODO: Maybe using attachments
+				}
+				else
+				{
+					proto.editor_dettachable = true;
+				}
+				
 
 				loaded = true;
 			}

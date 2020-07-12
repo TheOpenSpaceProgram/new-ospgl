@@ -72,21 +72,47 @@ void LuaVehicle::load_to(sol::table& table)
 			self.load_interface(sane_name, n_table);
 			return n_table;
 		},
-		"get_all_connected", [](Machine& self)
+
+		"get_all_wired_machines", sol::overload([](Machine& self)
 		{
-			return self.get_all_connected();
+			return self.get_all_wired_machines();
 		},
-		"get_connected_with", [](Machine& self, sol::variadic_args args)
+		[](Machine& self, bool include_this)
+		{
+			return self.get_all_wired_machines(include_this);
+		}),
+		"get_wired_machines_with", [](Machine& self, sol::variadic_args args)
 		{
 			// We build the vector, something which sol cannot do automatically
+			// and also find any 'false' value which sets include_this to false
 			std::vector<std::string> vec;
+			bool include_this = true;
 			for(auto arg : args)
 			{
-				vec.push_back(arg.get<std::string>());
+				if(arg.get_type() == sol::type::boolean)
+				{
+					if(arg.get<bool>() == false)
+					{
+						include_this = false;
+					}
+				}
+				else if(arg.get_type() == sol::type::string)
+				{
+					vec.push_back(arg.get<std::string>());
+				}
 			}
 
-			return self.get_connected_with(vec);
+			return self.get_wired_machines_with(vec, include_this);
 		},
+		"get_wired_interfaces", 
+		sol::overload([](Machine& self, const std::string& int_type, bool include_this)
+		{
+			return self.get_wired_interfaces(int_type, include_this);
+		},
+		[](Machine& self, const std::string& int_type)
+		{
+			return self.get_wired_interfaces(int_type);
+		}),
 		"get_interface", &Machine::get_interface
 		
 	);

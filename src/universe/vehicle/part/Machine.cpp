@@ -24,28 +24,33 @@ void Machine::load_interface(const std::string& name, sol::table n_table)
 		logger->fatal("Tried to load an interface which was already loaded ({})", name);
 	}
 
+	// We add ourselves to the table for easier code
+	// TODO: Naming, maybe use a subtable?
+	n_table["machine"] = this;
+
 	interfaces.insert(std::make_pair(name, n_table));
 }
 
 void Machine::pre_update(double dt)
 {
-	LuaUtil::call_function_if_present(env, "pre_update", "machine pre_update", dt);
+	LuaUtil::call_function_if_present(env["pre_update"], "machine pre_update", dt);
 }
 
 void Machine::update(double dt)
 {
-	LuaUtil::call_function_if_present(env, "update", "machine update", dt);
+	LuaUtil::call_function_if_present(env["update"], "machine update", dt);
 }
 
 void Machine::editor_update(double dt)
 {
-	LuaUtil::call_function_if_present(env, "editor_update", "machine editor_update", dt);
+	LuaUtil::call_function_if_present(env["editor_update"], "machine editor_update", dt);
 }
 
 void Machine::init(sol::state* lua_state, Part* in_part) 
 {
 	logger->check(init_toml != nullptr, "Malformed init_toml");
 	cpptoml::table& init_toml_p = *init_toml;
+	this->lua_state = lua_state;
 
 	std::string script_path;
 	SAFE_TOML_GET_FROM(init_toml_p, script_path, "script", std::string);
@@ -70,13 +75,13 @@ void Machine::init(sol::state* lua_state, Part* in_part)
 	(*lua_state)[this] = env;
 }
 
-std::vector<Machine*> Machine::get_all_connected()
+std::vector<Machine*> Machine::get_all_wired_machines(bool include_this)
 {
 	// TODO: We could cache this? Could be a small perfomance gain
-	return get_connected_if([](Machine* m){ return true; });
+	return get_connected_if([](Machine* m){ return true; }, include_this);
 }
 
-std::vector<Machine*> Machine::get_connected_with(const std::vector<std::string>& interfaces)
+std::vector<Machine*> Machine::get_wired_machines_with(const std::vector<std::string>& interfaces, bool include_this)
 {
 	return get_connected_if([interfaces](Machine* m)
 	{
@@ -89,9 +94,22 @@ std::vector<Machine*> Machine::get_connected_with(const std::vector<std::string>
 		}
 
 		return false;
-	});
+	}, include_this);
 }
 
+std::vector<sol::table> Machine::get_wired_interfaces(const std::string& type, bool include_this) 
+{
+	std::vector<Machine*> machines = get_wired_machines_with({type}, include_this);
+	std::vector<sol::table> out;
+	out.reserve(machines.size());
+
+	for(Machine* m : machines)
+	{
+		out.push_back(m->interfaces[type]);
+	}
+
+	return out;
+}
 
 sol::table Machine::get_interface(const std::string& name) 
 {
@@ -112,7 +130,7 @@ Machine::~Machine()
 	lua_state->collect_garbage();
 }
 
-std::vector<Machine*> Machine::get_connected_if(std::function<bool(Machine*)> fnc) 
+std::vector<Machine*> Machine::get_connected_if(std::function<bool(Machine*)> fnc, bool include_this) 
 {
 	std::vector<Machine*> out;
 
@@ -123,6 +141,11 @@ std::vector<Machine*> Machine::get_connected_if(std::function<bool(Machine*)> fn
 		{
 			out.push_back(it->second);
 		}
+	}
+
+	if(include_this && fnc(this))
+	{
+		out.push_back(this);
 	}
 
 	return out;

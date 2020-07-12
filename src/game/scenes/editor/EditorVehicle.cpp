@@ -128,8 +128,10 @@ void EditorVehicle::update(double dt)
 }
 
 
-void EditorVehicle::init()
+void EditorVehicle::init(sol::state* lua_state)
 {
+	veh->init(lua_state);
+
 	// Load all colliders
 	for(Piece* p : veh->all_pieces)
 	{

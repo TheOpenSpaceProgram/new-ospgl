@@ -68,7 +68,11 @@ void PartIconRenderer::render(PartPrototype* proto, double angle, GLuint target)
 
 	gbuffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	proto->pieces[proto->ROOT_NAME].model_node->draw(cu, model, 0, true);
+	for(auto piece : proto->pieces)
+	{
+		glm::dmat4 sub_model = piece.second.piece_offset;
+		piece.second.model_node->draw(cu, model * sub_model, 0, true);
+	}
 	gbuffer.unbind();
 
 	glEnable(GL_BLEND);

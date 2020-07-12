@@ -30,7 +30,6 @@ function pre_update(dt)
 		nozzle_dir = part:get_piece("p_root"):get_marker_forward(nozzle)
 		nozzle_pos = part:get_piece("p_root"):get_marker_position(nozzle)
 	end 
-	engine:say_wow();
 end
 
 function update(dt)

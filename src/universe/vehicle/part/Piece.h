@@ -157,7 +157,9 @@ public:
 	// Attachments don't have any significance in physics, but they are important
 	// for editing vehicles, so we store them, and a bool marking whether they are used 
 	// They are externally managed by the editor (or by wathever changes the vehicle in flight)
-	std::vector<std::pair<PieceAttachment, bool>> attachments;	
+	std::vector<std::pair<PieceAttachment, bool>> attachments;
+	// Can the piece be dettached in the editor? Useful for multi-piece parts
+	bool editor_dettachable;
 
 	Marker& get_marker(const std::string& marker_name);
 

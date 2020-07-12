@@ -107,6 +107,8 @@ public:
 	
 	// Called when the vehicle is added to the world
 	void init(Universe* into_universe);
+	// For the editor
+	void init(sol::state* lua_state);
 
 	// Finds which attachments are used on which parts
 	// (The vehicle doesn't need to be sorted)

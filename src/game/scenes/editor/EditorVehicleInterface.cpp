@@ -385,6 +385,12 @@ bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 v
 
 void EditorVehicleInterface::on_selection_change(const CameraUniforms& cu)
 {
+	if(!selected->editor_dettachable)
+	{
+		// We flip the link around so that the piece is not dettached
+		reroot(selected->attached_to, selected);
+	}
+
 	glm::dvec3 diff = cu.cam_pos - to_dvec3(selected->packed_tform.getOrigin()); 
 	on_selection_change(glm::length(diff));
 }
@@ -633,11 +639,14 @@ void EditorVehicleInterface::reroot(Piece* current, Piece* new_root)
 			// Note the inversion here, very important
 			(*it)->to_attachment = (*next)->from_attachment;
 			(*it)->from_attachment = (*next)->to_attachment;
+			std::swap((*it)->editor_dettachable, (*next)->editor_dettachable);
+
 
 			(*it)->link_from = (*next)->link_to;
 			(*it)->link_to = (*next)->link_from;
 			// TODO: Invert this too
 			(*it)->link_rot = (*next)->link_rot;
+
 
 
 		}

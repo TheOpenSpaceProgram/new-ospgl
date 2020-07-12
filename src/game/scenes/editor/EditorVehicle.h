@@ -69,7 +69,7 @@ public:
 	virtual bool needs_forward_pass() override { return true; }
 	virtual bool needs_shadow_pass() override { return true; }
 
-	void init();
+	void init(sol::state* lua_state);
 
 	void update(double dt);
 

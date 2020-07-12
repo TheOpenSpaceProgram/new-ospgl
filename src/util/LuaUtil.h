@@ -24,11 +24,10 @@ public:
 	}
 
 	// Handles errors
-	template<typename T, typename... Args>
-	static sol::safe_function_result call_function(T& env,
-			const std::string& name, const std::string& context, Args&&... args)
+	template<typename T, typename K, typename... Args>
+	static sol::safe_function_result call_function(sol::proxy<T, K> path, const std::string& context, Args&&... args)
 	{
-		sol::safe_function fnc = env[name];
+		sol::safe_function fnc = path;
 
 		auto result = fnc(std::forward<Args>(args)...);
 
@@ -42,11 +41,11 @@ public:
 	}
 
 	// Crashes on error
-	template<typename T, typename... Args>
-	static sol::safe_function_result safe_call_function(T& env, 
-			const std::string& name, const std::string& context, Args&&... args)
+	template<typename T, typename K, typename... Args>
+	static sol::safe_function_result safe_call_function(sol::proxy<T, K> path, 
+			const std::string& context, Args&&... args)
 	{
-		sol::safe_function fnc = env[name];
+		sol::safe_function fnc = path;
 		auto result = fnc(std::forward<Args>(args)...);
 
 		if(!result.valid())
@@ -59,19 +58,17 @@ public:
 	}
 
 	// Same as call_function but only does it if function is present
-	template<typename T, typename... Args>
-	static sol::safe_function_result call_function_if_present(T& env,
-		const std::string& name, const std::string& context, Args&&... args)
+	template<typename T, typename K, typename... Args>
+	static std::optional<sol::safe_function_result> 
+		call_function_if_present(sol::proxy<T, K> path, const std::string& context, Args&&... args)
 	{
-		sol::safe_function fnc = env[name];
-		if(fnc)
+		if(path.valid())
 		{
-			return call_function(env, name, context, args...);
+			return call_function(path, context, args...);
 		}
 		else
 		{
-			// This makes the error clearer, but may cause a perfomance hit
-			return fnc(std::forward<Args>(args)...);
+			return {};
 		}
 	}
 };

@@ -1,7 +1,4 @@
-print(__pkg)
-print("Requiring vehicle")
 require("vehicle")
-print("Requiring universe")
 require("universe")
 local flight_input = require("flight_input")
 
@@ -27,11 +24,9 @@ function pre_update(dt)
 	-- Axis goes from -1 to 1, we need to go from 0 to 1
 	local in_throttle = (input_ctx:get_axis("throttle") + 1.0) * 0.5
 
-	local all_engines = machine:get_connected_with("core:interfaces/engine.lua")
-	for _, machine in all_engines:pairs() do
-		local engine = machine:get_interface("core:interfaces/engine.lua")
+	local all_engines = machine:get_wired_interfaces("core:interfaces/engine.lua")
+	for _, engine in all_engines:pairs() do
 		engine.throttle = in_throttle
-
 	end
 
 	t = t + dt

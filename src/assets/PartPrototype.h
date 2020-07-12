@@ -31,6 +31,7 @@ struct PiecePrototype
 
 	btCollisionShape* collider;
 	glm::dmat4 render_offset; //< Offset inside of the part, for rendering
+	glm::dmat4 piece_offset; //< Offset inside the part
 	btTransform collider_offset;
 	std::unordered_map<std::string, Marker> markers;
 	std::vector<PieceAttachment> attachments;
@@ -39,6 +40,12 @@ struct PiecePrototype
 	double restitution;
 	// Can stuff attach radially to this part?
 	bool allows_radial;
+
+	std::string attached_to;
+	std::string link; // TODO: Write the link stuff
+	bool editor_dettachable;
+	bool welded;
+
 	
 	void copy(const PiecePrototype& b)
 	{
@@ -51,6 +58,10 @@ struct PiecePrototype
 		this->markers = b.markers;
 		this->attachments = b.attachments;
 		this->allows_radial = b.allows_radial;
+		this->piece_offset = b.piece_offset;
+		this->attached_to = b.attached_to;
+		this->welded = b.welded;
+		this->editor_dettachable = b.editor_dettachable;
 	}
 
 	PiecePrototype(GPUModelNodePointer&& n) : model_node(std::move(n))
@@ -62,6 +73,10 @@ struct PiecePrototype
 		this->restitution = PIECE_DEFAULT_RESTITUTION;
 		this->friction = PIECE_DEFAULT_FRICTION;
 		this->allows_radial = true;
+		this->piece_offset = glm::dmat4(1.0);
+		this->attached_to = "";
+		this->welded = false;
+		this->editor_dettachable = false;
 	}
 
 	// We have to declare copy constructor

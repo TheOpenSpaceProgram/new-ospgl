@@ -83,6 +83,8 @@ Machine* Part::get_machine(const std::string& id)
 std::vector<Piece*> Part::create_pieces() 
 {
 	std::vector<Piece*> n_pieces;
+	std::unordered_map<Piece*, std::string> piece_to_name;
+	std::unordered_map<std::string, Piece*> name_to_piece;
 
 	for(auto pair : part_proto->pieces)
 	{
@@ -92,13 +94,20 @@ std::vector<Piece*> Part::create_pieces()
 		p->in_vehicle = vehicle;
 		pieces[pair.first] = p;
 		n_pieces.push_back(p);
+		piece_to_name[p] = pair.first;
+		name_to_piece[pair.first] = p;
 	}			
 
-	// After everything is loaded, parts are responsible for creating
-	// attachments between the different pieces
-	// TODO: Create that functionality
-
-	// TODO: Afterwards check that all pieces are attached so there is a single root
+	// We create all the needed links now
+	for(Piece* p : n_pieces)
+	{
+		if(piece_to_name[p] != PartPrototype::ROOT_NAME)
+		{
+			p->attached_to =  name_to_piece[p->piece_prototype->attached_to];
+			p->welded = p->piece_prototype->welded;
+			// TODO: Load the link if present and nullify used attachment
+		}
+	}
 
 	return n_pieces;
 }

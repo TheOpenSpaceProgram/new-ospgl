@@ -91,12 +91,17 @@ std::vector<Vehicle*> Vehicle::physics_update(double dt)
 
 void Vehicle::init(Universe* in_universe)
 {
+	init(&in_universe->lua_state);
+	this->in_universe = in_universe;
+}
+
+void Vehicle::init(sol::state* lua_state)
+{
+	this->in_universe = nullptr;
 	for(Part* part : parts)
 	{
-		part->init(&in_universe->lua_state, this);
+		part->init(lua_state, this);
 	}
-
-	this->in_universe = in_universe;
 }
 
 // Helper function for update_attachments

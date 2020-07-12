@@ -44,6 +44,7 @@ private:
 
 	GUISkin* gui_skin;
 	NVGcontext* vg;
+	EditorScene* scene;
 	EditorVehicleInterface* edveh_int;
 	GUIInput* gui_input;
 

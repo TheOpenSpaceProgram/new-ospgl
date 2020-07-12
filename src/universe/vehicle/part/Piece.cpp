@@ -247,6 +247,8 @@ Piece::Piece(Part* in_part, std::string piece_name)
 		attachments.push_back(std::make_pair(atc, false));
 	}
 
+	editor_dettachable = piece_prototype->editor_dettachable;
+
 }
 
 Piece::~Piece()

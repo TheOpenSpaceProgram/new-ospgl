@@ -19,7 +19,7 @@ private:
 
 
 	Part* in_part;
-	std::vector<Machine*> get_connected_if(std::function<bool(Machine*)> fnc);
+	std::vector<Machine*> get_connected_if(std::function<bool(Machine*)> fnc, bool include_this);
 
 	std::string in_pkg;
 
@@ -42,8 +42,9 @@ public:
 
 	void load_interface(const std::string& name, sol::table n_table);
 
-	std::vector<Machine*> get_all_connected();
-	std::vector<Machine*> get_connected_with(const std::vector<std::string>& interfaces);
+	std::vector<Machine*> get_all_wired_machines(bool include_this = true);
+	std::vector<Machine*> get_wired_machines_with(const std::vector<std::string>& interfaces, bool include_this = true);
+	std::vector<sol::table> get_wired_interfaces(const std::string& type, bool include_this = true);
 
 	sol::table get_interface(const std::string& name);
 

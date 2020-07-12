@@ -41,12 +41,13 @@ void EditorScene::load()
 		btIDebugDraw::DBG_DrawConstraintLimits |
 		btIDebugDraw::DBG_DrawAabb);
 	bt_world->setDebugDrawer(debug_draw);
-	
+
+	lua_core->load(lua_state, "__UNDEFINED__");
 
 	vehicle.scene = this;
 	vehicle_int.scene = this;
 	vehicle_int.edveh = &vehicle;
-	vehicle.init();
+	vehicle.init(&lua_state);
 }
 
 double t = 0.0;
