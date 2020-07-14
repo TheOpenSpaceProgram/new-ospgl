@@ -89,7 +89,8 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 					proto.welded = link_toml->get_as<bool>("welded").value_or(false);
 					proto.editor_dettachable = link_toml->get_as<bool>("editor_dettachable").value_or(false);
 					// TODO: Link stuff
-					// TODO: Maybe using attachments
+					proto.from_attachment = link_toml->get_as<std::string>("from_attachment").value_or("");
+					proto.to_attachment = link_toml->get_as<std::string>("to_attachment").value_or("");
 				}
 				else
 				{

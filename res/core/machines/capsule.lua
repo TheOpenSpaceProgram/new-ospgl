@@ -29,6 +29,13 @@ function pre_update(dt)
 		engine.throttle = in_throttle
 	end
 
+	if input_ctx:get_action_down("stage") then 
+		local all_activables = machine:get_wired_interfaces("core:interfaces/activable.lua")
+		for _, activable in all_activables:pairs() do 
+			activable:activate()
+		end
+	end
+
 	t = t + dt
 end
 	

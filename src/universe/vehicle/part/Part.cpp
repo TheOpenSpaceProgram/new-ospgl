@@ -105,7 +105,14 @@ std::vector<Piece*> Part::create_pieces()
 		{
 			p->attached_to =  name_to_piece[p->piece_prototype->attached_to];
 			p->welded = p->piece_prototype->welded;
-			// TODO: Load the link if present and nullify used attachment
+			// TODO: Load the link if present
+			p->from_attachment = p->piece_prototype->from_attachment;
+			p->to_attachment = p->piece_prototype->to_attachment;
+			auto from_attch = p->find_attachment(p->from_attachment);
+			auto to_attch = p->attached_to->find_attachment(p->to_attachment);
+
+			from_attch ? from_attch->second = true : 0;
+			to_attch ? to_attch->second = true : 0;			
 		}
 	}
 

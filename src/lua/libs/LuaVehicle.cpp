@@ -3,11 +3,17 @@
 
 void LuaVehicle::load_to(sol::table& table)
 {
-	table.new_usertype<Vehicle>("vehicle");	
+	table.new_usertype<Vehicle>("vehicle");//,
+		//"get_attached_to", sol::overload(
+		//	sol::resolve<std::vector<Piece*>(Piece*)>(Vehicle::get_attached_to),
+		//	sol::resolve<Piece*(Piece*, const std::string&)>(Vehicle::get_attached_to)
+		//));
 
 	table.new_usertype<Piece>("piece",
 		"rigid_body", &Piece::rigid_body,
 		"welded", &Piece::welded,
+		"attached_to", &Piece::attached_to,
+		"set_dirty", &Piece::set_dirty, 
 		"get_global_transform", [](Piece& self)
 		{
 			return BulletTransform(self.get_global_transform());
@@ -53,7 +59,15 @@ void LuaVehicle::load_to(sol::table& table)
 		"get_marker_rotation", &Piece::get_marker_rotation,
 		"get_marker_transform", &Piece::get_marker_transform,
 		"get_marker_forward", &Piece::get_marker_forward,
-		"transform_point_to_rigidbody", &Piece::transform_point_to_rigidbody);
+		"transform_point_to_rigidbody", &Piece::transform_point_to_rigidbody,
+		"get_attached_to_this", [](Piece& self)
+		{
+			return self.in_vehicle->get_attached_to(&self);
+		},
+		"get_attached_to_marker", [](Piece& self, const std::string& marker)
+		{
+			return self.in_vehicle->get_attached_to(&self, marker);
+		});
 
 	table.new_usertype<Part>("part",
 		"get_piece", &Part::get_piece,

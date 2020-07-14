@@ -150,7 +150,7 @@ void EditorVehicle::init(sol::state* lua_state)
 
 EditorVehicle::EditorVehicle() : Drawable()
 {
-	auto vehicle_toml = SerializeUtil::load_file("udata/vehicles/Test Vehicle.toml");
+	auto vehicle_toml = SerializeUtil::load_file("udata/vehicles/saved.toml");
 	veh = VehicleLoader(*vehicle_toml).get_vehicle();
 	
 	// Load the different models

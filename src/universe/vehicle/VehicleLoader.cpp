@@ -123,6 +123,8 @@ void VehicleLoader::copy_pieces(cpptoml::table& root)
 			bool welded = link->get_qualified_as<bool>("welded").value_or(false);
 			p->welded = welded;
 
+			p->editor_dettachable = link->get_qualified_as<bool>("editor_dettachable").value_or(true);
+
 			std::string link_type = link->get_qualified_as<std::string>("type").value_or("none");
 			if(link_type != "none")
 			{

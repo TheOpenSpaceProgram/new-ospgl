@@ -34,6 +34,13 @@ config = "core_rocket.toml"
 		key = 90			# Z
 
 [[input]]
+	type = "action"
+	name = "stage"
+	[[input.mapping]]
+		type = "key"
+		key = 32			# Space
+
+[[input]]
 	type = "axis"
 	name = "pitch"
 	[[input.mapping]]

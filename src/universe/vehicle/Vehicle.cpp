@@ -68,13 +68,9 @@ void Vehicle::editor_update(double dt)
 }
 
 
-std::vector<Vehicle*> Vehicle::physics_update(double dt)
+void Vehicle::physics_update(double dt)
 {
-	if(packed)	
-	{
-		return std::vector<Vehicle*>();
-	}
-	else
+	if(!packed)
 	{
 		// Generate the gravity vector
 		// glm::dvec3 pos = unpacked_veh.get_center_of_mass(); 
@@ -82,8 +78,7 @@ std::vector<Vehicle*> Vehicle::physics_update(double dt)
 		glm::dvec3 grav = in_universe->system.get_gravity_vector(pos, &in_universe->system.bullet_states);
 
 		unpacked_veh.apply_gravity(to_btVector3(grav)); 
-		auto n_vehicles = unpacked_veh.update();
-		return n_vehicles;
+		unpacked_veh.update();
 	}	
 
 }
@@ -228,6 +223,38 @@ std::vector<Piece*> Vehicle::get_children_of(Piece* p)
 	return out;
 }
 
+
+
+std::vector<Piece*> Vehicle::get_attached_to(Piece* target) 
+{
+	std::vector<Piece*> out;
+
+	for(Piece* p : all_pieces)
+	{
+		if(p->attached_to == target)
+		{
+			out.push_back(p);
+		}
+	}
+
+	return out;
+}
+
+
+Piece* Vehicle::get_attached_to(Piece* p, const std::string& attachment_marker) 
+{
+	std::vector<Piece*> all = get_attached_to(p);
+	for(Piece* p : all)
+	{
+		if(p->to_attachment == attachment_marker)
+		{
+			return p;
+		}
+		// * Note that attachments allow only one attached piece
+	}
+
+	return nullptr;
+}
 void GenericSerializer<Vehicle>::serialize(const Vehicle& what, cpptoml::table& target) 
 {
 	logger->check(what.is_packed(), "Cannot serialize a unpacked vehicle");
@@ -250,8 +277,8 @@ void GenericSerializer<Vehicle>::serialize(const Vehicle& what, cpptoml::table& 
 	}
 
 	// These are used as a sanity check
-	target.insert("piece_id", piece_id + 1);
-	target.insert("part_id", part_id + 1);
+	target.insert("piece_id", piece_id);
+	target.insert("part_id", part_id);
 
 	auto part_array = cpptoml::make_table_array();
 	// Write all the parts
@@ -284,6 +311,11 @@ void GenericSerializer<Vehicle>::serialize(const Vehicle& what, cpptoml::table& 
 			// ? Insert the asset path of the prototype
 		}
 
+		if(what.root == pair.first)
+		{
+			table->insert("root", true);
+		}
+
 		table->insert("node", pair.first->piece_prototype->name);
 		auto pos_table = cpptoml::make_table();
 		auto rot_table = cpptoml::make_table();
@@ -298,9 +330,19 @@ void GenericSerializer<Vehicle>::serialize(const Vehicle& what, cpptoml::table& 
 			auto link = cpptoml::make_table();
 
 			link->insert("to", piece_to_id[pair.first->attached_to]);
-			link->insert("welded", pair.first->welded);
+			if(pair.first->welded)
+			{
+				link->insert("welded", true);
+			}
+
+			// This is kind of an "editor-metadata" but it's very important
+			if(!pair.first->editor_dettachable)
+			{
+				link->insert("editor_dettachable", false);
+			}
+
 			// TODO: Insert links, link orientation, etc...
-			
+
 			if(pair.first->from_attachment != "")
 			{
 				link->insert("from_attachment", pair.first->from_attachment);

@@ -16,11 +16,7 @@ void VehicleEntity::update(double dt)
 
 void VehicleEntity::physics_update(double pdt)
 {
-	auto n_vehicles = vehicle->physics_update(pdt);
-	for(Vehicle* n_vehicle : n_vehicles)
-	{
-		get_universe()->create_entity<VehicleEntity>(n_vehicle);
-	}
+	vehicle->physics_update(pdt);
 }
 
 VehicleEntity::VehicleEntity(Vehicle* vehicle)

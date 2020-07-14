@@ -3,25 +3,33 @@
 #include "../../util/DebugDrawer.h"
 #include "../../physics/glm/BulletGlmCompat.h"
 #include "Vehicle.h"
+#include "../entity/entities/VehicleEntity.h"
 
 using WeldedGroupCreation = std::pair<std::unordered_set<Piece*>, bool>;
 
-struct PieceState
-{
-	btTransform transform;
-	btVector3 linear;
-	btVector3 linear_tang;
-	btVector3 angular;
-};
 
-static PieceState obtain_piece_state(Piece* piece)
+static UnpackedVehicle::PieceState obtain_piece_state(Piece* piece)
 {
-	PieceState st;
+	UnpackedVehicle::PieceState st;
 	st.transform = piece->get_global_transform();
 	st.linear = piece->get_linear_velocity(true);
 	st.linear_tang = piece->get_linear_velocity(false);
 	st.angular = piece->get_angular_velocity();
 	return st;
+}
+
+
+static std::unordered_map<Piece*, UnpackedVehicle::PieceState> get_states_at_start(Vehicle* vehicle)
+{
+	std::unordered_map<Piece*, UnpackedVehicle::PieceState> states_at_start;
+
+	for (Piece* piece : vehicle->all_pieces)
+	{
+		piece->in_vehicle = vehicle;
+		states_at_start[piece] = obtain_piece_state(piece);
+	}
+
+	return states_at_start;
 }
 
 static void add_to_welded_groups(std::vector<WeldedGroupCreation>& welded_groups, Piece* piece)
@@ -140,7 +148,7 @@ static void remove_outdated_welded_groups(
 
 static void create_new_welded_group(
 	std::vector<WeldedGroup*>& welded, WeldedGroupCreation& wg, 
-	std::unordered_map<Piece*, PieceState>& states_at_start, btDynamicsWorld* world,
+	std::unordered_map<Piece*, UnpackedVehicle::PieceState>& states_at_start, btDynamicsWorld* world,
 	std::vector<Piece*>& all_pieces)
 {
 	if (wg.second == false)
@@ -266,7 +274,8 @@ static void add_piece_physics(Piece* piece, btTransform tform, btDynamicsWorld* 
 	piece->motion_state = motion_state;
 }
 
-static void create_piece_physics(Piece* piece, std::unordered_map<Piece*, PieceState>& states_at_start, btDynamicsWorld* world)
+static void create_piece_physics(Piece* piece, 
+	std::unordered_map<Piece*, UnpackedVehicle::PieceState>& states_at_start, btDynamicsWorld* world)
 {
 	// We must be a lone piece if we haven't been touched before
 	btVector3 local_inertia;
@@ -294,7 +303,7 @@ static void create_piece_physics(Piece* piece, std::unordered_map<Piece*, PieceS
 
 }
 
-std::vector<Vehicle*> UnpackedVehicle::update()
+void UnpackedVehicle::update()
 {
 	std::vector<Vehicle*> n_vehicles;
 	// Check for any broken links, they instantly set the dirty flags,
@@ -319,11 +328,16 @@ std::vector<Vehicle*> UnpackedVehicle::update()
 
 	if (dirty)
 	{
+		// We need this as we may remove rigidbodies, and with them,
+		// physics information. 
+
+		auto states_at_start = get_states_at_start(vehicle);
+
 		n_vehicles = handle_separation();
 
 		vehicle->sort(); //< Not sure if needed
 
-		build_physics();
+		build_physics(states_at_start);
 
 		for (Piece* p : vehicle->all_pieces)
 		{
@@ -337,10 +351,14 @@ std::vector<Vehicle*> UnpackedVehicle::update()
 
 	}
 
-	return n_vehicles;
+	for(Vehicle* n_vehicle : n_vehicles)
+	{
+		vehicle->in_universe->create_entity<VehicleEntity>(n_vehicle);
+	}
+
 }
 
-void UnpackedVehicle::build_physics()
+void UnpackedVehicle::build_physics(std::unordered_map<Piece*, PieceState>& states_at_start)
 {	
 	// Remove all old links
 	for (Piece* piece : vehicle->all_pieces)
@@ -357,15 +375,9 @@ void UnpackedVehicle::build_physics()
 	
 	std::vector<WeldedGroupCreation> welded_groups;
 
-	// We need this as we will remove rigidbodies, and with them,
-	// physics information. 
-	std::unordered_map<Piece*, PieceState> states_at_start;
 
 	for (Piece* piece : vehicle->all_pieces)
 	{
-		piece->in_vehicle = vehicle;
-		states_at_start[piece] = obtain_piece_state(piece);
-	
 		add_to_welded_groups(welded_groups, piece);
 	}
 
@@ -568,7 +580,8 @@ std::vector<Vehicle*> UnpackedVehicle::handle_separation()
 
 		n_vehicle->packed = false;
 		n_vehicle->sort();
-		n_vehicle->unpacked_veh.build_physics();
+		auto st_at_start = get_states_at_start(n_vehicle);
+		n_vehicle->unpacked_veh.build_physics(st_at_start);
 		
 		logger->info("Separated new vehicle");
 		n_vehicles.push_back(n_vehicle);
@@ -708,7 +721,8 @@ void UnpackedVehicle::activate()
 	dirty = true;
 	vehicle->packed = true;
 	// sort() 				// TODO: Sorting may not be neccesary here as pieces won't change while packed
-	build_physics();
+	auto st0 = get_states_at_start(vehicle);
+	build_physics(st0);
 	vehicle->packed = false;
 }
 

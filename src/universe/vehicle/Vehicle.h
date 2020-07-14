@@ -99,8 +99,7 @@ public:
 	// Remember to update the vehicle if on flight
 	Piece* remove_piece(Piece* p);
 
-	// The return is only populated if something separated
-	std::vector<Vehicle*> physics_update(double pdt);
+	void physics_update(double pdt);
 	
 	// Called when the vehicle is added to the world
 	void init(Universe* into_universe);
@@ -118,10 +117,15 @@ public:
 
 	void sort();
 
+	/// Vehicle structure functions:
+
 	// This one doesn't need the array to be sorted
 	// but it's slower (used in the editor)
 	// It allows finding children of separated parts
 	std::vector<Piece*> get_children_of(Piece* p);
+
+	std::vector<Piece*> get_attached_to(Piece* p);
+	Piece* get_attached_to(Piece* p, const std::string& attachment_marker);
 
 	Vehicle();
 	~Vehicle();

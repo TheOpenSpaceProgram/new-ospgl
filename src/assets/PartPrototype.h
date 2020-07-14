@@ -45,8 +45,10 @@ struct PiecePrototype
 	// Can stuff attach radially to this part?
 	bool allows_radial;
 
-	std::string attached_to;
 	std::string link; // TODO: Write the link stuff
+	std::string attached_to;
+	std::string from_attachment;
+	std::string to_attachment;
 	bool editor_dettachable;
 	bool welded;
 
@@ -67,22 +69,12 @@ struct PiecePrototype
 		this->attached_to = b.attached_to;
 		this->welded = b.welded;
 		this->editor_dettachable = b.editor_dettachable;
+		this->from_attachment = b.from_attachment;
+		this->to_attachment = b.to_attachment;
 	}
 
 	PiecePrototype(GPUModelNodePointer&& n) : model_node(std::move(n))
 	{
-		this->name = "";
-		this->collider = nullptr;
-		this->render_offset = glm::dmat4(1.0);
-		this->collider_offset = btTransform::getIdentity();
-		this->mass = 1.0;
-		this->restitution = PIECE_DEFAULT_RESTITUTION;
-		this->friction = PIECE_DEFAULT_FRICTION;
-		this->allows_radial = true;
-		this->piece_offset = glm::dmat4(1.0);
-		this->attached_to = "";
-		this->welded = false;
-		this->editor_dettachable = false;
 	}
 
 	// We have to declare copy constructor

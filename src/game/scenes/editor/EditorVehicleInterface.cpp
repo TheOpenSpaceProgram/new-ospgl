@@ -37,6 +37,9 @@ void EditorVehicleInterface::attach(Piece* target, std::string port)
 	selected->from_attachment = selected_attachment->marker;
 	selected->to_attachment = port;
 
+	// TODO: Links
+	selected->welded = true;
+
 	//use_attachment_port(selected, selected_attachment->marker);
 	if(port != "")
 	{

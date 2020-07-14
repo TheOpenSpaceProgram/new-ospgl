@@ -138,8 +138,7 @@ public:
 
 	glm::dmat4 get_graphics_matrix();
 
-	void set_dirty();
-
+	void set_dirty(bool update_now);
 	// The piece OWNS the link, which can be null
 	std::unique_ptr<Link> link;
 	// The point in our collider where the link originates
@@ -160,6 +159,9 @@ public:
 	std::vector<std::pair<PieceAttachment, bool>> attachments;
 	// Can the piece be dettached in the editor? Useful for multi-piece parts
 	bool editor_dettachable;
+
+	// Don't hold the pointer for very long!
+	std::pair<PieceAttachment, bool>* find_attachment(std::string marker_name);
 
 	Marker& get_marker(const std::string& marker_name);
 

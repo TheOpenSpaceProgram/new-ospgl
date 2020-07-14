@@ -147,7 +147,7 @@ btVector3 Piece::get_relative_position()
 	}
 }	 
 
-void Piece::set_dirty()
+void Piece::set_dirty(bool update_now)
 {
 	if (in_group != nullptr)
 	{
@@ -159,6 +159,25 @@ void Piece::set_dirty()
 	}
 
 	in_vehicle->unpacked_veh.dirty = true;
+
+	if(update_now)
+	{
+		in_vehicle->unpacked_veh.update();
+	}
+}
+
+
+std::pair<PieceAttachment, bool>* Piece::find_attachment(std::string marker_name) 
+{
+	for(auto& pair : attachments)
+	{
+		if(pair.first.marker == marker_name)
+		{
+			return &pair;
+		}
+	}	
+
+	return nullptr;
 }
 
 glm::dvec3 Piece::transform_axis(glm::dvec3 axis)

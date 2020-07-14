@@ -19,6 +19,13 @@ private:
 
 	bool breaking_enabled;
 public:
+	struct PieceState
+	{
+		btTransform transform;
+		btVector3 linear;
+		btVector3 linear_tang;
+		btVector3 angular;
+	};
 	Vehicle* vehicle;
 
 	btDynamicsWorld* world;
@@ -31,11 +38,11 @@ public:
 
 	// Call every frame, it checks the dirty flag
 	// Can create new vehicles if parts separate (only when unpacked)
-	std::vector<Vehicle*> update();
+	void update();
 
 	// Called automatically by update to rebuild the physics
 	// whenever the dirty flag is set
-	void build_physics();
+	void build_physics(std::unordered_map<Piece*, PieceState>& states_at_start);
 
 	// Piece gets 0 velocity and angular momentum
 	// Use only while building the vehicle, all at once
