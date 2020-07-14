@@ -75,7 +75,17 @@ public:
 
 	void draw_highlight(Piece* p, glm::vec3 color, CameraUniforms& cu);
 
+	void deserialize(cpptoml::table& from);
 
 	EditorVehicle();
 
+};
+
+template<>
+class GenericSerializer<EditorVehicle>
+{
+public:
+
+	static void serialize(const EditorVehicle& what, cpptoml::table& target);
+	static void deserialize(EditorVehicle& to, const cpptoml::table& from);
 };

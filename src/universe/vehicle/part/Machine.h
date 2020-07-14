@@ -18,12 +18,12 @@ class Machine
 private:
 
 
-	Part* in_part;
 	std::vector<Machine*> get_connected_if(std::function<bool(Machine*)> fnc, bool include_this);
 
 	std::string in_pkg;
 
 public:
+	Part* in_part;
 
 	// All Machines share the same lua_state to allow sharing data
 	sol::state* lua_state;

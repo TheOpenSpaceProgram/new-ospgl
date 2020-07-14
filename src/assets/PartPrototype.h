@@ -16,6 +16,8 @@ struct Marker
 
 struct PieceAttachment
 {
+	// Hidden attachment only provide a marker
+	bool hidden;
 	std::string marker, name;
 	bool radial, stack;
 	double size;	
@@ -27,6 +29,8 @@ struct PieceAttachment
 // NOTE: Colliders are always Z axis is up (same as blender!)
 struct PiecePrototype
 {
+	std::string name;
+
 	GPUModelNodePointer model_node;
 
 	btCollisionShape* collider;
@@ -49,6 +53,7 @@ struct PiecePrototype
 	
 	void copy(const PiecePrototype& b)
 	{
+		this->name = b.name;
 		this->collider = b.collider;
 		this->collider_offset = b.collider_offset;
 		this->render_offset = b.render_offset;
@@ -66,6 +71,7 @@ struct PiecePrototype
 
 	PiecePrototype(GPUModelNodePointer&& n) : model_node(std::move(n))
 	{
+		this->name = "";
 		this->collider = nullptr;
 		this->render_offset = glm::dmat4(1.0);
 		this->collider_offset = btTransform::getIdentity();

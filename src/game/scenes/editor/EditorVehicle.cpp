@@ -62,6 +62,7 @@ void EditorVehicle::forward_pass(CameraUniforms& cu)
 			for(std::pair<PieceAttachment, bool>& pair : p->attachments)
 			{
 				PieceAttachment& attch = pair.first;
+				if(attch.hidden){ continue; }
 
 				glm::dvec3 pos = p->get_marker_position(attch.marker);
 				glm::dquat quat = p->get_marker_rotation(attch.marker);
@@ -125,6 +126,12 @@ void EditorVehicle::update(double dt)
 {
 	veh->editor_update(dt);
 
+	if(input->key_down(GLFW_KEY_S))
+	{
+		auto table = cpptoml::make_table();
+		GenericSerializer<EditorVehicle>::serialize(*this, *table);
+		SerializeUtil::write_to_file(*table, "udata/vehicles/saved.toml");
+	}
 }
 
 
@@ -163,7 +170,6 @@ EditorVehicle::EditorVehicle() : Drawable()
 
 }
 
-
 void EditorVehicle::draw_highlight(Piece* p, glm::vec3 color, CameraUniforms& cu)
 {
 	// Override the hover color
@@ -171,4 +177,20 @@ void EditorVehicle::draw_highlight(Piece* p, glm::vec3 color, CameraUniforms& cu
 	over.uniforms["color"] = Uniform(color);
 
 	p->model_node->draw_override(cu, &(*mat_hover), p->get_graphics_matrix(), drawable_uid, &over, true);
+}
+
+
+void GenericSerializer<EditorVehicle>::serialize(const EditorVehicle& what, cpptoml::table& target) 
+{
+	// Code is very different for in flight vehicle serialization as the editor creates a big
+	// bunch of meta-data, but the basic stuff provided by the vehicle serialization works
+	// fine as a "starting material"
+	GenericSerializer<Vehicle>::serialize(*what.veh, target);
+	
+	// We not attach all the metadata
+}
+
+void GenericSerializer<EditorVehicle>::deserialize(EditorVehicle& to, const cpptoml::table& from) 
+{
+	
 }

@@ -4,9 +4,13 @@
 #include <util/serializers/glm.h>
 #include <physics/glm/BulletGlmCompat.h>
 
+// We don't use traditional serialization because this is a huge task
 class VehicleLoader
 {
 private:
+
+	int64_t vpart_id;
+	int64_t vpiece_id;
 
 	Vehicle* n_vehicle;
 	std::unordered_map<int64_t, Part*> parts_by_id;

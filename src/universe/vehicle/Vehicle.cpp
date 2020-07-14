@@ -65,7 +65,6 @@ void Vehicle::editor_update(double dt)
 	{
 		part->editor_update(dt);
 	}
-
 }
 
 
@@ -179,19 +178,6 @@ void Vehicle::sort()
 	all_pieces = sorted;
 }
 
-Piece* Vehicle::get_piece(int64_t id)
-{
-	auto it = id_to_piece.find(id);
-	logger->check(it != id_to_piece.end(), "Wrong piece id ({})", id);
-	return it->second;
-}
-
-Part* Vehicle::get_part(int64_t id)
-{
-	auto it = id_to_part.find(id);
-	logger->check(it != id_to_part.end(), "Wrong piece id ({})", id);
-	return it->second;
-}
 
 Vehicle::Vehicle() : unpacked_veh(this), packed_veh(this)
 {
@@ -201,6 +187,8 @@ Vehicle::~Vehicle()
 {
 	for(Part* p : parts)
 	{
+		// We delete the parts as if they are in this vehicle it means
+		// they are owned by this vehicle
 		delete p;
 	}
 
@@ -211,6 +199,7 @@ Vehicle::~Vehicle()
 
 	// Ports are deleted by the machines
 }
+
 
 std::vector<Piece*> Vehicle::get_children_of(Piece* p)
 {
@@ -237,4 +226,144 @@ std::vector<Piece*> Vehicle::get_children_of(Piece* p)
 	out.insert(out.end(), sub_children.begin(), sub_children.end());
 
 	return out;
+}
+
+void GenericSerializer<Vehicle>::serialize(const Vehicle& what, cpptoml::table& target) 
+{
+	logger->check(what.is_packed(), "Cannot serialize a unpacked vehicle");
+	// First we assign every piece and part an ID
+	std::unordered_map<Piece*, int64_t> piece_to_id;
+	std::unordered_map<Part*, int64_t> part_to_id;
+
+	int64_t piece_id = 0;
+	int64_t part_id = 0;
+	for(Piece* p : what.all_pieces)
+	{
+		piece_id++;
+		piece_to_id[p] = piece_id;
+	}
+
+	for(Part* p : what.parts)
+	{
+		part_id++;
+		part_to_id[p] = part_id;
+	}
+
+	// These are used as a sanity check
+	target.insert("piece_id", piece_id + 1);
+	target.insert("part_id", part_id + 1);
+
+	auto part_array = cpptoml::make_table_array();
+	// Write all the parts
+	for(auto pair : part_to_id)
+	{
+		auto table = cpptoml::make_table();
+
+		table->insert("id", pair.second);
+		table->insert("proto", pair.first->part_proto.pkg + ":" + pair.first->part_proto.name);
+		// TODO: Everything else
+
+		part_array->push_back(table);		
+	}
+	target.insert("part", part_array);
+
+	// Write all the pieces
+	auto piece_array = cpptoml::make_table_array();
+	for(auto pair : piece_to_id)
+	{
+		auto table = cpptoml::make_table();
+
+		table->insert("id", pair.second);
+		if(pair.first->part != nullptr)
+		{
+			table->insert("part", part_to_id[pair.first->part]);
+		}
+		else
+		{
+			// TODO: We need to insert the prototype anyway to load the piece properties
+			// ? Insert the asset path of the prototype
+		}
+
+		table->insert("node", pair.first->piece_prototype->name);
+		auto pos_table = cpptoml::make_table();
+		auto rot_table = cpptoml::make_table();
+		GenericSerializer<glm::dvec3>::serialize(to_dvec3(pair.first->packed_tform.getOrigin()), *pos_table);
+		GenericSerializer<glm::dquat>::serialize(to_dquat(pair.first->packed_tform.getRotation()), *rot_table);
+		table->insert("pos", pos_table);
+		table->insert("rot", rot_table);
+
+		if(pair.first->attached_to != nullptr)
+		{
+			// Serialize the link
+			auto link = cpptoml::make_table();
+
+			link->insert("to", piece_to_id[pair.first->attached_to]);
+			link->insert("welded", pair.first->welded);
+			// TODO: Insert links, link orientation, etc...
+			
+			if(pair.first->from_attachment != "")
+			{
+				link->insert("from_attachment", pair.first->from_attachment);
+			}
+
+			if(pair.first->to_attachment != "")
+			{
+				link->insert("to_attachment", pair.first->to_attachment);
+			}
+
+			table->insert("link", link);
+		}
+
+		piece_array->push_back(table);
+	}
+	target.insert("piece", piece_array);
+
+	// Insert all the wires, we want to insert only a single copy of each
+	auto wire_array = cpptoml::make_table_array();
+
+	std::set<std::pair<Machine*, Machine*>> seen_pairs;
+
+	for(auto pair : what.wires)
+	{
+		auto rpair = std::make_pair(pair.second, pair.first);
+		if(seen_pairs.find(pair) == seen_pairs.end() &&
+			seen_pairs.find(rpair) == seen_pairs.end())
+		{
+			seen_pairs.insert(pair);
+
+			auto wire = cpptoml::make_table();
+
+			std::string fmachine = "";
+			std::string tmachine = "";
+			for(auto m : pair.first->in_part->machines)
+			{
+				if(m.second == pair.first)
+				{
+					fmachine = m.first;
+				}
+			}
+			for(auto m : pair.second->in_part->machines)
+			{
+				if(m.second == pair.second)
+				{
+					tmachine = m.first;
+				}
+			}
+
+			logger->check(fmachine != "" && tmachine != "", "Invalid machines");
+
+			wire->insert("from", part_to_id[pair.first->in_part]);
+			wire->insert("fmachine", fmachine);
+			wire->insert("to", part_to_id[pair.second->in_part]);
+			wire->insert("tmachine", tmachine);
+
+			wire_array->push_back(wire);
+		}
+	}
+	target.insert("wire", wire_array);
+}
+
+void GenericSerializer<Vehicle>::deserialize(Vehicle& to, const cpptoml::table& from) 
+{
+	
 }

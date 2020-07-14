@@ -9,10 +9,19 @@
 void PieceAttachment::load(const cpptoml::table& from)
 {
 	SAFE_TOML_GET(marker, "marker", std::string);
-	SAFE_TOML_GET(name, "name", std::string);
-	SAFE_TOML_GET_OR(radial, "radial", bool, false);
-	SAFE_TOML_GET_OR(stack, "stack", bool, true);
-	SAFE_TOML_GET(size, "size", double);
+	SAFE_TOML_GET_OR(hidden, "hidden", bool, false);
+	if(!hidden)
+	{
+		SAFE_TOML_GET(name, "name", std::string);
+		SAFE_TOML_GET_OR(radial, "radial", bool, false);
+		SAFE_TOML_GET_OR(stack, "stack", bool, true);
+		SAFE_TOML_GET(size, "size", double);
+	}
+	else
+	{
+		radial = false;
+		stack = false;
+	}
 }
 
 
@@ -23,6 +32,7 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 	auto node_toml = toml.get_table(n->name);
 
 	proto.piece_offset = n->sub_transform;
+	proto.name = n->name;
 
 	bool loaded = false;
 	// Extract collider, the hardest part

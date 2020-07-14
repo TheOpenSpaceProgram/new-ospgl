@@ -73,9 +73,6 @@ public:
 	friend class Piece;
 	friend class Part;
 
-	int64_t part_id;
-	int64_t piece_id;	
-	
 	std::vector<Piece*> all_pieces;
 	Piece* root;
 
@@ -88,7 +85,7 @@ public:
 	void pack();
 
 	void unpack();
-	bool is_packed() { return packed; }
+	bool is_packed() const { return packed; }
 
 	void set_position(glm::dvec3 pos);
 	void set_linear_velocity(glm::dvec3 vel);
@@ -126,10 +123,15 @@ public:
 	// It allows finding children of separated parts
 	std::vector<Piece*> get_children_of(Piece* p);
 
-	Piece* get_piece(int64_t id);
-	Part* get_part(int64_t id);
-
 	Vehicle();
 	~Vehicle();
 };
 
+template<>
+class GenericSerializer<Vehicle>
+{
+public:
+
+	static void serialize(const Vehicle& what, cpptoml::table& target);
+	static void deserialize(Vehicle& to, const cpptoml::table& from);
+};

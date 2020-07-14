@@ -12,8 +12,8 @@ Vehicle* VehicleLoader::get_vehicle()
 void VehicleLoader::load_metadata(cpptoml::table& root)
 {
 	// TODO: Description and package check
-	n_vehicle->part_id = *root.get_qualified_as<int64_t>("part_id");
-	n_vehicle->piece_id = *root.get_qualified_as<int64_t>("piece_id");
+	vpart_id = *root.get_qualified_as<int64_t>("part_id");
+	vpiece_id = *root.get_qualified_as<int64_t>("piece_id");
 
 }
 
@@ -28,8 +28,8 @@ void VehicleLoader::obtain_parts(cpptoml::table& root)
 		Part* n_part = new Part(part_proto, part);
 
 		n_part->id = *part->get_qualified_as<int64_t>("id");
-		logger->check(n_part->id <= n_vehicle->part_id, "Malformed vehicle, part ID too big ({}/{})", 
-				n_part->id, n_vehicle->part_id);
+		logger->check(n_part->id <= vpart_id, "Malformed vehicle, part ID too big ({}/{})", 
+				n_part->id, vpart_id);
 
 		n_vehicle->parts.push_back(n_part);
 		parts_by_id[n_part->id] = n_part;

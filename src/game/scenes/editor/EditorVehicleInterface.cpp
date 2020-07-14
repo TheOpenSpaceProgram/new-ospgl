@@ -37,11 +37,11 @@ void EditorVehicleInterface::attach(Piece* target, std::string port)
 	selected->from_attachment = selected_attachment->marker;
 	selected->to_attachment = port;
 
-	use_attachment_port(selected, selected_attachment->marker);
+	//use_attachment_port(selected, selected_attachment->marker);
 	if(port != "")
 	{
 		logger->info("Using port: {}", port);
-		use_attachment_port(target, port);
+		//use_attachment_port(target, port);
 	}
 
 	selected = nullptr;
@@ -235,6 +235,7 @@ Piece* EditorVehicleInterface::try_attach_stack(glm::dvec3 r0, glm::dvec3 r1, gl
 		{
 			selected_rotation = MathUtil::quat_look_at(glm::dvec3(0), closest_fw);
 			selected_offset = closest_pos - selected_pos;
+			attach_to_marker = closest_attch;
 			return closest;
 		}
 		else
@@ -401,7 +402,7 @@ PieceAttachment* EditorVehicleInterface::find_free_attachment()
 	// Find the first free attachment
 	for(int i = 0; i < selected->attachments.size(); i++)
 	{
-		if(!selected->attachments[i].second)
+		if(!selected->attachments[i].second && !selected->attachments[i].first.hidden)
 		{
 			//selected_attachment = selected->attachments[i].first.marker;
 			return &selected->attachments[i].first;
@@ -422,7 +423,7 @@ void EditorVehicleInterface::cycle_attachments(int dir)
 			cur_index = i;
 		}
 
-		if(!selected->attachments[i].second)
+		if(!selected->attachments[i].second && !selected->attachments[i].first.hidden)
 		{
 			any_free = true;
 		}
@@ -447,7 +448,7 @@ void EditorVehicleInterface::cycle_attachments(int dir)
 			cur_index = selected->attachments.size() - 1;	
 		}
 		
-		if(!selected->attachments[cur_index].second)
+		if(!selected->attachments[cur_index].second && !selected->attachments[cur_index].first.hidden)
 		{
 			selected_attachment = &selected->attachments[cur_index].first;
 			found = true;
@@ -646,11 +647,10 @@ void EditorVehicleInterface::reroot(Piece* current, Piece* new_root)
 			(*it)->link_to = (*next)->link_from;
 			// TODO: Invert this too
 			(*it)->link_rot = (*next)->link_rot;
-
-
-
 		}
 	}	
+
+	edveh->veh->update_attachments();
 
 }
 

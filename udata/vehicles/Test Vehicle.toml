@@ -1,6 +1,3 @@
-
-description = "A very cool testing vehicle"
-packages = ["test_parts"]
 part_id = 4
 piece_id = 4
 
