@@ -16,18 +16,6 @@ Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg)
 
 void Machine::load_interface(const std::string& name, sol::table n_table) 
 {
-	auto it = interfaces.find(name);	
-	// We do this check anyway to try to keep the code consistent and avoid
-	// multiple interface loads (of the same interface) in the same machine
-	if(it != interfaces.end())
-	{
-		logger->fatal("Tried to load an interface which was already loaded ({})", name);
-	}
-
-	// We add ourselves to the table for easier code
-	// TODO: Naming, maybe use a subtable?
-	n_table["machine"] = this;
-
 	interfaces.insert(std::make_pair(name, n_table));
 }
 

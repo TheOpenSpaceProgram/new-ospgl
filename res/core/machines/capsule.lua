@@ -24,9 +24,9 @@ function pre_update(dt)
 	-- Axis goes from -1 to 1, we need to go from 0 to 1
 	local in_throttle = (input_ctx:get_axis("throttle") + 1.0) * 0.5
 
-	local all_engines = machine:get_wired_interfaces("core:interfaces/engine.lua")
-	for _, engine in all_engines:pairs() do
-		engine.throttle = in_throttle
+	local all_throttleable = machine:get_wired_interfaces("core:interfaces/throttleable.lua")
+	for _, throttleable in all_throttleable:pairs() do
+		throttleable.throttle = in_throttle
 	end
 
 	if input_ctx:get_action_down("stage") then 

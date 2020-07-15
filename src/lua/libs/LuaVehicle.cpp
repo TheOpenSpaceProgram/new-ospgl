@@ -75,18 +75,29 @@ void LuaVehicle::load_to(sol::table& table)
 
 	table.new_usertype<Machine>("machine",
 		"init_toml", &Machine::init_toml,
-		"load_interface", [](Machine& self, const std::string& iname, sol::this_state st)
+		"load_interface", [](Machine* self, const std::string& iname, sol::this_state tst)
 		{
-			sol::state_view sv(st);
+			sol::state_view sv = tst;
+			sol::environment env = sol::environment(sv, sol::create, sv.globals());
+			// We also add the special function 'create_interface' to the environment
+			// (Yep this is a nested lambda)
+			env["create_interface"] = [self](sol::this_state tst)
+			{
+				sol::state_view sv = tst;
+				sol::table out = sv.create_table();
+
+				out["machine"] = self;
+
+				return out;
+			};
+
 			auto[pkg, name] = assets->get_package_and_name(iname, sv["__pkg"]);
 			std::string sane_name = pkg + ":" + name;
-			auto result = sv.safe_script("return require(\"" + sane_name + "\")");
-			sol::table n_table = result.get<sol::table>();
-			// We give this one to the machine
-			self.load_interface(sane_name, n_table);
+			std::string script = assets->load_string(sane_name);
+			sol::table n_table = sv.script(script, env, (const std::string&) sane_name).get<sol::table>();
+			self->load_interface(sane_name, n_table);
 			return n_table;
 		},
-
 		"get_all_wired_machines", sol::overload([](Machine& self)
 		{
 			return self.get_all_wired_machines();
@@ -130,5 +141,7 @@ void LuaVehicle::load_to(sol::table& table)
 		"get_interface", &Machine::get_interface
 		
 	);
+
+
 
 }

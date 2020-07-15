@@ -4,14 +4,12 @@ require("toml")
 local glm = require("glm")
 local debug_drawer = require("debug_drawer")
 
-local thrust = machine.init_toml:get_number("thrust")
-local throttle = 0.0
+local engine = machine:load_interface("core:interfaces/engine.lua")
+engine.thrust = machine.init_toml:get_number("thrust")
+
 local nozzle = machine.init_toml:get_string("nozzle")
 local nozzle_dir = nil
 local nozzle_pos = nil
-local engine = machine:load_interface("core:interfaces/engine.lua")
-
-engine.wow = "WOw"
 
 function engine:get_nozzle_position()
 	local p_root = part:get_piece("p_root")
@@ -25,6 +23,10 @@ function engine:get_nozzle_forward()
 	return -p_root:transform_axis(nozzle_dir)
 end
 
+function engine:get_piece()
+	return part:get_piece("p_root")
+end
+
 function pre_update(dt)
 	if nozzle_dir == nil then 
 		nozzle_dir = part:get_piece("p_root"):get_marker_forward(nozzle)
@@ -33,21 +35,6 @@ function pre_update(dt)
 end
 
 function update(dt)
-	local f_thrust = thrust * engine.throttle 
-
-	if f_thrust > 0 then
-
-		local p_root = part:get_piece("p_root")
-		local rdir = engine:get_nozzle_forward()
-		local rpos = engine:get_nozzle_position()
-
-		p_root.rigid_body:apply_force(rdir * f_thrust, rpos)
-
-		-- Draw flame
-		local fpos = glm.vec3.new(p_root:get_graphics_transform():to_mat4() * glm.vec4.new(nozzle_pos, 1.0))
-		debug_drawer.add_cone(fpos, fpos - rdir * 10.0 * engine.throttle, 0.5, glm.vec3.new(1.0, 1.0, 0.0))
-
-	end
-
+	engine:update()
 end
 
