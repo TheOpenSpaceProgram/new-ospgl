@@ -291,7 +291,6 @@ static void create_piece_physics(Piece* piece,
 	rigid_body->setRestitution(piece->restitution);
 	rigid_body->setWorldTransform(states_at_start[piece].transform);
 
-
 	// Apply old impulses
 	rigid_body->setLinearVelocity(states_at_start[piece].linear_tang);
 	rigid_body->setAngularVelocity(states_at_start[piece].angular);
@@ -300,7 +299,7 @@ static void create_piece_physics(Piece* piece,
 
 	piece->rigid_body = rigid_body;
 	piece->motion_state = motion_state;
-
+	
 }
 
 void UnpackedVehicle::update()

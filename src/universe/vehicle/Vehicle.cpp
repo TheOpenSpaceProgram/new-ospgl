@@ -240,15 +240,39 @@ std::vector<Piece*> Vehicle::get_attached_to(Piece* target)
 	return out;
 }
 
+std::vector<Piece*> Vehicle::get_connected_to(Piece* target)
+{
+	std::vector<Piece*> attached = get_attached_to(target);
+	if(target->attached_to != nullptr)
+	{
+		attached.push_back(target->attached_to);
+	}
 
-Piece* Vehicle::get_attached_to(Piece* p, const std::string& attachment_marker) 
+	return attached;
+}
+
+Piece* Vehicle::get_connected_with(Piece* p, const std::string& attachment_marker) 
 {
 	std::vector<Piece*> all = get_attached_to(p);
-	for(Piece* p : all)
+	// We aditionally check p to see if it's attached through attachment_marker
+	all.push_back(p);
+	for(Piece* subp : all)
 	{
-		if(p->to_attachment == attachment_marker)
+		if(subp == p)
 		{
-			return p;
+			// This is needed as it's from_attachment when p is attaching
+			// and not to_attachment
+			if(subp->from_attachment == attachment_marker)
+			{
+				return subp;
+			}
+		}
+		else
+		{
+			if(subp->to_attachment == attachment_marker)
+			{
+				return subp;
+			}
 		}
 		// * Note that attachments allow only one attached piece
 	}

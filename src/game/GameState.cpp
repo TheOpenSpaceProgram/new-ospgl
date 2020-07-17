@@ -81,13 +81,15 @@ void GameState::update()
 		delete to_delete;
 		to_delete = nullptr;
 	}
-
+	
 	universe.update(osp->dt);
-
+	
 	if(scene)
 	{
 		scene->update();
 	}
+
+
 }
 
 void GameState::render()

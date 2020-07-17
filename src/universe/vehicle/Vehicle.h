@@ -124,8 +124,12 @@ public:
 	// It allows finding children of separated parts
 	std::vector<Piece*> get_children_of(Piece* p);
 
+	// Does not include what p is attached to!
 	std::vector<Piece*> get_attached_to(Piece* p);
-	Piece* get_attached_to(Piece* p, const std::string& attachment_marker);
+	// This one does include wathever p is attached to
+	std::vector<Piece*> get_connected_to(Piece* p);
+	// This potentially includes p if it's attached through said marker!
+	Piece* get_connected_with(Piece* p, const std::string& attachment_marker);
 
 	Vehicle();
 	~Vehicle();

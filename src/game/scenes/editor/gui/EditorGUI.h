@@ -25,6 +25,9 @@ private:
 	int prev_width, prev_height;
 	EditorVehicleInterface* edveh_int;
 
+	void prepare_toolset();
+	void prepare_file();
+
 public:
 
 	friend class EditorTrashcan;
@@ -37,7 +40,12 @@ public:
 	EditorPartList part_list;
 	EditorTrashcan trashcan;
 
+	GUICanvas toolset_canvas;
+	GUICanvas file_canvas;
+
 	void do_gui(int width, int height, GUIInput* gui_input);	
+	void do_toolset(int width, int height, float swidth, GUIInput* gui_input);
+	void do_file(int width, int height, GUIInput* gui_input);
 
 	void init(EditorScene* scene);
 

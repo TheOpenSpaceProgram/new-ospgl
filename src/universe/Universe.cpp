@@ -63,14 +63,16 @@ void Universe::update(double dt)
 {
 	if(!paused)
 	{
+		// update is BEFORE the physics!
 		system.update(dt, bt_world, false);
-
-		bt_world->stepSimulation(dt, MAX_PHYSICS_STEPS, PHYSICS_STEPSIZE);
 
 		for (Entity* e : entities)
 		{
 			e->update(dt);
 		}
+
+		bt_world->stepSimulation(dt, MAX_PHYSICS_STEPS, PHYSICS_STEPSIZE);
+
 	}
 
 }
