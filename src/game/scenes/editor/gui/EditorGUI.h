@@ -6,6 +6,7 @@
 #include <assets/Image.h>
 #include <assets/AssetManager.h>
 #include <gui/skins/SimpleSkin.h>
+#include <gui/widgets/GUIImageButton.h>
 #include "../EditorVehicleInterface.h"
 
 #include "EditorPartList.h"
@@ -33,6 +34,18 @@ public:
 	friend class EditorTrashcan;
 	friend class EditorPartList;
 
+	enum EditorMode
+	{
+		ATTACHING,
+		TRANSFORMING,
+		WIRING,
+		PLUMBING,
+		ELECTRIC_WIRING
+	};
+
+	EditorMode editor_mode;
+	GUIImageButton* current_editor_mode_button;
+
 	SimpleSkin skin;
 
 	NVGcontext* vg;
@@ -48,6 +61,8 @@ public:
 	void do_file(int width, int height, GUIInput* gui_input);
 
 	void init(EditorScene* scene);
+
+	void set_editor_mode(EditorMode mode);
 
 
 	int get_panel_width();

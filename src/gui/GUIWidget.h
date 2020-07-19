@@ -21,6 +21,9 @@ public:
 	// Set by the Layout during prepare
 	bool is_visible;	
 
+	// If the widget can block the mouse, this can disable that functionality
+	bool blocks_mouse = true;
+
 	
 
 	// Return the size you used

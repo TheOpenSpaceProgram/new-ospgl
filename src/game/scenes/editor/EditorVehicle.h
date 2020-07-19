@@ -77,7 +77,7 @@ public:
 
 	void deserialize(cpptoml::table& from);
 
-	EditorVehicle();
+	EditorVehicle(EditorScene* scene);
 
 };
 

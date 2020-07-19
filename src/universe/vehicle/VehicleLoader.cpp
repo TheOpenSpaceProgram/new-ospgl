@@ -1,15 +1,6 @@
 #include "VehicleLoader.h"
 
-Vehicle* VehicleLoader::get_vehicle()
-{
-	Vehicle* to_return = n_vehicle;
-	n_vehicle = nullptr;
-	// We give ownership to whoever takes the pointer, but don't 
-	// use a smart pointer for code simplicity
-	return to_return;
-}
-
-void VehicleLoader::load_metadata(cpptoml::table& root)
+void VehicleLoader::load_metadata(const cpptoml::table& root)
 {
 	// TODO: Description and package check
 	vpart_id = *root.get_qualified_as<int64_t>("part_id");
@@ -17,7 +8,7 @@ void VehicleLoader::load_metadata(cpptoml::table& root)
 
 }
 
-void VehicleLoader::obtain_parts(cpptoml::table& root)
+void VehicleLoader::obtain_parts(const cpptoml::table& root)
 {
 	auto parts = root.get_table_array_qualified("part");	
 
@@ -38,7 +29,7 @@ void VehicleLoader::obtain_parts(cpptoml::table& root)
 
 }
 
-Piece* VehicleLoader::load_piece(cpptoml::table& piece)
+Piece* VehicleLoader::load_piece(const cpptoml::table& piece)
 {
 	int64_t part_id = *piece.get_qualified_as<int64_t>("part");
 	std::string node = *piece.get_qualified_as<std::string>("node");
@@ -57,13 +48,9 @@ Piece* VehicleLoader::load_piece(cpptoml::table& piece)
 	n_piece->part = part;
 
 	// Load transform
-	auto pos = piece.get_table_qualified("pos");
-	auto rot = piece.get_table_qualified("rot");
-	glm::dvec3 pos_d; deserialize(pos_d, *pos);
-	glm::dvec4 rot_d; deserialize(rot_d, *rot);
-	n_piece->packed_tform.setIdentity();
-	n_piece->packed_tform.setOrigin(to_btVector3(pos_d));
-	n_piece->packed_tform.setRotation(to_btQuaternion(glm::dquat(rot_d.w, rot_d.x, rot_d.y, rot_d.z)));
+	auto transform = piece.get_array("transform");
+	glm::dmat4 tform = deserialize_matrix(*transform);
+	n_piece->packed_tform = to_btTransform(tform);
 
 	// Pre-load links (We cannot load them just yet)	
 	auto link = piece.get_table_qualified("link");
@@ -74,7 +61,7 @@ Piece* VehicleLoader::load_piece(cpptoml::table& piece)
 	return n_piece;
 }
 
-void VehicleLoader::obtain_pieces(cpptoml::table& root)
+void VehicleLoader::obtain_pieces(const cpptoml::table& root)
 {
 	auto pieces = root.get_table_array_qualified("piece");
 	root_piece = nullptr;
@@ -100,7 +87,7 @@ void VehicleLoader::obtain_pieces(cpptoml::table& root)
 
 }
 
-void VehicleLoader::copy_pieces(cpptoml::table& root)
+void VehicleLoader::copy_pieces(const cpptoml::table& root)
 {
 	n_vehicle->all_pieces.push_back(root_piece);
 	n_vehicle->root = root_piece;
@@ -140,7 +127,7 @@ void VehicleLoader::copy_pieces(cpptoml::table& root)
 	}
 }
 
-void VehicleLoader::obtain_wires(cpptoml::table& root)
+void VehicleLoader::obtain_wires(const cpptoml::table& root)
 {
 	auto wires = root.get_table_array_qualified("wire");
 	if(wires)
@@ -200,9 +187,9 @@ void VehicleLoader::obtain_wires(cpptoml::table& root)
 	}
 }
 
-VehicleLoader::VehicleLoader(cpptoml::table& root)
+VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to)
 {
-	n_vehicle = new Vehicle();
+	n_vehicle = &to;
 
 	load_metadata(root);
 	obtain_parts(root);

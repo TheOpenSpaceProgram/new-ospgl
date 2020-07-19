@@ -44,9 +44,6 @@ void EditorScene::load()
 
 	lua_core->load(lua_state, "__UNDEFINED__");
 
-	vehicle.scene = this;
-	vehicle_int.scene = this;
-	vehicle_int.edveh = &vehicle;
 	vehicle.init(&lua_state);
 }
 
@@ -69,10 +66,13 @@ void EditorScene::update()
 	glm::dvec2 real_screen_size = 
 		glm::dvec2(get_osp()->renderer->get_width(true), get_osp()->renderer->get_height(true));
 
-	vehicle_int.handle_input(
+	if(!gui_input.mouse_blocked)
+	{
+		vehicle_int.handle_input(
 			cam.get_camera_uniforms(rw, get_osp()->renderer->get_height(true)), 
 			viewport, real_screen_size,
 			&gui_input); 
+	}
 	
 	bt_world->updateAabbs();
 
@@ -109,6 +109,10 @@ void EditorScene::unload()
 	delete bt_brf_interface;
 	delete bt_dispatcher;
 	delete bt_collision_config;
+}
+
+EditorScene::EditorScene() : vehicle(this), vehicle_int(&vehicle, &cam)
+{
 }
 
 

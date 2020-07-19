@@ -51,4 +51,6 @@ public:
 	virtual void render() override;
 	virtual void unload() override;
 
+	EditorScene();
+
 };

@@ -4,7 +4,9 @@
 #include <util/serializers/glm.h>
 #include <physics/glm/BulletGlmCompat.h>
 
-// We don't use traditional serialization because this is a huge task
+
+// This is used internally by Vehicle::deserialize as it's cleaner this way
+// so it's not a single huge function
 class VehicleLoader
 {
 private:
@@ -20,17 +22,15 @@ private:
 	Piece* root_piece;
 
 
-	void load_metadata(cpptoml::table& root);
-	void obtain_parts(cpptoml::table& root);
-	void obtain_pieces(cpptoml::table& root);
-	void copy_pieces(cpptoml::table& root);
-	void obtain_wires(cpptoml::table& root);
+	void load_metadata(const cpptoml::table& root);
+	void obtain_parts(const cpptoml::table& root);
+	void obtain_pieces(const cpptoml::table& root);
+	void copy_pieces(const cpptoml::table& root);
+	void obtain_wires(const cpptoml::table& root);
 
-	Piece* load_piece(cpptoml::table& piece);
+	Piece* load_piece(const cpptoml::table& piece);
 
 public:
 
-	Vehicle* get_vehicle();
-
-	VehicleLoader(cpptoml::table& root);
+	VehicleLoader(const cpptoml::table& root, Vehicle& to);
 };

@@ -30,7 +30,7 @@ void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 	nvgFill(vg);
 
 	
-	if(edveh_int->selected == nullptr)
+	if(edveh_int->attach_interface.selected == nullptr)
 	{
 		part_list.do_gui(width, get_panel_width(), height, gui_input);
 	}
@@ -57,8 +57,8 @@ void EditorGUI::do_toolset(int width, int height, float swidth, GUIInput* gui_in
 	nvgMoveTo(vg, swidth, 0.0f);
 	nvgLineTo(vg, swidth + twidth + theight, 0.0f);
 	nvgLineTo(vg, swidth + twidth, theight);
-	nvgLineTo(vg, 0.0f, theight);
-	nvgLineTo(vg, 0.0f, 0.0f);
+	nvgLineTo(vg, swidth, theight);
+	nvgLineTo(vg, swidth, 0.0f);
 	nvgFillColor(vg, skin.background_color);
 	nvgFill(vg);
 
@@ -104,7 +104,21 @@ void EditorGUI::init(EditorScene* sc)
 
 }
 
-
+void EditorGUI::set_editor_mode(EditorMode mode) 
+{
+	editor_mode = mode;
+	
+	edveh_int->current_interface->leave();
+	switch(mode)
+	{
+		case ATTACHING:
+			edveh_int->current_interface = &edveh_int->attach_interface;
+			break;
+		case WIRING:	
+			edveh_int->current_interface = &edveh_int->wire_interface;
+			break;
+	}
+}
 
 void EditorGUI::prepare_toolset() 
 {	
@@ -113,19 +127,36 @@ void EditorGUI::prepare_toolset()
 	tlayout->vscrollbar.draw = false;
 	toolset_canvas.layout = tlayout;
 
-	auto create_button = [tlayout, this](const std::string& name)
+	auto create_button = [tlayout, this](const std::string& name, EditorMode mode)
 	{
 		GUIImageButton* button = new GUIImageButton();
 		button->set_image(vg, assets->get<Image>("core", name));
 		button->force_image_size = glm::ivec2(24, 24);
 		tlayout->add_widget(button);
+
+		button->on_clicked.add_handler([this, button, mode](int btn)
+		{
+			if(this->edveh_int->can_change_editor_mode())
+			{
+				this->current_editor_mode_button->toggled = false;
+				this->current_editor_mode_button = button;
+				button->toggled = true;
+				this->set_editor_mode(mode);
+			}
+		});
+
+		return button;
 	};
 
-	create_button("editor/attach.png");
-	create_button("editor/transform.png");
-	create_button("editor/wire.png");
-	create_button("editor/duct.png");
-	create_button("editor/electric.png");
+	editor_mode = ATTACHING;
+	current_editor_mode_button = create_button("editor/attach.png", ATTACHING);
+	current_editor_mode_button->toggled = true;
+	edveh_int->current_interface = &edveh_int->attach_interface;
+
+	create_button("editor/transform.png", TRANSFORMING);
+	create_button("editor/wire.png", WIRING);
+	create_button("editor/duct.png", PLUMBING);
+	create_button("editor/electric.png", ELECTRIC_WIRING);
 }
 
 void EditorGUI::prepare_file() 

@@ -98,8 +98,8 @@ void EditorPartList::create_part(AssetHandle<PartPrototype>& proto)
 		edveh->update_collider(p);
 	}
 
-	edveh_int->selected = n_part->pieces["p_root"];
-	edveh_int->on_selection_change();
+	edveh_int->attach_interface.selected = n_part->pieces["p_root"];
+	edveh_int->attach_interface.on_selection_change();
 
 	gui_input->block_mouse[GUI_LEFT_BUTTON] = true;
 

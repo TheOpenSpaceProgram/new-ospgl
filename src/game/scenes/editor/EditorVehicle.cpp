@@ -130,7 +130,7 @@ void EditorVehicle::update(double dt)
 	{
 		auto table = cpptoml::make_table();
 		GenericSerializer<EditorVehicle>::serialize(*this, *table);
-		SerializeUtil::write_to_file(*table, "udata/vehicles/saved.toml");
+		SerializeUtil::write_to_file(*table, "udata/vehicles/debug.toml");
 	}
 }
 
@@ -148,10 +148,11 @@ void EditorVehicle::init(sol::state* lua_state)
 }
 
 
-EditorVehicle::EditorVehicle() : Drawable()
+EditorVehicle::EditorVehicle(EditorScene* sc) 
+	: Drawable(), scene(sc)
 {
-	auto vehicle_toml = SerializeUtil::load_file("udata/vehicles/saved.toml");
-	veh = VehicleLoader(*vehicle_toml).get_vehicle();
+	veh = new Vehicle();
+	SerializeUtil::read_file_to("udata/vehicles/debug.toml", *veh);
 	
 	// Load the different models
 	std::string model_path = *SerializeUtil::load_file(assets->resolve_path("core:meshes/editor_attachment.toml"))

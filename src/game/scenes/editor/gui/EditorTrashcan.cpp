@@ -24,6 +24,7 @@ void EditorTrashcan::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
 
 	// Add a single button
 	trash_button = GUIImageButton();
+	trash_button.blocks_mouse = false;
 	trash_button.set_image(vg, trash_image.data);
 	trash_button.img_mode = GUIImageButton::CENTER;
 	trash_button.on_clicked.add_handler([this](int btn)
@@ -32,6 +33,9 @@ void EditorTrashcan::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
 	});
 	trash_area_layout->add_widget(&trash_button);
 
+	// It looks better this way
+	trash_area_layout->block_mouse = false;
+
 }
 
 void EditorTrashcan::on_trash(int button)
@@ -39,8 +43,8 @@ void EditorTrashcan::on_trash(int button)
 	if(button == GUI_LEFT_BUTTON)
 	{
 		// The editor vehicle is blocked, so we are responsible for "dropping" the piece
-		Piece* parent = edgui->edveh_int->selected;
-		edgui->edveh_int->selected = nullptr;	
+		Piece* parent = edgui->edveh_int->attach_interface.selected;
+		edgui->edveh_int->attach_interface.selected = nullptr;	
 
 		EditorVehicle* edveh = edgui->edveh_int->edveh;
 

@@ -297,3 +297,6 @@ res/test_parts/**
 #!udata/settings.toml
 # And the debug save
 #!udata/saves
+
+# Development vessel
+udata/vehicles/debug.toml

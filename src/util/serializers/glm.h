@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "../SerializeUtil.h"
 
@@ -148,3 +149,29 @@ public:
 	}
 };
 
+// This is a useful function as matrices are simply a toml array
+static std::shared_ptr<cpptoml::array> serialize_matrix(glm::dmat4 mat)
+{
+	auto out = cpptoml::make_array();
+	
+	for(int i = 0; i < 4 * 4; i++)
+	{
+		out->push_back(glm::value_ptr(mat)[i]);
+	}
+	
+	return out;
+}
+
+static glm::dmat4 deserialize_matrix(cpptoml::array& array)
+{
+	glm::dmat4 out;
+	// We assume it's valid
+	auto array_of_double = *array.get_array_of<double>();
+
+	for(int i = 0; i < 4 * 4; i++)
+	{
+		glm::value_ptr(out)[i] = array_of_double[i];
+	}
+
+	return out;
+}

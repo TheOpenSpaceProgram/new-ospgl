@@ -341,12 +341,9 @@ void GenericSerializer<Vehicle>::serialize(const Vehicle& what, cpptoml::table& 
 		}
 
 		table->insert("node", pair.first->piece_prototype->name);
-		auto pos_table = cpptoml::make_table();
-		auto rot_table = cpptoml::make_table();
-		GenericSerializer<glm::dvec3>::serialize(to_dvec3(pair.first->packed_tform.getOrigin()), *pos_table);
-		GenericSerializer<glm::dquat>::serialize(to_dquat(pair.first->packed_tform.getRotation()), *rot_table);
-		table->insert("pos", pos_table);
-		table->insert("rot", rot_table);
+		auto matrix = serialize_matrix(to_dmat4(pair.first->packed_tform));
+		table->insert("transform", matrix);
+		
 
 		if(pair.first->attached_to != nullptr)
 		{
@@ -429,7 +426,9 @@ void GenericSerializer<Vehicle>::serialize(const Vehicle& what, cpptoml::table& 
 	target.insert("wire", wire_array);
 }
 
+#include "VehicleLoader.h"
+
 void GenericSerializer<Vehicle>::deserialize(Vehicle& to, const cpptoml::table& from) 
 {
-	
+	VehicleLoader(from, to);
 }
