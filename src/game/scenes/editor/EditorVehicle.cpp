@@ -42,6 +42,17 @@ void EditorVehicle::remove_collider(Piece* p)
 	}
 }
 
+void EditorVehicle::clear_meta() 
+{
+	for(auto& mp : piece_meta)
+	{
+		mp.second.highlight = glm::vec3(0.0f);
+		mp.second.draw_out_attachments = false;
+		mp.second.draw_in_attachments = true;
+		mp.second.attachment_color.clear();
+	}
+}
+
 
 void EditorVehicle::deferred_pass(CameraUniforms& cu)
 {	

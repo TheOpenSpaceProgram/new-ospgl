@@ -21,6 +21,7 @@ private:
 	std::vector<Machine*> get_connected_if(std::function<bool(Machine*)> fnc, bool include_this);
 
 	std::string in_pkg;
+	AssetHandle<Image> default_icon;
 
 public:
 	Part* in_part;
@@ -47,6 +48,8 @@ public:
 	std::vector<sol::table> get_wired_interfaces(const std::string& type, bool include_this = true);
 
 	sol::table get_interface(const std::string& name);
+
+	AssetHandle<Image> get_icon();
 
 	// Make sure AssetManager's correct current package is set,
 	// otherwise script loading MAY fail!

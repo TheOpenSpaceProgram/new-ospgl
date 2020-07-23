@@ -6,7 +6,15 @@ class EditorVehicleInterface;
 class WireInterface : public BaseInterface
 {
 private:
+	EditorVehicle* edveh;
+	EditorScene* scene;
+	EditorVehicleInterface* edveh_int;
 
+	std::vector<std::pair<Part*, std::vector<Machine*>>> visible_machines;
+	// We story a copy for the GUI drawing
+	CameraUniforms cu;
+
+	void see_part(Part* p);
 
 public:
 
@@ -18,6 +26,8 @@ public:
 	virtual void leave() override;
 
 	virtual bool can_leave() override;
+	
+	virtual void do_gui(NVGcontext* vg, GUISkin* gui_skin, glm::vec4 viewport) override;
 	
 	WireInterface(EditorVehicleInterface* edveh_int);
 

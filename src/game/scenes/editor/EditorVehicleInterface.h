@@ -42,6 +42,8 @@ public:
 		glm::dvec2 real_screen_size, GUIInput* gui_input);
 
 	void update(double dt);
+	
+	void do_gui(NVGcontext* vg, GUISkin* gui_skin, glm::vec4 viewport);
 
 	bool can_change_editor_mode();
 

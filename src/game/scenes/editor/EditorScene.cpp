@@ -72,6 +72,7 @@ void EditorScene::update()
 			cam.get_camera_uniforms(rw, get_osp()->renderer->get_height(true)), 
 			viewport, real_screen_size,
 			&gui_input); 
+		do_edveh_gui();
 	}
 	
 	bt_world->updateAabbs();
@@ -95,7 +96,17 @@ void EditorScene::do_gui()
 	float width = get_osp()->renderer->get_width(true);
 	float height = get_osp()->renderer->get_height(true);
 
+
 	gui.do_gui(width, height, &gui_input);	
+}
+
+void EditorScene::do_edveh_gui() 
+{
+	float width = get_osp()->renderer->get_width(true);
+	float height = get_osp()->renderer->get_height(true);
+	float w = (float)gui.get_panel_width();
+	glm::vec4 vport = glm::vec4(w, 0, width - w, height);
+	vehicle_int.do_gui(get_osp()->renderer->vg, &gui.skin, vport);	
 }
 
 void EditorScene::unload()

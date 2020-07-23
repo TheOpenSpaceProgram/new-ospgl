@@ -12,6 +12,7 @@ Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg)
 {	
 	this->init_toml = init_toml;
 	this->in_pkg = cur_pkg;
+	default_icon = AssetHandle<Image>("core:machines/icons/default_icon.png");
 }
 
 void Machine::load_interface(const std::string& name, sol::table n_table) 
@@ -110,6 +111,19 @@ sol::table Machine::get_interface(const std::string& name)
 	{
 		return it->second;
 	}
+}
+
+AssetHandle<Image> Machine::get_icon() 
+{
+	/*auto result = LuaUtil::call_function_if_present(env["get_icon"], "machine get_icon");
+	if(result.has_value())
+	{
+		return std::move(result->get<AssetHandle<Image>>().duplicate());
+	}
+	else
+	{*/
+		return default_icon.duplicate();
+	//}
 }
 
 Machine::~Machine()

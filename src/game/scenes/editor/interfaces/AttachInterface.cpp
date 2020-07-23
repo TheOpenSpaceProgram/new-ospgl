@@ -566,13 +566,7 @@ void AttachInterface::reroot(Piece* current, Piece* new_root)
 
 void AttachInterface::update(double dt)
 {
-	for(auto& mp : edveh->piece_meta)
-	{
-		mp.second.highlight = glm::vec3(0.0f);
-		mp.second.draw_out_attachments = false;
-		mp.second.draw_in_attachments = true;
-		mp.second.attachment_color.clear();
-	}
+	edveh->clear_meta();
 
 	if(selected == nullptr)
 	{

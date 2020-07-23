@@ -48,6 +48,14 @@ public:
 	// mouse_pos must be in normalized device coordinates [-1 -> 1], y inverted
 	static std::pair<glm::dvec3, glm::dvec3> screen_raycast(glm::dvec2 mouse_pos, glm::dmat4 inverse_camera, 
 			double distance);
+
+	// The bool indicates wether the point is in front of the camera or not
+	// Coordinates are gl clip space, use another helper function to use them on real GUI
+	static std::pair<glm::dvec2, bool> world_to_clip(glm::dmat4 proj_view, glm::dvec3 wpoint);
+
+	// Viewport is (x0, y0, w, h), as used everywhere
+	// Returns the coordinates to be fed into NanoVG
+	static glm::vec2 clip_to_screen(glm::dvec2 clip_pos, glm::vec4 viewport);
 };
 
 class ProjectionUtil

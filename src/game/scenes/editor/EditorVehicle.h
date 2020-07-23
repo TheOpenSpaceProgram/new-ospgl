@@ -59,6 +59,8 @@ public:
 	Vehicle* veh;
 	std::unordered_map<Piece*, EditorVehiclePiece> piece_meta; 
 
+	void clear_meta();
+
 	bool draw_attachments;
 
 	virtual void deferred_pass(CameraUniforms& cu) override;

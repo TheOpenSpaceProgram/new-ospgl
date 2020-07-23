@@ -225,3 +225,20 @@ std::pair<glm::dvec3, glm::dvec3> MathUtil::screen_raycast(glm::dvec2 mouse_pos,
 	return std::make_pair(ray_start, ray_end);
 }
 
+glm::vec2 MathUtil::clip_to_screen(glm::dvec2 clip_pos, glm::vec4 viewport) 
+{
+	// We round to floats
+	glm::vec2 normalized = (glm::vec2(clip_pos) + glm::vec2(1.0f, 1.0f)) * 0.5f;
+	normalized.y = 1.0f - normalized.y;
+
+	return glm::vec2(viewport.x, viewport.y) + normalized * glm::vec2(viewport.z, viewport.w);
+}
+
+std::pair<glm::dvec2, bool> MathUtil::world_to_clip(glm::dmat4 proj_view, glm::dvec3 wpoint) 
+{
+	glm::dvec4 clip_pos = proj_view * glm::dvec4(wpoint, 1.0);
+	clip_pos /= clip_pos.w;
+
+	return std::make_pair(glm::dvec2(clip_pos.x, clip_pos.y), clip_pos.z >= 0);
+}
+
