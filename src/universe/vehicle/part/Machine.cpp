@@ -115,15 +115,15 @@ sol::table Machine::get_interface(const std::string& name)
 
 AssetHandle<Image> Machine::get_icon() 
 {
-	/*auto result = LuaUtil::call_function_if_present(env["get_icon"], "machine get_icon");
+	auto result = LuaUtil::call_function_if_present(env["get_icon"], "machine get_icon");
 	if(result.has_value())
 	{
 		return std::move(result->get<AssetHandle<Image>>().duplicate());
 	}
 	else
-	{*/
+	{
 		return default_icon.duplicate();
-	//}
+	}
 }
 
 Machine::~Machine()

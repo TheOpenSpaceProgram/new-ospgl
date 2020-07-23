@@ -7,8 +7,15 @@
 
 struct ImageConfig
 {
+	enum FilterMode
+	{
+		NEAREST,
+		LINEAR
+	};
+
 	bool upload;
 	bool in_memory;
+	FilterMode filter;
 };
 
 // Images are always RGBA, stored as float, for perfomance reasons
@@ -66,11 +73,28 @@ public:
 	{
 		target.insert("upload", what.upload);
 		target.insert("in_memory", what.in_memory);
+		std::string filter_str = "linear";
+		if(what.filter == ImageConfig::NEAREST)
+		{
+			filter_str = "nearest";
+		}
+		target.insert("filter", filter_str);
 	}
 
 	static void deserialize(ImageConfig& to, const cpptoml::table& from)
 	{
-		SAFE_TOML_GET(to.upload, "upload", bool);
-		SAFE_TOML_GET(to.in_memory, "in_memory", bool);
+		SAFE_TOML_GET_OR(to.upload, "upload", bool, true);
+		SAFE_TOML_GET_OR(to.in_memory, "in_memory", bool, false);
+		std::string filter_str;
+		SAFE_TOML_GET_OR(filter_str, "filter", std::string, "linear");
+
+		if(filter_str == "linear")
+		{
+			to.filter = ImageConfig::LINEAR;
+		}
+		else
+		{
+			to.filter = ImageConfig::NEAREST;
+		}
 	}
 };

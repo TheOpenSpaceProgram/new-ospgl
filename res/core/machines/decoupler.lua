@@ -1,11 +1,16 @@
 require("vehicle") 
 require("bullet")
 require("toml")
+local assets = require("assets")
 local glm = require("glm")
 local debug_drawer = require("debug_drawer")
 
+local icon = assets.get_image("core:machines/icons/decoupler.png") 
+function get_icon() return icon end 
+
 local force = machine.init_toml:get_number("force")
 local d_point = machine.init_toml:get_string("decoupling_point")
+
 
 local function decouple()
 	local root = part:get_piece("p_root")

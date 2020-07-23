@@ -1,8 +1,12 @@
 require("vehicle") 
 require("bullet")
 require("toml")
+local assets = require("assets")
 local glm = require("glm")
 local debug_drawer = require("debug_drawer")
+
+local icon = assets.get_image("core:machines/icons/engine.png") 
+function get_icon() return icon end 
 
 local engine = machine:load_interface("core:interfaces/engine.lua")
 engine.thrust = machine.init_toml:get_number("thrust")

@@ -277,10 +277,10 @@ inline bool AssetManager::load(const std::string& package, const std::string& na
 	// TODO: Think whether that is actually worth it, or even neccesary
 
 
-	if (file_exists(full_folder + "assets.toml"))
+	if (file_exists(full_folder + "folder.toml"))
 	{
 
-		folder_config = SerializeUtil::load_file(full_folder + "assets.toml");
+		folder_config = SerializeUtil::load_file(full_folder + "folder.toml");
 	}
 
 	if (file_exists(full_path + ".toml"))
@@ -297,7 +297,7 @@ inline bool AssetManager::load(const std::string& package, const std::string& na
 
 	for (auto all : *folder_config)
 	{
-		if (!cfg->get(all.first))
+		if (!cfg->contains(all.first))
 		{
 			cfg->insert(all.first, all.second);
 		} 
