@@ -21,6 +21,7 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 {
 	hovered = nullptr;
 	std::unordered_map<Machine*, glm::vec2> machine_to_pos;
+	Machine* new_wire = nullptr;
 
 	for(auto& pair : visible_machines)
 	{
@@ -105,8 +106,58 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 						nvgFillColor(vg, nvgRGBA(0, 0, 0, 128));
 					}
 					nvgFill(vg);
-					nvgStrokeColor(vg, nvgRGB(255, 255, 255));
+					if(is_hovered && selected != nullptr && selected != m)
+					{
+						if(contained_in_wired)
+						{
+							// Remove (RED)
+							nvgStrokeColor(vg, nvgRGB(255, 0, 0));
+							if(gui_input->mouse_down(GUI_RIGHT_BUTTON))
+							{
+								// We have to do two iterations
+								auto sel_to_m = edveh->veh->wires.equal_range(selected);
+								auto m_to_sel = edveh->veh->wires.equal_range(m);
+								for(auto i = sel_to_m.first; i != sel_to_m.second; i++)
+								{
+									if(i->second == m)
+									{
+										edveh->veh->wires.erase(i);
+										break;
+									}
+								}
+								for(auto i = m_to_sel.first; i != m_to_sel.second; i++)
+								{
+									if(i->second == selected)
+									{
+										edveh->veh->wires.erase(i);
+										break;
+									}
+								}
+
+							}
+						}
+						else
+						{
+							// Create (GREEN)
+							nvgStrokeColor(vg, nvgRGB(0, 255, 0));
+							if(gui_input->mouse_down(GUI_RIGHT_BUTTON))
+							{
+								edveh->veh->wires.insert(std::make_pair(selected, m));
+								edveh->veh->wires.insert(std::make_pair(m, selected));	
+							}
+							else
+							{
+								new_wire = m;
+							}
+						}
+						nvgStrokeWidth(vg, 2.0f);
+					}
+					else
+					{
+						nvgStrokeColor(vg, nvgRGB(255, 255, 255));
+					}
 					nvgStroke(vg);
+					nvgStrokeWidth(vg, 1.0f);
 
 				}
 
@@ -134,7 +185,14 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 		// we do a "bracket" style drawing, we move horizontally, then
 		// vertically, and then horizontally again
 		// TODO: We could also have "random" curved paths determined via a hash?
-		for(Machine* it : selected->get_all_wired_machines(false))
+		// TODO: Maybe 3D lines would be more convenient and better looking, think of it
+		std::vector<Machine*> to_draw_wires = selected_wired;
+		if(new_wire)
+		{
+			to_draw_wires.push_back(new_wire);
+		}
+
+		for(Machine* it : to_draw_wires)
 		{
 			glm::vec2 end = machine_to_pos[it] + 0.5f;
 			float h_offset = 40.0f;
@@ -151,6 +209,14 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 				nvgLineTo(vg, start.x - h_offset, end.y);
 			}
 			nvgLineTo(vg, end.x, end.y);
+			if(it == new_wire)
+			{
+				nvgStrokeColor(vg, nvgRGB(0, 255, 0));
+			}
+			else
+			{
+				nvgStrokeColor(vg, nvgRGB(255, 255, 255));
+			}
 			nvgStroke(vg); 
 		}
 
