@@ -11,7 +11,7 @@ public:
 
 	virtual void update(double dt) = 0;
 
-	virtual void do_gui(NVGcontext* vg, GUISkin* gui_skin, glm::vec4 viewport) {}
+	virtual void do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_input, glm::vec4 viewport) {}
 
 	// Called when the interface changes by user input
 	virtual void leave() = 0;

@@ -14,6 +14,10 @@ private:
 	// We story a copy for the GUI drawing
 	CameraUniforms cu;
 
+	Machine* hovered;
+	Machine* selected;
+	std::vector<Machine*> selected_wired;
+
 	void see_part(Part* p);
 
 public:
@@ -27,7 +31,7 @@ public:
 
 	virtual bool can_leave() override;
 	
-	virtual void do_gui(NVGcontext* vg, GUISkin* gui_skin, glm::vec4 viewport) override;
+	virtual void do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_input, glm::vec4 viewport) override;
 	
 	WireInterface(EditorVehicleInterface* edveh_int);
 

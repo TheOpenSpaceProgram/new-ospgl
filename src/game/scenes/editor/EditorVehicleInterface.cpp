@@ -44,9 +44,9 @@ void EditorVehicleInterface::update(double dt)
 	current_interface->update(dt);
 }
 
-void EditorVehicleInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, glm::vec4 viewport) 
+void EditorVehicleInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_input, glm::vec4 viewport) 
 {
-	current_interface->do_gui(vg, gui_skin, viewport);
+	current_interface->do_gui(vg, gui_skin, gui_input, viewport);
 }
 
 bool EditorVehicleInterface::can_change_editor_mode() 

@@ -106,7 +106,7 @@ void EditorScene::do_edveh_gui()
 	float height = get_osp()->renderer->get_height(true);
 	float w = (float)gui.get_panel_width();
 	glm::vec4 vport = glm::vec4(w, 0, width - w, height);
-	vehicle_int.do_gui(get_osp()->renderer->vg, &gui.skin, vport);	
+	vehicle_int.do_gui(get_osp()->renderer->vg, &gui.skin, &gui_input, vport);	
 }
 
 void EditorScene::unload()

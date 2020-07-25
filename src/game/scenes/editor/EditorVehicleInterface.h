@@ -43,7 +43,7 @@ public:
 
 	void update(double dt);
 	
-	void do_gui(NVGcontext* vg, GUISkin* gui_skin, glm::vec4 viewport);
+	void do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_input, glm::vec4 viewport);
 
 	bool can_change_editor_mode();
 

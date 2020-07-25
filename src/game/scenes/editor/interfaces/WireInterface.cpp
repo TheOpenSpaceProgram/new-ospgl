@@ -17,48 +17,52 @@ bool WireInterface::can_leave()
 	return true;
 }
 
-void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, glm::vec4 vport) 
+void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_input, glm::vec4 vport) 
 {
+	hovered = nullptr;
+	std::unordered_map<Machine*, glm::vec2> machine_to_pos;
+
 	for(auto& pair : visible_machines)
 	{
 		Part* p = pair.first;
 		glm::dvec3 pos = to_dvec3(p->get_piece("p_root")->packed_tform.getOrigin());
 		auto[clip, in_front] = MathUtil::world_to_clip(cu.tform, pos);
-		if(in_front)
+		glm::vec2 screen_pos = glm::round(MathUtil::clip_to_screen(clip, vport));
+		// Draw the polygon with the machines on its edges
+		// and a central "indicator"
+		std::vector<Machine*> machines = pair.second;
+		float dangle = glm::two_pi<float>() / machines.size();
+		float scale = glm::clamp(200.0f / ((float)glm::distance2(pos, cu.cam_pos)), 0.5f, 1.0f);
+		float icon_size = 22.0f * scale;
+		// This formula gives appropiate icon distancing
+		float radius = glm::max((float)log(machines.size()) * icon_size * scale * 0.6f, icon_size * 0.7f);
+		if(machines.size() == 1)
 		{
-			glm::vec2 screen_pos = glm::round(MathUtil::clip_to_screen(clip, vport));
-			// Draw the polygon with the machines on its edges
-			// and a central "indicator"
-			std::vector<Machine*> machines = pair.second;
-			float dangle = glm::two_pi<float>() / machines.size();
-			float scale = glm::clamp(200.0f / ((float)glm::distance2(pos, cu.cam_pos)), 0.5f, 1.0f);
-			float icon_size = 22.0f * scale;
-			// This formula gives appropiate icon distancing
-			float radius = glm::max((float)log(machines.size()) * icon_size * scale * 0.6f, icon_size * 0.7f);
-			if(machines.size() == 1)
+			radius = 0.0f;
+		}
+
+		// Indicator
+		if(machines.size() > 1 && in_front)
+		{
+			nvgBeginPath(vg);
+			nvgCircle(vg, screen_pos.x, screen_pos.y, 4.0f);
+			nvgFillColor(vg, nvgRGB(0, 0, 0));
+			nvgFill(vg);
+		}
+
+		int i = 0;
+		for(float angle = 0.0f; angle < glm::two_pi<float>(); angle += dangle)
+		{
+			Machine* m = machines[i];
+
+			glm::vec2 offset = glm::vec2(sin(angle), cos(angle));
+			glm::vec2 final_pos = screen_pos + offset * radius;
+			glm::vec2 rect_pos = glm::round(final_pos - icon_size * 0.5f);
+			glm::vec2 tex_pos = glm::round(final_pos + icon_size * 0.5f);
+			machine_to_pos[m] = rect_pos + glm::vec2(icon_size * 0.5f);
+
+			if(in_front)
 			{
-				radius = 0.0f;
-			}
-
-			// Indicator
-			if(machines.size() > 1)
-			{
-				nvgBeginPath(vg);
-				nvgCircle(vg, screen_pos.x, screen_pos.y, 4.0f);
-				nvgFillColor(vg, nvgRGB(0, 0, 0));
-				nvgFill(vg);
-			}
-
-			int i = 0;
-			for(float angle = 0.0f; angle < glm::two_pi<float>(); angle += dangle)
-			{
-				Machine* m = machines[i];
-
-				glm::vec2 offset = glm::vec2(sin(angle), cos(angle));
-				glm::vec2 final_pos = screen_pos + offset * radius;
-				glm::vec2 rect_pos = glm::round(final_pos - icon_size * 0.5f);
-				glm::vec2 tex_pos = glm::round(final_pos + icon_size * 0.5f);
-
 				// Indicator
 				if(machines.size() > 1)
 				{
@@ -70,6 +74,42 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, glm::vec4 vport)
 					nvgStroke(vg);
 				}
 
+				// Hover test
+				bool contained_in_wired = false;
+				for(Machine *sm : selected_wired)
+				{
+					if(sm == m)
+					{
+						contained_in_wired = true;
+						break;
+					}
+				}
+
+				bool is_hovered = gui_input->mouse_inside(rect_pos, glm::ivec2(icon_size));
+
+				if(is_hovered || selected == m || contained_in_wired)
+				{
+					hovered = m;	
+					// Hover / Selected indicator
+					nvgBeginPath(vg);
+					//nvgRect(vg, rect_pos.x - 0.5f, rect_pos.y - 0.5f, icon_size + 1.0f, icon_size + 1.0f);
+					nvgCircle(vg, rect_pos.x + icon_size * 0.5f, rect_pos.y + icon_size * 0.5f, icon_size * 0.71f);
+					if((gui_input->mouse_down(GUI_LEFT_BUTTON) && is_hovered) || selected == m)
+					{
+						selected = m;
+						selected_wired = m->get_all_wired_machines(false);
+						nvgFillColor(vg, nvgRGB(255, 255, 255));
+					}
+					else
+					{
+						nvgFillColor(vg, nvgRGBA(0, 0, 0, 128));
+					}
+					nvgFill(vg);
+					nvgStrokeColor(vg, nvgRGB(255, 255, 255));
+					nvgStroke(vg);
+
+				}
+
 				// Machine
 				AssetHandle<Image> img = m->get_icon();
 				int image = nvglCreateImageFromHandleGL3(vg, img->id, img->get_width(), img->get_height(), 0);
@@ -78,11 +118,41 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, glm::vec4 vport)
 				nvgRect(vg, rect_pos.x, rect_pos.y, icon_size, icon_size);
 				nvgFillPaint(vg, paint);
 				nvgFill(vg);
-
-				i++;
-
 			}
+
+
+			i++;
+
+		}
+
 	}
+
+	if(selected != nullptr)
+	{
+		glm::vec2 start = machine_to_pos[selected] + 0.5f;
+		// Draw wiring lines. As rockets are usually a tall stack of pieces,
+		// we do a "bracket" style drawing, we move horizontally, then
+		// vertically, and then horizontally again
+		// TODO: We could also have "random" curved paths determined via a hash?
+		for(Machine* it : selected->get_all_wired_machines(false))
+		{
+			glm::vec2 end = machine_to_pos[it] + 0.5f;
+			float h_offset = 40.0f;
+			nvgBeginPath(vg);
+			nvgMoveTo(vg, start.x, start.y);
+			if(end.y > start.y)
+			{
+				nvgLineTo(vg, start.x + h_offset, start.y);
+				nvgLineTo(vg, start.x + h_offset, end.y);
+			}
+			else
+			{
+				nvgLineTo(vg, start.x - h_offset, start.y);
+				nvgLineTo(vg, start.x - h_offset, end.y);
+			}
+			nvgLineTo(vg, end.x, end.y);
+			nvgStroke(vg); 
+		}
 
 	}
 }
@@ -92,6 +162,8 @@ WireInterface::WireInterface(EditorVehicleInterface* edveh_int)
 	this->edveh_int = edveh_int;
 	this->edveh = edveh_int->edveh;
 	this->scene = edveh_int->scene;
+	selected = nullptr;
+	hovered = nullptr;
 	
 }
 
@@ -109,11 +181,21 @@ bool WireInterface::handle_input(const CameraUniforms& cu, glm::dvec3 ray_start,
 
 
 	// Highlighting always shows the machines of said piece
-	if(res.has_hit)
+	if(res.has_hit && hovered == nullptr)
 	{
 		// TODO: It could be wise to add a check for p->part == nullptr
 		see_part(res.p->part);
 		edveh->piece_meta[res.p].highlight = glm::vec3(1.0f, 1.0f, 1.0f);
+	}
+
+	if(selected != nullptr)
+	{
+		// Also see all wired parts (including ourselves)
+		see_part(selected->in_part);
+		for(Machine* it : selected_wired)
+		{
+			see_part(it->in_part);
+		}
 	}
 	
 	for(Part* p : edveh->veh->parts)
