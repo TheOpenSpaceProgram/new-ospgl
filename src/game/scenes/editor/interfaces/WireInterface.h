@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseInterface.h"
+#include <assets/BitmapFont.h>
 
 class EditorVehicleInterface;
 
@@ -13,6 +14,8 @@ private:
 	std::vector<std::pair<Part*, std::vector<Machine*>>> visible_machines;
 	// We story a copy for the GUI drawing
 	CameraUniforms cu;
+
+	AssetHandle<BitmapFont> font;
 
 	Machine* hovered;
 	Machine* selected;

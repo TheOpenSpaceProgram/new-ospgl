@@ -239,6 +239,6 @@ std::pair<glm::dvec2, bool> MathUtil::world_to_clip(glm::dmat4 proj_view, glm::d
 	glm::dvec4 clip_pos = proj_view * glm::dvec4(wpoint, 1.0);
 	clip_pos /= clip_pos.w;
 
-	return std::make_pair(glm::dvec2(clip_pos.x, clip_pos.y), clip_pos.z >= 0);
+	return std::make_pair(glm::dvec2(clip_pos.x, clip_pos.y), clip_pos.z < 1.0);
 }
 

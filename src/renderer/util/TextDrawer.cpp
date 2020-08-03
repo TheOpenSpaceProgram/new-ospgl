@@ -58,16 +58,9 @@ void TextDrawer::draw_glyphs(const std::vector<BitmapFont::Glyph>& ps, BitmapFon
 	glEnable(GL_DEPTH_TEST);
 }
 
-void TextDrawer::draw_text(const std::string& text, BitmapFont* font, glm::vec2 pos,
-	glm::ivec2 screen, glm::vec4 color, glm::vec2 scale)
+std::pair<std::vector<BitmapFont::Glyph>, float> TextDrawer::get_glyphs_and_size(const std::string& text,
+		BitmapFont* font, glm::vec2 scale)
 {
-	draw_text_aligned(text, font, pos, Alignment::LEFT, screen, color, scale);
-}
-
-void TextDrawer::draw_text_aligned(const std::string& text, BitmapFont* font, glm::vec2 pos, Alignment alig,
-	 glm::ivec2 screen, glm::vec4 color, glm::vec2 scale)
-{
-
 	float x_off = 0;
 
 	auto it = text.begin();
@@ -96,6 +89,21 @@ void TextDrawer::draw_text_aligned(const std::string& text, BitmapFont* font, gl
 		x_off += gl.xadvance * scale.x;
 
 	}
+
+	return std::make_pair(glyphs, x_off);
+}
+
+void TextDrawer::draw_text(const std::string& text, BitmapFont* font, glm::vec2 pos,
+	glm::ivec2 screen, glm::vec4 color, glm::vec2 scale)
+{
+	draw_text_aligned(text, font, pos, Alignment::LEFT, screen, color, scale);
+}
+
+void TextDrawer::draw_text_aligned(const std::string& text, BitmapFont* font, glm::vec2 pos, Alignment alig,
+	 glm::ivec2 screen, glm::vec4 color, glm::vec2 scale)
+{
+
+	auto[glyphs, x_off] =  get_glyphs_and_size(text, font, scale);
 
 	glm::vec2 npos = pos;
 

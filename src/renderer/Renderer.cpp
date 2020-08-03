@@ -291,6 +291,7 @@ void Renderer::render(PlanetarySystem* system)
 
 		// Draw nanoVG 
 		nvgEndFrame(vg);
+		nvgEndFrameExt(vg);
 
 		// Sanitize OpenGL after nanoVG call
 		glEnable(GL_DEPTH_TEST);
@@ -299,6 +300,8 @@ void Renderer::render(PlanetarySystem* system)
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glEnable(GL_CULL_FACE);
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+		// Draw text_drawer added text
 	}
 
 }
@@ -566,6 +569,7 @@ Renderer::Renderer(cpptoml::table& settings)
 
 	// Create the nanoVG context
 	vg = nvgCreateGL3(NVG_ANTIALIAS);
+	nvgCreateExt(vg);
 	//vg = nvgCreateGL3(0);
 
 	// Load the default NVG fonts (TODO: Use generic names for this or move it over to package.lua)
@@ -573,6 +577,8 @@ Renderer::Renderer(cpptoml::table& settings)
 	nvgCreateFont(vg, "bold", (assets->res_path + "core/fonts/Roboto-Bold.ttf").c_str()); 
 	nvgCreateFont(vg, "light", (assets->res_path + "core/fonts/Roboto-Light.ttf").c_str()); 
 	nvgCreateFont(vg, "medium", (assets->res_path + "core/fonts/Roboto-Medium.ttf").c_str()); 
+	// This font is meant to be used at exactly size 12
+	nvgCreateFont(vg, "tiny", (assets->res_path + "core/fonts/ProggyTinySZ.ttf").c_str());
 
 	resize(width, height, scale);
 

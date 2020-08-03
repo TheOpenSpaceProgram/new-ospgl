@@ -20,12 +20,13 @@ file(GLOB_RECURSE IMGUI_SOURCES "dep/imgui/*.cpp")
 set(GLAD_SOURCES "dep/glad/glad.c")
 set(STB_SOURCES "dep/stb/stb_impl.cpp")
 set(FASTNOISEC_SOURCES "dep/FastNoiseC/FastNoise.c")
-set(NANOVG_SOURCES "dep/nanovg/nanovg.c")
+set(NANOVG_SOURCES "dep/nanovg/nanovg_ext.cpp")
 
 
 # Create the OSPGL executable
 
-add_executable(OSPGL ${OSP_SOURCES} ${IMGUI_SOURCES} ${GLAD_SOURCES} ${FASTNOISEC_SOURCES} ${STB_SOURCES} ${NANOVG_SOURCES})
+add_executable(OSPGL ${OSP_SOURCES} ${IMGUI_SOURCES} ${GLAD_SOURCES} 
+	${FASTNOISEC_SOURCES} ${STB_SOURCES} ${NANOVG_SOURCES})
 
 # Name it ospgl (lowercase)
 set_target_properties(OSPGL PROPERTIES OUTPUT_NAME "ospgl")

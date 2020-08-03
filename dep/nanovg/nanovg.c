@@ -127,6 +127,8 @@ struct NVGcontext {
 	int fillTriCount;
 	int strokeTriCount;
 	int textTriCount;
+
+	NVGEXTcontext ext_ctx;
 };
 
 static float nvg__sqrtf(float a) { return sqrtf(a); }

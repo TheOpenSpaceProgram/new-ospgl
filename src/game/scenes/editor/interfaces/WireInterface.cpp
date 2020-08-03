@@ -19,8 +19,10 @@ bool WireInterface::can_leave()
 
 void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_input, glm::vec4 vport) 
 {
+	nvgBitmapText(vg, font.duplicate(), TextDrawer::LEFT, 512.0f, 512.0f, "Hello, world!");
+
 	hovered = nullptr;
-	std::unordered_map<Machine*, glm::vec2> machine_to_pos;
+	std::unordered_map<Machine*, std::pair<glm::vec2, bool>> machine_to_pos;
 	Machine* new_wire = nullptr;
 
 	for(auto& pair : visible_machines)
@@ -57,10 +59,10 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 			Machine* m = machines[i];
 
 			glm::vec2 offset = glm::vec2(sin(angle), cos(angle));
-			glm::vec2 final_pos = screen_pos + offset * radius;
+			glm::vec2 final_pos = glm::round(screen_pos + offset * radius);
 			glm::vec2 rect_pos = glm::round(final_pos - icon_size * 0.5f);
 			glm::vec2 tex_pos = glm::round(final_pos + icon_size * 0.5f);
-			machine_to_pos[m] = rect_pos + glm::vec2(icon_size * 0.5f);
+			machine_to_pos[m] = std::make_pair(rect_pos + glm::vec2(icon_size * 0.5f), in_front);
 
 			if(in_front)
 			{
@@ -180,7 +182,7 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 
 	if(selected != nullptr)
 	{
-		glm::vec2 start = machine_to_pos[selected] + 0.5f;
+		glm::vec2 start = machine_to_pos[selected].first + 0.5f;
 		// Draw wiring lines. As rockets are usually a tall stack of pieces,
 		// we do a "bracket" style drawing, we move horizontally, then
 		// vertically, and then horizontally again
@@ -191,36 +193,62 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 		{
 			to_draw_wires.push_back(new_wire);
 		}
+		
 
+		int off_screen = 0;
 		for(Machine* it : to_draw_wires)
 		{
-			glm::vec2 end = machine_to_pos[it] + 0.5f;
-			float h_offset = 40.0f;
+			if(!machine_to_pos[it].second)
+			{
+				// Draw out-of-screen indicator (later)
+				off_screen++;
+			}		
+			else
+			{
+				glm::vec2 end = machine_to_pos[it].first + 0.5f;
+				float h_offset = 40.0f;
+				nvgBeginPath(vg);
+				nvgMoveTo(vg, start.x, start.y);
+				if(end.y > start.y)
+				{
+					nvgLineTo(vg, start.x + h_offset, start.y);
+					nvgLineTo(vg, start.x + h_offset, end.y);
+				}
+				else
+				{
+					nvgLineTo(vg, start.x - h_offset, start.y);
+					nvgLineTo(vg, start.x - h_offset, end.y);
+				}
+				nvgLineTo(vg, end.x, end.y);
+				if(it == new_wire)
+				{
+					nvgStrokeColor(vg, nvgRGB(0, 255, 0));
+				}
+				else
+				{
+					nvgStrokeColor(vg, nvgRGB(255, 255, 255));
+				}
+				nvgStroke(vg); 
+			}
+		}
+		
+		
+		if(off_screen != 0)
+		{
+			// Draw a little asterisk with a number indictaor
 			nvgBeginPath(vg);
-			nvgMoveTo(vg, start.x, start.y);
-			if(end.y > start.y)
-			{
-				nvgLineTo(vg, start.x + h_offset, start.y);
-				nvgLineTo(vg, start.x + h_offset, end.y);
-			}
-			else
-			{
-				nvgLineTo(vg, start.x - h_offset, start.y);
-				nvgLineTo(vg, start.x - h_offset, end.y);
-			}
-			nvgLineTo(vg, end.x, end.y);
-			if(it == new_wire)
-			{
-				nvgStrokeColor(vg, nvgRGB(0, 255, 0));
-			}
-			else
-			{
-				nvgStrokeColor(vg, nvgRGB(255, 255, 255));
-			}
-			nvgStroke(vg); 
+			nvgCircle(vg, start.x + 15.0f, start.y + 15.0f, 5.0f);
+			nvgFillColor(vg, nvgRGB(0, 0, 0));
+			nvgFill(vg);
+			nvgFillColor(vg, nvgRGB(255, 255, 255));
+			nvgFontSize(vg, 15.0f);
+			nvgFontFace(vg, "tiny");
+			nvgText(vg, floor(start.x + 10.0f) + 0.5f, floor(start.y + 20.0f) + 0.5f, std::to_string(off_screen).c_str(), nullptr); 
 		}
 
+
 	}
+
 }
 
 WireInterface::WireInterface(EditorVehicleInterface* edveh_int) 
@@ -230,6 +258,8 @@ WireInterface::WireInterface(EditorVehicleInterface* edveh_int)
 	this->scene = edveh_int->scene;
 	selected = nullptr;
 	hovered = nullptr;
+
+	font = AssetHandle<BitmapFont>("core:fonts/fira_code_medium.fnt");
 	
 }
 

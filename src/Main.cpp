@@ -41,16 +41,14 @@ int main(int argc, char** argv)
 
 	osp.game_state.load_scene(new EditorScene());
 
+	while (osp.should_loop())
 	{
-		while (osp.should_loop())
-		{
-			PROFILE_BLOCK("frame");
-			
-			osp.start_frame();
-			osp.update();
-			osp.render();
-			osp.finish_frame();
-		}
+		PROFILE_BLOCK("frame");
+		
+		osp.start_frame();
+		osp.update();
+		osp.render();
+		osp.finish_frame();
 	}
 
 	osp.finish();

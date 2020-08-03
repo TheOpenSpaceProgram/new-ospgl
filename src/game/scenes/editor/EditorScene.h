@@ -6,6 +6,8 @@
 #include "EditorVehicle.h"
 #include "EditorVehicleInterface.h"
 
+#include <assets/BitmapFont.h>
+
 #include <renderer/lighting/SunLight.h>
 
 #include <assets/Model.h>

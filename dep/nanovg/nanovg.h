@@ -32,6 +32,13 @@ extern "C" {
 
 typedef struct NVGcontext NVGcontext;
 
+typedef struct NVGEXTcontext
+{
+	// Points to a std::vector<AssetHandle<BitmapFont>>, managed from C++, so the C code can store it 
+	void* fonts;
+
+} NVGEXTcontext;
+
 struct NVGcolor {
 	union {
 		float rgba[4];
@@ -595,6 +602,8 @@ void nvgFontFace(NVGcontext* ctx, const char* font);
 // Draws text string at specified location. If end is specified only the sub-string up to the end is drawn.
 float nvgText(NVGcontext* ctx, float x, float y, const char* string, const char* end);
 
+
+
 // Draws multi-line text string at specified location wrapped at the specified width. If end is specified only the sub-string up to the end is drawn.
 // White space is stripped at the beginning of the rows, the text is split at word boundaries or when new-line characters are encountered.
 // Words longer than the max width are slit at nearest character (i.e. no hyphenation).
@@ -691,7 +700,28 @@ void nvgDebugDumpPathCache(NVGcontext* ctx);
 #define NVG_NOTUSED(v) for (;;) { (void)(1 ? (void)0 : ( (void)(v) ) ); break; }
 
 #ifdef __cplusplus
+
+
 }
+
+#include <vector>
+
+// We implement this stuff as C++ code so we want it ignored by nanovg.c
+template<typename T>
+class AssetHandle;
+
+#include <assets/BitmapFont.h>
+#include <renderer/util/TextDrawer.h>
+
+float nvgBitmapText(NVGcontext* ctx, AssetHandle<BitmapFont> bfont, int alig, float x, float y,
+	const char* string);
+
+void nvgCreateExt(NVGcontext* ctx);
+
+// Frees used fonts
+void nvgEndFrameExt(NVGcontext* ctx);
+
 #endif
+
 
 #endif // NANOVG_H
