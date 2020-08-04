@@ -106,12 +106,37 @@ Image::Image(ImageConfig config, const std::string& path)
 
 	int c_dump;
 
-	uint8_t* u8data = stbi_load(path.c_str(), &width, &height, &c_dump, 4);
-	fdata = nullptr;
+	uint8_t* u8data;
+
+	if(config.is_font)
+	{
+		uint8_t* font_u8data = stbi_load(path.c_str(), &width, &height, &c_dump, 1);
+		// We now expand the buffer to full size RGBA, using alpha for blending
+		// TODO:
+		//  This is sub-optimal for memory, and it could be better to simply store
+		//  the texture as a 1-channel texture and modify NanoVG to handle it, but 
+		//  the perfomance hit is tiny
+		u8data = (uint8_t*)malloc(width * height * 4);
+		for(size_t i = 0; i < width * height; i++)
+		{
+			uint8_t val = font_u8data[i];
+			uint8_t rgb = val == 0 ? 0 : 255;
+			u8data[i * 4 + 0] = rgb;
+			u8data[i * 4 + 1] = rgb;
+			u8data[i * 4 + 2] = rgb;
+			u8data[i * 4 + 3] = val; // < Alpha
+		}
+
+	}
+	else
+	{
+		u8data = stbi_load(path.c_str(), &width, &height, &c_dump, 4);
+		fdata = nullptr;
+	}
 
 	if (config.upload)
 	{
-		logger->debug("Uplading texture to OpenGL");
+		logger->debug("Uploading texture to OpenGL");
 
 		glGenTextures(1, &id);
 		glBindTexture(GL_TEXTURE_2D, id); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
@@ -154,8 +179,14 @@ Image::Image(ImageConfig config, const std::string& path)
 		}
 	}
 
-	stbi_image_free(u8data);
-
+	if(config.is_font)
+	{
+		free(u8data);
+	}
+	else
+	{
+		stbi_image_free(u8data);
+	}
 
 }
 

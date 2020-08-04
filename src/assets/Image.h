@@ -15,6 +15,9 @@ struct ImageConfig
 
 	bool upload;
 	bool in_memory;
+	// This converts the image from 1 channel to 4 with alpha for 
+	// compatibility with NanoVG
+	bool is_font;
 	FilterMode filter;
 };
 
@@ -73,6 +76,7 @@ public:
 	{
 		target.insert("upload", what.upload);
 		target.insert("in_memory", what.in_memory);
+		target.insert("is_font", what.is_font);
 		std::string filter_str = "linear";
 		if(what.filter == ImageConfig::NEAREST)
 		{
@@ -85,6 +89,7 @@ public:
 	{
 		SAFE_TOML_GET_OR(to.upload, "upload", bool, true);
 		SAFE_TOML_GET_OR(to.in_memory, "in_memory", bool, false);
+		SAFE_TOML_GET_OR(to.is_font, "is_font", bool, false);
 		std::string filter_str;
 		SAFE_TOML_GET_OR(filter_str, "filter", std::string, "linear");
 

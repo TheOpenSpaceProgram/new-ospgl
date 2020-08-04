@@ -14,7 +14,6 @@ using VecType = std::vector<AssetHandle<BitmapFont>>;
 float nvgBitmapText(NVGcontext* ctx, AssetHandle<BitmapFont> bfont, int alig, float x, float y, 
 	const char* string)
 {
-	logger->info("Enter");
 	TextDrawer::Alignment alignment = (TextDrawer::Alignment)alig;
 	VecType* vec = (VecType*)ctx->ext_ctx.fonts;
 	BitmapFont* font = bfont.data;
@@ -44,8 +43,6 @@ float nvgBitmapText(NVGcontext* ctx, AssetHandle<BitmapFont> bfont, int alig, fl
 	int cverts = nvg__maxi(2, (int)(end - string)) * 6; // conservative estimate.
 	NVGvertex* verts = nvg__allocTempVerts(ctx, cverts);
 	int nverts = 0;
-
-	logger->info("looping over {} glyphs", glyphs.size());
 
 	for(size_t i = 0; i < glyphs.size(); i++)
 	{
@@ -84,21 +81,16 @@ float nvgBitmapText(NVGcontext* ctx, AssetHandle<BitmapFont> bfont, int alig, fl
 	}
 
 	NVGpaint paint = state->fill;
-	logger->info("ID: {}", font->img->id);
 	paint.image = nvglCreateImageFromHandleGL3(ctx, font->img->id, font->img->get_width(), font->img->get_height(), 0);
 	paint.innerColor.a *= state->alpha;
 	paint.outerColor.a *= state->alpha;
 	
-	// Text has black background, so we need to add the text on top
 	NVGcompositeOperationState comp = state->compositeOperation;
-	comp.dstRGB = NVGcompositeOperation::NVG_LIGHTER;
-
 	ctx->params.renderTriangles(ctx->params.userPtr, &paint, comp, &state->scissor, verts, nverts, ctx->fringeWidth);
 
 
 	ctx->drawCallCount++;
 	ctx->textTriCount += nverts/3;
-	logger->info("Drawn {} verts", nverts);
 
 	return 0.0f;
 }

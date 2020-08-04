@@ -90,6 +90,10 @@ BitmapFont::BitmapFont(const std::vector<uint8_t>& fnt, Image* image)
 			line_height = (int)read_uint16_t(blocks[i].start_ptr, fnt);
 			base = (int)read_uint16_t(blocks[i].start_ptr + 2, fnt);
 		}
+		else if(blocks[i].id == 3)
+		{
+			// TODO: Parse multiple pages (could be tricky)
+		}
 		else if (blocks[i].id == 4)
 		{
 			// Chars
@@ -110,7 +114,11 @@ BitmapFont::BitmapFont(const std::vector<uint8_t>& fnt, Image* image)
 				chars[id] = g;
 			}
 		}
-		// TODO: Parse kerning (maybe neccesary for some fonts)
+		else if(blocks[i].id == 5)
+		{
+			// TODO: Parse kerning (maybe neccesary for some fonts)
+			logger->warn("Found kerning block on font, but it's not implemented");
+		}
 	}
 
 	logger->debug("Loaded {} characters", chars.size());

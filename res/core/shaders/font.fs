@@ -9,7 +9,7 @@ uniform vec4 color;
 
 void main()
 {
-	float val = texture(tex, vTex).r;
+	float val = texture(tex, vTex).a;
 
 	FragColor = color * val;
 }

@@ -19,7 +19,6 @@ bool WireInterface::can_leave()
 
 void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_input, glm::vec4 vport) 
 {
-	nvgBitmapText(vg, font.duplicate(), TextDrawer::LEFT, 512.0f, 512.0f, "Hello, world!");
 
 	hovered = nullptr;
 	std::unordered_map<Machine*, std::pair<glm::vec2, bool>> machine_to_pos;
@@ -60,12 +59,42 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 
 			glm::vec2 offset = glm::vec2(sin(angle), cos(angle));
 			glm::vec2 final_pos = glm::round(screen_pos + offset * radius);
+
+			if(!in_front)
+			{
+				// Calculate final_pos from relative position to the camera of 
+				// the machine in 3D space instead of screen space
+				glm::dvec3 rel = cu.cam_pos - pos;
+				final_pos.y = rel.z * 1e10f + vport.y + vport.w * 0.5f;
+				final_pos.x = 2.0f * vport.x + vport.z - final_pos.x;
+			}
+			
+			bool contained_in_wired = false;
+			for(Machine *sm : selected_wired)
+			{
+				if(sm == m)
+				{
+					contained_in_wired = true;
+					break;
+				}
+			}
+
+			// Clamp to screen edges
+			if(contained_in_wired)
+			{
+				final_pos = glm::clamp(final_pos, glm::vec2(vport.x, vport.y) + icon_size * 0.5f, 
+					glm::vec2(vport.x + vport.z, vport.y + vport.w) - icon_size * 0.5f);
+			}
+
 			glm::vec2 rect_pos = glm::round(final_pos - icon_size * 0.5f);
 			glm::vec2 tex_pos = glm::round(final_pos + icon_size * 0.5f);
-			machine_to_pos[m] = std::make_pair(rect_pos + glm::vec2(icon_size * 0.5f), in_front);
+			
+			glm::vec2 fpos = rect_pos + glm::vec2(icon_size * 0.5f);
+			machine_to_pos[m] = std::make_pair(fpos, in_front);
+			
 
-			if(in_front)
-			{
+			if(in_front || contained_in_wired)
+			{	
 				// Indicator
 				if(machines.size() > 1)
 				{
@@ -77,16 +106,6 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 					nvgStroke(vg);
 				}
 
-				// Hover test
-				bool contained_in_wired = false;
-				for(Machine *sm : selected_wired)
-				{
-					if(sm == m)
-					{
-						contained_in_wired = true;
-						break;
-					}
-				}
 
 				bool is_hovered = gui_input->mouse_inside(rect_pos, glm::ivec2(icon_size));
 
@@ -162,16 +181,16 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 					nvgStrokeWidth(vg, 1.0f);
 
 				}
-
-				// Machine
-				AssetHandle<Image> img = m->get_icon();
-				int image = nvglCreateImageFromHandleGL3(vg, img->id, img->get_width(), img->get_height(), 0);
-				NVGpaint paint = nvgImagePattern(vg, tex_pos.x, tex_pos.y, icon_size, icon_size, 0.0f, image, 1.0f);
-				nvgBeginPath(vg);
-				nvgRect(vg, rect_pos.x, rect_pos.y, icon_size, icon_size);
-				nvgFillPaint(vg, paint);
-				nvgFill(vg);
 			}
+
+			// Machine
+			AssetHandle<Image> img = m->get_icon();
+			int image = nvglCreateImageFromHandleGL3(vg, img->id, img->get_width(), img->get_height(), 0);
+			NVGpaint paint = nvgImagePattern(vg, tex_pos.x, tex_pos.y, icon_size, icon_size, 0.0f, image, 1.0f);
+			nvgBeginPath(vg);
+			nvgRect(vg, rect_pos.x, rect_pos.y, icon_size, icon_size);
+			nvgFillPaint(vg, paint);
+			nvgFill(vg);
 
 
 			i++;
@@ -198,7 +217,7 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 		int off_screen = 0;
 		for(Machine* it : to_draw_wires)
 		{
-			if(!machine_to_pos[it].second)
+			if(!machine_to_pos[it].second && false)
 			{
 				// Draw out-of-screen indicator (later)
 				off_screen++;
@@ -232,21 +251,6 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 			}
 		}
 		
-		
-		if(off_screen != 0)
-		{
-			// Draw a little asterisk with a number indictaor
-			nvgBeginPath(vg);
-			nvgCircle(vg, start.x + 15.0f, start.y + 15.0f, 5.0f);
-			nvgFillColor(vg, nvgRGB(0, 0, 0));
-			nvgFill(vg);
-			nvgFillColor(vg, nvgRGB(255, 255, 255));
-			nvgFontSize(vg, 15.0f);
-			nvgFontFace(vg, "tiny");
-			nvgText(vg, floor(start.x + 10.0f) + 0.5f, floor(start.y + 20.0f) + 0.5f, std::to_string(off_screen).c_str(), nullptr); 
-		}
-
-
 	}
 
 }
@@ -259,7 +263,7 @@ WireInterface::WireInterface(EditorVehicleInterface* edveh_int)
 	selected = nullptr;
 	hovered = nullptr;
 
-	font = AssetHandle<BitmapFont>("core:fonts/fira_code_medium.fnt");
+	tiny_font = AssetHandle<BitmapFont>("core:fonts/ProggyTiny.fnt");
 	
 }
 

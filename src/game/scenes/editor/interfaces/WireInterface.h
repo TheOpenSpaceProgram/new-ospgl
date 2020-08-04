@@ -15,7 +15,7 @@ private:
 	// We story a copy for the GUI drawing
 	CameraUniforms cu;
 
-	AssetHandle<BitmapFont> font;
+	AssetHandle<BitmapFont> tiny_font;
 
 	Machine* hovered;
 	Machine* selected;
