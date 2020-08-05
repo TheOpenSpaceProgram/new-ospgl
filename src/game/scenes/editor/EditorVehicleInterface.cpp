@@ -8,18 +8,8 @@ EditorVehicleInterface::EditorVehicleInterface(EditorVehicle* v, EditorCamera* c
 {
 }
 
-
-bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 viewport, 
-		glm::dvec2 screen_size, GUIInput* gui_input) 
+void EditorVehicleInterface::middle_click_focus(glm::dvec3 ray_start, glm::dvec3 ray_end)
 {
-	// We are only called if input is free
-	glm::dvec2 subscreen_size = screen_size * glm::dvec2(viewport.z - viewport.x, viewport.w - viewport.y);
-	glm::dvec2 subscreen_pos = screen_size * glm::dvec2(viewport.x, viewport.y);
-	// This goes from -1 to 1
-	glm::dvec2 in_subscreen = (((input->mouse_pos - subscreen_pos) / subscreen_size) - 0.5) * 2.0; 
-	in_subscreen.y = -in_subscreen.y;
-	auto[ray_start, ray_end] = MathUtil::screen_raycast(in_subscreen, glm::inverse(cu.tform), 1000.0);
-
 	// We first handle middle click (or CTRL+left-click) which centers the camera
 	// around a piece
 	if(input->mouse_down(GLFW_MOUSE_BUTTON_3) || 
@@ -30,13 +20,8 @@ bool EditorVehicleInterface::handle_input(const CameraUniforms& cu, glm::dvec4 v
 		{
 			camera->center = to_dvec3(res.p->packed_tform.getOrigin());
 		}
+	}
 
-		return false;
-	}
-	else
-	{
-		return current_interface->handle_input(cu, ray_start, ray_end, gui_input);
-	}
 }
 
 void EditorVehicleInterface::update(double dt) 
@@ -44,9 +29,18 @@ void EditorVehicleInterface::update(double dt)
 	current_interface->update(dt);
 }
 
-void EditorVehicleInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_input, glm::vec4 viewport) 
+bool EditorVehicleInterface::do_interface(const CameraUniforms& cu, glm::dvec4 viewport, glm::dvec4 gui_viewport,
+		glm::dvec2 screen_size, NVGcontext* vg, GUIInput* gui_input, GUISkin* gui_skin)
 {
-	current_interface->do_gui(vg, gui_skin, gui_input, viewport);
+	// We are only called if input is free
+	glm::dvec2 subscreen_size = screen_size * glm::dvec2(viewport.z - viewport.x, viewport.w - viewport.y);
+	glm::dvec2 subscreen_pos = screen_size * glm::dvec2(viewport.x, viewport.y);
+	// This goes from -1 to 1
+	glm::dvec2 in_subscreen = (((input->mouse_pos - subscreen_pos) / subscreen_size) - 0.5) * 2.0; 
+	in_subscreen.y = -in_subscreen.y;
+	auto[ray_start, ray_end] = MathUtil::screen_raycast(in_subscreen, glm::inverse(cu.tform), 1000.0);
+
+	return current_interface->do_interface(cu, ray_start, ray_end, gui_viewport, vg, gui_input, gui_skin); 
 }
 
 bool EditorVehicleInterface::can_change_editor_mode() 

@@ -2,6 +2,8 @@
 #include "BaseInterface.h"
 #include <assets/BitmapFont.h>
 
+#include "../gui/ContextMenu.h"
+
 class EditorVehicleInterface;
 
 class WireInterface : public BaseInterface
@@ -25,8 +27,8 @@ private:
 
 public:
 
-	virtual bool handle_input(const CameraUniforms& cu, glm::dvec3 ray_start, 
-		glm::dvec3 ray_end, GUIInput* gui_input) override;
+	ContextMenu test_menu;
+	GUICanvas test_menu_canvas;
 
 	virtual void update(double dt) override;
 
@@ -34,7 +36,8 @@ public:
 
 	virtual bool can_leave() override;
 	
-	virtual void do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_input, glm::vec4 viewport) override;
+	virtual bool do_interface(const CameraUniforms& cu, glm::dvec3 ray_start, glm::dvec3 ray_end,
+			glm::dvec4 viewport, NVGcontext* vg, GUIInput* gui_input, GUISkin* gui_skin) override;
 	
 	WireInterface(EditorVehicleInterface* edveh_int);
 

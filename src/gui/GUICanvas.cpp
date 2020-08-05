@@ -186,3 +186,19 @@ void GUICanvas::update_children()
 	}
 }
 
+GUICanvas::~GUICanvas()
+{
+	if(layout)
+	{
+		delete layout;
+	}
+	if(child_0)
+	{
+		delete child_0;
+	}
+	if(child_1)
+	{
+		delete child_1;
+	}
+}
+

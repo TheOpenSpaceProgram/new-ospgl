@@ -35,4 +35,6 @@ public:
 	virtual glm::ivec2 prepare(glm::ivec2 wpos, glm::ivec2 wsize, GUIInput* gui_input) = 0;
 	virtual void draw(NVGcontext* ctx, GUISkin* skin) = 0;
 
+	virtual ~GUIWidget(){};
+
 };

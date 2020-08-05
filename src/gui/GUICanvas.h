@@ -7,6 +7,8 @@
 
 // A canvas can contain more canvases
 // A canvas with children cannot contain layouts
+// Note: We automatically delete the layout and all children!
+//  - Make sure you don't delete any children canvas or layouts
 class GUICanvas
 {
 private:
@@ -61,4 +63,6 @@ public:
 		layout = nullptr;
 		child_0_pixels = -1;
 	}
+
+	~GUICanvas();
 };

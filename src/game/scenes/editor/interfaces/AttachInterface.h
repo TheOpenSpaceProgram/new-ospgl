@@ -1,6 +1,8 @@
 #pragma once
 #include "BaseInterface.h"
 
+
+
 class EditorVehicleInterface;
 
 class AttachInterface : public BaseInterface
@@ -67,8 +69,8 @@ public:
 	EditorScene* scene;
 	EditorVehicleInterface* edveh_int;
 
-	virtual bool handle_input(const CameraUniforms& cu,
-		glm::dvec3 ray_start, glm::dvec3 ray_end, GUIInput* gui_input) override;
+	virtual bool do_interface(const CameraUniforms& cu, glm::dvec3 ray_start, glm::dvec3 ray_end,
+			glm::dvec4 viewport, NVGcontext* vg, GUIInput* gui_input, GUISkin* gui_skin) override;
 	
 	virtual void update(double dt) override;
 

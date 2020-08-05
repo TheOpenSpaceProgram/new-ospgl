@@ -70,4 +70,5 @@ public:
 	size_t get_widget_count();
 
 	GUILayout();
+	virtual ~GUILayout();
 };

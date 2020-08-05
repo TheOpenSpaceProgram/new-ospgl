@@ -17,13 +17,86 @@ bool WireInterface::can_leave()
 	return true;
 }
 
-void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_input, glm::vec4 vport) 
+bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start, glm::dvec3 ray_end,
+	glm::dvec4 vport, NVGcontext* vg, GUIInput* gui_input, GUISkin* gui_skin)
 {
+
+	auto[pos, size] = test_menu.prepare(glm::vec2(512.0f, 512.0f), glm::vec2(300.0f, 500.0f), vport);
+	test_menu.draw(vg);
+	test_menu_canvas.prepare(pos, size, gui_input);
+	test_menu_canvas.draw(vg, gui_skin, glm::ivec4(0, 0, 1, 1));
+
+	this->cu = cu;	
+
+	visible_machines.clear();
+
+	EditorVehicleInterface::RaycastResult res = 
+		edveh_int->raycast(ray_start, ray_end, false);
+
+	bool see_all = gui_input->mouse_pressed(GUI_LEFT_BUTTON);
+
+
+	// Highlighting always shows the machines of said piece
+	if(res.has_hit && hovered == nullptr)
+	{
+		// TODO: It could be wise to add a check for p->part == nullptr
+		see_part(res.p->part);
+		edveh->piece_meta[res.p].highlight = glm::vec3(1.0f, 1.0f, 1.0f);
+	}
+
+	if(selected != nullptr)
+	{
+		// Also see all wired parts (including ourselves)
+		see_part(selected->in_part);
+		for(Machine* it : selected_wired)
+		{
+			see_part(it->in_part);
+		}
+	}
+	
+	for(Part* p : edveh->veh->parts)
+	{
+		if(p->machines.empty())
+		{
+			continue;
+		}
+		// We raycast p_root's center because that's where 
+		// the icons are, but ignore all pieces
+		bool visible = false;
+		if(!see_all)
+		{
+			std::vector<Piece*> all_pieces;
+			for(auto pair : p->pieces)
+			{
+				all_pieces.push_back(pair.second);
+			}
+
+			for(Piece* p : all_pieces)
+			{
+				EditorVehicleInterface::RaycastResult res = 
+					edveh_int->raycast(cu.cam_pos, 
+					to_dvec3(p->packed_tform.getOrigin()), false, all_pieces);
+
+				if(!res.has_hit)
+				{
+					visible = true;
+				}
+			}
+		}
+
+		if(visible || see_all)
+		{
+			see_part(p);
+		}
+	}
 
 	hovered = nullptr;
 	std::unordered_map<Machine*, std::pair<glm::vec2, bool>> machine_to_pos;
 	Machine* new_wire = nullptr;
 
+	std::vector<glm::vec2> seen_positions;
+
+	int rnd_idx = 0;
 	for(auto& pair : visible_machines)
 	{
 		Part* p = pair.first;
@@ -35,9 +108,10 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 		std::vector<Machine*> machines = pair.second;
 		float dangle = glm::two_pi<float>() / machines.size();
 		float scale = glm::clamp(200.0f / ((float)glm::distance2(pos, cu.cam_pos)), 0.5f, 1.0f);
-		float icon_size = 22.0f * scale;
+		float real_icon_size = 22.0f;
+		float icon_size = real_icon_size * scale;
 		// This formula gives appropiate icon distancing
-		float radius = glm::max((float)log(machines.size()) * icon_size * scale * 0.6f, icon_size * 0.7f);
+		float radius = glm::max((float)log(machines.size()) * icon_size * scale * 0.6f, icon_size);
 		if(machines.size() == 1)
 		{
 			radius = 0.0f;
@@ -56,8 +130,9 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 		for(float angle = 0.0f; angle < glm::two_pi<float>(); angle += dangle)
 		{
 			Machine* m = machines[i];
-
-			glm::vec2 offset = glm::vec2(sin(angle), cos(angle));
+			
+			float adj_angle = angle + glm::half_pi<float>();
+			glm::vec2 offset = glm::vec2(sin(adj_angle), cos(adj_angle));
 			glm::vec2 final_pos = glm::round(screen_pos + offset * radius);
 
 			if(!in_front)
@@ -78,13 +153,59 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 					break;
 				}
 			}
+			if(m == selected)
+			{
+				contained_in_wired = true;
+			}
 
 			// Clamp to screen edges
-			if(contained_in_wired)
+			glm::vec2 old_final_pos = final_pos;
+			final_pos = glm::clamp(final_pos, glm::vec2(vport.x, vport.y) + real_icon_size * 0.5f, 
+				glm::vec2(vport.x + vport.z, vport.y + vport.w) - real_icon_size * 0.5f);
+			
+			bool clamped = final_pos != old_final_pos;
+
+			bool done = false;
+			int its = 0;
+			while(!done && its < 20 && clamped)
 			{
-				final_pos = glm::clamp(final_pos, glm::vec2(vport.x, vport.y) + icon_size * 0.5f, 
-					glm::vec2(vport.x + vport.z, vport.y + vport.w) - icon_size * 0.5f);
+
+				bool any = false;
+				// Make sure there are no overlaps
+				// It also gives special priority to top-bottom overlaps,
+				// as side overlaps will be rarer due to the camera movement
+				// TODO: Write a better method, this gets a bit jittery
+				for(glm::vec2 other_pos : seen_positions)
+				{
+					float dist = glm::distance(other_pos, final_pos);
+					if(dist < real_icon_size)
+					{
+						glm::vec2 rand_offset;
+						if(rnd_idx % 2 == 0)
+						{
+							rand_offset = glm::vec2(1.0f, 0.0f);
+						}
+						else
+						{
+							rand_offset = glm::vec2(-1.0f, 0.0f);
+						}
+						final_pos += rand_offset * real_icon_size * 2.0f;
+						
+						
+						any = true;
+						break;
+					}
+				}
+
+				done = any == false;
+				its++;
+
 			}
+			
+			final_pos = glm::clamp(final_pos, glm::vec2(vport.x, vport.y) + real_icon_size * 0.5f, 
+				glm::vec2(vport.x + vport.z, vport.y + vport.w) - real_icon_size * 0.5f);
+
+			bool visible = contained_in_wired || (!clamped && in_front);
 
 			glm::vec2 rect_pos = glm::round(final_pos - icon_size * 0.5f);
 			glm::vec2 tex_pos = glm::round(final_pos + icon_size * 0.5f);
@@ -93,7 +214,7 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 			machine_to_pos[m] = std::make_pair(fpos, in_front);
 			
 
-			if(in_front || contained_in_wired)
+			if(visible)
 			{	
 				// Indicator
 				if(machines.size() > 1)
@@ -181,21 +302,26 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 					nvgStrokeWidth(vg, 1.0f);
 
 				}
-			}
 
-			// Machine
-			AssetHandle<Image> img = m->get_icon();
-			int image = nvglCreateImageFromHandleGL3(vg, img->id, img->get_width(), img->get_height(), 0);
-			NVGpaint paint = nvgImagePattern(vg, tex_pos.x, tex_pos.y, icon_size, icon_size, 0.0f, image, 1.0f);
-			nvgBeginPath(vg);
-			nvgRect(vg, rect_pos.x, rect_pos.y, icon_size, icon_size);
-			nvgFillPaint(vg, paint);
-			nvgFill(vg);
+				// Machine
+				AssetHandle<Image> img = m->get_icon();
+				int image = nvglCreateImageFromHandleGL3(vg, img->id, img->get_width(), img->get_height(), 0);
+				NVGpaint paint = nvgImagePattern(vg, tex_pos.x, tex_pos.y, icon_size, icon_size, 0.0f, image, 1.0f);
+				nvgBeginPath(vg);
+				nvgRect(vg, rect_pos.x, rect_pos.y, icon_size, icon_size);
+				nvgFillPaint(vg, paint);
+				nvgFill(vg);
+
+				seen_positions.push_back(final_pos);
+
+			}
 
 
 			i++;
 
 		}
+
+		rnd_idx++;
 
 	}
 
@@ -217,17 +343,27 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 		int off_screen = 0;
 		for(Machine* it : to_draw_wires)
 		{
-			if(!machine_to_pos[it].second && false)
+			glm::vec2 end = machine_to_pos[it].first + 0.5f;
+
+			nvgBeginPath(vg);
+			nvgMoveTo(vg, start.x, start.y);
+			if(it == new_wire)
 			{
-				// Draw out-of-screen indicator (later)
-				off_screen++;
-			}		
+				nvgStrokeColor(vg, nvgRGB(0, 255, 0));
+			}
 			else
 			{
-				glm::vec2 end = machine_to_pos[it].first + 0.5f;
+				nvgStrokeColor(vg, nvgRGB(255, 255, 255));
+			}
+
+			if(it->in_part == selected->in_part)
+			{
+				// We wire using a straight line
+				nvgLineTo(vg, end.x, end.y);
+			}
+			else
+			{
 				float h_offset = 40.0f;
-				nvgBeginPath(vg);
-				nvgMoveTo(vg, start.x, start.y);
 				if(end.y > start.y)
 				{
 					nvgLineTo(vg, start.x + h_offset, start.y);
@@ -239,19 +375,13 @@ void WireInterface::do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_inpu
 					nvgLineTo(vg, start.x - h_offset, end.y);
 				}
 				nvgLineTo(vg, end.x, end.y);
-				if(it == new_wire)
-				{
-					nvgStrokeColor(vg, nvgRGB(0, 255, 0));
-				}
-				else
-				{
-					nvgStrokeColor(vg, nvgRGB(255, 255, 255));
-				}
-				nvgStroke(vg); 
 			}
+			nvgStroke(vg); 
 		}
 		
 	}
+
+	return false;
 
 }
 
@@ -265,76 +395,6 @@ WireInterface::WireInterface(EditorVehicleInterface* edveh_int)
 
 	tiny_font = AssetHandle<BitmapFont>("core:fonts/ProggyTiny.fnt");
 	
-}
-
-bool WireInterface::handle_input(const CameraUniforms& cu, glm::dvec3 ray_start, 
-		glm::dvec3 ray_end, GUIInput* gui_input)
-{
-	this->cu = cu;	
-
-	visible_machines.clear();
-
-	EditorVehicleInterface::RaycastResult res = 
-		edveh_int->raycast(ray_start, ray_end, false);
-
-	bool see_all = gui_input->mouse_pressed(GUI_LEFT_BUTTON);
-
-
-	// Highlighting always shows the machines of said piece
-	if(res.has_hit && hovered == nullptr)
-	{
-		// TODO: It could be wise to add a check for p->part == nullptr
-		see_part(res.p->part);
-		edveh->piece_meta[res.p].highlight = glm::vec3(1.0f, 1.0f, 1.0f);
-	}
-
-	if(selected != nullptr)
-	{
-		// Also see all wired parts (including ourselves)
-		see_part(selected->in_part);
-		for(Machine* it : selected_wired)
-		{
-			see_part(it->in_part);
-		}
-	}
-	
-	for(Part* p : edveh->veh->parts)
-	{
-		if(p->machines.empty())
-		{
-			continue;
-		}
-		// We raycast p_root's center because that's where 
-		// the icons are, but ignore all pieces
-		bool visible = false;
-		if(!see_all)
-		{
-			std::vector<Piece*> all_pieces;
-			for(auto pair : p->pieces)
-			{
-				all_pieces.push_back(pair.second);
-			}
-
-			for(Piece* p : all_pieces)
-			{
-				EditorVehicleInterface::RaycastResult res = 
-					edveh_int->raycast(cu.cam_pos, 
-					to_dvec3(p->packed_tform.getOrigin()), false, all_pieces);
-
-				if(!res.has_hit)
-				{
-					visible = true;
-				}
-			}
-		}
-
-		if(visible || see_all)
-		{
-			see_part(p);
-		}
-	}
-
-	return false;
 }
 
 void WireInterface::see_part(Part* p) 

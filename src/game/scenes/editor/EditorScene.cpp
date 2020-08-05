@@ -68,11 +68,11 @@ void EditorScene::update()
 
 	if(!gui_input.mouse_blocked)
 	{
-		vehicle_int.handle_input(
-			cam.get_camera_uniforms(rw, get_osp()->renderer->get_height(true)), 
-			viewport, real_screen_size,
-			&gui_input); 
-		do_edveh_gui();
+		glm::vec4 vport = glm::vec4(w, 0, 1.0, 1.0);
+		float gw = (float)gui.get_panel_width();
+		glm::vec4 gui_vport = glm::vec4(gw, 0, real_screen_size.x - gw, real_screen_size.y); 
+		vehicle_int.do_interface(cam.get_camera_uniforms(rw, real_screen_size.y), 
+			vport, gui_vport, real_screen_size, get_osp()->renderer->vg, &gui_input, &gui.skin);
 	}
 	
 	bt_world->updateAabbs();
@@ -102,11 +102,6 @@ void EditorScene::do_gui()
 
 void EditorScene::do_edveh_gui() 
 {
-	float width = get_osp()->renderer->get_width(true);
-	float height = get_osp()->renderer->get_height(true);
-	float w = (float)gui.get_panel_width();
-	glm::vec4 vport = glm::vec4(w, 0, width - w, height);
-	vehicle_int.do_gui(get_osp()->renderer->vg, &gui.skin, &gui_input, vport);	
 }
 
 void EditorScene::unload()

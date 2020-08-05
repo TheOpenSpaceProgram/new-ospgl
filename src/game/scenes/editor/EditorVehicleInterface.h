@@ -18,6 +18,9 @@ public:
 		glm::dvec3 world_nrm;
 	};
 
+	// This functionality is common to many interfaces, so it's here
+	void middle_click_focus(glm::dvec3 ray_start, glm::dvec3 ray_end);
+
 	RaycastResult raycast(glm::dvec3 start, glm::dvec3 end,	bool ignore_non_radial,
 		   	std::vector<Piece*> ignore = std::vector<Piece*>());
 
@@ -37,13 +40,10 @@ public:
 	BaseInterface* current_interface;
 
 
-	// Return true if mouse should be blocked for the GUI
-	bool handle_input(const CameraUniforms& cu, glm::dvec4 viewport, 
-		glm::dvec2 real_screen_size, GUIInput* gui_input);
-
 	void update(double dt);
 	
-	void do_gui(NVGcontext* vg, GUISkin* gui_skin, GUIInput* gui_input, glm::vec4 viewport);
+	bool do_interface(const CameraUniforms& cu, glm::dvec4 viewport, glm::dvec4 gui_viewport, 
+			glm::dvec2 screen_size, NVGcontext* vg, GUIInput* gui_input, GUISkin* gui_skin);
 
 	bool can_change_editor_mode();
 

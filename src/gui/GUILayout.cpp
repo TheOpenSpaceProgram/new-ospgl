@@ -142,3 +142,10 @@ GUILayout::GUILayout()
 	block_mouse = true;
 }
 
+GUILayout::~GUILayout()
+{
+	for(GUIWidget* w : widgets)
+	{
+		delete w;
+	}
+}
