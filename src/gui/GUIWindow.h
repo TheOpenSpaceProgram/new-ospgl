@@ -19,10 +19,16 @@ private:
 public:
 
 
+	
 	// These are in screen-space pixels. They may be adjusted by the window
-	// manager if neccesary (only position)
+	// manager if neccesary (only position). The size of the window will be bigger
+	// due to decorations
 	glm::ivec2 pos;
 	glm::ivec2 size;
+
+	bool close_hovered;
+	bool minimize_hovered;
+	bool pin_hovered;
 
 	bool has_titlebar;
 	std::string title;
@@ -47,4 +53,6 @@ public:
 	void draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor);
 
 	bool is_focused() { return focused; }
+
+	GUIWindow();
 };

@@ -173,7 +173,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
 		}
 
 		btn->force_image_size = glm::ivec2(category_icon_size);
-		btn->set_image(vg, categories[i].icon.data);
+		btn->set_image(vg, categories[i].icon.duplicate());
 		category_list->add_widget(btn);
 		std::string id = categories[i].id;
 

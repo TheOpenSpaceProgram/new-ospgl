@@ -4,7 +4,6 @@
 #include <util/Logger.h>
 #include <util/SerializeUtil.h>
 
-
 struct ImageConfig
 {
 	enum FilterMode
@@ -21,6 +20,8 @@ struct ImageConfig
 	FilterMode filter;
 };
 
+struct NVGcontext;
+
 // Images are always RGBA, stored as float, for perfomance reasons
 class Image
 {
@@ -32,7 +33,15 @@ private:
 
 	int width, height;
 
+	// TODO: If at any time there are more than 1 NVGcontexts, then we need
+	// to write some kind of code here to handle multiple contexts
+	int nanovg_image;
+	NVGcontext* in_vg;
+
 public:
+
+	// This automatically creates the nanoVG image ONLY once
+	int get_nvg_image(NVGcontext* vg);
 
 	ImageConfig get_config() const { return config; }
 	inline int get_width() const { return width; }

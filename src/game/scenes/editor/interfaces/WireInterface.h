@@ -1,8 +1,7 @@
 #pragma once
 #include "BaseInterface.h"
 #include <assets/BitmapFont.h>
-
-#include "../gui/ContextMenu.h"
+#include <gui/GUIWindow.h>
 
 class EditorVehicleInterface;
 
@@ -27,8 +26,7 @@ private:
 
 public:
 
-	ContextMenu test_menu;
-	GUICanvas test_menu_canvas;
+	GUIWindow* test_window;
 
 	virtual void update(double dt) override;
 

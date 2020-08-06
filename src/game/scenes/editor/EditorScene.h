@@ -20,6 +20,10 @@
 
 class EditorScene : public Scene
 {
+public:	
+	friend class EditorGUI;
+	EditorGUI gui;
+	
 private:
 
 	EditorCamera cam;
@@ -41,8 +45,6 @@ private:
 
 public:
 
-	friend class EditorGUI;
-	EditorGUI gui;
 	
 	// We hold a non-universe lua_state for all machines to interact
 	sol::state lua_state;

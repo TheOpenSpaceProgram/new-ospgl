@@ -1,6 +1,7 @@
 #include "WireInterface.h"
 #include "../EditorVehicleInterface.h"
 #include <nanovg/nanovg_gl.h>
+#include "../EditorScene.h"
 
 void WireInterface::update(double dt) 
 {
@@ -20,11 +21,6 @@ bool WireInterface::can_leave()
 bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start, glm::dvec3 ray_end,
 	glm::dvec4 vport, NVGcontext* vg, GUIInput* gui_input, GUISkin* gui_skin)
 {
-
-	auto[pos, size] = test_menu.prepare(glm::vec2(512.0f, 512.0f), glm::vec2(300.0f, 500.0f), vport);
-	test_menu.draw(vg);
-	test_menu_canvas.prepare(pos, size, gui_input);
-	test_menu_canvas.draw(vg, gui_skin, glm::ivec4(0, 0, 1, 1));
 
 	this->cu = cu;	
 
@@ -394,6 +390,17 @@ WireInterface::WireInterface(EditorVehicleInterface* edveh_int)
 	hovered = nullptr;
 
 	tiny_font = AssetHandle<BitmapFont>("core:fonts/ProggyTiny.fnt");
+
+	test_window = scene->gui.window_manager.create_window();
+	test_window->pos = glm::ivec2(200, 200);
+	test_window->size = glm::ivec2(400, 400);
+	test_window->title = "Test window";
+
+	
+	GUIWindow* test_window2 = scene->gui.window_manager.create_window();
+	test_window2->pos = glm::ivec2(300, 300);
+	test_window2->size = glm::ivec2(400, 400);
+	test_window2->title = "Test 2 window";
 	
 }
 

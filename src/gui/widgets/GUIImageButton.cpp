@@ -56,14 +56,17 @@ void GUIImageButton::draw(NVGcontext* vg, GUISkin* skin)
 	}
 }
 
-void GUIImageButton::set_image(NVGcontext* vg, Image* to)
+void GUIImageButton::set_image(NVGcontext* vg, AssetHandle<Image>&& to)
 {
-	image = nvglCreateImageFromHandleGL3(vg, to->id, to->get_width(), to->get_height(), 0);
-	img_size = to->get_size();
+	image = to->get_nvg_image(vg);
+	img_handle = std::move(to);	
+	img_size = img_handle->get_size();
 }
 
 void GUIImageButton::set_image(NVGcontext* vg, GLuint handle, glm::ivec2 size)
 {
 	image = nvglCreateImageFromHandleGL3(vg, handle, size.x, size.y, 0);
 	img_size = size;
+	img_handle = AssetHandle<Image>();
+	// TODO: Remove the image from nanoVG? This is a tiny memory leak
 }

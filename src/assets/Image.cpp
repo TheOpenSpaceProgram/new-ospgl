@@ -3,6 +3,8 @@
 #include <stb/stb_image.h>
 #include <sstream>
 #include "../util/MathUtil.h"
+#include <nanovg/nanovg.h>
+#include <nanovg/nanovg_gl.h>
 
 int Image::get_index(int x, int y)
 {
@@ -100,8 +102,22 @@ glm::vec4 Image::get_rgba(int x, int y)
 	return get_rgba(get_index(x, y));
 }
 
+int Image::get_nvg_image(NVGcontext* vg)
+{
+	logger->check(this->config.upload, "Image must be uploaded to be used by NanoVG");
+	if(nanovg_image == 0)
+	{
+		nanovg_image = nvglCreateImageFromHandleGL3(vg, id, width, height, 0);
+		in_vg = vg;
+	}
+	
+	return nanovg_image;
+}
+
 Image::Image(ImageConfig config, const std::string& path)
 {
+	this->nanovg_image = 0;
+	this->in_vg = nullptr;
 	this->config = config;
 
 	int c_dump;
@@ -205,6 +221,11 @@ Image::~Image()
 	if (config.upload && id != 0)
 	{
 		glDeleteTextures(1, &id);
+	}
+
+	if(nanovg_image != 0)
+	{
+		nvgDeleteImage(in_vg, nanovg_image);
 	}
 }
 

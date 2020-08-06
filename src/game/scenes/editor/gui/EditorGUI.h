@@ -7,6 +7,8 @@
 #include <assets/AssetManager.h>
 #include <gui/skins/SimpleSkin.h>
 #include <gui/widgets/GUIImageButton.h>
+#include <gui/GUIWindowManager.h>
+
 #include "../EditorVehicleInterface.h"
 
 #include "EditorPartList.h"
@@ -55,6 +57,7 @@ public:
 
 	GUICanvas toolset_canvas;
 	GUICanvas file_canvas;
+	GUIWindowManager window_manager;
 
 	void do_gui(int width, int height, GUIInput* gui_input);	
 	void do_toolset(int width, int height, float swidth, GUIInput* gui_input);

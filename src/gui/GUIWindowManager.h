@@ -13,6 +13,7 @@ private:
 public:
 
 	GUIWindow* focused;
+	bool dragging;
 
 	// In pixels, allows bounding the windows to a certain viewport
 	glm::ivec4 viewport;
@@ -23,5 +24,7 @@ public:
 
 	GUIWindow* create_window();
 	void delete_window(GUIWindow* win);
+
+	GUIWindowManager();
 
 };

@@ -44,6 +44,10 @@ void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 
 	prev_width = width;
 	prev_height = height;
+
+	window_manager.viewport = glm::ivec4(0, 0, width, height);
+	window_manager.prepare(gui_input, &skin);
+	window_manager.draw(vg, &skin);
 }
 
 
@@ -130,7 +134,7 @@ void EditorGUI::prepare_toolset()
 	auto create_button = [tlayout, this](const std::string& name, EditorMode mode)
 	{
 		GUIImageButton* button = new GUIImageButton();
-		button->set_image(vg, assets->get<Image>("core", name));
+		button->set_image(vg, AssetHandle<Image>("core", name, true));
 		button->force_image_size = glm::ivec2(24, 24);
 		tlayout->add_widget(button);
 
@@ -182,7 +186,7 @@ void EditorGUI::prepare_file()
 	auto create_button = [right, this](const std::string& name)
 	{
 		GUIImageButton* button = new GUIImageButton();
-		button->set_image(vg, assets->get<Image>("core", name));
+		button->set_image(vg, AssetHandle<Image>("core", name));
 		button->force_image_size = glm::ivec2(16, 16);
 		right->layout->add_widget(button);
 	};
