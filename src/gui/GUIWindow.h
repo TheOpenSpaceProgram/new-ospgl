@@ -18,17 +18,21 @@ private:
 	bool focused;
 public:
 
+	float alpha;
 
-	
 	// These are in screen-space pixels. They may be adjusted by the window
 	// manager if neccesary (only position). The size of the window will be bigger
 	// due to decorations
 	glm::ivec2 pos;
 	glm::ivec2 size;
+	
+	// Only for resizeable windows
+	glm::ivec2 min_size;
 
 	bool close_hovered;
 	bool minimize_hovered;
 	bool pin_hovered;
+	bool drag_hovered;
 
 	bool has_titlebar;
 	std::string title;

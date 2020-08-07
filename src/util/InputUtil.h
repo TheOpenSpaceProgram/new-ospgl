@@ -12,9 +12,23 @@ class InputUtil
 {
 private:
 
-
+	GLFWcursor* std_cursors[10];
 
 public:
+
+	enum class Cursor
+	{
+		NORMAL,
+		IBEAM,
+		CROSSHAIR,
+		HAND,
+		RESIZE_EW,
+		RESIZE_NS,
+		RESIZE_NWSE, //< ! Not supported on many platforms
+		RESIZE_NESW, //< ! Not supported on many platforms
+		RESIZE_ALL,
+		NOT_ALLOWED					
+	};
 
 	glm::dvec2 prev_mouse_pos;
 	glm::dvec2 mouse_pos;
@@ -35,6 +49,16 @@ public:
 	{
 		glfwSetScrollCallback(window, scroll_callback);
 		this->window = window;
+		std_cursors[(int)Cursor::NORMAL] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+		std_cursors[(int)Cursor::IBEAM] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+		std_cursors[(int)Cursor::CROSSHAIR] = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+		std_cursors[(int)Cursor::HAND] = glfwCreateStandardCursor(GLFW_POINTING_HAND_CURSOR);
+		std_cursors[(int)Cursor::RESIZE_EW] = glfwCreateStandardCursor(GLFW_RESIZE_EW_CURSOR);
+		std_cursors[(int)Cursor::RESIZE_NS] = glfwCreateStandardCursor(GLFW_RESIZE_NS_CURSOR);
+		std_cursors[(int)Cursor::RESIZE_NWSE] = glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
+		std_cursors[(int)Cursor::RESIZE_NESW] = glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
+		std_cursors[(int)Cursor::RESIZE_ALL] = glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR);
+		std_cursors[(int)Cursor::NOT_ALLOWED] = glfwCreateStandardCursor(GLFW_NOT_ALLOWED_CURSOR);
 	}
 
 	void update(GLFWwindow* window)
@@ -107,6 +131,11 @@ public:
 	bool mouse_up(int button)
 	{
 		return key_up(button + GLFW_KEY_LAST);
+	}
+
+	void set_cursor(Cursor cursor)
+	{
+		glfwSetCursor(window, std_cursors[(int)cursor]);
 	}
 };
 

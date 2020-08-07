@@ -10,7 +10,7 @@ private:
 	float titlebar_height = 18.0f;
 	float titlebar_margin = 5.0f;
 
-	float window_margins = 3.0f;
+	float window_margins = 10.0f;
 	float window_edge_size = 1.0f;
 	
 	float window_icon_size = 11.0f;
@@ -33,6 +33,7 @@ public:
 	virtual bool can_close_window(GUIWindow* window, glm::ivec2 mpos) override;
 	virtual bool can_minimize_window(GUIWindow* window, glm::ivec2 mpos) override;
 	virtual bool can_pin_window(GUIWindow* window, glm::ivec2 mpos) override;
+	virtual ResizePoint can_resize_window(GUIWindow* window, glm::ivec2 mpos) override;
 	virtual glm::ivec4 get_window_aabb(GUIWindow* window) override;
 	
 	virtual void draw_window(NVGcontext* vg, GUIWindow* window) override;

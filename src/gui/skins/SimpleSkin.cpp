@@ -82,8 +82,11 @@ void SimpleSkin::draw_button(NVGcontext* v, glm::ivec2 pos, glm::ivec2 size, con
 
 bool SimpleSkin::can_drag_window(GUIWindow* window, glm::ivec2 mpos) 
 {
-	
-	return true;
+	float side_size = window_margins + window_edge_size;
+	glm::vec2 title_tl = glm::vec2(window->pos.x - side_size, window->pos.y - titlebar_height - side_size) + 0.5f;
+	glm::vec2 title_br = glm::vec2(window->pos.x + window->size.x + side_size, window->pos.y - window_margins) + 0.5f;
+
+	return mpos.x > title_tl.x && mpos.y > title_tl.y && mpos.x < title_br.x && mpos.y < title_br.y;
 }
 
 bool SimpleSkin::can_close_window(GUIWindow* window, glm::ivec2 mpos) 
@@ -92,8 +95,6 @@ bool SimpleSkin::can_close_window(GUIWindow* window, glm::ivec2 mpos)
 	glm::vec2 button_pos = 
 		glm::vec2(window->pos.x + window->size.x - window_icon_size, 
 		window->pos.y - titlebar_height - side_size + window_icon_size * 0.5f) + 0.5f;
-
-	logger->info("{},{} / {},{}", mpos.x, mpos.y, button_pos.x, button_pos.y);
 
 	return mpos.x > button_pos.x - 2.0f && mpos.y > button_pos.y - 2.0f && 
 		mpos.x < button_pos.x + window_icon_size + 2.0f && mpos.y < button_pos.y + window_icon_size + 2.0f;
@@ -133,6 +134,38 @@ bool SimpleSkin::can_pin_window(GUIWindow* window, glm::ivec2 mpos)
 		mpos.x < button_pos.x + window_icon_size + 2.0f && mpos.y < button_pos.y + window_icon_size + 2.0f;
 }
 
+SimpleSkin::ResizePoint SimpleSkin::can_resize_window(GUIWindow* window, glm::ivec2 mpos) 
+{
+	float margin = window_margins + window_edge_size;
+	glm::ivec4 outer = get_window_aabb(window);
+	glm::ivec4 inner = glm::ivec4(outer.x + margin, outer.y + margin * 0.5f, 
+		outer.z - margin * 2.0f, outer.w - margin * 2.0f);
+
+	bool in_outer = mpos.x > outer.x && mpos.y > outer.y && mpos.x < outer.x + outer.z && mpos.y < outer.y + outer.w;
+	bool in_inner = mpos.x > inner.x && mpos.y > inner.y && mpos.x < inner.x + inner.z && mpos.y < inner.y + inner.w;
+
+	if(in_outer && !in_inner)
+	{
+		// We can resize, check position
+		bool left = mpos.x < inner.x && mpos.x > outer.x;
+		bool right = mpos.x > inner.x + inner.z  && mpos.x < outer.x + outer.z;
+		bool top = mpos.y < inner.y && mpos.y > outer.y;
+		bool bottom = mpos.y > inner.y + inner.w && mpos.y < outer.y + outer.w;
+
+		if		(left && top)		{ return TOP_LEFT; }
+		else if	(left && bottom)	{ return BOTTOM_LEFT; }
+		else if (right && top) 		{ return TOP_RIGHT; }
+		else if (right && bottom)	{ return BOTTOM_RIGHT; }
+		else if (top)				{ return TOP; }
+		else if (right)				{ return RIGHT; }
+		else if (bottom) 			{ return BOTTOM; }
+		else if (left) 				{ return LEFT; }
+
+	}
+	
+	return NONE;
+}
+
 glm::ivec4 SimpleSkin::get_window_aabb(GUIWindow* window) 
 {
 	glm::ivec4 aabb;
@@ -157,11 +190,10 @@ void SimpleSkin::draw_window(NVGcontext* vg, GUIWindow* window)
 	glm::vec2 title_trb = glm::vec2(pos.x + size.x + side_size, pos.y - titlebar_height) + 0.5f;
 	glm::vec2 title_br = glm::vec2(pos.x + size.x + side_size, pos.y - window_margins) + 0.5f;
 	glm::vec2 title_bl = glm::vec2(pos.x - side_size, pos.y - window_margins) + 0.5f;
-	glm::vec2 win_br = title_br + glm::vec2(0.0f, size.y);
+	glm::vec2 win_br = title_br + glm::vec2(0.0f, size.y + side_size);
 	glm::vec2 win_bbr = win_br + glm::vec2(-4.0f, 4.0f);
-	glm::vec2 win_bbl = win_bbr + glm::vec2(-size.x, 0.0f);
-	glm::vec2 win_bl = win_bbl + glm::vec2(-4.0f, -4.0f);
-
+	glm::vec2 win_bl = win_br - glm::vec2(size.x + side_size * 2.0f, 0.0f);
+	glm::vec2 win_bbl = win_bl + glm::vec2(4.0f, 4.0f);
 	// Titlebar background is brighter
 	nvgBeginPath(vg);
 	nvgMoveTo(vg, title_tl.x, title_tl.y);
@@ -170,7 +202,14 @@ void SimpleSkin::draw_window(NVGcontext* vg, GUIWindow* window)
 	nvgLineTo(vg, title_br.x, title_br.y);
 	nvgLineTo(vg, title_bl.x, title_bl.y);
 	nvgLineTo(vg, title_tl.x, title_tl.y);
-	nvgFillColor(vg, nvgRGB(61, 70, 79));
+	if(window->drag_hovered)
+	{
+		nvgFillColor(vg, nvgRGBA(71, 80, 89, window->alpha * 255));
+	}
+	else
+	{
+		nvgFillColor(vg, nvgRGBA(61, 70, 79, window->alpha * 255));
+	}
 	nvgFill(vg);
 	// Window background is darker
 	nvgBeginPath(vg);
@@ -181,7 +220,7 @@ void SimpleSkin::draw_window(NVGcontext* vg, GUIWindow* window)
 	nvgLineTo(vg, win_bbl.x, win_bbl.y);
 	nvgLineTo(vg, win_bl.x, win_bl.y);
 	nvgLineTo(vg, title_bl.x, title_bl.y - 0.5f);
-	nvgFillColor(vg, nvgRGB(40, 45, 50));
+	nvgFillColor(vg, nvgRGBA(40, 45, 50, window->alpha * 255));
 	nvgFill(vg);
 	// Window edge is colored separately
 	if(window->is_focused())

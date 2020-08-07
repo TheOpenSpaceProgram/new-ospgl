@@ -29,6 +29,8 @@ void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 	nvgRect(vg, 0.0f, 0.0f, swidth, 1.0f * h);
 	nvgFill(vg);
 
+	// Prepare first so gui blocks stuff, but it's drawn last
+	window_manager.prepare(gui_input, &skin);
 	
 	if(edveh_int->attach_interface.selected == nullptr)
 	{
@@ -46,7 +48,6 @@ void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 	prev_height = height;
 
 	window_manager.viewport = glm::ivec4(0, 0, width, height);
-	window_manager.prepare(gui_input, &skin);
 	window_manager.draw(vg, &skin);
 }
 

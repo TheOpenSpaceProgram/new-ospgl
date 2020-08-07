@@ -11,6 +11,14 @@ class GUISkin
 {
 public:
 
+
+	enum ResizePoint
+	{
+		NONE,
+		TOP_LEFT, TOP, TOP_RIGHT, RIGHT,
+		BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT, LEFT
+	};
+	
 	enum class ButtonState
 	{	
 		NORMAL,
@@ -37,6 +45,7 @@ public:
 	virtual bool can_close_window(GUIWindow* window, glm::ivec2 mpos) = 0;
 	virtual bool can_minimize_window(GUIWindow* window, glm::ivec2 mpos) = 0;
 	virtual bool can_pin_window(GUIWindow* window, glm::ivec2 mpos) = 0;
+	virtual ResizePoint can_resize_window(GUIWindow* window, glm::ivec2 mpos) = 0;
 	virtual glm::ivec4 get_window_aabb(GUIWindow* window) = 0;
 
 	virtual void draw_window(NVGcontext* vg, GUIWindow* window) = 0;

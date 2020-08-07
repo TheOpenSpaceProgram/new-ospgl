@@ -20,5 +20,7 @@ GUIWindow::GUIWindow()
 	moveable = true;
 	resizeable = true;
 	has_titlebar = true;
+	min_size = glm::ivec2(50, 50);
+	alpha = 1.0f;
 
 }
