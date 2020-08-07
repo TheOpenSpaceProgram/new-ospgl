@@ -16,6 +16,9 @@ friend class GUIWindowManager;
 
 private:
 	bool focused;
+	bool minimized;
+	bool pinned;
+	bool passthrough;
 public:
 
 	float alpha;
@@ -41,8 +44,11 @@ public:
 	bool closeable;
 	// A minimized window shows just the titlebar
 	bool minimizable;
-	// A pinned window is always on top
+	// A pinned window can also optionally toggle input passthrough (optionally default)
+	// The unpin and input passthrough buttons are always interactable
 	bool pinable;
+	// Is the window forced-passthrough when pinned? 
+	bool pin_passthrough;
 	bool resizeable;
 	bool moveable;
 
@@ -50,13 +56,16 @@ public:
 	GUICanvas canvas;
 
 	// Useful for cleaning up (widgets are auto-deleted with the canvas!)
-	Signal<void(GUIWindow*)> on_close;
+	Signal<void(GUIWindow&)> on_close;
 
 	// We need the GUISkin on prepare to adjust sizings
 	void prepare(GUIInput* gui_input, GUISkin* skin);
 	void draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor);
 
 	bool is_focused() { return focused; }
+	bool is_minimized() { return minimized; }
+	bool is_pinned() { return pinned; }
+	bool is_passthrough() { return passthrough; }
 
 	GUIWindow();
 };

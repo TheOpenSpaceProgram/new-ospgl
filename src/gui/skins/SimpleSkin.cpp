@@ -82,6 +82,10 @@ void SimpleSkin::draw_button(NVGcontext* v, glm::ivec2 pos, glm::ivec2 size, con
 
 bool SimpleSkin::can_drag_window(GUIWindow* window, glm::ivec2 mpos) 
 {
+	if(window->is_pinned())
+	{
+		return false;
+	}
 	float side_size = window_margins + window_edge_size;
 	glm::vec2 title_tl = glm::vec2(window->pos.x - side_size, window->pos.y - titlebar_height - side_size) + 0.5f;
 	glm::vec2 title_br = glm::vec2(window->pos.x + window->size.x + side_size, window->pos.y - window_margins) + 0.5f;
@@ -91,6 +95,11 @@ bool SimpleSkin::can_drag_window(GUIWindow* window, glm::ivec2 mpos)
 
 bool SimpleSkin::can_close_window(GUIWindow* window, glm::ivec2 mpos) 
 {
+	if(window->is_pinned())
+	{
+		return false;
+	}
+
 	float side_size = window_margins + window_edge_size;
 	glm::vec2 button_pos = 
 		glm::vec2(window->pos.x + window->size.x - window_icon_size, 
@@ -102,6 +111,11 @@ bool SimpleSkin::can_close_window(GUIWindow* window, glm::ivec2 mpos)
 
 bool SimpleSkin::can_minimize_window(GUIWindow* window, glm::ivec2 mpos) 
 {
+	if(window->is_pinned())
+	{
+		return false;
+	}
+
 	float side_size = window_margins + window_edge_size;
 	glm::vec2 button_pos = 
 		glm::vec2(window->pos.x + window->size.x - window_icon_size, 
@@ -121,11 +135,11 @@ bool SimpleSkin::can_pin_window(GUIWindow* window, glm::ivec2 mpos)
 	glm::vec2 button_pos = 
 		glm::vec2(window->pos.x + window->size.x - window_icon_size, 
 		window->pos.y - titlebar_height - side_size + window_icon_size * 0.5f) + 0.5f;
-	if(window->closeable)
+	if(window->closeable && !window->is_pinned())
 	{
 		button_pos.x -= (window_icon_size + 2.0f);
 	}
-	if(window->minimizable)
+	if(window->minimizable && !window->is_pinned())
 	{
 		button_pos.x -= (window_icon_size + 2.0f);
 	}
@@ -136,6 +150,11 @@ bool SimpleSkin::can_pin_window(GUIWindow* window, glm::ivec2 mpos)
 
 SimpleSkin::ResizePoint SimpleSkin::can_resize_window(GUIWindow* window, glm::ivec2 mpos) 
 {
+	if(window->is_minimized() || window->is_pinned())
+	{
+		return SimpleSkin::NONE;
+	}
+
 	float margin = window_margins + window_edge_size;
 	glm::ivec4 outer = get_window_aabb(window);
 	glm::ivec4 inner = glm::ivec4(outer.x + margin, outer.y + margin * 0.5f, 
@@ -174,6 +193,11 @@ glm::ivec4 SimpleSkin::get_window_aabb(GUIWindow* window)
 	aabb.y = window->pos.y - window_margins - window_edge_size - titlebar_height;
 	aabb.z = window->size.x + (window_margins + window_edge_size) * 2;
 	aabb.w = window->size.y + window_margins * 2 + window_edge_size + titlebar_height;
+	if(window->is_minimized())
+	{
+		aabb.w = titlebar_height + window_edge_size;
+	}
+	
 
 	return aabb;
 }
@@ -185,6 +209,27 @@ void SimpleSkin::draw_window(NVGcontext* vg, GUIWindow* window)
 
 	float side_size = window_margins + window_edge_size;
 
+	NVGcolor body_background = nvgRGBA(40, 45, 50, window->alpha * 255);
+	NVGcolor title_background;
+	if(window->drag_hovered)
+	{
+		title_background = nvgRGBA(71, 80, 89, window->alpha * 255);
+	}
+	else
+	{
+		title_background = nvgRGBA(61, 70, 79, window->alpha * 255);
+	}
+	NVGcolor outline_color;
+	if(window->is_focused())
+	{
+		outline_color = nvgRGB(170, 170, 170);
+	}
+	else
+	{
+		outline_color = nvgRGB(61, 70, 79);
+	}
+
+
 	glm::vec2 title_tl = glm::vec2(pos.x - side_size, pos.y - titlebar_height - side_size) + 0.5f;
 	glm::vec2 title_tr = glm::vec2(pos.x + size.x, pos.y - titlebar_height - side_size) + 0.5f;
 	glm::vec2 title_trb = glm::vec2(pos.x + size.x + side_size, pos.y - titlebar_height) + 0.5f;
@@ -194,61 +239,85 @@ void SimpleSkin::draw_window(NVGcontext* vg, GUIWindow* window)
 	glm::vec2 win_bbr = win_br + glm::vec2(-4.0f, 4.0f);
 	glm::vec2 win_bl = win_br - glm::vec2(size.x + side_size * 2.0f, 0.0f);
 	glm::vec2 win_bbl = win_bl + glm::vec2(4.0f, 4.0f);
-	// Titlebar background is brighter
-	nvgBeginPath(vg);
-	nvgMoveTo(vg, title_tl.x, title_tl.y);
-	nvgLineTo(vg, title_tr.x, title_tr.y);
-	nvgLineTo(vg, title_trb.x, title_trb.y);
-	nvgLineTo(vg, title_br.x, title_br.y);
-	nvgLineTo(vg, title_bl.x, title_bl.y);
-	nvgLineTo(vg, title_tl.x, title_tl.y);
-	if(window->drag_hovered)
+	if(window->is_pinned())
 	{
-		nvgFillColor(vg, nvgRGBA(71, 80, 89, window->alpha * 255));
+		glm::vec2 fsize = glm::vec2(size.x + side_size * 2.0f, size.y + side_size * 2.0f + titlebar_height);
+		// We draw a simple rect with the titlebar space
+		nvgBeginPath(vg);
+		nvgRect(vg, title_tl.x, title_tl.y, fsize.x, fsize.y);
+		nvgFillColor(vg, body_background);
+		nvgStrokeColor(vg, outline_color);
+		nvgFill(vg);
+		nvgStroke(vg);
+		
 	}
 	else
 	{
-		nvgFillColor(vg, nvgRGBA(61, 70, 79, window->alpha * 255));
+		// Titlebar background is brighter
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, title_tl.x, title_tl.y);
+		nvgLineTo(vg, title_tr.x, title_tr.y);
+		nvgLineTo(vg, title_trb.x, title_trb.y);
+		nvgLineTo(vg, title_br.x, title_br.y);
+		nvgLineTo(vg, title_bl.x, title_bl.y);
+		nvgLineTo(vg, title_tl.x, title_tl.y);
+		nvgFillColor(vg, title_background);
+		nvgFill(vg);
+		
+
+		
+		nvgStrokeColor(vg, outline_color);
+
+		if(window->is_minimized())
+		{
+			// Only draw the titlebar outline
+			nvgBeginPath(vg);
+			nvgMoveTo(vg, title_tl.x, title_tl.y);
+			nvgLineTo(vg, title_tr.x, title_tr.y);
+			nvgLineTo(vg, title_trb.x, title_trb.y);
+			nvgLineTo(vg, title_br.x, title_br.y);
+			nvgLineTo(vg, title_bl.x, title_bl.y);
+			nvgLineTo(vg, title_tl.x, title_tl.y);
+			nvgStroke(vg);
+		}
+		else
+		{
+			// Window background is darker
+			nvgBeginPath(vg);
+			nvgMoveTo(vg, title_bl.x, title_bl.y - 0.5f);
+			nvgLineTo(vg, title_br.x, title_br.y - 0.5f);
+			nvgLineTo(vg, win_br.x, win_br.y);
+			nvgLineTo(vg, win_bbr.x, win_bbr.y);
+			nvgLineTo(vg, win_bbl.x, win_bbl.y);
+			nvgLineTo(vg, win_bl.x, win_bl.y);
+			nvgLineTo(vg, title_bl.x, title_bl.y - 0.5f);
+			nvgFillColor(vg, body_background);
+			nvgFill(vg);
+			
+			nvgBeginPath(vg);
+			nvgMoveTo(vg, title_tl.x, title_tl.y);
+			nvgLineTo(vg, title_tr.x, title_tr.y);
+			nvgLineTo(vg, title_trb.x, title_trb.y);
+			nvgLineTo(vg, title_br.x, title_br.y);
+			nvgLineTo(vg, win_br.x, win_br.y);
+			nvgLineTo(vg, win_bbr.x, win_bbr.y);
+			nvgLineTo(vg, win_bbl.x, win_bbl.y);
+			nvgLineTo(vg, win_bl.x, win_bl.y);
+			nvgLineTo(vg, title_tl.x, title_tl.y);
+			nvgStroke(vg);
+		}
 	}
-	nvgFill(vg);
-	// Window background is darker
-	nvgBeginPath(vg);
-	nvgMoveTo(vg, title_bl.x, title_bl.y - 0.5f);
-	nvgLineTo(vg, title_br.x, title_br.y - 0.5f);
-	nvgLineTo(vg, win_br.x, win_br.y);
-	nvgLineTo(vg, win_bbr.x, win_bbr.y);
-	nvgLineTo(vg, win_bbl.x, win_bbl.y);
-	nvgLineTo(vg, win_bl.x, win_bl.y);
-	nvgLineTo(vg, title_bl.x, title_bl.y - 0.5f);
-	nvgFillColor(vg, nvgRGBA(40, 45, 50, window->alpha * 255));
-	nvgFill(vg);
-	// Window edge is colored separately
-	if(window->is_focused())
-	{
-		nvgStrokeColor(vg, nvgRGB(170, 170, 170));
-	}
-	else
-	{
-		nvgStrokeColor(vg, nvgRGB(61, 70, 79));
-	}
-	nvgBeginPath(vg);
-	nvgMoveTo(vg, title_tl.x, title_tl.y);
-	nvgLineTo(vg, title_tr.x, title_tr.y);
-	nvgLineTo(vg, title_trb.x, title_trb.y);
-	nvgLineTo(vg, title_br.x, title_br.y);
-	nvgLineTo(vg, win_br.x, win_br.y);
-	nvgLineTo(vg, win_bbr.x, win_bbr.y);
-	nvgLineTo(vg, win_bbl.x, win_bbl.y);
-	nvgLineTo(vg, win_bl.x, win_bl.y);
-	nvgLineTo(vg, title_tl.x, title_tl.y);
-	nvgStroke(vg);
+
 
 	nvgFillColor(vg, nvgRGB(255, 255, 255));
 	nvgBitmapText(vg, window_title_font.duplicate(), TextDrawer::LEFT, 
 		title_tl.x + titlebar_margin + 0.5f, title_tl.y + titlebar_margin + 0.5f, window->title.c_str());
 
-
 	bool bools[3] = {window->closeable, window->minimizable, window->pinable};
+	if(window->is_pinned())
+	{
+		bools[0] = false; bools[1] = false;
+	}
 	bool hovered[3] = {window->close_hovered, window->minimize_hovered, window->pin_hovered};
 	AssetHandle<Image>* imgs[3] = {&window_close, &window_min, &window_pin};
 	float x_offset = 0.0f;
@@ -268,6 +337,8 @@ void SimpleSkin::draw_window(NVGcontext* vg, GUIWindow* window)
 		}
 
 	}
+
+
 }	
 
 SimpleSkin::SimpleSkin()

@@ -90,6 +90,8 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
 	}
 	else
 	{
+		bool remove = false;
+
 		// We iterate in reverse (painter's algorithm is used for rendering)
 		for(auto it = windows.rbegin(); it != windows.rend(); it++)
 		{
@@ -118,14 +120,28 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
 				if(w->closeable && skin->can_close_window(w, mouse_pos))
 				{
 					w->close_hovered = true;	
+					if(gui_input->mouse_down(0))
+					{ 
+						remove = true; 
+						w->on_close(*w);
+					}
 				}
 				else if(w->minimizable && skin->can_minimize_window(w, mouse_pos))
 				{
 					w->minimize_hovered = true;
+					if(gui_input->mouse_down(0))
+					{
+						w->minimized = !w->minimized;
+					}
 				}
 				else if(w->pinable && skin->can_pin_window(w, mouse_pos))
 				{
 					w->pin_hovered = true;
+
+					if(gui_input->mouse_down(0))
+					{
+						w->pinned = !w->pinned;
+					}
 				}
 				else if(rpt != GUISkin::NONE)
 				{
@@ -170,6 +186,13 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
 				}
 			}
 		}
+
+		if(remove)
+		{
+			windows.remove(focused);
+			delete focused;
+			new_top = nullptr;
+		}
 	}
 
 
@@ -183,8 +206,9 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
 	bool original_block_keyboard = gui_input->ext_keyboard_blocked;
 
 
-	for(GUIWindow* w : windows)
+	for(auto it = windows.rbegin(); it != windows.rend(); it++)
 	{
+		GUIWindow* w = *it;
 		if(w != focused)
 		{
 			// Block user input
