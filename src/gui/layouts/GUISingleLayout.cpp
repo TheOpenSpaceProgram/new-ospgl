@@ -16,7 +16,7 @@ void GUISingleLayout::prepare(GUIInput* gui_input)
 	size -= glm::ivec2(margins.y, margins.w) * 2; //< *2 because left and right are taken
 
 	widgets[0]->is_visible = true;
-	widgets[0]->prepare(glm::ivec2(pos.x, pos.y), glm::ivec2(size.x, size.y), gui_input);
+	widgets[0]->prepare(glm::ivec2(pos.x, pos.y), glm::ivec2(size.x, size.y), get_aabb(), gui_input);
 
 	vscrollbar.draw = false;
 }

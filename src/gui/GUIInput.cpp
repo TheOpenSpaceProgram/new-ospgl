@@ -17,6 +17,11 @@ bool GUIInput::mouse_inside(glm::ivec2 pos, glm::ivec2 size)
 	}
 }
 
+bool GUIInput::mouse_inside(glm::ivec4 aabb) 
+{
+	return mouse_inside(glm::ivec2(aabb.x, aabb.y), glm::ivec2(aabb.z, aabb.w)); 
+}
+
 bool GUIInput::mouse_int(int btn)
 {
 	if(btn < 0 || btn > 2)
@@ -51,9 +56,11 @@ void GUIInput::update()
 {
 	mouse_blocked = false;
 	keyboard_blocked = false;
+	scroll_blocked = false;
 	ext_mouse_blocked = false;
 	ext_keyboard_blocked = false;
-
+	ext_scroll_blocked = false;
+	
 	for(int i = 0; i < 3; i++)
 	{
 		if(input->mouse_up(i))

@@ -32,6 +32,8 @@ public:
 	double radius_delta;
 
 	// We block both the mouse and keyboard as we are an orbit camera
+	// This means we succesfully started an orbit motions, and stays
+	// until released
 	bool blocked;
 
 	// We implement a simple orbit camera

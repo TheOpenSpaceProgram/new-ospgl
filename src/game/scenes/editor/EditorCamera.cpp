@@ -36,17 +36,19 @@ CameraUniforms EditorCamera::get_camera_uniforms(int w, int h)
 
 void EditorCamera::update(double dt, GUIInput* gui_input)
 {
-	blocked = false;
 
-	if(gui_input->mouse_blocked || gui_input->keyboard_blocked)
-	{
-		return;
-	}	
-	
-	if(glfwGetMouseButton(input->window, main_button) == GLFW_PRESS)
+	if(gui_input->mouse_down(GUI_RIGHT_BUTTON) && !gui_input->mouse_blocked)
 	{
 		blocked = true;
-		
+	}
+	
+	if(gui_input->mouse_up(GUI_RIGHT_BUTTON))
+	{
+		blocked = false;
+	}
+	
+	if(blocked)
+	{
 		bool pan;
 		bool alt_pan;
 		
@@ -111,22 +113,25 @@ void EditorCamera::update(double dt, GUIInput* gui_input)
 
 	}
 
-	// Scrolling
 	bool changed_zoom = false;
 	bool changed_updown = false;
-	if(input->mouse_scroll_delta != 0.0)
+	if(!gui_input->scroll_blocked || blocked)
 	{
-		if(glfwGetKey(input->window, zoom_key))
+		// Scrolling
+		if(input->mouse_scroll_delta != 0.0)
 		{
-			radius_delta -= input->mouse_scroll_delta * zoom_vel;
-			changed_zoom = true;
-		}
-		else
-		{
-			updown_delta += input->mouse_scroll_delta * updown_vel;	
-			changed_updown = true;
-		}
+			if(glfwGetKey(input->window, zoom_key))
+			{
+				radius_delta -= input->mouse_scroll_delta * zoom_vel;
+				changed_zoom = true;
+			}
+			else
+			{
+				updown_delta += input->mouse_scroll_delta * updown_vel;	
+				changed_updown = true;
+			}
 
+		}
 	}
 
 	radius += radius_delta * dt;

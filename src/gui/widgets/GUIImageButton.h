@@ -32,7 +32,7 @@ public:
 	glm::ivec2 force_image_size;
 	ImageMode img_mode;
 
-	virtual glm::ivec2 prepare(glm::ivec2 wpos, glm::ivec2 wsize, GUIInput* ipt) override;
+	virtual glm::ivec2 prepare(glm::ivec2 wpos, glm::ivec2 wsize, glm::ivec4 viewport, GUIInput* ipt) override;
 
 	virtual void draw(NVGcontext* vg, GUISkin* skin) override;
 

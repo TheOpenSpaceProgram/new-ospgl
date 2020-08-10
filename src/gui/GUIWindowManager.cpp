@@ -8,7 +8,9 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
 		return;
 	}
 
-	bool mouse_down = gui_input->mouse_down(0) || gui_input->mouse_down(1) || gui_input->mouse_down(2);
+	bool any_down = gui_input->mouse_down(0) || gui_input->mouse_down(1) || gui_input->mouse_down(2);
+	bool left_down = gui_input->mouse_down(0);
+
 	bool found_focus = false;
 	GUIWindow* new_top = nullptr;
 
@@ -158,7 +160,7 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
 						input->set_cursor(InputUtil::Cursor::RESIZE_ALL);
 					}
 					
-					if(mouse_down)
+					if(left_down)
 					{
 						resizing = true;
 						resize_point = rpt;
@@ -170,14 +172,14 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
 				else if(w->moveable && skin->can_drag_window(w, mouse_pos))
 				{
 					w->drag_hovered = true;
-					if(mouse_down)
+					if(left_down)
 					{
 						dragging = true;
 						drag_point = glm::vec2(mouse_pos - w->pos);
 					}
 				}
 				found_focus = true;
-				if(w != focused && mouse_down)
+				if(w != focused && any_down)
 				{
 					w->focused = true;
 					focused->focused = false;
@@ -204,7 +206,7 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
 	}
 	bool original_block_mouse = gui_input->ext_mouse_blocked;
 	bool original_block_keyboard = gui_input->ext_keyboard_blocked;
-
+	bool original_block_scroll = gui_input->ext_scroll_blocked;
 
 	for(auto it = windows.rbegin(); it != windows.rend(); it++)
 	{
@@ -214,6 +216,7 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
 			// Block user input
 			gui_input->ext_mouse_blocked = true;
 			gui_input->ext_keyboard_blocked = true;
+			gui_input->ext_scroll_blocked = true;
 		}
 		w->prepare(gui_input, skin);
 	}
@@ -221,8 +224,10 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
 	// Prevent click through to other GUIs and to other game features
 	gui_input->ext_mouse_blocked = any_hovered || original_block_mouse;
 	gui_input->ext_keyboard_blocked = any_hovered || original_block_keyboard;
+	gui_input->ext_scroll_blocked = any_hovered || original_block_scroll;
 	gui_input->mouse_blocked = any_hovered || gui_input->mouse_blocked;
 	gui_input->keyboard_blocked = any_hovered || gui_input->keyboard_blocked;
+	gui_input->scroll_blocked = any_hovered || gui_input->scroll_blocked;
 }
 
 void GUIWindowManager::draw(NVGcontext* vg, GUISkin* skin)

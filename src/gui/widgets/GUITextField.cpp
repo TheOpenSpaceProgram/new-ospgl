@@ -1,6 +1,6 @@
 #include "GUITextField.h"
 
-glm::ivec2 GUITextField::prepare(glm::ivec2 wpos, glm::ivec2 wsize, GUIInput* gui_input) 
+glm::ivec2 GUITextField::prepare(glm::ivec2 wpos, glm::ivec2 wsize, glm::ivec4 viewport, GUIInput* gui_input) 
 {
 	pos = wpos;
 	size = wsize;

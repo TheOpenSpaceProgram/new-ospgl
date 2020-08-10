@@ -79,7 +79,7 @@ void GUILayout::prepare_vscrollbar(GUIInput* gui_input)
 {
 	if(vscrollbar.enabled)
 	{
-		if(gui_input->mouse_inside(get_pos(), get_size()))
+		if(gui_input->mouse_inside(get_pos(), get_size()) && !gui_input->ext_scroll_blocked)
 		{
 			vscrollbar.scroll -= input->mouse_scroll * 40.0;
 

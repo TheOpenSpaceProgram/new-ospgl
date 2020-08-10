@@ -52,9 +52,11 @@ double t = 0.0;
 void EditorScene::update()
 {
 	gui_input.update();
-	cam.update(get_osp()->game_dt, &gui_input);
-	gui_input.ext_mouse_blocked |= cam.blocked;
-	gui_input.ext_keyboard_blocked |= cam.blocked;
+	if(cam.blocked)
+	{
+		gui_input.ext_mouse_blocked = true;
+		gui_input.ext_keyboard_blocked = true;
+	}
 	do_gui();
 
 	vehicle.update(get_osp()->game_dt);
@@ -74,6 +76,10 @@ void EditorScene::update()
 		vehicle_int.do_interface(cam.get_camera_uniforms(rw, real_screen_size.y), 
 			vport, gui_vport, real_screen_size, get_osp()->renderer->vg, &gui_input, &gui.skin);
 	}
+	
+	cam.update(get_osp()->game_dt, &gui_input);
+	gui_input.ext_mouse_blocked |= cam.blocked;
+	gui_input.ext_keyboard_blocked |= cam.blocked;
 	
 	bt_world->updateAabbs();
 

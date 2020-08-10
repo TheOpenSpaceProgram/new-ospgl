@@ -11,14 +11,14 @@ private:
 
 public:
 
-	// Reset every frame, is moused blocked FOR the GUI?
+	// Reset every frame, is X blocked FOR the GUI?
 	bool ext_mouse_blocked = false;
-	// Reset every frame, is keyboard blocked FOR the GUI?
+	bool ext_scroll_blocked = false;
 	bool ext_keyboard_blocked = false;
 
-	// Reset every frame, is mouse used by the GUI?
+	// Reset every frame, is X used by the GUI?
 	bool mouse_blocked = false;
-	// Reset every frame, is keyboard used by the GUI?
+	bool scroll_blocked = false;
 	bool keyboard_blocked = false;
 
 	// Blocks a mouse button from returning pressed until it's
@@ -30,6 +30,7 @@ public:
 	void update();
 
 	bool mouse_inside(glm::ivec2 pos, glm::ivec2 size);
+	bool mouse_inside(glm::ivec4 aabb);
 
 	// To clear up the code a bit
 	// 0 = left

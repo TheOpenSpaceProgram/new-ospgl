@@ -7,7 +7,8 @@ class GUIBaseButton : public GUIWidget
 protected:
 
 	void set_hover(bool nhover);
-	void set_click(int btn, bool value);
+	void set_down(int btn);
+	void set_up(int btn);
 
 public:
 
@@ -22,11 +23,11 @@ public:
 	Signal<void()> during_hover; 			//< Called every frame the mouse is hovering
 	Signal<void()> on_leave_hover;		//< Called the frame the mouse leaves the button
 	
-	Signal<void(int)> on_clicked;		//< Called the frame the button is clicked with lmb
-	Signal<void(int)> during_click;		//< Called every frame the button is held with lmb
-	Signal<void(int)> on_released;		//< Called the frame the button is released (lmb)
+	Signal<void(int)> on_clicked;		//< Called the frame the button is clicked
+	Signal<void(int)> during_click;		//< Called every frame the button is held
+	Signal<void(int)> on_released;		//< Called the frame the button is released (or leaves)
 
-	void do_button(glm::ivec2 pos, glm::ivec2 size, GUIInput* ipt);
+	void do_button(glm::ivec2 pos, glm::ivec2 size, glm::ivec4 viewport, GUIInput* ipt);
 	GUISkin::ButtonState get_button_state();
 
 };

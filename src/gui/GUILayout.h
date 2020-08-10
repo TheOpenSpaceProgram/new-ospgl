@@ -66,6 +66,7 @@ public:
 	// These two are meant to be called from "draw" or "prepare"
 	glm::ivec2 get_pos(){ return pos; }
 	glm::ivec2 get_size(){ return size; }
+	glm::ivec4 get_aabb() { return glm::ivec4(pos.x, pos.y, size.x, size.y); }
 
 	size_t get_widget_count();
 
