@@ -33,13 +33,12 @@ int main(int argc, char** argv)
 
 	SerializeUtil::read_file_to("udata/saves/debug-save/save.toml", osp.game_state);
 
-	
 	double fps_t = 0.0;
 	double dt_avg = 0.0;
 
 	PROFILE_FUNC();
 
-	osp.game_state.load_scene(new EditorScene());
+	osp.game_state.load_scene(new FlightScene());
 
 	while (osp.should_loop())
 	{

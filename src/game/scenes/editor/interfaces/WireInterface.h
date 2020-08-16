@@ -26,8 +26,6 @@ private:
 
 public:
 
-	GUIWindow* test_window;
-
 	virtual void update(double dt) override;
 
 	virtual void leave() override;

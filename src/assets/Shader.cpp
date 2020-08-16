@@ -104,6 +104,8 @@ std::string Shader::preprocessor(const std::string& file)
 			else
 			{
 				std::string file = assets->load_string(path);
+				// Postprocess the file too
+				file = preprocessor(file);
 				final_file += file;
 			}
 		}

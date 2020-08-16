@@ -190,7 +190,7 @@ void AssetManager::load_packages(LuaCore* lua_core, GameDatabase* game_database)
 		{
 			pkg_pair.second.pkg_lua = new sol::state();
 			lua_core->load(*pkg_pair.second.pkg_lua, pkg_pair.first);
-			bool wrote_error;
+			bool wrote_error = false;
 			LuaUtil::safe_lua(*pkg_pair.second.pkg_lua, load_string_raw(pkg_lua_path), 
 				wrote_error, pkg_lua_path);
 

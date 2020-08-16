@@ -390,25 +390,6 @@ WireInterface::WireInterface(EditorVehicleInterface* edveh_int)
 	hovered = nullptr;
 
 	tiny_font = AssetHandle<BitmapFont>("core:fonts/ProggyTiny.fnt");
-
-	test_window = scene->gui.window_manager.create_window();
-	test_window->pos = glm::ivec2(200, 200);
-	test_window->size = glm::ivec2(400, 400);
-	test_window->title = "Test window";
-	test_window->canvas.layout = new GUIListLayout();
-	for(int i = 0; i < 32; i++)
-	{
-		GUIImageButton* btn = new GUIImageButton();
-		btn->force_image_size = glm::ivec2(128, 128);
-		test_window->canvas.layout->add_widget(btn);
-	}
-
-	
-	GUIWindow* test_window2 = scene->gui.window_manager.create_window();
-	test_window2->pos = glm::ivec2(300, 300);
-	test_window2->size = glm::ivec2(400, 400);
-	test_window2->title = "Test 2 window";
-	
 }
 
 void WireInterface::see_part(Part* p) 

@@ -30,6 +30,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 		shader->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
 		shader->setVec3("camera_pos", (glm::vec3)(camera_pos / config.radius));
 		shader->setFloat("atmo_radius", (float)(config.atmo.radius / config.radius));
+		shader->setFloat("planet_radius", 1.0f);
 		shader->setVec3("atmo_main_color", config.atmo.main_color);
 		shader->setVec3("atmo_sunset_color", config.atmo.sunset_color);
 		shader->setFloat("atmo_exponent", (float)config.atmo.exponent);
@@ -103,6 +104,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 			water_shader->setVec3("camera_pos", (glm::vec3)(camera_pos / config.radius));
 			water_shader->setFloat("time", (float)time);
 			water_shader->setFloat("atmo_radius", (float)(config.atmo.radius / config.radius));
+			water_shader->setFloat("planet_radius", 1.0f);
 			water_shader->setVec3("atmo_main_color", config.atmo.main_color);
 			water_shader->setVec3("atmo_sunset_color", config.atmo.sunset_color);
 			water_shader->setFloat("atmo_exponent", (float)config.atmo.exponent);
