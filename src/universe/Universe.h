@@ -11,7 +11,7 @@
 #pragma warning(pop)
 
 #include <physics/debug/BulletDebugDrawer.h>
-#include <sol.hpp>
+#include <sol/sol.hpp>
 
 // The Universe is the central class of the game. It stores both the system
 // and everything else in the system (buildings and vehicles).

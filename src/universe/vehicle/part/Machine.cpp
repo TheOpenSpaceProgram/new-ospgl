@@ -5,7 +5,7 @@
 
 #include "../Vehicle.h"
 #include "Part.h"
-#include "sol.hpp"
+#include "sol/sol.hpp"
 
 
 Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg)

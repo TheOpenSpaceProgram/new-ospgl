@@ -25,7 +25,7 @@ void GUIBaseButton::set_down(int btn)
 {
 	if(!click[btn])
 	{
-		on_clicked((int)btn);
+		on_clicked(std::move(btn));
 	}
 	click[btn] = true;
 }
@@ -34,7 +34,7 @@ void GUIBaseButton::set_up(int btn)
 {
 	if(click[btn])
 	{
-		on_released((int)btn);
+		on_released(std::move(btn));
 	}
 	click[btn] = false;
 }

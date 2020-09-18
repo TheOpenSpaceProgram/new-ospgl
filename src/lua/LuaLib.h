@@ -1,5 +1,5 @@
 #pragma once
-#include <sol.hpp>
+#include <sol/sol.hpp>
 
 class LuaLib
 {

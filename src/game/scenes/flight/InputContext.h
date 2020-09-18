@@ -1,10 +1,11 @@
 #pragma once
 #include <unordered_map>
 #include <vector>
+#include <array>
 #include <string>
 #include <cpptoml.h>
 
-class GLFWwindow;
+struct GLFWwindow;
 class FlightInput;
 
 // All invalid names will result in an error, not default values

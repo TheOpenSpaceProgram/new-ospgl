@@ -1,6 +1,6 @@
 #pragma once
 #include <variant>
-#include <sol.hpp>
+#include <sol/sol.hpp>
 #include <util/defines.h>
 
 using EventArgument = std::variant<int, double, int64_t, std::string>;

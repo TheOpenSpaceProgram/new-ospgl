@@ -675,8 +675,8 @@ FN_DECIMAL fn_perlin_fractal2(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y)
 	}
 }
 
-static const FN_DECIMAL F3 = 1 / (FN_DECIMAL)(3);
-static const FN_DECIMAL G3 = 1 / (FN_DECIMAL)(6);
+static FN_DECIMAL F3 = 1 / (FN_DECIMAL)(3);
+static FN_DECIMAL G3 = 1 / (FN_DECIMAL)(6);
 
 static FN_DECIMAL SingleSimplex3(FastNoise* fn, unsigned char offset, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
 {
@@ -856,9 +856,9 @@ FN_DECIMAL fn_simplex_fractal3(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y, FN_DEC
 	}
 }
 
-static const FN_DECIMAL SQRT3 = (FN_DECIMAL)(1.7320508075688772935274463415059);
-static const FN_DECIMAL F2 = (FN_DECIMAL)(0.5) * (SQRT3 - (FN_DECIMAL)(1.0));
-static const FN_DECIMAL G2 = ((FN_DECIMAL)(3.0) - SQRT3) / (FN_DECIMAL)(6.0);
+#define SQRT3 (FN_DECIMAL)(1.7320508075688772935274463415059)
+#define F2 (FN_DECIMAL)(0.5) * (SQRT3 - (FN_DECIMAL)(1.0))
+#define G2 ((FN_DECIMAL)(3.0) - SQRT3) / (FN_DECIMAL)(6.0)
 
 static FN_DECIMAL SingleSimplex2(FastNoise* fn, unsigned char offset, FN_DECIMAL x, FN_DECIMAL y)
 {
@@ -922,7 +922,7 @@ FN_DECIMAL fn_simplex2(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y)
 	return SingleSimplex2(fn, 0, x * fn->frequency, y * fn->frequency);
 }
 
-FN_DECIMAL SingleSimplexFractalFBM2(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y) 
+FN_DECIMAL SingleSimplexFractalFBM2(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y)
 {
 	FN_DECIMAL sum = SingleSimplex2(fn, fn->perm[0], x, y);
 	FN_DECIMAL amp = 1;
@@ -940,7 +940,7 @@ FN_DECIMAL SingleSimplexFractalFBM2(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y)
 	return sum * fn->fractal_bounding;
 }
 
-FN_DECIMAL SingleSimplexFractalBillow2(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y) 
+FN_DECIMAL SingleSimplexFractalBillow2(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y)
 {
 	FN_DECIMAL sum = FastAbs(SingleSimplex2(fn, fn->perm[0], x, y)) * 2 - 1;
 	FN_DECIMAL amp = 1;
@@ -958,7 +958,7 @@ FN_DECIMAL SingleSimplexFractalBillow2(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y
 	return sum * fn->fractal_bounding;
 }
 
-FN_DECIMAL SingleSimplexFractalRigidMulti2(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y) 
+FN_DECIMAL SingleSimplexFractalRigidMulti2(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y)
 {
 	FN_DECIMAL sum = 1 - FastAbs(SingleSimplex2(fn, fn->perm[0], x, y));
 	FN_DECIMAL amp = 1;
@@ -976,7 +976,7 @@ FN_DECIMAL SingleSimplexFractalRigidMulti2(FastNoise* fn, FN_DECIMAL x, FN_DECIM
 	return sum;
 }
 
-FN_DECIMAL SingleSimplexFractalBlend2(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y) 
+FN_DECIMAL SingleSimplexFractalBlend2(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y)
 {
 	FN_DECIMAL sum = SingleSimplex2(fn,  fn->perm[0], x, y);
 	FN_DECIMAL amp = 1;
@@ -1012,9 +1012,9 @@ FN_DECIMAL fn_simplex_fractal2(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y)
 	}
 }
 
-static const FN_DECIMAL SQRT5 = (FN_DECIMAL)(2.2360679775);
-static const FN_DECIMAL F4 = (SQRT5 - 1) / 4;
-static const FN_DECIMAL G4 = (5 - SQRT5) / 20;
+#define SQRT5 (FN_DECIMAL)(2.2360679775)
+#define F4 (FN_DECIMAL)((SQRT5 - 1) / 4)
+#define G4 (FN_DECIMAL)((5 - SQRT5) / 20)
 
 FN_DECIMAL SingleSimplex4(FastNoise* fn, unsigned char offset, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z, FN_DECIMAL w)
 {

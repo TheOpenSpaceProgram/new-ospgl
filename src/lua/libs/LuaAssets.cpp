@@ -3,6 +3,7 @@
 
 void LuaAssets::load_to(sol::table& table)
 {
+    // TODO: Fix on Windows
 	table.new_usertype<LuaAssetHandle<Image>>("image_handle",
 		"move", &LuaAssetHandle<Image>::move,
 		"get", &LuaAssetHandle<Image>::get,
@@ -18,7 +19,7 @@ void LuaAssets::load_to(sol::table& table)
 		"sample_bilinear", sol::overload(
 			sol::resolve<glm::dvec4(glm::dvec2)>(&Image::sample_bilinear_double),
 			sol::resolve<glm::dvec4(double, double)>(&Image::sample_bilinear_double)
-		)	
+		)
 		);
 
 	table.set_function(
@@ -28,6 +29,7 @@ void LuaAssets::load_to(sol::table& table)
 		Image* img = assets->get<Image>(pkg, name, true);
 		return std::move(LuaAssetHandle<Image>(pkg, name, img));
 	});
+
 }
 
 

@@ -4,7 +4,7 @@
 #include "PlanetTilePath.h"
 #include <glad/glad.h>
 #include <glm/gtx/normal.hpp>
-#include <sol.hpp>
+#include <sol/sol.hpp>
 #include <functional>
 #include <lua/LuaCore.h>
 #include <assets/AssetManager.h>

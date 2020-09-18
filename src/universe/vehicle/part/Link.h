@@ -5,7 +5,7 @@
 #include <btBulletDynamicsCommon.h>
 #pragma warning(pop)
 
-#include <sol.hpp>
+#include <sol/sol.hpp>
 #include "../../../util/LuaUtil.h"
 #include "../../../lua/libs/LuaBullet.h"
 #include <cpptoml.h>

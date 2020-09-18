@@ -46,6 +46,9 @@ the debugger launches the executable on the correct working directory.
 
 Set target to OSPGL.exe and build.
 
+You may need to point CMake to the freetype libraries if they are not detected by default, or disable freetype and use 
+stb_freetype, but it has lower text quality.
+
 ## MacOS
 
 (Not done yet, I guess the linux procedure will work fine, too)

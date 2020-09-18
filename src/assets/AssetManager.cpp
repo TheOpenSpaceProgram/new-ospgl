@@ -10,7 +10,7 @@
 
 #include <game/database/GameDatabase.h>
 
-#include "sol.hpp"
+#include "sol/sol.hpp"
 
 
 

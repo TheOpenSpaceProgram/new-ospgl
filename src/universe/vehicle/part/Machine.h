@@ -1,5 +1,5 @@
 #pragma once
-#include <sol.hpp>
+#include <sol/sol.hpp>
 #include <cpptoml.h>
 #include <universe/Universe.h>
 #include <util/LuaUtil.h>

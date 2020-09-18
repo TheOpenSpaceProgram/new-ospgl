@@ -16,6 +16,8 @@
 *.kdev4
 .vscode/
 *.vscode
+.idea
+*.idea/
 
 # Build results
 [Bb]in/
