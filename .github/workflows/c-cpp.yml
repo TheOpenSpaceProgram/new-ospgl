@@ -10,19 +10,17 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
+      - name: Checkout submodules
+        run: |
+          git submodule init
+          git submodule update
       - name: Dependencies
         run: |
-          vcpkg install openssl
-          vcpkg install freetype
-      - uses: actions/checkout@v2
-      - name: Checkout submodules
-        uses: textbook/git-checkout-submodule-action@master
-        with:
-          remote: true
+          vcpkg install openssl freetype --triplet x64-windows
       - name: configure twice
         run: |
-          cmake .
-          cmake .
+          cmake -DCMAKE_GENERATOR_PLATFORM=x64 .
+          cmake -DCMAKE_GENERATOR_PLATFORM=x64 .
       - name: make
         run: cmake --build . -- -j 2
         
