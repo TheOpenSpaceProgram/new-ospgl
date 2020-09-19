@@ -62,8 +62,7 @@ public:
 		if(!result.valid())
 		{
 			sol::error err = result;
-			sol::state_view sv = sol::state_view(path);
-			lua_error_handler(sv.lua_state(), err);
+			lua_error_handler(path.lua_state(), err);
 		}
 
 		return result;	
@@ -80,8 +79,7 @@ public:
 		if(!result.valid())
 		{
 			sol::error err = result;
-			sol::state_view sv = sol::state_view(path);
-			lua_error_handler(sv.lua_state(), err);
+			lua_error_handler(path.lua_state(), err);
 		}
 
 		return result;	

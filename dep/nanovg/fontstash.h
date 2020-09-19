@@ -21,7 +21,9 @@
 
 #define FONS_INVALID -1
 
+#ifdef WITH_FREETYPE
 #define FONS_USE_FREETYPE
+#endif
 
 enum FONSflags {
 	FONS_ZERO_TOPLEFT = 1,

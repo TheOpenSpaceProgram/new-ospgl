@@ -98,9 +98,14 @@ set(ASSIMP_BUILD_BLEND_IMPORTER ON CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "" FORCE)
 
 # FreeType
-find_package(Freetype REQUIRED)
-target_link_Libraries(OSPGL ${FREETYPE_LIBRARIES})
-include_directories(OSPGL ${FREETYPE_INCLUDE_DIRS})
+find_package(Freetype)
+if(Freetype_FOUND)
+	target_link_Libraries(OSPGL ${FREETYPE_LIBRARIES})
+	include_directories(OSPGL ${FREETYPE_INCLUDE_DIRS})
+	add_compile_definitions(WITH_FREETYPE)
+else()
+	message(WARNING "Could not find FreeType, text quality will be worse")
+endif()
 
 # Link libraries
 
