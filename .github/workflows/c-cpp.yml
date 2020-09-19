@@ -19,10 +19,10 @@ jobs:
           vcpkg install openssl freetype --triplet x64-windows
       - name: configure twice
         run: |
-          cmake -DCMAKE_GENERATOR_PLATFORM=x64 .
-          cmake -DCMAKE_GENERATOR_PLATFORM=x64 .
+          cmake -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_TOOLCHAIN_FILE=C://vcpkg/scripts/buildsystems/vcpkg.cmake .
+          cmake -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_TOOLCHAIN_FILE=C://vcpkg/scripts/buildsystems/vcpkg.cmake .
       - name: make
-        run: cmake --build . -- -j 2
+        run: cmake -j 2 --build .
         
   linux:
     runs-on: ubuntu-latest
@@ -41,6 +41,6 @@ jobs:
         sudo cmake . -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9
         sudo cmake . -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9
     - name: make
-      run: sudo cmake --build . -- -j 2
+      run: sudo cmake -j 2 --build .
 
 
