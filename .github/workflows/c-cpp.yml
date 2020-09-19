@@ -10,6 +10,8 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
       - name: Checkout submodules
         uses: snickerbockers/submodules-init@v4
       - name: Dependencies
