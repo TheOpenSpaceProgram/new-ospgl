@@ -19,16 +19,15 @@ jobs:
         uses: textbook/git-checkout-submodule-action@master
         with:
           remote: true
-        - name: configure twice
+      - name: configure twice
         run: |
           cmake .
           cmake .
       - name: make
         run: cmake --build . -- -j 2
+        
   linux:
-
     runs-on: ubuntu-latest
-
     steps:
     - name: Dependencies
       run: |
