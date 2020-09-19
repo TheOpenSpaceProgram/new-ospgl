@@ -1,5 +1,6 @@
 #include "PlanetTile.h"
-#include "../../util/Logger.h"
+#include <util/Logger.h>
+#include <util/LuaUtil.h>
 
 template<int S>
 constexpr std::array<uint16_t, (S + 2) * (S + 2) * 6> get_nrm_indices()
@@ -270,7 +271,7 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 	if (!result.valid())
 	{
 		sol::error err = result;
-		logger->error("Lua Error on PlanetTile generation:\n{}", err.what());
+		LuaUtil::lua_error_handler(lua_state.lua_state(), err);
 		// We only write one error per tile so we don't overload the log
 		errors = true;
 	}

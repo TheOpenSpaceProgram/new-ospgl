@@ -3,51 +3,49 @@
 #include <glm/glm.hpp>
 
 
-void LuaNoise::load_to(sol::table & table)
+void LuaNoise::load_to(sol::table& table)
 {
 	// We need to create a lua context to obtain the FFI stuff,
 	// this is a costly operation but thanksfully is done only once
-	// per script so perfomance is not an issue
+	// per script so performance is not an issue
 
 	sol::state_view sview(table.lua_state());
 
 	sview.open_libraries(sol::lib::ffi);
 
 	// Load all the FFI stuff
-	sview.script("\
-ffi.cdef[[\
-void fn_set_seed(struct FastNoise* fn, int seed);\
-void fn_set_frequency(struct FastNoise* fn, double freq);\
-void fn_set_fractal_octaves(struct FastNoise* fn, int octaves);\
-void fn_set_fractal_gain(struct FastNoise* fn, double gain);\
-void fn_set_fractal_lacunarity(struct FastNoise* fn, double lacunarity);\
-void fn_set_fractal_type(struct FastNoise* fn, int fractal_type);\
-void fn_set_interp(struct FastNoise* fn, int interp);\
-double fn_value2(struct FastNoise* fn, double x, double y);\
-double fn_value_fractal2(struct FastNoise* fn, double x, double y);\
-double fn_perlin2(struct FastNoise* fn, double x, double y);\
-double fn_perlin_fractal2(struct FastNoise* fn, double x, double y);\
-double fn_simplex2(struct FastNoise* fn, double x, double y);\
-double fn_simplex_fractal2(struct FastNoise* fn, double x, double y);\
-double fn_cellular2(struct FastNoise* fn, double x, double y);\
-double fn_cubic2(struct FastNoise* fn, double x, double y);\
-double fn_cubic_fractal2(struct FastNoise* fn, int x, int y);\
-void fn_gradient_perturb2(struct FastNoise* fn, double* x, double* y);\
-void fn_gradient_perturb_fractal2(struct FastNoise* fn, double* x, double* y);\
-double fn_value3(struct FastNoise* fn, double x, double y, double z);\
-double fn_value_fractal3(struct FastNoise* fn, double x, double y, double z);\
-double fn_perlin3(struct FastNoise* fn, double x, double y, double z);\
-double fn_perlin_fractal3(struct FastNoise* fn, double x, double y, double z);\
-double fn_simplex3(struct FastNoise* fn, double x, double y, double z);\
-double fn_simplex_fractal3(struct FastNoise* fn, double x, double y, double z);\
-double fn_cellular3(struct FastNoise* fn, double x, double y, double z);\
-double fn_cubic3(struct FastNoise* fn, double x, double y, double z);\
-double fn_cubic_fractal3(struct FastNoise* fn, int x, int y, int z);\
-void fn_gradient_perturb3(struct FastNoise* fn, double* x, double* y, double* z);\
-void fn_gradient_perturb_fractal3(struct FastNoise* fn, double* x, double* y, double* z);\
-double fn_simplex4(struct FastNoise* fn, double x, double y, double z, double w);\
-struct FastNoise* fn_new(int seed);\
-]]");
+	sview.script("ffi.cdef[["
+	"void fn_set_seed(struct FastNoise* fn, int seed);"
+	"void fn_set_frequency(struct FastNoise* fn, double freq);"
+  	"void fn_set_fractal_octaves(struct FastNoise* fn, int octaves);"
+  	"void fn_set_fractal_gain(struct FastNoise* fn, double gain);"
+	"void fn_set_fractal_lacunarity(struct FastNoise* fn, double lacunarity);"
+	"void fn_set_fractal_type(struct FastNoise* fn, int fractal_type);"
+	"void fn_set_interp(struct FastNoise* fn, int interp);"
+	"double fn_value2(struct FastNoise* fn, double x, double y);"
+	"double fn_value_fractal2(struct FastNoise* fn, double x, double y);"
+	"double fn_perlin2(struct FastNoise* fn, double x, double y);"
+	"double fn_perlin_fractal2(struct FastNoise* fn, double x, double y);"
+	"double fn_simplex2(struct FastNoise* fn, double x, double y);"
+	"double fn_simplex_fractal2(struct FastNoise* fn, double x, double y);"
+	"double fn_cellular2(struct FastNoise* fn, double x, double y);"
+	"double fn_cubic2(struct FastNoise* fn, double x, double y);"
+	"double fn_cubic_fractal2(struct FastNoise* fn, int x, int y);"
+	"void fn_gradient_perturb2(struct FastNoise* fn, double* x, double* y);"
+	"void fn_gradient_perturb_fractal2(struct FastNoise* fn, double* x, double* y);"
+	"double fn_value3(struct FastNoise* fn, double x, double y, double z);"
+	"double fn_value_fractal3(struct FastNoise* fn, double x, double y, double z);"
+	"double fn_perlin3(struct FastNoise* fn, double x, double y, double z);"
+	"double fn_perlin_fractal3(struct FastNoise* fn, double x, double y, double z);"
+	"double fn_simplex3(struct FastNoise* fn, double x, double y, double z);"
+	"double fn_simplex_fractal3(struct FastNoise* fn, double x, double y, double z);"
+	"double fn_cellular3(struct FastNoise* fn, double x, double y, double z);"
+	"double fn_cubic3(struct FastNoise* fn, double x, double y, double z);"
+	"double fn_cubic_fractal3(struct FastNoise* fn, int x, int y, int z);"
+	"void fn_gradient_perturb3(struct FastNoise* fn, double* x, double* y, double* z);"
+	"void fn_gradient_perturb_fractal3(struct FastNoise* fn, double* x, double* y, double* z);"
+	"double fn_simplex4(struct FastNoise* fn, double x, double y, double z, double w);"
+	"struct FastNoise* fn_new(int seed);]]", "internal: LuaNoise");
 	// Little macro to shorten a bit the code
 #define EXPORT_FFI(ffi_name, table_name) table[table_name] = sview["ffi"]["C"][ffi_name]
 

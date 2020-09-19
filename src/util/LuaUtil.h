@@ -7,15 +7,42 @@ class LuaUtil
 {
 public:
 
+	static void lua_error_handler(lua_State* L, sol::error err)
+	{
+		std::string what_str = err.what();
+		bool has_traceback = what_str.find("stack traceback:") != std::string::npos;
+		if(has_traceback)
+		{
+			logger->error("Lua error:\n{}", what_str);
+		}
+		else
+		{
+			std::string traceback;
+			int top = 1;
+			for (int i = 0; i < top; i++) {
+				luaL_where(L, i);
+				std::string st = sol::stack::pop<std::string>(L);
+				traceback += st;
+				if (i != top) {
+					traceback += '\n';
+				}
+			}
+
+			logger->error("Lua error:\n{}. Traceback:\n{}", what_str, traceback);
+		}
+	}
+
 	static void safe_lua(sol::state& state, const std::string& script, bool& wrote_error, const std::string& script_path)
 	{
-		state.safe_script(script, [&wrote_error, &script_path](lua_State*, sol::protected_function_result pfr)
+		state.safe_script(script, [&wrote_error, &script_path](lua_State* L, sol::protected_function_result pfr)
 		{
+			sol::default_traceback_error_handler(L);
+			std::string traceback = sol::stack::pop<std::string>(L);
 
 			if (!wrote_error)
 			{
 				sol::error err = pfr;
-				logger->error("Lua Error ({}):\n{}", script_path, err.what());
+				lua_error_handler(L, err);
 				wrote_error = true;
 			}
 
@@ -29,13 +56,15 @@ public:
     {
 		sol::safe_function fnc = path;
 
+
 		auto result = fnc(std::forward<Args>(args)...);
 
 		if(!result.valid())
 		{
-			sol::error as_error = result;
-			logger->error("Lua Error in {}:\n{}", context, as_error.what());
-		}	
+			sol::error err = result;
+			sol::state_view sv = sol::state_view(path);
+			lua_error_handler(sv.lua_state(), err);
+		}
 
 		return result;	
 	}
@@ -50,9 +79,10 @@ public:
 
 		if(!result.valid())
 		{
-			sol::error as_error = result;
-			logger->fatal("Lua Error in {}:\n{}", context, as_error.what());
-		}	
+			sol::error err = result;
+			sol::state_view sv = sol::state_view(path);
+			lua_error_handler(sv.lua_state(), err);
+		}
 
 		return result;	
 	}

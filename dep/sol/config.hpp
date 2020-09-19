@@ -29,6 +29,8 @@
 
 // beginning of sol/config.hpp
 
+#define SOL_LUAJIT 1
+
 /* Base, empty configuration file!
 
      To override, place a file in your include paths of the form:
