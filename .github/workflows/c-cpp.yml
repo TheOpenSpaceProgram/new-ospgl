@@ -22,7 +22,7 @@ jobs:
           cmake -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_TOOLCHAIN_FILE=C://vcpkg/scripts/buildsystems/vcpkg.cmake .
           cmake -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_TOOLCHAIN_FILE=C://vcpkg/scripts/buildsystems/vcpkg.cmake .
       - name: make
-        run: cmake -j 2 --build .
+        run: cmake --build . -- /p:CL_MPcount=2
         
   linux:
     runs-on: ubuntu-latest
@@ -41,6 +41,6 @@ jobs:
         sudo cmake . -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9
         sudo cmake . -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9
     - name: make
-      run: sudo cmake -j 2 --build .
+      run: sudo cmake --build . -- -j 2
 
 
