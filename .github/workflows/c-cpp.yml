@@ -7,6 +7,24 @@ on:
     branches: [ master ]
 
 jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Dependencies
+        run: |
+          vcpkg install openssl
+          vcpkg install freetype
+      - uses: actions/checkout@v2
+      - name: Checkout submodules
+        uses: textbook/git-checkout-submodule-action@master
+        with:
+          remote: true
+        - name: configure twice
+        run: |
+          cmake .
+          cmake .
+      - name: make
+        run: cmake --build . -- -j 2
   linux:
 
     runs-on: ubuntu-latest
@@ -27,3 +45,4 @@ jobs:
         sudo cmake . -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9
     - name: make
       run: sudo cmake --build . -- -j 2
+
