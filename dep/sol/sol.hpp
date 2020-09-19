@@ -24910,12 +24910,6 @@ namespace sol {
 			else {
 				lib libraries[1 + sizeof...(args)] = { lib::count, std::forward<Args>(args)... };
 
-				int ljit = 0;
-#ifdef SOL_LUAJIT
-				ljit = 1;
-#endif
-				printf("SOL_LUA_VERSION = %i SOL_LUAJIT = %i", SOL_LUA_VERSION, ljit);
-
 				for (auto&& library : libraries) {
 					switch (library) {
 #if SOL_LUA_VERSION <= 501 && defined(SOL_LUAJIT)
