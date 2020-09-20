@@ -2,10 +2,16 @@
 #include "../EditorVehicleInterface.h"
 #include <nanovg/nanovg_gl.h>
 #include "../EditorScene.h"
+#include <util/InputUtil.h>
 
 void WireInterface::update(double dt) 
 {
 	edveh->clear_meta();
+
+	if(input->key_down(GLFW_KEY_LEFT_ALT))
+	{
+		show_hidden = !show_hidden;
+	}
 }
 
 void WireInterface::leave() 
@@ -248,6 +254,8 @@ bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start,
 
 WireInterface::WireInterface(EditorVehicleInterface* edveh_int) 
 {
+	show_hidden = false;
+
 	this->edveh_int = edveh_int;
 	this->edveh = edveh_int->edveh;
 	this->scene = edveh_int->scene;
@@ -306,6 +314,7 @@ bool WireInterface::do_machine(NVGcontext* vg, GUIInput* gui_input, Machine* m, 
 			break;
 		}
 	}
+
 	if(m == selected)
 	{
 		contained_in_wired = true;
@@ -358,7 +367,8 @@ bool WireInterface::do_machine(NVGcontext* vg, GUIInput* gui_input, Machine* m, 
 	final_pos = glm::clamp(final_pos, glm::vec2(vport.x, vport.y) + real_icon_size * 0.5f,
 						   glm::vec2(vport.x + vport.z, vport.y + vport.w) - real_icon_size * 0.5f);
 
-	bool visible = contained_in_wired || (!clamped && in_front);
+	bool visible = contained_in_wired || (!clamped && in_front) &&
+			(!m->editor_hidden || contained_in_wired || show_hidden);
 
 
 	if(visible)

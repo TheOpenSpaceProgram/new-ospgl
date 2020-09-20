@@ -27,6 +27,8 @@ private:
 
 public:
 
+	bool show_hidden;
+
 	virtual void update(double dt) override;
 
 	virtual void leave() override;
