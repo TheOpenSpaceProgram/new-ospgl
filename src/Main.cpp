@@ -1,27 +1,10 @@
 #include "util/Timer.h"
 
-#include "renderer/camera/SimpleCamera.h"
-
-#include <imgui/imgui.h>
-
-
-
-#include "universe/vehicle/Vehicle.h"
 #include "assets/Model.h"
-
 #include "physics/ground/GroundShape.h"
-#include "renderer/lighting/SunLight.h"
-
 #include "OSP.h"
-
-#include "universe/vehicle/VehicleLoader.h"
 #include "game/scenes/flight/FlightScene.h"
 #include "game/scenes/editor/EditorScene.h"
-
-#include <util/fmt/glm.h>
-
-#include <game/input/JoystickDebug.h>
-
 #include <util/Profiler.h>
 
 static int iteration = 0;
@@ -38,12 +21,12 @@ int main(int argc, char** argv)
 
 	PROFILE_FUNC();
 
-	osp.game_state.load_scene(new FlightScene());
+	osp.game_state.load_scene(new EditorScene());
 
 	while (osp.should_loop())
 	{
 		PROFILE_BLOCK("frame");
-		
+
 		osp.start_frame();
 		osp.update();
 		osp.render();

@@ -33,6 +33,8 @@ public:
 	std::shared_ptr<cpptoml::table> init_toml;
 
 	std::unordered_map<std::string, sol::table> interfaces;
+	// May be "", in that case the machine is "centered" on the piece
+	std::string editor_location_marker;
 
 	// pre_update is mostly used for input
 	void pre_update(double dt);

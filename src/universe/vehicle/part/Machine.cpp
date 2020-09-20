@@ -12,6 +12,8 @@ Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg)
 {	
 	this->init_toml = init_toml;
 	this->in_pkg = cur_pkg;
+	this->editor_location_marker = init_toml->get_as<std::string>("__editor_marker").value_or("");
+
 	default_icon = AssetHandle<Image>("core:machines/icons/default_icon.png");
 }
 

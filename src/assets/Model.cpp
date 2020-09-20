@@ -171,13 +171,15 @@ void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool draw
 			ai_mat->GetTexture(type_t, 0, &path);
 
 			std::string path_s = std::string(path.C_Str());
+			logger->info("Loading texture: {}", path_s);
 			// Sanitize the path
 			replace_all(path_s, "\\", "/");
 			// We find 'res/', after it is the package name, and then the name, pretty easy
 			size_t pos = path_s.find("res/");
 			if (pos == std::string::npos)
 			{
-				logger->warn("Invalid path '{}' given in texture, ignoring!", path_s);
+				// It may be a relative path
+				logger->warn("Invalid path '{}' given in texture, ignoring! Make sure you enable absolute path mode", path_s);
 			}
 			else
 			{
