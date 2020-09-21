@@ -108,12 +108,12 @@ bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start,
 			Machine* m = *it;
 			if(m->editor_location_marker.empty())
 			{
-				machines_with_marker.push_back(m);
-				it = pair.second.erase(it);
+				it++;
 			}
 			else
 			{
-				it++;
+				machines_with_marker.push_back(m);
+				it = pair.second.erase(it);
 			}
 		}
 
@@ -121,7 +121,7 @@ bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start,
 		glm::dvec3 pos = to_dvec3(p->get_piece("p_root")->packed_tform.getOrigin());
 		// Draw the polygon with the machines on its edges
 		// and a central "indicator"
-		int polygon_machines = machines_with_marker.size();
+		int polygon_machines = pair.second.size();
 
 		float dangle = glm::two_pi<float>() / polygon_machines;
 
@@ -176,7 +176,7 @@ bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start,
 		}
 
 		// Draw the machines at a marker location
-		for(Machine* m : pair.second)
+		for(Machine* m : machines_with_marker)
 		{
 
 			glm::dvec3 mpos = p->get_piece("p_root")->get_marker_position(m->editor_location_marker);
