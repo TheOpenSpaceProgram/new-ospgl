@@ -13,6 +13,3 @@
 [submodule "dep/glfw"]
 	path = dep/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "dep/ospgl-assimp"]
-	path = dep/ospgl-assimp
-	url = https://github.com/TheOpenSpaceProgram/ospgl-assimp.git

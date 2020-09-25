@@ -21,12 +21,13 @@ set(GLAD_SOURCES "dep/glad/glad.c")
 set(STB_SOURCES "dep/stb/stb_impl.cpp")
 set(FASTNOISEC_SOURCES "dep/FastNoiseC/FastNoise.c")
 set(NANOVG_SOURCES "dep/nanovg/nanovg_ext.cpp")
+set(TINY_GLTF_SOURCES "dep/tiny_gltf/tiny_gltf.cpp")
 
 
 # Create the OSPGL executable
 
 add_executable(OSPGL ${OSP_SOURCES} ${IMGUI_SOURCES} ${GLAD_SOURCES} 
-	${FASTNOISEC_SOURCES} ${STB_SOURCES} ${NANOVG_SOURCES})
+	${FASTNOISEC_SOURCES} ${STB_SOURCES} ${NANOVG_SOURCES} ${TINY_GLTF_SOURCES})
 
 # Name it ospgl (lowercase)
 set_target_properties(OSPGL PROPERTIES OUTPUT_NAME "ospgl")
@@ -84,18 +85,6 @@ set(BUILD_BULLET3 OFF CACHE BOOL "" FORCE) #< Bullet3 is incomplete and uses onl
 # fmt
 
 add_subdirectory(dep/fmt)
-
-# Assimp
-
-add_subdirectory(dep/ospgl-assimp)
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_BLEND_IMPORTER ON CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "" FORCE)
 
 # FreeType
 find_package(Freetype)

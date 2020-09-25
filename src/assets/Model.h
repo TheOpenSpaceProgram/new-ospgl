@@ -8,12 +8,7 @@
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <physics/glm/BulletGlmCompat.h>
 
-
-struct aiScene;
-struct aiNode;
-struct aiMesh;
-
-class Mesh 
+class Mesh
 {
 private:
 
@@ -117,11 +112,6 @@ class Model
 {
 private:
 
-
-	void process_node(aiNode* node, const aiScene* scene, Node* to, bool drawable);
-	void process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool drawable);
-
-
 	friend class Mesh;
 	friend struct GPUModelPointer;
 
@@ -144,7 +134,7 @@ public:
 	void get_gpu();
 	void free_gpu();
 
-	Model(const aiScene* scene);
+	Model();
 	~Model();
 };
 

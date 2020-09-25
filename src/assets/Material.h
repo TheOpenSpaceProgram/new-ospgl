@@ -7,11 +7,11 @@
 #include <util/SerializeUtil.h>
 #include <renderer/camera/CameraUniforms.h>
 
+#include <tiny_gltf/tiny_gltf.h>
+
 #include <glm/gtx/matrix_decompose.hpp>
 #include <algorithm>
 #include <iostream>
-
-#include <assimp/material.h>
 
 struct MeshConfig
 {
@@ -39,7 +39,7 @@ struct MeshConfig
 	// but it's possible
 	MeshConfig();
 
-	size_t get_vertex_floats();
+	size_t get_vertex_floats() const;
 
 	size_t get_vertex_size();
 
@@ -127,31 +127,43 @@ public:
 };
 
 
-struct AssimpTexture
+struct ModelTexture
 {
-	aiTextureType first;
+	// Texture types from the glTF spec, they can
+	// be used for wathever other purpose
+	enum TextureType
+	{
+		BASE_COLOR,
+		METALLIC_ROUGHNESS,
+		AMBIENT_OCCLUSION,
+		NORMAL_MAP,
+		EMISSIVE,
+		UNKNOWN
+	};
+
+	TextureType first;
 	AssetHandle<Image> second;
 
-	AssimpTexture()
+	ModelTexture()
 	{
-		this->first = aiTextureType_UNKNOWN;
+		this->first = UNKNOWN;
 		this->second = AssetHandle<Image>();
 	}
 
-	AssimpTexture(AssimpTexture&& b)
+	ModelTexture(ModelTexture&& b)
 	{
 		this->first = b.first;
 		this->second = std::move(b.second);
 	}
 
-	AssimpTexture(const AssimpTexture& b)
+	ModelTexture(const ModelTexture& b)
 	{
 		this->first = b.first;
 		this->second = b.second.duplicate();
 	}
 
 
-	AssimpTexture& operator=(AssimpTexture&& b)
+	ModelTexture& operator=(ModelTexture&& b)
 	{
 		this->first = b.first;
 		this->second = std::move(b.second);
@@ -225,7 +237,7 @@ struct Material
 	// doesn't have a material with said texture!
 	// Keep in mind that this limits textures to only one per type, but
 	// realistically there will be no need for more than that.
-	std::unordered_map<aiTextureType, std::string> assimp_texture_type_to_uniform;
+	std::unordered_map<ModelTexture::TextureType, std::string> model_texture_type_to_uniform;
 
 
 
@@ -233,7 +245,7 @@ struct Material
 	CoreUniforms core_uniforms;
 
 
-	void set(std::vector<AssimpTexture>& assimp_textures, const MaterialOverride& over);
+	void set(std::vector<ModelTexture>& model_textures, const MaterialOverride& over);
 	void set_core(const CameraUniforms& cu, glm::dmat4 model, GLint drawable_id);
 
 };
@@ -317,8 +329,6 @@ public:
 		}
 	}
 
-	// Deserialize is only called for bodies and barycenters
-	// Star is special
 	static void deserialize(Material& to, const cpptoml::table& from)
 	{
 		std::string str;
@@ -353,7 +363,7 @@ public:
 			obtain_uniforms(to, *uniforms_toml);
 		}
 
-		auto asssimp_textures_toml = from.get_table_qualified("assimp_textures");
+		auto asssimp_textures_toml = from.get_table_qualified("model_textures");
 		if (asssimp_textures_toml)
 		{
 			for (auto entry : *asssimp_textures_toml)
@@ -362,74 +372,25 @@ public:
 				{
 					std::string val = entry.second->as<std::string>()->get();
 
-					if (entry.first == "diffuse")
+					if (entry.first == "base_color")
 					{
-						to.assimp_texture_type_to_uniform[aiTextureType_DIFFUSE] = val;
+						to.model_texture_type_to_uniform[ModelTexture::BASE_COLOR] = val;
 					}
-					else if(entry.first == "specular")
+					else if(entry.first == "metallic_roughness")
 					{
-						to.assimp_texture_type_to_uniform[aiTextureType_SPECULAR] = val;
-					}
-					else if (entry.first == "ambient")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_AMBIENT] = val;
-					}
-					else if (entry.first == "emissive")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_EMISSIVE] = val;
-					}
-					else if (entry.first == "height")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_HEIGHT] = val;
-					}
-					else if (entry.first == "normals")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_NORMALS] = val;
-					}
-					else if (entry.first == "shininess")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_SHININESS] = val;
-					}
-					else if (entry.first == "opacity")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_OPACITY] = val;
-					}
-					else if (entry.first == "displacement")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_DISPLACEMENT] = val;
-					}
-					else if (entry.first == "lightmap")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_LIGHTMAP] = val;
-					}
-					else if (entry.first == "reflection")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_REFLECTION] = val;
-					}
-					// PBR Materials
-					else if (entry.first == "base_color")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_BASE_COLOR] = val;
-					}
-					else if (entry.first == "normal_camera")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_NORMAL_CAMERA] = val;
-					}
-					else if (entry.first == "emission_color")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_EMISSION_COLOR] = val;
-					}
-					else if (entry.first == "metalness")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_METALNESS] = val;
-					}
-					else if (entry.first == "diffuse_roughness")
-					{
-						to.assimp_texture_type_to_uniform[aiTextureType_DIFFUSE_ROUGHNESS] = val;
+						to.model_texture_type_to_uniform[ModelTexture::METALLIC_ROUGHNESS] = val;
 					}
 					else if (entry.first == "ambient_occlusion")
 					{
-						to.assimp_texture_type_to_uniform[aiTextureType_AMBIENT_OCCLUSION] = val;
+						to.model_texture_type_to_uniform[ModelTexture::AMBIENT_OCCLUSION] = val;
+					}
+					else if (entry.first == "emissive")
+					{
+						to.model_texture_type_to_uniform[ModelTexture::EMISSIVE] = val;
+					}
+					else if (entry.first == "normal_map")
+					{
+						to.model_texture_type_to_uniform[ModelTexture::NORMAL_MAP] = val;
 					}
 					else
 					{

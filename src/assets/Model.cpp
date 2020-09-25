@@ -1,92 +1,10 @@
 #include "Model.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 #include <glm/gtx/quaternion.hpp>
 
 #pragma warning(push, 0)
 #include "btBulletCollisionCommon.h"
 #pragma warning(pop)
-
-inline glm::dmat4 aiMatrix4x4ToGlm(const aiMatrix4x4* from)
-{
-    glm::dmat4 to;
-
-
-    to[0][0] = (double)from->a1; to[0][1] = (double)from->b1;  to[0][2] = (double)from->c1; to[0][3] = (double)from->d1;
-    to[1][0] = (double)from->a2; to[1][1] = (double)from->b2;  to[1][2] = (double)from->c2; to[1][3] = (double)from->d2;
-    to[2][0] = (double)from->a3; to[2][1] = (double)from->b3;  to[2][2] = (double)from->c3; to[2][3] = (double)from->d3;
-    to[3][0] = (double)from->a4; to[3][1] = (double)from->b4;  to[3][2] = (double)from->c4; to[3][3] = (double)from->d4;
-
-    return to;
-}
-
-
-void Model::process_node(aiNode* node, const aiScene* scene, Node* to, bool drawable_parent)
-{
-	Node* n_node = new Node();
-
-	aiMetadata* m = node->mMetaData;
-	// Extract all properties:
-	if (m)
-	{
-		for (size_t i = 0; i < m->mNumProperties; i++)
-		{
-			std::string key = std::string(m->mKeys[i].C_Str());
-			aiMetadataEntry entry = m->mValues[i];
-
-			// TODO: Maybe handle other property types, we don't need them yet!
-			if (entry.mType == 5)
-			{
-				std::string cont = std::string(((aiString*)(entry.mData))->C_Str());
-				n_node->properties[key] = cont;
-			}
-		}
-	}
-
-	n_node->sub_transform = aiMatrix4x4ToGlm(&node->mTransformation);
-
-	n_node->name = node->mName.C_Str();
-
-	logger->check(node_by_name.find(n_node->name) == node_by_name.end(), 
-			"We don't support non-unique node names ('{}')", n_node->name);
-
-	node_by_name[n_node->name] =n_node;
-
-	bool drawable = drawable_parent;
-
-	if (n_node->name.rfind(Model::COLLIDER_PREFIX, 0) == 0
-		|| n_node->name.rfind(Model::MARK_PREFIX, 0) == 0) 
-	{
-		drawable = false;
-	}
-
-	for (unsigned int i = 0; i < node->mNumMeshes; i++)
-	{
-		// the node object only contains indices to index the actual objects in the scene. 
-		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
-		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-
-		process_mesh(mesh, scene, n_node, drawable);
-	}
-
-	// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
-	for (unsigned int i = 0; i < node->mNumChildren; i++)
-	{
-		process_node(node->mChildren[i], scene, n_node, drawable);
-	}
-
-	if (to == nullptr)
-	{
-		root = n_node;
-	}
-	else
-	{
-		to->children.push_back(n_node);
-	}
-
-}
 
 void replace_all(std::string& data, const std::string& search, const std::string& replace)
 {
@@ -124,254 +42,6 @@ std::vector<Mesh*> Node::get_all_meshes_recursive(bool include_ours)
 
 	return out;
 }
-
-void Model::process_mesh(aiMesh* mesh, const aiScene* scene, Node* to, bool drawable)
-{
-	
-	aiMaterial* ai_mat = scene->mMaterials[mesh->mMaterialIndex];
-	
-	AssetPointer mat_ptr;
-
-	std::string ai_mat_name = ai_mat->GetName().C_Str();
-
-	size_t pos = ai_mat_name.find_last_of('.');
-
-	if (pos < ai_mat_name.size() && ai_mat_name.substr(pos) == ".toml")
-	{
-		mat_ptr = AssetPointer(ai_mat->GetName().C_Str());
-	}
-	else
-	{
-		mat_ptr = AssetPointer("core:mat_default.toml");
-	}
-
-	
-	AssetHandle<Material> mat = AssetHandle<Material>(mat_ptr);
-
-
-	to->meshes.push_back(Mesh(std::move(mat)));
-	Mesh* m = &to->meshes[to->meshes.size() - 1];
-	m->drawable = drawable;
-
-	// Load Assimp textures
-	for (int type = 0; type < (int)aiTextureType::aiTextureType_UNKNOWN; type++)
-	{
-		aiTextureType type_t = (aiTextureType)type;
-		unsigned int count = ai_mat->GetTextureCount(type_t);
-
-		// TODO: Handle multiple textures of the same type
-		if (count > 1)
-		{
-			logger->warn("Multiple textures of the same type are not yet supported.");
-		}
-		else if (count == 1)
-		{
-			aiString path;
-			// TODO: Maybe handle other texture parameters? Atleast pass them to the shaders
-			ai_mat->GetTexture(type_t, 0, &path);
-
-			std::string path_s = std::string(path.C_Str());
-			logger->info("Loading texture: {}", path_s);
-			// Sanitize the path
-			replace_all(path_s, "\\", "/");
-			// We find 'res/', after it is the package name, and then the name, pretty easy
-			size_t pos = path_s.find("res/");
-			if (pos == std::string::npos)
-			{
-				// It may be a relative path
-				logger->warn("Invalid path '{}' given in texture, ignoring! Make sure you enable absolute path mode", path_s);
-			}
-			else
-			{
-				std::string sub_path = path_s.substr(pos + 4); //< +4 skips the res/
-				size_t first_dash = sub_path.find_first_of('/');
-				if (first_dash == std::string::npos)
-				{
-					logger->warn("Invalid path '{}' given in texture, ignoring!", path_s);
-				}
-				else
-				{
-					std::string pkg = sub_path.substr(0, first_dash);
-					std::string name = sub_path.substr(first_dash + 1);
-
-					AssimpTexture assimp_tex;
-					assimp_tex.first = type_t;
-					assimp_tex.second = std::move(AssetHandle<Image>(pkg, name, false));
-
-					// Load the texture
-					m->textures.push_back(assimp_tex);
-				}
-			}
-		}
-
-	}
-
-
-	MeshConfig& config = m->material->cfg;
-
-	size_t vert_size = config.get_vertex_size();
-	size_t floats_per_vert = config.get_vertex_floats();
-
-	m->indices = (uint32_t*)malloc(sizeof(uint32_t) * mesh->mNumFaces * 3);
-	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-	{
-		aiFace face = mesh->mFaces[i];
-		m->indices[i * 3 + 0] = face.mIndices[0];
-		m->indices[i * 3 + 1] = face.mIndices[1];
-		m->indices[i * 3 + 2] = face.mIndices[2];
-	}
-	m->index_count = mesh->mNumFaces * 3;
-
-
-	if (drawable)
-	{
-
-		// Work directly in the vector
-		m->data = (float*)malloc(vert_size * mesh->mNumVertices);
-	
-		m->data_size = vert_size * mesh->mNumVertices;
-
-		bool log_once_tangents = false;
-		bool log_once_colors = false;
-
-		
-
-	
-		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-		{
-			size_t i0 = i * floats_per_vert;
-			constexpr size_t o = 1; //< 1 Because we index using floats, could be removed ;)
-			size_t j = 0;
-
-			if (config.has_pos)
-			{
-				m->data[i0 + j * o] = mesh->mVertices[i].x; j++;
-				m->data[i0 + j * o] = mesh->mVertices[i].y; j++;
-				m->data[i0 + j * o] = mesh->mVertices[i].z; j++;
-			}
-
-			if (config.has_nrm)
-			{
-				m->data[i0 + j * o] = mesh->mNormals[i].x; j++;
-				m->data[i0 + j * o] = mesh->mNormals[i].y; j++;
-				m->data[i0 + j * o] = mesh->mNormals[i].z; j++;
-			}
-
-			if (config.has_tex)
-			{
-				if (mesh->mTextureCoords[0])
-				{
-					glm::vec2 uv;
-					uv.x = mesh->mTextureCoords[0][i].x;
-					uv.y = mesh->mTextureCoords[0][i].y;
-
-					if (config.flip_uv)
-					{
-						uv.y = 1.0f - uv.y;
-					}
-
-					// We only support one UV map
-					m->data[i0 + j * o] = uv.x; j++;
-					m->data[i0 + j * o] = uv.y; j++;
-				}
-				else
-				{
-					m->data[i0 + j * o] = 0.0f; j++;
-					m->data[i0 + j * o] = 0.0f; j++;
-				}
-
-
-
-			}
-
-			if (config.has_tgt)
-			{
-				if (mesh->mTangents)
-				{
-					m->data[i0 + j * o] = mesh->mTangents[i].x; j++;
-					m->data[i0 + j * o] = mesh->mTangents[i].y; j++;
-					m->data[i0 + j * o] = mesh->mTangents[i].z; j++;
-					m->data[i0 + j * o] = mesh->mBitangents[i].x; j++;
-					m->data[i0 + j * o] = mesh->mBitangents[i].y; j++;
-					m->data[i0 + j * o] = mesh->mBitangents[i].z; j++;
-				}
-				else
-				{
-					m->data[i0 + j * o] = 0.0f; j++;
-					m->data[i0 + j * o] = 0.0f; j++;
-					m->data[i0 + j * o] = 0.0f; j++;
-					m->data[i0 + j * o] = 0.0f; j++;
-					m->data[i0 + j * o] = 0.0f; j++;
-					m->data[i0 + j * o] = 0.0f; j++;
-
-					if (!log_once_tangents)
-					{
-						logger->warn("Could not find tangents. Make sure your model has texture coordinates and normals!");
-						log_once_tangents = true;
-					}
-				}
-
-			}
-
-			// We only support one vertex color map
-			if (config.has_cl3)
-			{
-				if (mesh->mColors[0])
-				{
-					m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
-					m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
-					m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
-				}
-				else
-				{
-					m->data[i0 + j * o] = 0.0f; j++;
-					m->data[i0 + j * o] = 0.0f; j++;
-					m->data[i0 + j * o] = 0.0f; j++;
-
-					if (!log_once_colors)
-					{
-						logger->warn("Could not find vertex colors. Make sure your model has them!");
-						log_once_colors = true;
-					}
-				}
-			}
-
-			if (config.has_cl4)
-			{
-				if (mesh->mColors[0])
-				{
-					m->data[i0 + j * o] = mesh->mColors[0][i].r; j++;
-					m->data[i0 + j * o] = mesh->mColors[0][i].g; j++;
-					m->data[i0 + j * o] = mesh->mColors[0][i].b; j++;
-					m->data[i0 + j * o] = mesh->mColors[0][i].a; j++;
-				}
-				else
-				{
-					m->data[i0 + j * o] = 0.0f; j++;
-					m->data[i0 + j * o] = 0.0f; j++;
-					m->data[i0 + j * o] = 0.0f; j++;
-					m->data[i0 + j * o] = 0.0f; j++;
-
-					if (!log_once_colors)
-					{
-						logger->warn("Could not find vertex colors. Make sure your model has them!");
-						log_once_colors = true;
-					}
-				}
-			}
-		}
-	}
-	else
-	{
-		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-		{
-			glm::vec3 p0 = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-			m->verts.push_back(p0);
-		}
-	}
-}
-
-
 
 bool Mesh::is_drawable()
 {
@@ -489,7 +159,7 @@ void Mesh::unload()
 
 void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model, GLint did)
 {
-	logger->check(drawable != false, "Cannot draw a non-drawable mesh!");
+	logger->check(drawable, "Cannot draw a non-drawable mesh!");
 
 	material->shader->use();
 
@@ -556,14 +226,10 @@ void Model::free_gpu()
 
 
 
-Model::Model(const aiScene* scene)
+Model::Model()
 {
-	logger->check(scene != nullptr, "Could not load model file, scene is nullptr");
-
 	gpu_users = 0;
 	uploaded = false;
-
-	process_node(scene->mRootNode, scene, nullptr, true);
 }
 
 Model::~Model()
@@ -572,19 +238,7 @@ Model::~Model()
 
 Model* load_model(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
 {
-	unsigned int flags = 
-		aiProcess_Triangulate | aiProcess_JoinIdenticalVertices |
-		aiProcess_GenSmoothNormals | aiProcess_GenUVCoords |
-	    aiProcess_CalcTangentSpace | aiProcess_SortByPType;
-
-	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, flags);
-	if(scene == nullptr)
-	{
-		logger->warn("Error while loading model: {}", importer.GetErrorString());
-	}
-	
-	Model* m = new Model(scene);
+	Model* m = new Model();
 
 	return m;
 }

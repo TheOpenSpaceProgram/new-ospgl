@@ -1,7 +1,4 @@
 #include "Material.h"
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 void Uniform::set(Shader* sh, const std::string& name, int* gl_tex) const
 {
@@ -86,7 +83,7 @@ Uniform::~Uniform()
 	}
 }
 
-void Material::set(std::vector<AssimpTexture>& assimp_textures, const MaterialOverride& over)
+void Material::set(std::vector<ModelTexture>& assimp_textures, const MaterialOverride& over)
 {
 	int gl_tex = 0;
 
@@ -113,9 +110,9 @@ void Material::set(std::vector<AssimpTexture>& assimp_textures, const MaterialOv
 
 	for (auto it = assimp_textures.begin(); it != assimp_textures.end(); it++)
 	{
-		aiTextureType type = it->first;
-		auto translates = assimp_texture_type_to_uniform.find(type);
-		if (translates != assimp_texture_type_to_uniform.end())
+		ModelTexture::TextureType type = it->first;
+		auto translates = model_texture_type_to_uniform.find(type);
+		if (translates != model_texture_type_to_uniform.end())
 		{
 			AssetHandle<Image>* img = &it->second;
 
@@ -135,63 +132,63 @@ void Material::set(std::vector<AssimpTexture>& assimp_textures, const MaterialOv
 void Material::set_core(const CameraUniforms& cu, glm::dmat4 model, GLint drawable_id)
 {
 
-	if (core_uniforms.mat4_proj != "")
+	if (!core_uniforms.mat4_proj.empty())
 	{
 		shader->setMat4(core_uniforms.mat4_proj, cu.proj);
 	}
 
-	if (core_uniforms.mat4_view != "")
+	if (!core_uniforms.mat4_view.empty())
 	{
 		shader->setMat4(core_uniforms.mat4_view, cu.view);
 	}
 
-	if (core_uniforms.mat4_camera_model != "")
+	if (!core_uniforms.mat4_camera_model.empty())
 	{
 		shader->setMat4(core_uniforms.mat4_camera_model, cu.c_model);
 	}
 
-	if (core_uniforms.mat4_proj_view != "")
+	if (!core_uniforms.mat4_proj_view.empty())
 	{
 		shader->setMat4(core_uniforms.mat4_proj_view, cu.proj_view);
 	}
 
-	if (core_uniforms.mat4_camera_tform != "")
+	if (!core_uniforms.mat4_camera_tform.empty())
 	{
 		shader->setMat4(core_uniforms.mat4_camera_tform, cu.tform);
 	}
 
-	if (core_uniforms.mat4_final_tform != "")
+	if (!core_uniforms.mat4_final_tform.empty())
 	{
 		glm::dmat4 final_tform = cu.tform * model;
 		shader->setMat4(core_uniforms.mat4_final_tform, final_tform);
 	}
 
-	if (core_uniforms.mat4_model != "")
+	if (!core_uniforms.mat4_model.empty())
 	{
 		shader->setMat4(core_uniforms.mat4_model, model);
 	}
 
-	if (core_uniforms.mat3_normal_model != "")
+	if (!core_uniforms.mat3_normal_model.empty())
 	{
 		shader->setMat3(core_uniforms.mat3_normal_model, glm::mat3(transpose(inverse(model))));
 	}
 
-	if (core_uniforms.float_far_plane != "")
+	if (!core_uniforms.float_far_plane.empty())
 	{
 		shader->setFloat(core_uniforms.float_far_plane, cu.far_plane);
 	}
 
-	if (core_uniforms.float_f_coef != "")
+	if (!core_uniforms.float_f_coef.empty())
 	{
 		shader->setFloat(core_uniforms.float_f_coef, 2.0f / glm::log2(cu.far_plane + 1.0f));
 	}
 
-	if (core_uniforms.vec3_camera_relative != "")
+	if (!core_uniforms.vec3_camera_relative.empty())
 	{
 		shader->setVec3(core_uniforms.vec3_camera_relative, cu.cam_pos);
 	}
 
-	if (core_uniforms.mat4_deferred_tform != "")
+	if (!core_uniforms.mat4_deferred_tform.empty())
 	{
 		// This transform simply brings the vertices to camera coordinates, and also applies the model
 		// but not view or projection
@@ -199,7 +196,7 @@ void Material::set_core(const CameraUniforms& cu, glm::dmat4 model, GLint drawab
 		shader->setMat4(core_uniforms.mat4_deferred_tform, (glm::mat4)final_mat);
 	}
 
-	if(core_uniforms.int_drawable_id != "")
+	if(!core_uniforms.int_drawable_id.empty())
 	{
 		shader->setInt(core_uniforms.int_drawable_id, drawable_id);
 	}
@@ -232,7 +229,7 @@ MeshConfig::MeshConfig()
 	flip_uv = true;
 }
 
-size_t MeshConfig::get_vertex_floats()
+size_t MeshConfig::get_vertex_floats() const
 {
 	size_t out = 0;
 
