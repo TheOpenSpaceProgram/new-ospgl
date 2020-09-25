@@ -7,8 +7,6 @@
 #include "game/scenes/editor/EditorScene.h"
 #include <util/Profiler.h>
 
-#include <tiny_gtlf/tiny_gltf.h>
-
 static int iteration = 0;
 
 int main(int argc, char** argv)

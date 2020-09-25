@@ -46,7 +46,6 @@ else()
 endif()
 
 include_directories(dep)
-include_directories(OSPGL PUBLIC dep/ospgl-assimp/include)   
 include_directories(OSPGL PUBLIC dep/bullet3/src)
 include_directories(OSPGL PUBLIC src)
 include_directories(OSPGL PUBLIC pkg)
@@ -98,7 +97,7 @@ endif()
 
 # Link libraries
 
-target_link_libraries(OSPGL fmt liblua-static assimp BulletSoftBody BulletDynamics BulletCollision LinearMath ${CMAKE_DL_LIBS} ${EXTRA_LINK})
+target_link_libraries(OSPGL fmt liblua-static BulletSoftBody BulletDynamics BulletCollision LinearMath ${CMAKE_DL_LIBS} ${EXTRA_LINK})
 
 ##################################################################################
 # ospm - The package manager for OSPGL (Open Space Program Manager)

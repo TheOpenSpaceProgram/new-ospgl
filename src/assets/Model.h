@@ -7,6 +7,7 @@
 #include <renderer/lighting/ShadowCamera.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <physics/glm/BulletGlmCompat.h>
+#include <tiny_gltf/tiny_gltf.h>
 
 class Mesh
 {
@@ -19,7 +20,7 @@ private:
 
 	// It's only loaded while we are uploaded
 	AssetHandle<Material> material;
-	std::vector<AssimpTexture> textures;
+	std::vector<ModelTexture> textures;
 
 	bool drawable;
 
@@ -124,6 +125,9 @@ private:
 	void upload();
 	void unload();
 
+	void load_node(const tinygltf::Model& model, int node, Node* parent, bool parent_draw);
+	void load_mesh(const tinygltf::Model& model, const tinygltf::Primitive& primitive, Node* node, bool drawable);
+
 public:
 
 	static constexpr const char* COLLIDER_PREFIX = "col_";
@@ -134,7 +138,7 @@ public:
 	void get_gpu();
 	void free_gpu();
 
-	Model();
+	Model(const tinygltf::Model& model);
 	~Model();
 };
 

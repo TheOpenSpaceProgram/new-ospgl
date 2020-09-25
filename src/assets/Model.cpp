@@ -226,21 +226,187 @@ void Model::free_gpu()
 
 
 
-Model::Model()
+Model::Model(const tinygltf::Model& model)
 {
 	gpu_users = 0;
 	uploaded = false;
+
+	// TODO: Load all other scenes as nodes?
+	const tinygltf::Scene scene = model.scenes[model.defaultScene];
+	// Load recursively all the nodes
+	Node* scene_node = new Node();
+	scene_node->name = scene.name;
+
+	for(int node : scene.nodes)
+	{
+		load_node(model, node, scene_node, true);
+	}
+
+	root = scene_node;
+}
+
+void Model::load_node(const tinygltf::Model &model, int node_idx, Node *parent, bool parent_draw)
+{
+	const tinygltf::Node node = model.nodes[node_idx];
+
+	Node* n_node = new Node();
+	n_node->name = node.name;
+
+	if(node.extras.IsObject())
+	{
+		for(const std::string& key : node.extras.Keys())
+		{
+			tinygltf::Value sub = node.extras.Get(key);
+			if(!sub.IsString())
+			{
+				logger->warn("Cannot parse property '{}', unsupported type (we only support string)", key);
+			}
+			else
+			{
+				n_node->properties[key] = sub.Get<std::string>();
+			}
+		}
+	}
+
+	if(node.matrix.size() != 0)
+	{
+		for(int i = 0; i < 16; i++)
+		{
+			n_node->sub_transform[i % 4][i / 4] = node.matrix[i];
+		}
+	}
+	else
+	{
+		glm::dvec3 trans = glm::dvec3(0.0, 0.0, 0.0), scale = glm::dvec3(1.0, 1.0, 1.0);
+		glm::dquat rot = glm::dquat(1.0, 0.0, 0.0, 0.0);
+
+		for(int i = 0; i < 3; i++)
+		{
+			if(!node.translation.empty())
+			{
+				trans[i] = node.translation[i];
+			}
+			if(!node.scale.empty())
+			{
+				scale[i] = node.scale[i];
+			}
+		}
+
+		for(int i = 0; i < 4; i++)
+		{
+			if(!node.rotation.empty())
+			{
+				rot[i] = node.rotation[i];
+			}
+		}
+
+		n_node->sub_transform = glm::scale(glm::dmat4(1.0), scale);
+		n_node->sub_transform = glm::toMat4(rot) * n_node->sub_transform;
+		n_node->sub_transform = glm::translate(n_node->sub_transform, trans);
+	}
+
+
+	node_by_name[n_node->name] = n_node;
+
+
+	bool drawable = parent_draw;
+	if (n_node->name.rfind(Model::COLLIDER_PREFIX, 0) == 0
+		|| n_node->name.rfind(Model::MARK_PREFIX, 0) == 0)
+	{
+		drawable = false;
+	}
+
+	if(node.mesh >= 0)
+	{
+		for (const auto& primitive : model.meshes[node.mesh].primitives)
+		{
+			load_mesh(model, primitive, n_node, drawable);
+		}
+	}
+
+
+
+	if(parent != nullptr)
+	{
+		parent->children.push_back(n_node);
+	}
+
+	for(int child : node.children)
+	{
+		load_node(model, child, n_node, drawable);
+	}
 }
 
 Model::~Model()
 {
 }
 
+void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &primitive, Node *node, bool drawable)
+{
+	AssetPointer mat_ptr;
+	const tinygltf::Material& gltf_mat = model.materials[primitive.material];
+	std::string mat_name = gltf_mat.name;
+	size_t pos = mat_name.find_last_of('.');
+
+	if (pos < mat_name.size() && mat_name.substr(pos) == ".toml")
+	{
+		mat_ptr = AssetPointer(mat_name);
+	}
+	else
+	{
+		// PBR material
+		mat_ptr = AssetPointer("core:mat_pbr.toml");
+	}
+
+
+	AssetHandle<Material> mat = AssetHandle<Material>(mat_ptr);
+
+	node->meshes.emplace_back(std::move(mat));
+	Mesh* m = &node->meshes[node->meshes.size() - 1];
+	m->drawable = drawable;
+
+	// Load model textures (they must be embedded) and PBR stuff
+
+
+	// Load the mesh itself, depending on the mesh configuration
+
+}
+
 Model* load_model(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
 {
-	Model* m = new Model();
+	std::string extension = name.substr(name.find_last_of('.'));
+	tinygltf::Model model;
+	tinygltf::TinyGLTF loader;
+	std::string err, wrn;
 
-	return m;
+	if(extension == ".glb")
+	{
+		loader.LoadBinaryFromFile(&model, &err, &wrn, path);
+	}
+	else if(extension == ".gltf")
+	{
+		loader.LoadASCIIFromFile(&model, &err, &wrn, path);
+	}
+	else
+	{
+		logger->error("Model format {} not supported: {}:{}", extension, pkg, name);
+	}
+
+	if(!err.empty())
+	{
+		logger->error("Error loading model {}:{}\n{}", pkg, name, err);
+		return nullptr;
+	}
+	else
+	{
+		if(!wrn.empty())
+		{
+			logger->warn("Warning loading model {}:{}\n{}", pkg, name, wrn);
+		}
+
+
+		return new Model(model);
+	}
 }
 
 
