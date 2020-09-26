@@ -1,24 +1,24 @@
 shader = "shaders/pbr.vs"
 
 [uniforms]
-diffuse = "core:notex.png"
-transparency = 0.0
+    diffuse = "core:notex.png"
+    transparency = 0.0
 
 
 [assimp_textures]
-diffuse = "diffuse"
+    diffuse = "diffuse"
 
 [core_uniforms]
-proj_view = "proj_view"
-normal_model = "normal_model"
-f_coef = "f_coef"
-final_tform = "final_tform"
-camera_relative = "camera_relative"
-deferred_tform = "deferred_tform"
-drawable_id = "drawable_id"
+    proj_view = "proj_view"
+    normal_model = "normal_model"
+    f_coef = "f_coef"
+    final_tform = "final_tform"
+    camera_relative = "camera_relative"
+    deferred_tform = "deferred_tform"
+    drawable_id = "drawable_id"
 
 [config]
-has_pos = true
-has_nrm = true
-has_tex = true
-flip_uv = true
+    has_pos = true
+    has_nrm = true
+    has_uv0 = true
+    flip_uv = true

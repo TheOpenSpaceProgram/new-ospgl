@@ -20,5 +20,5 @@ shader = "shaders/vehicle/simple_part.vs"
 [config]
 	has_pos = true
 	has_nrm = true
-	has_tex = true
+	has_uv0 = true
 	flip_uv = true

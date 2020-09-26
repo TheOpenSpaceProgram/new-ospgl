@@ -222,7 +222,8 @@ MeshConfig::MeshConfig()
 	// without vertex colors
 	has_pos = true;
 	has_nrm = true;
-	has_tex = true;
+	has_uv0 = true;
+	has_uv1 = false;
 	has_tgt = true;
 	has_cl3 = false;
 	has_cl4 = false;
@@ -237,7 +238,8 @@ size_t MeshConfig::get_vertex_floats() const
 	// as has_pos = 3 (it would be true)
 	out += has_pos ? 3 : 0;
 	out += has_nrm ? 3 : 0;
-	out += has_tex ? 2 : 0;
+	out += has_uv0 ? 2 : 0;
+	out += has_uv1 ? 2 : 0;
 	out += has_tgt ? 6 : 0;
 	out += has_cl3 ? 3 : 0;
 	out += has_cl4 ? 4 : 0;

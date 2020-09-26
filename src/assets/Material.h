@@ -19,7 +19,8 @@ struct MeshConfig
 	//
 	// pos: vec3	-> Vertex position
 	// nrm: vec3	-> Normal
-	// tex: vec2	-> Texture coordinate
+	// uv0: vec2	-> Texture coordinate
+	// uv1: vec2	-> Auxiliary texture coordinate
 	// tgt: 2*vec3	-> Tangent and Bitangent (First tangent, then bitangent)
 	// cl3: vec3	-> Vertex color (RGB)
 	// cl4: vec4	-> Vertex color (RGBA)
@@ -28,7 +29,8 @@ struct MeshConfig
 	// then the uniforms will be 0 = nrm and 1 = cl3
 	bool has_pos;
 	bool has_nrm;
-	bool has_tex;
+	bool has_uv0;
+	bool has_uv1;
 	bool has_tgt;
 	bool has_cl3;
 	bool has_cl4;
@@ -445,7 +447,8 @@ public:
 	{
 		SAFE_TOML_GET_OR(to.has_pos, "has_pos", bool, false);
 		SAFE_TOML_GET_OR(to.has_nrm, "has_nrm", bool, false);
-		SAFE_TOML_GET_OR(to.has_tex, "has_tex", bool, false);
+		SAFE_TOML_GET_OR(to.has_uv0, "has_uv0", bool, false);
+		SAFE_TOML_GET_OR(to.has_uv1, "has_uv1", bool, false);
 		SAFE_TOML_GET_OR(to.has_tgt, "has_tgt", bool, false);
 		SAFE_TOML_GET_OR(to.has_cl3, "has_cl3", bool, false);
 		SAFE_TOML_GET_OR(to.has_cl4, "has_cl4", bool, false);

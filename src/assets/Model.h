@@ -9,12 +9,39 @@
 #include <physics/glm/BulletGlmCompat.h>
 #include <tiny_gltf/tiny_gltf.h>
 
+class Model;
+
 class Mesh
 {
+	friend class Model;
+	friend struct Node;
+
 private:
 
+	struct Attribute
+	{
+		Model* in_model;
 
-	GLuint vbo, vao, ebo;
+		std::string type;
+		int component_type;
+		int byte_offset;
+		int count;
+
+		uint8_t* get_ptr(int idx = 0) const;
+		size_t get_size() const;
+		size_t get_component_size() const;
+		size_t get_type_components() const;
+		size_t get_unit_size() const;
+		void* data() const { return (void*)get_ptr(); };
+
+		glm::vec3 get_vec3(int idx) const;
+		int get_index(int idx) const;
+
+	};
+
+	// We use a global buffer as there is a single buffer in gltf (we only support it that way!)
+	// The buffer lives with the model
+	GLuint buffer, vao, ebo;
 
 
 
@@ -22,31 +49,27 @@ private:
 	AssetHandle<Material> material;
 	std::vector<ModelTexture> textures;
 
+	// Default GLTF attributes, but also includes "INDICES" for the indices
+	std::unordered_map<std::string, Attribute> attributes;
+
 	bool drawable;
 
 public:
-
-	friend class Model;
-	friend struct Node;
 
 	size_t data_size;
 	size_t index_count;
 
 	MaterialOverride mat_override;
+
+	glm::vec3 min_bound;
+	glm::vec3 max_bound;
 	
-	// Only present on non drawable meshes! Used internally
-	std::vector<glm::vec3> verts;
-
-	// data is only present on drawable meshes
-	float* data;
-
-	// Present on both, as both use indexed vertices
-	uint32_t* indices;
+	std::vector<glm::vec3> get_verts();
 
 	// Stuff that starts with 'col_' are colliders
 	// Any children of a non-drawable is not drawable!
 	// Non-drawable stuff gets the aditional vertex positions loaded
-	bool is_drawable();
+	bool is_drawable() const;
 
 	void upload();
 	void unload();
@@ -56,7 +79,7 @@ public:
 	void bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model, GLint drawable_id);
 
 	// Only issues the draw command, does absolutely nothing else
-	void draw_command();
+	void draw_command() const;
 
 	// We take ownership of the handle
 	Mesh(AssetHandle<Material>&& mat) : material(std::move(mat))
@@ -64,8 +87,6 @@ public:
 		vao = 0;
 		vbo = 0;
 		ebo = 0;
-		data = nullptr;
-		indices = nullptr;
 	}
 
 };
@@ -122,12 +143,14 @@ private:
 
 	Node* root;
 
+	// We only support a single buffer
+	std::vector<uint8_t> buffer;
+
 	void upload();
 	void unload();
 
-	void load_node(const tinygltf::Model& model, int node, Node* parent, bool parent_draw);
-	void load_mesh(const tinygltf::Model& model, const tinygltf::Primitive& primitive, Node* node, bool drawable);
-
+	void load_node(const tinygltf::Model& model, int node, Node* parent, Model* rmodel, bool parent_draw);
+	void load_mesh(const tinygltf::Model& model, const tinygltf::Primitive& primitive, Model* rmodel, Node* node, bool drawable);
 public:
 
 	static constexpr const char* COLLIDER_PREFIX = "col_";
@@ -166,7 +189,7 @@ public:
 	// it doesn't outlive the GPUModelPointer.
 	// It's better to simply call this every time, it's
 	// pretty fast!
-	Node* get_node(std::string name);
+	Node* get_node(const std::string& name);
 
 	// Same as above
 	Node* get_root_node();

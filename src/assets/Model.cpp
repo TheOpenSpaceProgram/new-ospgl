@@ -43,7 +43,7 @@ std::vector<Mesh*> Node::get_all_meshes_recursive(bool include_ours)
 	return out;
 }
 
-bool Mesh::is_drawable()
+bool Mesh::is_drawable() const
 {
 	return drawable;
 }
@@ -58,11 +58,13 @@ void Mesh::upload()
 
 		glBindVertexArray(vao);
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		auto& indices = attributes["INDICES"];
+		// Obtain the buffer data
+		glBindBuffer(GL_ARRAY_BUFFER, buffer);
 		glBufferData(GL_ARRAY_BUFFER, data_size, data, GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * indices.get_unit_size(), indices.data(), GL_STATIC_DRAW);
 
 		GLuint ptr_num = 0;
 		GLsizei stride = (GLsizei)material->cfg.get_vertex_floats();
@@ -88,7 +90,7 @@ void Mesh::upload()
 			offset += 3 * sizeof(float);
 		}
 
-		if (material->cfg.has_tex)
+		if (material->cfg.has_uv0)
 		{
 			// Texture 
 			glEnableVertexAttribArray(ptr_num);
@@ -145,13 +147,11 @@ void Mesh::unload()
 {
 	if (drawable)
 	{
-		glDeleteBuffers(1, &vbo);
 		glDeleteBuffers(1, &ebo);
 		glDeleteVertexArrays(1, &vao);
 
 		vao = 0;
 		ebo = 0;
-		vbo = 0;
 
 		material.unload();
 	}
@@ -167,16 +167,30 @@ void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model, GLint
 	material->set_core(uniforms, model, did);
 }
 
-void Mesh::draw_command()
+void Mesh::draw_command() const
 {
-	logger->check(drawable != false, "Cannot draw a non-drawable mesh!");
-
+	logger->check(drawable, "Cannot draw a non-drawable mesh!");
 	logger->check(vao != 0, "Tried to render a non-loaded mesh");
 
 	glBindVertexArray(vao);
-	glDrawElements(GL_TRIANGLES, (GLsizei)index_count, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, (GLsizei)index_count, GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
 
+}
+
+std::vector<glm::vec3> Mesh::get_verts()
+{
+	std::vector<glm::vec3> out;
+	auto indices = attributes["INDICES"];
+	auto positions = attributes["POSITIONS"];
+
+	for(int i = 0; i < index_count; i++)
+	{
+		int index = indices.get_index(i);
+		out.push_back(positions.get_vec3(index));
+	}
+
+	return out;
 }
 
 
@@ -231,7 +245,10 @@ Model::Model(const tinygltf::Model& model)
 	gpu_users = 0;
 	uploaded = false;
 
-	// TODO: Load all other scenes as nodes?
+	// Copy all the buffers first
+	// TODO: Handling of multiple buffers?
+	buffer = model.buffers[0].data;
+
 	const tinygltf::Scene scene = model.scenes[model.defaultScene];
 	// Load recursively all the nodes
 	Node* scene_node = new Node();
@@ -239,13 +256,13 @@ Model::Model(const tinygltf::Model& model)
 
 	for(int node : scene.nodes)
 	{
-		load_node(model, node, scene_node, true);
+		load_node(model, node, scene_node, this, true);
 	}
 
 	root = scene_node;
 }
 
-void Model::load_node(const tinygltf::Model &model, int node_idx, Node *parent, bool parent_draw)
+void Model::load_node(const tinygltf::Model &model, int node_idx, Node *parent, Model* rmodel, bool parent_draw)
 {
 	const tinygltf::Node node = model.nodes[node_idx];
 
@@ -292,12 +309,12 @@ void Model::load_node(const tinygltf::Model &model, int node_idx, Node *parent, 
 			}
 		}
 
-		for(int i = 0; i < 4; i++)
+		if(!node.rotation.empty())
 		{
-			if(!node.rotation.empty())
-			{
-				rot[i] = node.rotation[i];
-			}
+			rot[0] = node.rotation[3];
+			rot[1] = node.rotation[0];
+			rot[2] = node.rotation[1];
+			rot[3] = node.rotation[2];
 		}
 
 		n_node->sub_transform = glm::scale(glm::dmat4(1.0), scale);
@@ -320,7 +337,7 @@ void Model::load_node(const tinygltf::Model &model, int node_idx, Node *parent, 
 	{
 		for (const auto& primitive : model.meshes[node.mesh].primitives)
 		{
-			load_mesh(model, primitive, n_node, drawable);
+			load_mesh(model, primitive, rmodel, n_node, drawable);
 		}
 	}
 
@@ -333,7 +350,7 @@ void Model::load_node(const tinygltf::Model &model, int node_idx, Node *parent, 
 
 	for(int child : node.children)
 	{
-		load_node(model, child, n_node, drawable);
+		load_node(model, child, n_node, rmodel, drawable);
 	}
 }
 
@@ -341,10 +358,18 @@ Model::~Model()
 {
 }
 
-void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &primitive, Node *node, bool drawable)
+void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &primitive, Model* rmodel, Node *node, bool drawable)
 {
 	AssetPointer mat_ptr;
-	const tinygltf::Material& gltf_mat = model.materials[primitive.material];
+
+	tinygltf::Material gltf_mat = tinygltf::Material();
+	// We use PBR by default
+	gltf_mat.name = "core:mat_pbr.toml";
+	if(primitive.material >= 0)
+	{
+		gltf_mat = model.materials[primitive.material];
+	}
+
 	std::string mat_name = gltf_mat.name;
 	size_t pos = mat_name.find_last_of('.');
 
@@ -368,7 +393,45 @@ void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &p
 	// Load model textures (they must be embedded) and PBR stuff
 
 
-	// Load the mesh itself, depending on the mesh configuration
+	// Load the mesh itself, depending on the mesh configuration and the material
+	// TODO: Support non-indexed meshes
+	logger->check(primitive.indices >= 0, "Cannot load a non indexed mesh. Make sure you enable it in the 3d export");
+
+	// Load the indices
+	tinygltf::Accessor index_accessor = model.accessors[primitive.indices];
+	tinygltf::BufferView index_bview = model.bufferViews[index_accessor.bufferView];
+
+
+	if(drawable)
+	{
+	}
+
+	std::vector<std::string> needed;
+	if(m->material->cfg.has_pos){ needed.emplace_back("POSITION"); }
+	if(m->material->cfg.has_nrm){ needed.emplace_back("NORMAL"); }
+	if(m->material->cfg.has_tgt){ needed.emplace_back("TANGENT"); }
+	if(m->material->cfg.has_uv0){ needed.emplace_back("TEXCOORD_0"); }
+	if(m->material->cfg.has_uv1){ needed.emplace_back("TEXCOORD_1"); }
+	if(m->material->cfg.has_cl3){ needed.emplace_back("COLOR_0"); }
+	if(m->material->cfg.has_cl4){ needed.emplace_back("COLOR_0"); }
+	// TODO: Implement joints and weights
+
+	for(const std::string& need : needed)
+	{
+		auto it = primitive.attributes.find(need);
+		if(it == primitive.attributes.end())
+		{
+			logger->warn("Mesh doesn't have required attribute '{}', it will be filled with zeros", need);
+
+		}
+		else
+		{
+
+		}
+
+
+
+	}
 
 }
 
@@ -410,7 +473,7 @@ Model* load_model(const std::string& path, const std::string& name, const std::s
 }
 
 
-Node* GPUModelPointer::get_node(std::string name)
+Node* GPUModelPointer::get_node(const std::string& name)
 {
 	auto it = model->node_by_name.find(name);
 
@@ -649,25 +712,7 @@ void ModelColliderExtractor::single_collider_common(Node* n)
 
 std::pair<glm::vec3, glm::vec3> ModelColliderExtractor::obtain_bounds(Mesh* m)
 {
-	constexpr float BIG_NUMBER = 99999999999999.0f;
-	glm::vec3 min = glm::vec3(BIG_NUMBER, BIG_NUMBER, BIG_NUMBER);
-	glm::vec3 max = glm::vec3(-BIG_NUMBER, -BIG_NUMBER, -BIG_NUMBER);
-
-	for (size_t i = 0; i < m->verts.size(); i++)
-	{
-		glm::vec3 v = m->verts[i];
-
-		if (v.x < min.x) { min.x = v.x; }
-		if (v.y < min.y) { min.y = v.y; }
-		if (v.z < min.z) { min.z = v.z; }
-
-		if (v.x > max.x) { max.x = v.x; }
-		if (v.y > max.y) { max.y = v.y; }
-		if (v.z > max.z) { max.z = v.z; }
-	}
-
-	return std::make_pair(min, max);
-
+	return std::make_pair(m->min_bound, m->max_bound);
 }
 
 void ModelColliderExtractor::load_collider_compound(btCollisionShape** target, Node* n)
@@ -775,11 +820,109 @@ void ModelColliderExtractor::load_collider_convex(btCollisionShape** target, Nod
 	*target = new btConvexHullShape();
 	btConvexHullShape* target_c = (btConvexHullShape*)(*target);
 
-	for (size_t i = 0; i < n->meshes[0].verts.size(); i++)
+	std::vector<glm::vec3> verts = n->meshes[0].get_verts();
+	for (auto& vert : verts)
 	{
-		target_c->addPoint(to_btVector3(n->meshes[0].verts[i]), false);
+		target_c->addPoint(to_btVector3(vert), false);
 	}
 
 	target_c->recalcLocalAabb();
 	target_c->optimizeConvexHull();
 }
+
+uint8_t* Mesh::Attribute::get_ptr(int idx) const
+{
+	uint8_t* base = in_model->buffer.data() + byte_offset;
+	return base + get_unit_size() * idx;
+}
+
+size_t Mesh::Attribute::get_size() const
+{
+	return get_unit_size() * count;
+}
+
+size_t Mesh::Attribute::get_component_size() const
+{
+	switch (component_type)
+	{
+		case(5120):
+		case(5121):
+			return 1;
+		case(5122):
+		case(5123):
+			return 2;
+		case(5125):
+		case(5126):
+			return 4;
+		default:
+			logger->fatal("Unknown component type: {}", component_type);
+	}
+}
+
+glm::vec3 Mesh::Attribute::get_vec3(int idx) const
+{
+	void* ptr = (void*)get_ptr(idx);
+	switch (component_type)
+	{
+		case(5120):
+			return glm::vec3(*((int8_t*)ptr + 0), *((int8_t*)ptr + 1), *((int8_t*)ptr + 2));
+		case(5121):
+			return glm::vec3(*((uint8_t*)ptr + 0), *((uint8_t*)ptr + 1), *((uint8_t*)ptr + 2));
+		case(5122):
+			return glm::vec3(*((int16_t*)ptr + 0), *((int16_t*)ptr + 1), *((int16_t*)ptr + 2));
+		case(5123):
+			return glm::vec3(*((uint16_t*)ptr + 0), *((uint16_t*)ptr + 1), *((uint16_t*)ptr + 2));
+		case(5125):
+			return glm::vec3(*((int32_t*)ptr + 0), *((int32_t*)ptr + 1), *((int32_t*)ptr + 2));
+		case(5126):
+			return glm::vec3(*((float*)ptr + 0), *((float*)ptr + 1), *((float*)ptr + 2));
+		default:
+			logger->fatal("Unknown component type: {}", component_type);
+	}
+}
+
+int Mesh::Attribute::get_index(int idx) const
+{
+	void* ptr = (void*)get_ptr(idx);
+	switch (component_type)
+	{
+		case(5120):
+			return (int)(*(int8_t*)ptr);
+		case(5121):
+			return (int)(*(uint8_t*)ptr);
+		case(5122):
+			return (int)(*(int16_t*)ptr);
+		case(5123):
+			return (int)(*(uint16_t*)ptr);
+		case(5125):
+			return (int)(*(int32_t*)ptr);
+		case(5126):
+			return (int)(*(float*)ptr);
+		default:
+			logger->fatal("Unknown component type: {}", component_type);
+	}
+}
+
+size_t Mesh::Attribute::get_type_components() const
+{
+	if(type == "SCALAR")
+			return 1;
+	else if(type == "VEC2")
+			return 2;
+	else if(type == "VEC3")
+			return 3;
+	else if(type == "VEC4" || type == "MAT2")
+			return 4;
+	else if(type == "MAT3")
+			return 9;
+	else if(type == "MAT4")
+			return 16;
+	else
+			logger->fatal("Unknown type: {}", type);
+}
+
+size_t Mesh::Attribute::get_unit_size() const
+{
+	return get_component_size() * get_type_components();
+}
+
