@@ -41,8 +41,6 @@ void FlightScene::load()
 	}, this));
 
 	get_osp()->renderer->cam = &camera;
-	camera.speed = 20.0;
-
 
 	Vehicle* n_vehicle = new Vehicle();
 	SerializeUtil::read_file_to("udata/vehicles/debug.toml", *n_vehicle);
@@ -57,6 +55,7 @@ void FlightScene::load()
 	st.cartesian.vel = stt.cartesian.vel;
 	st.rotation = stt.rotation;
 	st.cartesian.pos += stt.rotation * glm::dvec3(0, 0, 1) * 10.0;
+	camera.init(stt.rotation * glm::dvec3(0, 0, 1));
 
 	n_vehicle->packed_veh.set_world_state(st);
 	n_vehicle->unpack();
