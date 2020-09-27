@@ -8,6 +8,7 @@
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <physics/glm/BulletGlmCompat.h>
 #include <tiny_gltf/tiny_gltf.h>
+#include <unordered_set>
 
 class Model;
 
@@ -18,49 +19,18 @@ class Mesh
 
 private:
 
-	struct Attribute
-	{
-		Model* in_model;
-
-		int type;
-		int component_type;
-		int byte_offset;
-		int count;
-
-		uint8_t* get_ptr(int idx = 0) const;
-		size_t get_size() const;
-		size_t get_component_size() const;
-		size_t get_type_components() const;
-		size_t get_unit_size() const;
-		static size_t get_default_size(const std::string& attrb);
-
-		void* data() const { return (void*)get_ptr(); };
-
-		glm::vec3 get_vec3(int idx) const;
-		int get_index(int idx) const;
-
-	};
-
-	GLuint vbo, vao, ebo;
-
-
+	GLuint vao, ebo;
+	std::vector<GLuint> vbos;
 
 	// It's only loaded while we are uploaded
 	AssetHandle<Material> material;
 	std::vector<ModelTexture> textures;
 
-	// Default GLTF attributes, but also includes "INDICES" for the indices
-	std::unordered_map<std::string, Attribute> attributes;
-	// Data we need extracted from the buffer, in order of appearance of attributes, interleaved
-	// Does not include the index buffer
-	std::vector<uint8_t> data;
-	std::vector<uint8_t> indices_data;
-
 	bool drawable;
 
 public:
 
-	size_t index_count;
+	Model* in_model;
 
 	MaterialOverride mat_override;
 
@@ -68,6 +38,9 @@ public:
 	glm::vec3 max_bound;
 	
 	std::vector<glm::vec3> get_verts();
+	std::unordered_set<std::string> has_attributes;
+	int mesh_idx;
+	int prim_idx;
 
 	// Stuff that starts with 'col_' are colliders
 	// Any children of a non-drawable is not drawable!
@@ -85,10 +58,10 @@ public:
 	void draw_command() const;
 
 	// We take ownership of the handle
-	Mesh(AssetHandle<Material>&& mat) : material(std::move(mat))
+	Mesh(AssetHandle<Material>&& mat, Model* rmodel) : material(std::move(mat))
 	{
+		in_model = rmodel;
 		vao = 0;
-		vbo = 0;
 		ebo = 0;
 	}
 
@@ -146,16 +119,17 @@ private:
 
 	Node* root;
 
-	// We only support a single buffer
-	std::vector<uint8_t> buffer;
 
 	void upload();
 	void unload();
 
 	void load_node(const tinygltf::Model& model, int node, Node* parent, Model* rmodel, bool parent_draw);
-	void load_mesh(const tinygltf::Model& model, const tinygltf::Primitive& primitive, Model* rmodel, Node* node, bool drawable);
-	Mesh::Attribute load_attribute(const tinygltf::Model& model, const std::string& type, const tinygltf::Accessor& acc, Model* rmodel);
+	void load_mesh(const tinygltf::Model& model, const tinygltf::Primitive& primitive, Model* rmodel, Node* node,
+				bool drawable, int mesh_idx, int prim_idx);
 public:
+
+	// Here lives all the data which needs to be upluaded to the GPU
+	tinygltf::Model gltf;
 
 	static constexpr const char* COLLIDER_PREFIX = "col_";
 	static constexpr const char* MARK_PREFIX = "m_";
@@ -165,7 +139,7 @@ public:
 	void get_gpu();
 	void free_gpu();
 
-	Model(const tinygltf::Model& model);
+	Model(tinygltf::Model&& model);
 	~Model();
 };
 
