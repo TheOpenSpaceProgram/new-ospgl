@@ -22,7 +22,7 @@ private:
 	{
 		Model* in_model;
 
-		std::string type;
+		int type;
 		int component_type;
 		int byte_offset;
 		int count;
@@ -32,6 +32,8 @@ private:
 		size_t get_component_size() const;
 		size_t get_type_components() const;
 		size_t get_unit_size() const;
+		static size_t get_default_size(const std::string& attrb);
+
 		void* data() const { return (void*)get_ptr(); };
 
 		glm::vec3 get_vec3(int idx) const;
@@ -39,9 +41,7 @@ private:
 
 	};
 
-	// We use a global buffer as there is a single buffer in gltf (we only support it that way!)
-	// The buffer lives with the model
-	GLuint buffer, vao, ebo;
+	GLuint vbo, vao, ebo;
 
 
 
@@ -51,12 +51,15 @@ private:
 
 	// Default GLTF attributes, but also includes "INDICES" for the indices
 	std::unordered_map<std::string, Attribute> attributes;
+	// Data we need extracted from the buffer, in order of appearance of attributes, interleaved
+	// Does not include the index buffer
+	std::vector<uint8_t> data;
+	std::vector<uint8_t> indices_data;
 
 	bool drawable;
 
 public:
 
-	size_t data_size;
 	size_t index_count;
 
 	MaterialOverride mat_override;
@@ -151,6 +154,7 @@ private:
 
 	void load_node(const tinygltf::Model& model, int node, Node* parent, Model* rmodel, bool parent_draw);
 	void load_mesh(const tinygltf::Model& model, const tinygltf::Primitive& primitive, Model* rmodel, Node* node, bool drawable);
+	Mesh::Attribute load_attribute(const tinygltf::Model& model, const std::string& type, const tinygltf::Accessor& acc, Model* rmodel);
 public:
 
 	static constexpr const char* COLLIDER_PREFIX = "col_";

@@ -59,12 +59,12 @@ void Mesh::upload()
 		glBindVertexArray(vao);
 
 		auto& indices = attributes["INDICES"];
-		// Obtain the buffer data
-		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glBufferData(GL_ARRAY_BUFFER, data_size, data, GL_STATIC_DRAW);
+		// Upload the buffer data
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, data.size(), data.data(), GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * indices.get_unit_size(), indices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * indices.get_unit_size(), indices_data.data(), GL_STATIC_DRAW);
 
 		GLuint ptr_num = 0;
 		GLsizei stride = (GLsizei)material->cfg.get_vertex_floats();
@@ -416,24 +416,61 @@ void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &p
 	if(m->material->cfg.has_cl4){ needed.emplace_back("COLOR_0"); }
 	// TODO: Implement joints and weights
 
+	size_t total_entries = 0;
+	size_t entry_size = 0;
 	for(const std::string& need : needed)
 	{
 		auto it = primitive.attributes.find(need);
 		if(it == primitive.attributes.end())
 		{
 			logger->warn("Mesh doesn't have required attribute '{}', it will be filled with zeros", need);
-
+			entry_size += Mesh::Attribute::get_default_size(need);
 		}
 		else
 		{
-
+			// Load the attribute
+			m->attributes[it->first] = load_attribute(model, it->first, model.accessors[it->second], rmodel);
+			if(it->first == "POSITION")
+			{
+				for(int i = 0; i < 3; i++)
+				{
+					m->min_bound[i] = model.accessors[it->second].minValues[i];
+					m->max_bound[i] = model.accessors[it->second].maxValues[i];
+				}
+			}
 		}
+	}
+
+	// Load the attributes interleaved, they must be fully exhaustive
+	int idx = 0;
+	for(const std::string& need : needed)
+	{
+		auto& attrib = m->attributes.find(need)->second;
+
+		void* ptr = attrib.get_ptr(idx);
 
 
-
+		idx++;
 	}
 
 }
+
+Mesh::Attribute Model::load_attribute(const tinygltf::Model &model, const tinygltf::Accessor &acc, Model* rmodel)
+{
+	Mesh::Attribute attrb;
+	attrb.in_model = rmodel;
+	attrb.component_type = acc.componentType;
+	attrb.type = acc.type;
+	attrb.count = acc.count;
+	attrb.byte_offset = acc.byteOffset + model.bufferViews[acc.bufferView].byteOffset;
+	return attrb;
+}
+
+size_t Mesh::Attribute::get_default_size(const std::string &attrb)
+{
+	return 4 * sizeof(float);
+}
+
 
 Model* load_model(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
 {
@@ -856,6 +893,7 @@ size_t Mesh::Attribute::get_component_size() const
 			return 4;
 		default:
 			logger->fatal("Unknown component type: {}", component_type);
+			return 0;
 	}
 }
 
@@ -878,6 +916,7 @@ glm::vec3 Mesh::Attribute::get_vec3(int idx) const
 			return glm::vec3(*((float*)ptr + 0), *((float*)ptr + 1), *((float*)ptr + 2));
 		default:
 			logger->fatal("Unknown component type: {}", component_type);
+			return glm::vec3(0.0);
 	}
 }
 
@@ -886,43 +925,47 @@ int Mesh::Attribute::get_index(int idx) const
 	void* ptr = (void*)get_ptr(idx);
 	switch (component_type)
 	{
-		case(5120):
+		case(TINYGLTF_COMPONENT_TYPE_BYTE):
 			return (int)(*(int8_t*)ptr);
-		case(5121):
+		case(TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE):
 			return (int)(*(uint8_t*)ptr);
-		case(5122):
+		case(TINYGLTF_COMPONENT_TYPE_SHORT):
 			return (int)(*(int16_t*)ptr);
-		case(5123):
+		case(TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT):
 			return (int)(*(uint16_t*)ptr);
-		case(5125):
+		case(TINYGLTF_COMPONENT_TYPE_INT):
 			return (int)(*(int32_t*)ptr);
-		case(5126):
+		case(TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT):
+			return (int)(*(uint32_t*)ptr);
+		case(TINYGLTF_COMPONENT_TYPE_FLOAT):
 			return (int)(*(float*)ptr);
+		case(TINYGLTF_COMPONENT_TYPE_DOUBLE):
+			return (int)(*(double*)ptr);
 		default:
 			logger->fatal("Unknown component type: {}", component_type);
+			return 0;
 	}
 }
 
 size_t Mesh::Attribute::get_type_components() const
 {
-	if(type == "SCALAR")
+	if(type == TINYGLTF_TYPE_SCALAR)
 			return 1;
-	else if(type == "VEC2")
+	else if(type == TINYGLTF_TYPE_VEC2)
 			return 2;
-	else if(type == "VEC3")
+	else if(type == TINYGLTF_TYPE_VEC3)
 			return 3;
-	else if(type == "VEC4" || type == "MAT2")
+	else if(type == TINYGLTF_TYPE_VEC4 || type == TINYGLTF_TYPE_MAT2)
 			return 4;
-	else if(type == "MAT3")
+	else if(type == TINYGLTF_TYPE_MAT3)
 			return 9;
-	else if(type == "MAT4")
+	else if(type == TINYGLTF_TYPE_MAT4)
 			return 16;
 	else
-			logger->fatal("Unknown type: {}", type);
+			logger->fatal("Unknown type: {}", type); return 0;
 }
 
 size_t Mesh::Attribute::get_unit_size() const
 {
 	return get_component_size() * get_type_components();
 }
-
