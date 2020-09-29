@@ -244,7 +244,6 @@ void Mesh::upload()
 
 						tmp_buffer[buff_ptr] = val;
 
-						// Data preprocessing
 						if(std::get<0>(tuple) == "TEXCOORD_0" && j == 1 && material->cfg.flip_uv)
 						{
 							tmp_buffer[buff_ptr] = -tmp_buffer[buff_ptr];
@@ -424,6 +423,7 @@ Model::Model(tinygltf::Model&& model)
 	// Load recursively all the nodes
 	Node* scene_node = new Node();
 	scene_node->name = scene.name;
+	scene_node->sub_transform = glm::dmat4(1.0);
 
 	for(int node : scene.nodes)
 	{
@@ -480,17 +480,19 @@ void Model::load_node(const tinygltf::Model &model, int node_idx, Node *parent, 
 			}
 		}
 
-		if(!node.rotation.empty())
+		for(int i = 0; i < 4; i++)
 		{
-			rot[0] = node.rotation[3];
-			rot[1] = node.rotation[0];
-			rot[2] = node.rotation[1];
-			rot[3] = node.rotation[2];
+			if (!node.rotation.empty())
+			{
+				rot[i] = node.rotation[i];
+			}
 		}
 
-		n_node->sub_transform = glm::scale(glm::dmat4(1.0), scale);
-		n_node->sub_transform = glm::toMat4(rot) * n_node->sub_transform;
-		n_node->sub_transform = glm::translate(n_node->sub_transform, trans);
+		n_node->sub_transform =
+				glm::translate(glm::dmat4(1.0), trans) *
+				glm::toMat4(rot) *
+				glm::scale(glm::dmat4(1.0), scale);
+
 	}
 
 

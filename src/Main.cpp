@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
 	PROFILE_FUNC();
 
-	osp.game_state.load_scene(new EditorScene());
+	osp.game_state.load_scene(new FlightScene());
 
 	while (osp.should_loop())
 	{
