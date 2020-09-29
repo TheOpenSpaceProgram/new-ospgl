@@ -1,52 +1,11 @@
 #include "Model.h"
 
+#include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
 #pragma warning(push, 0)
 #include "btBulletCollisionCommon.h"
 #pragma warning(pop)
-
-void replace_all(std::string& data, const std::string& search, const std::string& replace)
-{
-	// Get the first occurrence
-	size_t pos = data.find(search);
-
-	// Repeat till end is reached
-	while (pos != std::string::npos)
-	{
-		// Replace this occurrence of Sub String
-		data.replace(pos, search.size(), replace);
-		// Get the next occurrence from the current position
-		pos = data.find(search, pos + replace.size());
-	}
-}
-
-
-std::vector<Mesh*> Node::get_all_meshes_recursive(bool include_ours)
-{
-	std::vector<Mesh*> out;
-
-	if(include_ours)
-	{
-		for(int i = 0; i < meshes.size(); i++)
-		{	
-			out.push_back(&meshes[i]);
-		}
-	}
-
-	for(int i = 0; i < children.size(); i++)
-	{
-		std::vector<Mesh*> from_child = children[i]->get_all_meshes_recursive(true);
-		out.insert(out.end(), from_child.begin(), from_child.end());
-	}
-
-	return out;
-}
-
-bool Mesh::is_drawable() const
-{
-	return drawable;
-}
 
 static void* get_buffer_ptr(const tinygltf::Model& model, const tinygltf::Accessor& acc)
 {
@@ -66,129 +25,6 @@ static size_t get_accessor_size(const tinygltf::Model& model, const tinygltf::Ac
 	return acc.count * get_accessor_unit_size(model, acc);
 }
 
-void Mesh::upload()
-{
-	if (drawable)
-	{
-		glGenBuffers(1, &ebo);
-		glGenVertexArrays(1, &vao);
-
-		glBindVertexArray(vao);
-
-		tinygltf::Primitive prim = in_model->gltf.meshes[mesh_idx].primitives[prim_idx];
-		logger->check(prim.indices >= 0, "We don't support non-indexed drawing");
-
-		tinygltf::Accessor index_acc = in_model->gltf.accessors[prim.indices];
-
-
-		// Index data
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-			   get_accessor_size(in_model->gltf, index_acc),
-			   get_buffer_ptr(in_model->gltf, index_acc), GL_STATIC_DRAW);
-
-
-		// All other buffers
-		vbos.reserve(prim.attributes.size());
-		std::unordered_map<std::string, GLuint> attr_to_vbo;
-
-		std::vector<std::string> order;
-
-		if(material->cfg.has_pos)
-			order.emplace_back("POSITION");
-		if(material->cfg.has_nrm)
-			order.emplace_back("NORMAL");
-		if(material->cfg.has_uv0)
-			order.emplace_back("TEXCOORD_0");
-		if(material->cfg.has_uv1)
-			order.emplace_back("TEXCOORD_1");
-		if(material->cfg.has_tgt)
-			order.emplace_back("TANGENT");
-		if(material->cfg.has_cl3 || material->cfg.has_cl4)
-			order.emplace_back("COLOR_0");
-
-		int idx = 0;
-		for(const auto& name : order)
-		{
-			auto it = prim.attributes.find(name);
-			if(it == prim.attributes.end())
-			{
-				logger->warn("Could not find attribute {} in gltf file", name);
-				continue;
-			}
-
-			GLuint nvbo;
-			glGenBuffers(1, &nvbo);
-			glBindBuffer(GL_ARRAY_BUFFER, nvbo);
-
-			tinygltf::Accessor acc = in_model->gltf.accessors[it->second];
-			logger->check(!acc.sparse.isSparse, "We cannot handle sparse buffers yet!");
-
-			glBufferData(GL_ARRAY_BUFFER,
-						 get_accessor_size(in_model->gltf, acc),
-						 get_buffer_ptr(in_model->gltf, acc), GL_STATIC_DRAW);
-
-			vbos.push_back(nvbo);
-
-			glBindBuffer(GL_ARRAY_BUFFER, nvbo);
-			glEnableVertexAttribArray(idx);
-			int size = 1;
-			if(acc.type != TINYGLTF_TYPE_SCALAR) { size = acc.type; }
-
-			int byteStride = acc.ByteStride(in_model->gltf.bufferViews[acc.bufferView]);
-			logger->info("normalized = {}", acc.normalized);
-			// 0 as we use a different vbo per attribute? TODO
-			glVertexAttribPointer(idx, size, acc.componentType, acc.normalized ? GL_TRUE : GL_FALSE, byteStride, nullptr);
-
-			idx++;
-		}
-
-		glBindVertexArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-		material.get();
-	}
-}
-
-void Mesh::unload()
-{
-	if (drawable)
-	{
-		glDeleteBuffers(1, &ebo);
-		glDeleteVertexArrays(1, &vao);
-
-		vao = 0;
-		ebo = 0;
-
-		material.unload();
-	}
-}
-
-void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model, GLint did)
-{
-	logger->check(drawable, "Cannot draw a non-drawable mesh!");
-
-	material->shader->use();
-
-	material->set(textures, mat_override);
-	material->set_core(uniforms, model, did);
-}
-
-void Mesh::draw_command() const
-{
-	logger->check(drawable, "Cannot draw a non-drawable mesh!");
-	logger->check(vao != 0, "Tried to render a non-loaded mesh");
-
-	glBindVertexArray(vao);
-
-	tinygltf::Primitive prim = in_model->gltf.meshes[mesh_idx].primitives[prim_idx];
-	tinygltf::Accessor index_acc = in_model->gltf.accessors[prim.indices];
-	glDrawElements(GL_TRIANGLES, (GLsizei)index_acc.count, index_acc.componentType, nullptr);
-	glBindVertexArray(0);
-
-}
-
 static const uint8_t* get_ptr_from_accessor(const tinygltf::Model& model, const tinygltf::Accessor& acc, int idx)
 {
 	size_t byte_offset = acc.byteOffset + model.bufferViews[acc.bufferView].byteOffset;
@@ -196,6 +32,13 @@ static const uint8_t* get_ptr_from_accessor(const tinygltf::Model& model, const 
 	return base + get_accessor_unit_size(model, acc) * idx;
 }
 
+// This is used to extract single floats, not whole units
+static const uint8_t* get_subptr_from_accessor(const tinygltf::Model& model, const tinygltf::Accessor& acc, int idx)
+{
+	size_t byte_offset = acc.byteOffset + model.bufferViews[acc.bufferView].byteOffset;
+	const uint8_t* base = model.buffers[model.bufferViews[acc.bufferView].buffer].data.data() + byte_offset;
+	return base + tinygltf::GetComponentSizeInBytes(acc.componentType) * idx;
+}
 
 static glm::vec3 get_vec3_from_accessor(const tinygltf::Model& model, const tinygltf::Accessor& acc, int idx)
 {
@@ -241,6 +84,269 @@ static int get_index_from_accessor(const tinygltf::Model& model, const tinygltf:
 			logger->fatal("Unknown component type: {}", acc.componentType);
 			return 0;
 	}
+}
+
+static float get_subfloat_from_accessor(const tinygltf::Model& model, const tinygltf::Accessor& acc, int idx)
+{
+	void* ptr = (void*)get_subptr_from_accessor(model, acc, idx);
+	switch (acc.componentType)
+	{
+		case(TINYGLTF_COMPONENT_TYPE_BYTE):
+			return (float)(*(int8_t*)ptr);
+		case(TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE):
+			return (float)(*(uint8_t*)ptr);
+		case(TINYGLTF_COMPONENT_TYPE_SHORT):
+			return (float)(*(int16_t*)ptr);
+		case(TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT):
+			return (float)(*(uint16_t*)ptr);
+		case(TINYGLTF_COMPONENT_TYPE_INT):
+			return (float)(*(int32_t*)ptr);
+		case(TINYGLTF_COMPONENT_TYPE_FLOAT):
+			return (float)(*(float*)ptr);
+		default:
+			logger->fatal("Unknown component type: {}", acc.componentType);
+			return 0;
+	}
+}
+
+void replace_all(std::string& data, const std::string& search, const std::string& replace)
+{
+	// Get the first occurrence
+	size_t pos = data.find(search);
+
+	// Repeat till end is reached
+	while (pos != std::string::npos)
+	{
+		// Replace this occurrence of Sub String
+		data.replace(pos, search.size(), replace);
+		// Get the next occurrence from the current position
+		pos = data.find(search, pos + replace.size());
+	}
+}
+
+
+std::vector<Mesh*> Node::get_all_meshes_recursive(bool include_ours)
+{
+	std::vector<Mesh*> out;
+
+	if(include_ours)
+	{
+		for(int i = 0; i < meshes.size(); i++)
+		{	
+			out.push_back(&meshes[i]);
+		}
+	}
+
+	for(int i = 0; i < children.size(); i++)
+	{
+		std::vector<Mesh*> from_child = children[i]->get_all_meshes_recursive(true);
+		out.insert(out.end(), from_child.begin(), from_child.end());
+	}
+
+	return out;
+}
+
+bool Mesh::is_drawable() const
+{
+	return drawable;
+}
+
+
+void Mesh::upload()
+{
+	if (drawable)
+	{
+		glGenBuffers(1, &ebo);
+		glGenVertexArrays(1, &vao);
+
+		glBindVertexArray(vao);
+
+		tinygltf::Primitive prim = in_model->gltf.meshes[mesh_idx].primitives[prim_idx];
+		logger->check(prim.indices >= 0, "We don't support non-indexed drawing");
+
+		tinygltf::Accessor index_acc = in_model->gltf.accessors[prim.indices];
+
+
+		// Index data
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+			   get_accessor_size(in_model->gltf, index_acc),
+			   get_buffer_ptr(in_model->gltf, index_acc), GL_STATIC_DRAW);
+
+
+		// All other buffers
+		// (name, gltf_has_attribute, count)
+		std::vector<std::tuple<std::string, tinygltf::Accessor*, size_t>> order;
+
+		auto get_accessor_fnc = [&prim, this](const std::string& name) -> tinygltf::Accessor*
+		{
+			auto it = prim.attributes.find(name);
+			if(it == prim.attributes.end())
+			{
+				return nullptr;
+			}
+			else
+			{
+				return &this->in_model->gltf.accessors[it->second];
+			}
+
+		};
+
+		if(material->cfg.has_pos)
+			order.emplace_back("POSITION", get_accessor_fnc("POSITION"), 3);
+		if(material->cfg.has_nrm)
+			order.emplace_back("NORMAL", get_accessor_fnc("NORMAL"), 3);
+		if(material->cfg.has_uv0)
+			order.emplace_back("TEXCOORD_0", get_accessor_fnc("TEXCOORD_0"), 2);
+		if(material->cfg.has_uv1)
+			order.emplace_back("TEXCOORD_1", get_accessor_fnc("TEXCOORD_1"), 2);
+		if(material->cfg.has_tgt)
+			order.emplace_back("TANGENT", get_accessor_fnc("TANGENT"), 6);
+		if(material->cfg.has_cl3)
+			order.emplace_back("COLOR_0", get_accessor_fnc("COLOR_0"), 3);
+		if(material->cfg.has_cl4)
+			order.emplace_back("COLOR_0", get_accessor_fnc("COLOR_0"), 4);
+
+		tinygltf::Accessor* nrm_acc;
+		if(material->cfg.has_tgt)
+		{
+			logger->check(material->cfg.has_nrm, "Cannot have a mesh with tangents and no normal");
+			nrm_acc = get_accessor_fnc("NORMAL");
+			logger->check(nrm_acc, "Cannot have null normals in a material with tangents");
+		}
+
+		// We manually interleave the data and send it to a single VBO for perfomance reasons,
+		// convert everything to the float type and calculate the bitangents
+		size_t stride = material->cfg.get_vertex_floats();
+		size_t vert_count = in_model->gltf.accessors[prim.attributes["POSITION"]].count;
+
+		float* tmp_buffer = (float*)malloc(sizeof(float) * stride * vert_count);
+
+		size_t buff_ptr = 0;
+		for(size_t i = 0; i < vert_count; i++)
+		{
+			for(const auto& tuple : order)
+			{
+				for(size_t j = 0; j < std::get<2>(tuple); j++)
+				{
+					tinygltf::Accessor* acc = std::get<1>(tuple);
+					if (acc)
+					{
+						// Obtain data from gltf
+						size_t float_count = 1;
+						if(acc->type != TINYGLTF_TYPE_SCALAR) { float_count = acc->type; }
+
+						float val = 0.0f;
+						if(j < float_count)
+						{
+							val = get_subfloat_from_accessor(in_model->gltf, *acc, (i * float_count + j));
+						}
+
+						tmp_buffer[buff_ptr] = val;
+
+						// Data preprocessing
+						if(std::get<0>(tuple) == "TEXCOORD_0" && j == 1 && material->cfg.flip_uv)
+						{
+							tmp_buffer[buff_ptr] = -tmp_buffer[buff_ptr];
+						}
+
+						if(std::get<0>(tuple) == "TANGENT" && j == 3)
+						{
+							// Calculate the bitangent for indices 3, 4, 5 and skip to the end
+							glm::vec3 normal;
+							glm::vec4 tangent;
+
+							for(size_t ti = 0; ti < 4; ti++)
+								tangent[ti] = get_subfloat_from_accessor(in_model->gltf, *acc, (i * float_count + ti));
+							for(size_t tn = 0; tn < 3; tn++)
+								normal[tn] = get_subfloat_from_accessor(in_model->gltf, *nrm_acc, (i * 3 + tn));
+
+							glm::vec3 bitangent = glm::cross(normal, glm::vec3(tangent)) * tangent.w;
+							tmp_buffer[3] = bitangent.x;
+							tmp_buffer[4] = bitangent.y;
+							tmp_buffer[5] = bitangent.z;
+
+							buff_ptr += 3;
+							break;
+						}
+					}
+					else
+					{
+						// Default data (zeroes)
+						tmp_buffer[buff_ptr] = 0.0f;
+					}
+
+					buff_ptr++;
+				}
+			}
+		}
+
+		// Upload the buffer to the GPU
+		GLuint vbo;
+		glGenBuffers(1, &vbo);
+		vbos.push_back(vbo);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * stride * vert_count, tmp_buffer, GL_STATIC_DRAW);
+		free(tmp_buffer);
+
+		// And bind the vertex attributes in the order they appear
+		int idx = 0;
+		size_t off = 0;
+		for(const auto& tuple : order)
+		{
+			glVertexAttribPointer(idx, std::get<2>(tuple), GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)((float*)nullptr + off));
+			glEnableVertexAttribArray(idx);
+			off += std::get<2>(tuple);
+			idx++;
+		}
+
+
+
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		material.get();
+	}
+}
+
+void Mesh::unload()
+{
+	if (drawable)
+	{
+		glDeleteBuffers(1, &ebo);
+		glDeleteVertexArrays(1, &vao);
+
+		vao = 0;
+		ebo = 0;
+
+		material.unload();
+	}
+}
+
+void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model, GLint did)
+{
+	logger->check(drawable, "Cannot draw a non-drawable mesh!");
+
+	material->shader->use();
+
+	material->set(textures, mat_override);
+	material->set_core(uniforms, model, did);
+}
+
+void Mesh::draw_command() const
+{
+	logger->check(drawable, "Cannot draw a non-drawable mesh!");
+	logger->check(vao != 0, "Tried to render a non-loaded mesh");
+
+	glBindVertexArray(vao);
+
+	tinygltf::Primitive prim = in_model->gltf.meshes[mesh_idx].primitives[prim_idx];
+	tinygltf::Accessor index_acc = in_model->gltf.accessors[prim.indices];
+	glDrawElements(GL_TRIANGLES, (GLsizei)index_acc.count, index_acc.componentType, nullptr);
+	glBindVertexArray(0);
+
 }
 
 std::vector<glm::vec3> Mesh::get_verts()
