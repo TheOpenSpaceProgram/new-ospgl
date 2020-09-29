@@ -19,6 +19,6 @@ shader = "shaders/pbr.vs"
 
 [config]
     has_pos = true
-    has_nrm = true
-    has_uv0 = true
-    flip_uv = true
+#    has_nrm = true
+#    has_uv0 = true
+#    flip_uv = true

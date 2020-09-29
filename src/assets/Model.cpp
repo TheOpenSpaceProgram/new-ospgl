@@ -63,7 +63,7 @@ static size_t get_accessor_unit_size(const tinygltf::Model& model, const tinyglt
 
 static size_t get_accessor_size(const tinygltf::Model& model, const tinygltf::Accessor& acc)
 {
-	return acc.count * tinygltf::GetComponentSizeInBytes(acc.componentType) * tinygltf::GetNumComponentsInType(acc.type);
+	return acc.count * get_accessor_unit_size(model, acc);
 }
 
 void Mesh::upload()
@@ -87,46 +87,25 @@ void Mesh::upload()
 			   get_accessor_size(in_model->gltf, index_acc),
 			   get_buffer_ptr(in_model->gltf, index_acc), GL_STATIC_DRAW);
 
+
 		// All other buffers
 		vbos.reserve(prim.attributes.size());
 		std::unordered_map<std::string, GLuint> attr_to_vbo;
 
-		// TODO: Figure out how to handle interleaved data?
-		// Blender doesn't seem to generate it
-		for(const auto& pair : prim.attributes)
-		{
-			GLuint nvbo;
-			glGenBuffers(1, &nvbo);
-			glBindBuffer(GL_ARRAY_BUFFER, nvbo);
-
-			tinygltf::Accessor acc = in_model->gltf.accessors[pair.second];
-
-			glBufferData(GL_ARRAY_BUFFER,
-						 get_accessor_size(in_model->gltf, index_acc),
-						 get_buffer_ptr(in_model->gltf, index_acc), GL_STATIC_DRAW);
-
-			vbos.push_back(nvbo);
-
-			attr_to_vbo[pair.first] = nvbo;
-		}
-
-		GLuint ptr_num = 0;
-		//GLsizei stride = (GLsizei)material->cfg.get_vertex_floats();
-		//size_t offset = 0;
 		std::vector<std::string> order;
 
 		if(material->cfg.has_pos)
-			order.push_back("POSITION");
+			order.emplace_back("POSITION");
 		if(material->cfg.has_nrm)
-			order.push_back("NORMAL");
+			order.emplace_back("NORMAL");
 		if(material->cfg.has_uv0)
-			order.push_back("TEXCOORD_0");
+			order.emplace_back("TEXCOORD_0");
 		if(material->cfg.has_uv1)
-			order.push_back("TEXCOORD_1");
+			order.emplace_back("TEXCOORD_1");
 		if(material->cfg.has_tgt)
-			order.push_back("TANGENT");
+			order.emplace_back("TANGENT");
 		if(material->cfg.has_cl3 || material->cfg.has_cl4)
-			order.push_back("COLOR_0");
+			order.emplace_back("COLOR_0");
 
 		int idx = 0;
 		for(const auto& name : order)
@@ -138,16 +117,28 @@ void Mesh::upload()
 				continue;
 			}
 
-			tinygltf::Accessor acc = in_model->gltf.accessors[it->second];
+			GLuint nvbo;
+			glGenBuffers(1, &nvbo);
+			glBindBuffer(GL_ARRAY_BUFFER, nvbo);
 
-			glBindBuffer(GL_ARRAY_BUFFER, attr_to_vbo[name]);
+			tinygltf::Accessor acc = in_model->gltf.accessors[it->second];
+			logger->check(!acc.sparse.isSparse, "We cannot handle sparse buffers yet!");
+
+			glBufferData(GL_ARRAY_BUFFER,
+						 get_accessor_size(in_model->gltf, acc),
+						 get_buffer_ptr(in_model->gltf, acc), GL_STATIC_DRAW);
+
+			vbos.push_back(nvbo);
+
+			glBindBuffer(GL_ARRAY_BUFFER, nvbo);
 			glEnableVertexAttribArray(idx);
 			int size = 1;
 			if(acc.type != TINYGLTF_TYPE_SCALAR) { size = acc.type; }
 
 			int byteStride = acc.ByteStride(in_model->gltf.bufferViews[acc.bufferView]);
-			glVertexAttribPointer(idx, size, acc.componentType, acc.normalized ? GL_TRUE : GL_FALSE,
-						 byteStride, nullptr);
+			logger->info("normalized = {}", acc.normalized);
+			// 0 as we use a different vbo per attribute? TODO
+			glVertexAttribPointer(idx, size, acc.componentType, acc.normalized ? GL_TRUE : GL_FALSE, byteStride, nullptr);
 
 			idx++;
 		}
@@ -193,7 +184,7 @@ void Mesh::draw_command() const
 
 	tinygltf::Primitive prim = in_model->gltf.meshes[mesh_idx].primitives[prim_idx];
 	tinygltf::Accessor index_acc = in_model->gltf.accessors[prim.indices];
-	glDrawElements(GL_TRIANGLES, (GLsizei)index_acc.count, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, (GLsizei)index_acc.count, index_acc.componentType, nullptr);
 	glBindVertexArray(0);
 
 }
