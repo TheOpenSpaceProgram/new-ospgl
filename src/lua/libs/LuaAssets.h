@@ -51,6 +51,18 @@ public:
 template<typename T>
 struct LuaAssetHandle
 {
+	// Used when getting assets from lua where .data cannot be used
+	AssetHandle<T> get_asset_handle()
+	{
+		if(data == nullptr)
+		{
+			return AssetHandle<T>();
+		}
+
+		return AssetHandle<T>(pkg, name);
+	}
+
+
 	std::string pkg;
 	std::string name;
 

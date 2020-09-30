@@ -69,6 +69,8 @@ public:
 	GLuint id;
 
 	Image(ImageConfig config, const std::string& path);
+	Image(const unsigned char* data, int width, int height, int bits, int component,
+	   int mag_filter, int min_filter, int wrapS, int wrapT);
 	~Image();
 };
 

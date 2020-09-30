@@ -40,6 +40,29 @@ static const uint8_t* get_subptr_from_accessor(const tinygltf::Model& model, con
 	return base + tinygltf::GetComponentSizeInBytes(acc.componentType) * idx;
 }
 
+static glm::vec2 get_vec2_from_accessor(const tinygltf::Model& model, const tinygltf::Accessor& acc, int idx)
+{
+	void* ptr = (void*)get_ptr_from_accessor(model, acc, idx);
+	switch (acc.componentType)
+	{
+		case(TINYGLTF_COMPONENT_TYPE_BYTE):
+			return glm::vec2(*((int8_t*)ptr + 0), *((int8_t*)ptr + 1));
+		case(TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE):
+			return glm::vec2(*((uint8_t*)ptr + 0), *((uint8_t*)ptr + 1));
+		case(TINYGLTF_COMPONENT_TYPE_SHORT):
+			return glm::vec2(*((int16_t*)ptr + 0), *((int16_t*)ptr + 1));
+		case(TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT):
+			return glm::vec2(*((uint16_t*)ptr + 0), *((uint16_t*)ptr + 1));
+		case(TINYGLTF_COMPONENT_TYPE_INT):
+			return glm::vec2(*((int32_t*)ptr + 0), *((int32_t*)ptr + 1));
+		case(TINYGLTF_COMPONENT_TYPE_FLOAT):
+			return glm::vec2(*((float*)ptr + 0), *((float*)ptr + 1));
+		default:
+			logger->fatal("Unknown component type: {}", acc.componentType);
+			return glm::vec2(0.0);
+	}
+}
+
 static glm::vec3 get_vec3_from_accessor(const tinygltf::Model& model, const tinygltf::Accessor& acc, int idx)
 {
 	void* ptr = (void*)get_ptr_from_accessor(model, acc, idx);
@@ -192,32 +215,106 @@ void Mesh::upload()
 
 		};
 
+		size_t stride = material->cfg.get_vertex_floats();
+		tinygltf::Accessor *nrm_acc;
+
 		if(material->cfg.has_pos)
 			order.emplace_back("POSITION", get_accessor_fnc("POSITION"), 3);
-		if(material->cfg.has_nrm)
-			order.emplace_back("NORMAL", get_accessor_fnc("NORMAL"), 3);
-		if(material->cfg.has_uv0)
-			order.emplace_back("TEXCOORD_0", get_accessor_fnc("TEXCOORD_0"), 2);
-		if(material->cfg.has_uv1)
-			order.emplace_back("TEXCOORD_1", get_accessor_fnc("TEXCOORD_1"), 2);
-		if(material->cfg.has_tgt)
-			order.emplace_back("TANGENT", get_accessor_fnc("TANGENT"), 6);
-		if(material->cfg.has_cl3)
-			order.emplace_back("COLOR_0", get_accessor_fnc("COLOR_0"), 3);
-		if(material->cfg.has_cl4)
-			order.emplace_back("COLOR_0", get_accessor_fnc("COLOR_0"), 4);
-
-		tinygltf::Accessor* nrm_acc;
-		if(material->cfg.has_tgt)
+		if(drawable)
 		{
-			logger->check(material->cfg.has_nrm, "Cannot have a mesh with tangents and no normal");
-			nrm_acc = get_accessor_fnc("NORMAL");
-			logger->check(nrm_acc, "Cannot have null normals in a material with tangents");
+			if (material->cfg.has_nrm)
+				order.emplace_back("NORMAL", get_accessor_fnc("NORMAL"), 3);
+			if (material->cfg.has_uv0)
+				order.emplace_back("TEXCOORD_0", get_accessor_fnc("TEXCOORD_0"), 2);
+			if (material->cfg.has_uv1)
+				order.emplace_back("TEXCOORD_1", get_accessor_fnc("TEXCOORD_1"), 2);
+			if (material->cfg.has_tgt)
+				order.emplace_back("TANGENT", get_accessor_fnc("TANGENT"), 6);
+			if (material->cfg.has_cl3)
+				order.emplace_back("COLOR_0", get_accessor_fnc("COLOR_0"), 3);
+			if (material->cfg.has_cl4)
+				order.emplace_back("COLOR_0", get_accessor_fnc("COLOR_0"), 4);
+
+			if (material->cfg.has_tgt)
+			{
+				logger->check(material->cfg.has_nrm, "Cannot have a mesh with tangents and no normal");
+				nrm_acc = get_accessor_fnc("NORMAL");
+				logger->check(nrm_acc, "Cannot have null normals in a material with tangents");
+
+				if (prim.attributes.find("TANGENT") == prim.attributes.end())
+				{
+					// TODO: Eventually trust blender to generate the tangents, it's broken as of now!
+					// We instead create a new buffer and use it, this is a hacky workaround
+					// (We populate just what we need!)
+					tinygltf::Accessor* pos_acc = get_accessor_fnc("POSITION");
+					tinygltf::Accessor* uv_acc = get_accessor_fnc("TEXCOORD_0");
+
+					tinygltf::Accessor n_acc;
+					n_acc.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+					n_acc.type = TINYGLTF_TYPE_VEC3;
+					n_acc.byteOffset = 0;
+					tinygltf::BufferView bv;
+					bv.byteOffset = 0;
+					bv.byteStride = 0;
+					tinygltf::Buffer buff;
+					size_t vert_count = pos_acc->count;
+					buff.data.reserve(vert_count * sizeof(float) * 3);
+					glm::vec3* f_buff = (glm::vec3*)buff.data.data();
+					for(size_t i = 0; i < vert_count; i++)
+					{
+						f_buff[i] = glm::vec3(0.0f, 0.0f, 0.0f);
+					}
+
+					for(size_t idx = 0; idx < index_acc.count; idx+=3)
+					{
+						int indices[3];
+						glm::vec3 vpos[3];
+						glm::vec2 tpos[3];
+						for(size_t i = 0; i < 3; i++)
+						{
+							indices[i] = get_index_from_accessor(in_model->gltf, index_acc, idx + i);
+							vpos[i] = get_vec3_from_accessor(in_model->gltf, *pos_acc, indices[i]);
+							tpos[i] = get_vec2_from_accessor(in_model->gltf, *uv_acc, indices[i]);
+						}
+
+						glm::vec3 e1 = vpos[1] - vpos[0];
+						glm::vec3 e2 = vpos[2] - vpos[0];
+						glm::vec2 t1 = tpos[1] - tpos[0];
+						glm::vec2 t2 = tpos[2] - tpos[0];
+						float r = 1.0f / (t1.x * t2.y - t2.x * t1.y);
+						glm::vec3 t = (e1 * t2.y - e2 * t1.y);
+						// We could easily calculate the bitangent here, and save the computation later
+						// glm::vec3 b = (e2 * t1.x - e1 *  t2.x);
+						// TODO: If we decide to ignore gltf tangents, we should do exactly that
+						for(size_t i = 0; i < 3; i++)
+						{
+							f_buff[indices[i]] += t;
+						}
+
+					}
+
+					for(size_t i = 0; i < vert_count; i+=3)
+					{
+						f_buff[i] = glm::normalize(f_buff[i]);
+					}
+
+					in_model->gltf.buffers.push_back(buff);
+					bv.buffer = in_model->gltf.buffers.size() - 1;
+					in_model->gltf.bufferViews.push_back(bv);
+					n_acc.bufferView = in_model->gltf.bufferViews.size() - 1;
+					in_model->gltf.accessors.push_back(n_acc);
+					prim.attributes["TANGENT"] = in_model->gltf.accessors.size() - 1;
+				}
+			}
+
+			// We manually interleave the data and send it to a single VBO for perfomance reasons,
+			// convert everything to the float type and calculate the bitangents
+		}
+		else
+		{
+			stride = 3;
 		}
 
-		// We manually interleave the data and send it to a single VBO for perfomance reasons,
-		// convert everything to the float type and calculate the bitangents
-		size_t stride = material->cfg.get_vertex_floats();
 		size_t vert_count = in_model->gltf.accessors[prim.attributes["POSITION"]].count;
 
 		float* tmp_buffer = (float*)malloc(sizeof(float) * stride * vert_count);
@@ -294,10 +391,27 @@ void Mesh::upload()
 		size_t off = 0;
 		for(const auto& tuple : order)
 		{
-			glVertexAttribPointer(idx, std::get<2>(tuple), GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)((float*)nullptr + off));
-			glEnableVertexAttribArray(idx);
-			off += std::get<2>(tuple);
-			idx++;
+			if(std::get<0>(tuple) == "TANGENT")
+			{
+				// We bind two attributes
+				glVertexAttribPointer(idx, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float),
+									  (void *) ((float *) nullptr + off));
+				glEnableVertexAttribArray(idx);
+				off += 3;
+				glVertexAttribPointer(idx + 1, 3, GL_FLOAT, GL_FALSE, stride * sizeof(float),
+									  (void *) ((float *) nullptr + off));
+				glEnableVertexAttribArray(idx + 1);
+				off += 3;
+				idx++;
+			}
+			else
+			{
+				glVertexAttribPointer(idx, std::get<2>(tuple), GL_FLOAT, GL_FALSE, stride * sizeof(float),
+									  (void *) ((float *) nullptr + off));
+				glEnableVertexAttribArray(idx);
+				idx++;
+				off += std::get<2>(tuple);
+			}
 		}
 
 
@@ -545,6 +659,7 @@ void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &p
 		gltf_mat = model.materials[primitive.material];
 	}
 
+
 	std::string mat_name = gltf_mat.name;
 	size_t pos = mat_name.find_last_of('.');
 
@@ -567,7 +682,51 @@ void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &p
 
 	m->prim_idx = prim_idx;
 	m->mesh_idx = mesh_idx;
+
+
+	auto load_texture = [&model, &m](ModelTexture::TextureType type, int index) -> void
+	{
+		if(index >= 0)
+		{
+			const tinygltf::Texture& tex = model.textures[index];
+			const tinygltf::Image& img = model.images[tex.source];
+			ModelTexture mtex;
+			mtex.first = type;
+
+			if(img.uri.empty())
+			{
+				mtex.is_asset = false;
+				GLuint wrapS = GL_REPEAT, wrapT = GL_REPEAT, min_filter = GL_LINEAR, mag_filter = GL_LINEAR;
+				if(tex.sampler >= 0)
+				{
+					const tinygltf::Sampler &samp = model.samplers[tex.sampler];
+					wrapS = samp.wrapS;
+					wrapT = samp.wrapT;
+					min_filter = samp.minFilter;
+					mag_filter = samp.magFilter;
+				}
+
+				mtex.second_ptr = std::make_shared<Image>(img.image.data(), img.width, img.height, img.bits, img.component,
+											mag_filter, min_filter, wrapS, wrapT);
+			}
+			else
+			{
+				mtex.is_asset = true;
+				// TODO: Solve the path
+				mtex.second = AssetHandle<Image>(img.uri);
+			}
+
+			logger->info("second: {}", (void*)mtex.second_ptr.get());
+			m->textures.emplace_back(std::move(mtex));
+		}
+	};
 	// Load model textures (they must be embedded) and PBR stuff
+	load_texture(ModelTexture::BASE_COLOR, gltf_mat.pbrMetallicRoughness.baseColorTexture.index);
+	load_texture(ModelTexture::METALLIC_ROUGHNESS, gltf_mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
+	load_texture(ModelTexture::EMISSIVE, gltf_mat.emissiveTexture.index);
+	load_texture(ModelTexture::NORMAL_MAP, gltf_mat.normalTexture.index);
+	load_texture(ModelTexture::AMBIENT_OCCLUSION, gltf_mat.occlusionTexture.index);
+
 
 
 	// Load the mesh itself, depending on the mesh configuration and the material
@@ -585,12 +744,21 @@ void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &p
 
 	std::vector<std::string> needed;
 	if(m->material->cfg.has_pos){ needed.emplace_back("POSITION"); }
-	if(m->material->cfg.has_nrm){ needed.emplace_back("NORMAL"); }
-	if(m->material->cfg.has_tgt){ needed.emplace_back("TANGENT"); }
-	if(m->material->cfg.has_uv0){ needed.emplace_back("TEXCOORD_0"); }
-	if(m->material->cfg.has_uv1){ needed.emplace_back("TEXCOORD_1"); }
-	if(m->material->cfg.has_cl3){ needed.emplace_back("COLOR_0"); }
-	if(m->material->cfg.has_cl4){ needed.emplace_back("COLOR_0"); }
+	if( m->is_drawable())
+	{
+		if (m->material->cfg.has_nrm)
+			needed.emplace_back("NORMAL");
+		if (m->material->cfg.has_tgt)
+			needed.emplace_back("TANGENT");
+		if (m->material->cfg.has_uv0)
+			needed.emplace_back("TEXCOORD_0");
+		if (m->material->cfg.has_uv1)
+			needed.emplace_back("TEXCOORD_1");
+		if (m->material->cfg.has_cl3)
+			needed.emplace_back("COLOR_0");
+		if (m->material->cfg.has_cl4)
+			needed.emplace_back("COLOR_0");
+	}
 	// TODO: Implement joints and weights
 
 	for(const std::string& need : needed)
@@ -598,7 +766,7 @@ void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &p
 		auto it = primitive.attributes.find(need);
 		if(it == primitive.attributes.end())
 		{
-			logger->warn("Mesh doesn't have required attribute '{}', it will be filled with zeros", need);
+			logger->warn("Mesh in '{}' doesn't have required attribute '{}'", node->name, need);
 		}
 		else
 		{

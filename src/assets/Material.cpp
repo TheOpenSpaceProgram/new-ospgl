@@ -114,12 +114,10 @@ void Material::set(std::vector<ModelTexture>& assimp_textures, const MaterialOve
 		auto translates = model_texture_type_to_uniform.find(type);
 		if (translates != model_texture_type_to_uniform.end())
 		{
-			AssetHandle<Image>* img = &it->second;
-
 			std::string uniform = translates->second;
 
 			glActiveTexture(GL_TEXTURE0 + gl_tex);
-			glBindTexture(GL_TEXTURE_2D, img->get()->id);
+			glBindTexture(GL_TEXTURE_2D, it->get_image()->id);
 
 			shader->setInt(uniform, gl_tex);
 

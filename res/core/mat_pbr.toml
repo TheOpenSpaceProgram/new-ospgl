@@ -1,12 +1,38 @@
-shader = "shaders/vehicle/simple_part.vs"
+shader = "shaders/pbr.vs"
 
 [uniforms]
-    diffuse = "core:notex.png"
+
+    # Defaults expected by the shader, then multiplied by the material uniforms and/or changed to proper textures
+    # TODO: Using 1x1 textures may imply a perfomance loss compared to an if statement in the shader (profile it)
+    base_color_tex = "core:white_tex.png"
+    metallic_roughness_tex = "core:white_tex.png"
+    ambient_occlusion_tex = "core:white_tex.png"
+    normal_map = "core:normal_tex.png"
+    emissive_tex = "core:black_tex.png"
+
+    # These are also potentially changed by the model's material
+    base_color = [1.0, 1.0, 1.0]
+    metallic = 1.0
+    roughness = 1.0
+    emissive = [0.0, 0.0, 0.0]
+    normal_scale = 1.0
+    occlussion_strength = 1.0
+
     transparency = 0.0
 
 
-[assimp_textures]
-    diffuse = "diffuse"
+[model_textures]
+    base_color = "base_color_tex"
+    metallic_roughness = "metallic_roughness_tex"
+    ambient_occlusion = "ambient_occlusion_tex"
+    normal_map = "normal_map"
+    emissive = "emissive_tex"
+
+[model_uniforms]
+    base_color = "base_color"
+    metallic = "metallic"
+    roughness = "roughness"
+    emissive = "emissive"
 
 [core_uniforms]
     proj_view = "proj_view"
@@ -21,4 +47,5 @@ shader = "shaders/vehicle/simple_part.vs"
     has_pos = true
     has_nrm = true
     has_uv0 = true
-    flip_uv = true
+    has_tgt = true
+    flip_uv = false

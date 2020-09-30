@@ -5,8 +5,8 @@ shader = "shaders/vehicle/simple_part.vs"
 	transparency = 0.0
 
 
-[assimp_textures]
-	diffuse = "diffuse"
+[model_textures]
+	base_color = "diffuse"
 
 [core_uniforms]
 	proj_view = "proj_view"
@@ -21,4 +21,4 @@ shader = "shaders/vehicle/simple_part.vs"
 	has_pos = true
 	has_nrm = true
 	has_uv0 = true
-	flip_uv = true
+	flip_uv = false

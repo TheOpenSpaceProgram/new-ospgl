@@ -475,6 +475,11 @@ public:
 	// Returns a new AssetHandle, keeping this one valid
 	AssetHandle<T> duplicate() const
 	{
+		if(data == nullptr)
+		{
+			return AssetHandle<T>();
+		}
+
 		return AssetHandle<T>(pkg, name);
 	}
 

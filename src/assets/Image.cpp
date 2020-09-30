@@ -152,14 +152,10 @@ Image::Image(ImageConfig config, const std::string& path)
 
 	if (config.upload)
 	{
-		logger->debug("Uploading texture to OpenGL");
-
 		glGenTextures(1, &id);
-		glBindTexture(GL_TEXTURE_2D, id); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-		// set the texture wrapping parameters
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+		glBindTexture(GL_TEXTURE_2D, id);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		// set texture filtering parameters
 		if(config.filter == ImageConfig::NEAREST)
 		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -228,6 +224,52 @@ Image::~Image()
 		nvgDeleteImage(in_vg, nanovg_image);
 	}
 }
+
+Image::Image(const unsigned char* data, int width, int height, int bits, int component, int mag_filter, int min_filter,
+			 int wrapS, int wrapT)
+{
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_2D, id);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
+
+	GLenum target_format = GL_RGBA;
+ 	GLenum format = GL_RGBA;
+
+ 	if (component == 1)
+ 	{
+ 		format = GL_RED;
+ 	}
+ 	else if (component == 2)
+ 	{
+ 		format = GL_RG;
+ 	}
+ 	else if (component == 3)
+ 	{
+ 		format = GL_RGB;
+ 	}
+
+ 	GLenum type = GL_UNSIGNED_BYTE;
+
+ 	if (bits == 16)
+	{
+		type = GL_UNSIGNED_SHORT;
+	}
+
+	glTexImage2D(GL_TEXTURE_2D, 0, target_format, width, height, 0, format, type, (void*)data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	this->width = width;
+	this->height = height;
+
+	config.in_memory = false;
+	config.upload = true;
+	// The rest doesn't matter
+
+}
+
 
 static const std::string default_toml = R"-(
 

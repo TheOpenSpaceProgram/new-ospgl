@@ -145,23 +145,43 @@ struct ModelTexture
 
 	TextureType first;
 	AssetHandle<Image> second;
+	std::shared_ptr<Image> second_ptr;
+	bool is_asset;
+
+	Image* get_image()
+	{
+		if(is_asset)
+		{
+			return second.data;
+		}
+		else
+		{
+			return second_ptr.get();
+		}
+	}
 
 	ModelTexture()
 	{
 		this->first = UNKNOWN;
+		is_asset = false;
 		this->second = AssetHandle<Image>();
+		this->second_ptr = nullptr;
 	}
 
 	ModelTexture(ModelTexture&& b)
 	{
 		this->first = b.first;
 		this->second = std::move(b.second);
+		this->second_ptr = std::move(b.second_ptr);
+		this->is_asset = b.is_asset;
 	}
 
 	ModelTexture(const ModelTexture& b)
 	{
 		this->first = b.first;
 		this->second = b.second.duplicate();
+		this->second_ptr = b.second_ptr;
+		this->is_asset = b.is_asset;
 	}
 
 
@@ -169,6 +189,8 @@ struct ModelTexture
 	{
 		this->first = b.first;
 		this->second = std::move(b.second);
+		this->second_ptr = std::move(b.second_ptr);
+		this->is_asset = b.is_asset;
 
 		return *this;
 	}
@@ -316,8 +338,8 @@ public:
 				}
 				else if (as_tex)
 				{
-					auto[pkg, name] = assets->get_package_and_name(as_tex->get(), assets->get_current_package());
-					to.uniforms[name] = Uniform(pkg, name);
+					auto[tpkg, tname] = assets->get_package_and_name(as_tex->get(), assets->get_current_package());
+					to.uniforms[name] = Uniform(tpkg, tname);
 				}
 				else
 				{

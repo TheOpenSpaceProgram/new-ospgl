@@ -2,6 +2,7 @@
 #include <util/Logger.h>
 #include <util/SerializeUtil.h>
 #include <assets/AssetManager.h>
+#include <lua/libs/LuaAssets.h>
 
 #include "../Vehicle.h"
 #include "Part.h"
@@ -121,7 +122,7 @@ AssetHandle<Image> Machine::get_icon()
 	auto result = LuaUtil::call_function_if_present(env["get_icon"], "machine get_icon");
 	if(result.has_value())
 	{
-		return std::move(result->get<AssetHandle<Image>>().duplicate());
+		return std::move(result->get<LuaAssetHandle<Image>>().get_asset_handle());
 	}
 	else
 	{
