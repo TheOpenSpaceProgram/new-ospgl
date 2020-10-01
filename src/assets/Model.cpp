@@ -243,72 +243,13 @@ void Mesh::upload()
 
 				if (prim.attributes.find("TANGENT") == prim.attributes.end())
 				{
-					// TODO: Eventually trust blender to generate the tangents, it's broken as of now!
-					// We instead create a new buffer and use it, this is a hacky workaround
-					// (We populate just what we need!)
-					tinygltf::Accessor* pos_acc = get_accessor_fnc("POSITION");
-					tinygltf::Accessor* uv_acc = get_accessor_fnc("TEXCOORD_0");
+					logger->warn("Could not find tangents on the model. Note for blender users:");
+					logger->warn(" - Try triangulating your mesh, there's a bug in the gltf exporter which");
+					logger->warn("   prevents tangents from being generated on non-triangulated meshes.");
 
-					tinygltf::Accessor n_acc;
-					n_acc.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
-					n_acc.type = TINYGLTF_TYPE_VEC3;
-					n_acc.byteOffset = 0;
-					tinygltf::BufferView bv;
-					bv.byteOffset = 0;
-					bv.byteStride = 0;
-					tinygltf::Buffer buff;
-					size_t vert_count = pos_acc->count;
-					buff.data.reserve(vert_count * sizeof(float) * 3);
-					glm::vec3* f_buff = (glm::vec3*)buff.data.data();
-					for(size_t i = 0; i < vert_count; i++)
-					{
-						f_buff[i] = glm::vec3(0.0f, 0.0f, 0.0f);
-					}
-
-					for(size_t idx = 0; idx < index_acc.count; idx+=3)
-					{
-						int indices[3];
-						glm::vec3 vpos[3];
-						glm::vec2 tpos[3];
-						for(size_t i = 0; i < 3; i++)
-						{
-							indices[i] = get_index_from_accessor(in_model->gltf, index_acc, idx + i);
-							vpos[i] = get_vec3_from_accessor(in_model->gltf, *pos_acc, indices[i]);
-							tpos[i] = get_vec2_from_accessor(in_model->gltf, *uv_acc, indices[i]);
-						}
-
-						glm::vec3 e1 = vpos[1] - vpos[0];
-						glm::vec3 e2 = vpos[2] - vpos[0];
-						glm::vec2 t1 = tpos[1] - tpos[0];
-						glm::vec2 t2 = tpos[2] - tpos[0];
-						float r = 1.0f / (t1.x * t2.y - t2.x * t1.y);
-						glm::vec3 t = (e1 * t2.y - e2 * t1.y);
-						// We could easily calculate the bitangent here, and save the computation later
-						// glm::vec3 b = (e2 * t1.x - e1 *  t2.x);
-						// TODO: If we decide to ignore gltf tangents, we should do exactly that
-						for(size_t i = 0; i < 3; i++)
-						{
-							f_buff[indices[i]] += t;
-						}
-
-					}
-
-					for(size_t i = 0; i < vert_count; i+=3)
-					{
-						f_buff[i] = glm::normalize(f_buff[i]);
-					}
-
-					in_model->gltf.buffers.push_back(buff);
-					bv.buffer = in_model->gltf.buffers.size() - 1;
-					in_model->gltf.bufferViews.push_back(bv);
-					n_acc.bufferView = in_model->gltf.bufferViews.size() - 1;
-					in_model->gltf.accessors.push_back(n_acc);
-					prim.attributes["TANGENT"] = in_model->gltf.accessors.size() - 1;
 				}
 			}
 
-			// We manually interleave the data and send it to a single VBO for perfomance reasons,
-			// convert everything to the float type and calculate the bitangents
 		}
 		else
 		{
@@ -317,16 +258,19 @@ void Mesh::upload()
 
 		size_t vert_count = in_model->gltf.accessors[prim.attributes["POSITION"]].count;
 
-		float* tmp_buffer = (float*)malloc(sizeof(float) * stride * vert_count);
+		std::vector<float> tmp_buffer = std::vector<float>();
+		tmp_buffer.resize(stride * vert_count);
 
+		// We manually interleave the data and send it to a single VBO for perfomance reasons,
+		// convert everything to the float type and calculate the bitangents
 		size_t buff_ptr = 0;
 		for(size_t i = 0; i < vert_count; i++)
 		{
 			for(const auto& tuple : order)
 			{
+				tinygltf::Accessor* acc = std::get<1>(tuple);
 				for(size_t j = 0; j < std::get<2>(tuple); j++)
 				{
-					tinygltf::Accessor* acc = std::get<1>(tuple);
 					if (acc)
 					{
 						// Obtain data from gltf
@@ -358,9 +302,9 @@ void Mesh::upload()
 								normal[tn] = get_subfloat_from_accessor(in_model->gltf, *nrm_acc, (i * 3 + tn));
 
 							glm::vec3 bitangent = glm::cross(normal, glm::vec3(tangent)) * tangent.w;
-							tmp_buffer[3] = bitangent.x;
-							tmp_buffer[4] = bitangent.y;
-							tmp_buffer[5] = bitangent.z;
+							tmp_buffer[buff_ptr + 0] = bitangent.x;
+							tmp_buffer[buff_ptr + 1] = bitangent.y;
+							tmp_buffer[buff_ptr + 2] = bitangent.z;
 
 							buff_ptr += 3;
 							break;
@@ -383,8 +327,7 @@ void Mesh::upload()
 		vbos.push_back(vbo);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * stride * vert_count, tmp_buffer, GL_STATIC_DRAW);
-		free(tmp_buffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * stride * vert_count, tmp_buffer.data(), GL_STATIC_DRAW);
 
 		// And bind the vertex attributes in the order they appear
 		int idx = 0;

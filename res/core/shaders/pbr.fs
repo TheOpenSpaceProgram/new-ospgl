@@ -38,12 +38,11 @@ void main()
     vec3 normal = texture(normal_map, vTex).rgb;
     normal = normal * 2.0 - 1.0;
     normal = normalize(TBN * normal);
-    normal = vNrm;
 
     gPosition = vec4(vPos, 0.0f);
     gNormal = normalize(normal);
     //gAlbedoSpec.rgb = texture(base_color_tex, vTex).rgb;
-    gAlbedoSpec.rgb = vTgt;
+    gAlbedoSpec.rgb = texture(base_color_tex, vTex).rgb;
     gAlbedoSpec.a = texture(metallic_roughness_tex, vTex).b;
 
    	gl_FragDepth = log2(flogz) * f_coef * 0.5;
