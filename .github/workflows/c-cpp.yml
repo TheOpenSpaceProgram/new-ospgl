@@ -16,6 +16,7 @@ jobs:
         uses: snickerbockers/submodules-init@v4
       - name: Dependencies
         run: |
+          vcpkg update
           vcpkg install openssl freetype --triplet x64-windows
       - name: configure twice
         run: |
