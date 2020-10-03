@@ -415,7 +415,7 @@ public:
 	// This avoids the other constructor from being called when passing pointers
 	AssetHandle(const char* pkg, const char* name, bool load_now = true)
 	{
-		AssetHandle(std::string(pkg), std::string(name), load_now);
+		std::move(AssetHandle(std::string(pkg), std::string(name), load_now));
 	}
 
 	AssetHandle(const std::string& path, bool load_now = true)

@@ -197,7 +197,7 @@ void Renderer::prepare_gui()
 		texture_drawer->draw(fbuffer->tex_color_buffer,
 			glm::vec2(0, 0),
 			glm::vec2(width, height),
-			glm::vec2(width, height), true);
+			glm::vec2(width, height), hdr.data, true);
 		glDepthFunc(GL_LESS);
 	}
 }
@@ -584,6 +584,8 @@ Renderer::Renderer(cpptoml::table& settings)
 
 	auto quality_toml = settings.get_table_qualified("renderer.quality");
 	SerializeUtil::read_to(*quality_toml, quality);
+
+	hdr = AssetHandle<Shader>("core:shaders/hdr.vs");
 
 }
 

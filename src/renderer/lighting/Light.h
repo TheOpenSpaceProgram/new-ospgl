@@ -37,10 +37,13 @@ public:
 		glBindTexture(GL_TEXTURE_2D, gbuffer->g_nrm);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, gbuffer->g_col);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, gbuffer->g_pbr);
 
 		shader->setInt("gPosition", 0);
 		shader->setInt("gNormal", 1);
-		shader->setInt("gAlbedoSpec", 2);
+		shader->setInt("gAlbedo", 2);
+		shader->setInt("gPbr", 3);
 	}
 
 	void set_added(bool value)

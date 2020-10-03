@@ -1,8 +1,9 @@
 #version 330 core
 
-layout (location = 0) out vec4 gPosition;
+layout (location = 0) out vec4 gPositionEmit;
 layout (location = 1) out vec3 gNormal;
-layout (location = 2) out vec4 gAlbedoSpec;
+layout (location = 2) out vec3 gAlbedo;
+layout (location = 3) out vec3 gPbr;
 
 in vec3 vPos;
 in vec3 vNrm;
@@ -39,11 +40,13 @@ void main()
     normal = normal * 2.0 - 1.0;
     normal = normalize(TBN * normal);
 
-    gPosition = vec4(vPos, 0.0f);
+    gPositionEmit = vec4(vPos, 0.0f);
     gNormal = normalize(normal);
-    //gAlbedoSpec.rgb = texture(base_color_tex, vTex).rgb;
-    gAlbedoSpec.rgb = texture(base_color_tex, vTex).rgb;
-    gAlbedoSpec.a = texture(metallic_roughness_tex, vTex).b;
+    gAlbedo = texture(base_color_tex, vTex).rgb;
+    vec2 m_r = texture(metallic_roughness_tex, vTex).bg * vec2(metallic, roughness);
+    gPbr = vec3(texture(ambient_occlusion_tex, vTex).r * occlusion_strength, m_r);
+    gPbr.b = 1.0;
+
 
    	gl_FragDepth = log2(flogz) * f_coef * 0.5;
 }

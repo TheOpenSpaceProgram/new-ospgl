@@ -172,6 +172,11 @@ Image::Image(ImageConfig config, const std::string& path)
 
 		GLenum target_format = GL_RGBA;
 
+		if(config.is_srgb)
+		{
+			target_format = GL_SRGB_ALPHA;
+		}
+
 		glTexImage2D(GL_TEXTURE_2D, 0, target_format, width, height, 0, source_format, GL_UNSIGNED_BYTE, u8data);
 
 		
@@ -226,7 +231,7 @@ Image::~Image()
 }
 
 Image::Image(const unsigned char* data, int width, int height, int bits, int component, int mag_filter, int min_filter,
-			 int wrapS, int wrapT)
+			 int wrapS, int wrapT, bool srgb)
 {
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);
@@ -236,6 +241,11 @@ Image::Image(const unsigned char* data, int width, int height, int bits, int com
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag_filter);
 
 	GLenum target_format = GL_RGBA;
+	if(srgb)
+	{
+		target_format = GL_SRGB_ALPHA;
+	}
+
  	GLenum format = GL_RGBA;
 
  	if (component == 1)

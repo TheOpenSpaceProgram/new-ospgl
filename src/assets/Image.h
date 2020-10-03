@@ -17,6 +17,8 @@ struct ImageConfig
 	// This converts the image from 1 channel to 4 with alpha for 
 	// compatibility with NanoVG
 	bool is_font;
+	// This applies linear correction to the image
+	bool is_srgb;
 	FilterMode filter;
 };
 
@@ -70,7 +72,7 @@ public:
 
 	Image(ImageConfig config, const std::string& path);
 	Image(const unsigned char* data, int width, int height, int bits, int component,
-	   int mag_filter, int min_filter, int wrapS, int wrapT);
+	   int mag_filter, int min_filter, int wrapS, int wrapT, bool srgb);
 	~Image();
 };
 
@@ -88,6 +90,7 @@ public:
 		target.insert("upload", what.upload);
 		target.insert("in_memory", what.in_memory);
 		target.insert("is_font", what.is_font);
+		target.insert("is_srgb", what.is_srgb);
 		std::string filter_str = "linear";
 		if(what.filter == ImageConfig::NEAREST)
 		{
@@ -101,6 +104,7 @@ public:
 		SAFE_TOML_GET_OR(to.upload, "upload", bool, true);
 		SAFE_TOML_GET_OR(to.in_memory, "in_memory", bool, false);
 		SAFE_TOML_GET_OR(to.is_font, "is_font", bool, false);
+		SAFE_TOML_GET_OR(to.is_srgb, "is_srgb", bool, false);
 		std::string filter_str;
 		SAFE_TOML_GET_OR(filter_str, "filter", std::string, "linear");
 

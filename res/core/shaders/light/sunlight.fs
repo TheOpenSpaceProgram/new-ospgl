@@ -5,15 +5,17 @@ in vec2 TexCoords;
 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
-uniform sampler2D gAlbedoSpec;
+uniform sampler2D gAlbedo;
+uniform sampler2D gPbr;
 
 uniform vec3 sun_pos;
 uniform vec3 color;
 uniform vec3 ambient_color;
-uniform vec3 spec_color;
 
 uniform sampler2D near_shadow_map;
 uniform mat4 near_shadow_tform;
+
+#include <core:shaders/light/pbr.fsi>
 
 float calculate_shadow(vec4 FragPosLightSpace, float diff_fac)
 {
@@ -48,39 +50,33 @@ float calculate_shadow(vec4 FragPosLightSpace, float diff_fac)
 	}	
 }
 
+
 void main()
 {             
     // retrieve data from G-buffer
     vec4 FragPosEmit = texture(gPosition, TexCoords).rgba;
 	vec3 FragPos = FragPosEmit.rgb;
-    vec3 Normal = texture(gNormal, TexCoords).rgb;
-    vec3 Albedo = texture(gAlbedoSpec, TexCoords).rgb;
-    float Specular = texture(gAlbedoSpec, TexCoords).a;
     float Emissive = FragPosEmit.a;
+    vec3 Normal = texture(gNormal, TexCoords).rgb;
+    vec3 Albedo = texture(gAlbedo, TexCoords).rgb;
+    vec3 Pbr = texture(gPbr, TexCoords).rgb;
+    float Occlussion = Pbr.r;
+    float Roughness = Pbr.g;
+    float Metallic = Pbr.b;
 
     vec3 sun_dir = normalize(sun_pos - FragPos);
-	float diff_fac = dot(Normal, sun_dir);
-    vec3 diff = max(diff_fac, 0.0f) * color * Albedo;
+    vec3 cam_dir = normalize(-FragPos); //< Camera is always at (0, 0, 0)
 
-    // Specular is super simple as the camera is always on (0, 0, 0)
-    vec3 view_dir = normalize(-FragPos);
-    vec3 reflect_dir = reflect(-sun_dir, Normal);
-
-    vec3 spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64) * Specular * spec_color;
-    vec3 ambient = ambient_color * Albedo;
-
+    // TODO: Environment map sampling
+    vec3 ambient = ambient_color * Albedo * Occlussion;
     vec3 emit = Emissive * Albedo;
 
+    vec3 lo = get_pbr_lo(cam_dir, sun_dir, Normal, Albedo, Roughness, Metallic);
+
 	vec4 FragPosLightSpace = near_shadow_tform * vec4(FragPos, 1.0f);
-	
-	float shadow = calculate_shadow(FragPosLightSpace, diff_fac);
-	
-	diff *= shadow;
-	spec *= shadow;
+	float shadow = calculate_shadow(FragPosLightSpace, dot(Normal, sun_dir));
 
-	//shadow = texture(near_shadow_map, TexCoords).r;
+	vec3 fcolor = lo * shadow + ambient + emit;
 
-	//FragColor = vec4(shadow, shadow, shadow, 1.0);
-    FragColor = vec4(diff + spec + ambient + emit, 1.0);
-
-}  
+    FragColor = vec4(fcolor, 1.0);
+}

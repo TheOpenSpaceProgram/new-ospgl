@@ -650,7 +650,8 @@ void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &p
 				}
 
 				mtex.second_ptr = std::make_shared<Image>(img.image.data(), img.width, img.height, img.bits, img.component,
-											mag_filter, min_filter, wrapS, wrapT);
+											mag_filter, min_filter, wrapS, wrapT,
+											type == ModelTexture::BASE_COLOR);
 			}
 			else
 			{

@@ -18,8 +18,19 @@ private:
 public:
 
 	GLuint g_buffer;
-	// Position (alpha is emissive), normal and albedo (rgb) + specular (alpha)
-	GLuint g_pos, g_nrm, g_col;
+	// pos:
+	// - R, G, B = Position
+	// - A = Emissive factor (albedo is used as color) (*)
+	// nrm:
+	// - R, G, B = Normal
+	// col:
+	// - R, G, B = Albedo
+	// pbr: (Designed to conform more or less to gltf)
+	// - R 		 = Ambient Occlussion
+	// - G 		 = Rougness
+	// - B		 = Metalness
+	// (*) Emissive is in pos as RGBA_32F is widely supported, but RGB_32F is not!
+	GLuint g_pos, g_nrm, g_col, g_pbr;
 	// Depth buffer
 	GLuint rbo;
 

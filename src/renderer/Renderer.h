@@ -39,6 +39,8 @@ class PlanetarySystem;
 class Renderer
 {
 private:
+	AssetHandle<Shader> hdr;
+
 	Framebuffer* fbuffer;
 	GBuffer* gbuffer;
 
