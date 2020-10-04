@@ -64,7 +64,7 @@ vec3 get_pbr_lo(vec3 cam_dir, vec3 sun_dir, vec3 Normal, vec3 Albedo, float Roug
 
     vec3 H = normalize(cam_dir + sun_dir);
     float NDF = DistributionGGX(Normal, H, Roughness);
-    float G = GeometryGGX(max(dot(Normal, cam_dir), 0.0), max(dot(Normal, sun_dir), 0.0), Roughness);
+    float G = max(GeometryGGX(max(dot(Normal, cam_dir), 0.0), max(dot(Normal, sun_dir), 0.0), Roughness), 0.001);
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, Albedo, Metallic);
     vec3 F = FresnelSchlick(max(dot(H, cam_dir), 0.0), F0);

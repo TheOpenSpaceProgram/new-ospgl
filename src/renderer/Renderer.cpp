@@ -272,6 +272,13 @@ void Renderer::render(PlanetarySystem* system)
 		do_shadows(system, c_uniforms.cam_pos);
 		prepare_forward(c_uniforms);
 
+		// Sort forward drawables
+		std::sort(forward.begin(), forward.end(), [](Drawable* a, Drawable* b)
+		{
+			// This puts the higher priority drawables FIRST in the array
+			return a->get_forward_priority() > b->get_forward_priority();
+		});
+
 		for (Drawable* d : forward)
 		{
 			d->forward_pass(c_uniforms);

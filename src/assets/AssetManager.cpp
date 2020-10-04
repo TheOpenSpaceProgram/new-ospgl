@@ -7,6 +7,7 @@
 #include "Material.h"
 #include "PartPrototype.h"
 #include "BuildingPrototype.h"
+#include "Cubemap.h"
 
 #include <game/database/GameDatabase.h>
 
@@ -34,6 +35,7 @@ void create_global_asset_manager(std::string& res_path, std::string& udata_path)
 	assets->create_asset_type<Material>("Material", load_material);
 	assets->create_asset_type<PartPrototype>("Part Prototype", load_part_prototype);
 	assets->create_asset_type<BuildingPrototype>("Building Prototype", load_building_prototype);
+	assets->create_asset_type<Cubemap>("Cubemap", load_cubemap);
 
 	assets->check_packages();
 }

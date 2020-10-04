@@ -32,6 +32,9 @@ public:
 	virtual bool needs_shadow_pass() { return false; }
 	virtual bool needs_far_shadow_pass() { return false; }
 
+	// Objects with higher priority get drawn first
+	virtual int get_forward_priority() { return 0.0; }
+
 	bool is_in_renderer() 
 	{
 		return added;

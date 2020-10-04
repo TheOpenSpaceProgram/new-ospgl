@@ -17,12 +17,14 @@
 #include <BulletDynamics/ConstraintSolver/btNNCGConstraintSolver.h>
 #pragma warning(pop)
 #include <physics/debug/BulletDebugDrawer.h>
+#include <renderer/util/Skybox.h>
 
 class EditorScene : public Scene
 {
 public:	
 	friend class EditorGUI;
 	EditorGUI gui;
+	Skybox sky;
 	
 private:
 

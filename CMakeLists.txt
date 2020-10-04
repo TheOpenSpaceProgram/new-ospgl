@@ -12,7 +12,6 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(OSPGL)
 
 
-
 # Define source files for OSP and non-cmake dependencies
 
 file(GLOB_RECURSE OSP_SOURCES "src/*.cpp")
