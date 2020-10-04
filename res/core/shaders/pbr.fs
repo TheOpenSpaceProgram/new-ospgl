@@ -43,10 +43,10 @@ void main()
     gPositionEmit = vec4(vPos, 0.0f);
     gNormal = normalize(normal);
     gAlbedo = texture(base_color_tex, vTex).rgb;
-    vec2 m_r = texture(metallic_roughness_tex, vTex).bg * vec2(metallic, roughness);
-    gPbr = vec3(texture(ambient_occlusion_tex, vTex).r * occlusion_strength, m_r);
-    gPbr.b = 1.0;
-
+    vec2 m_r = texture(metallic_roughness_tex, vTex).gb * vec2(roughness, metallic);
+    gPbr.r = texture(ambient_occlusion_tex, vTex).r * occlusion_strength;
+    gPbr.g = m_r.x;
+    gPbr.b = m_r.y;
 
    	gl_FragDepth = log2(flogz) * f_coef * 0.5;
 }

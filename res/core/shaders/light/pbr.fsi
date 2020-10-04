@@ -12,45 +12,70 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
 
     return nom / max(denom, 0.001); // prevent divide by zero for roughness=0.0 and NdotH=1.0
 }
-float GeometrySchlickGGX(float NdotV, float roughness)
+float GeometryGGXSchlick(float NdotV, float roughness)
 {
-    float r = (roughness + 1.0);
-    float k = (r*r) / 8.0;
+	float r = (roughness + 1.0);
+	float k = (r*r) / 8.0;
 
-    float nom   = NdotV;
-    float denom = NdotV * (1.0 - k) + k;
+	float nom    = NdotV;
+	float denom = NdotV * (1.0 - k) + k ;
 
-    return nom / denom;
+	return nom / denom;
 }
-float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+float GeometryGGXSchlickIBL(float NdotV, float roughness)
 {
-    float NdotV = max(dot(N, V), 0.0);
-    float NdotL = max(dot(N, L), 0.0);
-    float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-    float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+	float a = roughness*roughness;
+	float k = a / 2.0;
 
-    return ggx1 * ggx2;
+	float nom    = NdotV;
+	float denom = NdotV * (1.0 - k) + k;
+
+	return nom / denom;
 }
-vec3 fresnelSchlick(float cosTheta, vec3 F0)
+float GeometryGGX(float NdotV, float NdotL, float roughness)
 {
-    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
-}
+	float ggx2 = GeometryGGXSchlick(NdotV, roughness);
+	float ggx1 = GeometryGGXSchlick(NdotL, roughness);
 
+	return ggx1 * ggx2;
+}
+float GeometryGGXIBL(float NdotV, float NdotL, float roughness)
+{
+	float ggx1 = GeometryGGXSchlickIBL(NdotV, roughness);
+	float ggx2 = GeometryGGXSchlickIBL(NdotL, roughness);
+
+	return ggx1 * ggx2;
+}
+vec3 FresnelSchlick(float cosTheta, vec3 F0)
+{
+	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}
+vec3 FresnelSphericalGaussian(float cosTheta, vec3 F0)
+{
+	return F0 + (1.0 - F0) * pow(2.0, (-5.55473 * cosTheta - 6.98316 * cosTheta));
+}
 vec3 get_pbr_lo(vec3 cam_dir, vec3 sun_dir, vec3 Normal, vec3 Albedo, float Roughness, float Metallic)
 {
+    Roughness = max(Roughness, 0.15);
+
     vec3 H = normalize(cam_dir + sun_dir);
     float NDF = DistributionGGX(Normal, H, Roughness);
-    float G = GeometrySmith(Normal, cam_dir, sun_dir, Roughness);
-    vec3 F0 = mix(vec3(0.04), Albedo, Metallic);
-    vec3 F = fresnelSchlick(clamp(dot(Normal, cam_dir), 0.0, 1.0), F0);
-
-    vec3 nominator = NDF * G * F;
-    float denominator = 4 * max(dot(Normal, cam_dir), 0.0) * max(dot(Normal, sun_dir), 0.0);
-    vec3 specular = nominator / max(denominator, 0.001);
+    float G = GeometryGGX(max(dot(Normal, cam_dir), 0.0), max(dot(Normal, sun_dir), 0.0), Roughness);
+    vec3 F0 = vec3(0.04);
+    F0 = mix(F0, Albedo, Metallic);
+    vec3 F = FresnelSchlick(max(dot(H, cam_dir), 0.0), F0);
 
     vec3 kS = F;
     vec3 kD = vec3(1.0) - kS;
     kD *= 1.0 - Metallic;
+
+    vec3 nominator = NDF * G * F;
+    float denominator = 4 * max(dot(Normal, cam_dir), 0.0) * max(dot(Normal, sun_dir), 0.0);
+    vec3 specular = nominator / max(denominator, 0.001);
 
     float NdotL = max(dot(Normal, sun_dir), 0.0);
 

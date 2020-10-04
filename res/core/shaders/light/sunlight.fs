@@ -71,7 +71,7 @@ void main()
     vec3 ambient = ambient_color * Albedo * Occlussion;
     vec3 emit = Emissive * Albedo;
 
-    vec3 lo = get_pbr_lo(cam_dir, sun_dir, Normal, Albedo, Roughness, Metallic);
+    vec3 lo = get_pbr_lo(cam_dir, sun_dir, Normal, Albedo, Roughness, Metallic) * color;
 
 	vec4 FragPosLightSpace = near_shadow_tform * vec4(FragPos, 1.0f);
 	float shadow = calculate_shadow(FragPosLightSpace, dot(Normal, sun_dir));
