@@ -8,20 +8,22 @@ class Skybox : public Drawable
 {
 private:
 
-	AssetHandle<Cubemap> cubemap;
 	AssetHandle<Shader> shader;
 	GLuint vbo{}, vao{};
 
 public:
+	AssetHandle<Cubemap> cubemap;
 
 	float intensity;
 
 	explicit Skybox(AssetHandle<Cubemap>&& ncubemap);
+	~Skybox();
 
 	void forward_pass(CameraUniforms &cu) override;
 
 	bool needs_forward_pass() override { return true; }
 
 	int get_forward_priority() override { return INT_MAX; }
+
 };
 

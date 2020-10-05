@@ -50,7 +50,7 @@ SunLight::~SunLight()
 
 void SunLight::do_pass(CameraUniforms& cu, GBuffer* gbuf)
 {
-	prepare_shader(shader, gbuf);
+	prepare_shader(shader, gbuf, cu.irradiance);
 
 	// Sun pso relative to the camera
 	glm::dvec3 sun_pos = position - cu.cam_pos;

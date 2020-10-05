@@ -88,6 +88,8 @@ private:
 
 public:
 
+	GLuint irradiance = 0;
+
 	RendererQuality quality;
 
 	// If values are positive, it will apply a glViewport

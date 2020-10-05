@@ -387,8 +387,8 @@ void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model, GLint
 
 	material->shader->use();
 
-	material->set(textures, mat_override);
-	material->set_core(uniforms, model, did);
+	int gl_tex = material->set(textures, mat_override);
+	material->set_core(&gl_tex, uniforms, model, did);
 }
 
 void Mesh::draw_command() const
@@ -839,15 +839,16 @@ void Node::draw_all_meshes_override(const CameraUniforms& uniforms, Material* ma
 			}
 
 			mat->shader->use();
+			int gl_tex;
 			if(mat_over)
 			{
-				mat->set(mesh.textures, *mat_over);
+				gl_tex = mat->set(mesh.textures, *mat_over);
 			}
 			else
 			{
-				mat->set(mesh.textures, mesh.mat_override);
+				gl_tex = mat->set(mesh.textures, mesh.mat_override);
 			}
-			mat->set_core(uniforms, model, did);
+			mat->set_core(&gl_tex, uniforms, model, did);
 			mesh.draw_command();
 
 			mat = def;

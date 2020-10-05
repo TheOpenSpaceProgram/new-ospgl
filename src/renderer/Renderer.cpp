@@ -259,6 +259,7 @@ void Renderer::render(PlanetarySystem* system)
 	}
 
 	CameraUniforms c_uniforms = cam->get_camera_uniforms(rswidth, rsheight);
+	c_uniforms.irradiance = this->irradiance;
 	
 	prepare_deferred();
 
@@ -568,6 +569,7 @@ Renderer::Renderer(cpptoml::table& settings)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_CLAMP);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 #ifdef ENABLE_GL_DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(open_gl_debug_callback, (void*)0);

@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <glad/glad.h>
 
 struct CameraUniforms
 {
@@ -17,4 +18,6 @@ struct CameraUniforms
 
 	glm::vec2 screen_size;
 	glm::ivec2 iscreen_size;
+
+	GLuint irradiance;
 };

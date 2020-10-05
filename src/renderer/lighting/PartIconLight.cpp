@@ -16,7 +16,7 @@ PartIconLight::PartIconLight()
 void PartIconLight::do_pass(CameraUniforms& cu, GBuffer* gbuf)
 {
 
-	prepare_shader(shader, gbuf);
+	prepare_shader(shader, gbuf, cu.irradiance);
 
 	// Sun pso relative to the camera
 	glm::dvec3 sun_pos = glm::dvec3(0, 0, 0) - cu.cam_pos;

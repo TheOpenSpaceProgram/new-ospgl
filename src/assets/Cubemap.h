@@ -2,9 +2,8 @@
 #include <glad/glad.h>
 #include <string>
 #include <cpptoml.h>
-
-template<typename T>
-class AssetHandle;
+#include "Shader.h"
+#include "AssetManager.h"
 
 // Cubemaps are used for a variety of effects, including skyboxes
 // and PBR irradiance maps (realtime generated or pregenerated)
@@ -13,11 +12,29 @@ class AssetHandle;
 // px, py, pz, nx, ny, nz [. folder extension]
 class Cubemap
 {
+private:
+
+	AssetHandle<Shader> irradiance_shader;
+	GLuint capture_fbo = 0, capture_rbo = 0;
+	GLuint cubemap_vao = 0, cubemap_vbo = 0;
+	size_t old_resolution = 0;
+
 public:
 
-	GLuint id;
+	size_t resolution = 0;
+	GLuint id = 0;
+
+	// nullptr if not used for IBL
+	Cubemap* irradiance = nullptr;
+
+	// If face is < 0 then all faces are generated
+	void generate_ibl_irradiance(size_t res = 32, int face = -1, bool bind = true);
+
 
 	Cubemap(std::vector<std::string>& images);
+	// Creates empty textures, to be used as rendertargets
+	Cubemap(size_t nresolution);
+	~Cubemap();
 
 };
 

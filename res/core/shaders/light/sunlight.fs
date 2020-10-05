@@ -8,6 +8,8 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedo;
 uniform sampler2D gPbr;
 
+uniform samplerCube irradiance_map;
+
 uniform vec3 sun_pos;
 uniform vec3 color;
 uniform vec3 ambient_color;
@@ -68,10 +70,12 @@ void main()
     vec3 cam_dir = normalize(-FragPos); //< Camera is always at (0, 0, 0)
 
     // TODO: Environment map sampling
-    vec3 ambient = ambient_color * Albedo * Occlussion;
     vec3 emit = Emissive * Albedo;
 
-    vec3 lo = get_pbr_lo(cam_dir, sun_dir, Normal, Albedo, Roughness, Metallic) * color;
+    vec3 kD;
+    vec3 lo = get_pbr_lo(cam_dir, sun_dir, Normal, Albedo, Roughness, Metallic, kD) * color;
+
+    vec3 ambient = texture(irradiance_map, Normal).rgb * Albedo * kD * Occlussion;
 
 	vec4 FragPosLightSpace = near_shadow_tform * vec4(FragPos, 1.0f);
 	float shadow = calculate_shadow(FragPosLightSpace, dot(Normal, sun_dir));
@@ -79,4 +83,5 @@ void main()
 	vec3 fcolor = lo * shadow + ambient + emit;
 
     FragColor = vec4(fcolor, 1.0);
+    //FragColor = vec4(kD, 1.0);
 }

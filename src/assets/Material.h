@@ -6,7 +6,6 @@
 #include "Config.h"
 #include <util/SerializeUtil.h>
 #include <renderer/camera/CameraUniforms.h>
-
 #include <tiny_gltf/tiny_gltf.h>
 
 #include <glm/gtx/matrix_decompose.hpp>
@@ -213,7 +212,7 @@ struct CoreUniforms
 	std::string mat4_proj, mat4_view, mat4_camera_model, mat4_proj_view, mat4_camera_tform, mat4_model,
 		mat4_deferred_tform,
 		mat4_final_tform, mat3_normal_model, float_far_plane, float_f_coef, vec3_camera_relative,
-		int_drawable_id;
+		int_drawable_id, int_irradiance;
 
 	// Lightning core uniforms:
 
@@ -269,8 +268,8 @@ struct Material
 	CoreUniforms core_uniforms;
 
 
-	void set(std::vector<ModelTexture>& model_textures, const MaterialOverride& over);
-	void set_core(const CameraUniforms& cu, glm::dmat4 model, GLint drawable_id);
+	int set(std::vector<ModelTexture>& model_textures, const MaterialOverride& over);
+	void set_core(int* gl_tex, const CameraUniforms& cu, glm::dmat4 model, GLint drawable_id);
 
 };
 
@@ -450,6 +449,7 @@ public:
 		SAFE_TOML_GET_OR(to.float_f_coef, "f_coef", std::string, "");
 		SAFE_TOML_GET_OR(to.vec3_camera_relative, "camera_relative", std::string, "");
 		SAFE_TOML_GET_OR(to.int_drawable_id, "drawable_id", std::string, "");
+		SAFE_TOML_GET_OR(to.int_irradiance, "irradiance", std::string, "");
 	}
 };
 

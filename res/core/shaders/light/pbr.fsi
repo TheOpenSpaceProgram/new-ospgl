@@ -58,9 +58,11 @@ vec3 FresnelSphericalGaussian(float cosTheta, vec3 F0)
 {
 	return F0 + (1.0 - F0) * pow(2.0, (-5.55473 * cosTheta - 6.98316 * cosTheta));
 }
-vec3 get_pbr_lo(vec3 cam_dir, vec3 sun_dir, vec3 Normal, vec3 Albedo, float Roughness, float Metallic)
+vec3 get_pbr_lo(vec3 cam_dir, vec3 sun_dir, vec3 Normal, vec3 Albedo, float Roughness, float Metallic,
+    out vec3 ambientkD)
 {
-    Roughness = max(Roughness, 0.15);
+    Roughness = clamp(Roughness, 0.15, 1.0);
+    Metallic = clamp(Metallic, 0.0, 0.96);
 
     vec3 H = normalize(cam_dir + sun_dir);
     float NDF = DistributionGGX(Normal, H, Roughness);
@@ -79,5 +81,10 @@ vec3 get_pbr_lo(vec3 cam_dir, vec3 sun_dir, vec3 Normal, vec3 Albedo, float Roug
 
     float NdotL = max(dot(Normal, sun_dir), 0.0);
 
+
+    vec3 ambientkS = FresnelSchlick(max(dot(Normal, cam_dir), 0.0), F0);
+    ambientkD = 1.0 - ambientkS;
+    ambientkD *= 1.0 - Metallic;
+    ambientkD = max(ambientkD, 0.05);
     return (kD * Albedo / PI + specular) * NdotL;
 }

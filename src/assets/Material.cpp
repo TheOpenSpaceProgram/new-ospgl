@@ -1,4 +1,5 @@
 #include "Material.h"
+#include <assets/Cubemap.h>
 
 void Uniform::set(Shader* sh, const std::string& name, int* gl_tex) const
 {
@@ -83,7 +84,7 @@ Uniform::~Uniform()
 	}
 }
 
-void Material::set(std::vector<ModelTexture>& assimp_textures, const MaterialOverride& over)
+int Material::set(std::vector<ModelTexture>& assimp_textures, const MaterialOverride& over)
 {
 	int gl_tex = 0;
 
@@ -125,9 +126,11 @@ void Material::set(std::vector<ModelTexture>& assimp_textures, const MaterialOve
 		}
 	}
 
+	return gl_tex;
+
 }
 
-void Material::set_core(const CameraUniforms& cu, glm::dmat4 model, GLint drawable_id)
+void Material::set_core(int* gl_tex, const CameraUniforms& cu, glm::dmat4 model, GLint drawable_id)
 {
 
 	if (!core_uniforms.mat4_proj.empty())
@@ -197,6 +200,14 @@ void Material::set_core(const CameraUniforms& cu, glm::dmat4 model, GLint drawab
 	if(!core_uniforms.int_drawable_id.empty())
 	{
 		shader->setInt(core_uniforms.int_drawable_id, drawable_id);
+	}
+
+	if(!core_uniforms.int_irradiance.empty())
+	{
+		glActiveTexture(GL_TEXTURE0 + *gl_tex);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cu.irradiance);
+		shader->setInt(core_uniforms.int_irradiance, *gl_tex);
+		(*gl_tex)++;
 	}
 
 }

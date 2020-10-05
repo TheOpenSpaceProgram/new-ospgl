@@ -27,7 +27,7 @@ public:
 	virtual void do_pass(CameraUniforms& cu, GBuffer* gbuf) = 0;
 
 	// Useful function as this code is present on all lights
-	void prepare_shader(Shader* shader, GBuffer* gbuffer)
+	void prepare_shader(Shader* shader, GBuffer* gbuffer, GLuint irradiance)
 	{
 		shader->use();
 		// Draw the gbuffer and copy depth 
@@ -39,11 +39,14 @@ public:
 		glBindTexture(GL_TEXTURE_2D, gbuffer->g_col);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, gbuffer->g_pbr);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, irradiance);
 
 		shader->setInt("gPosition", 0);
 		shader->setInt("gNormal", 1);
 		shader->setInt("gAlbedo", 2);
 		shader->setInt("gPbr", 3);
+		shader->setInt("irradiance_map", 4);
 	}
 
 	void set_added(bool value)
