@@ -20,4 +20,6 @@ struct CameraUniforms
 	glm::ivec2 iscreen_size;
 
 	GLuint irradiance;
+	GLuint specular;
+	GLuint brdf;
 };

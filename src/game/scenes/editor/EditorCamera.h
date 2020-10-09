@@ -28,8 +28,8 @@ public:
 
 
 	// Scrolling stuff uses acceleration so it feels smooth
-	double updown_delta;
-	double radius_delta;
+	double updown_delta{};
+	double radius_delta{};
 
 	// We block both the mouse and keyboard as we are an orbit camera
 	// This means we succesfully started an orbit motions, and stays

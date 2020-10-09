@@ -46,13 +46,13 @@ Cubemap::Cubemap(std::vector<std::string> &images) : id(0)
 		int width, height, channels;
 		if(is_hdr)
 		{
-			float* data = stbi_loadf(images[side].c_str(), &width, &height, &channels, 0);
+			float* data = stbi_loadf(images[side].c_str(), &width, &height, &channels, 3);
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, 0, GL_RGB16F, width, height, 0, GL_RGB,
 				GL_FLOAT, data);
 		}
 		else
 		{
-			uint8_t* data = stbi_load(images[side].c_str(), &width, &height, &channels, 0);
+			uint8_t* data = stbi_load(images[side].c_str(), &width, &height, &channels, 4);
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, 0, GL_RGB, width, height, 0, GL_RGBA,
 						 GL_UNSIGNED_BYTE, data);
 		}
@@ -70,17 +70,19 @@ Cubemap::Cubemap(std::vector<std::string> &images) : id(0)
 
 }
 
-void Cubemap::generate_ibl_irradiance(size_t res, int face, bool bind)
+void Cubemap::generate_ibl_irradiance(size_t res, size_t spec_res, int face, bool bind)
 {
 	if(irradiance == nullptr)
 	{
 		irradiance = new Cubemap(res);
+		specular = new Cubemap(spec_res, true);
 		irradiance_shader = AssetHandle<Shader>("core:shaders/ibl/irradiance.vs");
+		specular_shader = AssetHandle<Shader>("core:shaders/ibl/specular.vs");
+		brdf_lut = AssetHandle<Image>("core:shaders/ibl/brdf.png");
 		glGenFramebuffers(1, &capture_fbo);
 		glGenRenderbuffers(1, &capture_rbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, capture_fbo);
     	glBindRenderbuffer(GL_RENDERBUFFER, capture_rbo);
-    	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution, resolution);
     	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, capture_rbo);
     	CubeGeometry::generate_cubemap(&cubemap_vao, &cubemap_vbo);
 
@@ -93,7 +95,7 @@ void Cubemap::generate_ibl_irradiance(size_t res, int face, bool bind)
 	{
 		for(size_t side = 0; side < 6; side++)
 		{
-			generate_ibl_irradiance(res, side, false);
+			generate_ibl_irradiance(res, spec_res, side, false);
 		}
 
 		return;
@@ -121,9 +123,11 @@ void Cubemap::generate_ibl_irradiance(size_t res, int face, bool bind)
 		glGetIntegerv(GL_VIEWPORT, old_vport);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, capture_fbo);
-		glViewport(0, 0, res, res);
 	}
 
+	glBindRenderbuffer(GL_RENDERBUFFER, capture_rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution, resolution);
+	glViewport(0, 0, res, res);
 	irradiance_shader->use();
 	irradiance_shader->setInt("tex", 0);
 	irradiance_shader->setMat4("tform", proj * view[face]);
@@ -135,6 +139,30 @@ void Cubemap::generate_ibl_irradiance(size_t res, int face, bool bind)
 
 	glBindVertexArray(cubemap_vao);
     glDrawArrays(GL_TRIANGLES, 0, 36);
+    // Specular pass
+	specular_shader->use();
+ 	specular_shader->setInt("tex", 0);
+ 	specular_shader->setMat4("tform", proj * view[face]);
+
+
+	 size_t max_mip = 5;
+	 for(size_t mip = 0; mip < max_mip; mip++)
+	 {
+		 size_t msize = spec_res * glm::pow(0.5f, mip);
+		 glViewport(0, 0, msize, msize);
+		 glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, msize, msize);
+
+		 float roughness = (float)mip / (float)(max_mip - 1);
+		 specular_shader->setFloat("roughness", roughness);
+		 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+						  GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, specular->id, mip);
+
+		 glClear(GL_DEPTH_BUFFER_BIT);
+
+		 glDrawArrays(GL_TRIANGLES, 0, 36);
+	 }
+
+
     glBindVertexArray(0);
 
     if(face == 5 || bind)
@@ -145,7 +173,7 @@ void Cubemap::generate_ibl_irradiance(size_t res, int face, bool bind)
 	}
 }
 
-Cubemap::Cubemap(size_t nresolution)
+Cubemap::Cubemap(size_t nresolution, bool mipmap)
 {
 	resolution = nresolution;
 
@@ -160,7 +188,15 @@ Cubemap::Cubemap(size_t nresolution)
 	}
 
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	if(mipmap)
+	{
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	}
+	else
+	{
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -171,6 +207,7 @@ Cubemap::~Cubemap()
 	if(irradiance != nullptr)
 	{
 		delete irradiance;
+		delete specular;
 		glDeleteFramebuffers(1, &capture_fbo);
 		glDeleteRenderbuffers(1, &capture_rbo);
 		glDeleteVertexArrays(1, &cubemap_vao);

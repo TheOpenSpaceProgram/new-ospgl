@@ -50,7 +50,7 @@ SunLight::~SunLight()
 
 void SunLight::do_pass(CameraUniforms& cu, GBuffer* gbuf)
 {
-	prepare_shader(shader, gbuf, cu.irradiance);
+	prepare_shader(shader, gbuf, cu.irradiance, cu.specular, cu.brdf);
 
 	// Sun pso relative to the camera
 	glm::dvec3 sun_pos = position - cu.cam_pos;
@@ -66,9 +66,9 @@ void SunLight::do_pass(CameraUniforms& cu, GBuffer* gbuf)
 
 	shader->setMat4("near_shadow_tform", near_shadow_tform);
 	// Keep in mind space used by gbuffer textures
-	glActiveTexture(GL_TEXTURE5);
+	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_2D, near_shadow_tex);
-	shader->setInt("near_shadow_map", 5);
+	shader->setInt("near_shadow_map", 7);
 
 	texture_drawer->issue_fullscreen_rectangle();
 }

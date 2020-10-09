@@ -21,10 +21,10 @@ void EditorScene::load()
 
 	r->add_drawable(&vehicle);
 	r->add_drawable(&sky);
-	r->irradiance = sky.cubemap->irradiance->id;
+	r->ibl_source = sky.cubemap.data;
 
 	sun = SunLight(0, r->quality.sun_shadow_size);
-	sun.color = glm::vec3(16.0);
+	sun.color = glm::vec3(0.0);
 	sun.position = glm::dvec3(1000.0, 0.0, 400.0);
 	sun.ambient_color = glm::vec3(0.4, 0.4, 0.4);
 	sun.near_shadow_span = 10.0;

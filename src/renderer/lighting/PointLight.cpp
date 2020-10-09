@@ -107,8 +107,8 @@ void PointLight::do_pass(CameraUniforms& cu, GBuffer* gbuf)
 
 void PointLight::set_shader_uniforms(Shader* sh, GBuffer* gbuffer, glm::dvec3 rel_pos)
 {
-	// We don't do irradiance here
-	prepare_shader(sh, gbuffer, 0);
+	// We don't do ibl here
+	prepare_shader(sh, gbuffer, 0, 0, 0);
 	sh->setVec3("light_pos", rel_pos);
 	sh->setVec3("color", color);
 	sh->setVec3("spec_color", spec_color);

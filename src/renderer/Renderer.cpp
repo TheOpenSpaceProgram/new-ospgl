@@ -259,7 +259,9 @@ void Renderer::render(PlanetarySystem* system)
 	}
 
 	CameraUniforms c_uniforms = cam->get_camera_uniforms(rswidth, rsheight);
-	c_uniforms.irradiance = this->irradiance;
+	c_uniforms.irradiance = ibl_source->irradiance->id;
+	c_uniforms.specular = ibl_source->specular->id;
+	c_uniforms.brdf = brdf->id;
 	
 	prepare_deferred();
 
@@ -595,6 +597,7 @@ Renderer::Renderer(cpptoml::table& settings)
 	SerializeUtil::read_to(*quality_toml, quality);
 
 	hdr = AssetHandle<Shader>("core:shaders/hdr.vs");
+	brdf = AssetHandle<Image>("core:shaders/ibl/brdf.png");
 
 }
 

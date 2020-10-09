@@ -16,6 +16,8 @@
 #include "lighting/Light.h"
 #include <nanovg/nanovg.h>
 
+#include <assets/Cubemap.h>
+
 #include "RendererQuality.h"
 
 //#define ENABLE_GL_DEBUG
@@ -40,6 +42,7 @@ class Renderer
 {
 private:
 	AssetHandle<Shader> hdr;
+	AssetHandle<Image> brdf;
 
 	Framebuffer* fbuffer;
 	GBuffer* gbuffer;
@@ -88,7 +91,7 @@ private:
 
 public:
 
-	GLuint irradiance = 0;
+	Cubemap* ibl_source = nullptr;
 
 	RendererQuality quality;
 

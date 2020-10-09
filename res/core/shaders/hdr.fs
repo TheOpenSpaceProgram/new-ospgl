@@ -17,7 +17,7 @@ void main()
     }
 
     const float gamma = 2.2;
-    const float exposure = 2.0f;
+    const float exposure = 3.0;
 
     vec3 color = texture(tex, coord).rgb;
     vec3 mapped = vec3(1.0) - exp(-color * exposure);

@@ -58,11 +58,14 @@ vec3 FresnelSphericalGaussian(float cosTheta, vec3 F0)
 {
 	return F0 + (1.0 - F0) * pow(2.0, (-5.55473 * cosTheta - 6.98316 * cosTheta));
 }
-vec3 get_pbr_lo(vec3 cam_dir, vec3 sun_dir, vec3 Normal, vec3 Albedo, float Roughness, float Metallic,
-    out vec3 ambientkD)
+
+
+vec3 get_pbr(vec3 sun_dir, vec3 FragPos, vec3 Normal, vec3 Albedo, float Roughness, float Metallic,
+    samplerCube irradiance_map, samplerCube specular_map, sampler2D brdf_map, out vec3 ambient, out vec3 spec)
 {
-    Roughness = clamp(Roughness, 0.15, 1.0);
-    Metallic = clamp(Metallic, 0.0, 0.96);
+    vec3 cam_dir = normalize(-FragPos);
+    Roughness = clamp(Roughness, 0.0, 1.0);
+    Metallic = clamp(Metallic, 0.0, 1.0);
 
     vec3 H = normalize(cam_dir + sun_dir);
     float NDF = DistributionGGX(Normal, H, Roughness);
@@ -83,8 +86,18 @@ vec3 get_pbr_lo(vec3 cam_dir, vec3 sun_dir, vec3 Normal, vec3 Albedo, float Roug
 
 
     vec3 ambientkS = FresnelSchlick(max(dot(Normal, cam_dir), 0.0), F0);
-    ambientkD = 1.0 - ambientkS;
+    vec3 ambientkD = 1.0 - ambientkS;
     ambientkD *= 1.0 - Metallic;
     ambientkD = max(ambientkD, 0.05);
-    return (kD * Albedo / PI + specular) * NdotL;
+
+    vec3 l0 = (kD * Albedo / PI + specular) * NdotL;
+    ambient = texture(irradiance_map, Normal).rgb * Albedo * ambientkD;
+
+    vec2 envBRDF = texture(brdf_map, vec2(max(dot(Normal, cam_dir), 0.0) * 0.98, Roughness)).rg;
+    vec3 R = -reflect(-FragPos, Normal);
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(specular_map, R, Roughness * MAX_REFLECTION_LOD).rgb;
+    spec = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+
+    return l0;
 }
