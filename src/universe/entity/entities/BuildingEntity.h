@@ -33,7 +33,7 @@ public:
 
 	virtual std::string get_type() override { return "building"; }
 
-	virtual void deferred_pass(CameraUniforms& cu) override;
+	virtual void deferred_pass(CameraUniforms& cu, bool is_env) override;
 	virtual void shadow_pass(ShadowCamera& cu) override;
 
 	virtual bool needs_deferred_pass() override { return true; }

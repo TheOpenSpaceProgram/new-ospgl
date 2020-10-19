@@ -21,7 +21,7 @@ void EditorScene::load()
 
 	r->add_drawable(&vehicle);
 	r->add_drawable(&sky);
-	r->ibl_source = sky.cubemap.data;
+	r->set_ibl_source(sky.cubemap.data);
 
 	sun = SunLight(0, r->quality.sun_shadow_size);
 	sun.color = glm::vec3(0.0);

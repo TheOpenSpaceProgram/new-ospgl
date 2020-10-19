@@ -54,7 +54,7 @@ void EditorVehicle::clear_meta()
 }
 
 
-void EditorVehicle::deferred_pass(CameraUniforms& cu)
+void EditorVehicle::deferred_pass(CameraUniforms& cu, bool is_env_map)
 {	
 	for (Piece* p : veh->all_pieces)
 	{
@@ -62,7 +62,7 @@ void EditorVehicle::deferred_pass(CameraUniforms& cu)
 	}
 }
 
-void EditorVehicle::forward_pass(CameraUniforms& cu)
+void EditorVehicle::forward_pass(CameraUniforms& cu, bool is_env_map)
 {
 	// We only draw "receiver" models, that is, attachment
 	// points which are set to stack (radial goes anywhere)

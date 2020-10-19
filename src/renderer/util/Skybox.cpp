@@ -11,7 +11,7 @@ Skybox::Skybox(AssetHandle<Cubemap> &&ncubemap) : vao(0), vbo(0), intensity(1.0f
 
 }
 
-void Skybox::forward_pass(CameraUniforms &cu)
+void Skybox::forward_pass(CameraUniforms &cu, bool is_env_map)
 {
 	shader->use();
 	shader->setInt("skybox", 0);

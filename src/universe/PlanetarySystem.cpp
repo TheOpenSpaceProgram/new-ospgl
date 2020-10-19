@@ -187,9 +187,10 @@ void PlanetarySystem::render_body_atmosphere(CartesianState state, SystemElement
 static double zoom = 1.0;
 
 
-void PlanetarySystem::deferred_pass(CameraUniforms & cu)
+void PlanetarySystem::deferred_pass(CameraUniforms& cu, bool is_env_map)
 {
-	float fov = glm::radians(60.0f);
+	// TODO: Don't have this fixed
+	float fov = glm::radians(90.0f);
 
 	glm::dvec3 camera_pos = cu.cam_pos;
 
@@ -248,7 +249,7 @@ void PlanetarySystem::deferred_pass(CameraUniforms & cu)
 	}
 }
 
-void PlanetarySystem::forward_pass(CameraUniforms & cu)
+void PlanetarySystem::forward_pass(CameraUniforms& cu, bool is_env_map)
 {
 	glm::dvec3 camera_pos = cu.cam_pos;
 	glm::dmat4 proj_view = cu.proj_view;

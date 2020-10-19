@@ -20,8 +20,8 @@ protected:
 
 public:
 
-	virtual void deferred_pass(CameraUniforms& cu){}
-	virtual void forward_pass(CameraUniforms& cu){}
+	virtual void deferred_pass(CameraUniforms& cu, bool is_env_map = false){}
+	virtual void forward_pass(CameraUniforms& cu, bool is_env_map = false){}
 	virtual void gui_pass(CameraUniforms& cu) {}
 	virtual void shadow_pass(ShadowCamera& cu) {}
 	virtual void far_shadow_pass(ShadowCamera& cu) {}
@@ -31,6 +31,8 @@ public:
 	virtual bool needs_gui_pass() { return false; }
 	virtual bool needs_shadow_pass() { return false; }
 	virtual bool needs_far_shadow_pass() { return false; }
+	virtual bool needs_env_map_pass() { return false; }
+
 
 	// Objects with higher priority get drawn first
 	virtual int get_forward_priority() { return 0.0; }

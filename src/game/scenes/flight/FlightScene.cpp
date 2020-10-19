@@ -71,10 +71,10 @@ void FlightScene::load()
 
 	Renderer* r = get_osp()->renderer;
 
-	sky.cubemap->generate_ibl_irradiance();
 	r->add_drawable(&sky);
-	r->ibl_source = sky.cubemap.data;
-	
+	r->set_ibl_source(nullptr);
+
+
 	sun = SunLight(r->quality.sun_terrain_shadow_size, r->quality.sun_shadow_size);
 	r->add_light(&sun);
 }

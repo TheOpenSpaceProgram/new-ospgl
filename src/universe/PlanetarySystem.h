@@ -79,10 +79,11 @@ public:
 
 	glm::dvec3 get_gravity_vector(glm::dvec3 point, StateVector* states);
 
-	virtual void deferred_pass(CameraUniforms& cu) override;
-	virtual bool needs_deferred_pass() override { return true; }
-	virtual void forward_pass(CameraUniforms& cu) override;
-	virtual bool needs_forward_pass() override { return true; }
+	void deferred_pass(CameraUniforms& cu, bool is_env_map = false) override;
+	bool needs_deferred_pass() override { return true; }
+	void forward_pass(CameraUniforms& cu, bool is_env_map = false) override;
+	bool needs_forward_pass() override { return true; }
+	bool needs_env_map_pass() override { return true; }
 
 	void update(double dt, btDynamicsWorld* world, bool bullet);
 

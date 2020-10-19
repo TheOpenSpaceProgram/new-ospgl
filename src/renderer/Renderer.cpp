@@ -259,9 +259,13 @@ void Renderer::render(PlanetarySystem* system)
 	}
 
 	CameraUniforms c_uniforms = cam->get_camera_uniforms(rswidth, rsheight);
-	c_uniforms.irradiance = ibl_source->irradiance->id;
-	c_uniforms.specular = ibl_source->specular->id;
+	if(ibl_source && ibl_source->irradiance && ibl_source->specular)
+	{
+		c_uniforms.irradiance = ibl_source->irradiance->id;
+		c_uniforms.specular = ibl_source->specular->id;
+	}
 	c_uniforms.brdf = brdf->id;
+
 	
 	prepare_deferred();
 
@@ -354,6 +358,11 @@ void Renderer::add_drawable(Drawable* d, std::string n_id)
 		far_shadow.push_back(d);
 	}
 
+	if(d->needs_env_map_pass())
+	{
+		env_map.push_back(d);
+	}
+
 	all_drawables.push_back(d);
 }
 static void remove_from(std::vector<Drawable*>& array, Drawable* d)
@@ -402,6 +411,11 @@ void Renderer::remove_drawable(Drawable* drawable)
 	if(drawable->needs_far_shadow_pass())
 	{
 		remove_from(far_shadow, drawable);
+	}
+
+	if(drawable->needs_env_map_pass())
+	{
+		remove_from(env_map, drawable);
 	}
 }
 
@@ -611,3 +625,48 @@ Renderer::~Renderer()
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }
+
+void Renderer::set_ibl_source(Cubemap* cubemap)
+{
+	delete env_fbuffer;
+	delete env_gbuffer;
+
+	if(cubemap == nullptr)
+	{
+		cubemap = new Cubemap(quality.env_map_size);
+
+		env_fbuffer = new Framebuffer(cubemap->resolution, cubemap->resolution);
+		env_gbuffer = new GBuffer(cubemap->resolution, cubemap->resolution);
+	}
+
+	this->ibl_source = cubemap;
+}
+
+void Renderer::render_env_face(glm::dvec3 sample_pos, size_t face)
+{
+	CameraUniforms c_uniforms;
+	c_uniforms.cam_pos = sample_pos;
+
+	prepare_deferred();
+
+	for (Drawable* d : env_map)
+	{
+		d->deferred_pass(c_uniforms);
+	}
+
+	prepare_forward(c_uniforms);
+
+	// Sort forward drawables
+	std::sort(env_map.begin(), env_map.end(), [](Drawable* a, Drawable* b)
+	{
+		// This puts the higher priority drawables FIRST in the array
+		return a->get_forward_priority() > b->get_forward_priority();
+	});
+
+	for (Drawable* d : env_map)
+	{
+		d->forward_pass(c_uniforms);
+	}
+
+}
+

@@ -75,7 +75,7 @@ void BuildingEntity::physics_update(double pdt)
 	rigid->setWorldTransform(trans);
 }
 
-void BuildingEntity::deferred_pass(CameraUniforms& cu)
+void BuildingEntity::deferred_pass(CameraUniforms& cu, bool is_env)
 {
 	proto->model->node_by_name["building"]->draw(cu, get_model_matrix(false), drawable_uid, true);
 }

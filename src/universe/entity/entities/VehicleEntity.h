@@ -13,18 +13,18 @@ public:
 	Vehicle* vehicle;
 
 
-	virtual void enable_bullet(btDynamicsWorld * world) override;
-	virtual void disable_bullet(btDynamicsWorld * world) override;
+	void enable_bullet(btDynamicsWorld * world) override;
+	void disable_bullet(btDynamicsWorld * world) override;
 
-	virtual void init() override;
-	virtual void update(double dt) override;
-	virtual void physics_update(double pdt) override;
+	void init() override;
+	void update(double dt) override;
+	void physics_update(double pdt) override;
 
-	virtual void deferred_pass(CameraUniforms& camera_uniforms) override;
-	virtual bool needs_deferred_pass() override { return true; }
+	void deferred_pass(CameraUniforms& camera_uniforms, bool is_env) override;
+	bool needs_deferred_pass() override { return true; }
 
-	virtual void shadow_pass(ShadowCamera& sh_camera) override;
-	virtual bool needs_shadow_pass() override { return true; }
+	void shadow_pass(ShadowCamera& sh_camera) override;
+	bool needs_shadow_pass() override { return true; }
 
 	VehicleEntity(Vehicle* vehicle);
 	VehicleEntity(cpptoml::table& toml);

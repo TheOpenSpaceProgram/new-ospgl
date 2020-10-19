@@ -45,7 +45,7 @@ void VehicleEntity::disable_bullet(btDynamicsWorld * world)
 
 
 
-void VehicleEntity::deferred_pass(CameraUniforms & camera_uniforms)
+void VehicleEntity::deferred_pass(CameraUniforms& camera_uniforms, bool is_env)
 {
 	for (Piece* p : vehicle->all_pieces)
 	{

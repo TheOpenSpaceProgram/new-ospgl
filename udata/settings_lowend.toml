@@ -8,3 +8,4 @@
 	sun_shadow_size = 512 
 	sun_terrain_shadow_size = 512
 	secondary_shadow_size = 256
+	env_map_size = 256

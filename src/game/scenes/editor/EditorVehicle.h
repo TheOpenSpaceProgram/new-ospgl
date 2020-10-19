@@ -63,8 +63,8 @@ public:
 
 	bool draw_attachments;
 
-	virtual void deferred_pass(CameraUniforms& cu) override;
-	virtual void forward_pass(CameraUniforms& cu) override;
+	virtual void deferred_pass(CameraUniforms& cu, bool is_env_map = false) override;
+	virtual void forward_pass(CameraUniforms& cu, bool is_env_map = false) override;
 	virtual void shadow_pass(ShadowCamera& cu) override;
 
 	virtual bool needs_deferred_pass() override { return true; }

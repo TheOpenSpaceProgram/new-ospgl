@@ -19,9 +19,10 @@ public:
 	explicit Skybox(AssetHandle<Cubemap>&& ncubemap);
 	~Skybox();
 
-	void forward_pass(CameraUniforms &cu) override;
+	void forward_pass(CameraUniforms &cu, bool is_env_map) override;
 
 	bool needs_forward_pass() override { return true; }
+	bool needs_env_map_pass() override { return true; }
 
 	int get_forward_priority() override { return INT_MAX; }
 

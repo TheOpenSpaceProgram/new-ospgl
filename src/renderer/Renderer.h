@@ -47,6 +47,9 @@ private:
 	Framebuffer* fbuffer;
 	GBuffer* gbuffer;
 
+	Framebuffer* env_fbuffer;
+	GBuffer* env_gbuffer;
+
 	// Real size of the window
 	int width, height;
 	// Size of the scaled rendering (may be less than 100%)
@@ -85,13 +88,18 @@ private:
 	std::vector<Drawable*> gui;
 	std::vector<Drawable*> shadow;
 	std::vector<Drawable*> far_shadow;
+	std::vector<Drawable*> env_map;
 	std::vector<Drawable*> all_drawables;
 
 	std::vector<Light*> lights;
 
+	Cubemap* ibl_source = nullptr;
+
 public:
 
-	Cubemap* ibl_source = nullptr;
+	// If cubemap is nullptr, we will generate a ibl source cubemap
+	// and render to it using env_map samples
+	void set_ibl_source(Cubemap* cubemap);
 
 	RendererQuality quality;
 
@@ -117,6 +125,8 @@ public:
 	// nullptr if you are not currently on a scene which requires 
 	// complex shadows (landscape shadows)
 	void render(PlanetarySystem* system);
+
+	void render_env_face(glm::dvec3 sample_pos, size_t face);
 
 	// Must always be called (except on headless), even if nothing
 	// is rendering to the screen
