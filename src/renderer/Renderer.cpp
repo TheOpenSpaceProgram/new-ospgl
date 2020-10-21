@@ -37,16 +37,25 @@ void Renderer::resize(int nwidth, int nheight, float nscale)
 }
 
 
+void Renderer::deferred_bind(GLuint g_buffer, glm::ivec4 vport)
+{
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glDisable(GL_BLEND);
+	glBindFramebuffer(GL_FRAMEBUFFER, g_buffer);
+
+	glViewport(vport.x, vport.y, vport.z, vport.w);
+	doing_deferred = true;
+	doing_forward = false;
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
 void Renderer::prepare_deferred()
 {
-	glDisable(GL_BLEND);
-
 	if (wireframe)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	int nwidth = 0, nheight = 0;
 
@@ -76,12 +85,7 @@ void Renderer::prepare_deferred()
 			resize(nwidth, nheight, scale);
 		}
 
-		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer->g_buffer);
-
-		glViewport(viewport.x, viewport.y, viewport.z, viewport.w);
-		doing_deferred = true;
-		doing_forward = false;
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		deferred_bind(gbuffer->g_buffer, viewport);
 	}
 
 }
@@ -122,52 +126,65 @@ void Renderer::do_shadows(PlanetarySystem* system, glm::dvec3 camera_pos)
 	//glCullFace(GL_BACK);
 }
 
-void Renderer::prepare_forward(CameraUniforms& cu)
+// TODO: Take GLuint g_buffer instead of GBuffer* g_buffer for consistency?
+void Renderer::forward_bind(CameraUniforms& cu, GBuffer* g_buffer, GLuint f_buffer,
+							glm::ivec4 vport, Light* only_light)
 {
 	glEnable(GL_BLEND);
 
+	glBindFramebuffer(GL_FRAMEBUFFER, f_buffer);
+	glViewport(vport.x, vport.y, vport.z, vport.w);
+	glClear(GL_COLOR_BUFFER_BIT); //< Don't clear the depth buffer!
+
+	doing_deferred = false;
+	doing_forward = true;
+
+	if (wireframe)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+	glDepthMask(GL_FALSE);
+	glDepthFunc(GL_ALWAYS);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+	// Do a pass for every light
+	for (Light* l : lights)
+	{
+		glViewport(vport.x, vport.y, vport.z, vport.w);
+
+		if(only_light)
+		{
+			l = only_light;
+		}
+		else if(l->needs_fullscreen_viewport())
+		{
+			glViewport(0, 0, swidth, sheight);
+		}
+
+		l->do_pass(cu, g_buffer);
+
+		if(only_light)
+		{
+			break;
+		}
+	}
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDepthMask(GL_TRUE);
+	glDepthFunc(GL_LESS);
+	if (wireframe)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+
+	glViewport(vport.x, vport.y, vport.z, vport.w);
+}
+
+void Renderer::prepare_forward(CameraUniforms& cu)
+{
 	if (render_enabled)
 	{
-
-		glBindFramebuffer(GL_FRAMEBUFFER, fbuffer->fbuffer);
-		glClear(GL_COLOR_BUFFER_BIT); //< Don't clear the depth buffer!
-
-		doing_deferred = false;
-		doing_forward = true;
-
-		if (wireframe)
-		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		}
-		glDepthMask(GL_FALSE);
-		glDepthFunc(GL_ALWAYS);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-		// Do a pass for every light
-		for (Light* l : lights)
-		{
-			if(l->needs_fullscreen_viewport())
-			{
-				glViewport(0, 0, swidth, sheight);
-			}
-			else
-			{
-				glViewport(viewport.x, viewport.y, viewport.z, viewport.w);
-			}
-
-			l->do_pass(cu, gbuffer);
-			
-		}
-
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LESS);
-		if (wireframe)
-		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		}
-
-		glViewport(viewport.x, viewport.y, viewport.z, viewport.w);
+		forward_bind(cu, gbuffer, fbuffer->fbuffer, viewport, nullptr);
 
 	}
 }
@@ -227,6 +244,67 @@ void Renderer::finish()
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 }
+
+void Renderer::render_env_face(glm::dvec3 sample_pos, size_t face)
+{
+	CameraUniforms c_uniforms;
+	float far_plane = 1e16f;
+
+	glm::dmat4 views[] =
+	{
+		glm::lookAt(glm::dvec3(0.0f), glm::dvec3(1.0f,  0.0f,  0.0f), glm::dvec3(0.0f, -1.0f,  0.0f)),
+		glm::lookAt(glm::dvec3(0.0f), glm::dvec3(-1.0f,  0.0f,  0.0f), glm::dvec3(0.0f, -1.0f,  0.0f)),
+		glm::lookAt(glm::dvec3(0.0f), glm::dvec3(0.0f,  1.0f,  0.0f), glm::dvec3(0.0f,  0.0f,  1.0f)),
+		glm::lookAt(glm::dvec3(0.0f), glm::dvec3(0.0f, -1.0f,  0.0f), glm::dvec3(0.0f,  0.0f, -1.0f)),
+		glm::lookAt(glm::dvec3(0.0f), glm::dvec3(0.0f,  0.0f,  1.0f), glm::dvec3(0.0f, -1.0f,  0.0f)),
+		glm::lookAt(glm::dvec3(0.0f), glm::dvec3(0.0f,  0.0f, -1.0f), glm::dvec3(0.0f, -1.0f,  0.0f))
+	};
+
+	glm::dmat4 proj = glm::perspective(glm::radians(90.0), 1.0, 0.01, (double)far_plane);
+	glm::dmat4 view = views[face];
+	glm::dmat4 proj_view = proj * view;
+	c_uniforms.proj = proj;
+	c_uniforms.view = view;
+	c_uniforms.proj_view = proj_view;
+	c_uniforms.c_model = glm::translate(glm::dmat4(1.0), -sample_pos);
+	c_uniforms.tform = proj * view * c_uniforms.c_model;
+	c_uniforms.far_plane = far_plane;
+	c_uniforms.cam_pos = sample_pos;
+
+	c_uniforms.screen_size = glm::vec2(ibl_source->resolution, ibl_source->resolution);
+	c_uniforms.iscreen_size = glm::ivec2(c_uniforms.screen_size);
+
+
+	glm::dvec4 vport = glm::dvec4(0, 0, ibl_source->resolution, ibl_source->resolution);
+	deferred_bind(env_gbuffer->g_buffer, vport);
+
+	for (Drawable* d : env_map)
+	{
+		d->deferred_pass(c_uniforms, true);
+	}
+
+	// TODO: Disable texture creation in the framebuffer to avoid unused space
+	glBindFramebuffer(GL_FRAMEBUFFER, env_fbuffer->fbuffer);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, ibl_source->id, 0);
+
+	forward_bind(c_uniforms, env_gbuffer, env_fbuffer->fbuffer, vport, lights[0]);
+
+	// Sort forward drawables
+	std::sort(env_map.begin(), env_map.end(), [](Drawable* a, Drawable* b)
+	{
+		// This puts the higher priority drawables FIRST in the array
+		return a->get_forward_priority() > b->get_forward_priority();
+	});
+
+	for (Drawable* d : env_map)
+	{
+		d->forward_pass(c_uniforms, true);
+	}
+
+	ibl_source->generate_ibl_irradiance(64, 128, face);
+
+}
+
 
 void Renderer::render(PlanetarySystem* system)
 {
@@ -635,38 +713,11 @@ void Renderer::set_ibl_source(Cubemap* cubemap)
 	{
 		cubemap = new Cubemap(quality.env_map_size);
 
-		env_fbuffer = new Framebuffer(cubemap->resolution, cubemap->resolution);
 		env_gbuffer = new GBuffer(cubemap->resolution, cubemap->resolution);
+		env_fbuffer = new Framebuffer(cubemap->resolution, cubemap->resolution, env_gbuffer->rbo);
 	}
 
 	this->ibl_source = cubemap;
 }
 
-void Renderer::render_env_face(glm::dvec3 sample_pos, size_t face)
-{
-	CameraUniforms c_uniforms;
-	c_uniforms.cam_pos = sample_pos;
-
-	prepare_deferred();
-
-	for (Drawable* d : env_map)
-	{
-		d->deferred_pass(c_uniforms);
-	}
-
-	prepare_forward(c_uniforms);
-
-	// Sort forward drawables
-	std::sort(env_map.begin(), env_map.end(), [](Drawable* a, Drawable* b)
-	{
-		// This puts the higher priority drawables FIRST in the array
-		return a->get_forward_priority() > b->get_forward_priority();
-	});
-
-	for (Drawable* d : env_map)
-	{
-		d->forward_pass(c_uniforms);
-	}
-
-}
 

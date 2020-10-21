@@ -69,7 +69,6 @@ void main()
     float Roughness = Pbr.g;
     float Metallic = Pbr.b;
 
-
     vec3 sun_dir = normalize(sun_pos - FragPos);
     // TODO: Environment map sampling
     vec3 emit = Emissive * Albedo;

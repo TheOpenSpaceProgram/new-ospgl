@@ -136,6 +136,7 @@ void Cubemap::generate_ibl_irradiance(size_t res, size_t spec_res, int face, boo
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,
 				irradiance->id, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDepthFunc(GL_LESS);
 
 	glBindVertexArray(cubemap_vao);
     glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -183,7 +184,7 @@ Cubemap::Cubemap(size_t nresolution, bool mipmap)
 	for(size_t side = 0; side < 6; side++)
 	{
 		// We generate HDR by default, TODO: Give an option to toggle this behaviour
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, 0, GL_RGB16F, resolution, resolution, 0, GL_RGBA,
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, 0, GL_RGBA16F, resolution, resolution, 0, GL_RGBA,
 					 GL_UNSIGNED_BYTE, nullptr);
 	}
 

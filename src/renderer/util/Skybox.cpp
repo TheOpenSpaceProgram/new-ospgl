@@ -7,8 +7,6 @@ Skybox::Skybox(AssetHandle<Cubemap> &&ncubemap) : vao(0), vbo(0), intensity(1.0f
 	cubemap = std::move(ncubemap);
 	CubeGeometry::generate_cubemap(&vao, &vbo);
 
-	cubemap->generate_ibl_irradiance(32);
-
 }
 
 void Skybox::forward_pass(CameraUniforms &cu, bool is_env_map)
@@ -20,7 +18,14 @@ void Skybox::forward_pass(CameraUniforms &cu, bool is_env_map)
 	glDepthFunc(GL_LEQUAL);
 	glBindVertexArray(vao);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->id);
+	/*if(cubemap->irradiance)
+	{
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->irradiance->id);
+	}
+	else*/
+	{
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->id);
+	}
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS);

@@ -47,8 +47,8 @@ private:
 	Framebuffer* fbuffer;
 	GBuffer* gbuffer;
 
-	Framebuffer* env_fbuffer;
-	GBuffer* env_gbuffer;
+	Framebuffer* env_fbuffer = nullptr;
+	GBuffer* env_gbuffer = nullptr;
 
 	// Real size of the window
 	int width, height;
@@ -69,6 +69,7 @@ private:
 
 	// Setups OpenGL to draw to the gbuffer
 	void prepare_deferred();
+	void deferred_bind(GLuint g_buffer, glm::ivec4 viewport);
 
 	void do_shadows(PlanetarySystem* system, glm::dvec3 cam_pos);
 
@@ -76,6 +77,9 @@ private:
 	// and draws the gbuffer to the screen (also updating depth buffer
 	// for the forward rendering stuff)
 	void prepare_forward(CameraUniforms& cu);
+	void forward_bind(CameraUniforms& cu,
+				   GBuffer* g_buffer, GLuint f_buffer,
+				   glm::ivec4 viewport, Light* only_light);
 
 	// Draws the framebuffer to screen and prepares OpenGL
 	// to draw directly to backbuffer
@@ -93,9 +97,9 @@ private:
 
 	std::vector<Light*> lights;
 
-	Cubemap* ibl_source = nullptr;
 
 public:
+	Cubemap* ibl_source = nullptr;
 
 	// If cubemap is nullptr, we will generate a ibl source cubemap
 	// and render to it using env_map samples

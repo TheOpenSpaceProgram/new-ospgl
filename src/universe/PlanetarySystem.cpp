@@ -194,8 +194,10 @@ void PlanetarySystem::deferred_pass(CameraUniforms& cu, bool is_env_map)
 
 	glm::dvec3 camera_pos = cu.cam_pos;
 
-	update_render(camera_pos, fov, t);
-
+	if(!is_env_map)
+	{
+		update_render(camera_pos, fov, t);
+	}
 
 	glm::dmat4 proj_view = cu.proj_view;
 	glm::dmat4 c_model = cu.c_model;
