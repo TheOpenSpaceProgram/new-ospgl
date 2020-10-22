@@ -23,6 +23,9 @@ int main(int argc, char** argv)
 
 	osp.game_state.load_scene(new FlightScene());
 
+	double sample_t = 0.0f;
+	std::vector<double> samples;
+
 	while (osp.should_loop())
 	{
 		PROFILE_BLOCK("frame");
@@ -31,6 +34,24 @@ int main(int argc, char** argv)
 		osp.update();
 		osp.render();
 		osp.finish_frame();
+
+		samples.push_back(osp.game_dt);
+		sample_t += osp.game_dt;
+
+		if(sample_t >= 10.0f)
+		{
+			double average = 0.0;
+			for(double sample : samples)
+			{
+				average += sample;
+			}
+			average /= samples.size();
+
+			logger->info("Frame: {}", osp.game_dt * 1000.0);
+			logger->info("Average: {}ms", average * 1000.0);
+			abort();
+
+		}
 	}
 
 	osp.finish();

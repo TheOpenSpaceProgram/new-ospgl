@@ -1,7 +1,8 @@
 #version 430 core
-layout (location = 0) out vec4 gPosition;
+layout (location = 0) out vec4 gPositionEmit;
 layout (location = 1) out vec3 gNormal;
-layout (location = 2) out vec4 gAlbedoSpec;
+layout (location = 2) out vec3 gAlbedo;
+layout (location = 3) out vec3 gPbr;
 
 out vec4 FragColor;
 
@@ -28,9 +29,12 @@ void main()
     vec3 col = vColor;
    // vec3 col = texture(tex, vTexture).xyz;
 
-    gAlbedoSpec = vec4((col + atmoc.xyz * atmoc.w) * 0.77, 0.0);
+    gAlbedo = (col + atmoc.xyz * atmoc.w) * 0.77;
     gNormal = vNormal;
-    gPosition = vec4(vPos, atmoc.w * 0.5);
+    gPositionEmit = vec4(vPos, atmoc.w * 0.5);
+    gPbr.b = 1.0;
+    gPbr.g = 0.0;
+    gPbr.r = 0.0;
 
     // FragColor = vec4(diff * texture(tex, vTexture).xyz, 1.0);
     // FragColor = vec4(vTexture, 0.0, 1.0);

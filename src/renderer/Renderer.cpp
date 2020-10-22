@@ -301,6 +301,12 @@ void Renderer::render_env_face(glm::dvec3 sample_pos, size_t face)
 		d->forward_pass(c_uniforms, true);
 	}
 
+	// TODO: Find a way to generate the mipmap only for one face
+	// Although the perfomance hit is pretty much negligible on
+	// my laptop's GPUs (GTX 1650 and Intel HD 620)
+	glBindTexture(GL_TEXTURE_CUBE_MAP, ibl_source->id);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
 	ibl_source->generate_ibl_irradiance(64, 128, face);
 
 }
@@ -711,7 +717,7 @@ void Renderer::set_ibl_source(Cubemap* cubemap)
 
 	if(cubemap == nullptr)
 	{
-		cubemap = new Cubemap(quality.env_map_size);
+		cubemap = new Cubemap(quality.env_map_size, true);
 
 		env_gbuffer = new GBuffer(cubemap->resolution, cubemap->resolution);
 		env_fbuffer = new Framebuffer(cubemap->resolution, cubemap->resolution, env_gbuffer->rbo);

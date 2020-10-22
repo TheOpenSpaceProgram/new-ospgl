@@ -58,7 +58,7 @@ void FlightScene::load()
 	st.cartesian.vel = stt.cartesian.vel;
 	st.rotation = stt.rotation;
 	st.cartesian.pos += stt.rotation * glm::dvec3(0, 0, 1) * 10.0;
-	st.cartesian.pos += glm::dvec3(-1000000.0, 100000.0, 0.0) * 0.0;
+	st.cartesian.pos += glm::dvec3(-1000000.0, 100000.0, 0.0) * 0.000;
 
 	n_vehicle->packed_veh.set_world_state(st);
 	n_vehicle->unpack();
@@ -105,20 +105,24 @@ void FlightScene::update()
 }
 
 static int taken = 0;
+static int face = 0;
 
 void FlightScene::render()
 {
 	get_osp()->renderer->render(&get_osp()->game_state.universe.system);
 
 	taken++;
-	if(taken % 200 == 0)
+	if(taken % 20 == 0 || true)
 	{
 		VehicleEntity* vent = (VehicleEntity*)get_osp()->game_state.universe.entities[1];
 		glm::dvec3 sample_pos = to_dvec3(vent->vehicle->root->get_global_transform().getOrigin());
-		for(size_t i = 0; i < 6; i++)
+		/*for(size_t i = 0; i < 6; i++)
 		{
 			get_osp()->renderer->render_env_face(sample_pos, i);
-		}
+		}*/
+
+		get_osp()->renderer->render_env_face(sample_pos, face % 6);
+		face++;
 
 		//sky.cubemap.data = get_osp()->renderer->ibl_source;
 	}

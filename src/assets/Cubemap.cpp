@@ -78,12 +78,14 @@ void Cubemap::generate_ibl_irradiance(size_t res, size_t spec_res, int face, boo
 		specular = new Cubemap(spec_res, true);
 		irradiance_shader = AssetHandle<Shader>("core:shaders/ibl/irradiance.vs");
 		specular_shader = AssetHandle<Shader>("core:shaders/ibl/specular.vs");
+		blit_shader = AssetHandle<Shader>("core:shaders/skybox.vs");
 		brdf_lut = AssetHandle<Image>("core:shaders/ibl/brdf.png");
 		glGenFramebuffers(1, &capture_fbo);
 		glGenRenderbuffers(1, &capture_rbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, capture_fbo);
     	glBindRenderbuffer(GL_RENDERBUFFER, capture_rbo);
     	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, capture_rbo);
+
     	CubeGeometry::generate_cubemap(&cubemap_vao, &cubemap_vbo);
 
 		old_resolution = resolution;
@@ -140,9 +142,11 @@ void Cubemap::generate_ibl_irradiance(size_t res, size_t spec_res, int face, boo
 
 	glBindVertexArray(cubemap_vao);
     glDrawArrays(GL_TRIANGLES, 0, 36);
-    // Specular pass
+
+	// Specular pass
 	specular_shader->use();
  	specular_shader->setInt("tex", 0);
+ 	specular_shader->setFloat("tex_size", this->resolution);
  	specular_shader->setMat4("tform", proj * view[face]);
 
 

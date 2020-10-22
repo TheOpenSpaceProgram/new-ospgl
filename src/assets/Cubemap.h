@@ -17,6 +17,7 @@ private:
 
 	AssetHandle<Shader> irradiance_shader;
 	AssetHandle<Shader> specular_shader;
+	AssetHandle<Shader> blit_shader;
 	AssetHandle<Image> brdf_lut;
 	GLuint capture_fbo = 0, capture_rbo = 0;
 	GLuint cubemap_vao = 0, cubemap_vbo = 0;
