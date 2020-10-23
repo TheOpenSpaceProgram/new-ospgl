@@ -16,7 +16,7 @@ class FlightInput
 {
 private:
 
-	InputContext* cur_ctx;
+	InputContext* cur_ctx = nullptr;
 
 public:
 

@@ -23,6 +23,13 @@ private:
 	GLuint cubemap_vao = 0, cubemap_vbo = 0;
 	size_t old_resolution = 0;
 
+	static const size_t MAX_MIP = 5;
+	static const size_t SAMPLE_COUNT = 32;
+
+	std::vector<float> pcomp_mip_levels;
+
+	GLuint pcomp_sample_dir_tex[MAX_MIP - 1];
+
 public:
 
 	size_t resolution = 0;

@@ -72,6 +72,7 @@ Cubemap::Cubemap(std::vector<std::string> &images) : id(0)
 
 void Cubemap::generate_ibl_irradiance(size_t res, size_t spec_res, int face, bool bind)
 {
+
 	if(irradiance == nullptr)
 	{
 		irradiance = new Cubemap(res);
@@ -89,6 +90,54 @@ void Cubemap::generate_ibl_irradiance(size_t res, size_t spec_res, int face, boo
     	CubeGeometry::generate_cubemap(&cubemap_vao, &cubemap_vbo);
 
 		old_resolution = resolution;
+
+		// Precompute the sample directions (this also prevents jitter)
+		// (Copyed from the shader)
+		std::array<glm::vec3, SAMPLE_COUNT> sample_dirs;
+		for(size_t mip = 1; mip < MAX_MIP; mip++)
+		{
+			float roughness = (float) mip / (float) (MAX_MIP - 1);
+			for (uint32_t i = 0; i < SAMPLE_COUNT; i++)
+			{
+				// Radical_Inverse_VdC
+				uint32_t bits = (i << 16u) | (i >> 16u);
+				bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+				bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+				bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+				bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+				float VdC = float(bits) * 2.3283064365386963e-10f;
+
+				// Hammersley
+				glm::vec2 Xi = glm::vec2(float(i)/float(SAMPLE_COUNT), VdC);
+
+				// ImportanceSampleGGX
+				float a = roughness * roughness;
+				float phi = 2.0f * glm::pi<float>() * Xi.x;
+				float cosTheta = glm::sqrt((1.0f - Xi.y) / (1.0f + (a*a - 1.0f) * Xi.y));
+				float sinTheta = glm::sqrt(1.0f - cosTheta*cosTheta);
+
+				// from spherical coordinates to cartesian coordinates
+				glm::vec3 H;
+				H.x = glm::cos(phi) * sinTheta;
+				H.y = glm::sin(phi) * sinTheta;
+				H.z = cosTheta;
+
+				// TODO: Investigate a better way to do this without
+				// losing too much precision. This method may be too loosy!
+				// It causes small discrepancy of about 0.00393
+				// (We could use a non-normalized format? Investigate a bit)
+				sample_dirs[i] = H * 0.5f + 0.5f;
+
+			}
+
+			// Upload it to a texture
+			glGenTextures(1, &pcomp_sample_dir_tex[mip - 1]);
+			glBindTexture(GL_TEXTURE_1D, pcomp_sample_dir_tex[mip - 1]);
+			glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, SAMPLE_COUNT, 0, GL_RGB, GL_FLOAT, (float*)sample_dirs.data());
+			glGenerateMipmap(GL_TEXTURE_1D);
+			glBindTexture(GL_TEXTURE_1D, 0);
+		}
+
 	}
 
 	logger->check(resolution == old_resolution, "Cannot change IBL resolution after it has been created");
@@ -150,15 +199,20 @@ void Cubemap::generate_ibl_irradiance(size_t res, size_t spec_res, int face, boo
  	specular_shader->setMat4("tform", proj * view[face]);
 
 
-	 size_t max_mip = 5;
-	 for(size_t mip = 0; mip < max_mip; mip++)
+	 for(size_t mip = 0; mip < 5; mip++)
 	 {
 		 size_t msize = spec_res * glm::pow(0.5f, mip);
 		 glViewport(0, 0, msize, msize);
 		 glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, msize, msize);
 
-		 float roughness = (float)mip / (float)(max_mip - 1);
+		 float roughness = (float)mip / (float)(MAX_MIP - 1);
 		 specular_shader->setFloat("roughness", roughness);
+		 if(mip != 0)
+		 {
+			 glActiveTexture(GL_TEXTURE1);
+			 glBindTexture(GL_TEXTURE_1D, pcomp_sample_dir_tex[mip - 1]);
+			 specular_shader->setInt("sample_positions", 1);
+		 }
 		 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 						  GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, specular->id, mip);
 

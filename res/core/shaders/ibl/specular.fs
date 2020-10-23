@@ -6,39 +6,21 @@ uniform samplerCube tex;
 uniform float tex_size;
 uniform float roughness;
 
+uniform sampler1D sample_positions;
+
 const float PI = 3.14159265359;
 
-float RadicalInverse_VdC(uint bits)
-{
-    bits = (bits << 16u) | (bits >> 16u);
-    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
-    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
-    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
-    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
-    return float(bits) * 2.3283064365386963e-10; // / 0x100000000
-}
-
-vec2 Hammersley(uint i, uint N)
-{
-    return vec2(float(i)/float(N), RadicalInverse_VdC(i));
-}
-
-vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
+float DistributionGGX(float NdotH, float roughness)
 {
     float a = roughness*roughness;
+    float a2 = a*a;
+    float NdotH2 = NdotH*NdotH;
 
-    float phi = 2.0 * PI * Xi.x;
-    float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a*a - 1.0) * Xi.y));
-    float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+    float nom   = a2;
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
 
-    // from spherical coordinates to cartesian coordinates
-    vec3 H;
-    H.x = cos(phi) * sinTheta;
-    H.y = sin(phi) * sinTheta;
-    H.z = cosTheta;
-
-
-    return H;
+    return nom / max(denom, 0.001);
 }
 
 void main()
@@ -65,29 +47,22 @@ void main()
         vec3 prefilteredColor = vec3(0.0);
         for(uint i = 0u; i < SAMPLE_COUNT; ++i)
         {
-            vec2 Xi = Hammersley(i, SAMPLE_COUNT);
-            vec3 Hi  = ImportanceSampleGGX(Xi, N, roughness);
+            // We must decode the data as textures cannot store negatives
+            vec3 Hi  = (texelFetch(sample_positions, int(i), 0).rgb - 0.5) * 2.0;
             vec3 H = normalize(tangentToWorld * Hi);
-            vec3 L  = normalize(2.0 * dot(V, H) * H - V);
+            float VdotH = clamp(dot(V, H), 0.0, 1.0);
+            vec3 L  = normalize(2.0 * VdotH * H - V);
 
             float NdotL = max(dot(N, L), 0.0);
             if(NdotL > 0.0)
             {
                 float NdotH = clamp(dot(N, H), 0.0, 1.0);
-                float VdotH = clamp(dot(V, H), 0.0, 1.0);
 
-                // TODO: Calculate ggx properly, this looks CLOSE
-                // to the 1024 samples, but it's certainly different
-                float alpha = 0.4;
-                float cos2 = NdotH * NdotH;
-                float tan2 = (1-cos2) / cos2;
-                float term = alpha / (cos2 * (alpha * alpha + tan2));
-                float ggx = (1.0 / PI) * term * term;
-                float Pdf = ggx * NdotH / (4.0 * VdotH);
-                float OmegaS = 1.0 / (SAMPLE_COUNT * Pdf);
+                float D = DistributionGGX(NdotH, roughness);
+                float Pdf = (D * NdotH / (4.0 * VdotH)) + 0.0001;
+                float OmegaS = 1.0 / (float(SAMPLE_COUNT) * Pdf + 0.0001);
                 float OmegaP = 4.0 * PI / (6.0 * tex_size * tex_size);
-                float MipBias = 1.0;
-                float MipLevel = max(0.5 * log2(OmegaS / OmegaP) + MipBias, 0.0);
+                float MipLevel = max(0.5 * log2(OmegaS / OmegaP) - 1.0, 0.0);
 
                 prefilteredColor += textureLod(tex, L, MipLevel).rgb * NdotL;
                 totalWeight      += NdotL;
