@@ -49,3 +49,16 @@ vec2 raySphereIntersect(vec3 r0, vec3 rd, float sr)
 		return vec2(-b - sqrt(disc), -b + sqrt(disc)) / (2.0 * a);
 	}
 }
+
+// Returns a value from 0->1, 0 being fully occluded
+float softSphereShadow(vec3 r0, vec3 rd, float sr, float lr)
+{
+	float b = dot( r0, rd );
+	float c = dot( r0, r0 ) - sr*sr;
+	float h = b*b - c;
+
+    // A bit expensive to compute, there are optimizations possible
+    float d = sqrt( max(0.0,sr*sr-h)) - sr;
+    float t = -b - sqrt( max(h,0.0) );
+    return (t<0.0) ? 1.0 : smoothstep(0.0, 1.0, 2.5*lr*d/t );
+}

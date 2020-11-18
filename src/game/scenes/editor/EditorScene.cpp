@@ -21,6 +21,7 @@ void EditorScene::load()
 
 	r->add_drawable(&vehicle);
 	r->add_drawable(&sky);
+	sky.cubemap->generate_ibl_irradiance(32, 32);
 	r->set_ibl_source(sky.cubemap.data);
 
 	sun = SunLight(0, r->quality.sun_shadow_size);
@@ -127,7 +128,7 @@ void EditorScene::unload()
 }
 
 EditorScene::EditorScene() : vehicle(this), vehicle_int(&vehicle, &cam),
-	sky(std::move(AssetHandle<Cubemap>("debug_system:skybox.png")))
+	sky(std::move(AssetHandle<Cubemap>("debug_system:skybox.hdr")))
 {
 }
 

@@ -9,7 +9,7 @@ uniform float f_coef;
 
 uniform vec3 camera_pos;
 
-const int STEPS = 2;
+const int STEPS = 3;
 const float STEP_INVERSE = 1.0 / float(STEPS);
 
 uniform vec3 light_dir;
@@ -59,14 +59,16 @@ void main()
 		intersect.x = 0.0;
 	}
 
-	float d = 0.0;
-	float l = 0.0;
+    float r_odepth = 0.0;
+    vec3 total_r = vec3(0.0);
 
 	vec3 start = camera_pos + intersect.x * ray;
 	vec3 ipos = start;
 
-	float ds = 0.0;
+    vec3 kRlh = vec3(5.5e-6, 13.0e-6, 22.4e-6);
 
+    // This is a cast from the camera to the points of the atmosphere,
+    // we absorb the reflected sun-light
 	for(int i = 0; i < STEPS; i++)
 	{
         float step = float(i) / float(STEPS);
@@ -75,48 +77,40 @@ void main()
         ipos = start + ray * dr * step;
 
 		float h = height(ipos);
-		float shfac = 1.0;
 
-		float dist = rayPointDistance(ipos, -light_dir, vec3(0.0, 0.0, 0.0));
+        float odstep = density(h) * dr * STEP_INVERSE;
+		r_odepth += odstep;
 
-		float dotp = dot(ipos, -light_dir);
-		float dfac = exp(20.0 * dotp) / (exp(20.0 * dotp) + 1.0);
+        vec3 sray = normalize(-light_dir);
+        vec2 sintersect = raySphereIntersect(ipos, sray, 1.0);
 
-		dist = dfac + (1.0 - dfac) * dist;
+        float sdr = sintersect.y; // intersect.x doesn't make sense here as we start inside the atmo
+        float sr_odepth = 0.0;
 
-		shfac = pow(dist, 80.0);
+        float shadow = 0.0;
+		for(int j = 0; j < STEPS; j++)
+		{
+		    float sstep = float(j) / float(STEPS);
+		    vec3 spos = ipos + sray * sdr * sstep;
+		    float sh = height(spos);
+		    sr_odepth += density(sh) * sdr * STEP_INVERSE;
 
+            // Sum and average avoids some artifacts, we could
+            // also do multiplication or even just sample shadow once!
+            // The last parameter controls the "sharpness" of the shadow,
+            // the greater the sharpest
+            shadow += softSphereShadow(spos, sray, planet_radius, 1.0);
+		}
+		shadow /= STEPS;
 
-
-		d += density(h) * STEP_INVERSE * min(max(shfac, 0.0), 1.0);
-		ds = d;
+        // Tweak the iORlh parameters
+		vec3 attn = exp(-kRlh * (r_odepth * 2e4 + sr_odepth * 3e6));
+        total_r += attn * odstep * shadow;
 
 	}
 
-	float fade_factor = 0.05;
-	float fade_factor_add = 0.0;
-
-	float fade = max( min( dot(ipos, -light_dir), fade_factor), 0.0) * (1.0 / fade_factor) + fade_factor_add;
-	d = sqrt(d) * 1.5;
-
-
-	// TODO: Clean this mess up, it works but damn is it horrible code
-	float miew = max(dot(ray, -light_dir), 0.0);
-	float mie2 = pow(miew, 32.0 * 1.0);
-	float mie = pow(miew, 128.0 * 1.0 / ds);
-
-	float fade_mie = ((1.0 - mie2) * miew + mie * (1.0 - miew)) * (1.0 - fade * fade);
-
-    float r_color = max(exp(-(sunset_exponent) * (1.0 - (fade_mie + mie2))) * sqrt(ds) * (1.0 - ds), 0.0);
-	vec3 col = d * (atmo_main_color * (1.0 - r_color) + atmo_sunset_color * r_color);
-
-
-	float r_factor = abs(dot(start, light_dir));
-	r_factor = 1.0 - (pow(r_factor, 1.0 * 1.0 / (ds)));
-
-	vec3 mieColor = vec3(1.0, 1.0, 1.0) * (1.0 - r_factor) + atmo_sunset_color * r_factor;
-
-	FragColor = vec4(col + mie * mieColor * d, d);
+    vec3 color = total_r * kRlh * 1e6;
+	FragColor = vec4(color, 1.0);
 
 	//gl_FragDepth = log2(flogz) * f_coef * 0.5;
 }

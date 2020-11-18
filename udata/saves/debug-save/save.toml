@@ -11,7 +11,7 @@ in_focus = "vehicle_0"
 
 system = "debug_system:systems/system.toml"
 uid = 1
-t = 966772800.0
+t = 966702800.0
 
 [[entity]]
 	id = 1

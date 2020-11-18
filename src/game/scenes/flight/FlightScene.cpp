@@ -42,7 +42,7 @@ void FlightScene::load()
 	}, this));
 
 	get_osp()->renderer->cam = &camera;
-	camera.speed = 20.0;
+	camera.speed = 1e6;
 
 
 	Vehicle* n_vehicle = new Vehicle();
@@ -112,7 +112,7 @@ void FlightScene::render()
 	get_osp()->renderer->render(&get_osp()->game_state.universe.system);
 
 	taken++;
-	if(taken % 20 == 0 || true)
+	if(taken % 20 == 0)
 	{
 		VehicleEntity* vent = (VehicleEntity*)get_osp()->game_state.universe.entities[1];
 		glm::dvec3 sample_pos = to_dvec3(vent->vehicle->root->get_global_transform().getOrigin());
