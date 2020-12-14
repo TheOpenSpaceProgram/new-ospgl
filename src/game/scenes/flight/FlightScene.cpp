@@ -42,7 +42,7 @@ void FlightScene::load()
 	}, this));
 
 	get_osp()->renderer->cam = &camera;
-	camera.speed = 1e6;
+	camera.speed = 20.0;
 
 
 	Vehicle* n_vehicle = new Vehicle();

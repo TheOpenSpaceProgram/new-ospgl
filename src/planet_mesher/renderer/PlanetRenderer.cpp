@@ -31,8 +31,8 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 		shader->setVec3("camera_pos", (glm::vec3)(camera_pos / config.radius));
 		shader->setFloat("atmo_radius", (float)(config.atmo.radius / config.radius));
 		shader->setFloat("planet_radius", 1.0f);
-		shader->setVec3("atmo_main_color", config.atmo.main_color);
-		shader->setVec3("atmo_sunset_color", config.atmo.sunset_color);
+		shader->setVec3("kRlh", config.atmo.kRlh);
+		shader->setFloat("kMie", config.atmo.kMie);
 		shader->setFloat("atmo_exponent", (float)config.atmo.exponent);
 		shader->setFloat("sunset_exponent", (float)config.atmo.sunset_exponent);
 		shader->setVec3("light_dir", light_dir);
@@ -105,8 +105,8 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 			water_shader->setFloat("time", (float)time);
 			water_shader->setFloat("atmo_radius", (float)(config.atmo.radius / config.radius));
 			water_shader->setFloat("planet_radius", 1.0f);
-			water_shader->setVec3("atmo_main_color", config.atmo.main_color);
-			water_shader->setVec3("atmo_sunset_color", config.atmo.sunset_color);
+			water_shader->setVec3("kRlh", config.atmo.kRlh);
+			water_shader->setFloat("kMie", config.atmo.kMie);
 			water_shader->setFloat("atmo_exponent", (float)config.atmo.exponent);
 			water_shader->setFloat("sunset_exponent", (float)config.atmo.sunset_exponent);
 			water_shader->setVec3("light_dir", light_dir);

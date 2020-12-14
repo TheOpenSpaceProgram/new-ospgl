@@ -24,14 +24,14 @@ uniform vec3 camera_pos;
 
 void main()
 {
-    vec4 atmoc = atmo(light_dir, camera_pos);
+    vec3 atmoc = atmo(light_dir, camera_pos);
 
     vec3 col = vColor;
    // vec3 col = texture(tex, vTexture).xyz;
 
-    gAlbedo = (col + atmoc.xyz * atmoc.w) * 0.77;
+    gAlbedo = (col + atmoc) * 0.77;
     gNormal = vNormal;
-    gPositionEmit = vec4(vPos, atmoc.w * 0.5);
+    gPositionEmit = vec4(vPos, length(atmoc));
     gPbr.b = 1.0;
     gPbr.g = 0.0;
     gPbr.r = 0.0;

@@ -55,7 +55,7 @@ float snoise(vec2 v){
 uniform vec3 light_dir;
 void main()
 {
-    vec4 atmoc = atmo(light_dir, camera_pos);
+    vec3 atmoc = atmo(light_dir, camera_pos);
 
 
     float wave_power = max(min(0.0000001 / pow(length(camera_pos - vPos), 2.0), 1.0), 0.0);
@@ -72,7 +72,7 @@ void main()
 
     vec3 nrm = normalize(vNormal + offset);
 
-    float diff = max(dot(-light_dir, vNormal + offset * 0.5), atmoc.w * 0.5);
+    float diff = max(dot(-light_dir, vNormal + offset * 0.5), 1.0);
 
     vec3 viewDir = normalize(camera_pos - vNormal);
     vec3 reflectDir = reflect(light_dir, nrm);
@@ -93,9 +93,9 @@ void main()
 
     vec3 col = shallowcol * (1.0 - deepfactor) + deepcol * deepfactor + veryshallowcol * (1.0 - veryshallow);
 
-    gAlbedoSpec = vec4((col + atmoc.xyz * atmoc.w) * 0.77, 1.0);
+    gAlbedoSpec = vec4((col + atmoc) * 0.77, 1.0);
     gNormal = nrm;
-    gPosition = vec4(vPos, atmoc.w * 0.5 + spec);
+    gPosition = vec4(vPos, length(atmoc) + spec);
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets

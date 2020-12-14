@@ -34,8 +34,8 @@ void AtmosphereRenderer::do_pass(glm::dmat4 proj_view, glm::dmat4 model, float f
 	atmo->setVec3("camera_pos", cam_pos_relative);
 	atmo->setFloat("planet_radius", (float)(config.radius / config.atmo.radius));
 	atmo->setFloat("atmo_radius", 1.0f);
-	atmo->setVec3("atmo_main_color", config.atmo.main_color);
-	atmo->setVec3("atmo_sunset_color", config.atmo.sunset_color);
+	atmo->setVec3("kRlh", config.atmo.kRlh);
+	atmo->setFloat("kMie", config.atmo.kMie);
 	atmo->setFloat("atmo_exponent", (float)config.atmo.exponent);
 	atmo->setFloat("sunset_exponent", (float)config.atmo.sunset_exponent);
 	atmo->setVec3("light_dir", light_dir);

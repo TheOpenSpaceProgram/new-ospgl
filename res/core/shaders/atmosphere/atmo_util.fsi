@@ -2,8 +2,16 @@ uniform vec3 atmo_main_color;
 uniform vec3 atmo_sunset_color;
 uniform float atmo_exponent;
 uniform float sunset_exponent;
-const int ATMO_STEPS = 4;
-const float ATMO_STEPS_INVERSE = 1.0 / float(ATMO_STEPS);
+uniform vec3 kRlh;
+uniform float kMie;
+const int STEPS = 2;
+const int SUB_STEPS = 10;
+const int GSTEPS = 4;
+const int SUB_GSTEPS = 10;
+const float STEPS_INVERSE = 1.0 / float(STEPS);
+const float SUB_STEPS_INVERSE = 1.0 / float(SUB_STEPS);
+const float GSTEPS_INVERSE = 1.0 / float(GSTEPS);
+const float SUB_GSTEPS_INVERSE = 1.0 / float(SUB_GSTEPS);
 uniform float atmo_radius;
 uniform float planet_radius;
 
@@ -25,12 +33,6 @@ float density(float h)
    float SCALE_H = 8.0;
    return min(exp(-pow(h, atmo_exponent) * SCALE_H), 1.0);
 }
-
-float atmo_curve(float d)
-{
-	return 1.1 * (pow(20, d) - 1) / (pow(20, d) + 1);
-}
-
 
 vec2 raySphereIntersect(vec3 r0, vec3 rd, float sr)
 {
