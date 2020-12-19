@@ -65,7 +65,7 @@ public:
 		SAFE_TOML_GET(np_right_ascension, "north_pole_right_ascension", double);
 
 
-		// At the equinox the rotation is 22.5º towards the Z axis
+		// At the equinox the rotation is 22.5ï¿½ towards the Z axis
 		// for Earth (the rotation matrix is valid for everything as the
 		// data is measured relative to Earth)
 		glm::dmat4 rot = glm::rotate(glm::radians(22.43671), glm::dvec3(1.0, 0.0, 0.0));
@@ -91,7 +91,7 @@ public:
 		std::string config;
 		SAFE_TOML_GET(config, "config", std::string);
 
-		auto config_toml = assets->get_from_path<Config>(config)->root;
+		auto config_toml = osp->assets->get_from_path<Config>(config)->root;
 		::deserialize(to.config, *config_toml);
 
 		static constexpr double REVS_PER_HOUR_TO_DEGREES_PER_SECOND = 0.1;

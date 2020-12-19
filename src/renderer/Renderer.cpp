@@ -682,12 +682,12 @@ Renderer::Renderer(cpptoml::table& settings)
 	//vg = nvgCreateGL3(0);
 
 	// Load the default NVG fonts (TODO: Use generic names for this or move it over to package.lua)
-	nvgCreateFont(vg, "regular", (assets->res_path + "core/fonts/Roboto-Regular.ttf").c_str()); 
-	nvgCreateFont(vg, "bold", (assets->res_path + "core/fonts/Roboto-Bold.ttf").c_str()); 
-	nvgCreateFont(vg, "light", (assets->res_path + "core/fonts/Roboto-Light.ttf").c_str()); 
-	nvgCreateFont(vg, "medium", (assets->res_path + "core/fonts/Roboto-Medium.ttf").c_str()); 
+	nvgCreateFont(vg, "regular", (osp->assets->res_path + "core/fonts/Roboto-Regular.ttf").c_str());
+	nvgCreateFont(vg, "bold", (osp->assets->res_path + "core/fonts/Roboto-Bold.ttf").c_str());
+	nvgCreateFont(vg, "light", (osp->assets->res_path + "core/fonts/Roboto-Light.ttf").c_str());
+	nvgCreateFont(vg, "medium", (osp->assets->res_path + "core/fonts/Roboto-Medium.ttf").c_str());
 	// This font is meant to be used at exactly size 12
-	nvgCreateFont(vg, "tiny", (assets->res_path + "core/fonts/ProggyTinySZ.ttf").c_str());
+	nvgCreateFont(vg, "tiny", (osp->assets->res_path + "core/fonts/ProggyTinySZ.ttf").c_str());
 
 	resize(width, height, scale);
 

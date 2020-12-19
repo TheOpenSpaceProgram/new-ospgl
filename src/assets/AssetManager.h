@@ -12,6 +12,8 @@
 #include <util/SerializeUtil.h>
 #include <lua/LuaCore.h>
 
+#include <OSP.h>
+
 #include <PackageMetadata.h>
 
 // Pointer to a function which looks like:
@@ -140,12 +142,7 @@ public:
 	std::string res_path;
 	std::string udata_path;
 
-	AssetManager(const std::string& res_path, const std::string& udata_path)
-	{
-		current_package = "core";
-		this->res_path = res_path;
-		this->udata_path = udata_path;
-	}
+	AssetManager(const std::string& res_path, const std::string& udata_path);
 };
 
 template<typename T>
@@ -328,15 +325,8 @@ inline bool AssetManager::load(const std::string& package, const std::string& na
 	logger->debug("Loaded asset '{}:{}'", package, name);
 
 	return true;
-}	
+}
 
-extern AssetManager* assets;
-
-// Creates the default asset manager, with all 
-// asset types loaded 
-void create_global_asset_manager(std::string& res_path, std::string& udata_path);
-
-void destroy_global_asset_manager();
 
 struct AssetPointer
 {
@@ -349,7 +339,7 @@ struct AssetPointer
 
 	AssetPointer(const std::string& path, const std::string& def = "")
 	{
-		std::tie(pkg, name) = assets->get_package_and_name(path, def);
+		std::tie(pkg, name) = osp->assets->get_package_and_name(path, def);
 	}
 
 	AssetPointer()
@@ -382,7 +372,7 @@ public:
 		}
 		else
 		{
-			data = assets->get<T>(pkg, name);
+			data = osp->assets->get<T>(pkg, name);
 			return data;
 		}
 	}
@@ -391,7 +381,7 @@ public:
 	{
 		if (data != nullptr)
 		{
-			assets->free<T>(pkg, name);
+			osp->assets->free<T>(pkg, name);
 			data = nullptr;
 		}
 	}
@@ -404,7 +394,7 @@ public:
 
 		if (load_now)
 		{
-			data = assets->get<T>(pkg, name);
+			data = osp->assets->get<T>(pkg, name);
 		}
 		else
 		{
@@ -420,13 +410,13 @@ public:
 
 	AssetHandle(const std::string& path, bool load_now = true)
 	{
-		auto[pkg, name] = assets->get_package_and_name(path, assets->get_current_package());
+		auto[pkg, name] = osp->assets->get_package_and_name(path, osp->assets->get_current_package());
 		this->pkg = pkg;
 		this->name = name;
 
 		if (load_now)
 		{
-			data = assets->get<T>(pkg, name);
+			data = osp->assets->get<T>(pkg, name);
 		}
 		else
 		{

@@ -5,33 +5,34 @@
 #include "OSP.h"
 #include "game/scenes/flight/FlightScene.h"
 #include "game/scenes/editor/EditorScene.h"
+#include "game/GameState.h"
 #include <util/Profiler.h>
 
 static int iteration = 0;
 
 int main(int argc, char** argv)
 {
-	OSP osp = OSP();
-	osp.init(argc, argv);
+	osp = new OSP();
 
-	SerializeUtil::read_file_to("udata/saves/debug-save/save.toml", osp.game_state);
+	osp->init(argc, argv);
+	SerializeUtil::read_file_to("udata/saves/debug-save/save.toml", *osp->game_state);
 
 	double fps_t = 0.0;
 	double dt_avg = 0.0;
 
 	PROFILE_FUNC();
 
-	osp.game_state.load_scene(new FlightScene());
+	osp->game_state->load_scene(new FlightScene());
 
-	while (osp.should_loop())
+	while (osp->should_loop())
 	{
 		PROFILE_BLOCK("frame");
 
-		osp.start_frame();
-		osp.update();
-		osp.render();
-		osp.finish_frame();
+		osp->start_frame();
+		osp->update();
+		osp->render();
+		osp->finish_frame();
 	}
 
-	osp.finish();
+	osp->finish();
 }

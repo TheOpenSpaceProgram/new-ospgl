@@ -93,17 +93,17 @@ std::string Shader::preprocessor(const std::string& file)
 			}
 			else
 			{
-				auto[pk, nm] = assets->get_package_and_name(token, pkg);
+				auto[pk, nm] = osp->assets->get_package_and_name(token, pkg);
 				path = pk + ":" + nm;
 			}
 
-			if(!assets->file_exists(assets->resolve_path(path)))
+			if(!osp->assets->file_exists(osp->assets->resolve_path(path)))
 			{
 				logger->error("Could not include: {}", path);
 			}
 			else
 			{
-				std::string file = assets->load_string(path);
+				std::string file = osp->assets->load_string(path);
 				// Postprocess the file too
 				file = preprocessor(file);
 				final_file += file;

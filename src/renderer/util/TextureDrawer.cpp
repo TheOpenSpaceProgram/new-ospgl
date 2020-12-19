@@ -106,7 +106,7 @@ TextureDrawer::TextureDrawer()
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	shader = assets->get<Shader>("core", "shaders/simple_sprite.vs");
+	shader = osp->assets->get<Shader>("core", "shaders/simple_sprite.vs");
 }
 
 TextureDrawer::~TextureDrawer()

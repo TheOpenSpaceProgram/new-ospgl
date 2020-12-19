@@ -5,16 +5,18 @@
 #include <cpptoml.h>
 #include <memory>
 #include "util/SerializeUtil.h"
-#include "assets/AssetManager.h"
-#include "renderer/Renderer.h"
 #include "util/InputUtil.h"
-#include "lua/LuaCore.h"
 #include "util/defines.h"
 #include "util/Timer.h"
-#include <game/GameState.h>
 #include <game/database/GameDatabase.h>
 
+class AssetManager;
+class Renderer;
+class LuaCore;
+class GameState;
+
 // Initializes the different subsystems OSP has
+// It's a global class, only one OSP may exist at once (filesystem related)
 class OSP
 {
 public:
@@ -23,13 +25,14 @@ public:
 
 	// Delta time but is at maximum the physics framerate,
 	// use for stuff related to simulation
-	double dt;
+	double dt{};
 	
 	// For use with user input unrelated to simulation (cameras and similar)
-	double game_dt;
+	double game_dt{};
 
-	Renderer* renderer;
-	GameState game_state;
+	AssetManager* assets{};
+	Renderer* renderer{};
+	GameState* game_state{};
 	GameDatabase game_database;
 
 	constexpr static const char* OSP_VERSION = "PRE-RELEASE";
@@ -50,3 +53,5 @@ public:
 
 	OSP();
 };
+
+extern OSP* osp;

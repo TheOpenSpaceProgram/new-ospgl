@@ -51,10 +51,10 @@ int LoadFileRequire(lua_State* L)
 	else
 	{
 		// Attempt to load lua file from package
-		std::string resolved = assets->resolve_path(path, sview["__pkg"].get_or<std::string>("core"));
-		if (assets->file_exists(resolved))
+		std::string resolved = osp->assets->resolve_path(path, sview["__pkg"].get_or<std::string>("core"));
+		if (osp->assets->file_exists(resolved))
 		{
-			std::string file = assets->load_string_raw(resolved);
+			std::string file = osp->assets->load_string_raw(resolved);
 
 			luaL_loadbuffer(L, file.data(), file.size(), file.c_str());
 

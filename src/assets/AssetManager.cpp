@@ -20,29 +20,25 @@
 
 AssetManager* assets;
 
-
-void create_global_asset_manager(std::string& res_path, std::string& udata_path)
+AssetManager::AssetManager(const std::string &res_path, const std::string &udata_path)
 {
-	assets = new AssetManager(res_path, udata_path);
+	current_package = "core";
+	this->res_path = res_path;
+	this->udata_path = udata_path;
 
-	assets->preload();
+	preload();
 
-	assets->create_asset_type<Shader>("Shader", load_shader);
-	assets->create_asset_type<Image>("Image", load_image);
-	assets->create_asset_type<Config>("Config", load_config);
-	assets->create_asset_type<BitmapFont>("Bitmap Font", load_bitmap_font);
-	assets->create_asset_type<Model>("Model", load_model);
-	assets->create_asset_type<Material>("Material", load_material);
-	assets->create_asset_type<PartPrototype>("Part Prototype", load_part_prototype);
-	assets->create_asset_type<BuildingPrototype>("Building Prototype", load_building_prototype);
-	assets->create_asset_type<Cubemap>("Cubemap", load_cubemap);
+	create_asset_type<Shader>("Shader", load_shader);
+	create_asset_type<Image>("Image", load_image);
+	create_asset_type<Config>("Config", load_config);
+	create_asset_type<BitmapFont>("Bitmap Font", load_bitmap_font);
+	create_asset_type<Model>("Model", load_model);
+	create_asset_type<Material>("Material", load_material);
+	create_asset_type<PartPrototype>("Part Prototype", load_part_prototype);
+	create_asset_type<BuildingPrototype>("Building Prototype", load_building_prototype);
+	create_asset_type<Cubemap>("Cubemap", load_cubemap);
 
-	assets->check_packages();
-}
-
-void destroy_global_asset_manager()
-{
-	delete assets;
+	check_packages();
 }
 
 bool AssetManager::file_exists(const std::string& path)

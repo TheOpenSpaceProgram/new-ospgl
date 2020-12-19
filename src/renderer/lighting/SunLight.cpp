@@ -29,7 +29,7 @@ SunLight::SunLight(int far_size, int near_size)
 	near_shadow_size = near_size;
 	far_shadow_size = far_size;
 
-	shader = assets->get<Shader>("core", "shaders/light/sunlight.vs");
+	shader = osp->assets->get<Shader>("core", "shaders/light/sunlight.vs");
 	color = glm::vec3(1.0f, 0.9f, 0.9f);
 	spec_color = glm::vec3(1.0f, 0.8f, 0.8f);
 	ambient_color = glm::vec3(0.1f, 0.1f, 0.1f);

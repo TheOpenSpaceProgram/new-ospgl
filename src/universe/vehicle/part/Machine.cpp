@@ -59,9 +59,9 @@ void Machine::init(sol::state* lua_state, Part* in_part)
 
 	this->in_part = in_part;
 
-	std::string old = assets->get_current_package();
-	auto[pkg, name] = assets->get_package_and_name(script_path, in_pkg);
-	std::string full_path = assets->res_path + pkg + "/" + name;	
+	std::string old = osp->assets->get_current_package();
+	auto[pkg, name] = osp->assets->get_package_and_name(script_path, in_pkg);
+	std::string full_path = osp->assets->res_path + pkg + "/" + name;
 	auto result = (*lua_state).safe_script_file(full_path, env);
 
 	// Then we simply move over the environment to an entry in the global lua_state

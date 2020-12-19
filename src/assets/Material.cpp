@@ -215,7 +215,7 @@ void Material::set_core(int* gl_tex, const CameraUniforms& cu, glm::dmat4 model,
 Material* load_material(const std::string & path, const std::string & name, const std::string & pkg, const cpptoml::table& cfg)
 {
 	// Config makes the package magic work
-	Config* c = assets->get<Config>(pkg, name);
+	Config* c = osp->assets->get<Config>(pkg, name);
 	
 	Material* out = new Material();
 

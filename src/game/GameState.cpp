@@ -1,15 +1,14 @@
 #include "GameState.h"
 #include <OSP.h>
 
-GameState::GameState(OSP* n_osp) : universe()
+GameState::GameState() : universe()
 {
-	osp = n_osp;
 }
 
 void GameState::load(const cpptoml::table& from)
 {
 	std::string system_path = *from.get_as<std::string>("system");
-	assets->get_from_path<Config>(system_path)->read_to(universe.system);
+	osp->assets->get_from_path<Config>(system_path)->read_to(universe.system);
 
 	double t0 = *from.get_as<double>("t");
 	universe.system.t0 = t0;
@@ -110,7 +109,6 @@ void GameState::load_scene(Scene* n_scene)
 	}
 
 	scene = n_scene;
-	scene->setup(osp);
 	scene->load();
 }
 

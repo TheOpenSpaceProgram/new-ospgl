@@ -166,7 +166,7 @@ EditorVehicle::EditorVehicle(EditorScene* sc)
 	SerializeUtil::read_file_to("udata/vehicles/debug.toml", *veh);
 	
 	// Load the different models
-	std::string model_path = *SerializeUtil::load_file(assets->resolve_path("core:meshes/editor_attachment.toml"))
+	std::string model_path = *SerializeUtil::load_file(osp->assets->resolve_path("core:meshes/editor_attachment.toml"))
 		->get_as<std::string>("model");
 
 	AssetHandle<Model> model = AssetHandle<Model>(model_path);

@@ -2,7 +2,6 @@
 #include "PlanetarySystem.h"
 #include "entity/Entity.h"
 #include <any>
-#include <renderer/Renderer.h>
 #include <unordered_set>
 #include "Events.h"
 #pragma warning(push, 0)

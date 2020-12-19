@@ -1,5 +1,7 @@
 #include "FlightScene.h"
 #include <OSP.h>
+#include <game/GameState.h>
+#include <renderer/Renderer.h>
 #include <universe/Universe.h>
 
 #include <universe/vehicle/Vehicle.h>
@@ -10,17 +12,17 @@
 void FlightScene::load()
 {
 	logger->info("A");
-	game_state = &get_osp()->game_state;
+	game_state = osp->game_state;
 	universe = &game_state->universe;
 	
 	debug_drawer->debug_enabled = true;
 
 	// Add all entities and system to the renderer
-	get_osp()->renderer->add_drawable(&universe->system);
+	osp->renderer->add_drawable(&universe->system);
 	
 	for(Entity* ent : universe->entities)
 	{
-		get_osp()->renderer->add_drawable(ent);
+		osp->renderer->add_drawable(ent);
 	}
 
 	// Sign up for new entities to automatically add them to the renderer
@@ -28,7 +30,7 @@ void FlightScene::load()
 	{
 		FlightScene* self_s = (FlightScene*)self;
 		int64_t id = std::get<int64_t>(args[0]);
-		self_s->get_osp()->renderer->add_drawable(self_s->universe->get_entity(id));	
+		osp->renderer->add_drawable(self_s->universe->get_entity(id));
 
 	}, this));
 
@@ -37,21 +39,21 @@ void FlightScene::load()
 	{
 		FlightScene* self_s = (FlightScene*)self;
 		int64_t id = std::get<int64_t>(args[0]);
-		self_s->get_osp()->renderer->remove_drawable(self_s->universe->get_entity(id));
+		osp->renderer->remove_drawable(self_s->universe->get_entity(id));
 
 	}, this));
 
-	get_osp()->renderer->cam = &camera;
+	osp->renderer->cam = &camera;
 	camera.speed = 20.0;
 
 
-	Vehicle* n_vehicle = new Vehicle();
+	auto* n_vehicle = new Vehicle();
 	SerializeUtil::read_file_to("udata/vehicles/debug.toml", *n_vehicle);
 
-	get_osp()->game_state.universe.create_entity<VehicleEntity>(n_vehicle);
+	osp->game_state->universe.create_entity<VehicleEntity>(n_vehicle);
 
 	WorldState st = WorldState();
-	BuildingEntity* lpad_ent = (BuildingEntity*)get_osp()->game_state.universe.entities[0];
+	auto* lpad_ent = (BuildingEntity*)osp->game_state->universe.entities[0];
 	WorldState stt = lpad_ent->traj.get_state(0.0, true);
 
 	st.cartesian.pos = stt.cartesian.pos;
@@ -71,7 +73,7 @@ void FlightScene::load()
 		input.set_ctx(result->get<InputContext*>());		
 	}
 
-	Renderer* r = get_osp()->renderer;
+	Renderer* r = osp->renderer;
 	r->add_drawable(&sky);
 	r->set_ibl_source(nullptr);
 
@@ -94,13 +96,13 @@ void FlightScene::update()
 	// GUI preparation goes here
 	
 	input.keyboard_blocked = camera.keyboard_blocked || gui_input.keyboard_blocked;
-	input.update(get_osp()->renderer->window, get_osp()->game_dt);
+	input.update(osp->renderer->window, osp->game_dt);
 
 	VehicleEntity* v_ent =  universe->get_entity_as<VehicleEntity>(2);	
 	
 	camera.center = v_ent->vehicle->unpacked_veh.get_center_of_mass(true);
 	
-	camera.update(get_osp()->game_dt);
+	camera.update(osp->game_dt);
 
 }
 
@@ -109,21 +111,21 @@ static int face = 0;
 
 void FlightScene::render()
 {
-	get_osp()->renderer->render(&get_osp()->game_state.universe.system);
+	osp->renderer->render(&osp->game_state->universe.system);
 
 	taken++;
 	if(taken % 20 == 0)
 	{
-		VehicleEntity* vent = (VehicleEntity*)get_osp()->game_state.universe.entities[1];
+		VehicleEntity* vent = (VehicleEntity*)osp->game_state->universe.entities[1];
 		glm::dvec3 sample_pos = to_dvec3(vent->vehicle->root->get_global_transform().getOrigin());
 		/*for(size_t i = 0; i < 6; i++)
 		{
-			get_osp()->renderer->render_env_face(sample_pos, i);
+			osp->renderer->render_env_face(sample_pos, i);
 		}*/
 
-		get_osp()->renderer->render_env_face(sample_pos, face % 6);
+		osp->renderer->render_env_face(sample_pos, face % 6);
 		face++;
 
-		//sky.cubemap.data = get_osp()->renderer->ibl_source;
+		//sky.cubemap.data = osp->renderer->ibl_source;
 	}
 }

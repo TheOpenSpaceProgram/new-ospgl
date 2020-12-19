@@ -25,8 +25,8 @@ void LuaAssets::load_to(sol::table& table)
 	table.set_function(
 		"get_image", [](sol::this_state st, const std::string& path)
 	{
-		auto[pkg, name] = assets->get_package_and_name(path, sol::state_view(st)["__pkg"].get<std::string>());
-		Image* img = assets->get<Image>(pkg, name, true);
+		auto[pkg, name] = osp->assets->get_package_and_name(path, sol::state_view(st)["__pkg"].get<std::string>());
+		Image* img = osp->assets->get<Image>(pkg, name, true);
 		return std::move(LuaAssetHandle<Image>(pkg, name, img));
 	});
 
@@ -62,7 +62,7 @@ LuaAssetHandle<T>::LuaAssetHandle(const LuaAssetHandle<T>& p2)
 	data = p2.data;
 	ut = p2.ut;
 
-	assets->get<T>(pkg, name, true);
+	osp->assets->get<T>(pkg, name, true);
 }
 
 template<typename T>
@@ -78,6 +78,6 @@ LuaAssetHandle<T>::~LuaAssetHandle()
 {
 	if (data != nullptr)
 	{
-		assets->free<T>(pkg, name);
+		osp->assets->free<T>(pkg, name);
 	}
 }

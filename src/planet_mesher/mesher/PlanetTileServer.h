@@ -13,6 +13,7 @@
 #include "PlanetTile.h"
 #include "../quadtree/QuadTreePlanet.h"
 #include <util/ThreadUtil.h>
+#include <assets/AssetManager.h>
 
 
 

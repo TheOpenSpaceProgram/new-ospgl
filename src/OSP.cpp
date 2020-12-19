@@ -2,8 +2,14 @@
 #include "rang.hpp"
 #include <renderer/util/TextDrawer.h>
 #include <util/Profiler.h>
+#include <assets/AssetManager.h>
+#include <renderer/Renderer.h>
+#include <lua/LuaCore.h>
+#include <game/GameState.h>
 
 InputUtil* input;
+
+OSP* osp;
 
 #ifdef DETAILED_TIMING
 extern Timer timing;
@@ -107,7 +113,7 @@ void OSP::init(int argc, char** argv)
 		// Initialize subsystems
 		create_global_logger();
 
-		logger->info("Starting OSP with settings = \"{}\", resource path = \"{}\", user data path = \"{}\"", settings_path, res_path, udata_path);
+		logger->info(R"(Starting OSP with settings = "{}", resource path = "{}", user data path = "{}")", settings_path, res_path, udata_path);
 		
 		// Load settings
 		std::string settings_file = AssetManager::load_string_raw(udata_path + settings_path);
@@ -155,13 +161,15 @@ void OSP::init(int argc, char** argv)
 
 		std::cout << *config << std::endl;
 
-		create_global_asset_manager(res_path, udata_path);
+		assets = new AssetManager(res_path, udata_path);
 		renderer = new Renderer(*config);
 		create_global_debug_drawer();
 		create_global_texture_drawer();
 		create_global_text_drawer();
 		create_global_lua_core();
 		create_global_profiler();
+
+		game_state = new GameState();
 
 		// Load packages now so they register all scripts...
 		assets->load_packages(lua_core, &game_database);
@@ -170,8 +178,7 @@ void OSP::init(int argc, char** argv)
 		input->setup(renderer->window);
 
 		dt = 0.0;
-		Timer dtt = Timer();
-	}	
+	}
 }
 
 void OSP::finish()
@@ -183,7 +190,8 @@ void OSP::finish()
 	destroy_global_texture_drawer();
 	destroy_global_debug_drawer();
 	delete renderer;
-	destroy_global_asset_manager();	
+	delete assets;
+	delete game_state;
 	destroy_global_logger();
 }
 
@@ -210,14 +218,14 @@ void OSP::start_frame()
 
 void OSP::update()
 {
-	game_state.update();
+	game_state->update();
 }
 
 void OSP::render()
 {
 	if(renderer != nullptr)
 	{
-		game_state.render();
+		game_state->render();
 		// It's the responsability of the Scene to call renderer render
 		renderer->do_imgui();
 		renderer->finish();
@@ -226,7 +234,7 @@ void OSP::render()
 
 void OSP::finish_frame()
 {
-	double max_dt = game_state.universe.MAX_PHYSICS_STEPS * game_state.universe.PHYSICS_STEPSIZE;
+	double max_dt = game_state->universe.MAX_PHYSICS_STEPS * game_state->universe.PHYSICS_STEPSIZE;
 	dt = dtt.restart();
 	game_dt = dt;
 
@@ -237,7 +245,6 @@ void OSP::finish_frame()
 	}
 }
 
-OSP::OSP() : game_state(this)
+OSP::OSP()
 {
-
 }

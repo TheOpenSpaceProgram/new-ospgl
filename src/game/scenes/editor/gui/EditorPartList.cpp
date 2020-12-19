@@ -6,9 +6,9 @@
 void EditorCategory::load_from_path(const std::string& path)
 {
 	using table_ptr = std::shared_ptr<cpptoml::table>;
-	std::string pkg = assets->get_package_and_name(path, "core").first;
+	std::string pkg = osp->assets->get_package_and_name(path, "core").first;
 	
-	table_ptr root = SerializeUtil::load_file(assets->resolve_path(path));
+	table_ptr root = SerializeUtil::load_file(osp->assets->resolve_path(path));
 	name = root->get_as<std::string>("name").value_or("[NAME NOT SET]");
 	desc = root->get_as<std::string>("description").value_or("");
 	priority = root->get_as<int64_t>("priority").value_or(0);
@@ -16,10 +16,10 @@ void EditorCategory::load_from_path(const std::string& path)
 
 	std::string icon_path = root->get_as<std::string>("icon").value_or("core:notex.png");
 
-	std::string prev_pkg = assets->get_current_package();
-	assets->set_current_package(pkg);
+	std::string prev_pkg = osp->assets->get_current_package();
+	osp->assets->set_current_package(pkg);
 	icon = AssetHandle<Image>(icon_path);
-	assets->set_current_package(prev_pkg);
+	osp->assets->set_current_package(prev_pkg);
 }
 
 void EditorPartList::update_part_list()
@@ -123,7 +123,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
 
 	icon_renderer = new PartIconRenderer(part_icon_size);
 	// Load all exposed via the database parts
-	for(const std::string& path : sc->get_osp()->game_database.parts)
+	for(const std::string& path : osp->game_database.parts)
 	{
 		all_parts.emplace_back();
 		all_parts.back().proto = AssetHandle<PartPrototype>(path);
@@ -133,7 +133,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
 	}	
 
 	// Load categories
-	for(const std::string& cat : sc->get_osp()->game_database.part_categories)
+	for(const std::string& cat : osp->game_database.part_categories)
 	{
 		categories.emplace_back();
 		EditorCategory& n = categories[categories.size() - 1];
@@ -160,7 +160,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
 	category_list->margins = glm::ivec4(1, 2, part_margin, 0);
 	def_panel.child_1->child_0->layout = category_list;
 
-	GameDatabase* gdb = &sc->get_osp()->game_database;
+	GameDatabase* gdb = &osp->game_database;
 
 	// Category buttons
 	for(int i = 0; i < categories.size(); i++)

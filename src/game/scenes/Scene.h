@@ -7,10 +7,6 @@ class OSP;
 // and controlling vehicles or other task (creating vehicles, discovering technology...)
 class Scene
 {
-private:
-
-	OSP* osp;
-
 public:
 
 	GUIInput gui_input;
@@ -22,17 +18,5 @@ public:
 	// Called the frame the scene is unloaded
 	virtual void unload() = 0;
 
-	
-
-	OSP* get_osp()
-	{
-		return osp;
-	}
-
-	void setup(OSP* osp)
-	{
-		this->osp = osp;
-	}
-
-	virtual ~Scene() {}	
+	virtual ~Scene() {}
 };

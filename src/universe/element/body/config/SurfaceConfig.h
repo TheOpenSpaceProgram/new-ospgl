@@ -1,10 +1,11 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "../../../../util/SerializeUtil.h"
-#include "../../../../util/serializers/glm.h"
-#include "../../../../assets/Image.h"
-#include "../../../../assets/AssetManager.h"
+#include <OSP.h>
+#include <util/SerializeUtil.h>
+#include <util/serializers/glm.h>
+#include <assets/Image.h>
+#include <assets/AssetManager.h>
 
 constexpr bool LOAD_SURFACES_ON_START = false;
 
@@ -66,6 +67,6 @@ public:
 
 		SAFE_TOML_GET(to.max_height, "max_height", double);
 
-		to.script_path = assets->resolve_path(to.script_path_raw);
+		to.script_path = osp->assets->resolve_path(to.script_path_raw);
 	}
 };

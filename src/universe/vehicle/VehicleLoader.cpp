@@ -116,7 +116,7 @@ void VehicleLoader::copy_pieces(const cpptoml::table& root)
 			if(link_type != "none")
 			{
 				// Load the physical link
-				p->link = std::make_unique<Link>(assets->load_script(link_type).first);	
+				p->link = std::make_unique<Link>(osp->assets->load_script(link_type).first);
 
 				glm::dvec3 link_from, link_to;
 				deserialize(p->link_from, *link->get_table_qualified("pfrom"));	

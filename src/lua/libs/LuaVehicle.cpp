@@ -91,9 +91,9 @@ void LuaVehicle::load_to(sol::table& table)
 				return out;
 			};
 
-			auto[pkg, name] = assets->get_package_and_name(iname, sv["__pkg"]);
+			auto[pkg, name] = osp->assets->get_package_and_name(iname, sv["__pkg"]);
 			std::string sane_name = pkg + ":" + name;
-			std::string script = assets->load_string(sane_name);
+			std::string script = osp->assets->load_string(sane_name);
 			sol::table n_table = sv.script(script, env, (const std::string&) sane_name).get<sol::table>();
 			self->load_interface(sane_name, n_table);
 			return n_table;

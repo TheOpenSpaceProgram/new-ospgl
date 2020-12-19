@@ -14,7 +14,6 @@ public:
 	Scene* scene;
 	Scene* to_delete;
 
-	OSP* osp;
 	Universe universe;
 
 	void load(const cpptoml::table& from);
@@ -27,7 +26,7 @@ public:
 	// Previous scene is deleted on next update
 	void load_scene(Scene* new_scene);
 
-	GameState(OSP* osp);
+	GameState();
 };
 
 

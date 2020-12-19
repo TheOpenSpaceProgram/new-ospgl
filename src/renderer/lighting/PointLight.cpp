@@ -14,8 +14,8 @@ PointLight::PointLight()
 		SphereGeometry::generate_and_upload(&vao, &vbo, &ebo, &index_count, 8);
 	}
 
-	fullscreen = assets->get<Shader>("core", "shaders/light/point_fullscreen.vs");
-	sphere = assets->get<Shader>("core", "shaders/light/point_sphere.vs");
+	fullscreen = osp->assets->get<Shader>("core", "shaders/light/point_fullscreen.vs");
+	sphere = osp->assets->get<Shader>("core", "shaders/light/point_sphere.vs");
 	pos = glm::dvec3(0, 0, 0);
 	color = glm::vec3(1.0f, 0.9f, 0.9f);
 	spec_color = glm::vec3(1.0f, 0.8f, 0.8f);

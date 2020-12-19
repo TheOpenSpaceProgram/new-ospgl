@@ -354,11 +354,11 @@ InputContext::~InputContext()
 void InputContext::load_from_file(const std::string& path)
 {
 	using table_ptr = std::shared_ptr<cpptoml::table>;
-	Config* cfg = assets->get_from_path<Config>(path);
+	Config* cfg = osp->assets->get_from_path<Config>(path);
 
 	// All input configs are stored in udata/input/ so it's 
 	// easy to find them
-	std::string config_path = assets->udata_path + "input/" + *cfg->root->get_as<std::string>("config");
+	std::string config_path = osp->assets->udata_path + "input/" + *cfg->root->get_as<std::string>("config");
 
 	if(!std::filesystem::exists(config_path))
 	{

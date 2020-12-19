@@ -408,7 +408,7 @@ bool PlanetTile::generate_physics(PlanetTilePath path, double planet_radius, sol
 
 void PlanetTile::prepare_lua(sol::state& lua_state)
 {
-	lua_core->load(lua_state, assets->get_current_package());
+	lua_core->load(lua_state, osp->assets->get_current_package());
 
 
 	// We must define the little utility struct GeneratorInfo

@@ -11,10 +11,10 @@ void LuaFlightInput::load_to(sol::table& table)
 			InputContext out = InputContext();
 
 			// We load an asset, so set the current package to the script's package
-			std::string old_pkg = assets->get_current_package();
-			assets->set_current_package(st["__pkg"]);
+			std::string old_pkg = osp->assets->get_current_package();
+			osp->assets->set_current_package(st["__pkg"]);
 			out.load_from_file(resource_path);
-			assets->set_current_package(old_pkg);
+			osp->assets->set_current_package(old_pkg);
 
 			return out;
 		},

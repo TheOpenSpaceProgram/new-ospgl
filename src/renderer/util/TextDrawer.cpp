@@ -178,7 +178,7 @@ TextDrawer::TextDrawer()
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	shader = assets->get<Shader>("core", "shaders/font.vs");
+	shader = osp->assets->get<Shader>("core", "shaders/font.vs");
 }
 
 
