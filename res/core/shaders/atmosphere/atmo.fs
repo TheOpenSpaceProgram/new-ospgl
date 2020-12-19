@@ -10,6 +10,7 @@ uniform float f_coef;
 uniform vec3 camera_pos;
 uniform vec3 light_dir;
 
+
 #include <core:shaders/atmosphere/atmo_util.fsi>
 
 void main()

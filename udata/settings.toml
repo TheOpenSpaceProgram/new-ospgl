@@ -9,3 +9,9 @@
 	sun_terrain_shadow_size = 1024
 	secondary_shadow_size = 512
 	env_map_size = 256
+	pbr_quality = "full"
+
+[renderer.quality.atmosphere]
+	iterations = 3
+	sub_iterations = 2
+	low_end = false

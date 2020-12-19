@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include "AssetManager.h"
+#include <renderer/Renderer.h>
 #include <string>
 
 std::string Shader::preprocessor(const std::string& file)
@@ -12,6 +13,7 @@ std::string Shader::preprocessor(const std::string& file)
 
 	std::string final_file;
 
+	size_t line_num = 1;
 	while(std::getline(ss, line, '\n'))
 	{
 		// Remove whitespace, the shader compiler does not care about it
@@ -93,20 +95,36 @@ std::string Shader::preprocessor(const std::string& file)
 			}
 			else
 			{
-				auto[pk, nm] = osp->assets->get_package_and_name(token, pkg);
-				path = pk + ":" + nm;
+				if(token == "quality_defines")
+				{
+					// Add the config defines from RenderConfig
+					final_file += osp->renderer->quality.get_shader_defines();
+					final_file += "\n";
+					final_file += "\n#line " + std::to_string(line_num - 1);
+					final_file += "\n";
+					continue;
+				}
+				else
+				{
+					auto[pk, nm] = osp->assets->get_package_and_name(token, pkg);
+					path = pk + ":" + nm;
+				}
 			}
 
-			if(!osp->assets->file_exists(osp->assets->resolve_path(path)))
+			if(!AssetManager::file_exists(osp->assets->resolve_path(path)))
 			{
 				logger->error("Could not include: {}", path);
 			}
 			else
 			{
-				std::string file = osp->assets->load_string(path);
+				std::string sfile = osp->assets->load_string(path);
 				// Postprocess the file too
-				file = preprocessor(file);
-				final_file += file;
+				sfile = preprocessor(sfile);
+				final_file += sfile;
+				// Add line directive
+				final_file += "\n#line " + std::to_string(line_num - 1);
+				final_file += "\n";
+
 			}
 		}
 		else
@@ -114,15 +132,16 @@ std::string Shader::preprocessor(const std::string& file)
 			// Parse substitutions
 			final_file += line;
 			final_file += "\n";
-		}	
+		}
 
-	
+
+		line_num++;
 	}
 
 	return final_file;
 }
 
-void Shader::use()
+void Shader::use() const
 {
 	logger->check(id != 0, "Shader must be created before use");
 	glUseProgram(id);
@@ -144,27 +163,27 @@ Shader::Shader(const std::string& v, const std::string& f, const std::string& pk
 
 	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
 
-	glShaderSource(vs, 1, &vproc_cstr, NULL);
+	glShaderSource(vs, 1, &vproc_cstr, nullptr);
 	glCompileShader(vs);
 
 	glGetShaderiv(vs, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
-		glGetShaderInfoLog(vs, 1024, NULL, infoLog);
+		glGetShaderInfoLog(vs, 1024, nullptr, infoLog);
 		logger->error("Error compiling vertex shader:\n{}", std::string(infoLog));
-	};
+	}
 
 	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
 
-	glShaderSource(fs, 1, &fproc_cstr, NULL);
+	glShaderSource(fs, 1, &fproc_cstr, nullptr);
 	glCompileShader(fs);
 
 	glGetShaderiv(fs, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
-		glGetShaderInfoLog(fs, 1024, NULL, infoLog);
+		glGetShaderInfoLog(fs, 1024, nullptr, infoLog);
 		logger->error("Error compiling fragment shader:\n{}", std::string(infoLog));
-	};
+	}
 
 	id = glCreateProgram();
 	glAttachShader(id, vs);
@@ -174,9 +193,9 @@ Shader::Shader(const std::string& v, const std::string& f, const std::string& pk
 	glGetProgramiv(id, GL_LINK_STATUS, &success);
 	if (!success)
 	{
-		glGetProgramInfoLog(id, 1024, NULL, infoLog);
+		glGetProgramInfoLog(id, 1024, nullptr, infoLog);
 		logger->error("Error linking shaders:\n{}", std::string(infoLog));
-	};
+	}
 
 	glDeleteShader(vs);
 	glDeleteShader(fs);
@@ -184,9 +203,7 @@ Shader::Shader(const std::string& v, const std::string& f, const std::string& pk
 }
 
 
-Shader::~Shader()
-{
-}
+Shader::~Shader() = default;
 
 Shader* load_shader(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
 {

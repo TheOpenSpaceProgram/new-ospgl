@@ -51,7 +51,7 @@ public:
 		
 	}
 
-	void use();
+	void use() const;
 
 	inline void setBool(const std::string &name, bool value)
 	{
