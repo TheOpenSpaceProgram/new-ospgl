@@ -1,92 +1,58 @@
 #pragma once
 #include "../kepler/KeplerElements.h"
-#include "body/PlanetaryBody.h"
-#include "barycenter/Barycenter.h"
-#include "star/Star.h"
+#include "config/ElementConfig.h"
+#include <renderer/PlanetaryBodyRenderer.h>
+#include <assets/Config.h>
+
+class GroundShape;
+class btRigidBody;
 
 class SystemElement
 {
 public:
-
-	enum SystemElementType
-	{
-		STAR,
-		BARYCENTER,
-		BODY
-	};
-
 	size_t index;
 
 	std::string name;
 
-	SystemElementType type;
+	ElementConfig config;
 
-	PlanetaryBody* as_body;
-	Barycenter* as_barycenter;
-	Star* as_star;
+	PlanetaryBodyRenderer renderer;
 
-	// Only needed on bodies which orbit barycenters
-	// If a body is a primary it does not need any orbital 
-	// parameters other than the smajor_axis (which is computed
-	// on load time)
-	bool is_primary;
+	// Externally managed, these are not present on gas giants
+	GroundShape* ground_shape;
+	btRigidBody* rigid_body;
 
 
-	double soi_radius;
+	// 0 = no dot, 1 = only dot
+	// Used to save resources when rendering planets which are far away
+	float dot_factor;
 
-	// Set by PlanetarySystem deserializer
-	SystemElement* parent;
-	ArbitraryKeplerOrbit orbit;
-	// Applied to barycenter primaries only
-	double barycenter_radius;
 
-	// Warning: Be careful when orbiting around barycenters
-	double get_mass(bool as_primary = false, bool compound = false)
+	// FOV is in radians
+	float get_dot_factor(float distance, float fov);
+
+	glm::dvec3 position_at_epoch;
+	glm::dvec3 velocity_at_epoch;
+
+	// In degrees per second
+	double rotation_speed;
+	// In degrees
+	double rotation_at_epoch;
+	// Relative to the ecliptic, aligned would mean (0, 1, 0)
+	// It's constructed from the right ascension (towards vernal equinox, 'x')
+	// and declination (towards north celestial pole, towards 'y')
+	// in the config so the user does not need to touch this
+	glm::dvec3 rotation_axis;
+
+	glm::dmat4 build_rotation_matrix(double t0, double t, bool include_rot_at_epoch = true) const;
+
+	// Coordimates are given relative to the rotated body
+	// (Real rotation axis)
+	glm::dvec3 get_tangential_speed(glm::dvec3 at_relative) const;
+
+	double get_mass() const
 	{
-		if (type == STAR)
-		{
-			return as_star->mass;
-		}
-		else if (type == BARYCENTER)
-		{
-			if (compound)
-			{
-				return as_barycenter->primary->as_body->config.mass + as_barycenter->secondary->as_body->config.mass;
-			}
-			else
-			{
-				if (as_primary)
-				{
-					return as_barycenter->secondary->as_body->config.mass;
-				}
-				else
-				{
-					return as_barycenter->primary->as_body->config.mass;
-				}
-			}
-
-		}
-		else
-		{
-			return as_body->config.mass;
-		}
-	}
-
-	// Returns 0 for barycenters
-	double get_real_mass()
-	{
-		if(type == STAR)
-		{
-			return as_star->mass;
-		}
-		else if(type == BARYCENTER)
-		{
-			return 0.0;
-		}
-		else
-		{
-			return as_body->config.mass;
-		}
+		return config.mass;
 	}
 
 	SystemElement();
@@ -106,31 +72,27 @@ public:
 	// Star is special
 	static void deserialize(SystemElement& to, const cpptoml::table& from)
 	{
-		to.as_body = nullptr;
-
 		SAFE_TOML_GET(to.name, "name", std::string);
 
-		bool is_barycenter;
+		std::string config;
+		SAFE_TOML_GET(config, "config", std::string);
 
-		SAFE_TOML_GET_OR(is_barycenter, "is_barycenter", bool, false);
-		SAFE_TOML_GET_OR(to.is_primary, "is_primary", bool, false);
+		auto config_toml = osp->assets->get_from_path<Config>(config)->root;
+		::deserialize(to.config, *config_toml);
 
-		if (!to.is_primary)
-		{
-			::deserialize(to.orbit, from);
-		}
+		static constexpr double REVS_PER_HOUR_TO_DEGREES_PER_SECOND = 0.1;
 
-		if (is_barycenter)
-		{
-			to.type = SystemElement::BARYCENTER;
-			to.as_barycenter = new Barycenter();
-		}
-		else
-		{
-			to.type = SystemElement::BODY;
-			to.as_body = new PlanetaryBody();
-			::deserialize(*to.as_body, from);
+		SAFE_TOML_GET(to.rotation_at_epoch, "rotation_at_epoch", double);
+		double rotation_period;
+		SAFE_TOML_GET(rotation_period, "rotation_period", double);
 
-		}
+		to.rotation_speed = (1.0 / rotation_period) * REVS_PER_HOUR_TO_DEGREES_PER_SECOND;
+
+		SAFE_TOML_GET_TABLE(to.rotation_axis, "rotation_axis", glm::dvec3);
+		to.rotation_axis = glm::normalize(to.rotation_axis);
+
+		SAFE_TOML_GET_TABLE(to.position_at_epoch, "position", glm::dvec3);
+		SAFE_TOML_GET_TABLE(to.velocity_at_epoch, "velocity", glm::dvec3);
+
 	}
 };

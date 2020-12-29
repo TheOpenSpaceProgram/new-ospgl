@@ -2,7 +2,7 @@
 #include <planet_mesher/quadtree/QuadTreeDefines.h>
 #include <planet_mesher/quadtree/QuadTreeNode.h>
 #include <planet_mesher/mesher/PlanetTile.h>
-#include <universe/element/body/PlanetaryBody.h>
+#include <universe/element/SystemElement.h>
 #include "../glm/BulletGlmCompat.h"
 #include <glm/glm.hpp>
 #include <unordered_map>
@@ -49,7 +49,7 @@ public:
 
 	sol::state lua;
 
-	PlanetaryBody* body;
+	SystemElement* body;
 
 	// Needs to be called with the physics engine tick to ensure
 	// proper unloading of unused tiles
@@ -58,7 +58,7 @@ public:
 	
 	btVector3* query(QuadTreeNode* node, double time = 1.0);
 
-	GroundShapeServer(PlanetaryBody* body);
+	GroundShapeServer(SystemElement* body);
 	~GroundShapeServer();
 };
 

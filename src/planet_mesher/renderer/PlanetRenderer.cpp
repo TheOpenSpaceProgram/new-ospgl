@@ -4,10 +4,10 @@
 
 #include <imgui/imgui.h>
 
-void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, 
-	glm::dmat4 wmodel, glm::dmat4 normal_matrix, glm::dmat4 rot_tform,
-	float far_plane, glm::dvec3 camera_pos,
-	PlanetConfig& config, double time, glm::vec3 light_dir)
+void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view,
+							glm::dmat4 wmodel, glm::dmat4 normal_matrix, glm::dmat4 rot_tform,
+							float far_plane, glm::dvec3 camera_pos,
+							ElementConfig& config, double time, glm::vec3 light_dir)
 {
 	/*ImGui::Begin("Planet Surface", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 	planet.do_imgui(nullptr);

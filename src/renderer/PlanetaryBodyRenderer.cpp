@@ -4,8 +4,8 @@
 
 
 void PlanetaryBodyRenderer::deferred(glm::dmat4 proj_view, glm::dmat4 model, glm::dmat4 rotation_matrix,
-	double far_plane, glm::dvec3 camera_pos, 
-	PlanetConfig & config, double time, glm::vec3 light_dir, float dot_factor)
+									 double far_plane, glm::dvec3 camera_pos,
+									 ElementConfig & config, double time, glm::vec3 light_dir, float dot_factor) const
 {
 
 	if (rocky != nullptr)
@@ -20,14 +20,13 @@ void PlanetaryBodyRenderer::deferred(glm::dmat4 proj_view, glm::dmat4 model, glm
 	}
 }
 
-void PlanetaryBodyRenderer::forward(glm::dmat4 proj_view, glm::dvec3 camera_pos, 
-	PlanetConfig& config, double far_plane, glm::vec3 light_dir)
+void PlanetaryBodyRenderer::forward(glm::dmat4 proj_view, glm::dvec3 camera_pos,
+									ElementConfig& config, double far_plane, glm::vec3 light_dir) const
 {
 	if (atmo != nullptr)
 	{
 		glm::dmat4 amodel = glm::translate(glm::dmat4(1.0f), -camera_pos);
 		amodel = glm::scale(amodel, glm::dvec3(config.atmo.radius, config.atmo.radius, config.atmo.radius));
-		float rel_radius = (float)(config.radius / config.atmo.radius);
 		glm::vec3 cam_pos_relative = (glm::vec3)(camera_pos / config.atmo.radius);
 
 
@@ -38,38 +37,13 @@ void PlanetaryBodyRenderer::forward(glm::dmat4 proj_view, glm::dvec3 camera_pos,
 
 void PlanetaryBodyRenderer::draw_debug(double t0, double t, CartesianState st, SystemElement* elem)
 {
-	if (elem->type == SystemElement::BARYCENTER)
-	{ 
-		// Barycenter
-	}
-	else if(elem->type == SystemElement::BODY)
+	float dot_factor = elem->dot_factor;
+	if (dot_factor == 1.0f)
 	{
-		float dot_factor = elem->as_body->dot_factor;
-		if (dot_factor == 1.0f)
-		{
-			debug_drawer->add_point(st.pos, elem->as_body->config.far_color);
-		}
-		else
-		{
-			glm::dvec3 orbit_plane = elem->orbit.to_orbit_at(t0, t).get_plane_normal();
-			glm::dvec3 prograde = glm::normalize(st.vel);
-			glm::dvec3 normal = glm::cross(prograde, orbit_plane);
-
-			debug_drawer->add_line(st.pos, st.pos + elem->as_body->rotation_axis * elem->as_body->config.radius * 2.0, glm::vec3(1.0, 0.0, 0.0));
-			debug_drawer->add_line(st.pos, st.pos - elem->as_body->rotation_axis * elem->as_body->config.radius * 2.0, glm::vec3(0.0, 0.0, 1.0));
-			debug_drawer->add_line(st.pos, st.pos - glm::normalize(st.pos) * elem->as_body->config.radius * 1.5, glm::vec3(1.0, 0.5, 0.0));
-
-			double oind_size = 2.5;
-
-			debug_drawer->add_arrow(st.pos, st.pos + orbit_plane * elem->as_body->config.radius * oind_size, glm::vec3(0.0, 1.0, 1.0));
-			debug_drawer->add_arrow(st.pos, st.pos + prograde * elem->as_body->config.radius * oind_size, glm::vec3(1.0, 1.0, 1.0));
-			debug_drawer->add_arrow(st.pos, st.pos + normal * elem->as_body->config.radius * oind_size, glm::vec3(1.0, 1.0, 0.0));
-
-		}
+		debug_drawer->add_point(st.pos, elem->config.far_color);
 	}
 	else
 	{
-		// Star
 	}
 }
 
@@ -95,12 +69,8 @@ PlanetaryBodyRenderer::~PlanetaryBodyRenderer()
 	}
 }
 
-void RockyPlanetRenderer::load(const std::string& script, const std::string& script_path, PlanetConfig& config)
+void RockyPlanetRenderer::load(const std::string& script, const std::string& script_path, ElementConfig& config)
 {
-	if (server != nullptr)
-	{
-		delete server;
-	}
-
+	delete server;
 	server = new PlanetTileServer(script, script_path, &config, config.surface.has_water);
 }

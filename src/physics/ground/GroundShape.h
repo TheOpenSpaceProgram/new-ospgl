@@ -4,16 +4,17 @@
 #include <btBulletCollisionCommon.h>
 #pragma warning(pop)
 
-#include <universe/element/body/PlanetaryBody.h>
+#include <universe/element/SystemElement.h>
 #include "../glm/BulletGlmCompat.h"
 #include <util/DebugDrawer.h>
 #include "GroundShapeServer.h"
+
 class GroundShape : public btConcaveShape
 {
 private:
 
 	btVector3 m_localScaling;
-	PlanetaryBody* body;
+	SystemElement* body;
 	GroundShapeServer* server;
 
 
@@ -43,7 +44,7 @@ public:
 
 	virtual const char*	getName() const { return "PROCTERRAIN"; }
 
-	GroundShape(PlanetaryBody* body);
+	GroundShape(SystemElement* body);
 	~GroundShape();
 };
 

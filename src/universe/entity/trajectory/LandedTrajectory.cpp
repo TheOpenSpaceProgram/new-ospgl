@@ -24,8 +24,7 @@ WorldState LandedTrajectory::get_state(double _unused, double _unused2, bool use
 
 	WorldState out;
 
-	SystemElement* elem = &get_universe()->system.elements[elem_index];
-	PlanetaryBody* body = elem->as_body;
+	SystemElement* elem = get_universe()->system.elements[elem_index];
 
 	double tnow;
 	if (use_bullet)
@@ -37,7 +36,7 @@ WorldState LandedTrajectory::get_state(double _unused, double _unused2, bool use
 		tnow = get_universe()->system.t;
 	}
 
-	glm::dmat4 rot_matrix = body->build_rotation_matrix(get_universe()->system.t0, tnow, false);
+	glm::dmat4 rot_matrix = elem->build_rotation_matrix(get_universe()->system.t0, tnow, false);
 	glm::dvec3 body_pos;
 	if (use_bullet)
 	{
@@ -58,7 +57,7 @@ WorldState LandedTrajectory::get_state(double _unused, double _unused2, bool use
 	out.rotation = tform_rot;
 
 	// Tangential velocity
-	glm::dvec3 tang = body->get_tangential_speed(rel_pos);
+	glm::dvec3 tang = elem->get_tangential_speed(rel_pos);
 
 	out.cartesian.vel = get_universe()->system.bullet_states[elem_index].vel + tang;
 

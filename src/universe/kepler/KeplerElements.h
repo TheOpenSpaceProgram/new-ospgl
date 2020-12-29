@@ -6,7 +6,7 @@
 #include "../CartesianState.h"
 
 
-// Units are, always, meters (m), degrees (º), kilograms (kg)
+// Units are, always, meters, degrees, kilograms
 // (Technically eccentricity is in radians)
 
 // Easier to use and generate KeplerElements, they don't allow parameter

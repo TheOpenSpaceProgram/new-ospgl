@@ -4,15 +4,18 @@
 #include "../UniverseDefinitions.h"
 
 class PlanetarySystem;
-class Vessel;
 
+// Propagates N-body systems and can also handle vessels and non-attracting bodies
 class SystemPropagator
 {
 public:
 
 
-	virtual void initialize(PlanetarySystem* system, size_t body_count) = 0;
-	virtual void prepare(double t0, double t, double tstep, PosVector& out_pos) = 0;
-	// Must return the index of the closest body
-	virtual size_t propagate(CartesianState* state) = 0;
+	virtual void initialize(PlanetarySystem* system) = 0;
+	// Propagates the system, including non-nbody bodies
+	virtual void propagate(StateVector& states, double dt) = 0;
+	// Propagates a vessel / non-attracting body, must return index of closest body
+	virtual size_t propagate(CartesianState* state, const StateVector& states, double dt) = 0;
+
+	virtual ~SystemPropagator() = default;
 };

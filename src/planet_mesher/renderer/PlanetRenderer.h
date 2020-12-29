@@ -26,9 +26,9 @@ private:
 public:
 
 	// Camera position should be given RELATIVE to the planet
-	void render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, glm::dmat4 model, 
-		glm::dmat4 no_rot_model, glm::dmat4 normal_matrix, float far_plane,
-		glm::dvec3 camera_pos, PlanetConfig& config, double time, glm::vec3 light_dir);
+	void render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, glm::dmat4 model,
+				glm::dmat4 no_rot_model, glm::dmat4 normal_matrix, float far_plane,
+				glm::dvec3 camera_pos, ElementConfig& config, double time, glm::vec3 light_dir);
 
 	PlanetRenderer();
 	~PlanetRenderer();

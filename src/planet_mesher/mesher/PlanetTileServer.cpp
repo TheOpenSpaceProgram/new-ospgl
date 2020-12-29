@@ -131,8 +131,8 @@ double PlanetTileServer::get_height(glm::dvec3 pos_3d, size_t depth)
 	}
 }
 
-PlanetTileServer::PlanetTileServer(const std::string& script, const std::string& script_path, 
-	PlanetConfig* config, bool has_water, size_t thread_count)
+PlanetTileServer::PlanetTileServer(const std::string& script, const std::string& script_path,
+								   ElementConfig* config, bool has_water, size_t thread_count)
 {
 	this->has_water = has_water;
 

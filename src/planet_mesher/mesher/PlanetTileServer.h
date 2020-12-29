@@ -8,7 +8,7 @@
 
 #include <util/LuaUtil.h>
 #include <lua/LuaCore.h>
-#include <universe/element/body/config/PlanetConfig.h>
+#include <universe/element/config/ElementConfig.h>
 #include "PlanetTilePath.h"
 #include "PlanetTile.h"
 #include "../quadtree/QuadTreePlanet.h"
@@ -54,7 +54,7 @@ public:
 
 	bool has_water;
 
-	PlanetConfig* config;
+	ElementConfig* config;
 
 	bool has_errors;
 
@@ -97,8 +97,8 @@ public:
 
 	// Make sure you call once a OpenGL context is available
 	// as we will create the index buffer here
-	PlanetTileServer(const std::string& script, const std::string& script_path, 
-			PlanetConfig* config, bool has_water, size_t thread_count = 4);
+	PlanetTileServer(const std::string& script, const std::string& script_path,
+					 ElementConfig* config, bool has_water, size_t thread_count = 4);
 
 	~PlanetTileServer();
 };

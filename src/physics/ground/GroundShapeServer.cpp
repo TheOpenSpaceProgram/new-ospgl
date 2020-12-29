@@ -21,7 +21,7 @@ btVector3* GroundShapeServer::query(QuadTreeNode* node, double time)
 	}
 }
 
-GroundShapeServer::GroundShapeServer(PlanetaryBody* body)
+GroundShapeServer::GroundShapeServer(SystemElement* body)
 {
 	this->body = body;
 

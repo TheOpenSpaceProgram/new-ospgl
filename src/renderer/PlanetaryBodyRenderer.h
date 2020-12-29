@@ -11,7 +11,7 @@ struct RockyPlanetRenderer
 	PlanetTileServer* server;
 	PlanetRenderer renderer;
 
-	void load(const std::string& script, const std::string& script_path, PlanetConfig& config);
+	void load(const std::string& script, const std::string& script_path, ElementConfig& config);
 	
 	RockyPlanetRenderer()
 	{
@@ -40,15 +40,15 @@ public:
 	AtmosphereRenderer* atmo;
 
 
-	void deferred(glm::dmat4 proj_view, glm::dmat4 model, 
-		glm::dmat4 rotation_matrix, double far_plane,
-		glm::dvec3 camera_pos, PlanetConfig& config, double time, glm::vec3 light_dir,
-		float dot_factor);
+	void deferred(glm::dmat4 proj_view, glm::dmat4 model,
+				  glm::dmat4 rotation_matrix, double far_plane,
+				  glm::dvec3 camera_pos, ElementConfig& config, double time, glm::vec3 light_dir,
+				  float dot_factor) const;
 
 	void forward(glm::dmat4 proj_view, glm::dvec3 camera_pos,
-		PlanetConfig& config, double far_plane, glm::vec3 light_dir);
+				 ElementConfig& config, double far_plane, glm::vec3 light_dir) const;
 
-	void draw_debug(double t0, double t, CartesianState state, SystemElement* elem);
+	static void draw_debug(double t0, double t, CartesianState state, SystemElement* elem);
 
 	PlanetaryBodyRenderer();
 	~PlanetaryBodyRenderer();

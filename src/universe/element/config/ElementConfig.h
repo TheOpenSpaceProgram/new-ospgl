@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 
-struct PlanetConfig
+struct ElementConfig
 {
 	double mass;
 	double radius;
@@ -25,13 +25,13 @@ struct PlanetConfig
 
 
 template<>
-class GenericSerializer<PlanetConfig>
+class GenericSerializer<ElementConfig>
 {
 public:
 
 
 
-	static void serialize(const PlanetConfig& what, cpptoml::table& target)
+	static void serialize(const ElementConfig& what, cpptoml::table& target)
 	{
 		if (what.has_atmo)
 		{
@@ -58,7 +58,7 @@ public:
 		serialize_to_table(what.far_color, target, "far_color");
 	}
 
-	static void deserialize(PlanetConfig& to, const cpptoml::table& from)
+	static void deserialize(ElementConfig& to, const cpptoml::table& from)
 	{
 		SAFE_TOML_GET(to.radius, "radius", double);
 		SAFE_TOML_GET(to.mass, "mass", double);

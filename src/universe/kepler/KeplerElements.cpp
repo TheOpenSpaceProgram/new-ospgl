@@ -352,5 +352,5 @@ CartesianState KeplerElements::get_cartesian(double parent_mass, double our_mass
 	vel.z = zx * flat_vel.x + zy * flat_vel.y;
 
 	// We have to correct the coordinate system
-	return CartesianState(glm::dvec3(-pos.x, pos.y, pos.z), glm::dvec3(-vel.x, vel.y, vel.z));
+	return CartesianState(glm::dvec3(-pos.x, pos.y, pos.z), glm::dvec3(-vel.x, vel.y, vel.z), our_mass);
 }

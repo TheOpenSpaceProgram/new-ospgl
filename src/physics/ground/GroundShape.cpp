@@ -113,7 +113,7 @@ void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVect
 	}
 }
 
-GroundShape::GroundShape(PlanetaryBody* body)
+GroundShape::GroundShape(SystemElement* body)
 {
 	this->body = body;
 	// We have to use this instead of CUSTOM_CONCAVE_SHAPE_TYPE as 

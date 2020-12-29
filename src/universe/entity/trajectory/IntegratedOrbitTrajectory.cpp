@@ -23,7 +23,7 @@ void IntegratedOrbitTrajectory::update(double dt)
 {
 	t_now += dt;
 	// Integrate (The propagator has been prepared)
-	universe->system.propagator->propagate(&current.cartesian);
+	//universe->system.propagator->propagate(&current.cartesian);
 
 	double l = glm::length(current.angular_velocity);
 	current.rotation *= glm::angleAxis(l * dt, current.angular_velocity / l);

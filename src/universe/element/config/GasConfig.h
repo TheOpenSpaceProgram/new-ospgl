@@ -1,5 +1,6 @@
 #pragma once
 
+// Gas giants also work as stars
 struct GasConfig 
 {
 
