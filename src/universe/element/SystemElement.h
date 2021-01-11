@@ -14,6 +14,8 @@ public:
 
 	std::string name;
 
+	bool nbody;
+
 	ElementConfig config;
 
 	PlanetaryBodyRenderer renderer;
@@ -72,13 +74,14 @@ public:
 	// Star is special
 	static void deserialize(SystemElement& to, const cpptoml::table& from)
 	{
-		SAFE_TOML_GET(to.name, "name", std::string);
+		SAFE_TOML_GET_OR(to.name, "name", std::string, "");
+		SAFE_TOML_GET_OR(to.nbody, "nbody", bool, false);
 
 		std::string config;
 		SAFE_TOML_GET(config, "config", std::string);
 
-		auto config_toml = osp->assets->get_from_path<Config>(config)->root;
-		::deserialize(to.config, *config_toml);
+		AssetHandle<Config> cfg = AssetHandle<Config>(config);
+		cfg->read_to(to.config);
 
 		static constexpr double REVS_PER_HOUR_TO_DEGREES_PER_SECOND = 0.1;
 

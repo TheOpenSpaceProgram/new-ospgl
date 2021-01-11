@@ -7,8 +7,8 @@ GameState::GameState() : universe()
 
 void GameState::load(const cpptoml::table& from)
 {
-	std::string system_path = *from.get_as<std::string>("system");
-	osp->assets->get_from_path<Config>(system_path)->read_to(universe.system);
+	// Load the system
+	universe.system.load(from);
 
 	double t0 = *from.get_as<double>("t");
 	universe.system.t0 = t0;
@@ -30,7 +30,7 @@ void GameState::load(const cpptoml::table& from)
 
 	if (entities)
 	{
-		for (auto entity : *entities)
+		for (const auto& entity : *entities)
 		{
 			int64_t id = entity->get_as<int64_t>("id").value_or(0);
 			if (id > last_uid || id <= 0)

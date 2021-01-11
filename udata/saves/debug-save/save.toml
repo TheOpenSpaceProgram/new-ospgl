@@ -9,9 +9,54 @@ packages = [
 in_control = "vehicle_0"
 in_focus = "vehicle_0"
 
-system = "debug_system:systems/system.toml"
 uid = 1
 t = 0.0
+
+[[element]]
+	name = "Sun"
+	nbody = true
+	config = "debug_system:planets/earth/config.toml"
+
+	rotation_period = 586.56
+	rotation_at_epoch = 0.0
+
+	[element.position]
+		x = +1.309126697236264e8
+		y = +3.443856610385113e8
+		z = +1.364602296561306e8
+
+	[element.velocity]
+		x = -7.799754996220354
+		y = -5.561927893069310
+		z = -2.253148239533338
+
+	[element.rotation_axis]
+		x = 0.0
+		y = 1.0
+		z = 0.0
+
+[[element]]
+	name = "Earth"
+	nbody = true
+	config = "debug_system:planets/earth/config.toml"
+
+	rotation_period = 24.0
+	rotation_at_epoch = 800.0
+
+	[element.position]
+		x = -2.720318042296709e10
+		y = +1.329407956490104e10
+		z = +5.764165538717468e10
+
+	[element.velocity]
+		x = -2.975363625990147e4
+		y = -5.189341029926219e3
+		z = -2.251484908750744e3
+
+	[element.rotation_axis]
+		x = 0.0
+		y = 1.0
+		z = 0.0
 
 [[entity]]
 	id = 1

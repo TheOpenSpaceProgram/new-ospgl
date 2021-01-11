@@ -614,7 +614,7 @@ Renderer::Renderer(cpptoml::table& settings)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	if (type == "windowed")
 	{
-		window = glfwCreateWindow(width, height, "New OSP", NULL, NULL);
+		window = glfwCreateWindow(width, height, "New OSP", nullptr, nullptr);
 	}
 	// TODO: Allow any monitor from settings
 	else if (type == "fullscreen")

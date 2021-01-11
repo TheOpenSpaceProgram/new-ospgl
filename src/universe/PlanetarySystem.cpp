@@ -203,15 +203,23 @@ size_t PlanetarySystem::get_element_index_from_name(const std::string& name)
 
 void PlanetarySystem::update(double dt, btDynamicsWorld* world, bool bullet)
 {
-	if (bullet_states.empty())
-	{
-		bullet_states.resize(elements.size());
-	}
-
+	// TODO: This could be moved to load?
 	if (states_now.empty())
 	{
-		init_physics(world);
+		bullet_states.resize(elements.size());
 		states_now.resize(elements.size());
+		// Load the initial positions and speeds
+		for(size_t i = 0; i < elements.size(); i++)
+		{
+			bullet_states[i].pos = elements[i]->position_at_epoch;
+			bullet_states[i].vel = elements[i]->velocity_at_epoch;
+			bullet_states[i].mass = elements[i]->get_mass();
+			states_now[i].pos = elements[i]->position_at_epoch;
+			states_now[i].vel = elements[i]->velocity_at_epoch;
+			states_now[i].mass = elements[i]->get_mass();
+		}
+
+		init_physics(world);
 	}
 
 	update_physics(dt, bullet);
@@ -379,4 +387,40 @@ PlanetarySystem::~PlanetarySystem()
 			delete elem->ground_shape;
 		}
 	}
+}
+
+void PlanetarySystem::load(const cpptoml::table &root)
+{
+	auto toml_elements = root.get_table_array("element");
+	if(!toml_elements) return;
+
+	// Load all the elements first
+	nbody_count = 0;
+
+	for(const auto& toml_element : *toml_elements)
+	{
+		auto elem = new SystemElement();
+		SerializeUtil::read_to(*toml_element, *elem);
+		elements.push_back(elem);
+
+		if(elem->nbody)
+		{
+			nbody_count++;
+		}
+	}
+
+	// Sort by nbody tag for optimal simulation
+	std::sort(elements.begin(), elements.end(), [](SystemElement* a, SystemElement* b)
+	{
+		return b->nbody;
+	});
+
+	// Create the name list
+	for(size_t i = 0; i < elements.size(); i++)
+	{
+		if(elements[i]->name.empty()) continue;
+
+		name_to_index[elements[i]->name] = i;
+	}
+
 }
