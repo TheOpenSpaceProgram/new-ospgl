@@ -128,7 +128,7 @@ void Renderer::do_shadows(PlanetarySystem* system, glm::dvec3 camera_pos)
 
 // TODO: Take GLuint g_buffer instead of GBuffer* g_buffer for consistency?
 void Renderer::forward_bind(CameraUniforms& cu, GBuffer* g_buffer, GLuint f_buffer,
-							glm::ivec4 vport, Light* only_light)
+							glm::ivec4 vport, bool is_env_pass)
 {
 	glEnable(GL_BLEND);
 
@@ -150,23 +150,20 @@ void Renderer::forward_bind(CameraUniforms& cu, GBuffer* g_buffer, GLuint f_buff
 	// Do a pass for every light
 	for (Light* l : lights)
 	{
-		glViewport(vport.x, vport.y, vport.z, vport.w);
-
-		if(only_light)
+		if(l->needs_fullscreen_viewport())
 		{
-			l = only_light;
-		}
-		else if(l->needs_fullscreen_viewport())
-		{
-			glViewport(0, 0, swidth, sheight);
+			if(is_env_pass)
+			{
+				glViewport(vport.x, vport.y, vport.z, vport.w);
+			}
+			else
+			{
+				glViewport(0, 0, swidth, sheight);
+			}
 		}
 
 		l->do_pass(cu, g_buffer);
 
-		if(only_light)
-		{
-			break;
-		}
 	}
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -184,7 +181,7 @@ void Renderer::prepare_forward(CameraUniforms& cu)
 {
 	if (render_enabled)
 	{
-		forward_bind(cu, gbuffer, fbuffer->fbuffer, viewport, nullptr);
+		forward_bind(cu, gbuffer, fbuffer->fbuffer, viewport, false);
 
 	}
 }
@@ -287,7 +284,7 @@ void Renderer::render_env_face(glm::dvec3 sample_pos, size_t face)
 	glBindFramebuffer(GL_FRAMEBUFFER, env_fbuffer->fbuffer);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, ibl_source->id, 0);
 
-	forward_bind(c_uniforms, env_gbuffer, env_fbuffer->fbuffer, vport, lights[0]);
+	forward_bind(c_uniforms, env_gbuffer, env_fbuffer->fbuffer, vport, true);
 
 	// Sort forward drawables
 	std::sort(env_map.begin(), env_map.end(), [](Drawable* a, Drawable* b)

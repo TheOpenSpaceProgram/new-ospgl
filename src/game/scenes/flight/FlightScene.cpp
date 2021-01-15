@@ -9,6 +9,8 @@
 #include <universe/entity/entities/VehicleEntity.h>
 #include <universe/entity/entities/BuildingEntity.h>
 
+#include <renderer/lighting/EnvMap.h>
+
 void FlightScene::load()
 {
 	logger->info("A");
@@ -79,9 +81,12 @@ void FlightScene::load()
 
 
 
+
 	sun = SunLight(r->quality.sun_terrain_shadow_size, r->quality.sun_shadow_size);
 	r->add_light(&sun);
 
+	EnvMap* env = new EnvMap();
+	r->add_light(env);
 }
 
 void FlightScene::unload()

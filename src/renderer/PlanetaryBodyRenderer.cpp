@@ -54,6 +54,7 @@ PlanetaryBodyRenderer::PlanetaryBodyRenderer()
 {
 	rocky = nullptr;
 	atmo = nullptr;
+	gas = nullptr;
 }
 
 

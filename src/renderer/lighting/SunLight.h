@@ -1,7 +1,7 @@
 #pragma once
 #include "Light.h"
-// It's actually a point-light but renders a fullscreen quad. It also allows setting ambient light
-//
+// It's actually a point-light but always renders a fullscreen quad. It also allows setting ambient light
+// Used for stars
 // Shadows:
 // 	We need to render two shadow maps.
 // 	- FAR: Renders just the closest planetary surface to the camera,
@@ -42,12 +42,13 @@ public:
 	SunLight(int far_shadow_size = 512, int near_shadow_size = 512);
 	~SunLight();
 
-	virtual LightType get_type () override { return SUN; }
+	LightType get_type () override { return SUN; }
 
-	virtual void do_pass(CameraUniforms& cu, GBuffer * gbuf) override;
-	virtual ShadowCamera get_shadow_camera(glm::dvec3 camera_pos) override;
+	void do_pass(CameraUniforms& cu, GBuffer * gbuf) override;
+	ShadowCamera get_shadow_camera(glm::dvec3 camera_pos) override;
 
-	virtual bool casts_shadows () override { return true; }
+	bool casts_shadows () override { return true; }
+	bool is_planetary_light() override { return true; }
 
 };
 

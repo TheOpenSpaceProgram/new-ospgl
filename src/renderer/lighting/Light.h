@@ -19,6 +19,7 @@ public:
 	enum LightType
 	{
 		POINT,
+		ENV_MAP,
 		SUN, 
 		PART_ICON
 	};
@@ -74,6 +75,10 @@ public:
 	virtual bool casts_shadows() { return false; }
 
 	virtual bool needs_fullscreen_viewport() { return true; }
+
+	// Planetary lights effect env_map
+	// TODO: Change terminology?
+	virtual bool is_planetary_light() { return false; }
 
 	Light()
 	{

@@ -77,9 +77,7 @@ private:
 	// and draws the gbuffer to the screen (also updating depth buffer
 	// for the forward rendering stuff)
 	void prepare_forward(CameraUniforms& cu);
-	void forward_bind(CameraUniforms& cu,
-				   GBuffer* g_buffer, GLuint f_buffer,
-				   glm::ivec4 viewport, Light* only_light);
+	void forward_bind(CameraUniforms& cu, GBuffer* g_buffer, GLuint f_buffer, glm::ivec4 viewport, bool is_env_pass);
 
 	// Draws the framebuffer to screen and prepares OpenGL
 	// to draw directly to backbuffer

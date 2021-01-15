@@ -8,11 +8,6 @@ uniform sampler2D gNormal;
 uniform sampler2D gAlbedo;
 uniform sampler2D gPbr;
 
-uniform samplerCube irradiance_map;
-uniform samplerCube specular_map;
-
-uniform sampler2D brdf_map;
-
 uniform vec3 sun_pos;
 uniform vec3 color;
 uniform vec3 ambient_color;
@@ -74,14 +69,12 @@ void main()
     // TODO: Environment map sampling
     vec3 emit = Emissive * Albedo;
 
-    vec3 ambient, specular;
-    vec3 lo = get_pbr(sun_dir, FragPos, Normal, Albedo, Roughness, Metallic, irradiance_map, specular_map, brdf_map,
-        ambient, specular);
+    vec3 lo = get_pbr(sun_dir, FragPos, Normal, Albedo, Roughness, Metallic);
 
 	vec4 FragPosLightSpace = near_shadow_tform * vec4(FragPos, 1.0f);
 	float shadow = calculate_shadow(FragPosLightSpace, dot(Normal, sun_dir));
 
-	vec3 fcolor = lo * shadow * color + (ambient + specular) * Occlussion + emit;
+	vec3 fcolor = lo * shadow * color + emit;
 
     FragColor = vec4(fcolor, 1.0);
     //FragColor = vec4(kD, 1.0);
