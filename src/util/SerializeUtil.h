@@ -29,6 +29,9 @@
 #define SAFE_TOML_GET_OR_IGNORE(target, name, type) \
 	do{ auto t = from.get_qualified_as<type>(name); if (t){target = *t;}}while(0);
 
+#define NOT_SERIALIZABLE(type) static void serialize(const type &, cpptoml::table& target) {\
+	logger->check(false, "Serialize called on non-serializable type: " #type); }
+
 template<typename T>
 class GenericSerializer
 {

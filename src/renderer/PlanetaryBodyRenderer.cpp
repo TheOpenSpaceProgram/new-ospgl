@@ -8,15 +8,18 @@ void PlanetaryBodyRenderer::deferred(glm::dmat4 proj_view, glm::dmat4 model, glm
 									 ElementConfig & config, double time, glm::vec3 light_dir, float dot_factor) const
 {
 
+	glm::dmat4 normal_matrix = glm::transpose(glm::inverse(rotation_matrix));
+
 	if (rocky != nullptr)
 	{
-		// Normal matrix is used to transform normals
-		glm::dmat4 normal_matrix = glm::transpose(glm::inverse(rotation_matrix));
-
 		// We have to give the renderer the rotation matrix so atmosphere
 		// can be rendered properly
-		rocky->renderer.render(*rocky->server, rocky->qtree, proj_view, model, 
+		rocky->renderer.render(*rocky->server, rocky->qtree, proj_view, model,
 			rotation_matrix, normal_matrix, (float)far_plane, camera_pos, config, time, light_dir);
+	}
+	else if(gas != nullptr)
+	{
+		gas->render(proj_view, model, rotation_matrix, normal_matrix, (float)far_plane, camera_pos, config, time);
 	}
 }
 
@@ -56,21 +59,10 @@ PlanetaryBodyRenderer::PlanetaryBodyRenderer()
 
 PlanetaryBodyRenderer::~PlanetaryBodyRenderer()
 {
-	if (rocky != nullptr)
-	{
-		delete rocky;
-		rocky = nullptr;
-	}
+	delete rocky;
+	rocky = nullptr;
 
-	if (atmo != nullptr)
-	{
-		delete atmo;
-		atmo = nullptr;
-	}
+	delete atmo;
+	atmo = nullptr;
 }
 
-void RockyPlanetRenderer::load(const std::string& script, const std::string& script_path, ElementConfig& config)
-{
-	delete server;
-	server = new PlanetTileServer(script, script_path, &config, config.surface.has_water);
-}

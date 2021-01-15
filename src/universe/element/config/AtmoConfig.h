@@ -17,16 +17,7 @@ class GenericSerializer<AtmoConfig>
 {
 public:
 
-	static void serialize(const AtmoConfig& what, cpptoml::table& target)
-	{
-		target.insert("exponent", what.exponent);
-		target.insert("sunset_exponent", what.sunset_exponent);
-		target.insert("radius", what.radius);
-		target.insert("mie", what.kMie);
-		serialize_to_table(what.kRlh, target, "rayleigh");
-
-
-	}
+	NOT_SERIALIZABLE(AtmoConfig);
 
 	static void deserialize(AtmoConfig& to, const cpptoml::table& from)
 	{

@@ -245,7 +245,7 @@ static void load_body(SystemElement* body)
 	}
 	else
 	{
-
+		body->renderer.gas = new GasPlanetRenderer();
 	}
 
 	if (body->config.has_atmo)
@@ -418,6 +418,8 @@ void PlanetarySystem::load(const cpptoml::table &root)
 	// Create the name list
 	for(size_t i = 0; i < elements.size(); i++)
 	{
+		elements[i]->index = i;
+
 		if(elements[i]->name.empty()) continue;
 
 		name_to_index[elements[i]->name] = i;

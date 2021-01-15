@@ -34,26 +34,7 @@ class GenericSerializer<SurfaceConfig>
 {
 public:
 
-	static void serialize(const SurfaceConfig& what, cpptoml::table& target)
-	{
-		target.insert("script_path", what.script_path_raw);
-		target.insert("has_water", what.has_water);
-
-
-		auto noise = cpptoml::make_table();
-
-
-		target.insert("noise", noise);
-
-		auto lod = cpptoml::make_table();
-
-		lod->insert("max_depth", what.max_depth);
-		lod->insert("coef_a", what.coef_a);
-		lod->insert("coef_b", what.coef_b);
-		
-		target.insert("lod", lod);
-
-	}
+	NOT_SERIALIZABLE(SurfaceConfig);
 
 	static void deserialize(SurfaceConfig& to, const cpptoml::table& from)
 	{

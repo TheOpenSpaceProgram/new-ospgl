@@ -29,34 +29,7 @@ class GenericSerializer<ElementConfig>
 {
 public:
 
-
-
-	static void serialize(const ElementConfig& what, cpptoml::table& target)
-	{
-		if (what.has_atmo)
-		{
-			auto atmo = cpptoml::make_table();
-			::serialize(what.atmo, *atmo);
-			target.insert("atmo", atmo);
-		}
-
-		if (what.has_surface) 
-		{
-			auto surface = cpptoml::make_table();
-			::serialize(what.surface, *surface);
-			target.insert("surface", surface);
-		}
-		else
-		{
-			auto gas = cpptoml::make_table();
-			::serialize(what.gas, *gas);
-			target.insert("gas", gas);
-		}
-
-		target.insert("radius", what.radius);
-		target.insert("mass", what.mass);
-		serialize_to_table(what.far_color, target, "far_color");
-	}
+	NOT_SERIALIZABLE(ElementConfig);
 
 	static void deserialize(ElementConfig& to, const cpptoml::table& from)
 	{

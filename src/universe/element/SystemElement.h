@@ -66,12 +66,8 @@ class GenericSerializer<SystemElement>
 {
 public:
 
-	static void serialize(const SystemElement& what, cpptoml::table& target)
-	{
-	}
+	NOT_SERIALIZABLE(SystemElement);
 
-	// Deserialize is only called for bodies and barycenters
-	// Star is special
 	static void deserialize(SystemElement& to, const cpptoml::table& from)
 	{
 		SAFE_TOML_GET_OR(to.name, "name", std::string, "");

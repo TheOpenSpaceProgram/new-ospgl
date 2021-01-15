@@ -37,7 +37,7 @@ struct Date
 
 	std::tuple<int, int, int> get_hours_minutes_seconds();
 
-	// Seconds are given relativeto J2000
+	// Seconds are given relative to J2000
 	Date(double seconds);
 	Date(int year, int month, int day, double day_decimal = 0.0);
 };

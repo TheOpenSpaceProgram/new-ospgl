@@ -15,7 +15,7 @@ t = 0.0
 [[element]]
 	name = "Sun"
 	nbody = true
-	config = "debug_system:planets/earth/config.toml"
+	config = "debug_system:planets/sun/config.toml"
 
 	rotation_period = 586.56
 	rotation_at_epoch = 0.0
