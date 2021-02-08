@@ -95,6 +95,12 @@ private:
 
 	std::vector<Light*> lights;
 
+	// Used for env_map sampling
+	glm::dvec3 env_last_pos;
+	double env_last_time;
+	size_t env_frames;
+	size_t env_face;
+	bool env_first;
 
 public:
 	Cubemap* ibl_source = nullptr;
@@ -129,6 +135,8 @@ public:
 	void render(PlanetarySystem* system);
 
 	void render_env_face(glm::dvec3 sample_pos, size_t face);
+
+	void env_map_sample();
 
 	// Must always be called (except on headless), even if nothing
 	// is rendering to the screen

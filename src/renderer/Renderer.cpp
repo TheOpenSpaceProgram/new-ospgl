@@ -399,6 +399,32 @@ void Renderer::render(PlanetarySystem* system)
 		// Draw text_drawer added text
 	}
 
+	env_frames++;
+
+	// TODO: Move this inside render_enabled?
+	if(quality.pbr.quality != RendererQuality::PBR::Quality::SIMPLE)
+	{
+		if(env_first)
+		{
+			env_map_sample();
+			env_first = false;
+		}
+
+		if (env_frames > quality.pbr.frames_per_sample)
+		{
+			if(quality.pbr.simple_sampling)
+			{
+				env_map_sample();
+			}
+			else
+			{
+				logger->fatal("Non-simple envmap sampling is not yet implemented!");
+			}
+
+			env_frames = 0;
+		}
+	}
+
 }
 
 
@@ -583,6 +609,12 @@ Renderer::Renderer(cpptoml::table& settings)
 {
 	drawable_uid = 0;
 	cam = nullptr;
+	env_frames = 0;
+	env_face = 0;
+	env_first = true;
+	env_last_pos = glm::dvec3(0.0, 0.0, 0.0);
+	env_last_time = 0.0;
+
 
 	override_viewport = glm::dvec4(-1.0, -1.0, -1.0, -1.0);
 
@@ -721,6 +753,32 @@ void Renderer::set_ibl_source(Cubemap* cubemap)
 	}
 
 	this->ibl_source = cubemap;
+}
+
+// This is needed for the sampling which uses vehicle position
+#include <universe/entity/entities/VehicleEntity.h>
+#include <game/GameState.h>
+
+void Renderer::env_map_sample()
+{
+	auto* vent = (VehicleEntity*)osp->game_state->universe.entities[1];
+	glm::dvec3 sample_pos = to_dvec3(vent->vehicle->root->get_global_transform().getOrigin());
+
+	size_t samples = quality.pbr.faces_per_sample;
+	if(env_first)
+	{
+		samples = 6;
+	}
+
+	for(size_t i = 0; i < samples; i++)
+	{
+		osp->renderer->render_env_face(sample_pos, env_face);
+		env_face++;
+		if (env_face == 6)
+		{
+			env_face = 0;
+		}
+	}
 }
 
 

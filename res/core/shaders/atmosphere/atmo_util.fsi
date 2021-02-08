@@ -1,19 +1,17 @@
-uniform vec3 atmo_main_color;
-uniform vec3 atmo_sunset_color;
 uniform float atmo_exponent;
-uniform float sunset_exponent;
 uniform vec3 kRlh;
 uniform float kMie;
-const int STEPS = 2;
-const int SUB_STEPS = 10;
+uniform float atmo_radius;
+uniform float planet_radius;
+
+const int STEPS = _ATMO_ITERATIONS;
+const int SUB_STEPS = _ATMO_SUB_ITERATIONS;
 const int GSTEPS = 4;
 const int SUB_GSTEPS = 10;
 const float STEPS_INVERSE = 1.0 / float(STEPS);
 const float SUB_STEPS_INVERSE = 1.0 / float(SUB_STEPS);
 const float GSTEPS_INVERSE = 1.0 / float(GSTEPS);
 const float SUB_GSTEPS_INVERSE = 1.0 / float(SUB_GSTEPS);
-uniform float atmo_radius;
-uniform float planet_radius;
 
 float rayPointDistance(vec3 r0, vec3 rd, vec3 p)
 {

@@ -106,31 +106,13 @@ void FlightScene::update()
 	VehicleEntity* v_ent =  universe->get_entity_as<VehicleEntity>(2);	
 	
 	camera.center = v_ent->vehicle->unpacked_veh.get_center_of_mass(true);
+	camera.speed = 10000000.0;
 	
 	camera.update(osp->game_dt);
 
 }
 
-static int taken = 0;
-static int face = 0;
-
 void FlightScene::render()
 {
 	osp->renderer->render(&osp->game_state->universe.system);
-
-	taken++;
-	if(taken % 20 == 0)
-	{
-		VehicleEntity* vent = (VehicleEntity*)osp->game_state->universe.entities[1];
-		glm::dvec3 sample_pos = to_dvec3(vent->vehicle->root->get_global_transform().getOrigin());
-		/*for(size_t i = 0; i < 6; i++)
-		{
-			osp->renderer->render_env_face(sample_pos, i);
-		}*/
-
-		osp->renderer->render_env_face(sample_pos, face % 6);
-		face++;
-
-		//sky.cubemap.data = osp->renderer->ibl_source;
-	}
 }
