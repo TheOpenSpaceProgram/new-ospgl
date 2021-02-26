@@ -11,6 +11,10 @@ void VehicleLoader::load_metadata(const cpptoml::table& root)
 void VehicleLoader::obtain_parts(const cpptoml::table& root)
 {
 	auto parts = root.get_table_array_qualified("part");	
+	if(!parts)
+	{
+		return;
+	}
 
 	for(auto part : *parts)
 	{
@@ -66,6 +70,11 @@ void VehicleLoader::obtain_pieces(const cpptoml::table& root)
 	auto pieces = root.get_table_array_qualified("piece");
 	root_piece = nullptr;
 
+	if(!pieces)
+	{
+		return;
+	}
+
 	for(auto piece : *pieces)
 	{
 		Piece* n_piece = load_piece(*piece);
@@ -89,6 +98,12 @@ void VehicleLoader::obtain_pieces(const cpptoml::table& root)
 
 void VehicleLoader::copy_pieces(const cpptoml::table& root)
 {
+	if(root_piece == nullptr)
+	{
+		n_vehicle->root = nullptr;
+		return;
+	}
+
 	n_vehicle->all_pieces.push_back(root_piece);
 	n_vehicle->root = root_piece;
 	for(Piece* p : all_pieces)
@@ -130,59 +145,61 @@ void VehicleLoader::copy_pieces(const cpptoml::table& root)
 void VehicleLoader::obtain_wires(const cpptoml::table& root)
 {
 	auto wires = root.get_table_array_qualified("wire");
-	if(wires)
+	if(!wires)
 	{
-		for(auto wire_toml : *wires)
+		return;
+	}
+
+	for(auto wire_toml : *wires)
+	{
+		int from = *wire_toml->get_as<int>("from");
+		int to = *wire_toml->get_as<int>("to");
+		std::string fmachine = *wire_toml->get_as<std::string>("fmachine");
+		std::string tmachine = *wire_toml->get_as<std::string>("tmachine");
+
+		Part* fromp = parts_by_id[from];
+		Part* top = parts_by_id[to];
+		Machine* fromm = fromp->get_machine(fmachine);
+		Machine* tom = top->get_machine(tmachine);
+
+		// Check if it already exists bidirectionally to emit a warning
+		// TODO: Move this code to a function as it may be reused
+		auto from_it = n_vehicle->wires.equal_range(fromm);
+		bool found_from_to = false;
+		for(auto from_subit = from_it.first; from_subit != from_it.second; from_subit++)
 		{
-			int from = *wire_toml->get_as<int>("from");
-			int to = *wire_toml->get_as<int>("to");
-			std::string fmachine = *wire_toml->get_as<std::string>("fmachine");
-			std::string tmachine = *wire_toml->get_as<std::string>("tmachine");
-
-			Part* fromp = parts_by_id[from];
-			Part* top = parts_by_id[to];
-			Machine* fromm = fromp->get_machine(fmachine);
-			Machine* tom = top->get_machine(tmachine);
-
-			// Check if it already exists bidirectionally to emit a warning
-			// TODO: Move this code to a function as it may be reused
-			auto from_it = n_vehicle->wires.equal_range(fromm);
-			bool found_from_to = false;
-			for(auto from_subit = from_it.first; from_subit != from_it.second; from_subit++)
+			if(from_subit->second == tom)
 			{
-				if(from_subit->second == tom)
-				{
-					found_from_to = true;
-					break;
-				}
+				found_from_to = true;
+				break;
 			}
+		}
 
-			auto to_it = n_vehicle->wires.equal_range(tom);
-			bool found_to_from = false;
-			for(auto to_subit = to_it.first; to_subit != to_it.second; to_subit++)
+		auto to_it = n_vehicle->wires.equal_range(tom);
+		bool found_to_from = false;
+		for(auto to_subit = to_it.first; to_subit != to_it.second; to_subit++)
+		{
+			if(to_subit->second == fromm)
 			{
-				if(to_subit->second == fromm)
-				{
-					found_to_from = true;
-					break;
-				}
+				found_to_from = true;
+				break;
 			}
+		}
 
-			if(!found_from_to)
-			{
-				n_vehicle->wires.insert(std::make_pair(fromm, tom));
-			}
+		if(!found_from_to)
+		{
+			n_vehicle->wires.insert(std::make_pair(fromm, tom));
+		}
 
-			if(!found_to_from)
-			{
-				n_vehicle->wires.insert(std::make_pair(tom, fromm));
-			}
+		if(!found_to_from)
+		{
+			n_vehicle->wires.insert(std::make_pair(tom, fromm));
+		}
 
-			if(found_from_to || found_to_from)
-			{
-				logger->warn("Found a duplicate wire (from: {} fmachine: {} -> to: {} tmachine: {}), it was ignored", 
-					from, fmachine, to,  tmachine);
-			}
+		if(found_from_to || found_to_from)
+		{
+			logger->warn("Found a duplicate wire (from: {} fmachine: {} -> to: {} tmachine: {}), it was ignored",
+				from, fmachine, to,  tmachine);
 		}
 	}
 }
@@ -200,6 +217,11 @@ VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to)
 	n_vehicle->id_to_part = parts_by_id;
 	n_vehicle->id_to_piece = pieces_by_id;
 
+	if(n_vehicle->root == nullptr)
+	{
+		logger->fatal("Loaded an empty vehicle!");
+	}
+
 	// Initialize the vehicle's physical state to packed and save default values
 	WorldState n_state;
 	n_vehicle->packed_veh.set_world_state(n_state);
@@ -208,8 +230,6 @@ VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to)
 	// Calculate the packed COM
 	n_vehicle->packed_veh.calculate_com();
 
-	// Sort the vehicle so it's ready for physics
-	n_vehicle->sort();
-
 	n_vehicle->update_attachments();
+
 }

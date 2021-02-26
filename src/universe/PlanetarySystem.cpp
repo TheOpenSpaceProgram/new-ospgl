@@ -3,6 +3,7 @@
 #include <imgui/imgui.h>
 #include "../physics/glm/BulletGlmCompat.h"
 #include "../physics/ground/GroundShape.h"
+#include <game/GameState.h>
 
 glm::dvec3 PlanetarySystem::get_gravity_vector(glm::dvec3 p, StateVector* states)
 {
@@ -137,7 +138,6 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 
 	propagator->propagate(*v, dt);
 
-
 	if (bullet)
 	{
 		bt += dt;
@@ -157,13 +157,12 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 				elem->rigid_body->setWorldTransform(tform);
 			}
 		}
-
 	}
 	else
 	{ 
 		t += dt;
 	}
-	
+
 }
 
 void PlanetarySystem::init_physics(btDynamicsWorld* world)
@@ -223,7 +222,7 @@ void PlanetarySystem::update(double dt, btDynamicsWorld* world, bool bullet)
 	}
 
 	update_physics(dt, bullet);
-	
+
 }
 
 void PlanetarySystem::init(btDynamicsWorld* world)
@@ -327,6 +326,8 @@ void PlanetarySystem::update_render_body_rocky(SystemElement* body, glm::dvec3 b
 			debug_drawer->add_point(
 				glm::inverse(rel_matrix) * glm::dvec4(glm::normalize(rel_camera_pos) * (altitude * 1.1 + body->config.radius * 1.01), 1.0),
 				glm::vec3(1.0, 1.0, 1.0));
+
+			//osp->game_state->universe.bt_world->debugDrawWorld();
 		}
 	}
 }

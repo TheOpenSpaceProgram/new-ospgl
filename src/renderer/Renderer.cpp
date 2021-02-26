@@ -402,7 +402,7 @@ void Renderer::render(PlanetarySystem* system)
 	env_frames++;
 
 	// TODO: Move this inside render_enabled?
-	if(quality.pbr.quality != RendererQuality::PBR::Quality::SIMPLE)
+	if(quality.pbr.quality != RendererQuality::PBR::Quality::SIMPLE && env_enabled)
 	{
 		if(env_first)
 		{
@@ -609,6 +609,7 @@ Renderer::Renderer(cpptoml::table& settings)
 {
 	drawable_uid = 0;
 	cam = nullptr;
+	env_enabled = false;
 	env_frames = 0;
 	env_face = 0;
 	env_first = true;
@@ -741,6 +742,7 @@ Renderer::~Renderer()
 
 void Renderer::set_ibl_source(Cubemap* cubemap)
 {
+	env_enabled = false;
 	delete env_fbuffer;
 	delete env_gbuffer;
 
@@ -750,6 +752,8 @@ void Renderer::set_ibl_source(Cubemap* cubemap)
 
 		env_gbuffer = new GBuffer(cubemap->resolution, cubemap->resolution);
 		env_fbuffer = new Framebuffer(cubemap->resolution, cubemap->resolution, env_gbuffer->rbo);
+
+		env_enabled = true;
 	}
 
 	this->ibl_source = cubemap;

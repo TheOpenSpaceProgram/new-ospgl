@@ -3,6 +3,7 @@
 #include <assets/AssetManager.h>
 #include <OSP.h>
 #include <renderer/Renderer.h>
+#include <renderer/lighting/EnvMap.h>
 #include <game/GameState.h>
 
 void EditorScene::load()
@@ -22,6 +23,7 @@ void EditorScene::load()
 
 
 	r->add_drawable(&vehicle);
+
 	r->add_drawable(&sky);
 	sky.cubemap->generate_ibl_irradiance(32, 32);
 	r->set_ibl_source(sky.cubemap.data);
@@ -32,7 +34,10 @@ void EditorScene::load()
 	sun.ambient_color = glm::vec3(0.4, 0.4, 0.4);
 	sun.near_shadow_span = 10.0;
 
-	r->add_light(&sun);	
+	r->add_light(&sun);
+
+	EnvMap* env = new EnvMap();
+	r->add_light(env);
 
 	// Create the bullet physics stuff
 	bt_brf_interface = new btDbvtBroadphase();

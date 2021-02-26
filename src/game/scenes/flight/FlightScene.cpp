@@ -51,6 +51,7 @@ void FlightScene::load()
 
 	auto* n_vehicle = new Vehicle();
 	SerializeUtil::read_file_to("udata/vehicles/debug.toml", *n_vehicle);
+	n_vehicle->sort();
 
 	osp->game_state->universe.create_entity<VehicleEntity>(n_vehicle);
 
@@ -61,8 +62,7 @@ void FlightScene::load()
 	st.cartesian.pos = stt.cartesian.pos;
 	st.cartesian.vel = stt.cartesian.vel;
 	st.rotation = stt.rotation;
-	st.cartesian.pos += stt.rotation * glm::dvec3(0, 0, 1) * 10.0;
-	st.cartesian.pos += glm::dvec3(-1000000.0, 100000.0, 0.0) * 0.000;
+	st.cartesian.pos += stt.rotation * glm::dvec3(0, 0.0, 1) * 10.0;
 
 	n_vehicle->packed_veh.set_world_state(st);
 	n_vehicle->unpack();
@@ -78,8 +78,6 @@ void FlightScene::load()
 	Renderer* r = osp->renderer;
 	r->add_drawable(&sky);
 	r->set_ibl_source(nullptr);
-
-
 
 
 	sun = SunLight(r->quality.sun_terrain_shadow_size, r->quality.sun_shadow_size);
@@ -106,7 +104,7 @@ void FlightScene::update()
 	VehicleEntity* v_ent =  universe->get_entity_as<VehicleEntity>(2);	
 	
 	camera.center = v_ent->vehicle->unpacked_veh.get_center_of_mass(true);
-	camera.speed = 10000000.0;
+	camera.speed = 100.0;
 	
 	camera.update(osp->game_dt);
 

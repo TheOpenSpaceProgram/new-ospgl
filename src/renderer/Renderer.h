@@ -101,6 +101,7 @@ private:
 	size_t env_frames;
 	size_t env_face;
 	bool env_first;
+	bool env_enabled;
 
 public:
 	Cubemap* ibl_source = nullptr;

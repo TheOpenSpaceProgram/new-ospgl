@@ -13,8 +13,8 @@ static int iteration = 0;
 int main(int argc, char** argv)
 {
 	osp = new OSP();
-
 	osp->init(argc, argv);
+
 	SerializeUtil::read_file_to("udata/saves/debug-save/save.toml", *osp->game_state);
 
 	double fps_t = 0.0;

@@ -32,5 +32,6 @@ private:
 
 public:
 
+	// Doesn't sort! This is so it can be used in the editor too
 	VehicleLoader(const cpptoml::table& root, Vehicle& to);
 };

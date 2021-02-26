@@ -189,7 +189,7 @@ void generate_skirt(PlanetTileVertex* target, glm::dmat4 model, glm::dmat4 inver
 	glm::dvec3 world_pos_cubic = model * glm::vec4(in_tile, 1.0);
 	glm::dvec3 world_pos_spheric = MathUtil::cube_to_sphere(world_pos_cubic);
 
-	world_pos_spheric *= 0.95;
+	world_pos_spheric *= 0.99;
 
 	vert = copy_vert;
 	vert.pos = (glm::vec3)(inverse_model_spheric * glm::dvec4(world_pos_spheric, 1.0));

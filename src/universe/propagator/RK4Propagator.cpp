@@ -48,7 +48,7 @@ void RK4Propagator::propagate(std::vector<CartesianState>& states, double dt)
 	{
 		auto acc = glm::dvec3(0.0);
 		acceleration(i, states[i], t0_snap, system->nbody_count, acc);
-		states[i].vel += acc;
+		states[i].vel += acc * dt;
 	}
 }
 
