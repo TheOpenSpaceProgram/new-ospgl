@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
 	PROFILE_FUNC();
 
-	osp->game_state->load_scene(new EditorScene());
+	osp->game_state->load_scene(new FlightScene());
 
 	PhysicalMaterial H2;
 	PhysicalMaterial O2;

@@ -36,7 +36,7 @@ void Logger::log(int level, const char* format, fmt::format_args args)
 	else
 	{
 		prefix = "FTL";
-		std::cout << rang::bg::red << rang::fg::black;
+		std::cout << rang::fg::red;
 	}
 
 	std::string fmated = fmt::vformat(format, args);

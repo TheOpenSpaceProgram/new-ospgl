@@ -212,8 +212,7 @@ void AssetManager::load_packages(LuaCore* lua_core, GameDatabase* game_database)
 
 		if(lua)
 		{
-			sol::function load_fnc = lua->get<sol::function>("load");
-			load_fnc(game_database);	
+			LuaUtil::call_function((*lua)["load"], "package.lua load execution", game_database);
 		}
 
 	}

@@ -1,4 +1,3 @@
-print("Requiring game_database")
 require("game_database")
 
 function load(database) 
@@ -8,6 +7,7 @@ function load(database)
 	database:add_part_category("categories/all.toml")
 
 	database:add_material("materials/hydrogen.toml")
+	database:add_material("materials/oxygen.toml")
 
 end 
 

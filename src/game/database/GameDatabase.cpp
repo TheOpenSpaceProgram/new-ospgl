@@ -1,6 +1,6 @@
 #include "GameDatabase.h"
 #include <util/Logger.h>
-
+#include <assets/AssetManager.h>
 
 static std::string sanitize_path(const std::string& path, const std::string& pkg)
 {
@@ -32,7 +32,7 @@ void GameDatabase::add_material(const std::string& path, const std::string& pkg)
 	std::string sane_path = sanitize_path(path, pkg);
 	logger->debug("[DB] Adding material with path '{}'", sane_path);
 	PhysicalMaterial pmat;
-	SerializeUtil::read_file_to(sane_path, pmat);
+	SerializeUtil::read_file_to(osp->assets->resolve_path(sane_path), pmat);
 	materials[sane_path] = pmat;
 }
 
