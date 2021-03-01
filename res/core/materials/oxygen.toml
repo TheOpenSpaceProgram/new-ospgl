@@ -1,0 +1,8 @@
+name = "Oxygen"
+formula = "O_2"
+std_bp = 90.188
+molar_mass = 31.998
+liquid_density = 1.141
+solid_density = 1.141
+dH_formation = 0.0
+dH_vaporization = 213138.3211

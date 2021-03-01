@@ -184,7 +184,7 @@ void PartPrototype::load(const cpptoml::table& from)
 	}
 }
 
-PartPrototype::PartPrototype() : model(std::move(AssetHandle<Model>()))
+PartPrototype::PartPrototype(ASSET_INFO) : model(std::move(AssetHandle<Model>())), Asset(ASSET_INFO_P)
 {
 }
 
@@ -200,11 +200,11 @@ PartPrototype::~PartPrototype()
 	}
 }
 
-PartPrototype* load_part_prototype(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
+PartPrototype* load_part_prototype(ASSET_INFO, const cpptoml::table& cfg)
 {
 	std::shared_ptr<cpptoml::table> toml = SerializeUtil::load_file(path);
 
-	PartPrototype* proto = new PartPrototype();
+	PartPrototype* proto = new PartPrototype(ASSET_INFO_P);
 	proto->in_package = pkg;
 
 	SerializeUtil::read_to(*toml, *proto);

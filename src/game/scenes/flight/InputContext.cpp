@@ -363,7 +363,7 @@ void InputContext::load_from_file(const std::string& path)
 	if(!std::filesystem::exists(config_path))
 	{
 		// Copy the file
-		std::string real_path = cfg->real_path;
+		std::string real_path = cfg->get_asset_resolved_path();
 		std::string dir_path = config_path.substr(0, config_path.find_last_of('/') + 1);
 		std::filesystem::create_directories(dir_path);
 		logger->info("Copying input config from {} to {} (in dir: {})", real_path, config_path, dir_path);

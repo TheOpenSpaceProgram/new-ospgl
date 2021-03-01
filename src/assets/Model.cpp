@@ -470,7 +470,7 @@ void Model::free_gpu()
 
 
 
-Model::Model(tinygltf::Model&& model)
+Model::Model(tinygltf::Model&& model, ASSET_INFO) : Asset(ASSET_INFO_P)
 {
 	this->gltf = std::move(model);
 	gpu_users = 0;
@@ -651,7 +651,7 @@ void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &p
 
 				mtex.second_ptr = std::make_shared<Image>(img.image.data(), img.width, img.height, img.bits, img.component,
 											mag_filter, min_filter, wrapS, wrapT,
-											type == ModelTexture::BASE_COLOR);
+											type == ModelTexture::BASE_COLOR, GENERATED_ASSET_INFO);
 			}
 			else
 			{
@@ -727,7 +727,7 @@ void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &p
 
 }
 
-Model* load_model(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
+Model* load_model(ASSET_INFO, const cpptoml::table& cfg)
 {
 	std::string extension = name.substr(name.find_last_of('.'));
 	tinygltf::Model model;
@@ -760,7 +760,7 @@ Model* load_model(const std::string& path, const std::string& name, const std::s
 		}
 
 
-		return new Model(std::move(model));
+		return new Model(std::move(model), ASSET_INFO_P);
 	}
 }
 

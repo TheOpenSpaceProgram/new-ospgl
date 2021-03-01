@@ -1,4 +1,6 @@
 #pragma once
+#include "Asset.h"
+
 #include <string>
 #include <cpptoml.h>
 #include <unordered_map>
@@ -13,7 +15,7 @@
 // Font file must be .png and named the same as the .fnt file
 // (except for extension)
 
-class BitmapFont
+class BitmapFont : public Asset
 {
 public:
 
@@ -43,10 +45,10 @@ public:
 
 	std::unordered_map<uint32_t, Glyph> chars;
 
-	BitmapFont(const std::vector<uint8_t>& fnt, Image* image);
+	BitmapFont(const std::vector<uint8_t>& fnt, Image* image, ASSET_INFO);
 	~BitmapFont();
 };
 
-BitmapFont* load_bitmap_font(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
+BitmapFont* load_bitmap_font(ASSET_INFO, const cpptoml::table& cfg);
 
 

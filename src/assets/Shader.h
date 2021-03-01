@@ -5,18 +5,14 @@
 
 #include <glm/gtc/type_ptr.hpp>
 #include <cpptoml.h>
+#include "Asset.h"
 
 // Not only do we load the shader, and make it easily usable
 // we also run a preprocessor to allow includes
-class Shader
+class Shader : public Asset
 {
 private:
 
-
-	// For the preprocessor
-	std::string pkg;
-	std::string name;
-	
 	// Run basic preprocessing on shader
 	// We allow:
 	// #include <absolute_path>		(Allows packages)
@@ -92,10 +88,10 @@ public:
 		glUniformMatrix3fv(get_uniform_location(name), 1, GL_FALSE, glm::value_ptr(value));
 	}
 
-	Shader(const std::string& vertexData, const std::string& fragmentData, const std::string& pkg, const std::string& path);
+	Shader(const std::string& vertexData, const std::string& fragmentData, ASSET_INFO);
 	~Shader();
 };
 
-Shader* load_shader(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
+Shader* load_shader(ASSET_INFO, const cpptoml::table& cfg);
 
 

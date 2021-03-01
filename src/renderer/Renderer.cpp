@@ -347,7 +347,34 @@ void Renderer::render(PlanetarySystem* system)
 	}
 	c_uniforms.brdf = brdf->id;
 
-	
+
+	if(quality.pbr.quality != RendererQuality::PBR::Quality::SIMPLE && env_enabled && render_enabled)
+	{
+		env_frames++;
+
+		if(env_first)
+		{
+			env_map_sample();
+			env_first = false;
+		}
+
+		if (env_frames > quality.pbr.frames_per_sample)
+		{
+			if(quality.pbr.simple_sampling)
+			{
+				env_map_sample();
+			}
+			else
+			{
+				logger->fatal("Non-simple envmap sampling is not yet implemented!");
+			}
+
+			env_frames = 0;
+		}
+	}
+
+
+
 	prepare_deferred();
 
 	if (render_enabled)
@@ -384,7 +411,7 @@ void Renderer::render(PlanetarySystem* system)
 			d->gui_pass(c_uniforms);
 		}
 
-		// Draw nanoVG 
+		// Draw nanoVG
 		nvgEndFrame(vg);
 		nvgEndFrameExt(vg);
 
@@ -397,32 +424,6 @@ void Renderer::render(PlanetarySystem* system)
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		// Draw text_drawer added text
-	}
-
-	env_frames++;
-
-	// TODO: Move this inside render_enabled?
-	if(quality.pbr.quality != RendererQuality::PBR::Quality::SIMPLE && env_enabled)
-	{
-		if(env_first)
-		{
-			env_map_sample();
-			env_first = false;
-		}
-
-		if (env_frames > quality.pbr.frames_per_sample)
-		{
-			if(quality.pbr.simple_sampling)
-			{
-				env_map_sample();
-			}
-			else
-			{
-				logger->fatal("Non-simple envmap sampling is not yet implemented!");
-			}
-
-			env_frames = 0;
-		}
 	}
 
 }
@@ -690,8 +691,6 @@ Renderer::Renderer(cpptoml::table& settings)
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 130");
 	ImGui::StyleColorsDark();
-	
-	ImFont* font_default = io.Fonts->AddFontDefault();
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 

@@ -52,7 +52,7 @@ std::string Shader::preprocessor(const std::string& file)
 			if(relative)
 			{
 				// We add the package later for simplicity
-				path = name.substr(0, name.find_last_of('/') + 1);
+				path = get_asset_name().substr(0, get_asset_name().find_last_of('/') + 1);
 
 				// Starting path is the path of the shader, any ../ goes backwards one
 				// subdirectory. It's forbidden to go lower than the package root directory,
@@ -91,7 +91,7 @@ std::string Shader::preprocessor(const std::string& file)
 
 				}		
 
-				path = pkg + ":" + path;
+				path = get_asset_pkg() + ":" + path;
 			}
 			else
 			{
@@ -106,7 +106,7 @@ std::string Shader::preprocessor(const std::string& file)
 				}
 				else
 				{
-					auto[pk, nm] = osp->assets->get_package_and_name(token, pkg);
+					auto[pk, nm] = osp->assets->get_package_and_name(token, get_asset_pkg());
 					path = pk + ":" + nm;
 				}
 			}
@@ -147,11 +147,8 @@ void Shader::use() const
 	glUseProgram(id);
 }
 
-Shader::Shader(const std::string& v, const std::string& f, const std::string& pkg, const std::string& path)
+Shader::Shader(const std::string& v, const std::string& f, ASSET_INFO) : Asset(ASSET_INFO_P)
 {
-	this->pkg = pkg;
-	this->name = path;
-
 	std::string vproc = preprocessor(v);
 	std::string fproc = preprocessor(f);
 
@@ -213,6 +210,6 @@ Shader* load_shader(const std::string& path, const std::string& name, const std:
 	std::string vs = AssetManager::load_string_raw(path);
 	std::string fs = AssetManager::load_string_raw(fspath);
 
-	return new Shader(vs, fs, pkg, name);
+	return new Shader(vs, fs, ASSET_INFO_P);
 	
 }

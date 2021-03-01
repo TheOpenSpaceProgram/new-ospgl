@@ -9,6 +9,7 @@
 #include <physics/glm/BulletGlmCompat.h>
 #include <tiny_gltf/tiny_gltf.h>
 #include <unordered_set>
+#include "Asset.h"
 
 class Model;
 
@@ -106,7 +107,7 @@ struct Node
 // - .fbx (Easy to export from blender, make sure custom-properties are enabled for collision to work!)
 // It supports a full hierarchy of meshes, each with a subtransform.
 // An empty mesh is a node, it contains only a transform
-class Model
+class Model : public Asset
 {
 private:
 
@@ -139,7 +140,7 @@ public:
 	void get_gpu();
 	void free_gpu();
 
-	Model(tinygltf::Model&& model);
+	Model(tinygltf::Model&& model, ASSET_INFO);
 	~Model();
 };
 

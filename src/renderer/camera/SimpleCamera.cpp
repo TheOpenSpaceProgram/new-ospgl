@@ -6,7 +6,7 @@ void SimpleCamera::update(double dt)
 {
 	keyboard_blocked = false;
 
-	if (!ImGui::IsAnyItemFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsAnyWindowFocused())
+	if (!ImGui::IsAnyItemFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsWindowFocused())
 	{
 		bool moved = false;
 		// Motion

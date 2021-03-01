@@ -5,13 +5,14 @@
 #include "Shader.h"
 #include "Image.h"
 #include "AssetManager.h"
+#include "Asset.h"
 
 // Cubemaps are used for a variety of effects, including skyboxes
 // and PBR irradiance maps (realtime generated or pregenerated)
 // These are OpenGL only, they could also bmagee accesible from RAM, though
 // These are loaded from a folder with images named:
 // px, py, pz, nx, ny, nz [. folder extension]
-class Cubemap
+class Cubemap : public Asset
 {
 private:
 
@@ -43,11 +44,11 @@ public:
 	void generate_ibl_irradiance(size_t res = 32, size_t spec_res = 128, int face = -1, bool bind = true);
 
 
-	Cubemap(std::vector<std::string>& images);
+	Cubemap(std::vector<std::string>& images, ASSET_INFO);
 	// Creates empty textures, to be used as rendertargets
 	Cubemap(size_t nresolution, bool mipmap = false);
 	~Cubemap();
 
 };
 
-Cubemap* load_cubemap(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
+Cubemap* load_cubemap(ASSET_INFO, const cpptoml::table& cfg);

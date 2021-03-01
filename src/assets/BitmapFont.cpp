@@ -64,8 +64,9 @@ Block get_block(size_t offset, const std::vector<uint8_t>& fnt)
 
 
 
-BitmapFont::BitmapFont(const std::vector<uint8_t>& fnt, Image* image)
+BitmapFont::BitmapFont(const std::vector<uint8_t>& fnt, Image* image, ASSET_INFO) : Asset(ASSET_INFO_P)
 {
+
 	this->img = image;
 
 
@@ -129,11 +130,11 @@ BitmapFont::~BitmapFont()
 {
 }
 
-BitmapFont* load_bitmap_font(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
+BitmapFont* load_bitmap_font(ASSET_INFO, const cpptoml::table& cfg)
 {
 	std::vector<uint8_t> font = AssetManager::load_binary_raw(path);
 
 	Image* font_image = osp->assets->get<Image>(pkg, name.substr(0, name.find_last_of('.')) + ".png");
 
-	return new BitmapFont(font, font_image);
+	return new BitmapFont(font, font_image, ASSET_INFO_P);
 }

@@ -11,6 +11,7 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <algorithm>
 #include <iostream>
+#include "Asset.h"
 
 struct MeshConfig
 {
@@ -245,7 +246,7 @@ struct MaterialOverride
 	std::unordered_map<std::string, Uniform> uniforms;
 };
 
-struct Material
+struct Material : public Asset
 {
 
 	MeshConfig cfg;
@@ -271,9 +272,11 @@ struct Material
 	int set(std::vector<ModelTexture>& model_textures, const MaterialOverride& over);
 	void set_core(int* gl_tex, const CameraUniforms& cu, glm::dmat4 model, GLint drawable_id);
 
+	Material(ASSET_INFO) : Asset(ASSET_INFO_P) {}
+
 };
 
-Material* load_material(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
+Material* load_material(ASSET_INFO, const cpptoml::table& cfg);
 
 
 template<>

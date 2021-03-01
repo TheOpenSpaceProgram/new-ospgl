@@ -1,0 +1,8 @@
+name = "Hydrogen"
+formula = "H_2"
+std_bp = 20.271
+molar_mass = 2.0159
+liquid_density = 0.07
+solid_density = 0.0763
+dH_formation = 0.0
+dH_vaporization = 448434.9422

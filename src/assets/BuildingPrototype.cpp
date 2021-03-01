@@ -1,16 +1,16 @@
 #include "BuildingPrototype.h"
 #include <assets/AssetManager.h>
 
-BuildingPrototype* load_building_prototype(const std::string & path, const std::string & name, const std::string & pkg, const cpptoml::table & cfg)
+BuildingPrototype* load_building_prototype(ASSET_INFO, const cpptoml::table & cfg)
 {
 	std::shared_ptr<cpptoml::table> toml = SerializeUtil::load_file(path);
 
-	BuildingPrototype* out = new BuildingPrototype(toml);
+	BuildingPrototype* out = new BuildingPrototype(toml, ASSET_INFO_P);
 
 	return out;
 }
 
-BuildingPrototype::BuildingPrototype(std::shared_ptr<cpptoml::table> table)
+BuildingPrototype::BuildingPrototype(std::shared_ptr<cpptoml::table> table, ASSET_INFO) : Asset(ASSET_INFO_P)
 {
 	std::string model_path = *table->get_as<std::string>("model");
 

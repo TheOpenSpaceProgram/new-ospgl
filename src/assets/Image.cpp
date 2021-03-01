@@ -114,7 +114,7 @@ int Image::get_nvg_image(NVGcontext* vg)
 	return nanovg_image;
 }
 
-Image::Image(ImageConfig config, const std::string& path)
+Image::Image(ImageConfig config, ASSET_INFO) : Asset(ASSET_INFO_P)
 {
 	this->nanovg_image = 0;
 	this->in_vg = nullptr;
@@ -231,7 +231,7 @@ Image::~Image()
 }
 
 Image::Image(const unsigned char* data, int width, int height, int bits, int component, int mag_filter, int min_filter,
-			 int wrapS, int wrapT, bool srgb)
+			 int wrapS, int wrapT, bool srgb, ASSET_INFO) : Asset(ASSET_INFO_P)
 {
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);
@@ -288,7 +288,7 @@ in_memory = false
 
 )-";
 
-Image* load_image(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg)
+Image* load_image(ASSET_INFO, const cpptoml::table& cfg)
 {
 	if (!AssetManager::file_exists(path))
 	{
@@ -313,7 +313,7 @@ Image* load_image(const std::string& path, const std::string& name, const std::s
 	ImageConfig config;
 	::deserialize(config, *sub_ptr);
 
-	Image* n_image = new Image(config, path);
+	Image* n_image = new Image(config, ASSET_INFO_P);
 
 	return n_image;
 }

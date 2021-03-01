@@ -212,12 +212,12 @@ void Material::set_core(int* gl_tex, const CameraUniforms& cu, glm::dmat4 model,
 
 }
 
-Material* load_material(const std::string & path, const std::string & name, const std::string & pkg, const cpptoml::table& cfg)
+Material* load_material(ASSET_INFO, const cpptoml::table& cfg)
 {
 	// Config makes the package magic work
 	Config* c = osp->assets->get<Config>(pkg, name);
 	
-	Material* out = new Material();
+	Material* out = new Material(ASSET_INFO_P);
 
 	c->read_to(*out, "");
 

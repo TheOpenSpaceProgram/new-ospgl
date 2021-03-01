@@ -117,7 +117,7 @@ struct PiecePrototype
 // - Usage of concave collision meshes should be avoided, they are quite slow!
 //
 // NOTE: We keep the model loaded!
-class PartPrototype
+class PartPrototype : public Asset
 {
 private:
 
@@ -147,7 +147,7 @@ public:
 
 	void load(const cpptoml::table& from);
 
-	PartPrototype();
+	PartPrototype(ASSET_INFO);
 	~PartPrototype();
 };
 

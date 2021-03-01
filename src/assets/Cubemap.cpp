@@ -7,8 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-Cubemap* load_cubemap(const std::string& path, const std::string& name,
-					  const std::string& pkg, const cpptoml::table& cfg)
+Cubemap* load_cubemap(ASSET_INFO, const cpptoml::table& cfg)
 {
 	size_t last_dot = path.find_last_of('.');
 	if(last_dot == std::string::npos)
@@ -30,10 +29,10 @@ Cubemap* load_cubemap(const std::string& path, const std::string& name,
 	}
 
 	// Pass everything to cubemap
-	return new Cubemap(images);
+	return new Cubemap(images, ASSET_INFO_P);
 }
 
-Cubemap::Cubemap(std::vector<std::string> &images) : id(0)
+Cubemap::Cubemap(std::vector<std::string> &images, ASSET_INFO) : id(0), Asset(ASSET_INFO_P)
 {
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
@@ -232,7 +231,7 @@ void Cubemap::generate_ibl_irradiance(size_t res, size_t spec_res, int face, boo
 	}
 }
 
-Cubemap::Cubemap(size_t nresolution, bool mipmap)
+Cubemap::Cubemap(size_t nresolution, bool mipmap) : Asset(GENERATED_ASSET_INFO)
 {
 	resolution = nresolution;
 

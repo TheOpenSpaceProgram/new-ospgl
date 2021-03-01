@@ -1,19 +1,16 @@
 #include "Config.h"
 
-Config* load_config(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& ccfg)
+Config* load_config(ASSET_INFO, const cpptoml::table& ccfg)
 {
 	logger->info("Loading config from file: '{}'", path);
 
-	Config* cfg = new Config();
+	Config* cfg = new Config(ASSET_INFO_P);
 	cfg->root = SerializeUtil::load_file(path);
-	cfg->path = name;
-	cfg->pkg = pkg;
-	cfg->real_path = path;
 
 	return cfg;
 }
 
 void Config::write_to_file()
 {
-	SerializeUtil::write_to_file(*root, path);
+	SerializeUtil::write_to_file(*root, get_asset_resolved_path());
 }

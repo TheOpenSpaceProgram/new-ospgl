@@ -3,6 +3,7 @@
 #include <string>
 #include <util/Logger.h>
 #include <util/SerializeUtil.h>
+#include "Asset.h"
 
 struct ImageConfig
 {
@@ -25,7 +26,7 @@ struct ImageConfig
 struct NVGcontext;
 
 // Images are always RGBA, stored as float, for perfomance reasons
-class Image
+class Image : public Asset
 {
 private:
 
@@ -70,13 +71,13 @@ public:
 
 	GLuint id;
 
-	Image(ImageConfig config, const std::string& path);
+	Image(ImageConfig config, ASSET_INFO);
 	Image(const unsigned char* data, int width, int height, int bits, int component,
-	   int mag_filter, int min_filter, int wrapS, int wrapT, bool srgb);
+	   int mag_filter, int min_filter, int wrapS, int wrapT, bool srgb, ASSET_INFO);
 	~Image();
 };
 
-Image* load_image(const std::string& path, const std::string& name, const std::string& pkg, const cpptoml::table& cfg);
+Image* load_image(ASSET_INFO, const cpptoml::table& cfg);
 
 
 
