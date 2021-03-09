@@ -58,7 +58,7 @@ void GUIImageButton::draw(NVGcontext* vg, GUISkin* skin)
 
 void GUIImageButton::set_image(NVGcontext* vg, AssetHandle<Image>&& to)
 {
-	image = to->get_nvg_image(vg);
+	image = to.get_noconst()->get_nvg_image(vg);
 	img_handle = std::move(to);	
 	img_size = img_handle->get_size();
 }

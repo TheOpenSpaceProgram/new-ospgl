@@ -239,7 +239,7 @@ glm::dvec3 Piece::transform_point_to_rigidbody(glm::dvec3 p)
 }
 
 Piece::Piece(Part* in_part, std::string piece_name)
-	: model_node(in_part->part_proto->pieces[piece_name].model_node.duplicate())
+	: model_node(in_part->part_proto->pieces.at(piece_name).model_node.duplicate())
 {
 	attached_to = nullptr;
 	part = nullptr;
@@ -251,7 +251,7 @@ Piece::Piece(Part* in_part, std::string piece_name)
 
 	part = in_part;
 
-	piece_prototype = &in_part->part_proto->pieces[piece_name];
+	piece_prototype = &in_part->part_proto.get_noconst()->pieces[piece_name];
 
 	mass = piece_prototype->mass;
 	friction = piece_prototype->friction;

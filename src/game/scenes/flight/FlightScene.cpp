@@ -46,7 +46,7 @@ void FlightScene::load()
 	}, this));
 
 	osp->renderer->cam = &camera;
-	camera.speed = 20.0;
+	camera.speed = 10.0;
 
 
 	auto* n_vehicle = new Vehicle();
@@ -104,8 +104,7 @@ void FlightScene::update()
 	VehicleEntity* v_ent =  universe->get_entity_as<VehicleEntity>(2);	
 	
 	camera.center = v_ent->vehicle->unpacked_veh.get_center_of_mass(true);
-	camera.speed = 100.0;
-	
+
 	camera.update(osp->game_dt);
 
 }

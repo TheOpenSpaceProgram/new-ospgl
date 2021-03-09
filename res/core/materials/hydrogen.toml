@@ -1,8 +1,13 @@
 name = "Hydrogen"
 formula = "H_2"
 std_bp = 20.271
-molar_mass = 2.0159
-liquid_density = 0.07
-solid_density = 0.0763
+molar_mass = 2.0159e-3
+liquid_density = 0.07e3
+solid_density = 0.0763e3
+# TODO: Find this data, I copied the liquid
+heat_capacity_solid = 25000.0
+# Calculated from https://www.mathscinotes.com/wp-content/uploads/2016/01/Appendix_C.pdf at 20K
+heat_capacity_liquid = 25000.0
+heat_capacity_gas = 14300
 dH_formation = 0.0
 dH_vaporization = 448434.9422

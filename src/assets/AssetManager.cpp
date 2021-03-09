@@ -8,6 +8,7 @@
 #include "PartPrototype.h"
 #include "BuildingPrototype.h"
 #include "Cubemap.h"
+#include "PhysicalMaterial.h"
 
 #include <game/database/GameDatabase.h>
 
@@ -37,6 +38,7 @@ AssetManager::AssetManager(const std::string &res_path, const std::string &udata
 	create_asset_type<PartPrototype>("Part Prototype", load_part_prototype);
 	create_asset_type<BuildingPrototype>("Building Prototype", load_building_prototype);
 	create_asset_type<Cubemap>("Cubemap", load_cubemap);
+	create_asset_type<PhysicalMaterial>("Physical Material", load_physical_material);
 
 	check_packages();
 }

@@ -135,7 +135,7 @@ void EditorGUI::prepare_toolset()
 	auto create_button = [tlayout, this](const std::string& name, EditorMode mode)
 	{
 		GUIImageButton* button = new GUIImageButton();
-		button->set_image(vg, AssetHandle<Image>("core", name, true));
+		button->set_image(vg, AssetHandle<Image>("core", name));
 		button->force_image_size = glm::ivec2(24, 24);
 		tlayout->add_widget(button);
 

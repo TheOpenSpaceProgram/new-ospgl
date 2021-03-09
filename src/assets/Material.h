@@ -148,7 +148,7 @@ struct ModelTexture
 	std::shared_ptr<Image> second_ptr;
 	bool is_asset;
 
-	Image* get_image()
+	Image* get_image() const
 	{
 		if(is_asset)
 		{
@@ -269,8 +269,8 @@ struct Material : public Asset
 	CoreUniforms core_uniforms;
 
 
-	int set(std::vector<ModelTexture>& model_textures, const MaterialOverride& over);
-	void set_core(int* gl_tex, const CameraUniforms& cu, glm::dmat4 model, GLint drawable_id);
+	int set(const std::vector<ModelTexture>& model_textures, const MaterialOverride& over) const;
+	void set_core(int* gl_tex, const CameraUniforms& cu, glm::dmat4 model, GLint drawable_id) const;
 
 	Material(ASSET_INFO) : Asset(ASSET_INFO_P) {}
 

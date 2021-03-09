@@ -148,21 +148,21 @@ void replace_all(std::string& data, const std::string& search, const std::string
 }
 
 
-std::vector<Mesh*> Node::get_all_meshes_recursive(bool include_ours)
+std::vector<const Mesh*> Node::get_all_meshes_recursive(bool include_ours) const
 {
-	std::vector<Mesh*> out;
+	std::vector<const Mesh*> out;
 
 	if(include_ours)
 	{
-		for(int i = 0; i < meshes.size(); i++)
+		for(const auto& mesh : meshes)
 		{	
-			out.push_back(&meshes[i]);
+			out.push_back(&mesh);
 		}
 	}
 
-	for(int i = 0; i < children.size(); i++)
+	for(auto i : children)
 	{
-		std::vector<Mesh*> from_child = children[i]->get_all_meshes_recursive(true);
+		std::vector<const Mesh*> from_child = i->get_all_meshes_recursive(true);
 		out.insert(out.end(), from_child.begin(), from_child.end());
 	}
 
@@ -381,14 +381,14 @@ void Mesh::unload()
 	}
 }
 
-void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model, GLint did)
+void Mesh::bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model, GLint did) const
 {
 	logger->check(drawable, "Cannot draw a non-drawable mesh!");
 
-	material->shader->use();
+	material.data->shader->use();
 
-	int gl_tex = material->set(textures, mat_override);
-	material->set_core(&gl_tex, uniforms, model, did);
+	int gl_tex = material.data->set(textures, mat_override);
+	material.data->set_core(&gl_tex, uniforms, model, did);
 }
 
 void Mesh::draw_command() const
@@ -783,7 +783,7 @@ GPUModelPointer::GPUModelPointer(AssetHandle<Model>&& m) : model(std::move(m))
 {
 	if (!is_null())
 	{
-		model->get_gpu();
+		model.get_noconst()->get_gpu();
 	}
 }
 
@@ -791,13 +791,13 @@ GPUModelPointer::~GPUModelPointer()
 {
 	if (!is_null())
 	{
-		model->free_gpu();
+		model.get_noconst()->free_gpu();
 	}
 }
 
-void Node::draw_all_meshes(const CameraUniforms& uniforms, GLint did, glm::dmat4 model)
+void Node::draw_all_meshes(const CameraUniforms& uniforms, GLint did, glm::dmat4 model) const
 {
-	for (Mesh& mesh : meshes)
+	for (const Mesh& mesh : meshes)
 	{
 		if (mesh.is_drawable())
 		{
@@ -808,15 +808,16 @@ void Node::draw_all_meshes(const CameraUniforms& uniforms, GLint did, glm::dmat4
 
 }
 
-void Node::draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model)
+void Node::draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model) const
 {
-	for(Mesh& mesh : meshes)
+	for(const Mesh& mesh : meshes)
 	{
 		if(mesh.is_drawable())
 		{
 			glm::dmat4 tform = sh_cam.tform * model;
 
-			Shader* sh = mesh.material->shadow_shader;
+			// We can safely use data here as materials are loaded as long as we are
+			Shader* sh = mesh.material.data->shadow_shader;
 			sh->use();
 			sh->setMat4("tform", tform);
 
@@ -825,14 +826,14 @@ void Node::draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model)
 	}
 }
 
-void Node::draw_all_meshes_override(const CameraUniforms& uniforms, Material* mat, MaterialOverride* mat_over, 
-		GLint did, glm::dmat4 model)
+void Node::draw_all_meshes_override(const CameraUniforms& uniforms, const Material* mat, const MaterialOverride* mat_over,
+		GLint did, glm::dmat4 model) const
 {
-	for (Mesh& mesh : meshes)
+	for (const Mesh& mesh : meshes)
 	{
 		if (mesh.is_drawable())
 		{
-			Material* def = mat;
+			const Material* def = mat;
 			if(mat == nullptr)
 			{
 				mat = mesh.material.data;
@@ -857,7 +858,8 @@ void Node::draw_all_meshes_override(const CameraUniforms& uniforms, Material* ma
 }
 
 
-void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, GLint did, bool ignore_our_subtform, bool increase_did)
+void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, GLint did,
+				bool ignore_our_subtform, bool increase_did) const
 {
 	glm::dmat4 n_model;
 	if (ignore_our_subtform)
@@ -882,8 +884,8 @@ void Node::draw(const CameraUniforms& uniforms, glm::dmat4 model, GLint did, boo
 	}
 }
 
-void Node::draw_override(const CameraUniforms& uniforms, Material* mat, glm::dmat4 model, GLint did, 
-			MaterialOverride* mat_override, bool ignore_our_subtform, bool increase_did)
+void Node::draw_override(const CameraUniforms& uniforms, const Material* mat, glm::dmat4 model, GLint did,
+			const MaterialOverride* mat_override, bool ignore_our_subtform, bool increase_did) const
 {
 	glm::dmat4 n_model;
 	if (ignore_our_subtform)
@@ -911,7 +913,7 @@ void Node::draw_override(const CameraUniforms& uniforms, Material* mat, glm::dma
 }
 
 
-void Node::draw_shadow(const ShadowCamera& sh_cam, glm::dmat4 model, bool ignore_our_subtform)
+void Node::draw_shadow(const ShadowCamera& sh_cam, glm::dmat4 model, bool ignore_our_subtform) const
 {
 	glm::dmat4 n_model;
 	if(ignore_our_subtform)

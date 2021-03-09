@@ -25,7 +25,7 @@ void EditorScene::load()
 	r->add_drawable(&vehicle);
 
 	r->add_drawable(&sky);
-	sky.cubemap->generate_ibl_irradiance(32, 32);
+	sky.cubemap.get_noconst()->generate_ibl_irradiance(32, 32);
 	r->set_ibl_source(sky.cubemap.data);
 
 	sun = SunLight(0, r->quality.sun_shadow_size);

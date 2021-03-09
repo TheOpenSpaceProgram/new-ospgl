@@ -1,6 +1,7 @@
 #include "EditorPartList.h"
 #include "../EditorScene.h"
 #include "../EditorVehicleInterface.h"
+#include <game/database/GameDatabase.h>
 #include <OSP.h>
 
 void EditorCategory::load_from_path(const std::string& path)
@@ -123,7 +124,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
 
 	icon_renderer = new PartIconRenderer(part_icon_size);
 	// Load all exposed via the database parts
-	for(const std::string& path : osp->game_database.parts)
+	for(const std::string& path : osp->game_database->parts)
 	{
 		all_parts.emplace_back();
 		all_parts.back().proto = AssetHandle<PartPrototype>(path);
@@ -133,7 +134,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
 	}	
 
 	// Load categories
-	for(const std::string& cat : osp->game_database.part_categories)
+	for(const std::string& cat : osp->game_database->part_categories)
 	{
 		categories.emplace_back();
 		EditorCategory& n = categories[categories.size() - 1];
@@ -160,7 +161,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
 	category_list->margins = glm::ivec4(1, 2, part_margin, 0);
 	def_panel.child_1->child_0->layout = category_list;
 
-	GameDatabase* gdb = &osp->game_database;
+	GameDatabase* gdb = osp->game_database;
 
 	// Category buttons
 	for(int i = 0; i < categories.size(); i++)

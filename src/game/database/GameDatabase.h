@@ -1,7 +1,8 @@
 #pragma once 
 #include <vector>
 #include <string>
-#include <universe/vehicle/material/PhysicalMaterial.h>
+#include <assets/AssetManager.h>
+#include <assets/PhysicalMaterial.h>
 
 // Stores different game assets, such as parts, planetary systems, toolbars...
 // that may be used by the user and not by code. This is different from assets
@@ -19,17 +20,16 @@ class GameDatabase
 {
 public:
 
-	// Light-weight, data only items are loaded automatically
-	std::unordered_map<std::string, PhysicalMaterial> materials;
 
-	// Heavy-weight items are loaded on demand: (They may be assets)
-	std::vector<std::string> parts;	
+	std::vector<std::string> parts;
 	std::vector<std::string> systems;
 	std::vector<std::string> part_categories;
+	std::vector<std::string> materials;
 
 	void add_part(const std::string& path, const std::string& pkg);
 	void add_part_category(const std::string& path, const std::string& pkg);
 	void add_material(const std::string& path, const std::string& pkg);
 
 	GameDatabase();
+	~GameDatabase();
 };

@@ -329,7 +329,7 @@ void SimpleSkin::draw_window(NVGcontext* vg, GUIWindow* window)
 			glm::vec2 pos = title_tr + glm::vec2(-window_icon_size - x_offset, window_icon_size * 0.5f);
 			x_offset += window_icon_size + 2.0f;
 			NVGpaint pnt = nvgImagePattern(vg, pos.x, pos.y, window_icon_size, window_icon_size, 
-				0.0f, (*imgs[i])->get_nvg_image(vg), alpha);
+				0.0f, (*imgs[i]).get_noconst()->get_nvg_image(vg), alpha);
 			nvgBeginPath(vg);
 			nvgRect(vg, pos.x, pos.y, window_icon_size, window_icon_size);
 			nvgFillPaint(vg, pnt);

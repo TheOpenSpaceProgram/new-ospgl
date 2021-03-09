@@ -1,8 +1,13 @@
 name = "Oxygen"
 formula = "O_2"
 std_bp = 90.188
-molar_mass = 31.998
-liquid_density = 1.141
-solid_density = 1.141
+molar_mass = 31.998e-3
+liquid_density = 1.141e3
+solid_density = 1.141e3
+# TODO: Find this data, I copied the liquid
+heat_capacity_solid = 1673.09
+# Calculated from https://www.mathscinotes.com/wp-content/uploads/2016/01/Appendix_C.pdf at 50K
+heat_capacity_liquid = 1673.09
+heat_capacity_gas = 918.0
 dH_formation = 0.0
 dH_vaporization = 213138.3211

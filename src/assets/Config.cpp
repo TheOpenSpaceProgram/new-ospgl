@@ -10,7 +10,7 @@ Config* load_config(ASSET_INFO, const cpptoml::table& ccfg)
 	return cfg;
 }
 
-void Config::write_to_file()
+void Config::write_to_file() const
 {
 	SerializeUtil::write_to_file(*root, get_asset_resolved_path());
 }

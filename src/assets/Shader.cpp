@@ -197,6 +197,21 @@ Shader::Shader(const std::string& v, const std::string& f, ASSET_INFO) : Asset(A
 	glDeleteShader(vs);
 	glDeleteShader(fs);
 
+	// Cache all uniforms
+	GLint count, length, size;
+	GLenum type;
+	GLsizei buf_size = 32;
+	GLchar uname[buf_size]; // variable name in GLSL
+
+	glGetProgramiv(id, GL_ACTIVE_UNIFORMS, &count);
+
+	for (size_t i = 0; i < count; i++)
+	{
+		glGetActiveUniform(id, (GLuint)i, buf_size, &length, &size, &type, uname);
+		std::string uname_str = uname;
+		uniform_locations[uname_str] = i;
+	}
+
 }
 
 

@@ -6,11 +6,11 @@
 #include "game/scenes/flight/FlightScene.h"
 #include "game/scenes/editor/EditorScene.h"
 #include "game/GameState.h"
+#include "game/database/GameDatabase.h"
 #include <util/Profiler.h>
 
 #include <universe/vehicle/material/FluidTank.h>
-
-static int iteration = 0;
+#include <renderer/Renderer.h>
 
 int main(int argc, char** argv)
 {
@@ -24,24 +24,18 @@ int main(int argc, char** argv)
 
 	PROFILE_FUNC();
 
-	osp->game_state->load_scene(new FlightScene());
+	osp->game_state->load_scene(new EditorScene());
 
-	PhysicalMaterial H2;
-	PhysicalMaterial O2;
-	SerializeUtil::read_file_to(osp->assets->resolve_path("core:materials/hydrogen.toml"), H2);
-	SerializeUtil::read_file_to(osp->assets->resolve_path("core:materials/oxygen.toml"), O2);
-	StoredFluid H2C = StoredFluid();
-	StoredFluid O2C = StoredFluid();
-	H2C.gas_mass = 2.0f;
-	O2C.gas_mass = 5.0f;
+	StoredFluid H2C;
+	H2C.gas_mass = 1.0f;
+	H2C.liquid_mass = 0.0f;
 
 	FluidTank ft;
-	ft.volume = 100.0f;
-	ft.temperature = 20.28f;
-	ft.contents["core:materials/hydrogen.toml"] = H2C;
-	ft.contents["core:materials/oxygen.toml"] = O2C;
+	ft.volume = 0.1f;
+	ft.temperature = 375.15f;
+	ft.contents[AssetHandle<PhysicalMaterial>("core:materials/water.toml")] = H2C;
 	ft.ullage_distribution = 1.0f;
-
+	ft.go_to_equilibrium();
 
 
 	while (osp->should_loop())
@@ -51,11 +45,16 @@ int main(int argc, char** argv)
 		osp->start_frame();
 		osp->update();
 		ft.draw_imgui_debug();
-		ft.update(osp->dt, 1.0f);
 		if(input->key_pressed(GLFW_KEY_SPACE))
 		{
-			ft.contents[0].liquid_mass -= 0.01f;
+			ft.exchange_heat(10000000.0f * osp->dt);
+			float atm_mol = (1.0f * ft.get_ullage_volume() * 1e3) / (0.082f * ft.temperature);
+			float atm_kg = atm_mol * 18.015e-3f;
+			//ft.contents["core:materials/water.toml"].gas_mass = glm::min(atm_kg, ft.contents["core:materials/water.toml"].gas_mass);
 		}
+
+
+		ft.update((float)osp->dt, 1.0f);
 		osp->render();
 		osp->finish_frame();
 	}

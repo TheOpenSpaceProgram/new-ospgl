@@ -16,7 +16,11 @@ BuildingPrototype::BuildingPrototype(std::shared_ptr<cpptoml::table> table, ASSE
 
 	model = GPUModelPointer(AssetHandle<Model>(model_path));
 
-	Node* building = model->node_by_name["building"];
+	auto it = model->node_by_name.find("building");
+	logger->check(it != model->node_by_name.end(),
+			   "Could not find building node on model while loading '{}'", get_asset_id());
+	Node* building = it->second;
+
 	collider = nullptr;
 	for (Node* child : building->children)
 	{

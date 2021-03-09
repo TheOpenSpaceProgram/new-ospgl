@@ -53,7 +53,7 @@ public:
 
 
 	// Binds core uniforms and material uniforms
-	void bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model, GLint drawable_id);
+	void bind_uniforms(const CameraUniforms& uniforms, glm::dmat4 model, GLint drawable_id) const;
 
 	// Only issues the draw command, does absolutely nothing else
 	void draw_command() const;
@@ -79,27 +79,27 @@ struct Node
 
 	std::unordered_map<std::string, std::string> properties;
 
-	std::vector<Mesh*> get_all_meshes_recursive(bool include_ours = true);
+	std::vector<const Mesh*> get_all_meshes_recursive(bool include_ours = true) const;
 
-	void draw_all_meshes(const CameraUniforms& uniforms, GLint drawable_id, glm::dmat4 model);
-	void draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model);
-	void draw_all_meshes_override(const CameraUniforms& uniforms, Material* mat, MaterialOverride* mat_override, 
-		GLint drawable_id, glm::dmat4 model);
+	void draw_all_meshes(const CameraUniforms& uniforms, GLint drawable_id, glm::dmat4 model) const;
+	void draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model) const;
+	void draw_all_meshes_override(const CameraUniforms& uniforms, const Material* mat, const MaterialOverride* mat_override,
+		GLint drawable_id, glm::dmat4 model) const;
 
 	// Draws all meshes, and call sthe same on all children,
 	// accumulating sub transforms
 	// The ignore_our_subtform flag is useful specially for stuff like parts
 	// where the piece transform is ignored during game rendering
 	void draw(const CameraUniforms& uniforms, glm::dmat4 model, GLint drawable_id, 
-		bool ignore_our_subtform, bool increase_did = false);
+		bool ignore_our_subtform, bool increase_did = false) const;
 
-	void draw_shadow(const ShadowCamera& sh_cam, glm::dmat4 model, bool ignore_our_subtform = false);
+	void draw_shadow(const ShadowCamera& sh_cam, glm::dmat4 model, bool ignore_our_subtform = false) const;
 
 	// Draws everything using given material, is mat_override is null, the default material override will be
 	// used, if it's non-null, the given one will be used
 	// If mat is null then default materials are used, but the material override is applied
-	void draw_override(const CameraUniforms& uniforms, Material* mat, glm::dmat4 model, GLint drawable_id, 
-		MaterialOverride* mat_over, bool ignore_our_subtform, bool increase_did = false);
+	void draw_override(const CameraUniforms& uniforms, const Material* mat, glm::dmat4 model, GLint drawable_id,
+		const MaterialOverride* mat_over, bool ignore_our_subtform, bool increase_did = false) const;
 };
 
 // Models allow loading 3d models using the assimp library
@@ -206,14 +206,15 @@ public:
 	GPUModelPointer(AssetHandle<Model>&& model);
 	~GPUModelPointer();
 
-	Model* operator->()
+	// We can safely handle model.data directly, allowing const for convenience
+	const Model* operator->() const
 	{
-		return model.operator->();
+		return model.data;
 	}
 
-	Model& operator*()
+	const Model& operator*() const
 	{
-		return model.operator*();
+		return *model.data;
 	}
 
 };
@@ -262,12 +263,12 @@ struct GPUModelNodePointer
 	// Automatic destructor is good
 
 
-	Node* operator->()
+	const Node* operator->() const
 	{
 		return sub_node;
 	}
 
-	Node& operator*()
+	const Node& operator*() const
 	{
 		return *sub_node;
 	}

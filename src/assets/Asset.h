@@ -18,6 +18,7 @@ private:
 
 public:
 
+
 	const std::string& get_asset_id() const
 	{
 		return asset_id;

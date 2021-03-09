@@ -8,12 +8,12 @@
 #include "util/InputUtil.h"
 #include "util/defines.h"
 #include "util/Timer.h"
-#include <game/database/GameDatabase.h>
 
 class AssetManager;
 class Renderer;
 class LuaCore;
 class GameState;
+class GameDatabase;
 
 // Initializes the different subsystems OSP has
 // It's a global class, only one OSP may exist at once (filesystem related)
@@ -33,7 +33,7 @@ public:
 	AssetManager* assets{};
 	Renderer* renderer{};
 	GameState* game_state{};
-	GameDatabase game_database;
+	GameDatabase* game_database{};
 
 	constexpr static const char* OSP_VERSION = "PRE-RELEASE";
 	void init(int argc, char** argv);

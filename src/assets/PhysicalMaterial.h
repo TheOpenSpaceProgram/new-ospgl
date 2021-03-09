@@ -1,11 +1,12 @@
 #pragma once
+#include "Asset.h"
 #include <string>
 #include <util/SerializeUtil.h>
 
 // Temperatures in kelvin, pressures in atmospheres
 // This is a simple simulation and ignores critical fluids and similar,
 // it can handle solids, liquids and gases, although solids are simplified
-struct PhysicalMaterial
+struct PhysicalMaterial : public Asset
 {
 	std::string name;
 	std::string formula;
@@ -19,13 +20,15 @@ struct PhysicalMaterial
 
 	// J kg-1 K-1
 	// For the isochoric process if possible
+	// TODO: Give the option of using a polynomial approximation? Scientific data is given like that
 	float heat_capacity_solid;
 	float heat_capacity_liquid;
 	float heat_capacity_gas;
 
-	// g / mol for convenience
+	// kg / mol for convenience
 	float molar_mass;
 
+	// kg / m^3
 	float liquid_density;
 	float solid_density;
 
@@ -33,33 +36,23 @@ struct PhysicalMaterial
 	float get_vapor_pressure(float T) const;
 	float get_boiling_point(float P) const;
 
+	// Returns a number to be multiplied by heat capacity to avoid
+	// 0K being reachable (unrealistic approach, good enough)
+	static float get_heat_capacity_increase(float T);
+
 	inline float get_moles(float mass) const
 	{
-		return (mass * 1000.0f) / molar_mass;
+		return mass / molar_mass;
 	}
 
 	inline float get_mass(float moles) const
 	{
-		return moles * molar_mass * 1e-3f;
+		return moles * molar_mass;
 	}
+
+	PhysicalMaterial(ASSET_INFO) : Asset(ASSET_INFO_P) {}
 
 };
 
-template<>
-class GenericSerializer<PhysicalMaterial>
-{
-public:
-
-	static void deserialize(PhysicalMaterial& to, const cpptoml::table& from)
-	{
-		SAFE_TOML_GET(to.name, "name", std::string);
-		SAFE_TOML_GET_OR(to.formula, "formula", std::string, "N/A");
-		SAFE_TOML_GET(to.std_bp, "std_bp", double);
-		SAFE_TOML_GET(to.molar_mass, "molar_mass", double);
-		SAFE_TOML_GET(to.liquid_density, "liquid_density", double);
-		SAFE_TOML_GET(to.solid_density, "solid_density", double);
-		SAFE_TOML_GET(to.dH_formation, "dH_formation", double);
-		SAFE_TOML_GET(to.dH_vaporization, "dH_vaporization", double);
-	}
-};
+PhysicalMaterial* load_physical_material(ASSET_INFO, const cpptoml::table& cfg);
 

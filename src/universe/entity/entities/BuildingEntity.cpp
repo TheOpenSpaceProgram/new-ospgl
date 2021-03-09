@@ -77,10 +77,12 @@ void BuildingEntity::physics_update(double pdt)
 
 void BuildingEntity::deferred_pass(CameraUniforms& cu, bool is_env)
 {
-	proto->model->node_by_name["building"]->draw(cu, get_model_matrix(false), drawable_uid, true);
+	const Node* node = proto->model->node_by_name.find("building")->second;
+	node->draw(cu, get_model_matrix(false), drawable_uid, true);
 }
 
 void BuildingEntity::shadow_pass(ShadowCamera& cu)
 {
-	proto->model->node_by_name["building"]->draw_shadow(cu, get_model_matrix(false), true);
+	const Node* node = proto->model->node_by_name.find("building")->second;
+	node->draw_shadow(cu, get_model_matrix(false), true);
 }

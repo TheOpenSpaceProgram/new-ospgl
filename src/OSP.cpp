@@ -6,6 +6,7 @@
 #include <renderer/Renderer.h>
 #include <lua/LuaCore.h>
 #include <game/GameState.h>
+#include <game/database/GameDatabase.h>
 
 InputUtil* input;
 
@@ -169,10 +170,11 @@ void OSP::init(int argc, char** argv)
 		create_global_lua_core();
 		create_global_profiler();
 
+		game_database = new GameDatabase();
 		game_state = new GameState();
 
 		// Load packages now so they register all scripts...
-		assets->load_packages(lua_core, &game_database);
+		assets->load_packages(lua_core, game_database);
 
 		input = new InputUtil();	
 		input->setup(renderer->window);

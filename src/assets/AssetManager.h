@@ -15,13 +15,12 @@
 #include <OSP.h>
 
 #include <PackageMetadata.h>
+#include "Asset.h"
 
-// Pointer to a function which looks like:
-// T* loadAsset(const std::string& path)
 // You must allocate the new asset!
 // Return nullptr if not possible
 template<typename T>
-using LoadAssetPtr = T*(*)(const std::string&, const std::string&, const std::string&, const cpptoml::table& config);
+using LoadAssetPtr = T*(*)(ASSET_INFO, const cpptoml::table& config);
 
 template<typename T>
 struct AssetHandle;
@@ -352,8 +351,6 @@ struct AssetPointer
 
 
 // Automatically frees the asset when done using it
-// It allows holding just a "pointer" to the asset until
-// needed (load_now = false)
 template<typename T>
 struct AssetHandle
 {
@@ -362,19 +359,15 @@ struct AssetHandle
 
 public:
 
-	T* get()
+	T* get_noconst() const
 	{
 		logger->check(pkg != "" && name != "", "Tried to get a null asset handle");
+		return data;
+	}
 
-		if (data != nullptr)
-		{
-			return data;
-		}
-		else
-		{
-			data = osp->assets->get<T>(pkg, name);
-			return data;
-		}
+	const T* get() const
+	{
+		return get_noconst();
 	}
 
 	void unload()
@@ -386,45 +379,30 @@ public:
 		}
 	}
 
-	// Set load_now to false to avoid loading the asset just as the handle is created
-	AssetHandle(const std::string& pkg, const std::string& name, bool load_now = true)
+	AssetHandle(const std::string& pkg, const std::string& name)
 	{
 		this->pkg = pkg;
 		this->name = name;
 
-		if (load_now)
-		{
-			data = osp->assets->get<T>(pkg, name);
-		}
-		else
-		{
-			data = nullptr;
-		}
+		data = osp->assets->get<T>(pkg, name);
 	}
 
 	// This avoids the other constructor from being called when passing pointers
-	AssetHandle(const char* pkg, const char* name, bool load_now = true)
+	AssetHandle(const char* pkg, const char* name)
 	{
-		std::move(AssetHandle(std::string(pkg), std::string(name), load_now));
+		std::move(AssetHandle(std::string(pkg), std::string(name)));
 	}
 
-	AssetHandle(const std::string& path, bool load_now = true)
+	AssetHandle(const std::string& path)
 	{
 		auto[pkg, name] = osp->assets->get_package_and_name(path, osp->assets->get_current_package());
 		this->pkg = pkg;
 		this->name = name;
 
-		if (load_now)
-		{
-			data = osp->assets->get<T>(pkg, name);
-		}
-		else
-		{
-			data = nullptr;
-		}
+		data = osp->assets->get<T>(pkg, name);
 	}
 
-	AssetHandle(const AssetPointer& ptr, bool load_now = true) : AssetHandle(ptr.pkg, ptr.name, load_now)
+	AssetHandle(const AssetPointer& ptr) : AssetHandle(ptr.pkg, ptr.name)
 	{
 	}
 
@@ -433,7 +411,7 @@ public:
 		pkg = "null";
 		name = "null";
 		data = nullptr;
-		
+
 		// To satisfy std vectors, not really needed
 	}
 
@@ -483,15 +461,32 @@ public:
 		return data == nullptr;
 	}
 
-	T* operator->()
+	const T* operator->() const
 	{
 		return get();
 	}
 
-	T& operator*()
+	const T& operator*() const
 	{
 		return *get();
 	}
 
+	bool operator==(const AssetHandle<T>& other) const
+	{
+		return pkg == other.pkg && name == other.name;
+	}
+
 };
 
+namespace std
+{
+	template<typename T>
+	struct hash<AssetHandle<T>>
+	{
+		size_t operator()(const AssetHandle<T>& k) const
+		{
+			return std::hash<std::string>()(k.name) ^ std::hash<std::string>()(k.pkg);
+		}
+	};
+
+}

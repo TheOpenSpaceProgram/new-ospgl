@@ -30,14 +30,16 @@ void GameDatabase::add_part_category(const std::string& path, const std::string&
 void GameDatabase::add_material(const std::string& path, const std::string& pkg)
 {
 	std::string sane_path = sanitize_path(path, pkg);
-	logger->debug("[DB] Adding material with path '{}'", sane_path);
-	PhysicalMaterial pmat;
-	SerializeUtil::read_file_to(osp->assets->resolve_path(sane_path), pmat);
-	materials[sane_path] = pmat;
+	logger->debug("[DB] Adding physical material with path '{}'", sane_path);
+	materials.push_back(sane_path);
 }
 
 GameDatabase::GameDatabase()
 {
-	
+}
+
+GameDatabase::~GameDatabase()
+{
+
 }
 

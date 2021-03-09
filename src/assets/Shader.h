@@ -31,14 +31,13 @@ public:
 
 	GLuint id;
 
-	inline GLint get_uniform_location(const std::string& name)
+	inline GLint get_uniform_location(const std::string& name) const
 	{
 		auto it = uniform_locations.find(name);
 		if(it == uniform_locations.end())
 		{
-			GLint n_pos = glGetUniformLocation(id, name.c_str());
-			uniform_locations[name] = n_pos;
-			return n_pos;
+			logger->error("Could not find uniform '{}' on shader '{}'", name, get_asset_id());
+			return 0;
 		}
 		else
 		{
@@ -49,41 +48,41 @@ public:
 
 	void use() const;
 
-	inline void setBool(const std::string &name, bool value)
+	inline void setBool(const std::string &name, bool value) const
 	{
 		glUniform1i(get_uniform_location(name), (int)value);
 	}
-	inline void setInt(const std::string &name, int value)
+	inline void setInt(const std::string &name, int value) const
 	{
 		glUniform1i(get_uniform_location(name), value);
 	}
 
-	inline void setFloat(const std::string &name, float value)
+	inline void setFloat(const std::string &name, float value) const
 	{
 		glUniform1f(get_uniform_location(name), value);
 	}
 
-	inline void setVec2(const std::string& name, glm::vec2 value)
+	inline void setVec2(const std::string& name, glm::vec2 value) const
 	{
 		glUniform2f(get_uniform_location(name), value.x, value.y);
 	}
 
-	inline void setVec3(const std::string& name, glm::vec3 value)
+	inline void setVec3(const std::string& name, glm::vec3 value) const
 	{
 		glUniform3f(get_uniform_location(name), value.x, value.y, value.z);
 	}
 
-	inline void setVec4(const std::string& name, glm::vec4 value)
+	inline void setVec4(const std::string& name, glm::vec4 value) const
 	{
 		glUniform4f(get_uniform_location(name), value.x, value.y, value.z, value.w);
 	}
 
-	inline void setMat4(const std::string& name, glm::mat4 value)
+	inline void setMat4(const std::string& name, glm::mat4 value) const
 	{
 		glUniformMatrix4fv(get_uniform_location(name), 1, GL_FALSE, glm::value_ptr(value));
 	}
 
-	inline void setMat3(const std::string& name, glm::mat3 value)
+	inline void setMat3(const std::string& name, glm::mat3 value) const
 	{
 		glUniformMatrix3fv(get_uniform_location(name), 1, GL_FALSE, glm::value_ptr(value));
 	}

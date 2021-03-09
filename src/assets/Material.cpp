@@ -71,7 +71,7 @@ Uniform::Uniform(glm::vec4 v)
 Uniform::Uniform(std::string pkg, std::string name)
 {
 	type = TEX;
-	value.as_tex = new AssetHandle<Image>(pkg, name, false);
+	value.as_tex = new AssetHandle<Image>(pkg, name);
 }
 
 
@@ -84,41 +84,41 @@ Uniform::~Uniform()
 	}
 }
 
-int Material::set(std::vector<ModelTexture>& assimp_textures, const MaterialOverride& over)
+int Material::set(const std::vector<ModelTexture>& assimp_textures, const MaterialOverride& over) const
 {
 	int gl_tex = 0;
 
 	std::unordered_map<std::string, const Uniform*> final_uniforms;
 
-	for(auto it = uniforms.begin(); it != uniforms.end(); it++)
+	for(const auto& uniform : uniforms)
 	{
-		final_uniforms[it->first] = &it->second;
+		final_uniforms[uniform.first] = &uniform.second;
 	}
 
-	for(auto it = over.uniforms.begin(); it != over.uniforms.end(); it++)
+	for(const auto& uniform : over.uniforms)
 	{
-		auto pos = final_uniforms.find(it->first);
+		auto pos = final_uniforms.find(uniform.first);
 		if(pos != final_uniforms.end())
 		{
-			pos->second = &it->second;
+			pos->second = &uniform.second;
 		}
 	}
 
-	for (auto it = final_uniforms.begin(); it != final_uniforms.end(); it++)
+	for (auto& final_uniform : final_uniforms)
 	{
-		it->second->set(shader, it->first, &gl_tex);
+		final_uniform.second->set(shader, final_uniform.first, &gl_tex);
 	}
 
-	for (auto it = assimp_textures.begin(); it != assimp_textures.end(); it++)
+	for (const auto& assimp_texture : assimp_textures)
 	{
-		ModelTexture::TextureType type = it->first;
+		ModelTexture::TextureType type = assimp_texture.first;
 		auto translates = model_texture_type_to_uniform.find(type);
 		if (translates != model_texture_type_to_uniform.end())
 		{
 			std::string uniform = translates->second;
 
 			glActiveTexture(GL_TEXTURE0 + gl_tex);
-			glBindTexture(GL_TEXTURE_2D, it->get_image()->id);
+			glBindTexture(GL_TEXTURE_2D, assimp_texture.get_image()->id);
 
 			shader->setInt(uniform, gl_tex);
 
@@ -130,7 +130,7 @@ int Material::set(std::vector<ModelTexture>& assimp_textures, const MaterialOver
 
 }
 
-void Material::set_core(int* gl_tex, const CameraUniforms& cu, glm::dmat4 model, GLint drawable_id)
+void Material::set_core(int* gl_tex, const CameraUniforms& cu, glm::dmat4 model, GLint drawable_id) const
 {
 
 	if (!core_uniforms.mat4_proj.empty())

@@ -1,0 +1,13 @@
+name = "Water"
+formula = "H_2O"
+std_bp = 373.15
+molar_mass = 18.015e-3
+liquid_density = 1.0e3
+solid_density = 0.9167e3
+# TODO: Find this data, I copied the liquid
+heat_capacity_solid = 2117.0
+# Calculated from https://www.mathscinotes.com/wp-content/uploads/2016/01/Appendix_C.pdf at 20K
+heat_capacity_liquid = 4150.0
+heat_capacity_gas = 1850.0
+dH_formation = -16249.79
+dH_vaporization = 2453600
