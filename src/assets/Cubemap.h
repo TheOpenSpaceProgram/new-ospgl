@@ -31,6 +31,8 @@ private:
 
 	GLuint pcomp_sample_dir_tex[MAX_MIP - 1];
 
+	GLint old_fbo, old_vport[4];
+
 public:
 
 	size_t resolution = 0;

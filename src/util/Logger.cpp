@@ -10,7 +10,7 @@
 #include <backward/backward.hpp>
 
 #ifdef _WIN32
-
+#include <Windows.h>
 #else
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -19,13 +19,13 @@
 size_t get_console_width()
 {
 #ifdef _WIN32
-
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	return csbi.srWindow.Right - csbi.srWindow.Left + 1;
 #else
-
 	struct winsize size;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
 	return size.ws_col;
-
 #endif
 }
 
@@ -40,12 +40,14 @@ void Logger::stacktrace()
 	TraceResolver tr; tr.load_stacktrace(st);
 	std::cout << rang::fg::yellow << "Stacktrace: " << std::endl;
 	toFile.push_back("Stacktrace: \n");
-	for(size_t i = 5; i < st.size(); i++)
+	for(size_t i = 0; i < st.size(); i++)
 	{
 		ResolvedTrace trace = tr.resolve(st[i]);
 		std::string file = trace.source.filename;
 		auto it = file.find("src");
-		if(it != std::string::npos)
+		// Filter vctools on windows
+		auto it2 = file.find("vctools");
+		if(it != std::string::npos && it2 == std::string::npos)
 		{
 			file = file.substr(it);
 		}
@@ -63,7 +65,7 @@ void Logger::stacktrace()
 			}
 		}
 		std::string path = file + "(" + std::to_string(trace.source.line) + ")";
-		std::string fnc = trace.object_function;
+		std::string fnc = trace.source.function;
 		std::string pad = " ";
 		if(fnc.size() >= con_width - 64)
 		{

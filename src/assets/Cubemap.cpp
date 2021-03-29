@@ -163,7 +163,6 @@ void Cubemap::generate_ibl_irradiance(size_t res, size_t spec_res, int face, boo
         glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
     };
 
-    GLint old_fbo, old_vport[4];
     if(face == 0 || bind)
 	{
 		glActiveTexture(GL_TEXTURE0);

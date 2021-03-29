@@ -42,8 +42,8 @@ public:
 
 	Universe* universe;
 
-	std::unordered_map<std::string, size_t> name_to_index;
-	std::vector<SystemElement*> elements;
+	std::unordered_map<std::string, size_t> name_to_index{};
+	std::vector<SystemElement*> elements{};
 	// How many n-body interacting elements are there? (The others are simply attracted)
 	size_t nbody_count;
 	

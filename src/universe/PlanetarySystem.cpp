@@ -411,10 +411,26 @@ void PlanetarySystem::load(const cpptoml::table &root)
 	}
 
 	// Sort by nbody tag for optimal simulation
-	std::sort(elements.begin(), elements.end(), [](SystemElement* a, SystemElement* b)
+	// We sadly can't use std::sort as it requires weak ordering
+	std::vector<SystemElement*> ordered;
+	size_t all = elements.size();
+	while(ordered.size() != all)
 	{
-		return b->nbody;
-	});
+		for(auto it = elements.begin(); it != elements.end();)
+		{
+			if((*it)->nbody)
+			{
+				ordered.push_back((*it));
+				it = elements.erase(it);
+			}
+			else
+			{
+				it++;
+			}
+		}
+	}
+	ordered.insert(ordered.end(), elements.begin(), elements.end());
+	elements = ordered;
 
 	// Create the name list
 	for(size_t i = 0; i < elements.size(); i++)

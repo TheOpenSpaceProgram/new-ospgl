@@ -45,8 +45,7 @@ AssetManager::AssetManager(const std::string &res_path, const std::string &udata
 
 bool AssetManager::file_exists(const std::string& path)
 {
-	std::ifstream f(path.c_str());
-	return f.good();
+	return std::filesystem::exists(path);
 }
 
 std::string AssetManager::load_string(const std::string& full_path, const std::string& def)
