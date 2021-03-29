@@ -17,6 +17,8 @@ Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg)
 	this->editor_hidden = init_toml->get_as<bool>("__editor_hidden").value_or(false);
 
 	default_icon = AssetHandle<Image>("core:machines/icons/default_icon.png");
+
+	piece_missing = false;
 }
 
 void Machine::load_interface(const std::string& name, sol::table n_table) 
@@ -36,6 +38,7 @@ void Machine::update(double dt)
 
 void Machine::editor_update(double dt)
 {
+	// Called regardless of enabled status
 	LuaUtil::call_function_if_present(env["editor_update"], "machine editor_update", dt);
 }
 
@@ -155,4 +158,9 @@ std::vector<Machine*> Machine::get_connected_if(std::function<bool(Machine*)> fn
 	}
 
 	return out;
+}
+
+bool Machine::is_enabled()
+{
+	return !piece_missing;
 }

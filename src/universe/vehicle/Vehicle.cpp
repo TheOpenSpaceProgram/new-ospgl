@@ -83,19 +83,85 @@ void Vehicle::physics_update(double dt)
 
 }
 
-void Vehicle::init(Universe* in_universe)
+void Vehicle::init(Universe* universe)
 {
-	init(&in_universe->lua_state);
-	this->in_universe = in_universe;
+	init(&universe->lua_state);
+	this->in_universe = universe;
 }
 
 void Vehicle::init(sol::state* lua_state)
 {
 	this->in_universe = nullptr;
+
+	remove_outdated();
+
 	for(Part* part : parts)
 	{
 		part->init(lua_state, this);
 	}
+}
+
+static bool find_machine(Machine* m, Vehicle* veh)
+{
+	if(!m->is_enabled())
+		return false;
+
+	for(auto& part : veh->parts)
+	{
+		for(auto& machine : part->machines)
+		{
+			if(machine.second == m)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+static bool find_piece(Piece* p, Vehicle* veh)
+{
+	return p->in_vehicle == veh;
+}
+
+// TODO: This could be optimized by integrating it into UnpackedVehicle::handle_separation
+void Vehicle::remove_outdated()
+{
+	// First of all, we will make missing pieces become nullptr
+	// This also makes machines go missing
+	for(Part* part : parts)
+	{
+		for(auto& pair : part->pieces)
+		{
+			if(!find_piece(pair.second, this))
+			{
+				pair.second = nullptr;
+				for(auto& mpair : part->machines)
+				{
+					if(mpair.second->assigned_piece == pair.first)
+					{
+						mpair.second->piece_missing = true;
+					}
+				}
+			}
+		}
+	}
+
+	// Some machines may have gone missing
+	for(auto it = wires.begin(); it != wires.end();)
+	{
+		if(!find_machine(it->first, this) || !find_machine(it->second, this))
+		{
+			it = wires.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
+
+	// Some pipes might have been cut (TODO)
 }
 
 // Helper function for update_attachments
@@ -279,7 +345,8 @@ Piece* Vehicle::get_connected_with(Piece* p, const std::string& attachment_marke
 
 	return nullptr;
 }
-void GenericSerializer<Vehicle>::serialize(const Vehicle& what, cpptoml::table& target) 
+
+void GenericSerializer<Vehicle>::serialize(const Vehicle& what, cpptoml::table& target)
 {
 	logger->check(what.is_packed(), "Cannot serialize a unpacked vehicle");
 	// First we assign every piece and part an ID

@@ -6,6 +6,8 @@
 
 // The vessel has many pieces, out of which some are "root"
 // Those root pieces point to a Part which stores data and behaviour
+// BUT, machines may have an assigned piece. In the case of this piece going
+// missing, the machine will be disabled. Useful in many cases
 class Part
 {
 private:

@@ -4,10 +4,11 @@
 #include <universe/Universe.h>
 #include <util/LuaUtil.h>
 #include <lua/LuaCore.h>
+#include "../plumbing/MachinePlumbing.h"
 
 class Vehicle;
 class Part;
-
+class Piece;
 
 // Machines implement functionality for parts in lua
 // TODO: Think naming of the lua global variables, or 
@@ -15,6 +16,8 @@ class Part;
 // global as they may cause naming errors
 class Machine
 {
+friend class Vehicle;
+
 private:
 
 
@@ -23,8 +26,14 @@ private:
 	std::string in_pkg;
 	AssetHandle<Image> default_icon;
 
+	// We precache this on Vehicle::remove_outdated
+	bool piece_missing;
+
 public:
+	MachinePlumbing plumbing;
+
 	Part* in_part;
+	std::string assigned_piece;
 
 	// All Machines share the same lua_state to allow sharing data
 	sol::state* lua_state;
@@ -36,6 +45,11 @@ public:
 	// May be "", in that case the machine is "centered" on the piece
 	std::string editor_location_marker;
 	bool editor_hidden;
+
+	// A machine may not be enabled if its part goes missing!
+	// We update anyway, this is informative to the piece lua, but
+	// keep in mind a missing machine will lose all wire and pipe connetions!
+	bool is_enabled();
 
 	// pre_update is mostly used for input
 	void pre_update(double dt);

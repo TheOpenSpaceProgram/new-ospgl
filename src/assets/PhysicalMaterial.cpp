@@ -40,6 +40,8 @@ public:
 		SAFE_TOML_GET(to.molar_mass, "molar_mass", double);
 		SAFE_TOML_GET(to.liquid_density, "liquid_density", double);
 		SAFE_TOML_GET(to.solid_density, "solid_density", double);
+		SAFE_TOML_GET(to.liquid_viscosity, "liquid_viscosity", double);
+		SAFE_TOML_GET(to.gas_viscosity, "gas_viscosity", double);
 		SAFE_TOML_GET(to.heat_capacity_gas, "heat_capacity_gas", double);
 		SAFE_TOML_GET(to.heat_capacity_liquid, "heat_capacity_liquid", double);
 		SAFE_TOML_GET(to.heat_capacity_solid, "heat_capacity_solid", double);

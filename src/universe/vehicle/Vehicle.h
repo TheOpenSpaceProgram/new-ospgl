@@ -117,6 +117,8 @@ public:
 
 	void sort();
 
+	void remove_outdated();
+
 	/// Vehicle structure functions:
 
 	// This one doesn't need the array to be sorted
