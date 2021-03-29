@@ -17,6 +17,8 @@ private:
 
 	int wantedFlushCounter;
 
+	void stacktrace();
+
 public:
 
 	std::mutex mtx;

@@ -32,10 +32,6 @@ struct PhysicalMaterial : public Asset
 	float liquid_density;
 	float solid_density;
 
-	// Pa * s
-	float liquid_viscosity;
-	float gas_viscosity;
-
 	// Uses the clausius-clapeyron equation, approximate but good enough
 	float get_vapor_pressure(float T) const;
 	float get_boiling_point(float P) const;

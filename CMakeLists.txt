@@ -4,7 +4,7 @@ cmake_minimum_required (VERSION 3.2.3)
 
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
+set (OSPGL_STACKTRACES ON)
 
 ##################################################################################
 # OSPGL - The game engine
@@ -21,12 +21,14 @@ set(STB_SOURCES "dep/stb/stb_impl.cpp")
 set(FASTNOISEC_SOURCES "dep/FastNoiseC/FastNoise.c")
 set(NANOVG_SOURCES "dep/nanovg/nanovg_ext.cpp")
 set(TINY_GLTF_SOURCES "dep/tiny_gltf/tiny_gltf.cpp")
+set(BACKWARD_SOURCES "dep/tiny_gltf/tiny_gltf.cpp")
 
 
 # Create the OSPGL executable
 
 add_executable(OSPGL ${OSP_SOURCES} ${IMGUI_SOURCES} ${GLAD_SOURCES} 
-	${FASTNOISEC_SOURCES} ${STB_SOURCES} ${NANOVG_SOURCES} ${TINY_GLTF_SOURCES})
+	${FASTNOISEC_SOURCES} ${STB_SOURCES} ${NANOVG_SOURCES} ${TINY_GLTF_SOURCES}
+	${BACKWARD_SOURCES})
 
 # Name it ospgl (lowercase)
 set_target_properties(OSPGL PROPERTIES OUTPUT_NAME "ospgl")
@@ -37,10 +39,14 @@ if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	add_definitions(-D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
 	target_compile_options(OSPGL PUBLIC /bigobj)
-	set(EXTRA_LINK "")
 else()
 	target_compile_options(OSPGL PUBLIC -g -Werror -O0)
 	set(EXTRA_LINK "stdc++fs")
+	if(OSPGL_STACKTRACES)
+		add_definitions(-DBACKWARD_HAS_BFD=1)
+		set(STACKTRACE_LINK "bfd")
+	endif()
+
 	link_libraries(${CMAKE_DL_LIBS})
 endif()
 
@@ -96,7 +102,8 @@ endif()
 
 # Link libraries
 
-target_link_libraries(OSPGL fmt liblua-static BulletSoftBody BulletDynamics BulletCollision LinearMath ${CMAKE_DL_LIBS} ${EXTRA_LINK})
+target_link_libraries(OSPGL fmt liblua-static BulletSoftBody BulletDynamics
+		BulletCollision LinearMath ${CMAKE_DL_LIBS} ${EXTRA_LINK} ${STACKTRACE_LINK})
 
 ##################################################################################
 # ospm - The package manager for OSPGL (Open Space Program Manager)

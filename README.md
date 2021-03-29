@@ -16,6 +16,9 @@ We use CMake for building, so the procedure should be similar on all systems.
 OpenSSL is a dependency (for ospm), on most linux distributions it's probably available on the package manager (it will probably come preinstalled),
 on windows it needs to be manually downloaded (Here's a good binary compilation: https://slproweb.com/download/Win64OpenSSL-1_1_1f.exe)
 
+``binutils-dev`` is needed for libbfd. You can disable this requirement by disabling
+stacktraces at compile time.
+
 You may also need `libx11-dev`, `xorg-dev` and `libgl-mesa-dev` on linux, but these are usually installed on most systems. 
 
 Run these commands to obtain the source:

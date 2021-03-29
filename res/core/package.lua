@@ -10,6 +10,6 @@ function load(database)
 	database:add_material("materials/oxygen.toml")
 	database:add_material("materials/water.toml")
 
-end 
+end
 
 

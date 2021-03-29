@@ -36,7 +36,8 @@ public:
 		auto it = uniform_locations.find(name);
 		if(it == uniform_locations.end())
 		{
-			logger->error("Could not find uniform '{}' on shader '{}'", name, get_asset_id());
+			// This warning is useful when debbuging errors
+			//logger->warn("Could not find uniform '{}' on shader '{}'", name, get_asset_id());
 			return 0;
 		}
 		else
