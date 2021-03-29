@@ -4,16 +4,26 @@
 
 class Vehicle;
 
+// A pipe joins either a machine to a machine, or
+// a junction to a machine (Junction-junction connections
+// are simplified to a single junction)
 struct Pipe
 {
-	Machine* ma, mb;
+	size_t id;
+	// mb may be null, then junction must be present
+	Machine *ma, *mb;
+	size_t junction;
 	std::string port_a, port_b;
-	float radius;
+	float surface;
+
+	// Real-time updated
+	float flow;
 };
 
 struct PipeJunction
 {
-	Pipe *a, *b, *c;
+	// NOT SERIALIZED, generated on load to speed up the algorithm
+	std::vector<size_t> pipes;
 };
 
 
@@ -27,8 +37,9 @@ class VehiclePlumbing
 {
 public:
 
-	std::vector<Pipe> pipes;
-	std::vector<PipeJunction> junctions;
+	std::unordered_map<size_t, Pipe> pipes;
+	// Junction id to its pipes, generated on load / modify to speed up the algorithm
+	std::unordered_map<size_t, PipeJunction> junctions;
 
 	// m^3/s Positive flow rate means from a to b, negative
 	// from b to a. We assume that more dense fluids
@@ -36,6 +47,6 @@ public:
 	static float get_flow_rate(Pipe* p);
 
 	void update_pipes(Vehicle* in_vehicle);
-	std::vector<float> junction_flow_rate();
+	void junction_flow_rate(PipeJunction& jnc);
 
 };

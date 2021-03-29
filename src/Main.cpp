@@ -17,8 +17,6 @@ int main(int argc, char** argv)
 {
 	osp = new OSP();
 	osp->init(argc, argv);
-	VehiclePlumbing plumb;
-	plumb.junction_flow_rate();
 
 	SerializeUtil::read_file_to("udata/saves/debug-save/save.toml", *osp->game_state);
 

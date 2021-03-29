@@ -200,7 +200,7 @@ Shader::Shader(const std::string& v, const std::string& f, ASSET_INFO) : Asset(A
 	// Cache all uniforms
 	GLint count, length, size;
 	GLenum type;
-	GLsizei buf_size = 32;
+	constexpr GLsizei buf_size = 32;
 	GLchar uname[buf_size]; // variable name in GLSL
 
 	glGetProgramiv(id, GL_ACTIVE_UNIFORMS, &count);

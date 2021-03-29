@@ -10,7 +10,7 @@ struct FluidPort
 	std::string marker;
 };
 
-
+// Wrapper around the lua stuff
 class MachinePlumbing
 {
 public:
@@ -20,6 +20,7 @@ public:
 
 	bool is_requester();
 	void fluid_update();
+	float get_pressure(std::string port);
 
 };
 
