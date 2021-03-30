@@ -9,10 +9,11 @@
 
 static void* get_buffer_ptr(const tinygltf::Model& model, const tinygltf::Accessor& acc)
 {
-	tinygltf::BufferView bv = model.bufferViews[acc.bufferView];
-	tinygltf::Buffer b = model.buffers[bv.buffer];
+	const tinygltf::BufferView& bv = model.bufferViews[acc.bufferView];
+	const tinygltf::Buffer& b = model.buffers[bv.buffer];
 
-	return (void*)(b.data.data() + bv.byteOffset + acc.byteOffset);
+	void* ptr = (void*)((uint8_t*)b.data.data() + bv.byteOffset + acc.byteOffset);
+	return ptr;
 }
 
 static size_t get_accessor_unit_size(const tinygltf::Model& model, const tinygltf::Accessor& acc)
@@ -179,10 +180,9 @@ void Mesh::upload()
 {
 	if (drawable)
 	{
-		glGenBuffers(1, &ebo);
 		glGenVertexArrays(1, &vao);
+		glGenBuffers(1, &ebo);
 
-		glBindVertexArray(vao);
 
 		tinygltf::Primitive prim = in_model->gltf.meshes[mesh_idx].primitives[prim_idx];
 		logger->check(prim.indices >= 0, "We don't support non-indexed drawing");
@@ -190,10 +190,14 @@ void Mesh::upload()
 		tinygltf::Accessor index_acc = in_model->gltf.accessors[prim.indices];
 
 
+		glBindVertexArray(vao);
+
 		// Index data
+		auto size = get_accessor_size(in_model->gltf, index_acc);
+		auto ptr = get_buffer_ptr(in_model->gltf, index_acc);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-			   get_accessor_size(in_model->gltf, index_acc),
+			   (GLsizeiptr)get_accessor_size(in_model->gltf, index_acc),
 			   get_buffer_ptr(in_model->gltf, index_acc), GL_STATIC_DRAW);
 
 
@@ -401,6 +405,7 @@ void Mesh::draw_command() const
 	tinygltf::Primitive prim = in_model->gltf.meshes[mesh_idx].primitives[prim_idx];
 	tinygltf::Accessor index_acc = in_model->gltf.accessors[prim.indices];
 	glDrawElements(GL_TRIANGLES, (GLsizei)index_acc.count, index_acc.componentType, nullptr);
+
 	glBindVertexArray(0);
 
 }
@@ -660,7 +665,6 @@ void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &p
 				mtex.second = AssetHandle<Image>(img.uri);
 			}
 
-			logger->info("second: {}", (void*)mtex.second_ptr.get());
 			m->textures.emplace_back(std::move(mtex));
 		}
 	};
@@ -677,9 +681,8 @@ void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &p
 	// TODO: Support non-indexed meshes
 	logger->check(primitive.indices >= 0, "Cannot load a non indexed mesh. Make sure you enable it in the 3d export");
 
-	// Load the indices
-	tinygltf::Accessor index_accessor = model.accessors[primitive.indices];
-	tinygltf::BufferView index_bview = model.bufferViews[index_accessor.bufferView];
+	const tinygltf::Accessor& index_accessor = model.accessors[primitive.indices];
+	const tinygltf::BufferView& index_bview = model.bufferViews[index_accessor.bufferView];
 
 
 	if(drawable)
