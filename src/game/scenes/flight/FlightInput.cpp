@@ -9,8 +9,11 @@ void FlightInput::set_ctx(InputContext* ctx)
 		cur_ctx->input = nullptr;
 	}
 
-	cur_ctx = ctx;
-	cur_ctx->input = this;
+	if(ctx != nullptr)
+	{
+		cur_ctx = ctx;
+		cur_ctx->input = this;
+	}
 }
 
 void FlightInput::update(GLFWwindow* window, double dt)

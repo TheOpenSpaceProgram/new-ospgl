@@ -205,11 +205,14 @@ Shader::Shader(const std::string& v, const std::string& f, ASSET_INFO) : Asset(A
 
 	glGetProgramiv(id, GL_ACTIVE_UNIFORMS, &count);
 
-	for (size_t i = 0; i < count; i++)
+	uniform_locations = std::unordered_map<std::string, GLint>();
+
+	for (GLuint i = 0; i < count; i++)
 	{
 		glGetActiveUniform(id, (GLuint)i, buf_size, &length, &size, &type, uname);
 		std::string uname_str = uname;
-		uniform_locations[uname_str] = i;
+		GLint location = glGetUniformLocation(id, uname);
+		uniform_locations[uname_str] = location;
 	}
 
 }

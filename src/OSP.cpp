@@ -186,6 +186,7 @@ void OSP::init(int argc, char** argv)
 void OSP::finish()
 {
 	logger->info("Closing OSP");
+	delete game_state;
 	delete input;
 	destroy_global_lua_core();
 	destroy_global_text_drawer();
@@ -193,7 +194,6 @@ void OSP::finish()
 	destroy_global_debug_drawer();
 	delete renderer;
 	delete assets;
-	delete game_state;
 	destroy_global_logger();
 }
 

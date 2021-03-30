@@ -17,12 +17,11 @@ private:
 
 	int wantedFlushCounter;
 
-	void stacktrace();
-
 public:
 
 	std::mutex mtx;
 
+	void stacktrace();
 
 	template <typename... Args>
 	void debug(const char* format, const Args & ... args)

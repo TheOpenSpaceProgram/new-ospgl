@@ -6,6 +6,8 @@
 //?
 #include "../universe/PlanetarySystem.h"
 
+#define ENABLE_GL_DEBUG
+
 void Renderer::resize(int nwidth, int nheight, float nscale)
 {
 	if(nwidth <= 1 || nheight <= 1 || nscale <= 0.0f)
@@ -591,14 +593,16 @@ static void open_gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum
 	if(severity == GL_DEBUG_SEVERITY_LOW)
 	{
 		logger->info("{}", str_msg);
+		logger->stacktrace();
 	}
 	else if(severity == GL_DEBUG_SEVERITY_MEDIUM)
 	{
 		logger->warn("{}", str_msg);
+		logger->stacktrace();
 	}
 	else if(severity == GL_DEBUG_SEVERITY_HIGH)
 	{
-		logger->fatal("{}", str_msg);
+		logger->error("{}", str_msg);
 	}
 	else
 	{

@@ -40,7 +40,8 @@ void Logger::stacktrace()
 	TraceResolver tr; tr.load_stacktrace(st);
 	std::cout << rang::fg::yellow << "Stacktrace: " << std::endl;
 	toFile.push_back("Stacktrace: \n");
-	for(size_t i = 0; i < st.size(); i++)
+	// We start at 1 to ignore the backward.hpp call
+	for(size_t i = 1; i < st.size(); i++)
 	{
 		ResolvedTrace trace = tr.resolve(st[i]);
 		std::string file = trace.source.filename;
@@ -66,6 +67,10 @@ void Logger::stacktrace()
 		}
 		std::string path = file + "(" + std::to_string(trace.source.line) + ")";
 		std::string fnc = trace.source.function;
+		if(fnc.find("Logger") != std::string::npos)
+		{
+			continue;
+		}
 		std::string pad = " ";
 		if(fnc.size() >= con_width - 64)
 		{

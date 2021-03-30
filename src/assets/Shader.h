@@ -7,6 +7,8 @@
 #include <cpptoml.h>
 #include "Asset.h"
 
+#define GET_LOC() GLint loc = get_uniform_location(name); if(loc < 0) return;
+
 // Not only do we load the shader, and make it easily usable
 // we also run a preprocessor to allow includes
 class Shader : public Asset
@@ -37,55 +39,63 @@ public:
 		if(it == uniform_locations.end())
 		{
 			// This warning is useful when debbuging errors
-			//logger->warn("Could not find uniform '{}' on shader '{}'", name, get_asset_id());
-			return 0;
+		//	logger->warn("Could not find uniform '{}' on shader '{}'", name, get_asset_id());
+			return -1;
 		}
 		else
 		{
 			return it->second;	
 		}
-		
 	}
 
 	void use() const;
 
 	inline void setBool(const std::string &name, bool value) const
 	{
-		glUniform1i(get_uniform_location(name), (int)value);
+		GET_LOC();
+		glUniform1i(loc, (int)value);
 	}
+
 	inline void setInt(const std::string &name, int value) const
 	{
-		glUniform1i(get_uniform_location(name), value);
+		GET_LOC();
+		glUniform1i(loc, value);
 	}
 
 	inline void setFloat(const std::string &name, float value) const
 	{
-		glUniform1f(get_uniform_location(name), value);
+		GET_LOC();
+		glUniform1f(loc, value);
 	}
 
 	inline void setVec2(const std::string& name, glm::vec2 value) const
 	{
-		glUniform2f(get_uniform_location(name), value.x, value.y);
+		GET_LOC();
+		glUniform2f(loc, value.x, value.y);
 	}
 
 	inline void setVec3(const std::string& name, glm::vec3 value) const
 	{
-		glUniform3f(get_uniform_location(name), value.x, value.y, value.z);
+		GET_LOC();
+		glUniform3f(loc, value.x, value.y, value.z);
 	}
 
 	inline void setVec4(const std::string& name, glm::vec4 value) const
 	{
-		glUniform4f(get_uniform_location(name), value.x, value.y, value.z, value.w);
+		GET_LOC();
+		glUniform4f(loc, value.x, value.y, value.z, value.w);
 	}
 
 	inline void setMat4(const std::string& name, glm::mat4 value) const
 	{
-		glUniformMatrix4fv(get_uniform_location(name), 1, GL_FALSE, glm::value_ptr(value));
+		GET_LOC();
+		glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	inline void setMat3(const std::string& name, glm::mat3 value) const
 	{
-		glUniformMatrix3fv(get_uniform_location(name), 1, GL_FALSE, glm::value_ptr(value));
+		GET_LOC();
+		glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	Shader(const std::string& vertexData, const std::string& fragmentData, ASSET_INFO);

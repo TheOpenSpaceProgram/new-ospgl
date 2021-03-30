@@ -25,19 +25,7 @@ int main(int argc, char** argv)
 
 	PROFILE_FUNC();
 
-	osp->game_state->load_scene(new EditorScene());
-
-	StoredFluid H2C;
-	H2C.gas_mass = 1.0f;
-	H2C.liquid_mass = 0.0f;
-
-	FluidTank ft;
-	ft.volume = 0.1f;
-	ft.temperature = 375.15f;
-	ft.contents[AssetHandle<PhysicalMaterial>("core:materials/water.toml")] = H2C;
-	ft.ullage_distribution = 1.0f;
-	ft.go_to_equilibrium();
-
+	osp->game_state->load_scene(new FlightScene());
 
 	while (osp->should_loop())
 	{
@@ -45,17 +33,6 @@ int main(int argc, char** argv)
 
 		osp->start_frame();
 		osp->update();
-		ft.draw_imgui_debug();
-		if(input->key_pressed(GLFW_KEY_SPACE))
-		{
-			ft.exchange_heat(10000000.0f * osp->dt);
-			float atm_mol = (1.0f * ft.get_ullage_volume() * 1e3) / (0.082f * ft.temperature);
-			float atm_kg = atm_mol * 18.015e-3f;
-			//ft.contents["core:materials/water.toml"].gas_mass = glm::min(atm_kg, ft.contents["core:materials/water.toml"].gas_mass);
-		}
-
-
-		ft.update((float)osp->dt, 1.0f);
 		osp->render();
 		osp->finish_frame();
 	}
