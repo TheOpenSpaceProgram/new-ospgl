@@ -22,4 +22,11 @@ struct CameraUniforms
 	GLuint irradiance;
 	GLuint specular;
 	GLuint brdf;
+
+	CameraUniforms()
+	{
+		irradiance = 0;
+		specular = 0;
+		brdf = 0;
+	}
 };

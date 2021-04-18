@@ -6,7 +6,8 @@
 //?
 #include "../universe/PlanetarySystem.h"
 
-#define ENABLE_GL_DEBUG
+// Enable to have detailed GL debugging. Causes very heavy perfomance hit
+// #define ENABLE_GL_DEBUG
 
 void Renderer::resize(int nwidth, int nheight, float nscale)
 {
@@ -16,17 +17,8 @@ void Renderer::resize(int nwidth, int nheight, float nscale)
 		return;
 	}
 
-	if (gbuffer != nullptr)
-	{
-		delete gbuffer;
-	}
-
-	if (fbuffer != nullptr)
-	{
-		delete fbuffer;
-	}
-	
-	
+	delete gbuffer;
+	delete fbuffer;
 
 	width = nwidth;
 	height = nheight;
@@ -320,7 +312,7 @@ void Renderer::render(PlanetarySystem* system)
 	}
 
 	// Calculate viewport and widths
-	if(override_viewport.x >= 0.0)
+	if(override_viewport != glm::dvec4(0.0, 0.0, 1.0, 1.0))
 	{
 		double xdiff = override_viewport.z - override_viewport.x;
 		double ydiff = override_viewport.w - override_viewport.y;
@@ -331,7 +323,8 @@ void Renderer::render(PlanetarySystem* system)
 		int x0 = (int)(swidth * override_viewport.x);
 		int y0 = (int)(sheight * override_viewport.y);
 
-		viewport = glm::ivec4(x0, y0, rswidth, rsheight);	
+		// Note that GL coordinates start in bottom left corner!
+		viewport = glm::ivec4(x0, sheight-rsheight-y0, rswidth, rsheight);
 	}
 	else
 	{
@@ -346,6 +339,11 @@ void Renderer::render(PlanetarySystem* system)
 	{
 		c_uniforms.irradiance = ibl_source->irradiance->id;
 		c_uniforms.specular = ibl_source->specular->id;
+	}
+	else
+	{
+		c_uniforms.irradiance = 0;
+		c_uniforms.specular = 0;
 	}
 	c_uniforms.brdf = brdf->id;
 
@@ -622,7 +620,7 @@ Renderer::Renderer(cpptoml::table& settings)
 	env_last_time = 0.0;
 
 
-	override_viewport = glm::dvec4(-1.0, -1.0, -1.0, -1.0);
+	override_viewport = glm::dvec4(0.0, 0.0, 1.0, 1.0);
 
 	render_enabled = true;
 	gbuffer = nullptr;

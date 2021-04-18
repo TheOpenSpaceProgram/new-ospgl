@@ -41,20 +41,25 @@ public:
 		glBindTexture(GL_TEXTURE_2D, gbuffer->g_col);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, gbuffer->g_pbr);
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, irradiance);
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, specular);
-		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_2D, brdf);
 
+		if(irradiance > 0)
+		{
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, irradiance);
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, specular);
+			glActiveTexture(GL_TEXTURE6);
+			glBindTexture(GL_TEXTURE_2D, brdf);
+
+			shader->setInt("irradiance_map", 4);
+			shader->setInt("specular_map", 5);
+			shader->setInt("brdf_map", 6);
+		}
 		shader->setInt("gPosition", 0);
 		shader->setInt("gNormal", 1);
 		shader->setInt("gAlbedo", 2);
 		shader->setInt("gPbr", 3);
-		shader->setInt("irradiance_map", 4);
-		shader->setInt("specular_map", 5);
-		shader->setInt("brdf_map", 6);
+
 	}
 
 	void set_added(bool value)

@@ -1,36 +1,49 @@
 #include "VehiclePlumbing.h"
 #include "../Vehicle.h"
 
-float VehiclePlumbing::get_flow_rate(Pipe *p)
-{
-	// Each fluid gets a "flow dominance" ranking
-	// that depends on density and ammount of fluid
-	// We apply Bernoulli solved for velocity, and then multiply by surface
-
-
-	return 0.0f;
-}
-
-void VehiclePlumbing::update_pipes(Vehicle* veh)
+void VehiclePlumbing::update_pipes(float dt, Vehicle* veh)
 {
 	// machines->fluid_preupdate();
 
 	// First we solve junctions. They will query machines for pressure
 	for(const auto& jnc : junctions)
 	{
+		// First we do a pass to see how much can be accepted by the receivers
+		// This is to prevent "sucking" too much from the suppliers and then
+		// having to give back
+		// We assume gases can be accepted in infinite ammount as they are compressible
+		float available_liquid_volume = 0.0f;
+		float intake_liquid_volume = 0.0f;
+		junction_flow_rate(jnc, dt);
 
+		for(Pipe* p : jnc.pipes)
+		{
+			intake_liquid_volume += p->flow;
+			if(p->flow > 0.0f)
+			{
+				//available_liquid_volume += p->ma->plumbing.get_free_volume();
+			}
+		}
+
+		StoredFluids in;
+		for(Pipe* p : jnc.pipes)
+		{
+			if(p->flow > 0.0f)
+			{
+				//in.modify(p->ma->plumbing.out_flow(p->port_a, p->flow));
+			}
+		}
+		// It may happen that "in" is not enough as to satisfy all pipes
 	}
 
 	// Then we solve single pipes. They will query machines for pressure
-
-	// Now we have every flow, make it real
 
 	// machines->fluid_update();
 
 
 }
 
-void VehiclePlumbing::junction_flow_rate(PipeJunction& junction)
+void VehiclePlumbing::junction_flow_rate(const PipeJunction& junction, float dt)
 {
 	size_t jsize = junction.pipes.size();
 
@@ -46,11 +59,10 @@ void VehiclePlumbing::junction_flow_rate(PipeJunction& junction)
 	std::vector<std::pair<Pipe*, float>> pipe_pressure;
 
 	pipe_pressure.reserve(jsize);
-	for(auto& pipe_id : junction.pipes)
+	for(auto& pipe : junction.pipes)
 	{
-		Pipe* p = &pipes[pipe_id];
-		float pr = p->ma->plumbing.get_pressure(p->port_a);
-		pipe_pressure.emplace_back(p, pr);
+		float pr = pipe->ma->plumbing.get_pressure(pipe->port_a);
+		pipe_pressure.emplace_back(pipe, pr);
 	}
 
 	// TODO: Obtain density by averaging or something
@@ -115,7 +127,8 @@ void VehiclePlumbing::junction_flow_rate(PipeJunction& junction)
 	{
 		float sign = i > (jsize - 2 - solution_section) ? -1.0f : 1.0f;
 		float constant = pipe_pressure[i].first->surface * sqrt(2.0f) / sqrt_density;
-		pipe_pressure[i].first->flow = sign * constant * sqrt(sign * (pipe_pressure[i].second - x));
+		// We multiply by dt to obtain flow in m^3 instead of flow rate
+		pipe_pressure[i].first->flow = sign * constant * sqrt(sign * (pipe_pressure[i].second - x)) * dt;
 	}
 
 

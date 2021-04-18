@@ -9,7 +9,6 @@
 #include "game/database/GameDatabase.h"
 #include <util/Profiler.h>
 
-#include <universe/vehicle/material/FluidTank.h>
 #include <renderer/Renderer.h>
 #include <universe/vehicle/plumbing/VehiclePlumbing.h>
 
@@ -25,7 +24,7 @@ int main(int argc, char** argv)
 
 	PROFILE_FUNC();
 
-	osp->game_state->load_scene(new FlightScene());
+	osp->game_state->load_scene(new EditorScene());
 
 	while (osp->should_loop())
 	{

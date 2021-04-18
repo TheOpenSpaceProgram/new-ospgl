@@ -112,7 +112,7 @@ public:
 
 	RendererQuality quality;
 
-	// If values are positive, it will apply a glViewport
+	// If it's not (0,0,1,1), it will apply a glViewport
 	// to forward and deferred (GUI is always full) adjusted
 	// for these coeficitents
 	// You should specify a rectangle, (x,y) being min and (z,w) max

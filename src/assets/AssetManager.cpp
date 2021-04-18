@@ -21,8 +21,11 @@
 
 AssetManager* assets;
 
+size_t generated_asset_counter;
+
 AssetManager::AssetManager(const std::string &res_path, const std::string &udata_path)
 {
+	generated_asset_counter = 0;
 	current_package = "core";
 	this->res_path = res_path;
 	this->udata_path = udata_path;

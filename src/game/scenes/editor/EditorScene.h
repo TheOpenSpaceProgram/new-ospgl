@@ -25,6 +25,8 @@ public:
 	friend class EditorGUI;
 	EditorGUI gui;
 	Skybox sky;
+
+	glm::dvec4 get_viewport();
 	
 private:
 

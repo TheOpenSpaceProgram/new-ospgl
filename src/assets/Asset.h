@@ -4,8 +4,11 @@
 // Macros to shorten the constructors a little bit
 #define ASSET_INFO const std::string& path, const std::string& name, const std::string& pkg
 #define ASSET_INFO_P path, name, pkg
-// For generated assets
-#define GENERATED_ASSET_INFO "", "null", "generated_asset"
+// For generated assets this uses a global static function
+#define GENERATED_ASSET_INFO "", Asset::get_generated_package_name(), "generated_assets"
+
+// Defined in AssetManager.cpp (It's a global variable)
+extern size_t generated_asset_counter;
 
 // Base class for an asset, contains basic information and hashing
 class Asset
@@ -18,6 +21,11 @@ private:
 
 public:
 
+	static std::string get_generated_package_name()
+	{
+		generated_asset_counter++;
+		return "asset_" + std::to_string(generated_asset_counter);
+	}
 
 	const std::string& get_asset_id() const
 	{

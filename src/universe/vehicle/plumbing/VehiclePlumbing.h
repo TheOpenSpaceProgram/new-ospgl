@@ -4,15 +4,20 @@
 
 class Vehicle;
 
-// A pipe joins either a machine to a machine, or
+struct PipeJunction;
+
+// A pipe joins either a machine to a machine or
 // a junction to a machine (Junction-junction connections
-// are simplified to a single junction)
+// are simplified to a single junction).
+// (Fluid tanks are machines)
 struct Pipe
 {
+	// For serialization and re-generation of the tree on changes
 	size_t id;
+
 	// mb may be null, then junction must be present
 	Machine *ma, *mb;
-	size_t junction;
+	PipeJunction* junction;
 	std::string port_a, port_b;
 	float surface;
 
@@ -23,7 +28,7 @@ struct Pipe
 struct PipeJunction
 {
 	// NOT SERIALIZED, generated on load to speed up the algorithm
-	std::vector<size_t> pipes;
+	std::vector<Pipe*> pipes;
 };
 
 
@@ -33,20 +38,18 @@ struct PipeJunction
 // A vehicle's plumbing is made of a set of fluid tanks,
 // connected via pipes into other fluid tanks or machines
 // We also simulate junctions
+// Unlike machines, pipes are lightweight so we hold them in
+// contiguous memory. Modifying pipes or junctions requires
+// regeneration of the tree SO DON'T DO IT MANUALLY!
 class VehiclePlumbing
 {
 public:
 
-	std::unordered_map<size_t, Pipe> pipes;
+	std::vector<Pipe> pipes;
 	// Junction id to its pipes, generated on load / modify to speed up the algorithm
-	std::unordered_map<size_t, PipeJunction> junctions;
+	std::vector<PipeJunction> junctions;
 
-	// m^3/s Positive flow rate means from a to b, negative
-	// from b to a. We assume that more dense fluids
-	// dominate the flow, homogeinizing it
-	static float get_flow_rate(Pipe* p);
-
-	void update_pipes(Vehicle* in_vehicle);
-	void junction_flow_rate(PipeJunction& jnc);
+	void update_pipes(float dt, Vehicle* in_vehicle);
+	void junction_flow_rate(const PipeJunction& jnc, float dt);
 
 };
