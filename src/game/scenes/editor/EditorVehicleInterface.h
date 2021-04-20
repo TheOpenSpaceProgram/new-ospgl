@@ -3,6 +3,7 @@
 
 #include "interfaces/AttachInterface.h"
 #include "interfaces/WireInterface.h"
+#include "interfaces/PlumbingInterface.h"
 #include "EditorCamera.h"
 
 // Handles user interaction with the EditorVehicle
@@ -35,6 +36,7 @@ public:
 	// Note: This must be below these two for initializing order!
 	AttachInterface attach_interface;
 	WireInterface wire_interface;
+	PlumbingInterface plumbing_interface;
 
 	// A convenience pointer
 	BaseInterface* current_interface;

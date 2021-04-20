@@ -68,7 +68,6 @@ void EditorScene::update()
 		gui_input.ext_mouse_blocked = true;
 		gui_input.ext_keyboard_blocked = true;
 	}
-	do_gui();
 
 	vehicle.update(osp->game_dt);
 	vehicle_int.update(osp->game_dt);
@@ -79,6 +78,8 @@ void EditorScene::update()
 	int rw = (viewport.z - viewport.x) * (int)real_screen_size.x;
 	int rh = (viewport.w - viewport.y) * (int)real_screen_size.y;
 
+	prepare_gui();
+
 	if(!gui_input.mouse_blocked)
 	{
 		float gw = (float)gui.get_panel_width();
@@ -86,7 +87,9 @@ void EditorScene::update()
 		vehicle_int.do_interface(cam.get_camera_uniforms(rw, rh),
 			viewport, gui_vport, real_screen_size, osp->renderer->vg, &gui_input, &gui.skin);
 	}
-	
+
+	do_gui();
+
 	cam.update(osp->game_dt, &gui_input);
 	gui_input.ext_mouse_blocked |= cam.blocked;
 	gui_input.ext_keyboard_blocked |= cam.blocked;
@@ -110,9 +113,14 @@ void EditorScene::do_gui()
 {
 	int width = osp->renderer->get_width(true);
 	int height = osp->renderer->get_height(true);
+	gui.do_gui(width, height);
+}
 
-
-	gui.do_gui(width, height, &gui_input);	
+void EditorScene::prepare_gui()
+{
+	int width = osp->renderer->get_width(true);
+	int height = osp->renderer->get_height(true);
+	gui.prepare_gui(width, height, &gui_input);
 }
 
 void EditorScene::do_edveh_gui() 

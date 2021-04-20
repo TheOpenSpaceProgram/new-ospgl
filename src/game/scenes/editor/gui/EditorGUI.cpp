@@ -15,7 +15,26 @@ int EditorGUI::get_panel_width()
 	return part_list.get_panel_width();
 }
 
-void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
+void EditorGUI::prepare_gui(int width, int height, GUIInput *gui_input)
+{
+	float swidth = (float)get_panel_width();
+	// Prepare first so gui blocks stuff, but it's drawn last
+	window_manager.prepare(gui_input, &skin);
+
+	if(edveh_int->attach_interface.selected == nullptr)
+	{
+		part_list.prepare_gui(width, get_panel_width(), height, gui_input);
+	}
+	else
+	{
+		trashcan.prepare_gui(width, get_panel_width(), height, gui_input);
+	}
+
+	prepare_toolset(width, height, swidth, gui_input);
+	prepare_file(width, height, gui_input);
+}
+
+void EditorGUI::do_gui(int width, int height)
 {
 	float w = (float)width; float h = (float)height;
 
@@ -29,20 +48,18 @@ void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 	nvgRect(vg, 0.0f, 0.0f, swidth, 1.0f * h);
 	nvgFill(vg);
 
-	// Prepare first so gui blocks stuff, but it's drawn last
-	window_manager.prepare(gui_input, &skin);
-	
+
 	if(edveh_int->attach_interface.selected == nullptr)
 	{
-		part_list.do_gui(width, get_panel_width(), height, gui_input);
+		part_list.do_gui(width, get_panel_width(), height);
 	}
 	else
 	{
-		trashcan.do_gui(width, get_panel_width(), height, gui_input);
+		trashcan.do_gui(width, get_panel_width(), height);
 	}
 
-	do_toolset(width, height, swidth, gui_input);
-	do_file(width, height, gui_input);
+	do_toolset(width, height, swidth);
+	do_file(width, height);
 
 	prev_width = width;
 	prev_height = height;
@@ -50,13 +67,17 @@ void EditorGUI::do_gui(int width, int height, GUIInput* gui_input)
 	window_manager.viewport = glm::ivec4(0, 0, width, height);
 	window_manager.draw(vg, &skin);
 }
+void EditorGUI::prepare_toolset(int width, int height, float swidth, GUIInput *gui_input)
+{
+	float twidth = 152.0f;
+	float real_theight = 30.0f;
+	toolset_canvas.prepare(glm::ivec2(swidth + 4, 0), glm::ivec2(twidth, real_theight), gui_input);
+}
 
-
-void EditorGUI::do_toolset(int width, int height, float swidth, GUIInput* gui_input) 
+void EditorGUI::do_toolset(int width, int height, float swidth)
 {
 	float twidth = 152.0f;
 	float theight = 23.0f;
-	float real_theight = 30.0f;
 
 	nvgBeginPath(vg);
 	nvgMoveTo(vg, swidth, 0.0f);
@@ -67,12 +88,18 @@ void EditorGUI::do_toolset(int width, int height, float swidth, GUIInput* gui_in
 	nvgFillColor(vg, skin.background_color);
 	nvgFill(vg);
 
-	toolset_canvas.prepare(glm::ivec2(swidth + 4, 0), glm::ivec2(twidth, real_theight), gui_input);
 	toolset_canvas.draw(vg, &skin, glm::ivec4(0, 0, width, height));
-	
 }
 
-void EditorGUI::do_file(int width, int height, GUIInput* gui_input) 
+void EditorGUI::prepare_file(int width, int height, GUIInput* gui_input)
+{
+	float fwidth = 300.0f;
+	float fheight = 25.0f;
+
+	file_canvas.prepare(glm::ivec2(width - fwidth, 0), glm::ivec2(fwidth, fheight), gui_input);
+}
+
+void EditorGUI::do_file(int width, int height)
 {
 	// File canvas background
 	float fwidth = 300.0f;
@@ -88,7 +115,6 @@ void EditorGUI::do_file(int width, int height, GUIInput* gui_input)
 
 	file_canvas.child_0_pixels = fwidth - 18.0f * 5.0f;
 
-	file_canvas.prepare(glm::ivec2(width - fwidth, 0), glm::ivec2(fwidth, fheight), gui_input);
 	file_canvas.draw(vg, &skin, glm::ivec4(0, 0, width, height));
 	
 }
@@ -104,8 +130,8 @@ void EditorGUI::init(EditorScene* sc)
 	part_list.init(sc, vg, &skin);
 	trashcan.init(sc, vg, &skin);
 
-	prepare_toolset();
-	prepare_file();
+	create_toolset();
+	create_file();
 
 }
 
@@ -122,10 +148,13 @@ void EditorGUI::set_editor_mode(EditorMode mode)
 		case WIRING:	
 			edveh_int->current_interface = &edveh_int->wire_interface;
 			break;
+		case PLUMBING:
+			edveh_int->current_interface = &edveh_int->plumbing_interface;
+			break;
 	}
 }
 
-void EditorGUI::prepare_toolset() 
+void EditorGUI::create_toolset()
 {	
 	// Prepare the toolset_canvas
 	GUIListLayout* tlayout = new GUIListLayout();
@@ -164,7 +193,7 @@ void EditorGUI::prepare_toolset()
 	create_button("editor/electric.png", ELECTRIC_WIRING);
 }
 
-void EditorGUI::prepare_file() 
+void EditorGUI::create_file()
 {
 	// It doesn't matter as we later on set the fixed pixel ammount
 	auto pair = file_canvas.divide_h(0.5f);
@@ -198,3 +227,5 @@ void EditorGUI::prepare_file()
 	create_button("editor/launch.png");
 	create_button("editor/quit.png");
 }
+
+

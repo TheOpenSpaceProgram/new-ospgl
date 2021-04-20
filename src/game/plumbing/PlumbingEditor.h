@@ -6,6 +6,5 @@
 class PlumbingEditor
 {
 public:
-	Vehicle* veh;
 
 };

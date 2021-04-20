@@ -12,6 +12,7 @@ public:
 			glm::dvec4 viewport, NVGcontext* vg, GUIInput* gui_input, GUISkin* gui_skin) = 0;
 
 	// Get the viewport of the vehicle, fractional coordinates relative to max size (viewport)
+	// Useful to implement "opaque" interfaces so the vehicle remains centered and we save on GPU usage
 	virtual glm::dvec4 get_vehicle_viewport() { return glm::vec4(0.0, 0.0f, 1.0f, 1.0f); }
 
 	// Called when the interface changes by user input

@@ -30,6 +30,7 @@ private:
 	void on_trash(int button);
 
 public:
-	virtual void init(EditorScene* sc, NVGcontext* vg, GUISkin* skin);
-	virtual void do_gui(int width, int panel_width, int height, GUIInput* gui_input);
+	void init(EditorScene* sc, NVGcontext* vg, GUISkin* skin) override;
+	void prepare_gui(int width, int panel_width, int height, GUIInput* gui_input) override;
+	void do_gui(int width, int panel_width, int height) override;
 };

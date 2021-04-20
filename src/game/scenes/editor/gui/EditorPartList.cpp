@@ -106,10 +106,14 @@ void EditorPartList::create_part(AssetHandle<PartPrototype>& proto)
 
 }
 
-void EditorPartList::do_gui(int width, int panel_width, int height, GUIInput* gui_input)
+void EditorPartList::prepare_gui(int width, int panel_width, int height, GUIInput* gui_ipt)
 {
-	this->gui_input = gui_input;
-	def_panel.prepare(glm::ivec2(0, 0), glm::ivec2(panel_width, height), gui_input);	
+	this->gui_input = gui_ipt;
+	def_panel.prepare(glm::ivec2(0, 0), glm::ivec2(panel_width, height), gui_input);
+}
+
+void EditorPartList::do_gui(int width, int panel_width, int height)
+{
 	def_panel.draw(vg, gui_skin, glm::ivec4(0, 0, width, height));
 
 }
@@ -206,5 +210,6 @@ int EditorPartList::get_panel_width()
 		(part_icon_size.x + part_margin) * parts_per_row + 	// < Icons take one margin per part
 		category_icon_size + part_margin * 2 + 3;			// < Margins of the part list + category margins
 }
+
 
 

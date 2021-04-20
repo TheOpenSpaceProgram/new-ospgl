@@ -3,11 +3,14 @@
 #include "EditorGUI.h"
 #include <algorithm>
 
-
-void EditorTrashcan::do_gui(int width, int panel_width, int height, GUIInput* gui_input)
+void EditorTrashcan::prepare_gui(int width, int panel_width, int height, GUIInput *gui_input)
 {
 	this->gui_input = gui_input;
-	panel.prepare(glm::ivec2(0, 0), glm::ivec2(panel_width, height), gui_input);	
+	panel.prepare(glm::ivec2(0, 0), glm::ivec2(panel_width, height), gui_input);
+}
+
+void EditorTrashcan::do_gui(int width, int panel_width, int height)
+{
 	panel.draw(vg, gui_skin, glm::ivec4(0, 0, width, height));
 }
 
@@ -67,3 +70,4 @@ void EditorTrashcan::on_trash(int button)
 
 	}
 }
+

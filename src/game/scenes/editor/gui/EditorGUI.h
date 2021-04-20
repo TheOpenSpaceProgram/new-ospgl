@@ -28,8 +28,8 @@ private:
 	int prev_width, prev_height;
 	EditorVehicleInterface* edveh_int;
 
-	void prepare_toolset();
-	void prepare_file();
+	void create_toolset();
+	void create_file();
 
 public:
 
@@ -59,9 +59,12 @@ public:
 	GUICanvas file_canvas;
 	GUIWindowManager window_manager;
 
-	void do_gui(int width, int height, GUIInput* gui_input);	
-	void do_toolset(int width, int height, float swidth, GUIInput* gui_input);
-	void do_file(int width, int height, GUIInput* gui_input);
+	void prepare_gui(int width, int height, GUIInput* gui_input);
+	void prepare_toolset(int width, int height, float swidth, GUIInput* gui_input);
+	void prepare_file(int width, int height, GUIInput *gui_input);
+	void do_gui(int width, int height);
+	void do_toolset(int width, int height, float swidth);
+	void do_file(int width, int height);
 
 	void init(EditorScene* scene);
 

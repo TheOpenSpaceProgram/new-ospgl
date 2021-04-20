@@ -45,6 +45,7 @@ private:
 	SunLight sun;
 
 	void do_gui();
+	void prepare_gui();
 	void do_edveh_gui();
 
 public:

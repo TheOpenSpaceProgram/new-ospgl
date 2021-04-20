@@ -72,9 +72,10 @@ public:
 	// Called when changing category
 	void update_part_list();
 
-	virtual void init(EditorScene* sc, NVGcontext* vg, GUISkin* skin) override;
+	void init(EditorScene* sc, NVGcontext* vg, GUISkin* skin) override;
 
-	virtual void do_gui(int width, int panel_width, int height, GUIInput* gui_input) override;
+	void prepare_gui(int width, int panel_width, int height, GUIInput* gui_input) override;
+	void do_gui(int width, int panel_width, int height) override;
 
 	int get_panel_width();
 	

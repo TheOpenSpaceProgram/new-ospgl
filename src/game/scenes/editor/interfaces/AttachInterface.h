@@ -5,6 +5,11 @@
 
 class EditorVehicleInterface;
 
+
+// TODO: Integrate AttachInterface into the other interfaces
+// when a piece is tryin to be added OR make it automatically toggle
+// to a temporal attach interface that returns to the previous status
+// automatically
 class AttachInterface : public BaseInterface
 {
 private:
@@ -69,14 +74,14 @@ public:
 	EditorScene* scene;
 	EditorVehicleInterface* edveh_int;
 
-	virtual bool do_interface(const CameraUniforms& cu, glm::dvec3 ray_start, glm::dvec3 ray_end,
+	bool do_interface(const CameraUniforms& cu, glm::dvec3 ray_start, glm::dvec3 ray_end,
 			glm::dvec4 viewport, NVGcontext* vg, GUIInput* gui_input, GUISkin* gui_skin) override;
 	
-	virtual void update(double dt) override;
+	void update(double dt) override;
 
-	virtual void leave() override;
+	void leave() override;
 
-	virtual bool can_leave() override;
+	bool can_leave() override;
 	
 	AttachInterface(EditorVehicleInterface* edveh_int);
 
