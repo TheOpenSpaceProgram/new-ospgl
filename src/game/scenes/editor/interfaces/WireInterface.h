@@ -43,5 +43,6 @@ public:
 	bool do_machine(NVGcontext *vg, GUIInput *gui_input, Machine *m, glm::vec2 final_pos, glm::dvec3 pos,
 				 glm::ivec4 vport, bool in_front, std::vector<glm::vec2> &seen_positions, int rnd_idx,
 				 int polygon_machines, Machine *&new_wire,
-				 std::unordered_map<Machine *, std::pair<glm::vec2, bool>>& machine_to_pos);
+				 std::unordered_map<Machine *, std::pair<glm::vec2, bool>>& machine_to_pos,
+				 bool mouse_blocked);
 };

@@ -586,19 +586,21 @@ bool AttachInterface::can_leave()
 bool AttachInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start, glm::dvec3 ray_end,
 		glm::dvec4 viewport, NVGcontext* vg, GUIInput* gui_input, GUISkin* gui_skin)
 {
-	edveh_int->middle_click_focus(ray_start, ray_end);
-
-	edveh->draw_attachments = selected != nullptr;
-
-	if(selected == nullptr)
+	if(!gui_input->mouse_blocked)
 	{
-		handle_input_hovering(cu, ray_start, ray_end, gui_input);
-	}
-	else
-	{
-		handle_input_selected(cu, ray_start, ray_end, gui_input);
-	}
+		edveh_int->middle_click_focus(ray_start, ray_end);
 
+		edveh->draw_attachments = selected != nullptr;
+
+		if (selected == nullptr)
+		{
+			handle_input_hovering(cu, ray_start, ray_end, gui_input);
+		}
+		else
+		{
+			handle_input_selected(cu, ray_start, ray_end, gui_input);
+		}
+	}
 	return false;
 }
 

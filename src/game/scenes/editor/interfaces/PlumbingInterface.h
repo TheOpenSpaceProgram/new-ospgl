@@ -1,11 +1,15 @@
 #pragma once
 #include "BaseInterface.h"
+#include <game/plumbing/PlumbingEditor.h>
+
+class EditorVehicleInterface;
 
 class PlumbingInterface : public BaseInterface
 {
 private:
 
 	float view_size;
+	PlumbingEditor pb_editor;
 
 public:
 
@@ -16,5 +20,5 @@ public:
 	bool can_leave() override;
 	glm::dvec4 get_vehicle_viewport() override;
 
-	PlumbingInterface();
+	PlumbingInterface(EditorVehicleInterface* edveh_int);
 };

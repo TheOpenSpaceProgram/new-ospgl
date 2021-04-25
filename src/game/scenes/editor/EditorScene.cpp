@@ -78,15 +78,16 @@ void EditorScene::update()
 	int rw = (viewport.z - viewport.x) * (int)real_screen_size.x;
 	int rh = (viewport.w - viewport.y) * (int)real_screen_size.y;
 
-	prepare_gui();
 
-	if(!gui_input.mouse_blocked)
-	{
-		float gw = (float)gui.get_panel_width();
-		glm::vec4 gui_vport = glm::vec4(gw, 0, real_screen_size.x - gw, real_screen_size.y); 
-		vehicle_int.do_interface(cam.get_camera_uniforms(rw, rh),
-			viewport, gui_vport, real_screen_size, osp->renderer->vg, &gui_input, &gui.skin);
-	}
+	// We prepare a first time to block the interface
+	prepare_gui();
+	float gw = (float)gui.get_panel_width();
+	glm::vec4 gui_vport = glm::vec4(gw, 0, real_screen_size.x - gw, real_screen_size.y);
+	vehicle_int.do_interface(cam.get_camera_uniforms(rw, rh),
+							 viewport, gui_vport, real_screen_size, osp->renderer->vg, &gui_input, &gui.skin);
+
+	// We prepare again as do_interface may have blocked, for example, due to an ongoing drag
+	prepare_gui();
 
 	do_gui();
 

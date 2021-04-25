@@ -4,7 +4,7 @@
 
 EditorVehicleInterface::EditorVehicleInterface(EditorVehicle* v, EditorCamera* cam)
 	: edveh(v), scene(v->scene), camera(cam),
-	attach_interface(this), wire_interface(this)
+	attach_interface(this), wire_interface(this), plumbing_interface(this)
 {
 }
 

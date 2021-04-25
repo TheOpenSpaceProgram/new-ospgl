@@ -35,11 +35,10 @@ bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start,
 	EditorVehicleInterface::RaycastResult res = 
 		edveh_int->raycast(ray_start, ray_end, false);
 
-	bool see_all = gui_input->mouse_pressed(GUI_LEFT_BUTTON);
-
+	bool see_all = gui_input->mouse_pressed(GUI_LEFT_BUTTON) && !gui_input->mouse_blocked;
 
 	// Highlighting always shows the machines of said piece
-	if(res.has_hit && hovered == nullptr)
+	if(res.has_hit && hovered == nullptr && !gui_input->mouse_blocked)
 	{
 		// TODO: It could be wise to add a check for p->part == nullptr
 		see_part(res.p->part);
@@ -158,7 +157,7 @@ bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start,
 			glm::vec2 final_pos = glm::round(screen_pos + offset * radius);
 
 			bool was_visible = do_machine(vg, gui_input, m, final_pos, pos, vport, in_front, seen_positions, rnd_idx,
-								 polygon_machines, new_wire, machine_to_pos);
+								 polygon_machines, new_wire, machine_to_pos, gui_input->mouse_blocked);
 
 			// Indicator
 			if(was_visible && polygon_machines != 1)
@@ -185,7 +184,7 @@ bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start,
 			glm::vec2 mscreen_pos = glm::round(MathUtil::clip_to_screen(clip, vport));
 
 			do_machine(vg, gui_input, m, mscreen_pos, pos, vport, in_front, seen_positions, rnd_idx,
-			  			polygon_machines, new_wire, machine_to_pos);
+			  			polygon_machines, new_wire, machine_to_pos, gui_input->mouse_blocked);
 		}
 
 		rnd_idx++;
@@ -290,7 +289,8 @@ void WireInterface::see_part(Part* p)
 bool WireInterface::do_machine(NVGcontext* vg, GUIInput* gui_input, Machine* m, glm::vec2 final_pos, glm::dvec3 pos,
 							   glm::ivec4 vport, bool in_front, std::vector<glm::vec2>& seen_positions,
 							   int rnd_idx, int polygon_machines, Machine*& new_wire,
-							   std::unordered_map<Machine*, std::pair<glm::vec2, bool>>& machine_to_pos)
+							   std::unordered_map<Machine*, std::pair<glm::vec2, bool>>& machine_to_pos,
+							   bool mouse_blocked)
 {
 	float scale = glm::clamp(200.0f / ((float)glm::distance2(pos, cu.cam_pos)), 0.5f, 1.0f);
 	float real_icon_size = 22.0f;
@@ -379,7 +379,7 @@ bool WireInterface::do_machine(NVGcontext* vg, GUIInput* gui_input, Machine* m, 
 		glm::vec2 fpos = rect_pos + glm::vec2(icon_size * 0.5f);
 		machine_to_pos[m] = std::make_pair(fpos, in_front);
 
-		bool is_hovered = gui_input->mouse_inside(rect_pos, glm::ivec2(icon_size));
+		bool is_hovered = gui_input->mouse_inside(rect_pos, glm::ivec2(icon_size)) && !mouse_blocked;
 
 		if(is_hovered || selected == m || contained_in_wired)
 		{
