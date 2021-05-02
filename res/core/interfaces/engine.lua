@@ -1,3 +1,7 @@
+-- An engine imparts force to the vehicle by any means.
+-- The engine interface is also needed to interact with systems such as
+-- RCS controllers which may need to know nozzle position, direction
+-- and thrust.
 local engine = create_interface()
 
 -- (self) -> glm.vec3
@@ -22,13 +26,14 @@ engine.get_piece = nil
 -- Useful for implementing visual effects
 engine.after_thrust = nil
 
-engine.activable = engine.machine:load_interface("core:interfaces/activable.lua")
-engine.throttleable = engine.machine:load_interface("core:interfaces/throttleable.lua")
+-- (self) -> float
+-- Returns the thrust generated in newtons
+-- Called on update only
+engine.get_thrust = nil
 
-engine.thrust = 0.0
 
 function engine:update()
-	local f_thrust = self.thrust * self.throttleable.throttle 
+	local f_thrust = self:get_thrust()
 
 	if f_thrust > 0 then
 		local piece = self:get_piece()

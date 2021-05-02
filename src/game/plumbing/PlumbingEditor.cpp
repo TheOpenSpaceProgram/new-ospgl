@@ -1,4 +1,5 @@
 #include "PlumbingEditor.h"
+#include <lua/libs/LuaNanoVG.h>
 
 void PlumbingEditor::show_editor(NVGcontext* vg, GUIInput* gui_input, glm::vec4 span)
 {
@@ -11,12 +12,15 @@ void PlumbingEditor::show_editor(NVGcontext* vg, GUIInput* gui_input, glm::vec4 
 	nvgSave(vg);
 	nvgScissor(vg, span.x, span.y, span.z, span.w);
 
-	nvgStrokeColor(vg, nvgRGB(200, 200, 200));
+	nvgStrokeColor(vg, nvgRGB(230, 230, 230));
 	draw_grid(vg, span);
 
+	bool inside_and_not_blocked = gui_input->mouse_inside(span) &&
+	   !gui_input->mouse_blocked && !gui_input->ext_mouse_blocked &&
+	   !gui_input->scroll_blocked && !gui_input->ext_scroll_blocked;
+
 	// Click and drag
-	if(gui_input->mouse_inside(span) &&
-		!gui_input->mouse_blocked && !gui_input->ext_mouse_blocked || in_drag)
+	if(inside_and_not_blocked || in_drag)
 	{
 		if (gui_input->mouse_down(1))
 		{
@@ -38,14 +42,18 @@ void PlumbingEditor::show_editor(NVGcontext* vg, GUIInput* gui_input, glm::vec4 
 			gui_input->mouse_blocked = true;
 		}
 
-		double delta = gui_input->mouse_scroll_delta();
-		if(delta != 0)
-		{
-			gui_input->scroll_blocked = true;
-			zoom += zoom * delta * 0.1;
-			zoom = glm::clamp(zoom, 16, 128);
-		}
 	}
+
+	// Zooming in and out
+	if(inside_and_not_blocked)
+	{
+		double delta = input->mouse_scroll_delta;
+		gui_input->scroll_blocked = true;
+		zoom += zoom * delta * 0.1;
+		zoom = glm::clamp(zoom, 16, 128);
+	}
+
+	draw_machines(vg, span);
 
 
 	nvgRestore(vg);
@@ -78,4 +86,17 @@ void PlumbingEditor::draw_grid(NVGcontext* vg, glm::vec4 span)
 		nvgLineTo(vg, span.x + span.z, (float)y);
 	}
 	nvgStroke(vg);
+}
+
+
+void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span)
+{
+	for(const Part* p : veh->parts)
+	{
+		for(const auto& pair : p->machines)
+		{
+			LuaUtil::call_function_if_present(pair.second->env["nanovg_test"], "machine test", (void*)vg);
+		}
+	}
+
 }

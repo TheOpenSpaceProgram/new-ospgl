@@ -11,7 +11,8 @@ struct FluidPort
 	std::string marker;
 };
 
-// Wrapper around the lua stuff
+// Wrapper around the lua stuff, all functions must be inside
+// a table named "plumbing"
 class MachinePlumbing
 {
 public:

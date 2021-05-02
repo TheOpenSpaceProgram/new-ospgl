@@ -168,17 +168,14 @@ SimpleSkin::ResizePoint SimpleSkin::can_resize_window(GUIWindow* window, glm::iv
 		// We can resize, check position
 		bool left = mpos.x < inner.x && mpos.x > outer.x;
 		bool right = mpos.x > inner.x + inner.z  && mpos.x < outer.x + outer.z;
-		bool top = mpos.y < inner.y && mpos.y > outer.y;
+		bool top = mpos.y < inner.y + titlebar_height && mpos.y > outer.y;
 		bool bottom = mpos.y > inner.y + inner.w && mpos.y < outer.y + outer.w;
 
-		if		(left && top)		{ return TOP_LEFT; }
-		else if	(left && bottom)	{ return BOTTOM_LEFT; }
-		else if (right && top) 		{ return TOP_RIGHT; }
-		else if (right && bottom)	{ return BOTTOM_RIGHT; }
-		else if (top)				{ return TOP; }
-		else if (right)				{ return RIGHT; }
-		else if (bottom) 			{ return BOTTOM; }
-		else if (left) 				{ return LEFT; }
+		if	(left && bottom && !top)	{ return BOTTOM_LEFT; }
+		else if (right && bottom && !top)	{ return BOTTOM_RIGHT; }
+		else if (right && !top)				{ return RIGHT; }
+		else if (bottom && !top) 			{ return BOTTOM; }
+		else if (left && !top) 				{ return LEFT; }
 
 	}
 	

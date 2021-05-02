@@ -128,11 +128,3 @@ void LuaNoise::load_to(sol::table& table)
 	
 }
 
-LuaNoise::LuaNoise()
-{
-}
-
-
-LuaNoise::~LuaNoise()
-{
-}

@@ -69,14 +69,3 @@ void GUIInput::update()
 		}
 	}
 }
-
-double GUIInput::mouse_scroll_delta() const
-{
-	if(scroll_blocked || ext_scroll_blocked)
-	{
-		return 0.0;
-	}
-
-	return input->mouse_scroll_delta;
-
-}

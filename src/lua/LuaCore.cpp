@@ -12,6 +12,7 @@
 #include "libs/LuaUniverse.h"
 #include "libs/LuaFlightInput.h"
 #include "libs/LuaGameDatabase.h"
+#include "libs/LuaNanoVG.h"
 
 LuaCore* lua_core;
 
@@ -116,6 +117,10 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::GAME_DATABASE;
 	}
+	else if(name == "nano_vg")
+	{
+		return LibraryID::NANO_VG;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -161,6 +166,7 @@ LuaCore::LuaCore()
 	libraries[LibraryID::UNIVERSE] = new LuaUniverse();
 	libraries[LibraryID::FLIGHT_INPUT] =  new LuaFlightInput();
 	libraries[LibraryID::GAME_DATABASE] = new LuaGameDatabase();
+	libraries[LibraryID::NANO_VG] = new LuaNanoVG();
 }
 
 LuaCore::~LuaCore()

@@ -18,6 +18,7 @@ private:
 
 	// Draws a 1 unit grid. If zoom is too
 	void draw_grid(NVGcontext* vg, glm::vec4 span);
+	void draw_machines(NVGcontext* vg, glm::vec4 span);
 
 public:
 

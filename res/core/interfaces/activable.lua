@@ -1,3 +1,5 @@
+-- An activable machine can receive activation/deactivation signals. Example: Valves
+
 local activable = create_interface()
 
 activable.activated = false

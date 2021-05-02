@@ -132,7 +132,6 @@ void EditorGUI::init(EditorScene* sc)
 
 	create_toolset();
 	create_file();
-
 }
 
 void EditorGUI::set_editor_mode(EditorMode mode) 

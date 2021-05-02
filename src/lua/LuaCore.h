@@ -37,7 +37,8 @@ public:
 		VEHICLE,		// LuaVehicle (Vehicle, Part, Piece, Machine)
 		UNIVERSE,		// LuaUniverse (Events, entity creation...)
 		FLIGHT_INPUT,	// LuaFlightInput (InputContext)
-		GAME_DATABASE,	// LuaGameDatabase 
+		GAME_DATABASE,	// LuaGameDatabase
+		NANO_VG,		// LuaNanoVG
 		COUNT,
 	};
 

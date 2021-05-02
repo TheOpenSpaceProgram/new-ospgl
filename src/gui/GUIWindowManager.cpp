@@ -155,11 +155,15 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
 					{
 						input->set_cursor(InputUtil::Cursor::RESIZE_EW);
 					}
-					else
+					else if(rpt == GUISkin::BOTTOM_LEFT || rpt == GUISkin::TOP_RIGHT)
 					{
-						input->set_cursor(InputUtil::Cursor::RESIZE_ALL);
+						input->set_cursor(InputUtil::Cursor::RESIZE_NESW);
 					}
-					
+					else if(rpt == GUISkin::TOP_LEFT || rpt == GUISkin::BOTTOM_RIGHT)
+					{
+						input->set_cursor(InputUtil::Cursor::RESIZE_NWSE);
+					}
+
 					if(left_down)
 					{
 						resizing = true;
