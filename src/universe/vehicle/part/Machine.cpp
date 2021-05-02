@@ -68,6 +68,11 @@ void Machine::init(sol::state* lua_state, Part* in_part)
 	std::string old = osp->assets->get_current_package();
 	std::string full_path = osp->assets->res_path + pkg + "/" + name;
 	auto result = (*lua_state).safe_script_file(full_path, env);
+	if(!result.valid())
+	{
+		sol::error err = result;
+		logger->error("Lua Error loading machine:\n{}", err.what());
+	}
 
 	// Then we simply move over the environment to an entry in the global lua_state
 	(*lua_state)[this] = env;

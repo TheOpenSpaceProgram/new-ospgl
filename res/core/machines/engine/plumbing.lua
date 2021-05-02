@@ -1,5 +1,9 @@
 local plumbing = {};
 
+local logger = require("logger")
+local nvg = require("nano_vg")
+
+
 function plumbing.is_requester() return true end
 
 function plumbing.fluid_update()
@@ -43,13 +47,15 @@ function plumbing.draw_diagram(vg)
     nvg.quad_to(vg, 0.6, 1.8, 0.75, 2.0)
     nvg.quad_to(vg, 0.6, 2.4, 0.5, 3.0)
 
+    logger.info("DRAWING!")
+
 
 end
 
 -- Return a pair of values, width and height of the box in units
 -- It will be used for dragging and preventing overlaps
 function plumbing.get_draw_bounds()
-    return (2, 3)
+    return 2
 end
 
 -- Return 4 values, first two represent position, next two direction

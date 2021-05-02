@@ -91,11 +91,14 @@ void PlumbingEditor::draw_grid(NVGcontext* vg, glm::vec4 span)
 
 void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span)
 {
+	nvgScale(vg, 40.0f, 40.0f);
+	nvgTranslate(vg, 1000.0f, 500.0f);
 	for(const Part* p : veh->parts)
 	{
 		for(const auto& pair : p->machines)
 		{
-			LuaUtil::call_function_if_present(pair.second->env["nanovg_test"], "machine test", (void*)vg);
+			LuaUtil::call_function_if_present(pair.second->env["plumbing"]["draw_diagram"],
+				 "PlumbingEditor::draw_machines", (void*)vg);
 		}
 	}
 

@@ -15,6 +15,8 @@
 #include "libs/LuaNanoVG.h"
 
 LuaCore* lua_core;
+// This function is extremely hacky and contains multiple work-arounds
+// for how our lua code is structured
 int LoadFileRequire(lua_State* L)
 {
 	sol::state_view sview = sol::state_view(L);
@@ -25,21 +27,21 @@ int LoadFileRequire(lua_State* L)
 	sol::table module_table = sview.create_table();
 
 	LuaCore::LibraryID id = LuaCore::name_to_id(path);
-	
+
 	if (id != LuaCore::LibraryID::UNKNOWN)
 	{
 		was_module = true;
 		lua_core->load_library(module_table, id);
 	}
 
-
 	if (was_module)
 	{
+		// TODO: Maybe the index trick is needed here too?
 		// We have to do this weird thing to make sure the module's table
 		// is returned and not a global table
 		// Lua calls this script with only an argument, the module name
 		// Note that 'require("wathever")' won't work, you need 'local wathever = require("wathever")'!
-		std::string script = "local l = ...; return __loaded_modules[l];";
+		std::string script = "local l = ...; local ret = __loaded_modules[l]; return ret";
 
 		sol::load_result fx = sview.load(script);
 		sol::function ffx = fx;
@@ -51,44 +53,16 @@ int LoadFileRequire(lua_State* L)
 	}
 	else
 	{
-		// Attempt to load lua file from package
+		// This is not what require is meant to be used for, so throw an error
+		// Remember that require creates only one instance of a file, so it will cause errors
+		// as files will be shared across many objects. This is appropiate for libraries, but not for
+		// single files, such as machines.
+		logger->error("Could not find library '{}'. Require is used for libraries, use dofile for files!", path);
+		sol::stack::push(L, "ERROR");
+		return 1;
 
-		// We must use lua debug to find the environment of caller here
-		lua_Debug info;
-		int level = 2;
-		int pre_stack_size = lua_gettop(L);
-		lua_getstack(L, level, &info);
-		lua_getinfo(L, "fnluS", &info);
-		sol::function caller(L, -1);
-		sol::environment env(sol::env_key, caller);
-
-		std::string pkg = sview["__pkg"].get_or<std::string>("core");
-
-		if(env.valid())
-		{
-			pkg = env["__pkg"].get_or<std::string>(pkg);
-		}
-
-
-		std::string resolved = osp->assets->resolve_path(path, pkg);
-		if (osp->assets->file_exists(resolved))
-		{
-			std::string file = osp->assets->load_string_raw(resolved);
-
-			luaL_loadbuffer(L, file.data(), file.size(), file.c_str());
-
-			return 1;
-		}
-		else
-		{
-			logger->error("Could not find file loaded from lua: '{}'", resolved);
-			std::string formated = fmt::format(" Could not find file ('{}')", resolved);
-			sol::stack::push(L, formated);
-			return 1;
-		}
 	}
 }
-
 
 LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 {
@@ -169,6 +143,53 @@ void LuaCore::load(sol::state& to, const std::string& pkg)
 void LuaCore::load(sol::table& to, const std::string& pkg)
 {
 	to["__pkg"] = pkg;
+
+	// We override the default dofile and loadfile for package behaviour
+	// The file will be passed the environment of the caller (!)
+	to["dofile"] = [](const std::string& path, sol::this_environment te, sol::this_state ts)
+	{
+		sol::environment env = te;
+		sol::state_view sv = ts;
+		std::string spath = osp->assets->resolve_path(path, env["__pkg"]);
+
+		// We load and execute the file, and return the result
+		// We obey the standard and pass errors to the caller with throw
+		sol::load_result lresult = sv.load_file(spath);
+		if(!lresult.valid())
+		{
+			sol::error err = lresult;
+			throw(err);
+		}
+		sol::safe_function fnc = lresult;
+		sol::set_environment(env, fnc);
+		sol::safe_function_result result = fnc();
+		if(!result.valid())
+		{
+			sol::error err = result;
+			throw(err);
+		}
+
+		return result;
+	};
+
+	// The file will be passed the environment of the caller (!)
+	to["loadfile"] = [](const std::string& path, sol::this_environment te, sol::this_state ts)
+	{
+		sol::environment env = te;
+		sol::state_view sv = ts;
+		std::string spath = osp->assets->resolve_path(path, env["__pkg"]);
+
+		sol::load_result lresult = sv.load_file(spath);
+		if(!lresult.valid())
+		{
+			std::string err = "Could not find file: " + spath;
+			return std::make_tuple((sol::function)sol::nil, err);
+		}
+
+		sol::function fnc = lresult;
+		sol::set_environment(env, fnc);
+		return std::make_tuple(fnc, std::string(""));
+	};
 }
 
 LuaCore::LuaCore()
