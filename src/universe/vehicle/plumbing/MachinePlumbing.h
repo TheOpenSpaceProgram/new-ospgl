@@ -11,8 +11,11 @@ struct FluidPort
 	std::string marker;
 };
 
-// Wrapper around the lua stuff, all functions must be inside
-// a table named "plumbing"
+// Each machine may have any number of fluid ports, defined in the
+// machine toml file with an ID and a marker ID for location. The count and
+// IDs of the plumbing connections ARE NOT determined by the machine, which
+// can impose limiations on the ammount of connections and ID names. Machines
+// should raise errors on any incosistency
 class MachinePlumbing
 {
 public:

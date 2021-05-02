@@ -15,11 +15,11 @@
 #include "libs/LuaNanoVG.h"
 
 LuaCore* lua_core;
-
-int LoadFileRequire(lua_State* L) 
+int LoadFileRequire(lua_State* L)
 {
 	sol::state_view sview = sol::state_view(L);
 	std::string path = sol::stack::get<std::string>(L, 1);
+
 
 	bool was_module = false;
 	sol::table module_table = sview.create_table();
@@ -52,7 +52,25 @@ int LoadFileRequire(lua_State* L)
 	else
 	{
 		// Attempt to load lua file from package
-		std::string resolved = osp->assets->resolve_path(path, sview["__pkg"].get_or<std::string>("core"));
+
+		// We must use lua debug to find the environment of caller here
+		lua_Debug info;
+		int level = 2;
+		int pre_stack_size = lua_gettop(L);
+		lua_getstack(L, level, &info);
+		lua_getinfo(L, "fnluS", &info);
+		sol::function caller(L, -1);
+		sol::environment env(sol::env_key, caller);
+
+		std::string pkg = sview["__pkg"].get_or<std::string>("core");
+
+		if(env.valid())
+		{
+			pkg = env["__pkg"].get_or<std::string>(pkg);
+		}
+
+
+		std::string resolved = osp->assets->resolve_path(path, pkg);
 		if (osp->assets->file_exists(resolved))
 		{
 			std::string file = osp->assets->load_string_raw(resolved);
@@ -63,6 +81,7 @@ int LoadFileRequire(lua_State* L)
 		}
 		else
 		{
+			logger->error("Could not find file loaded from lua: '{}'", resolved);
 			std::string formated = fmt::format(" Could not find file ('{}')", resolved);
 			sol::stack::push(L, formated);
 			return 1;

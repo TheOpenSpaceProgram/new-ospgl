@@ -41,10 +41,3 @@ end
 
 print("Requiring nanovg");
 local nvg = require("nano_vg")
-
-function nanovg_test(vg)
-    nvg.begin_path(vg)
-    nvg.move_to(vg, 512, 512)
-    nvg.line_to(vg, 1920, 1080)
-    nvg.stroke(vg)
-end

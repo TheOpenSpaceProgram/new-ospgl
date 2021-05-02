@@ -75,12 +75,14 @@ void LuaVehicle::load_to(sol::table& table)
 
 	table.new_usertype<Machine>("machine",
 		"init_toml", &Machine::init_toml,
-		"load_interface", [](Machine* self, const std::string& iname, sol::this_state tst)
+		"load_interface", [](Machine* self, const std::string& iname, sol::this_state tst, sol::this_environment tenv)
 		{
+			sol::environment old_env = tenv;
 			sol::state_view sv = tst;
 			sol::environment env = sol::environment(sv, sol::create, sv.globals());
 			// We also add the special function 'create_interface' to the environment
 			// (Yep this is a nested lambda)
+			// TODO: This code may be unneccesary? Think of it
 			env["create_interface"] = [self](sol::this_state tst)
 			{
 				sol::state_view sv = tst;
@@ -91,7 +93,7 @@ void LuaVehicle::load_to(sol::table& table)
 				return out;
 			};
 
-			auto[pkg, name] = osp->assets->get_package_and_name(iname, sv["__pkg"]);
+			auto[pkg, name] = osp->assets->get_package_and_name(iname, old_env["__pkg"]);
 			std::string sane_name = pkg + ":" + name;
 			std::string script = osp->assets->load_string(sane_name);
 			sol::table n_table = sv.script(script, env, (const std::string&) sane_name).get<sol::table>();

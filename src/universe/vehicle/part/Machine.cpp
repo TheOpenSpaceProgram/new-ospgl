@@ -51,10 +51,13 @@ void Machine::init(sol::state* lua_state, Part* in_part)
 	std::string script_path;
 	SAFE_TOML_GET_FROM(init_toml_p, script_path, "script", std::string);
 
+	// Extract package from script path, as in_pkg is the PART's package
+	auto[pkg, name] = osp->assets->get_package_and_name(script_path, in_pkg);
+
 	// We create a new environment for our script
 	env = sol::environment(*lua_state, sol::create, lua_state->globals());
 	// We need to load LuaCore to it
-	lua_core->load((sol::table&)env, in_pkg);	
+	lua_core->load((sol::table&)env, pkg);
 	env["machine"] = this;
 	env["part"] = in_part;
 	env["universe"] = in_part->vehicle->in_universe;
@@ -63,7 +66,6 @@ void Machine::init(sol::state* lua_state, Part* in_part)
 	this->in_part = in_part;
 
 	std::string old = osp->assets->get_current_package();
-	auto[pkg, name] = osp->assets->get_package_and_name(script_path, in_pkg);
 	std::string full_path = osp->assets->res_path + pkg + "/" + name;
 	auto result = (*lua_state).safe_script_file(full_path, env);
 

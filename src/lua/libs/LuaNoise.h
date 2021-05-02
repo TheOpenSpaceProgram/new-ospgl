@@ -24,8 +24,6 @@
 	Note: You don't need to call ``[noise import name].noise.new(seed)`` (but that's possible), 
 	 a shortcut (``[noise import name].new(seed)``) is created as the library is one class only.
 
- 	TODO: Allow calling as fn = noise.new(seed) and then fn:[wathever](x, y)
-
 */
 class LuaNoise : public LuaLib
 {

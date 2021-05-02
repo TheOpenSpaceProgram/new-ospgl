@@ -23,9 +23,10 @@ void LuaAssets::load_to(sol::table& table)
 		);
 
 	table.set_function(
-		"get_image", [](sol::this_state st, const std::string& path)
+		"get_image", [](sol::this_environment te, const std::string& path)
 	{
-		auto[pkg, name] = osp->assets->get_package_and_name(path, sol::state_view(st)["__pkg"].get<std::string>());
+		sol::environment& env = te;
+		auto[pkg, name] = osp->assets->get_package_and_name(path, env["__pkg"].get_or<std::string>("core"));
 		Image* img = osp->assets->get<Image>(pkg, name, true);
 		return std::move(LuaAssetHandle<Image>(pkg, name, img));
 	});
