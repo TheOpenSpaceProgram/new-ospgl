@@ -165,6 +165,12 @@ void AssetManager::preload()
 
 			std::string sstr = as_str.substr(as_str.find_last_of('/') + 1);
 
+			// Ignore hidden folders
+			if(sstr[0] == '.')
+			{
+				continue;
+			}
+
 			PackageMetadata pkg_meta(SerializeUtil::load_file(as_str + "/package.toml"));
 			packages[sstr] = Package();
 			packages[sstr].metadata = pkg_meta;
@@ -216,7 +222,7 @@ void AssetManager::load_packages(LuaCore* lua_core, GameDatabase* game_database)
 
 		if(lua)
 		{
-			LuaUtil::call_function((*lua)["load"], "package.lua load execution", game_database);
+			LuaUtil::call_function((*lua)["load"], game_database);
 		}
 
 	}

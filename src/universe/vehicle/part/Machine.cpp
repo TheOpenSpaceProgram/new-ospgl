@@ -9,7 +9,7 @@
 #include "sol/sol.hpp"
 
 
-Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg)
+Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg) : plumbing(this)
 {	
 	this->init_toml = init_toml;
 	this->in_pkg = cur_pkg;
@@ -28,18 +28,18 @@ void Machine::load_interface(const std::string& name, sol::table n_table)
 
 void Machine::pre_update(double dt)
 {
-	LuaUtil::call_function_if_present(env["pre_update"], "machine pre_update", dt);
+	LuaUtil::call_function_if_present(env["pre_update"], dt);
 }
 
 void Machine::update(double dt)
 {
-	LuaUtil::call_function_if_present(env["update"], "machine update", dt);
+	LuaUtil::call_function_if_present(env["update"], dt);
 }
 
 void Machine::editor_update(double dt)
 {
 	// Called regardless of enabled status
-	LuaUtil::call_function_if_present(env["editor_update"], "machine editor_update", dt);
+	LuaUtil::call_function_if_present(env["editor_update"], dt);
 }
 
 void Machine::init(sol::state* lua_state, Part* in_part) 
@@ -59,6 +59,7 @@ void Machine::init(sol::state* lua_state, Part* in_part)
 	// We need to load LuaCore to it
 	lua_core->load((sol::table&)env, pkg);
 	env["machine"] = this;
+	env["testing"] = 1;
 	env["part"] = in_part;
 	env["universe"] = in_part->vehicle->in_universe;
 	env["vehicle"] = in_part->vehicle;
@@ -75,7 +76,10 @@ void Machine::init(sol::state* lua_state, Part* in_part)
 	}
 
 	// Then we simply move over the environment to an entry in the global lua_state
-	(*lua_state)[this] = env;
+	// TODO: Is this even neccesary?
+	//(*lua_state)[this] = sol::table(env);
+
+	plumbing.init(*init_toml);
 }
 
 std::vector<Machine*> Machine::get_all_wired_machines(bool include_this)
@@ -129,7 +133,7 @@ sol::table Machine::get_interface(const std::string& name)
 
 AssetHandle<Image> Machine::get_icon() 
 {
-	auto result = LuaUtil::call_function_if_present(env["get_icon"], "machine get_icon");
+	auto result = LuaUtil::call_function_if_present(env["get_icon"]);
 	if(result.has_value())
 	{
 		return std::move(result->get<LuaAssetHandle<Image>>().get_asset_handle());

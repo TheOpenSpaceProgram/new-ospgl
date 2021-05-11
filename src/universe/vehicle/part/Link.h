@@ -23,7 +23,7 @@ public:
 	// toml serialized data
 	void load_toml(std::shared_ptr<cpptoml::table> data)
 	{
-		LuaUtil::safe_call_function(lua_state["load_toml"], "link load_toml", data);
+		LuaUtil::safe_call_function(lua_state["load_toml"], data);
 	}
 
 	// Called when the pieces are unwelded, or first created
@@ -35,7 +35,7 @@ public:
 	{
 		is_initialized = true;
 
-		LuaUtil::safe_call_function(lua_state["activate"], "link activate",
+		LuaUtil::safe_call_function(lua_state["activate"],
 				from, BulletTransform(from_frame), to, BulletTransform(to_frame), world);
 	}
 
@@ -47,7 +47,7 @@ public:
 	{
 		is_initialized = false;
 
-		LuaUtil::safe_call_function(lua_state["deactivate"], "link deactivate");
+		LuaUtil::safe_call_function(lua_state["deactivate"]);
 	}
 
 	// Return true if the link has broken and should be deleted
@@ -59,14 +59,13 @@ public:
 		}
 		else
 		{
-			return LuaUtil::safe_call_function(lua_state["is_broken"], "link is_broken").get<bool>();
+			return LuaUtil::safe_call_function(lua_state["is_broken"]).get<bool>();
 		}
 	}
 
 	void set_breaking_enabled(bool value)
 	{
-		LuaUtil::safe_call_function(lua_state["set_breaking_enabled"], "link set_breaking_enabled",
-				value);
+		LuaUtil::safe_call_function(lua_state["set_breaking_enabled"], value);
 	}
 
 	Link(sol::state&& st)
