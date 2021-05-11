@@ -3,6 +3,10 @@ local plumbing = {};
 local logger = require("logger")
 local nvg = require("nano_vg")
 
+-- Generated on init, everything that starts with inlet_ (Atleast one)
+local inlet_ids = {}
+-- Only one
+local outlet_id = "outlet"
 
 function plumbing.is_requester() return true end
 
@@ -26,11 +30,9 @@ function plumbing.get_free_volume()
 
 end
 
--- Transform, colors and width are already set, just draw the lines.
--- Respect your bounding box
 function plumbing.draw_diagram(vg)
-    nvg.begin_path(vg)
 
+    nvg.begin_path(vg)
     -- Chamber part
     nvg.move_to(vg, 0.0, 0.0)
     nvg.line_to(vg, 2.0, 0.0)
@@ -46,22 +48,37 @@ function plumbing.draw_diagram(vg)
     nvg.move_to(vg, 0.5, 1.5)
     nvg.quad_to(vg, 0.6, 1.8, 0.75, 2.0)
     nvg.quad_to(vg, 0.6, 2.4, 0.5, 3.0)
-
-    logger.info("DRAWING!")
-
+    nvg.line_to(vg, 1.5, 3.0)
+    nvg.quad_to(vg, 2 - 0.6, 2.4, 2 - 0.75, 2.0)
+    nvg.quad_to(vg, 2 - 0.6, 1.8, 2 - 0.5, 1.5)
+    nvg.fill(vg)
+    nvg.stroke(vg)
 
 end
 
 -- Return a pair of values, width and height of the box in units
 -- It will be used for dragging and preventing overlaps
-function plumbing.get_draw_bounds()
-    return 2
+function plumbing.get_editor_size()
+    return 2, 3
 end
 
 -- Return 4 values, first two represent position, next two direction
 -- Ports will be drawn in an unified manner by the editor
 function plumbing.get_port_draw_position(port)
 
+end
+
+-- We check that needed ports are present
+function plumbing.init(ports)
+    for id, marker in pairs(ports) do
+        if string.find(id, "inlet_") ~= nil then
+            inlet_ids[#inlet_ids + 1] = id
+        end
+    end
+
+    if #inlet_ids == 0 then
+        logger.fatal("Could not find any inlets on engine")
+    end
 end
 
 return plumbing;

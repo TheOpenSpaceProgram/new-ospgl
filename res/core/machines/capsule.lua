@@ -38,6 +38,3 @@ function pre_update(dt)
 
 	t = t + dt
 end
-
-print("Requiring nanovg");
-local nvg = require("nano_vg")
