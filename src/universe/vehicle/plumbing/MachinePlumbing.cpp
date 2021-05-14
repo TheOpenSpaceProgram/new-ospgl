@@ -1,6 +1,7 @@
 #include "MachinePlumbing.h"
 #include "../part/Machine.h"
 #include <util/LuaUtil.h>
+#include <util/serializers/glm.h>
 
 float MachinePlumbing::get_pressure(std::string port)
 {
@@ -66,6 +67,7 @@ void MachinePlumbing::init(const cpptoml::table& init)
 			SAFE_TOML_GET_FROM(*port, n_port.id, "id", std::string);
 			SAFE_TOML_GET_FROM(*port, n_port.marker, "marker", std::string);
 
+
 			// Check that the name is not present already
 			bool found = false;
 			for(auto& fluid_port : fluid_ports)
@@ -84,6 +86,20 @@ void MachinePlumbing::init(const cpptoml::table& init)
 			}
 		}
 	}
+
+	glm::dvec2 offset = glm::dvec2(0.0);
+	auto fluid_offset = init.get_table("fluid_offset");
+	if(fluid_offset)
+	{
+		SerializeUtil::read_to(*fluid_offset, offset);
+	}
+	editor_position = glm::round(offset);
+	if(editor_position.x < 0 || editor_position.y < 0)
+	{
+		logger->warn("Machines cannot have fluid_offsets below (0,0). Clamping!");
+		editor_position = glm::ivec2(0, 0);
+	}
+
 
 	if(has_plumbing())
 	{

@@ -34,9 +34,6 @@ private:
 	// Returns mouse pos in corrected coordinates
 	glm::vec2 get_mouse_pos(glm::vec4 span) const;
 
-	std::vector<Machine*> aabb_check(glm::vec2 start, glm::vec2 end) const { return aabb_check(start, end, {}); }
-	std::vector<Machine*> aabb_check(glm::vec2 start, glm::vec2 end, const std::vector<Machine*>& ignore) const;
-
 	// Draws a 1 unit grid. If zoom is too
 	void draw_grid(NVGcontext* vg, glm::vec4 span) const;
 	void draw_machines(NVGcontext* vg, glm::vec4 span);

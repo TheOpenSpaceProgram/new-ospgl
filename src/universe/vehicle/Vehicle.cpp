@@ -240,7 +240,7 @@ void Vehicle::sort()
 }
 
 
-Vehicle::Vehicle() : unpacked_veh(this), packed_veh(this)
+Vehicle::Vehicle() : unpacked_veh(this), packed_veh(this), plumbing(this)
 {
 }
 

@@ -15,6 +15,7 @@
 
 #include "UnpackedVehicle.h"
 #include "PackedVehicle.h"
+#include "plumbing/VehiclePlumbing.h"
 
 
 class VehicleLoader;
@@ -66,6 +67,7 @@ public:
 
 	UnpackedVehicle unpacked_veh;
 	PackedVehicle packed_veh;
+	VehiclePlumbing plumbing;
 	
 	friend class UnpackedVehicle;
 	friend class PackedVehicle;

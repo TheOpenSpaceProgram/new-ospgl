@@ -197,7 +197,7 @@ bool PlumbingEditor::update_dragging(GUIInput *gui_input, glm::vec2 mpos)
 		for(Machine* m : selected)
 		{
 			glm::ivec2 end_pos = m->plumbing.editor_position + glm::ivec2(offset);
-			if(!aabb_check(end_pos, end_pos + m->plumbing.get_editor_size(), selected).empty())
+			if(!veh->plumbing.grid_aabb_check(end_pos, end_pos + m->plumbing.get_editor_size(), selected).empty())
 			{
 				drag_conflicts.push_back(m);
 			}
@@ -254,7 +254,7 @@ bool PlumbingEditor::update_selection(GUIInput *gui_input, glm::vec4 span)
 	// Hovering
 	hovered = nullptr;
 
-	auto hover_vec = aabb_check(mpos, mpos);
+	auto hover_vec = veh->plumbing.grid_aabb_check(mpos, mpos);
 	if(hover_vec.size() >= 1)
 	{
 		hovered = hover_vec[0];
@@ -297,7 +297,7 @@ bool PlumbingEditor::update_selection(GUIInput *gui_input, glm::vec4 span)
 			{
 				std::swap(mouse_start.y, mouse_current.y);
 			}
-			auto new_sel = aabb_check(mouse_start, mouse_current, selected);
+			auto new_sel = veh->plumbing.grid_aabb_check(mouse_start, mouse_current, selected);
 			selected.insert(selected.end() , new_sel.begin(), new_sel.end());
 
 			in_selection = false;
@@ -314,40 +314,6 @@ bool PlumbingEditor::is_inside_and_not_blocked(GUIInput *gui_input, glm::vec4 sp
 		!gui_input->scroll_blocked && !gui_input->ext_scroll_blocked;
 }
 
-std::vector<Machine*> PlumbingEditor::aabb_check(glm::vec2 start, glm::vec2 end,
-												 const std::vector<Machine*>& ignore) const
-{
-	std::vector<Machine*> out;
-
-	for(const Part* p : veh->parts)
-	{
-		for (const auto &pair : p->machines)
-		{
-			bool ignored = false;
-			for(Machine* m : ignore)
-			{
-				if(pair.second == m)
-				{
-					ignored = true;
-					break;
-				}
-			}
-
-			if(pair.second->plumbing.has_plumbing() && !ignored)
-			{
-				glm::ivec2 min = pair.second->plumbing.editor_position;
-				glm::ivec2 max = min + pair.second->plumbing.get_editor_size();
-
-				if (min.x < end.x && max.x > start.x && min.y < end.y && max.y > start.y)
-				{
-					out.push_back(pair.second);
-				}
-			}
-		}
-	}
-
-	return out;
-}
 
 glm::vec2 PlumbingEditor::get_mouse_pos(glm::vec4 span) const
 {

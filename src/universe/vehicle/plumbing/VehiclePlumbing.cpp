@@ -133,3 +133,115 @@ void VehiclePlumbing::junction_flow_rate(const PipeJunction& junction, float dt)
 
 
 }
+
+VehiclePlumbing::VehiclePlumbing(Vehicle *in_vehicle)
+{
+	veh = in_vehicle;
+}
+
+std::vector<Machine*> VehiclePlumbing::grid_aabb_check(glm::vec2 start, glm::vec2 end,
+												 const std::vector<Machine*>& ignore) const
+{
+	std::vector<Machine*> out;
+
+	for(const Part* p : veh->parts)
+	{
+		for (const auto &pair : p->machines)
+		{
+			bool ignored = false;
+			for(Machine* m : ignore)
+			{
+				if(pair.second == m)
+				{
+					ignored = true;
+					break;
+				}
+			}
+
+			if(pair.second->plumbing.has_plumbing() && !ignored)
+			{
+				glm::ivec2 min = pair.second->plumbing.editor_position;
+				glm::ivec2 max = min + pair.second->plumbing.get_editor_size();
+
+				if (min.x < end.x && max.x > start.x && min.y < end.y && max.y > start.y)
+				{
+					out.push_back(pair.second);
+				}
+			}
+		}
+	}
+
+	return out;
+}
+
+glm::ivec4 VehiclePlumbing::get_plumbing_bounds()
+{
+	glm::ivec2 amin = glm::ivec2(INT_MAX, INT_MAX);
+	glm::ivec2 amax = glm::ivec2(INT_MIN, INT_MIN);
+
+	bool any = false;
+	for(const Part* p : veh->parts)
+	{
+		for (const auto &pair : p->machines)
+		{
+			if (pair.second->plumbing.has_plumbing())
+			{
+				glm::ivec2 min = pair.second->plumbing.editor_position;
+				glm::ivec2 max = min + pair.second->plumbing.get_editor_size();
+
+				amin = glm::min(amin, min);
+				amax = glm::max(amax, max);
+				any = true;
+			}
+		}
+	}
+
+	if(any)
+	{
+		return glm::ivec4(amin.x, amin.y, amax.x - amin.x, amax.y - amin.y);
+	}
+	else
+	{
+		return glm::ivec4(0, 0, 0, 0);
+	}
+}
+
+glm::ivec2 VehiclePlumbing::find_free_space(glm::ivec2 size)
+{
+	// We first do a binary search in the currently used space
+
+	// If that cannot be found, return outside of used space, to the
+	// bottom right
+	glm::ivec4 bounds = get_plumbing_bounds();
+	return glm::ivec2(bounds.x + bounds.z, bounds.y + bounds.w);
+
+
+}
+
+glm::ivec2 VehiclePlumbing::get_plumbing_size_of(Part* p)
+{
+	// min is always (0, 0) as that's the forced origin of the plumbing start positions
+	glm::ivec2 max = glm::ivec2(INT_MIN, INT_MIN);
+	bool found_any = false;
+
+	for(const auto& pair : p->machines)
+	{
+		MachinePlumbing& pb = pair.second->plumbing;
+		if(pb.has_plumbing())
+		{
+			found_any = true;
+			max = glm::max(max, pb.editor_position + pb.get_editor_size());
+		}
+	}
+
+	if(found_any)
+	{
+		return max;
+	}
+	else
+	{
+		return glm::ivec2(0, 0);
+	}
+
+}
+

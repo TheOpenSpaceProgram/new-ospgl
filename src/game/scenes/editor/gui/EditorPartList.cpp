@@ -84,6 +84,24 @@ void EditorPartList::create_part(AssetHandle<PartPrototype>& proto)
 	std::vector<Piece*> n_pieces = n_part->create_pieces();
 	n_part->init(&scene->lua_state, veh);
 
+	// Find a space for plumbing and put it there IF IT HAS PLUMBING
+	// All machines are added at once following the toml offsets
+	// so that everything remains coherent spatially
+	glm::ivec2 part_pb_size = veh->plumbing.get_plumbing_size_of(n_part);
+	if(part_pb_size != glm::ivec2(0, 0))
+	{
+		glm::ivec2 pos = veh->plumbing.find_free_space(part_pb_size);
+		for(const auto& pair : n_part->machines)
+		{
+			MachinePlumbing& pb = pair.second->plumbing;
+			if(pb.has_plumbing())
+			{
+				pb.editor_position += pos;
+			}
+		}
+	}
+
+
 
 	// Create the pieces and parts
 	veh->all_pieces.insert(veh->all_pieces.end(), n_pieces.begin(), n_pieces.end());
@@ -98,6 +116,7 @@ void EditorPartList::create_part(AssetHandle<PartPrototype>& proto)
 	{
 		edveh->update_collider(p);
 	}
+
 
 	edveh_int->attach_interface.selected = n_part->pieces["p_root"];
 	edveh_int->attach_interface.on_selection_change();
