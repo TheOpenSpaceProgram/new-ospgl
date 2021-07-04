@@ -206,7 +206,8 @@ bool PlumbingEditor::update_dragging(GUIInput *gui_input, glm::vec2 mpos)
 		for(Machine* m : selected)
 		{
 			glm::ivec2 end_pos = m->plumbing.editor_position + glm::ivec2(offset);
-			if(!veh->plumbing.grid_aabb_check(end_pos, end_pos + m->plumbing.get_editor_size(), selected).empty())
+			if(!veh->plumbing.grid_aabb_check(end_pos,end_pos + m->plumbing.get_editor_size(true),
+											  selected, true).empty())
 			{
 				drag_conflicts.push_back(m);
 			}

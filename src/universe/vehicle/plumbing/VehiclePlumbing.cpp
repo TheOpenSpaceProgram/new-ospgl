@@ -140,7 +140,7 @@ VehiclePlumbing::VehiclePlumbing(Vehicle *in_vehicle)
 }
 
 std::vector<Machine*> VehiclePlumbing::grid_aabb_check(glm::vec2 start, glm::vec2 end,
-												 const std::vector<Machine*>& ignore) const
+												 const std::vector<Machine*>& ignore, bool expand) const
 {
 	std::vector<Machine*> out;
 
@@ -161,7 +161,7 @@ std::vector<Machine*> VehiclePlumbing::grid_aabb_check(glm::vec2 start, glm::vec
 			if(pair.second->plumbing.has_lua_plumbing() && !ignored)
 			{
 				glm::ivec2 min = pair.second->plumbing.editor_position;
-				glm::ivec2 max = min + pair.second->plumbing.get_editor_size();
+				glm::ivec2 max = min + pair.second->plumbing.get_editor_size(expand);
 
 				if (min.x < end.x && max.x > start.x && min.y < end.y && max.y > start.y)
 				{
@@ -187,7 +187,7 @@ glm::ivec4 VehiclePlumbing::get_plumbing_bounds()
 			if (pair.second->plumbing.has_lua_plumbing())
 			{
 				glm::ivec2 min = pair.second->plumbing.editor_position;
-				glm::ivec2 max = min + pair.second->plumbing.get_editor_size();
+				glm::ivec2 max = min + pair.second->plumbing.get_editor_size(true);
 
 				amin = glm::min(amin, min);
 				amax = glm::max(amax, max);

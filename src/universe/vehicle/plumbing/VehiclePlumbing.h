@@ -50,9 +50,10 @@ private:
 public:
 
 	// These functions check and area of the plumbing grid for machines
-	std::vector<Machine*> grid_aabb_check(glm::vec2 start, glm::vec2 end) const
-		{ return grid_aabb_check(start, end, {}); }
-	std::vector<Machine*> grid_aabb_check(glm::vec2 start, glm::vec2 end, const std::vector<Machine*>& ignore) const;
+	std::vector<Machine*> grid_aabb_check(glm::vec2 start, glm::vec2 end, bool expand = false) const
+		{ return grid_aabb_check(start, end, {}, expand); }
+	std::vector<Machine*> grid_aabb_check(glm::vec2 start, glm::vec2 end, const std::vector<Machine*>& ignore,
+										  bool expand = false) const;
 
 	std::vector<Pipe> pipes;
 	// Junction id to its pipes, generated on load / modify to speed up the algorithm

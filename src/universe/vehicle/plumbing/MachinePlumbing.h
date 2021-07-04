@@ -32,7 +32,8 @@ private:
 public:
 
 	glm::ivec2 editor_position;
-	glm::ivec2 get_editor_size();
+	// Expand extends the size by 1 in both directions so parts must be spaced out
+	glm::ivec2 get_editor_size(bool expand = false);
 	void draw_diagram(void* vg);
 
 	std::vector<FluidPort> fluid_ports;

@@ -8,9 +8,11 @@ float MachinePlumbing::get_pressure(std::string port)
 	return 1.0f;
 }
 
-glm::ivec2 MachinePlumbing::get_editor_size()
+// TODO: We could cache this too
+glm::ivec2 MachinePlumbing::get_editor_size(bool expand)
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
+	glm::ivec2 ret;
 
 	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["get_editor_size"]);
 	if(result.valid())
@@ -18,19 +20,29 @@ glm::ivec2 MachinePlumbing::get_editor_size()
 		if(result.get_type() == sol::type::userdata)
 		{
 			glm::dvec2 dvec = result.get<glm::dvec2>();
-			return glm::ivec2(glm::round(dvec));
+			ret = glm::ivec2(glm::round(dvec));
 		}
 		else
 		{
 			// It's a pair of numbers
 			std::pair<int, int> pair = result.get<std::pair<int, int>>();
-			return glm::ivec2(pair.first, pair.second);
+			ret = glm::ivec2(pair.first, pair.second);
 		}
 	}
 	else
 	{
 		logger->warn("Could not find function get_editor_size in plumbing");
-		return glm::ivec2(0,0);
+		ret = glm::ivec2(0,0);
+	}
+
+	if(expand)
+	{
+		ret += glm::ivec2(1, 1);
+		return ret;
+	}
+	else
+	{
+		return ret;
 	}
 }
 
