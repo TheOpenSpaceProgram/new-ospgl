@@ -8,6 +8,7 @@ class Machine;
 struct FluidPort
 {
 	std::string id;
+	std::string gui_name;
 	// Fluid ports must have a physical location
 	std::string marker;
 	// Position in the plumbing editor, set only during init or if the
@@ -64,8 +65,7 @@ public:
 
 	explicit MachinePlumbing(Machine* sm) : machine(sm) {}
 	void init(const cpptoml::table& toml);
-
-	void create_port(std::string id, std::string marker, float x, float y);
+	void create_port(std::string id, std::string marker, std::string ui_name, float x, float y);
 
 
 };

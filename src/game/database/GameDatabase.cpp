@@ -43,3 +43,59 @@ GameDatabase::~GameDatabase()
 
 }
 
+// TODO: This could be optimized! We concatenate strings on every call!
+// Ideally, mod developers should only use get_string once during the mod load and store all their strings
+// in lua variables, which is the preferred method
+const std::string& GameDatabase::get_string(const std::string &id, const std::string &def_pkg)
+{
+	auto[pkg, name] = osp->assets->get_package_and_name(id, def_pkg);
+	std::string final_id = pkg + ":" + name;
+
+	auto it = current_locale.find(final_id);
+	if(it != current_locale.end())
+	{
+		return it->second;
+	}
+	else
+	{
+		logger->error("Could not find localised string '{}'", final_id);
+		// We return a default string to avoid crashing the game over missing text
+		const static std::string UNLOCALISED = "NOT_LOCALE_STR";
+		return UNLOCALISED;
+	}
+}
+
+void GameDatabase::load_locale(const sol::table &locale, const std::string &in_pkg)
+{
+	// We seek the current locale loaded by OSP, if it's present, we load it, otherwise we load the default
+	// and report a warning
+	// (NOTE THAT LUA ARRAYS START AT 1 IN THE CODE BELOW!)
+	std::string osp_locale = osp->current_locale;
+
+	int wanted_locale = -1;
+	sol::table locales = locale[1].get<sol::table>();
+	for(size_t i = 1; i <= locales.size(); i++)
+	{
+		if(locales[i].get<std::string>() == osp_locale)
+		{
+			wanted_locale = (int)i;
+			break;
+		}
+	}
+
+	if(wanted_locale == -1)
+	{
+		logger->warn("Could not find locale '{}', using default", osp_locale);
+		wanted_locale = 0;
+	}
+
+	for(size_t i = 2; i <= locale.size(); i++)
+	{
+		std::string toml_id = locale[i].get<sol::table>()[1].get<std::string>();
+		auto[pkg, name] = osp->assets->get_package_and_name(toml_id, in_pkg);
+		std::string id = pkg + ":" + name;
+		current_locale[id] = locale[i][wanted_locale + 1].get<std::string>();
+	}
+
+}
+

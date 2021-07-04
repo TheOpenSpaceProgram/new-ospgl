@@ -1,4 +1,6 @@
 require("toml")
+require("game_database")
+
 -- Requirements for modders:
 --  You must assign the inlet marker names in the TOML given as
 --  an array of marker names named "inlets". The number is determined from this.
@@ -91,6 +93,9 @@ function plumbing.get_port_draw_position(port)
 
 end
 
+local inlet_str = database:get_string("inlet")
+logger.info(inlet_str)
+
 -- We create needed ports
 function plumbing.init()
     local inlets_toml = machine.init_toml:get_array_of_string("inlets")
@@ -99,9 +104,13 @@ function plumbing.init()
     }
 
     for idx, inlet in pairs(inlets_toml) do
+        if idx > 4 then
+            logger.warn("Engine was given more inlets than allowed")
+            break
+        end
         local name = "inlet_" .. idx
         table.insert(inlets, name)
-        machine.plumbing:create_port(name, inlet, unpack(positions[idx]))
+        machine.plumbing:create_port(name, inlet, inlet_str, unpack(positions[idx]))
     end
 
 

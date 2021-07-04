@@ -21,6 +21,7 @@ class OSP
 {
 public:
 
+	std::string current_locale;
 	Timer dtt;
 
 	// Delta time but is at maximum the physics framerate,

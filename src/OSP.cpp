@@ -162,6 +162,10 @@ void OSP::init(int argc, char** argv)
 
 		std::cout << *config << std::endl;
 
+		// load localisation from the config before everything else
+		auto locale_toml = config->get_qualified_as<std::string>("locale.language");
+		current_locale = locale_toml ? *locale_toml : "en";
+
 		assets = new AssetManager(res_path, udata_path);
 		renderer = new Renderer(*config);
 		create_global_debug_drawer();
@@ -169,6 +173,7 @@ void OSP::init(int argc, char** argv)
 		create_global_text_drawer();
 		create_global_lua_core();
 		create_global_profiler();
+
 
 		game_database = new GameDatabase();
 		game_state = new GameState();

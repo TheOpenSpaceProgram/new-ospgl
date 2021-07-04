@@ -104,7 +104,7 @@ void MachinePlumbing::init(const cpptoml::table& init)
 	}
 }
 
-void MachinePlumbing::create_port(std::string id, std::string marker, float x, float y)
+void MachinePlumbing::create_port(std::string id, std::string marker, std::string name, float x, float y)
 {
 	logger->check(can_add_ports, "Cannot add port ({}) currently, machine is already init", id);
 
@@ -120,6 +120,7 @@ void MachinePlumbing::create_port(std::string id, std::string marker, float x, f
 	FluidPort port;
 	port.pos = glm::vec2(x, y);
 	port.marker = marker;
+	port.gui_name = name;
 	port.id = id;
 
 	fluid_ports.push_back(port);

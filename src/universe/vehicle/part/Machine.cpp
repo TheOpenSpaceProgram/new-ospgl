@@ -3,6 +3,7 @@
 #include <util/SerializeUtil.h>
 #include <assets/AssetManager.h>
 #include <lua/libs/LuaAssets.h>
+#include <game/database/GameDatabase.h>
 
 #include "../Vehicle.h"
 #include "Part.h"
@@ -63,6 +64,7 @@ void Machine::init(sol::state* lua_state, Part* in_part)
 	env["part"] = in_part;
 	env["universe"] = in_part->vehicle->in_universe;
 	env["vehicle"] = in_part->vehicle;
+	env["database"] = osp->game_database;
 
 	this->in_part = in_part;
 
