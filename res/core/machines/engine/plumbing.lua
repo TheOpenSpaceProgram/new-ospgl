@@ -1,11 +1,14 @@
-local plumbing = {};
+require("toml")
+-- Requirements for modders:
+--  You must assign the inlet marker names in the TOML given as
+--  an array of marker names named "inlets". The number is determined from this.
+local plumbing = {}
 
+local inlets = {}
 local logger = require("logger")
 local nvg = require("nano_vg")
 
--- Generated on init, everything that starts with inlet_ (Atleast one)
-local inlet_ids = {}
--- Only one
+-- Only one (do we have it for real???)
 local outlet_id = "outlet"
 
 function plumbing.is_requester() return true end
@@ -36,12 +39,12 @@ function plumbing.draw_diagram(vg)
     -- Chamber part
     nvg.move_to(vg, 0.0, 0.0)
     nvg.line_to(vg, 2.0, 0.0)
-    nvg.line_to(vg, 2.0, 0.5)
+    nvg.line_to(vg, 2.0, 0.75)
     nvg.line_to(vg, 1.5, 1.0)
     nvg.line_to(vg, 1.5, 1.5)
     nvg.line_to(vg, 0.5, 1.5)
     nvg.line_to(vg, 0.5, 1.0)
-    nvg.line_to(vg, 0.0, 0.5)
+    nvg.line_to(vg, 0.0, 0.75)
     nvg.line_to(vg, 0.0, 0.0)
 
     -- Nozzle
@@ -62,23 +65,46 @@ function plumbing.get_editor_size()
     return 2, 3
 end
 
--- Return 4 values, first two represent position, next two direction
+-- Return 2 values, x and y position relative to our drawing top-left
 -- Ports will be drawn in an unified manner by the editor
+-- Coordinates must be fractional in one of the dimensions (0.5) because
+-- plumbing pipes go through the center of the grid
+-- They SHOULD NEVER CHANGE as this function will be called only if ports change!
 function plumbing.get_port_draw_position(port)
 
-end
+    if port == "outlet" then
+        return 0, 0
+    end
 
--- We check that needed ports are present
-function plumbing.init(ports)
-    for id, marker in pairs(ports) do
-        if string.find(id, "inlet_") ~= nil then
-            inlet_ids[#inlet_ids + 1] = id
+    -- Find the id number of the port
+    local num = -1
+    for number, name in pairs(inlet_ids) do
+        if port == name then
+            num = number
         end
     end
 
-    if #inlet_ids == 0 then
-        logger.fatal("Could not find any inlets on engine")
+    -- This should never happen
+    logger.check(num == -1)
+
+    return positions[num]
+
+end
+
+-- We create needed ports
+function plumbing.init()
+    local inlets_toml = machine.init_toml:get_array_of_string("inlets")
+    local positions = {
+        {0.5, 0}, {1.5, 0}, {0, 0.5}, {2, 0.5}
+    }
+
+    for idx, inlet in pairs(inlets_toml) do
+        local name = "inlet_" .. idx
+        table.insert(inlets, name)
+        machine.plumbing:create_port(name, inlet, unpack(positions[idx]))
     end
+
+
 end
 
 return plumbing;

@@ -94,7 +94,7 @@ void EditorPartList::create_part(AssetHandle<PartPrototype>& proto)
 		for(const auto& pair : n_part->machines)
 		{
 			MachinePlumbing& pb = pair.second->plumbing;
-			if(pb.has_plumbing())
+			if(pb.has_lua_plumbing())
 			{
 				pb.editor_position += pos;
 			}

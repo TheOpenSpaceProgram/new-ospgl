@@ -10,7 +10,7 @@ float MachinePlumbing::get_pressure(std::string port)
 
 glm::ivec2 MachinePlumbing::get_editor_size()
 {
-	logger->check(has_plumbing(), "Cannot use plumbing functions on machines without plumbing");
+	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 
 	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["get_editor_size"]);
 	if(result.valid())
@@ -36,14 +36,12 @@ glm::ivec2 MachinePlumbing::get_editor_size()
 
 void MachinePlumbing::draw_diagram(void *vg)
 {
-	logger->check(has_plumbing(), "Cannot use plumbing functions on machines without plumbing");
+	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 	LuaUtil::safe_call_function(get_lua_plumbing()["draw_diagram"], vg);
 }
 
-sol::table MachinePlumbing::get_lua_plumbing()
+sol::table MachinePlumbing::get_lua_plumbing(bool silent_fail)
 {
-	logger->check(has_plumbing(), "Cannot use plumbing functions on machines without plumbing");
-
 	auto value = machine->env["plumbing"];
 	if(value.valid() && value.get_type() == sol::type::table)
 	{
@@ -51,42 +49,27 @@ sol::table MachinePlumbing::get_lua_plumbing()
 	}
 	else
 	{
-		logger->fatal("Couldn't find plumbing table on a machine with plumbing");
+		if(!silent_fail)
+		{
+			logger->fatal("Couldn't find plumbing table on a machine with plumbing");
+		}
 		return sol::table();
 	}
 }
 
-void MachinePlumbing::init(const cpptoml::table& init)
+bool MachinePlumbing::has_lua_plumbing()
 {
-	auto fluid_ports_toml = init.get_table_array("fluid_port");
-	if(fluid_ports_toml)
+	auto value = machine->env["plumbing"];
+	if(value.valid() && value.get_type() == sol::type::table)
 	{
-		for(auto& port : *fluid_ports_toml)
-		{
-			FluidPort n_port;
-			SAFE_TOML_GET_FROM(*port, n_port.id, "id", std::string);
-			SAFE_TOML_GET_FROM(*port, n_port.marker, "marker", std::string);
-
-
-			// Check that the name is not present already
-			bool found = false;
-			for(auto& fluid_port : fluid_ports)
-			{
-				if(fluid_port.id == n_port.id)
-				{
-					logger->error("Duplicated port name '{}', ignoring", n_port.id);
-					found = true;
-					break;
-				}
-			}
-
-			if(!found)
-			{
-				fluid_ports.push_back(n_port);
-			}
-		}
+		return true;
 	}
 
+	return false;
+}
+
+void MachinePlumbing::init(const cpptoml::table& init)
+{
 	glm::dvec2 offset = glm::dvec2(0.0);
 	auto fluid_offset = init.get_table("fluid_offset");
 	if(fluid_offset)
@@ -101,18 +84,33 @@ void MachinePlumbing::init(const cpptoml::table& init)
 	}
 
 
-	if(has_plumbing())
+	if(has_lua_plumbing())
 	{
-		// Let machine init, it should check and store ports
-		// We create a sol table for convenience to the lua code (so it can be copied over without trouble)
-		// indices are fluid_ports ids and they point to the marker
-		sol::table tb = sol::state_view(machine->env.lua_state()).create_table();
-
-		for(auto& fluid_port : fluid_ports)
-		{
-			tb[fluid_port.id] = fluid_port.marker;
-		}
-
-		LuaUtil::call_function_if_present(get_lua_plumbing()["init"], tb);
+		can_add_ports = true;
+		LuaUtil::safe_call_function_if_present(get_lua_plumbing()["init"]);
+		can_add_ports = false;
 	}
 }
+
+void MachinePlumbing::create_port(std::string id, std::string marker, float x, float y)
+{
+	logger->check(can_add_ports, "Cannot add port ({}) currently, machine is already init", id);
+
+	// Check that ID is available
+	for(const FluidPort& port : fluid_ports)
+	{
+		if(port.id == id)
+		{
+			logger->fatal("Cannot add ports with duplicate id: {}", id);
+		}
+	}
+
+	FluidPort port;
+	port.pos = glm::vec2(x, y);
+	port.marker = marker;
+	port.id = id;
+
+	fluid_ports.push_back(port);
+
+}
+

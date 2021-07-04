@@ -83,7 +83,7 @@ void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span)
 	{
 		for(const auto& pair : p->machines)
 		{
-			if(pair.second->plumbing.has_plumbing())
+			if(pair.second->plumbing.has_lua_plumbing())
 			{
 				bool is_selected = false;
 				bool is_conflict = false;
@@ -138,6 +138,15 @@ void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span)
 				nvgScale(vg, (float)zoom, (float)zoom);
 
 				pair.second->plumbing.draw_diagram((void*)vg);
+
+				// Draw the ports
+				for(const FluidPort& port : pair.second->plumbing.fluid_ports)
+				{
+					nvgFillColor(vg, nvgRGB(0, 0, 0));
+					nvgBeginPath(vg);
+					nvgCircle(vg, port.pos.x, port.pos.y, 0.15f);
+					nvgFill(vg);
+				}
 			}
 		}
 		i += 3;

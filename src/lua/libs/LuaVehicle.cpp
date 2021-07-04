@@ -75,6 +75,7 @@ void LuaVehicle::load_to(sol::table& table)
 
 	table.new_usertype<Machine>("machine",
 		"init_toml", &Machine::init_toml,
+		"plumbing", &Machine::plumbing,
 		"load_interface", [](Machine* self, const std::string& iname, sol::this_state tst, sol::this_environment tenv)
 		{
 			sol::environment old_env = tenv;
@@ -142,6 +143,10 @@ void LuaVehicle::load_to(sol::table& table)
 		}),
 		"get_interface", &Machine::get_interface
 		
+	);
+
+	table.new_usertype<MachinePlumbing>("machine_plumbing",
+		"create_port", &MachinePlumbing::create_port
 	);
 
 

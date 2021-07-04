@@ -158,7 +158,7 @@ std::vector<Machine*> VehiclePlumbing::grid_aabb_check(glm::vec2 start, glm::vec
 				}
 			}
 
-			if(pair.second->plumbing.has_plumbing() && !ignored)
+			if(pair.second->plumbing.has_lua_plumbing() && !ignored)
 			{
 				glm::ivec2 min = pair.second->plumbing.editor_position;
 				glm::ivec2 max = min + pair.second->plumbing.get_editor_size();
@@ -184,7 +184,7 @@ glm::ivec4 VehiclePlumbing::get_plumbing_bounds()
 	{
 		for (const auto &pair : p->machines)
 		{
-			if (pair.second->plumbing.has_plumbing())
+			if (pair.second->plumbing.has_lua_plumbing())
 			{
 				glm::ivec2 min = pair.second->plumbing.editor_position;
 				glm::ivec2 max = min + pair.second->plumbing.get_editor_size();
@@ -227,7 +227,7 @@ glm::ivec2 VehiclePlumbing::get_plumbing_size_of(Part* p)
 	for(const auto& pair : p->machines)
 	{
 		MachinePlumbing& pb = pair.second->plumbing;
-		if(pb.has_plumbing())
+		if(pb.has_lua_plumbing())
 		{
 			found_any = true;
 			max = glm::max(max, pb.editor_position + pb.get_editor_size());

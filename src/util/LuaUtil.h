@@ -98,4 +98,18 @@ public:
 			return {};
 		}
 	}
+
+	template<typename T, typename K, typename... Args>
+	static std::optional<sol::safe_function_result>
+	safe_call_function_if_present(sol::table_proxy<T, K> path, Args&&... args)
+	{
+		if(path.valid())
+		{
+			return safe_call_function(path, args...);
+		}
+		else
+		{
+			return {};
+		}
+	}
 };
