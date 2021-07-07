@@ -45,5 +45,11 @@ PlumbingInterface::PlumbingInterface(EditorVehicleInterface *edveh_int)
 {
 	pb_editor.veh = edveh_int->edveh->veh;
 	view_size = 0.35f;
+
+
+	Pipe pipe;
+	pipe.waypoints.push_back(glm::vec2(5.5, 0.5));
+	pipe.waypoints.push_back(glm::vec2(5.5, 5.0));
+	pb_editor.veh->plumbing.pipes.push_back(pipe);
 }
 

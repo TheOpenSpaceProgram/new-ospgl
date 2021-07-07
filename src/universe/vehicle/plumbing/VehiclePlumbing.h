@@ -23,6 +23,13 @@ struct Pipe
 
 	// Real-time updated
 	float flow;
+
+	// Editor only but serialized
+	std::vector<glm::vec2> waypoints;
+	// Editor only and not serialized, jumps are visual only and
+	// happen on horizontal segments of pipe which intersect a vertical
+	// section
+	std::vector<glm::vec2> jumps;
 };
 
 struct PipeJunction

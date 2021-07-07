@@ -33,8 +33,11 @@ private:
 public:
 
 	glm::ivec2 editor_position;
+	// 0 means no rotation, 1 90º, 2 180º, 3 270º
+	int editor_rotation = 0;
 	// Expand extends the size by 1 in both directions so parts must be spaced out
-	glm::ivec2 get_editor_size(bool expand = false);
+	glm::ivec2 get_editor_size(bool expand = false, bool rotate = true);
+	// Does not include rotation!
 	void draw_diagram(void* vg);
 
 	std::vector<FluidPort> fluid_ports;

@@ -9,7 +9,7 @@ float MachinePlumbing::get_pressure(std::string port)
 }
 
 // TODO: We could cache this too
-glm::ivec2 MachinePlumbing::get_editor_size(bool expand)
+glm::ivec2 MachinePlumbing::get_editor_size(bool expand, bool rotate)
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 	glm::ivec2 ret;
@@ -37,13 +37,19 @@ glm::ivec2 MachinePlumbing::get_editor_size(bool expand)
 
 	if(expand)
 	{
-		ret += glm::ivec2(1, 1);
-		return ret;
+		ret += glm::ivec2(2, 2);
 	}
-	else
+
+	// Rotation
+	if(rotate)
 	{
-		return ret;
+		if (editor_rotation == 1 || editor_rotation == 3)
+		{
+			std::swap(ret.x, ret.y);
+		}
 	}
+
+	return ret;
 }
 
 void MachinePlumbing::draw_diagram(void *vg)

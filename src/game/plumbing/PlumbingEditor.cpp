@@ -12,6 +12,7 @@ void PlumbingEditor::show_editor(NVGcontext* vg, GUIInput* gui_input, glm::vec4 
 	bool block = false;
 	block |= update_mouse(gui_input, span);
 	block |= update_selection(gui_input, span);
+	block |= update_pipes(gui_input, span);
 
 	if(block)
 	{
@@ -27,7 +28,9 @@ void PlumbingEditor::show_editor(NVGcontext* vg, GUIInput* gui_input, glm::vec4 
 	nvgStrokeColor(vg, nvgRGB(230, 230, 230));
 	draw_grid(vg, span);
 	draw_machines(vg, span);
+	draw_pipes(vg, span);
 	draw_selection(vg, span);
+	draw_collisions(vg, span);
 
 
 	nvgRestore(vg);
@@ -71,7 +74,7 @@ void PlumbingEditor::draw_grid(NVGcontext* vg, glm::vec4 span) const
 }
 
 
-void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span)
+void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span) const
 {
 	nvgResetTransform(vg);
 
@@ -136,16 +139,21 @@ void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span)
 				nvgTranslate(vg, center.x + (ppos.x - cam_center.x) * (float)zoom,
 				 	center.y + (ppos.y - cam_center.y) * (float)zoom);
 				nvgScale(vg, (float)zoom, (float)zoom);
+				glm::ivec2 size = pair.second->plumbing.get_editor_size(false, false);
+				// Translate to the center
+				nvgTranslate(vg, round(size.x * 0.5f), round(size.y * 0.5f));
+				nvgRotate(vg, glm::half_pi<float>() * pair.second->plumbing.editor_rotation);
+				nvgTranslate(vg, -round(size.x * 0.5f), -round(size.y * 0.5f));
 
 				pair.second->plumbing.draw_diagram((void*)vg);
 
 				// Draw the ports
 				for(const FluidPort& port : pair.second->plumbing.fluid_ports)
 				{
-					nvgFillColor(vg, nvgRGB(0, 0, 0));
 					nvgBeginPath(vg);
-					nvgCircle(vg, port.pos.x, port.pos.y, 0.15f);
+					nvgCircle(vg, port.pos.x, port.pos.y, pipe_end_radius);
 					nvgFill(vg);
+					nvgStroke(vg);
 				}
 			}
 		}
@@ -202,6 +210,18 @@ bool PlumbingEditor::update_dragging(GUIInput *gui_input, glm::vec2 mpos)
 		mouse_current = mpos;
 		glm::vec2 offset = glm::round(mouse_current - mouse_start);
 
+		int prev_rotation = -1;
+		// Rotation
+		if(input->mouse_up(0) && offset == glm::vec2(0, 0) && selected.size() == 1)
+		{
+			prev_rotation = selected[0]->plumbing.editor_rotation;
+			selected[0]->plumbing.editor_rotation++;
+			if(selected[0]->plumbing.editor_rotation == 4)
+			{
+				selected[0]->plumbing.editor_rotation = 0;
+			}
+		}
+
 		drag_conflicts.clear();
 		for(Machine* m : selected)
 		{
@@ -225,6 +245,10 @@ bool PlumbingEditor::update_dragging(GUIInput *gui_input, glm::vec2 mpos)
 			}
 
 			in_machine_drag = false;
+			if(prev_rotation != -1 && !drag_conflicts.empty())
+			{
+				selected[0]->plumbing.editor_rotation = prev_rotation;
+			}
 			drag_conflicts.clear();
 		}
 		return true;
@@ -283,6 +307,8 @@ bool PlumbingEditor::update_selection(GUIInput *gui_input, glm::vec4 span)
 	{
 		if(gui_input->mouse_down(0))
 		{
+			// Check if we are over a port or a pipe, this will generate a new pipe
+
 			in_selection = true;
 			mouse_start = mpos;
 		}
@@ -315,6 +341,13 @@ bool PlumbingEditor::update_selection(GUIInput *gui_input, glm::vec4 span)
 	}
 
 	return block;
+}
+
+bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
+{
+	glm::vec2 mpos = get_mouse_pos(span);
+
+	return false;
 }
 
 bool PlumbingEditor::is_inside_and_not_blocked(GUIInput *gui_input, glm::vec4 span)
@@ -359,4 +392,98 @@ void PlumbingEditor::draw_selection(NVGcontext *vg, glm::vec4 span) const
 		nvgFill(vg);
 	}
 }
+
+void PlumbingEditor::draw_pipe_cap(NVGcontext *vg, glm::vec2 pos) const
+{
+	float r = pipe_end_radius / sqrtf(2.0f);
+	nvgBeginPath(vg);
+	nvgMoveTo(vg, pos.x, pos.y);
+	nvgLineTo(vg, pos.x + r, pos.y + r);
+	nvgMoveTo(vg, pos.x, pos.y);
+	nvgLineTo(vg, pos.x - r, pos.y - r);
+	nvgMoveTo(vg, pos.x, pos.y);
+	nvgLineTo(vg, pos.x - r, pos.y + r);
+	nvgMoveTo(vg, pos.x, pos.y);
+	nvgLineTo(vg, pos.x + r, pos.y - r);
+	nvgStroke(vg);
+}
+
+static bool test_test = false;
+
+void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
+{
+	nvgResetTransform(vg);
+	glm::vec2 center = glm::vec2(span.x + span.z * 0.5f, span.y + span.w * 0.5f);
+	nvgTranslate(vg, center.x - cam_center.x * (float) zoom, center.y - cam_center.y * (float) zoom);
+	nvgScale(vg, (float) zoom, (float) zoom);
+	nvgStrokeColor(vg, nvgRGB(0, 0, 0));
+
+	for(const Pipe& p : veh->plumbing.pipes)
+	{
+		draw_pipe_cap(vg, p.waypoints[0]);
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, p.waypoints[0].x, p.waypoints[0].y);
+		for(size_t i = 1; i < p.waypoints.size(); i++)
+		{
+			nvgLineTo(vg, p.waypoints[i].x, p.waypoints[i].y);
+		}
+		nvgStroke(vg);
+		draw_pipe_cap(vg, p.waypoints[p.waypoints.size() - 1]);
+	}
+
+}
+
+void PlumbingEditor::draw_collisions(NVGcontext* vg, glm::vec4 span) const
+{
+	if (in_machine_drag)
+	{
+		glm::vec2 center = glm::vec2(span.x + span.z * 0.5f, span.y + span.w * 0.5f);
+
+		int i = 0;
+
+		for(const Part* p : veh->parts)
+		{
+			for(const auto& pair : p->machines)
+			{
+				if(pair.second->plumbing.has_lua_plumbing())
+				{
+					bool is_selected = false;
+					for(Machine* m : selected)
+					{
+						if(m == pair.second)
+						{
+							is_selected = true;
+							break;
+						}
+					}
+					if(is_selected)
+					{
+						continue;
+					}
+					nvgStrokeWidth(vg, 2.0f / (float)zoom);
+					nvgStrokeColor(vg, nvgRGB(255, 0, 0));
+					nvgResetTransform(vg);
+
+					glm::vec2 ppos = pair.second->plumbing.editor_position;
+
+					nvgTranslate(vg, center.x + (ppos.x - cam_center.x) * (float)zoom,
+								 center.y + (ppos.y - cam_center.y) * (float)zoom);
+					nvgScale(vg, (float)zoom, (float)zoom);
+
+					// Draw the collision envelope, this is expanded
+					glm::ivec2 size = pair.second->plumbing.get_editor_size();
+					nvgBeginPath(vg);
+					nvgRect(vg, -1.0, -1.0, size.x + 2.0, size.y + 2.0);
+					nvgStroke(vg);
+
+				}
+			}
+			i += 3;
+		}
+
+
+	}
+}
+
+
 

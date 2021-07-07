@@ -28,7 +28,7 @@ end
 function plumbing.draw_diagram(vg)
 
     nvg.begin_path(vg)
-    nvg.rounded_rect(vg, 0, 0, 2, 3, 0.5)
+    nvg.rounded_rect(vg, 0, 0, 1, 3, 0.5)
     nvg.fill(vg)
     nvg.stroke(vg)
 
@@ -37,7 +37,7 @@ end
 -- Return a pair of values, width and height of the box in units
 -- It will be used for dragging and preventing overlaps
 function plumbing.get_editor_size()
-    return 2, 3
+    return 1, 3
 end
 
 function plumbing.get_port_draw_position(port)

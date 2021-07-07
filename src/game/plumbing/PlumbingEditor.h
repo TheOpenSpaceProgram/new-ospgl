@@ -13,9 +13,15 @@ class PlumbingEditor
 {
 private:
 
+	float pipe_end_radius = 0.18f;
+
 	Machine* hovered;
 
 	bool in_selection;
+	bool in_pipe_drag;
+	// Pipe drags start by clicking a pipe end-cap. A pipe is automatically
+	// created when clicking on ports and dragging atleast one square. Pipes can
+	// be deleted by shortening them to 0 length
 	bool in_machine_drag;
 	glm::vec2 mouse_start;
 	glm::vec2 mouse_current;
@@ -31,13 +37,17 @@ private:
 	bool update_mouse(GUIInput* gui_input, glm::vec4 span);
 	bool update_selection(GUIInput* gui_input, glm::vec4 span);
 	bool update_dragging(GUIInput* gui_input, glm::vec2 mpos);
+	bool update_pipes(GUIInput* gui_input, glm::vec4 span);
 	// Returns mouse pos in corrected coordinates
 	glm::vec2 get_mouse_pos(glm::vec4 span) const;
 
 	// Draws a 1 unit grid. If zoom is too
 	void draw_grid(NVGcontext* vg, glm::vec4 span) const;
-	void draw_machines(NVGcontext* vg, glm::vec4 span);
+	void draw_machines(NVGcontext* vg, glm::vec4 span) const;
 	void draw_selection(NVGcontext* vg, glm::vec4 span) const;
+	void draw_pipes(NVGcontext* vg, glm::vec4 span) const;
+	void draw_collisions(NVGcontext* vg, glm::vec4 span) const;
+	void draw_pipe_cap(NVGcontext* vg, glm::vec2 pos) const;
 
 public:
 
