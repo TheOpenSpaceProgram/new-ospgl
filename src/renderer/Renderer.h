@@ -158,6 +158,7 @@ public:
 
 	glm::ivec2 get_size(bool gui = false);
 
+	GLuint get_brdf_id() const { return brdf->id; }
 
 	// Initializes OpenGL. Don't forget to set the camera afterwards
 	Renderer(cpptoml::table& settings);

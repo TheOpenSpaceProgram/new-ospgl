@@ -1,8 +1,11 @@
 #include "PartIconRenderer.h"
+#include <renderer/Renderer.h>
+#include <assets/Cubemap.h>
 
 PartIconRenderer::PartIconRenderer(glm::ivec2 size, double fov) : 
 	gbuffer((size_t)size.x, (size_t)size.y),
-	fbuffer((size_t)size.x, (size_t)size.y)
+	fbuffer((size_t)size.x, (size_t)size.y),
+	cubemap("debug_system:skybox.hdr")
 {
 	this->size = size;
 	this->fov = fov;
@@ -12,6 +15,12 @@ PartIconRenderer::PartIconRenderer(glm::ivec2 size, double fov) :
 
 void PartIconRenderer::render(PartPrototype* proto, double angle, GLuint target)
 {
+	// This is safe to do as it's only done once, so noconst is safe
+	if(cubemap->specular == nullptr)
+	{
+		cubemap.get_noconst()->generate_ibl_irradiance();
+	}
+
 	constexpr double BIG_NUMBER = 9999999999.0;
 	// Find part AABB
 	glm::dvec3 min = glm::dvec3(BIG_NUMBER, BIG_NUMBER, BIG_NUMBER);	
@@ -62,6 +71,9 @@ void PartIconRenderer::render(PartPrototype* proto, double angle, GLuint target)
 	cu.screen_size = (glm::vec2)size;
 	cu.tform = proj * view * c_model;
 	cu.view = view;
+	cu.irradiance = cubemap->irradiance->id;
+	cu.specular = cubemap->specular->id;
+	cu.brdf = osp->renderer->get_brdf_id();
 
 	// Now we can do the rendering
 	glDisable(GL_BLEND);

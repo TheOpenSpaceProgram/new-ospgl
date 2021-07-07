@@ -3,6 +3,7 @@
 #include <renderer/util/Framebuffer.h>
 #include <assets/PartPrototype.h>
 #include <renderer/lighting/PartIconLight.h>
+#include <renderer/util/Skybox.h>
 
 // Renders part prototypes to a framebuffer only when needed,
 // used for the part icons in the editor
@@ -14,6 +15,7 @@ class PartIconRenderer
 {
 public:
 
+	AssetHandle<Cubemap> cubemap;
 	PartIconLight light;
 
 	// IN RADIANS

@@ -12,8 +12,6 @@ private:
 public:
 
 	glm::vec3 color;
-	glm::vec3 spec_color;
-	glm::vec3 ambient_color;
 	glm::dvec3 sun_dir;
 
 	PartIconLight();
