@@ -140,10 +140,21 @@ void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span) const
 				 	center.y + (ppos.y - cam_center.y) * (float)zoom);
 				nvgScale(vg, (float)zoom, (float)zoom);
 				glm::ivec2 size = pair.second->plumbing.get_editor_size(false, false);
-				// Translate to the center
-				nvgTranslate(vg, round(size.x * 0.5f), round(size.y * 0.5f));
+				// The logical rotation simply changes x and y dimensions, which is similar
+				// to tipping over the box
+				if(pair.second->plumbing.editor_rotation == 1)
+				{
+					nvgTranslate(vg, size.y, 0.0f);
+				}
+				else if(pair.second->plumbing.editor_rotation == 2)
+				{
+					nvgTranslate(vg, size.x, size.y);
+				}
+				else if(pair.second->plumbing.editor_rotation == 3)
+				{
+					nvgTranslate(vg, 0.0f, size.x);
+				}
 				nvgRotate(vg, glm::half_pi<float>() * pair.second->plumbing.editor_rotation);
-				nvgTranslate(vg, -round(size.x * 0.5f), -round(size.y * 0.5f));
 
 				pair.second->plumbing.draw_diagram((void*)vg);
 
@@ -396,7 +407,6 @@ void PlumbingEditor::draw_selection(NVGcontext *vg, glm::vec4 span) const
 void PlumbingEditor::draw_pipe_cap(NVGcontext *vg, glm::vec2 pos) const
 {
 	float r = pipe_end_radius / sqrtf(2.0f);
-	nvgBeginPath(vg);
 	nvgMoveTo(vg, pos.x, pos.y);
 	nvgLineTo(vg, pos.x + r, pos.y + r);
 	nvgMoveTo(vg, pos.x, pos.y);
@@ -405,7 +415,6 @@ void PlumbingEditor::draw_pipe_cap(NVGcontext *vg, glm::vec2 pos) const
 	nvgLineTo(vg, pos.x - r, pos.y + r);
 	nvgMoveTo(vg, pos.x, pos.y);
 	nvgLineTo(vg, pos.x + r, pos.y - r);
-	nvgStroke(vg);
 }
 
 static bool test_test = false;
@@ -420,15 +429,17 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 
 	for(const Pipe& p : veh->plumbing.pipes)
 	{
-		draw_pipe_cap(vg, p.waypoints[0]);
+		// Hovered machines show the pipes in bold (TODO)
+		nvgStrokeWidth(vg, 1.0f / (float)zoom);
 		nvgBeginPath(vg);
+		draw_pipe_cap(vg, p.waypoints[0]);
 		nvgMoveTo(vg, p.waypoints[0].x, p.waypoints[0].y);
 		for(size_t i = 1; i < p.waypoints.size(); i++)
 		{
 			nvgLineTo(vg, p.waypoints[i].x, p.waypoints[i].y);
 		}
-		nvgStroke(vg);
 		draw_pipe_cap(vg, p.waypoints[p.waypoints.size() - 1]);
+		nvgStroke(vg);
 	}
 
 }

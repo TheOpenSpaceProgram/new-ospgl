@@ -67,31 +67,6 @@ function plumbing.get_editor_size()
     return 2, 3
 end
 
--- Return 2 values, x and y position relative to our drawing top-left
--- Ports will be drawn in an unified manner by the editor
--- Coordinates must be fractional in one of the dimensions (0.5) because
--- plumbing pipes go through the center of the grid
--- They SHOULD NEVER CHANGE as this function will be called only if ports change!
-function plumbing.get_port_draw_position(port)
-
-    if port == "outlet" then
-        return 0, 0
-    end
-
-    -- Find the id number of the port
-    local num = -1
-    for number, name in pairs(inlet_ids) do
-        if port == name then
-            num = number
-        end
-    end
-
-    -- This should never happen
-    logger.check(num == -1)
-
-    return positions[num]
-
-end
 
 local inlet_str = database:get_string("inlet")
 logger.info(inlet_str)
