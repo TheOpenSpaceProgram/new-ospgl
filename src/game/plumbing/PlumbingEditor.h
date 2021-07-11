@@ -19,7 +19,7 @@ private:
 	double max_time_for_rotation = 0.2;
 	float pipe_end_radius = 0.18f;
 
-	Machine* hovered;
+	PlumbingElement hovered;
 
 	bool in_selection;
 	bool in_pipe_drag;
@@ -30,8 +30,8 @@ private:
 	glm::vec2 mouse_start;
 	glm::vec2 mouse_current;
 	// We allow shift-selection and also box selection
-	std::vector<Machine*> selected;
-	std::vector<Machine*> drag_conflicts;
+	std::vector<PlumbingElement> selected;
+	std::vector<PlumbingElement> drag_conflicts;
 
 	glm::dvec2 last_click;
 	glm::vec2 last_center;
@@ -51,7 +51,13 @@ private:
 	void draw_selection(NVGcontext* vg, glm::vec4 span) const;
 	void draw_pipes(NVGcontext* vg, glm::vec4 span) const;
 	void draw_collisions(NVGcontext* vg, glm::vec4 span) const;
+	void draw_port(NVGcontext* vg, glm::vec2 pos) const;
 	void draw_pipe_cap(NVGcontext* vg, glm::vec2 pos) const;
+	// Junctions of more than 4 ports are drawn as a series of connected junctions
+	void draw_junction(NVGcontext* vg, glm::vec2 pos, size_t port_count, bool flip_three=false) const;
+
+	// Handles both AABBs and ports
+	void handle_hovering(GUIInput* gui_input, glm::vec2 mpos);
 
 public:
 
@@ -68,8 +74,8 @@ public:
 	// span is a rectangle, (x,y, width, height)
 	void show_editor(NVGcontext* vg, GUIInput* gui_input, glm::vec4 span);
 
-	const Machine* get_hovered() const { return hovered; }
-	const std::vector<Machine*>& get_selected() const { return selected; }
+	const PlumbingElement get_hovered() const { return hovered; }
+	const std::vector<PlumbingElement> get_selected() const { return selected; }
 
 	PlumbingEditor();
 

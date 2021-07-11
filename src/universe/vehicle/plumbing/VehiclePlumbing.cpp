@@ -139,19 +139,19 @@ VehiclePlumbing::VehiclePlumbing(Vehicle *in_vehicle)
 	veh = in_vehicle;
 }
 
-std::vector<Machine*> VehiclePlumbing::grid_aabb_check(glm::vec2 start, glm::vec2 end,
-												 const std::vector<Machine*>& ignore, bool expand) const
+std::vector<PlumbingElement> VehiclePlumbing::grid_aabb_check(glm::vec2 start, glm::vec2 end,
+												 const std::vector<PlumbingElement>& ignore, bool expand)
 {
-	std::vector<Machine*> out;
+	std::vector<PlumbingElement> out;
 
 	for(const Part* p : veh->parts)
 	{
 		for (const auto &pair : p->machines)
 		{
 			bool ignored = false;
-			for(Machine* m : ignore)
+			for(PlumbingElement m : ignore)
 			{
-				if(pair.second == m)
+				if(m == pair.second)
 				{
 					ignored = true;
 					break;
@@ -165,10 +165,33 @@ std::vector<Machine*> VehiclePlumbing::grid_aabb_check(glm::vec2 start, glm::vec
 
 				if (min.x < end.x && max.x > start.x && min.y < end.y && max.y > start.y)
 				{
-					out.push_back(pair.second);
+					out.emplace_back(pair.second);
 				}
 			}
 		}
+	}
+
+	// It's easier for junctions, note that we return pointers too
+	for(PipeJunction& jnc : junctions)
+	{
+		bool ignored = false;
+		for(PlumbingElement m : ignore)
+		{
+			if(m == &jnc)
+			{
+				ignored = true;
+				break;
+			}
+		}
+
+		glm::ivec2 min = jnc.pos;
+		glm::ivec2 max = min + jnc.get_size(expand);
+
+		if (min.x < end.x && max.x > start.x && min.y < end.y && max.y > start.y && !ignored)
+		{
+			out.emplace_back(&jnc);
+		}
+
 	}
 
 	return out;
@@ -211,9 +234,9 @@ glm::ivec2 VehiclePlumbing::find_free_space(glm::ivec2 size)
 	// We first do a binary search in the currently used space
 
 	// If that cannot be found, return outside of used space, to the
-	// bottom right
+	// bottom as rockets are usually vertical
 	glm::ivec4 bounds = get_plumbing_bounds();
-	return glm::ivec2(bounds.x + bounds.z, bounds.y + bounds.w);
+	return glm::ivec2(bounds.x, bounds.y + bounds.w);
 
 
 }
@@ -245,3 +268,150 @@ glm::ivec2 VehiclePlumbing::get_plumbing_size_of(Part* p)
 
 }
 
+glm::ivec2 PipeJunction::get_size(bool extend, bool rotate) const
+{
+	size_t num_subs;
+	if(get_port_number() <= 4)
+	{
+		num_subs = 1;
+	}
+	else
+	{
+		num_subs = ((get_port_number() - 5) / 2) + 2;
+	}
+	glm::ivec2 base = glm::ivec2(num_subs, 1);
+
+	if(extend)
+	{
+		base += glm::ivec2(1, 1);
+	}
+
+	if(rotate && (rotation == 1 || rotation == 3))
+	{
+		std::swap(base.x, base.y);
+	}
+
+	return base;
+}
+
+PlumbingElement::PlumbingElement(PipeJunction *junction)
+{
+	as_junction = junction;
+	type = JUNCTION;
+}
+
+PlumbingElement::PlumbingElement()
+{
+	as_machine = nullptr;
+	type = EMPTY;
+}
+
+PlumbingElement::PlumbingElement(Machine *machine)
+{
+	as_machine = machine;
+	type = MACHINE;
+}
+
+// This operator== functions may unnecesarly check type as afterall
+// there wont' be a machine and a pipe with the same memory index!
+bool PlumbingElement::operator==(const Machine* m) const
+{
+	return type == MACHINE && as_machine == m;
+}
+
+bool PlumbingElement::operator==(const PipeJunction* jnc) const
+{
+	return type == JUNCTION && as_junction == jnc;
+}
+
+// TODO: This one is specially stupid
+bool PlumbingElement::operator==(const PlumbingElement& j) const
+{
+	if(type == MACHINE)
+	{
+		return as_machine == j.as_machine && j.type == MACHINE;
+	}
+	else if(type == JUNCTION)
+	{
+		return as_junction == j.as_junction && j.type == JUNCTION;
+	}
+
+	return false;
+}
+
+glm::ivec2 PlumbingElement::get_size(bool expand, bool rotate)
+{
+	logger->check(type != EMPTY, "Tried to call get_size on an empty PlumbingElement");
+
+	if(type == MACHINE)
+	{
+		return as_machine->plumbing.get_editor_size(expand, rotate);
+	}
+	else if(type == JUNCTION)
+	{
+		return as_junction->get_size(expand, rotate);
+	}
+
+	return glm::ivec2(0, 0);
+}
+
+glm::ivec2 PlumbingElement::get_pos()
+{
+	logger->check(type != EMPTY, "Tried to call get_pos on an empty PlumbingElement");
+
+	if(type == MACHINE)
+	{
+		return as_machine->plumbing.editor_position;
+	}
+	else if(type == JUNCTION)
+	{
+		return as_junction->pos;
+	}
+
+	return glm::ivec2(0, 0);
+}
+
+void PlumbingElement::set_pos(glm::ivec2 pos)
+{
+	logger->check(type != EMPTY, "Tried to call set_pos on an empty PlumbingElement");
+
+	if(type == MACHINE)
+	{
+		as_machine->plumbing.editor_position = pos;
+	}
+	else if(type == JUNCTION)
+	{
+		as_junction->pos = pos;
+	}
+}
+
+int PlumbingElement::get_rotation()
+{
+	logger->check(type != EMPTY, "Tried to call get_rotation on an empty PlumbingElement");
+
+	if(type == MACHINE)
+	{
+		return as_machine->plumbing.editor_rotation;
+	}
+	else if(type == JUNCTION)
+	{
+		return as_junction->rotation;
+	}
+
+	return 0;
+}
+
+void PlumbingElement::set_rotation(int value)
+{
+	logger->check(type != EMPTY, "Tried to call set_rotation on an empty PlumbingElement");
+
+	if(type == MACHINE)
+	{
+		as_machine->plumbing.editor_rotation = value;
+	}
+	else if(type == JUNCTION)
+	{
+		as_junction->rotation = value;
+	}
+
+}
