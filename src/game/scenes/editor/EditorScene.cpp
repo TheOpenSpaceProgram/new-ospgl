@@ -10,13 +10,7 @@ void EditorScene::load()
 {
 
 	debug_drawer->debug_enabled = true;
-	
-	
-	gui.vg = osp->renderer->vg;
-	gui.init(this);
 
-	osp->game_state->universe.paused = true;
-	
 	Renderer* r = osp->renderer;
 
 	r->cam = &cam;
@@ -38,6 +32,12 @@ void EditorScene::load()
 
 	EnvMap* env = new EnvMap();
 	r->add_light(env);
+
+	gui.vg = osp->renderer->vg;
+	gui.init(this);
+
+	osp->game_state->universe.paused = true;
+	
 
 	// Create the bullet physics stuff
 	bt_brf_interface = new btDbvtBroadphase();

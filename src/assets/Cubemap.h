@@ -43,7 +43,7 @@ public:
 	Cubemap* specular = nullptr;
 
 	// If face is < 0 then all faces are generated
-	void generate_ibl_irradiance(size_t res = 32, size_t spec_res = 128, int face = -1, bool bind = true);
+	void generate_ibl_irradiance(size_t res = 32, size_t spec_res = 32, int face = -1, bool bind = true);
 
 
 	Cubemap(std::vector<std::string>& images, ASSET_INFO);

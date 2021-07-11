@@ -18,7 +18,7 @@ void PartIconRenderer::render(PartPrototype* proto, double angle, GLuint target)
 	// This is safe to do as it's only done once, so noconst is safe
 	if(cubemap->specular == nullptr)
 	{
-		cubemap.get_noconst()->generate_ibl_irradiance();
+		cubemap.get_noconst()->generate_ibl_irradiance(32, 32);
 	}
 
 	constexpr double BIG_NUMBER = 9999999999.0;
