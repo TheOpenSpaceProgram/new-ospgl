@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <nanovg/nanovg.h>
 #include "GUIInput.h"
-#include "Signal.h"
+#include "util/Signal.h"
 #include "GUISkin.h"
 
 // Base class for GUIWidgets, which are contained

@@ -2,6 +2,7 @@
 #include <gui/GUIInput.h>
 #include <nanovg/nanovg.h>
 #include <universe/vehicle/Vehicle.h>
+#include <util/Signal.h>
 
 // Display and editing of the plumbing of a vehicle
 // Maybe used in the editor to set up plumbing, and viewed
@@ -13,6 +14,9 @@ class PlumbingEditor
 {
 private:
 
+	// For rotation you must click and un-click fast enough
+	double time_held;
+	double max_time_for_rotation = 0.2;
 	float pipe_end_radius = 0.18f;
 
 	Machine* hovered;
@@ -51,6 +55,8 @@ private:
 
 public:
 
+	Signal<void(Machine*&)> on_middle_click;
+
 	Vehicle* veh;
 	glm::vec2 cam_center;
 	// How many pixels is each unit?
@@ -61,6 +67,9 @@ public:
 	// We don't draw the background
 	// span is a rectangle, (x,y, width, height)
 	void show_editor(NVGcontext* vg, GUIInput* gui_input, glm::vec4 span);
+
+	const Machine* get_hovered() const { return hovered; }
+	const std::vector<Machine*>& get_selected() const { return selected; }
 
 	PlumbingEditor();
 

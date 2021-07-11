@@ -8,8 +8,20 @@ class PlumbingInterface : public BaseInterface
 {
 private:
 
+	Part* last_focused;
+	size_t last_focused_i;
+
 	float view_size;
 	PlumbingEditor pb_editor;
+	EditorVehicle* edveh;
+	EditorVehicleInterface* edveh_int;
+
+	void do_highlight();
+	void do_3d_to_2d(GUIInput* gui_input, glm::dvec3 ray_start, glm::dvec3 ray_end);
+	// Signal handler, called from PlumbingEditor's signal
+	void do_2d_to_3d(Machine* m);
+
+	void focus_pb_editor(Machine* m);
 
 public:
 

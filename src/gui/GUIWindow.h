@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "GUICanvas.h"
-#include "Signal.h"
+#include "util/Signal.h"
 #include "glm/fwd.hpp"
 
 class GUIWindowManager;

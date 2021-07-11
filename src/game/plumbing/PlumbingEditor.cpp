@@ -222,8 +222,10 @@ bool PlumbingEditor::update_dragging(GUIInput *gui_input, glm::vec2 mpos)
 		glm::vec2 offset = glm::round(mouse_current - mouse_start);
 
 		int prev_rotation = -1;
+		double time_passed = glfwGetTime() - time_held;
 		// Rotation
-		if(input->mouse_up(0) && offset == glm::vec2(0, 0) && selected.size() == 1)
+		if(input->mouse_up(0) && offset == glm::vec2(0, 0) && selected.size() == 1
+			&& time_passed < max_time_for_rotation)
 		{
 			prev_rotation = selected[0]->plumbing.editor_rotation;
 			selected[0]->plumbing.editor_rotation++;
@@ -279,6 +281,7 @@ bool PlumbingEditor::update_dragging(GUIInput *gui_input, glm::vec2 mpos)
 		if (gui_input->mouse_down(0) && hovered_selected)
 		{
 			in_machine_drag = true;
+			time_held = glfwGetTime();
 			mouse_start = mpos;
 			mouse_current = mpos;
 			return true;
@@ -302,7 +305,12 @@ bool PlumbingEditor::update_selection(GUIInput *gui_input, glm::vec4 span)
 	auto hover_vec = veh->plumbing.grid_aabb_check(mpos, mpos);
 	if(hover_vec.size() >= 1)
 	{
-		hovered = hover_vec[0];
+		Machine* m = hover_vec[0];
+		hovered = m;
+		if(gui_input->mouse_down(2))
+		{
+			on_middle_click(m);
+		}
 	}
 
 	if(!in_selection && inside_and_not_blocked && !in_drag || in_machine_drag)
@@ -446,7 +454,7 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 
 void PlumbingEditor::draw_collisions(NVGcontext* vg, glm::vec4 span) const
 {
-	if (in_machine_drag)
+	if (in_machine_drag && !drag_conflicts.empty())
 	{
 		glm::vec2 center = glm::vec2(span.x + span.z * 0.5f, span.y + span.w * 0.5f);
 
