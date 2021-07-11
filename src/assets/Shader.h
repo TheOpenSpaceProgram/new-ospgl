@@ -39,7 +39,7 @@ public:
 		if(it == uniform_locations.end())
 		{
 			// This warning is useful when debbuging errors
-		//	logger->warn("Could not find uniform '{}' on shader '{}'", name, get_asset_id());
+			//logger->warn("Could not find uniform '{}' on shader '{}'", name, get_asset_id());
 			return -1;
 		}
 		else

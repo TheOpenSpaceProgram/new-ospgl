@@ -52,7 +52,7 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 }
 vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 {
-	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
 }
 vec3 FresnelSphericalGaussian(float cosTheta, vec3 F0)
 {
@@ -83,7 +83,10 @@ vec3 get_ambient(vec3 FragPos, vec3 Normal, vec3 Albedo, float Roughness, float 
 
     vec3 ambient = texture(irradiance_map, Normal).rgb * Albedo * ambientkD;
 
-    vec2 envBRDF = texture(brdf_map, vec2(max(dot(Normal, cam_dir), 0.0) * 0.98, Roughness)).rg;
+    vec2 brdf_uv = vec2(max(dot(Normal, cam_dir), 0.0));
+    brdf_uv = brdf_uv * 0.98;
+
+    vec2 envBRDF = texture(brdf_map, brdf_uv, Roughness).rg;
     vec3 R = -reflect(-FragPos, Normal);
     const float MAX_REFLECTION_LOD = 4.0;
     vec3 prefilteredColor = textureLod(specular_map, R, Roughness * MAX_REFLECTION_LOD).rgb;
@@ -114,7 +117,6 @@ vec3 get_pbr(vec3 sun_dir, vec3 FragPos, vec3 Normal, vec3 Albedo, float Roughne
     vec3 specular = nominator / max(denominator, 0.001);
 
     float NdotL = max(dot(Normal, sun_dir), 0.0);
-
 
     vec3 l0 = (kD * Albedo / PI + specular) * NdotL;
 

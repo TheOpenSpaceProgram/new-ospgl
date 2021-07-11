@@ -207,7 +207,7 @@ Shader::Shader(const std::string& v, const std::string& f, ASSET_INFO) : Asset(A
 
 	uniform_locations = std::unordered_map<std::string, GLint>();
 
-	for (GLuint i = 0; i < count; i++)
+	for (GLint i = 0; i < count; i++)
 	{
 		glGetActiveUniform(id, (GLuint)i, buf_size, &length, &size, &type, uname);
 		std::string uname_str = uname;
@@ -215,6 +215,7 @@ Shader::Shader(const std::string& v, const std::string& f, ASSET_INFO) : Asset(A
 		uniform_locations[uname_str] = location;
 	}
 
+	logger->info("Shader {} has {} uniforms", get_asset_name(), count);
 }
 
 

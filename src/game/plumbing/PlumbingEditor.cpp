@@ -144,17 +144,17 @@ void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span) const
 				// to tipping over the box
 				if(pair.second->plumbing.editor_rotation == 1)
 				{
-					nvgTranslate(vg, size.y, 0.0f);
+					nvgTranslate(vg, (float)size.y, 0.0f);
 				}
 				else if(pair.second->plumbing.editor_rotation == 2)
 				{
-					nvgTranslate(vg, size.x, size.y);
+					nvgTranslate(vg, (float)size.x, (float)size.y);
 				}
 				else if(pair.second->plumbing.editor_rotation == 3)
 				{
-					nvgTranslate(vg, 0.0f, size.x);
+					nvgTranslate(vg, 0.0f, (float)size.x);
 				}
-				nvgRotate(vg, glm::half_pi<float>() * pair.second->plumbing.editor_rotation);
+				nvgRotate(vg, glm::half_pi<float>() * (float)pair.second->plumbing.editor_rotation);
 
 				pair.second->plumbing.draw_diagram((void*)vg);
 

@@ -1,17 +1,15 @@
 #version 330 core
+
 out vec4 FragColor;
-  
 in vec2 TexCoords;
 
+
+uniform vec3 color;
+uniform vec3 sun_pos;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedo;
 uniform sampler2D gPbr;
-
-uniform vec3 sun_pos;
-uniform vec3 color;
-uniform vec3 ambient_color;
-
 uniform sampler2D near_shadow_map;
 uniform mat4 near_shadow_tform;
 

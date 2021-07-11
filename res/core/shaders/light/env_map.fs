@@ -31,5 +31,5 @@ void main()
     vec3 ambient = get_ambient(FragPos, Normal, Albedo, Roughness, Metallic, irradiance_map, specular_map, brdf_map, specular);
 
     FragColor = vec4((ambient + specular) * Occlussion, 1.0);
-    //FragColor = vec4(kD, 1.0);
+    FragColor = vec4(specular, 1.0);
 }

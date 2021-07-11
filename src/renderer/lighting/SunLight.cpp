@@ -30,7 +30,7 @@ SunLight::SunLight(int far_size, int near_size)
 	far_shadow_size = far_size;
 
 	shader = osp->assets->get<Shader>("core", "shaders/light/sunlight.vs");
-	color = glm::vec3(1.0f, 0.9f, 0.9f);
+	color = glm::vec3(1.0f, 1.0f, 1.0f);
 	spec_color = glm::vec3(1.0f, 0.8f, 0.8f);
 	ambient_color = glm::vec3(0.1f, 0.1f, 0.1f);
 
@@ -56,8 +56,6 @@ void SunLight::do_pass(CameraUniforms& cu, GBuffer* gbuf)
 	glm::dvec3 sun_pos = position - cu.cam_pos;
 	shader->setVec3("sun_pos", sun_pos);
 	shader->setVec3("color", color);
-	shader->setVec3("spec_color", spec_color);
-	shader->setVec3("ambient_color", ambient_color);
 
 //	glm::dmat4 pos_mat = glm::translate(glm::dmat4(1.0), -position);
 	glm::dmat4 pos_mat = glm::dmat4(1.0);
