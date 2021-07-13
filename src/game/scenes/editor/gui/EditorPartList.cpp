@@ -78,8 +78,7 @@ void EditorPartList::create_part(AssetHandle<PartPrototype>& proto)
 	Vehicle* veh = edveh_int->edveh->veh;
 	EditorVehicle* edveh = edveh_int->edveh;
 	
-	auto empty_table = cpptoml::make_table();
-	Part* n_part = new Part(proto, empty_table);
+	Part* n_part = new Part(proto, nullptr);
 	n_part->vehicle = veh;
 	std::vector<Piece*> n_pieces = n_part->create_pieces();
 	n_part->init(&scene->lua_state, veh);

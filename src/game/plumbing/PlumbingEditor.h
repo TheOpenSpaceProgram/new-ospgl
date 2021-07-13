@@ -21,8 +21,14 @@ private:
 
 	PlumbingElement hovered;
 
-	bool in_selection;
+	// Hovered will be a machine if this is not ""
+	std::string hovering_port;
+	// We are hovering an unfinished pipe endpoint if this is not null, or... see in_pipe_drag
+	Pipe* hovering_pipe;
+	// If true, hovering_pipe contains the pipe we are working on, and the pipe-dragging UI will be at play
 	bool in_pipe_drag;
+
+	bool in_selection;
 	// Pipe drags start by clicking a pipe end-cap. A pipe is automatically
 	// created when clicking on ports and dragging atleast one square. Pipes can
 	// be deleted by shortening them to 0 length

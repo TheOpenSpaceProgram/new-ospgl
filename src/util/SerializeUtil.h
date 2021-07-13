@@ -190,7 +190,7 @@ public:
 	{
 		for(auto children : source)
 		{
-			if(target.get(children.first))
+			if(target.contains(children.first))
 			{
 				if(children.second->is_table())
 				{

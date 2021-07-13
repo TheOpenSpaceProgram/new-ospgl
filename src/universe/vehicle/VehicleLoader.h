@@ -4,6 +4,23 @@
 #include <util/serializers/glm.h>
 #include <physics/glm/BulletGlmCompat.h>
 
+// This is used internally by Vehicle::serializer to avoid a huge function
+class VehicleSaver
+{
+private:
+
+	std::unordered_map<Piece*, int64_t> piece_to_id;
+	std::unordered_map<Part*, int64_t> part_to_id;
+
+	void assign_ids(cpptoml::table& target, const Vehicle& what);
+	void write_parts(cpptoml::table& target, const Vehicle& what);
+	void write_pieces(cpptoml::table& target, const Vehicle& what);
+	void write_wires(cpptoml::table& target, const Vehicle& what);
+
+public:
+	VehicleSaver(cpptoml::table& target, const Vehicle& what);
+
+};
 
 // This is used internally by Vehicle::deserialize as it's cleaner this way
 // so it's not a single huge function

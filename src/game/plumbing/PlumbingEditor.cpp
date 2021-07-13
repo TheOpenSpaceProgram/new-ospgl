@@ -289,6 +289,8 @@ bool PlumbingEditor::update_dragging(GUIInput *gui_input, glm::vec2 mpos)
 
 void PlumbingEditor::handle_hovering(GUIInput *gui_input, glm::vec2 mpos)
 {
+	// First check if we are hovering any port
+
 	auto hover_vec = veh->plumbing.grid_aabb_check(mpos, mpos);
 	if (hover_vec.size() >= 1)
 	{

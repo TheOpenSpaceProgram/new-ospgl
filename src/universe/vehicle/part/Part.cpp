@@ -12,17 +12,22 @@ Part::Part(AssetHandle<PartPrototype>& part_proto, std::shared_ptr<cpptoml::tabl
 		std::string id = *machine_toml->get_as<std::string>("id");
 		std::string script = *machine_toml->get_as<std::string>("script");
 
-		auto config_toml = machine_toml;
-		auto override_toml = our_table->get_table(id);
-		if(override_toml)
+		// We must make a clone! Otherwise it modifies all instances of the machine
+		auto config_toml = machine_toml->clone()->as_table();
+		if(our_table)
 		{
-			SerializeUtil::override(*config_toml, *override_toml);
-		}		
+			auto override_toml = our_table->get_table(id);
+			if (override_toml)
+			{
+				SerializeUtil::override(*config_toml, *override_toml);
+			}
+		}
 
 		std::string cur_pkg = part_proto.pkg;
 
 		Machine* n_machine = new Machine(config_toml, cur_pkg);
 		machines[id] = n_machine;
+
 	}
 }
 

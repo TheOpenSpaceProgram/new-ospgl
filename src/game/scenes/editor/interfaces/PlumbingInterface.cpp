@@ -59,12 +59,6 @@ PlumbingInterface::PlumbingInterface(EditorVehicleInterface *edveh_int)
 	this->edveh = edveh_int->edveh;
 	this->edveh_int = edveh_int;
 
-
-	Pipe pipe;
-	pipe.waypoints.push_back(glm::vec2(5.5, 0.5));
-	pipe.waypoints.push_back(glm::vec2(5.5, 5.0));
-	pb_editor.veh->plumbing.pipes.push_back(pipe);
-
 	pb_editor.on_middle_click.add_handler([this](Machine* m){this->do_2d_to_3d(m);});
 }
 

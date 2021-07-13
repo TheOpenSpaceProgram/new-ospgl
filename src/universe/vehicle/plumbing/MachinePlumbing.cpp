@@ -88,22 +88,37 @@ bool MachinePlumbing::has_lua_plumbing()
 
 void MachinePlumbing::init(const cpptoml::table& init)
 {
-	glm::dvec2 offset = glm::dvec2(0.0);
-	auto fluid_offset = init.get_table("fluid_offset");
-	if(fluid_offset)
+	std::cout << init << std::endl;
+	// Read plumbing_pos and rot from init if present
+	bool found_pos = false;
+	auto pos_table = init.get_table("plumbing_pos");
+	if(pos_table)
 	{
-		SerializeUtil::read_to(*fluid_offset, offset);
+		deserialize(editor_position, *pos_table);
+		found_pos = true;
 	}
-	editor_position = glm::round(offset);
-	if(editor_position.x < 0 || editor_position.y < 0)
+	editor_rotation = init.get_as<int>("plumbing_rot").value_or(editor_rotation);
+
+	if(!found_pos)
 	{
-		logger->warn("Machines cannot have fluid_offsets below (0,0). Clamping!");
-		editor_position = glm::ivec2(0, 0);
+		glm::dvec2 offset = glm::dvec2(0.0);
+		auto fluid_offset = init.get_table("fluid_offset");
+		if (fluid_offset)
+		{
+			SerializeUtil::read_to(*fluid_offset, offset);
+		}
+		editor_position = glm::round(offset);
+		if (editor_position.x < 0 || editor_position.y < 0)
+		{
+			logger->warn("Machines cannot have fluid_offsets below (0,0). Clamping!");
+			editor_position = glm::ivec2(0, 0);
+		}
 	}
 
 
 	if(has_lua_plumbing())
 	{
+
 		can_add_ports = true;
 		LuaUtil::safe_call_function_if_present(get_lua_plumbing()["init"]);
 		can_add_ports = false;

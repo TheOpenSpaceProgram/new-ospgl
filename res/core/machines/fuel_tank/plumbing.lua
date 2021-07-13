@@ -1,7 +1,9 @@
 local plumbing = {};
 
+require("toml")
 local logger = require("logger")
 local nvg = require("nano_vg")
+require("game_database")
 
 function plumbing.is_requester() return true end
 
