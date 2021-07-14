@@ -39,8 +39,9 @@ public:
 
 	// Gets a string in the current locale
 	// REMEMBER: locale ids are automatically prefixed with the mod ID (if it's not already done by the modder)
-	// This function will also automatically add the prefix, that's why you must pass pkg
-	const std::string& get_string(const std::string& id, const std::string& pkg);
+	// This function will also automatically add the prefix, that's why you must pass pkg. Otherwise, asset
+	// manager default is used!
+	const std::string& get_string(const std::string& id, const std::string& pkg = "");
 
 	GameDatabase();
 	~GameDatabase();

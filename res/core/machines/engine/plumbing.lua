@@ -61,12 +61,6 @@ function plumbing.draw_diagram(vg)
 
 end
 
--- Return a pair of values, width and height of the box in units
--- It will be used for dragging and preventing overlaps
-function plumbing.get_editor_size()
-    return 2, 3
-end
-
 
 local inlet_str = database:get_string("inlet")
 logger.info(inlet_str)
@@ -88,6 +82,7 @@ function plumbing.init()
         machine.plumbing:create_port(name, inlet, inlet_str, unpack(positions[idx]))
     end
 
+    return 2, 3
 
 end
 

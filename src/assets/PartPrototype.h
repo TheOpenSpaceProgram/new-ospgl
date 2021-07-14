@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Model.h"
+#include <game/database/GameDatabase.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
 #define PIECE_DEFAULT_FRICTION 0.7
@@ -137,6 +138,8 @@ public:
 	std::vector<std::shared_ptr<cpptoml::table>> machines;
 
 	GPUModelPointer model;
+	// Note that these four strings are the true strings and not the localization id
+	// established in the toml file
 	std::string name;
 	std::string country;
 	std::string manufacturer;
@@ -171,6 +174,11 @@ public:
 		SAFE_TOML_GET_OR(to.country, "country", std::string, "Unknown");
 		SAFE_TOML_GET_OR(to.manufacturer, "manufacturer", std::string, "Unknown");
 		SAFE_TOML_GET(to.description, "description", std::string);
+
+		to.name = osp->game_database->get_string(to.name);
+		to.country = osp->game_database->get_string(to.country);
+		to.manufacturer = osp->game_database->get_string(to.manufacturer);
+		to.description = osp->game_database->get_string(to.description);
 
 		to.categories = *from.get_array_of<std::string>("categories");
 		to.categories.push_back("all");

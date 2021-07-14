@@ -44,6 +44,7 @@ struct PipeJunction
 	// Editor only, same as parts
 	int rotation;
 
+	// The order matters for display purposes
 	std::vector<Pipe*> pipes;
 
 	size_t get_port_number() const {return pipes.size(); }

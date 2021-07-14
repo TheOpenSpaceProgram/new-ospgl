@@ -4,6 +4,7 @@
 #include "StoredFluids.h"
 
 class Machine;
+class MachinePlumbing;
 
 struct FluidPort
 {
@@ -14,6 +15,8 @@ struct FluidPort
 	// Position in the plumbing editor, set only during init or if the
 	// ports change during editor operations
 	glm::vec2 pos;
+
+	glm::vec2 get_position(const MachinePlumbing& in_machine) const;
 };
 
 
@@ -29,6 +32,8 @@ private:
 
 	Machine* machine;
 	bool can_add_ports;
+	glm::ivec2 base_size;
+	bool has_lua;
 
 public:
 
@@ -36,7 +41,7 @@ public:
 	// 0 means no rotation, 1 90º, 2 180º, 3 270º
 	int editor_rotation = 0;
 	// Expand extends the size by 1 in both directions so parts must be spaced out
-	glm::ivec2 get_editor_size(bool expand = false, bool rotate = true);
+	glm::ivec2 get_editor_size(bool expand = false, bool rotate = true) const;
 	// Does not include rotation!
 	void draw_diagram(void* vg);
 
@@ -48,7 +53,7 @@ public:
 
 	bool has_ports() const { return !fluid_ports.empty(); }
 	// TODO: we could cache the result as it won't disappear mid-game
-	bool has_lua_plumbing();
+	bool has_lua_plumbing() const { return has_lua; }
 
 	bool is_requester();
 	void fluid_update();

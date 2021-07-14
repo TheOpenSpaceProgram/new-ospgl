@@ -30,6 +30,7 @@ private:
 	bool piece_missing;
 
 public:
+
 	// Always present, but may not be used if "has_plumbing" is false
 	MachinePlumbing plumbing;
 
