@@ -19,7 +19,10 @@ Part::Part(AssetHandle<PartPrototype>& part_proto, std::shared_ptr<cpptoml::tabl
 			auto override_toml = our_table->get_table(id);
 			if (override_toml)
 			{
+				logger->warn("OVERRIDE!");
+				std::cout << "Before: " << *config_toml << std::endl;
 				SerializeUtil::override(*config_toml, *override_toml);
+				std::cout << "After: " << *config_toml << std::endl;
 			}
 		}
 

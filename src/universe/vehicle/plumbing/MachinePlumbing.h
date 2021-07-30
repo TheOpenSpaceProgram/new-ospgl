@@ -52,7 +52,6 @@ public:
 	sol::table get_lua_plumbing(bool silent_fail = false);
 
 	bool has_ports() const { return !fluid_ports.empty(); }
-	// TODO: we could cache the result as it won't disappear mid-game
 	bool has_lua_plumbing() const { return has_lua; }
 
 	bool is_requester();

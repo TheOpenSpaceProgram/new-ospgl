@@ -63,6 +63,7 @@ bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start,
 		}
 		// We raycast p_root's center because that's where 
 		// the icons are, but ignore all pieces
+		// TODO: Raycast to the location of each machine? Requires a big code change
 		bool visible = false;
 		if(!see_all)
 		{
@@ -102,6 +103,7 @@ bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start,
 	{
 		std::vector<Machine*> machines_with_marker;
 
+		// Remove machines with marker and add them to the other array
 		for(auto it = pair.second.begin(); it != pair.second.end(); )
 		{
 			Machine* m = *it;
@@ -148,10 +150,9 @@ bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start,
 		}
 
 		float angle = 0.0f;
-		for(int i = 0; i < polygon_machines; i++)
+		int i = 0;
+		for(Machine* m : pair.second)
 		{
-			Machine* m = pair.second[i];
-			
 			float adj_angle = angle + glm::half_pi<float>();
 			glm::vec2 offset = glm::vec2(sin(adj_angle), cos(adj_angle));
 			glm::vec2 final_pos = glm::round(screen_pos + offset * radius);
@@ -171,7 +172,7 @@ bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start,
 			}
 
 			angle += dangle;
-
+			i++;
 		}
 
 		// Draw the machines at a marker location
@@ -179,7 +180,7 @@ bool WireInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start,
 		{
 
 			glm::dvec3 mpos = p->get_piece("p_root")->get_marker_position(m->editor_location_marker);
-			mpos = to_dmat4(p->get_piece("p_root")->get_global_transform()) * glm::dvec4(mpos, 1.0);
+			mpos = p->get_piece("p_root")->get_graphics_matrix() * glm::dvec4(mpos, 1.0);
 			auto[clip, in_front] = MathUtil::world_to_clip(cu.tform, mpos);
 			glm::vec2 mscreen_pos = glm::round(MathUtil::clip_to_screen(clip, vport));
 
