@@ -17,11 +17,11 @@ private:
 	// For rotation you must click and un-click fast enough
 	double time_held;
 	double max_time_for_rotation = 0.2;
-	float pipe_end_radius = 0.18f;
+	float port_radius = 0.18f;
 
 	PlumbingElement hovered;
 
-	// Hovered will be a machine if this is not ""
+	// Hovered will be a machine if this is not "".
 	std::string hovering_port;
 	// We are hovering an unfinished pipe endpoint if this is not null, or... see in_pipe_drag
 	Pipe* hovering_pipe;
@@ -57,7 +57,7 @@ private:
 	void draw_selection(NVGcontext* vg, glm::vec4 span) const;
 	void draw_pipes(NVGcontext* vg, glm::vec4 span) const;
 	void draw_collisions(NVGcontext* vg, glm::vec4 span) const;
-	void draw_port(NVGcontext* vg, glm::vec2 pos) const;
+	void draw_port(NVGcontext* vg, glm::vec2 pos, bool hovered = false) const;
 	void draw_pipe_cap(NVGcontext* vg, glm::vec2 pos) const;
 	// Junctions of more than 4 ports are drawn as a series of connected junctions
 	void draw_junction(NVGcontext* vg, glm::vec2 pos, size_t port_count, bool flip_three=false) const;

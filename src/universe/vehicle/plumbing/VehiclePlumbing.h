@@ -16,6 +16,8 @@ struct Pipe
 	size_t id;
 
 	// mb may be null, then junction must be present
+	// The pipe goes from ma to junction, although during building ma may also not be present
+	// if the start of the pipe has been disconnected
 	Machine *ma, *mb;
 	PipeJunction* junction;
 	std::string port_a, port_b;
@@ -77,6 +79,8 @@ struct PlumbingElement
 	bool operator==(const PipeJunction* j) const;
 	bool operator==(const PlumbingElement& j) const;
 
+	// The second value in the pair is the position of the port in the grid, including rotation and transforms
+	std::vector<std::pair<FluidPort, glm::vec2>> get_ports();
 	glm::ivec2 get_size(bool expand = false, bool rotate = true);
 	glm::ivec2 get_pos();
 	void set_pos(glm::ivec2 pos);
@@ -107,6 +111,8 @@ public:
 		{ return grid_aabb_check(start, end, {}, expand); }
 	std::vector<PlumbingElement> grid_aabb_check(glm::vec2 start, glm::vec2 end, const std::vector<PlumbingElement>& ignore,
 										  bool expand = false);
+
+	std::vector<PlumbingElement> get_all_elements();
 
 	std::vector<Pipe> pipes;
 	// Junction id to its pipes, generated on load / modify to speed up the algorithm

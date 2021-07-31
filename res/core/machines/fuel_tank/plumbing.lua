@@ -34,12 +34,17 @@ function plumbing.draw_diagram(vg)
     nvg.fill(vg)
     nvg.stroke(vg)
 
+    nvg.begin_path(vg)
+    nvg.move_to(vg, 1.5, 3)
+    nvg.line_to(vg, 1.5, 3.5)
+    nvg.stroke(vg)
+
 end
 
 local port_str = database:get_string("inlet")
 function plumbing.init(ports)
     local port_marker = machine.init_toml:get_string("port_marker")
-    machine.plumbing:create_port("port", port_marker, port_str, 1.5, 3)
+    machine.plumbing:create_port("port", port_marker, port_str, 1.5, 3.5)
 
     return 3, 3
 end

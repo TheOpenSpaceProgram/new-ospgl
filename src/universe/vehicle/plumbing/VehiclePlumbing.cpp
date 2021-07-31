@@ -268,6 +268,31 @@ glm::ivec2 VehiclePlumbing::get_plumbing_size_of(Part* p)
 
 }
 
+std::vector<PlumbingElement> VehiclePlumbing::get_all_elements()
+{
+	std::vector<PlumbingElement> out;
+
+	// Machines
+	for(const Part* p : veh->parts)
+	{
+		for (const auto &pair : p->machines)
+		{
+			if (pair.second->plumbing.has_lua_plumbing())
+			{
+				out.emplace_back(pair.second);
+			}
+		}
+	}
+
+	// Junctions
+	for(PipeJunction& jnc : junctions)
+	{
+		out.emplace_back(&jnc);
+	}
+
+	return out;
+}
+
 glm::ivec2 PipeJunction::get_size(bool extend, bool rotate) const
 {
 	size_t num_subs;
@@ -414,4 +439,26 @@ void PlumbingElement::set_rotation(int value)
 		as_junction->rotation = value;
 	}
 
+}
+
+std::vector<std::pair<FluidPort, glm::vec2>> PlumbingElement::get_ports()
+{
+	logger->check(type != EMPTY, "Tried to call get_ports on an empty PlumbingElement");
+
+	std::vector<std::pair<FluidPort, glm::vec2>> out;
+
+	if(type == MACHINE)
+	{
+		for(const FluidPort& p : as_machine->plumbing.fluid_ports)
+		{
+			glm::vec2 pos = as_machine->plumbing.get_port_position(p.id);
+			out.emplace_back(p, pos);
+		}
+	}
+	else if(type == JUNCTION)
+	{
+		// TODO: Generate them
+	}
+
+	return out;
 }

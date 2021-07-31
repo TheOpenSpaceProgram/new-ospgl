@@ -12,11 +12,8 @@ struct FluidPort
 	std::string gui_name;
 	// Fluid ports must have a physical location
 	std::string marker;
-	// Position in the plumbing editor, set only during init or if the
-	// ports change during editor operations
+	// Position relative to the part
 	glm::vec2 pos;
-
-	glm::vec2 get_position(const MachinePlumbing& in_machine) const;
 };
 
 
@@ -73,6 +70,8 @@ public:
 	explicit MachinePlumbing(Machine* sm) : machine(sm) {}
 	void init(const cpptoml::table& toml);
 	void create_port(std::string id, std::string marker, std::string ui_name, float x, float y);
+
+	glm::vec2 get_port_position(std::string id);
 
 
 };

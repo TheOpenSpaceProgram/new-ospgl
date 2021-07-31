@@ -13,6 +13,8 @@ local nvg = require("nano_vg")
 -- Only one (do we have it for real???)
 local outlet_id = "outlet"
 
+local inlet_count = 0
+
 function plumbing.is_requester() return true end
 
 function plumbing.fluid_update()
@@ -59,6 +61,27 @@ function plumbing.draw_diagram(vg)
     nvg.fill(vg)
     nvg.stroke(vg)
 
+    nvg.begin_path(vg)
+
+    if inlet_count >= 1 then
+        nvg.move_to(vg, 0.5, 0.0)
+        nvg.line_to(vg, 0.5, -0.5)
+    end
+    if inlet_count >= 2 then
+        nvg.move_to(vg, 1.5, 0.0)
+        nvg.line_to(vg, 1.5, -0.5)
+    end
+    if inlet_count >= 3 then
+        nvg.move_to(vg, 0.0, 0.5)
+        nvg.line_to(vg, -0.5, 0.5)
+    end
+    if inlet_count >= 4 then
+        nvg.move_to(vg, 2.0, 0.5)
+        nvg.line_to(vg, 2.5, 0.5)
+    end
+
+    nvg.stroke(vg)
+
 end
 
 
@@ -69,7 +92,7 @@ logger.info(inlet_str)
 function plumbing.init()
     local inlets_toml = machine.init_toml:get_array_of_string("inlets")
     local positions = {
-        {0.5, 0}, {1.5, 0}, {0, 0.5}, {2, 0.5}
+        {0.5, -0.5}, {1.5, -0.5}, {-0.5, 0.5}, {2.5, 0.5}
     }
 
     for idx, inlet in pairs(inlets_toml) do
@@ -80,6 +103,7 @@ function plumbing.init()
         local name = "inlet_" .. idx
         table.insert(inlets, name)
         machine.plumbing:create_port(name, inlet, inlet_str, unpack(positions[idx]))
+        inlet_count = inlet_count + 1
     end
 
     return 2, 3

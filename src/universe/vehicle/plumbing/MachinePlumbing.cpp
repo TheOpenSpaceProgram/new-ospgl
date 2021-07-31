@@ -137,25 +137,38 @@ void MachinePlumbing::create_port(std::string id, std::string marker, std::strin
 
 }
 
-glm::vec2 FluidPort::get_position(const MachinePlumbing& in_machine) const
+glm::vec2 MachinePlumbing::get_port_position(std::string id)
 {
-	glm::vec2 out = pos;
-	glm::ivec2 size = in_machine.get_editor_size();
-	if(in_machine.editor_rotation == 1)
+	for(const FluidPort& port : fluid_ports)
 	{
-		std::swap(out.x, out.y);
-		out.x = size.x - out.x;
-	}
-	else if(in_machine.editor_rotation == 2)
-	{
-		out.x = (float)size.x - out.x;
-		out.y = (float)size.y - out.y;
-	}
-	else if(in_machine.editor_rotation == 3)
-	{
-		std::swap(out.x, out.y);
-		out.y = (float)size.y - out.y;
+		if(port.id == id)
+		{
+			glm::vec2 pos = port.pos;
+
+			glm::ivec2 size = get_editor_size();
+			if(editor_rotation == 1)
+			{
+				std::swap(pos.x, pos.y);
+				pos.x = size.x - pos.x;
+			}
+			else if(editor_rotation == 2)
+			{
+				pos.x = (float)size.x - pos.x;
+				pos.y = (float)size.y - pos.y;
+			}
+			else if(editor_rotation == 3)
+			{
+				std::swap(pos.x, pos.y);
+				pos.y = (float)size.y - pos.y;
+			}
+
+			pos += editor_position;
+
+			return pos;
+		}
 	}
 
-	return out;
+	logger->fatal("Unknown port {}", id);
+	return glm::vec2(0, 0);
 }
+
