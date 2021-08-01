@@ -379,6 +379,7 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 	glm::vec2 mpos = get_mouse_pos(span);
 	glm::vec2 round = glm::floor(mpos) + glm::vec2(0.5f);
 	hovering_port = "";
+	hovering_port_user = nullptr;
 	// Hovering ports
 	std::vector<PlumbingElement> all_elems = veh->plumbing.get_all_elements();
 	for (PlumbingElement &elem : all_elems)
@@ -396,6 +397,16 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 			if ((!in_pipe_drag && glm::distance(mpos, pair.second) <= port_radius * 1.15f) ||
 					(in_pipe_drag && round == glm::floor(pair.second) + glm::vec2(0.5f)))
 			{
+				for(Pipe& p : veh->plumbing.pipes)
+				{
+					if((elem == p.ma && p.port_a == pair.first.id) ||
+						(elem == p.mb && p.port_b == pair.first.id))
+					{
+						hovering_port_user = &p;
+						break;
+					}
+				}
+
 				hovering_port = pair.first.id;
 				hovered = elem;
 				break;
@@ -416,35 +427,49 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 			}
 			else
 			{
-
-				// Add a waypoint at mouse pos
-				hovering_pipe->waypoints.push_back(round);
-			}
-		}
-		else if(gui_input->mouse_down(1))
-		{
-			// Remove waypoints
-			if(hovering_pipe->waypoints.size() >= 1)
-			{
-				hovering_pipe->waypoints.pop_back();
+				// Add a waypoint at mouse pos, or remove it if it's already there
+				auto it = std::find(hovering_pipe->waypoints.begin(), hovering_pipe->waypoints.end(), round);
+				if(it == hovering_pipe->waypoints.end())
+				{
+					hovering_pipe->waypoints.push_back(round);
+				}
+				else
+				{
+					hovering_pipe->waypoints.erase(it);
+				}
 			}
 		}
 	}
 	else
 	{
 		// Creating new pipes, finishing unfinished ones, or modifying them
-
-
 		if (!hovering_port.empty() && gui_input->mouse_down(0))
 		{
-			// if a pipe is already connected, modify that one. Otherwise, start a new pipe
-			Pipe n_pipe = Pipe();
-			n_pipe.ma = hovered.as_machine;
-			n_pipe.port_a = hovering_port;
-			veh->plumbing.pipes.push_back(n_pipe);
+			if(hovering_port_user)
+			{
+				// Modify existing pipe, multiple conditions
+				hovering_pipe = hovering_port_user;
+				in_pipe_drag = true;
+				if(hovered == hovering_port_user->ma)
+				{
+					// Modify from the start (invert pipe)
+					hovering_pipe->invert();
+				}
+				// Disconnect the pipe
+				hovering_pipe->mb = nullptr;
+				hovering_pipe->port_b = "";
+			}
+			else
+			{
+				// Create new pipe
+				Pipe n_pipe = Pipe();
+				n_pipe.ma = hovered.as_machine;
+				n_pipe.port_a = hovering_port;
+				veh->plumbing.pipes.push_back(n_pipe);
 
-			hovering_pipe = &veh->plumbing.pipes[veh->plumbing.pipes.size() - 1];
-			in_pipe_drag = true;
+				hovering_pipe = &veh->plumbing.pipes[veh->plumbing.pipes.size() - 1];
+				in_pipe_drag = true;
+			}
 		}
 	}
 
@@ -522,8 +547,13 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 
 	for(const Pipe& p : veh->plumbing.pipes)
 	{
-		// Hovered machines show the pipes in bold (TODO)
-		nvgStrokeWidth(vg, 1.0f / (float)zoom);
+		float size = 1.0f;
+		// If we hover a port, the joined pipe gets in bold
+		if(hovering_port_user == &p)
+		{
+			size = 2.0f;
+		}
+		nvgStrokeWidth(vg, size / (float)zoom);
 		nvgBeginPath(vg);
 		// We start on the first port, or first waypoint if such is not present
 		if(p.ma != nullptr)

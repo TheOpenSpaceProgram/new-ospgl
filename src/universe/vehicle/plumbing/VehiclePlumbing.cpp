@@ -462,3 +462,11 @@ std::vector<std::pair<FluidPort, glm::vec2>> PlumbingElement::get_ports()
 
 	return out;
 }
+
+void Pipe::invert()
+{
+	logger->check(junction == nullptr, "Cannot invert a pipe that goes to a junction as it must always be the end");
+	std::swap(ma, mb);
+	std::swap(port_a, port_b);
+	std::reverse(waypoints.begin(), waypoints.end());
+}

@@ -30,10 +30,8 @@ struct Pipe
 	// They are helpful if your pipes get cluttered up and can be added as the
 	// pipe is built
 	std::vector<glm::vec2> waypoints;
-	// Editor only and not serialized, jumps are visual only and
-	// happen on "horizontal" segments of pipe which intersect a "vertical"
-	// section
-	std::vector<glm::vec2> jumps;
+
+	void invert();
 };
 
 struct PipeJunction

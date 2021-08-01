@@ -23,6 +23,8 @@ private:
 
 	// Hovered will be a machine if this is not "".
 	std::string hovering_port;
+	// nullptr if no user
+	Pipe* hovering_port_user;
 	// We are hovering an unfinished pipe endpoint if this is not null, or... see in_pipe_drag
 	Pipe* hovering_pipe;
 	// If true, hovering_pipe contains the pipe we are working on, and the pipe-dragging UI will be at play
