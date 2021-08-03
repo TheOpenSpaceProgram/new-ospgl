@@ -15,11 +15,12 @@ struct Pipe
 	// For serialization and re-generation of the tree on changes
 	size_t id;
 
-	// mb may be null, then junction must be present
-	// The pipe goes from ma to junction, although during building ma may also not be present
+	// ma may be null, then junction must be present
+	// The pipe goes from a junction to mb, although during building ma may also not be present
 	// if the start of the pipe has been disconnected
 	Machine *ma, *mb;
 	PipeJunction* junction;
+	size_t junction_id;
 	std::string port_a, port_b;
 	float surface;
 
@@ -29,7 +30,8 @@ struct Pipe
 	// Editor only but serialized
 	// They are helpful if your pipes get cluttered up and can be added as the
 	// pipe is built
-	std::vector<glm::vec2> waypoints;
+	std::vector<glm::ivec2> waypoints;
+	void connect_junction(PipeJunction* jnc);
 
 	void invert();
 };
@@ -46,9 +48,14 @@ struct PipeJunction
 
 	// The order matters for display purposes
 	std::vector<Pipe*> pipes;
+	std::vector<size_t> pipes_id;
+
+	void add_pipe(Pipe* p);
 
 	size_t get_port_number() const {return pipes.size(); }
 	glm::ivec2 get_size(bool extend = false, bool rotate = true) const;
+
+	glm::vec2 get_port_position(const Pipe* p);
 };
 
 // Do not keep for long! They store pointers to PipeJunction which
@@ -96,11 +103,15 @@ struct PlumbingElement
 // contiguous memory. Modifying pipes or junctions requires
 // regeneration of the tree SO DON'T DO IT MANUALLY!
 // Junctions are not machines as they are not a physical part
+// WARNING:
+// Do not hold pointers to pipes for long as they may be modified, use ids instead
 class VehiclePlumbing
 {
 private:
 
 	Vehicle* veh;
+	size_t pipe_id;
+	size_t junction_id;
 
 public:
 
@@ -126,6 +137,17 @@ public:
 
 	// Returns an AABB (pos, size) with the bounds of used plumbing area by machines
 	glm::ivec4 get_plumbing_bounds();
+
+	Pipe* get_pipe(size_t id);
+	// Creates a new pipe, rebuilds the tree
+	// WARNING: Invalidates all pointers!
+	Pipe* create_pipe();
+	// Creates a new pipe junction, rebuilds the tree
+	// WARNING: Invalidates all pointers!
+	PipeJunction* create_pipe_junction();
+
+	void remove_pipe(size_t id);
+	void remove_junction(size_t id);
 
 	explicit VehiclePlumbing(Vehicle* in_vehicle);
 

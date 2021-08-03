@@ -137,6 +137,8 @@ void VehiclePlumbing::junction_flow_rate(const PipeJunction& junction, float dt)
 VehiclePlumbing::VehiclePlumbing(Vehicle *in_vehicle)
 {
 	veh = in_vehicle;
+	pipe_id = 0;
+	junction_id = 0;
 }
 
 std::vector<PlumbingElement> VehiclePlumbing::grid_aabb_check(glm::vec2 start, glm::vec2 end,
@@ -293,6 +295,110 @@ std::vector<PlumbingElement> VehiclePlumbing::get_all_elements()
 	return out;
 }
 
+Pipe* VehiclePlumbing::create_pipe()
+{
+	size_t id = ++pipe_id;
+	Pipe p = Pipe();
+	p.id = id;
+
+	pipes.push_back(p);
+
+	// Rebuild the junctions as pointers may change in the vector
+	for(PipeJunction& jnc : junctions)
+	{
+		for(size_t i = 0; i < jnc.pipes.size(); i++)
+		{
+			jnc.pipes[i] = get_pipe(jnc.pipes_id[i]);
+		}
+	}
+
+	return &pipes[pipes.size() - 1];
+}
+
+PipeJunction* VehiclePlumbing::create_pipe_junction()
+{
+	size_t id = ++junction_id;
+	PipeJunction j = PipeJunction();
+	j.id = id;
+
+	junctions.push_back(j);
+
+	// Rebuild junctions in pipes as they may have changed pointer
+	for(Pipe& p : pipes)
+	{
+		if(p.junction_id != 0)
+		{
+			PipeJunction* found = nullptr;
+			for(PipeJunction& fj : junctions)
+			{
+				if(fj.id == p.junction_id)
+				{
+					found = &fj;
+					break;
+				}
+			}
+
+			logger->check(found != nullptr, "Couldn't find pipe junction with id = {}", p.junction_id);
+			p.junction = found;
+		}
+	}
+
+	return &junctions[junctions.size() - 1];
+}
+
+Pipe* VehiclePlumbing::get_pipe(size_t id)
+{
+	for(Pipe& p : pipes)
+	{
+		if(p.id == id)
+		{
+			return &p;
+		}
+	}
+
+	logger->fatal("Couldn't find pipe with id = {}", id);
+	return nullptr;
+}
+
+void VehiclePlumbing::remove_pipe(size_t id)
+{
+	bool found = false;
+	for(size_t i = 0; i < pipes.size(); i++)
+	{
+		if(pipes[i].id == id)
+		{
+			pipes.erase(pipes.begin() + i);
+			found = true;
+			break;
+		}
+	}
+
+	logger->check(found, "Couldn't find pipe with id= {} to remove", id);
+
+	// TODO: Check if any references remain?
+
+}
+
+void VehiclePlumbing::remove_junction(size_t id)
+{
+	bool found = false;
+	for(size_t i = 0; i < junctions.size(); i++)
+	{
+		if(junctions[i].id == id)
+		{
+			junctions.erase(junctions.begin() + i);
+			found = true;
+			break;
+		}
+	}
+
+	logger->check(found, "Couldn't find junction with id= {} to remove", id);
+
+	// TODO: Check if any references remain?
+
+}
+
+
 glm::ivec2 PipeJunction::get_size(bool extend, bool rotate) const
 {
 	size_t num_subs;
@@ -317,6 +423,57 @@ glm::ivec2 PipeJunction::get_size(bool extend, bool rotate) const
 	}
 
 	return base;
+}
+
+void PipeJunction::add_pipe(Pipe* p)
+{
+	pipes.push_back(p);
+	pipes_id.push_back(p->id);
+
+}
+
+glm::vec2 PipeJunction::get_port_position(const Pipe *p)
+{
+	// Port positions are a.lways in the same order, same as rendering
+	float f = 1.0f;
+	size_t port_count = get_port_number();
+	int i = -1;
+	for(size_t j = 0; j < pipes.size(); j++)
+	{
+		if(pipes[j] == p)
+		{
+			i = (int)j;
+		}
+	}
+	logger->check(i != -1, "Couldn't find pipe with id = {}", p->id);
+
+	glm::vec2 offset;
+	if(port_count <= 4 || (i <= 3))
+	{
+		if(i == 0)
+		{
+			offset = glm::vec2(0.0f, -1.0f);
+		}
+		else if(i == 1)
+		{
+			offset = glm::vec2(-1.0f, 0.0f);
+		}
+		else if(i == 2)
+		{
+			offset = glm::vec2(0.0f, 1.0f);
+		}
+		else if(i == 3)
+		{
+			offset = glm::vec2(1.0f, 0.0f);
+		}
+	}
+	else
+	{
+		// Algorithmic procedure for ports to the right
+	}
+
+	return offset * f + (glm::vec2)pos + glm::vec2(0.5f);
+
 }
 
 PlumbingElement::PlumbingElement(PipeJunction *junction)
@@ -458,6 +615,15 @@ std::vector<std::pair<FluidPort, glm::vec2>> PlumbingElement::get_ports()
 	else if(type == JUNCTION)
 	{
 		// TODO: Generate them
+		for(const Pipe* p : as_junction->pipes)
+		{
+			glm::vec2 pos = as_junction->get_port_position(p);
+			FluidPort port = FluidPort();
+			port.id = "__junction";
+			port.gui_name = "Junction Port";
+			port.marker = "";
+			out.emplace_back(port, pos);
+		}
 	}
 
 	return out;
@@ -469,4 +635,14 @@ void Pipe::invert()
 	std::swap(ma, mb);
 	std::swap(port_a, port_b);
 	std::reverse(waypoints.begin(), waypoints.end());
+}
+
+void Pipe::connect_junction(PipeJunction *jnc)
+{
+	junction = jnc;
+	junction_id = jnc->id;
+	ma = nullptr;
+	port_a = "";
+
+	jnc->add_pipe(this);
 }

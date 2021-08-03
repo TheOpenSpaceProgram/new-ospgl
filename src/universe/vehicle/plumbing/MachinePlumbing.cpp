@@ -168,7 +168,7 @@ glm::vec2 MachinePlumbing::get_port_position(std::string id)
 		}
 	}
 
-	logger->fatal("Unknown port {}", id);
+	logger->fatal("Unknown port id={}", id);
 	return glm::vec2(0, 0);
 }
 

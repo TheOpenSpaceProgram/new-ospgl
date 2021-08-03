@@ -58,6 +58,7 @@ private:
 	void draw_machines(NVGcontext* vg, glm::vec4 span) const;
 	void draw_selection(NVGcontext* vg, glm::vec4 span) const;
 	void draw_pipes(NVGcontext* vg, glm::vec4 span) const;
+	void draw_junctions(NVGcontext* vg, glm::vec4 span) const;
 	void draw_collisions(NVGcontext* vg, glm::vec4 span) const;
 	void draw_port(NVGcontext* vg, glm::vec2 pos, bool hovered = false) const;
 	void draw_pipe_cap(NVGcontext* vg, glm::vec2 pos) const;

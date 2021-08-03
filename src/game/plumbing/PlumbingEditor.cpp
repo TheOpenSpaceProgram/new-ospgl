@@ -29,6 +29,7 @@ void PlumbingEditor::show_editor(NVGcontext* vg, GUIInput* gui_input, glm::vec4 
 	nvgStrokeColor(vg, nvgRGB(230, 230, 230));
 	draw_grid(vg, span);
 	draw_machines(vg, span);
+	draw_junctions(vg, span);
 	draw_pipes(vg, span);
 	draw_selection(vg, span);
 	draw_collisions(vg, span);
@@ -56,7 +57,7 @@ void PlumbingEditor::draw_grid(NVGcontext* vg, glm::vec4 span) const
 
 	nvgResetTransform(vg);
 	glm::vec2 center = glm::vec2(span.x + span.z * 0.5f, span.y + span.w * 0.5f);
-	nvgTranslate(vg, center.x-fmod(cam_center.x, 1.0f) *zoom, center.y-fmod(cam_center.y, 1.0f) *zoom);
+	nvgTranslate(vg, center.x-fmod(cam_center.x, 1.0f) * zoom, center.y-fmod(cam_center.y, 1.0f) * zoom);
 	nvgScale(vg, (float)zoom, (float)zoom);
 	nvgStrokeWidth(vg, 1.0f / (float)zoom);
 	// Vertical lines
@@ -377,17 +378,20 @@ bool PlumbingEditor::update_selection(GUIInput *gui_input, glm::vec4 span)
 bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 {
 	glm::vec2 mpos = get_mouse_pos(span);
-	glm::vec2 round = glm::floor(mpos) + glm::vec2(0.5f);
+	glm::ivec2 round = glm::floor(mpos);
 	hovering_port = "";
 	hovering_port_user = nullptr;
 	// Hovering ports
 	std::vector<PlumbingElement> all_elems = veh->plumbing.get_all_elements();
 	for (PlumbingElement &elem : all_elems)
 	{
-		// Junctions are different, you must drag INTO them, not into ports
-		if(elem.type != PlumbingElement::MACHINE)
+		// We may be hovering a junction (as a whole, not ports) too
+		if(elem.type == PlumbingElement::JUNCTION &&
+			elem.get_pos().x <= round.x && elem.get_pos().y <= round.y &&
+			elem.get_pos().x + elem.get_size().x > round.x &&
+			elem.get_pos().y + elem.get_size().y > round.y)
 		{
-			continue;
+			hovered = elem;
 		}
 
 		auto ports = elem.get_ports();
@@ -395,16 +399,32 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 		{
 			// If in pipe drag we just need to be in the same square to hover the port
 			if ((!in_pipe_drag && glm::distance(mpos, pair.second) <= port_radius * 1.15f) ||
-					(in_pipe_drag && round == glm::floor(pair.second) + glm::vec2(0.5f)))
+					(in_pipe_drag && round == (glm::ivec2)glm::floor(pair.second)))
 			{
-				for(Pipe& p : veh->plumbing.pipes)
+				if(elem.type == PlumbingElement::MACHINE)
 				{
-					if((elem == p.ma && p.port_a == pair.first.id) ||
-						(elem == p.mb && p.port_b == pair.first.id))
+					for (Pipe &p : veh->plumbing.pipes)
 					{
-						hovering_port_user = &p;
-						break;
+						if ((elem == p.ma && p.port_a == pair.first.id) ||
+							(elem == p.mb && p.port_b == pair.first.id))
+						{
+							hovering_port_user = &p;
+							break;
+						}
 					}
+				}
+				else if(elem.type == PlumbingElement::JUNCTION)
+				{
+					for(Pipe* p : elem.as_junction->pipes)
+					{
+						// TODO: This check feels like a workaround, use some kind of id??
+						if((glm::ivec2)glm::floor(elem.as_junction->get_port_position(p)) == round)
+						{
+							hovering_port_user = p;
+							break;
+						}
+					}
+
 				}
 
 				hovering_port = pair.first.id;
@@ -418,20 +438,83 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 	{
 		if(gui_input->mouse_down(0))
 		{
-			if(!hovering_port.empty())
+			if(hovered.type == PlumbingElement::JUNCTION)
+			{
+				hovering_pipe->invert();
+				hovering_pipe->connect_junction(hovered.as_junction);
+				in_pipe_drag = false;
+				hovering_pipe = nullptr;
+			}
+			else if(!hovering_port.empty())
 			{
 				// End a pipe in a port
 				in_pipe_drag = false;
 				hovering_pipe->mb = hovered.as_machine;
 				hovering_pipe->port_b = hovering_port;
+				hovering_pipe = nullptr;
 			}
 			else
 			{
-				// Add a waypoint at mouse pos, or remove it if it's already there
+				// Add a waypoint at mouse pos, remove it if it's already there, or create junction if other pipe contains it
 				auto it = std::find(hovering_pipe->waypoints.begin(), hovering_pipe->waypoints.end(), round);
 				if(it == hovering_pipe->waypoints.end())
 				{
-					hovering_pipe->waypoints.push_back(round);
+					// try to find it in another pipe
+					// We cannot use pointers here!
+					size_t found_in_id = 0;
+					size_t waypoint_i = 0;
+					for(Pipe& p : veh->plumbing.pipes)
+					{
+						for(size_t i = 0; i < p.waypoints.size(); i++)
+						{
+							if (p.waypoints[i] == round)
+							{
+								found_in_id = p.id;
+								waypoint_i = i;
+								break;
+							}
+						}
+						// Early exit
+						if(found_in_id != 0)
+						{
+							break;
+						}
+					}
+
+					if(found_in_id != 0)
+					{
+						// Pointers will be invalidated!
+						size_t hovering_id = hovering_pipe->id;
+						// Create a junction, if it fits, between the three new pipes
+						PipeJunction* jnc = veh->plumbing.create_pipe_junction();
+						Pipe* n_pipe = veh->plumbing.create_pipe();
+						// Restore pointers
+						Pipe* found_in = veh->plumbing.get_pipe(found_in_id);
+						hovering_pipe = veh->plumbing.get_pipe(hovering_id);
+						jnc->pos = found_in->waypoints[waypoint_i];
+						// Connect the new pipe to the old target and the junction
+						n_pipe->mb = found_in->mb;
+						n_pipe->port_b = found_in->port_b;
+						n_pipe->connect_junction(jnc);
+						// The new pipe gets all waypoints FROM the overriden one
+						n_pipe->waypoints.insert(n_pipe->waypoints.begin(),
+												 found_in->waypoints.begin() + waypoint_i + 1, found_in->waypoints.end());
+						// The old pipe gets all waypoints up to the overriden one
+						found_in->waypoints.erase(found_in->waypoints.begin() + waypoint_i, found_in->waypoints.end());
+						// Disconnect the old pipe and connect it to the junction
+						found_in->invert();
+						found_in->connect_junction(jnc);
+						// Connect ourselves to the junction, we must also invert
+						hovering_pipe->invert();
+						hovering_pipe->connect_junction(jnc);
+
+						hovering_pipe = nullptr;
+						in_pipe_drag = false;
+					}
+					else
+					{
+						hovering_pipe->waypoints.push_back(round);
+					}
 				}
 				else
 				{
@@ -455,19 +538,68 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 					// Modify from the start (invert pipe)
 					hovering_pipe->invert();
 				}
-				// Disconnect the pipe
-				hovering_pipe->mb = nullptr;
-				hovering_pipe->port_b = "";
+
+				if(hovered.type == PlumbingElement::JUNCTION)
+				{
+					PipeJunction* jnc = hovered.as_junction;
+					// Disconnect the junction
+					hovering_pipe->junction = nullptr;
+					hovering_pipe->junction_id = 0;
+					// Invert the pipe
+					hovering_pipe->invert();
+					// Now remove the pipe from the junction
+					for(size_t i = 0; i < jnc->pipes.size(); i++)
+					{
+						if(jnc->pipes[i] == hovering_pipe)
+						{
+							jnc->pipes.erase(jnc->pipes.begin() + i);
+							jnc->pipes_id.erase(jnc->pipes_id.begin() + i);
+							break;
+						}
+					}
+
+					if(jnc->pipes.size() <= 2)
+					{
+						// We must remove the junction and reconnect the remaining two pipes
+						Pipe *p0 = jnc->pipes[0], *p1 = jnc->pipes[1];
+						p0->junction = nullptr;
+						p0->junction_id = 0;
+						p1->junction = nullptr;
+						p1->junction_id = 0;
+
+						p0->ma = p1->mb;
+						p0->port_a = p1->port_b;
+						// Insert a waypoint where the junction was
+						p0->waypoints.push_back(jnc->pos);
+						// Merge the waypoints
+						p0->waypoints.insert(p0->waypoints.begin(),
+											 p1->waypoints.begin(), p1->waypoints.end());
+
+						// Remove the [1] pipe and the junction, invalidates pointers but we wont use them again!
+						// We must re-create the hovering pipe!
+						size_t hovering_pipe_id = hovering_pipe->id;
+						veh->plumbing.remove_pipe(p1->id);
+						hovering_pipe = veh->plumbing.get_pipe(hovering_pipe_id);
+						// Remove the junction
+						// TODO: we must be careful as it may be contained in selected or hovered
+						veh->plumbing.remove_junction(jnc->id);
+					}
+				}
+				else
+				{
+					// Disconnect the pipe
+					hovering_pipe->mb = nullptr;
+					hovering_pipe->port_b = "";
+				}
 			}
 			else
 			{
 				// Create new pipe
-				Pipe n_pipe = Pipe();
-				n_pipe.ma = hovered.as_machine;
-				n_pipe.port_a = hovering_port;
-				veh->plumbing.pipes.push_back(n_pipe);
+				Pipe* n_pipe = veh->plumbing.create_pipe();
+				n_pipe->ma = hovered.as_machine;
+				n_pipe->port_a = hovering_port;
 
-				hovering_pipe = &veh->plumbing.pipes[veh->plumbing.pipes.size() - 1];
+				hovering_pipe = n_pipe;
 				in_pipe_drag = true;
 			}
 		}
@@ -555,26 +687,37 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 		}
 		nvgStrokeWidth(vg, size / (float)zoom);
 		nvgBeginPath(vg);
+
+		glm::vec2 pos;
+
 		// We start on the first port, or first waypoint if such is not present
 		if(p.ma != nullptr)
 		{
-			glm::vec2 pos = p.ma->plumbing.get_port_position(p.port_a);
+			pos = p.ma->plumbing.get_port_position(p.port_a);
 			if(in_machine_drag && std::find(selected.begin(), selected.end(), PlumbingElement(p.ma)) != selected.end())
 			{
 				pos += glm::round(mpos - mouse_start);
 			}
-			draw_pipe_cap(vg, pos);
-			nvgMoveTo(vg, pos.x, pos.y);
+		}
+		else if(p.junction != nullptr)
+		{
+			pos = p.junction->get_port_position(&p);
+			if(in_machine_drag && std::find(selected.begin(), selected.end(), PlumbingElement(p.junction)) != selected.end())
+			{
+				pos += glm::round(mpos - mouse_start);
+			}
 		}
 		else
 		{
-			draw_pipe_cap(vg, p.waypoints[0]);
-			nvgMoveTo(vg, p.waypoints[0].x, p.waypoints[0].y);
+			pos = (glm::vec2)p.waypoints[0] + glm::vec2(0.5f);
 		}
+
+		draw_pipe_cap(vg, pos);
+		nvgMoveTo(vg, pos.x, pos.y);
 
 		for(size_t i = 0; i < p.waypoints.size(); i++)
 		{
-			nvgLineTo(vg, p.waypoints[i].x, p.waypoints[i].y);
+			nvgLineTo(vg, p.waypoints[i].x + 0.5f, p.waypoints[i].y + 0.5f);
 		}
 
 		glm::vec2 end_pos;
@@ -585,10 +728,6 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 			{
 				end_pos += glm::round(mpos - mouse_start);
 			}
-		}
-		else if(p.junction != nullptr)
-		{
-
 		}
 		else if(in_pipe_drag && hovering_pipe == &p)
 		{
@@ -602,10 +741,77 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 
 		nvgLineTo(vg, end_pos.x, end_pos.y);
 		draw_pipe_cap(vg, end_pos);
-
 		nvgStroke(vg);
+
+
+		// While dragging, waypoints must be visible to allow modification or junction creation
+		if(in_pipe_drag)
+		{
+			if(&p == hovering_pipe)
+			{
+				nvgFillColor(vg, nvgRGB(0, 0, 0));
+				nvgStrokeColor(vg, nvgRGBA(0, 0, 0, 0));
+			}
+			else
+			{
+				nvgFillColor(vg, nvgRGB(255, 255, 255));
+				nvgStrokeColor(vg, nvgRGBA(0, 0, 0, 255));
+			}
+
+			for(size_t i = 0; i < p.waypoints.size(); i++)
+			{
+				// Draw waypoints as dots so the user knows where they are
+				nvgBeginPath(vg);
+				nvgCircle(vg, p.waypoints[i].x + 0.5f, p.waypoints[i].y + 0.5f, 4.0f / (float)zoom);
+				nvgFill(vg);
+				nvgStroke(vg);
+			}
+		}
 	}
 
+}
+
+void PlumbingEditor::draw_junctions(NVGcontext *vg, glm::vec4 span) const
+{
+	nvgResetTransform(vg);
+	glm::vec2 center = glm::vec2(span.x + span.z * 0.5f, span.y + span.w * 0.5f);
+	nvgTranslate(vg, center.x - cam_center.x * (float) zoom, center.y - cam_center.y * (float) zoom);
+	nvgScale(vg, (float) zoom, (float) zoom);
+
+	for(const PipeJunction& j : veh->plumbing.junctions)
+	{
+		glm::vec2 pos = (glm::vec2)j.pos + glm::vec2(0.5f);
+		bool contains = false;
+		for(auto& pelem : selected)
+		{
+			if(pelem == &j)
+			{
+				contains = true;
+				break;
+			}
+		}
+		if(contains)
+		{
+			nvgStrokeColor(vg, nvgRGB(0, 0, 255));
+			nvgStrokeWidth(vg, 2.0f / (float)zoom);
+			if(in_machine_drag)
+			{
+				pos += glm::round(mouse_current - mouse_start);
+			}
+		}
+		else
+		{
+			nvgStrokeColor(vg, nvgRGB(0, 0, 0));
+			nvgStrokeWidth(vg, 1.0f / (float)zoom);
+		}
+
+		if(hovered == &j)
+		{
+			nvgStrokeWidth(vg, 2.0f / (float)zoom);
+		}
+
+		draw_junction(vg, pos, j.pipes.size());
+	}
 }
 
 void PlumbingEditor::draw_collisions(NVGcontext* vg, glm::vec4 span) const
@@ -662,15 +868,16 @@ void PlumbingEditor::draw_collisions(NVGcontext* vg, glm::vec4 span) const
 
 void PlumbingEditor::draw_junction(NVGcontext *vg, glm::vec2 pos, size_t port_count, bool flip_three) const
 {
+	float f = 1.0f;
 	if(port_count <= 4)
 	{
 		if (port_count >= 1)
 		{
 			nvgBeginPath(vg);
 			nvgMoveTo(vg, pos.x, pos.y);
-			nvgLineTo(vg, pos.x, pos.y - 0.5f);
+			nvgLineTo(vg, pos.x, pos.y - f);
 			nvgStroke(vg);
-			draw_port(vg, pos + glm::vec2(0.0, -0.5));
+			draw_port(vg, pos + glm::vec2(0.0f, -f));
 		}
 
 		if (port_count >= 2)
@@ -679,17 +886,17 @@ void PlumbingEditor::draw_junction(NVGcontext *vg, glm::vec2 pos, size_t port_co
 			{
 				nvgBeginPath(vg);
 				nvgMoveTo(vg, pos.x, pos.y);
-				nvgLineTo(vg, pos.x + 0.5f, pos.y);
+				nvgLineTo(vg, pos.x + f, pos.y);
 				nvgStroke(vg);
-				draw_port(vg, pos + glm::vec2(0.5, 0.0));
+				draw_port(vg, pos + glm::vec2(f, 0.0));
 			}
 			else
 			{
 				nvgBeginPath(vg);
 				nvgMoveTo(vg, pos.x, pos.y);
-				nvgLineTo(vg, pos.x - 0.5f, pos.y);
+				nvgLineTo(vg, pos.x - f, pos.y);
 				nvgStroke(vg);
-				draw_port(vg, pos + glm::vec2(-0.5, 0.0));
+				draw_port(vg, pos + glm::vec2(-f, 0.0));
 			}
 		}
 
@@ -697,18 +904,18 @@ void PlumbingEditor::draw_junction(NVGcontext *vg, glm::vec2 pos, size_t port_co
 		{
 			nvgBeginPath(vg);
 			nvgMoveTo(vg, pos.x, pos.y);
-			nvgLineTo(vg, pos.x, pos.y + 0.5f);
+			nvgLineTo(vg, pos.x, pos.y + f);
 			nvgStroke(vg);
-			draw_port(vg, pos + glm::vec2(0.0, 0.5));
+			draw_port(vg, pos + glm::vec2(0.0f, f));
 		}
 
 		if (port_count == 4)
 		{
 			nvgBeginPath(vg);
 			nvgMoveTo(vg, pos.x, pos.y);
-			nvgLineTo(vg, pos.x+0.5f, pos.y);
+			nvgLineTo(vg, pos.x + f, pos.y);
 			nvgStroke(vg);
-			draw_port(vg, pos + glm::vec2(0.5, 0.0));
+			draw_port(vg, pos + glm::vec2(f, 0.0f));
 		}
 	}
 	else
@@ -738,15 +945,15 @@ void PlumbingEditor::draw_junction(NVGcontext *vg, glm::vec2 pos, size_t port_co
 				nvgBeginPath(vg);
 				nvgMoveTo(vg, pos.x + i - 1.0f, pos.y);
 				nvgLineTo(vg, pos.x + i, pos.y);
-				nvgLineTo(vg, pos.x + i, pos.y - 0.5f);
+				nvgLineTo(vg, pos.x + i, pos.y - f);
 				nvgMoveTo(vg, pos.x + i, pos.y);
-				nvgLineTo(vg, pos.x + i, pos.y + 0.5f);
+				nvgLineTo(vg, pos.x + i, pos.y + f);
 				nvgStroke(vg);
 
 				size_t put = std::min<size_t>(port_count - put_ports, 2);
 				// Top and bottom
-				draw_port(vg, rpos + glm::vec2(0.0, -0.5));
-				draw_port(vg, rpos + glm::vec2(0.0, 0.5));
+				draw_port(vg, rpos + glm::vec2(0.0, -f));
+				draw_port(vg, rpos + glm::vec2(0.0, f));
 				put_ports += put;
 			}
 		}
@@ -769,6 +976,7 @@ void PlumbingEditor::draw_port(NVGcontext *vg, glm::vec2 pos, bool hovered_port)
 	nvgFill(vg);
 	nvgStroke(vg);
 }
+
 
 
 
