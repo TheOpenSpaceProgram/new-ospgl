@@ -45,6 +45,7 @@ PlumbingEditor::PlumbingEditor()
 	in_drag = false;
 	in_selection = false;
 	in_pipe_drag = false;
+	vacant_junction = nullptr;
 }
 
 void PlumbingEditor::draw_grid(NVGcontext* vg, glm::vec4 span) const
@@ -448,6 +449,7 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 			else if(!hovering_port.empty())
 			{
 				// End a pipe in a port
+				handle_vacant_junction();
 				in_pipe_drag = false;
 				hovering_pipe->mb = hovered.as_machine;
 				hovering_pipe->port_b = hovering_port;
@@ -541,49 +543,28 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 
 				if(hovered.type == PlumbingElement::JUNCTION)
 				{
+					// We leave a vacant pipe slot in the junction to avoid it from disappearing
+					// It will disappear if the pipe is saved and the vacant slot is not filled
+					// A vacant slot is simply a nullptr in the array
 					PipeJunction* jnc = hovered.as_junction;
 					// Disconnect the junction
 					hovering_pipe->junction = nullptr;
 					hovering_pipe->junction_id = 0;
 					// Invert the pipe
 					hovering_pipe->invert();
-					// Now remove the pipe from the junction
+					// Now remove the pipe from the junction, leaving a vacant slot
 					for(size_t i = 0; i < jnc->pipes.size(); i++)
 					{
 						if(jnc->pipes[i] == hovering_pipe)
 						{
-							jnc->pipes.erase(jnc->pipes.begin() + i);
-							jnc->pipes_id.erase(jnc->pipes_id.begin() + i);
+							jnc->pipes[i] = nullptr;
+							jnc->pipes_id[i] = 0xDEADBEEF;
 							break;
 						}
 					}
 
-					if(jnc->pipes.size() <= 2)
-					{
-						// We must remove the junction and reconnect the remaining two pipes
-						Pipe *p0 = jnc->pipes[0], *p1 = jnc->pipes[1];
-						p0->junction = nullptr;
-						p0->junction_id = 0;
-						p1->junction = nullptr;
-						p1->junction_id = 0;
+					vacant_junction = jnc;
 
-						p0->ma = p1->mb;
-						p0->port_a = p1->port_b;
-						// Insert a waypoint where the junction was
-						p0->waypoints.push_back(jnc->pos);
-						// Merge the waypoints
-						p0->waypoints.insert(p0->waypoints.begin(),
-											 p1->waypoints.begin(), p1->waypoints.end());
-
-						// Remove the [1] pipe and the junction, invalidates pointers but we wont use them again!
-						// We must re-create the hovering pipe!
-						size_t hovering_pipe_id = hovering_pipe->id;
-						veh->plumbing.remove_pipe(p1->id);
-						hovering_pipe = veh->plumbing.get_pipe(hovering_pipe_id);
-						// Remove the junction
-						// TODO: we must be careful as it may be contained in selected or hovered
-						veh->plumbing.remove_junction(jnc->id);
-					}
 				}
 				else
 				{
@@ -675,10 +656,10 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 	glm::vec2 center = glm::vec2(span.x + span.z * 0.5f, span.y + span.w * 0.5f);
 	nvgTranslate(vg, center.x - cam_center.x * (float) zoom, center.y - cam_center.y * (float) zoom);
 	nvgScale(vg, (float) zoom, (float) zoom);
-	nvgStrokeColor(vg, nvgRGB(0, 0, 0));
 
 	for(const Pipe& p : veh->plumbing.pipes)
 	{
+		nvgStrokeColor(vg, nvgRGB(0, 0, 0));
 		float size = 1.0f;
 		// If we hover a port, the joined pipe gets in bold
 		if(hovering_port_user == &p)
@@ -975,6 +956,55 @@ void PlumbingEditor::draw_port(NVGcontext *vg, glm::vec2 pos, bool hovered_port)
 	nvgCircle(vg, pos.x, pos.y, port_radius);
 	nvgFill(vg);
 	nvgStroke(vg);
+}
+
+void PlumbingEditor::handle_vacant_junction()
+{
+	if(!vacant_junction)
+	{
+		return;
+	}
+
+	PipeJunction* jnc = vacant_junction;
+	vacant_junction = nullptr;
+
+	for(size_t i = 0; i < jnc->pipes.size(); i++)
+	{
+		// TODO: This check may be unnecesary, as is the constant
+		if(jnc->pipes[i] == nullptr && jnc->pipes_id[i] == 0xDEADBEEF)
+		{
+			jnc->pipes.erase(jnc->pipes.begin() + i);
+			jnc->pipes_id.erase(jnc->pipes_id.begin() + i);
+			break;
+		}
+	}
+
+	if (jnc->pipes.size() <= 2)
+	{
+		// We must remove the junction and reconnect the remaining two pipes
+		Pipe *p0 = jnc->pipes[0], *p1 = jnc->pipes[1];
+		p0->junction = nullptr;
+		p0->junction_id = 0;
+		p1->junction = nullptr;
+		p1->junction_id = 0;
+
+		p0->ma = p1->mb;
+		p0->port_a = p1->port_b;
+		// Insert a waypoint where the junction was
+		p0->waypoints.push_back(jnc->pos);
+		// Merge the waypoints
+		p0->waypoints.insert(p0->waypoints.begin(),
+							 p1->waypoints.begin(), p1->waypoints.end());
+
+		// Remove the [1] pipe and the junction, invalidates pointers but we wont use them again!
+		// We must re-create the hovering pipe!
+		size_t hovering_pipe_id = hovering_pipe->id;
+		veh->plumbing.remove_pipe(p1->id);
+		hovering_pipe = veh->plumbing.get_pipe(hovering_pipe_id);
+		// Remove the junction
+		// TODO: we must be careful as it may be contained in selected or hovered
+		veh->plumbing.remove_junction(jnc->id);
+	}
 }
 
 

@@ -10,10 +10,9 @@ EditorVehicleInterface::EditorVehicleInterface(EditorVehicle* v, EditorCamera* c
 
 void EditorVehicleInterface::middle_click_focus(glm::dvec3 ray_start, glm::dvec3 ray_end)
 {
-	// We first handle middle click (or CTRL+left-click) which centers the camera
+	// We first handle middle click (or simulated middle click) which centers the camera
 	// around a piece
-	if(input->mouse_down(GLFW_MOUSE_BUTTON_3) || 
-		(input->mouse_down(GLFW_MOUSE_BUTTON_1) && input->key_pressed(GLFW_KEY_LEFT_CONTROL)))
+	if(input->mouse_down(GLFW_MOUSE_BUTTON_3))
 	{
 		RaycastResult res = raycast(ray_start, ray_end, false, ignore_center);
 		if(res.has_hit)

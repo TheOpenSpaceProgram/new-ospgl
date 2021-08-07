@@ -8,6 +8,7 @@ static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 
 // Central class for making GLFW inputs easy to handle
+// TODO: An option to simulate middle click may be useful for the few users who dont have a mouse with scrollbar?
 class InputUtil
 {
 private:

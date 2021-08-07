@@ -427,6 +427,17 @@ glm::ivec2 PipeJunction::get_size(bool extend, bool rotate) const
 
 void PipeJunction::add_pipe(Pipe* p)
 {
+	// Try to find a vacant slot
+	for(size_t i = 0; i < pipes.size(); i++)
+	{
+		if(pipes[i] == nullptr && pipes_id[i] == 0xDEADBEEF)
+		{
+			pipes[i] = p;
+			pipes_id[i] = p->id;
+			return;
+		}
+	}
+	// Otherwise add new pipe
 	pipes.push_back(p);
 	pipes_id.push_back(p->id);
 

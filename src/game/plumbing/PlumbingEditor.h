@@ -30,6 +30,9 @@ private:
 	// If true, hovering_pipe contains the pipe we are working on, and the pipe-dragging UI will be at play
 	bool in_pipe_drag;
 
+	// A junction which has had a pipe removed from it
+	PipeJunction* vacant_junction;
+
 	bool in_selection;
 	// Pipe drags start by clicking a pipe end-cap. A pipe is automatically
 	// created when clicking on ports and dragging atleast one square. Pipes can
@@ -67,6 +70,8 @@ private:
 
 	// Handles both AABBs and ports
 	void handle_hovering(GUIInput* gui_input, glm::vec2 mpos);
+
+	void handle_vacant_junction();
 
 public:
 
