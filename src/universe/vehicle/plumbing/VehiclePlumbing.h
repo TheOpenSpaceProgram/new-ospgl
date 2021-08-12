@@ -54,6 +54,7 @@ struct PipeJunction
 
 	size_t get_port_number() const {return pipes.size(); }
 	glm::ivec2 get_size(bool extend = false, bool rotate = true) const;
+	size_t get_port_id(const Pipe* p);
 
 	glm::vec2 get_port_position(const Pipe* p);
 };

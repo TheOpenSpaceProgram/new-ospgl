@@ -21,8 +21,10 @@ private:
 
 	PlumbingElement hovered;
 
-	// Hovered will be a machine if this is not "".
+	// Hovered will be set if this is not "".
 	std::string hovering_port;
+	// if hovered is a junction, this contains the hovered port id
+	size_t hovering_port_numer;
 	// nullptr if no user
 	Pipe* hovering_port_user;
 	// We are hovering an unfinished pipe endpoint if this is not null, or... see in_pipe_drag

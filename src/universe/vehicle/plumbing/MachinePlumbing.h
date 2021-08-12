@@ -9,6 +9,8 @@ class MachinePlumbing;
 struct FluidPort
 {
 	std::string id;
+	// Numeric id is only used for junctions
+	size_t numer_id;
 	std::string gui_name;
 	// Fluid ports must have a physical location
 	std::string marker;

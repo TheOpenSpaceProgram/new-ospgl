@@ -381,6 +381,7 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 	glm::vec2 mpos = get_mouse_pos(span);
 	glm::ivec2 round = glm::floor(mpos);
 	hovering_port = "";
+	hovering_port_numer = 0;
 	hovering_port_user = nullptr;
 	// Hovering ports
 	std::vector<PlumbingElement> all_elems = veh->plumbing.get_all_elements();
@@ -429,6 +430,7 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 				}
 
 				hovering_port = pair.first.id;
+				hovering_port_numer = pair.first.numer_id;
 				hovered = elem;
 				break;
 			}
@@ -437,23 +439,49 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 
 	if(in_pipe_drag)
 	{
+		selected.clear();
 		if(gui_input->mouse_down(0))
 		{
-			if(hovered.type == PlumbingElement::JUNCTION)
+			if(!hovering_port.empty())
 			{
-				hovering_pipe->invert();
-				hovering_pipe->connect_junction(hovered.as_junction);
-				in_pipe_drag = false;
-				hovering_pipe = nullptr;
-			}
-			else if(!hovering_port.empty())
-			{
-				// End a pipe in a port
-				handle_vacant_junction();
-				in_pipe_drag = false;
-				hovering_pipe->mb = hovered.as_machine;
-				hovering_pipe->port_b = hovering_port;
-				hovering_pipe = nullptr;
+				if(hovered.type == PlumbingElement::JUNCTION)
+				{
+					PipeJunction* jnc = hovered.as_junction;
+					// Do we have a vacant slot?
+					int vacant_slot = -1;
+					for(size_t i = 0; i < jnc->pipes.size(); i++)
+					{
+						if(jnc->pipes[i] == nullptr && jnc->pipes_id[i] == 0xDEADBEEF)
+						{
+							vacant_slot = (int)i;
+							break;
+						}
+					}
+
+					if(vacant_slot != -1 && hovering_port_numer != vacant_slot)
+					{
+						// We must first rearrange the pipe
+						std::swap(jnc->pipes[hovering_port_numer], jnc->pipes[vacant_slot]);
+						std::swap(jnc->pipes_id[hovering_port_numer], jnc->pipes_id[vacant_slot]);
+					}
+
+					// We can now simply add the pipe
+					hovering_pipe->invert();
+					hovering_pipe->connect_junction(jnc);
+					in_pipe_drag = false;
+					hovering_pipe = nullptr;
+					return true;
+				}
+				else
+				{
+					// End a pipe in a port
+					handle_vacant_junction();
+					in_pipe_drag = false;
+					hovering_pipe->mb = hovered.as_machine;
+					hovering_pipe->port_b = hovering_port;
+					hovering_pipe = nullptr;
+					return true;
+				}
 			}
 			else
 			{
@@ -512,15 +540,18 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 
 						hovering_pipe = nullptr;
 						in_pipe_drag = false;
+						return true;
 					}
 					else
 					{
 						hovering_pipe->waypoints.push_back(round);
+						return true;
 					}
 				}
 				else
 				{
 					hovering_pipe->waypoints.erase(it);
+					return true;
 				}
 			}
 		}
@@ -564,13 +595,14 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 					}
 
 					vacant_junction = jnc;
-
+					return true;
 				}
 				else
 				{
 					// Disconnect the pipe
 					hovering_pipe->mb = nullptr;
 					hovering_pipe->port_b = "";
+					return true;
 				}
 			}
 			else
@@ -582,6 +614,7 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 
 				hovering_pipe = n_pipe;
 				in_pipe_drag = true;
+				return true;
 			}
 		}
 	}
@@ -754,13 +787,13 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 
 void PlumbingEditor::draw_junctions(NVGcontext *vg, glm::vec4 span) const
 {
-	nvgResetTransform(vg);
-	glm::vec2 center = glm::vec2(span.x + span.z * 0.5f, span.y + span.w * 0.5f);
-	nvgTranslate(vg, center.x - cam_center.x * (float) zoom, center.y - cam_center.y * (float) zoom);
-	nvgScale(vg, (float) zoom, (float) zoom);
-
 	for(const PipeJunction& j : veh->plumbing.junctions)
 	{
+		nvgResetTransform(vg);
+		glm::vec2 center = glm::vec2(span.x + span.z * 0.5f, span.y + span.w * 0.5f);
+		nvgTranslate(vg, center.x - cam_center.x * (float) zoom, center.y - cam_center.y * (float) zoom);
+		nvgScale(vg, (float) zoom, (float) zoom);
+
 		glm::vec2 pos = (glm::vec2)j.pos + glm::vec2(0.5f);
 		bool contains = false;
 		for(auto& pelem : selected)
@@ -791,7 +824,24 @@ void PlumbingEditor::draw_junctions(NVGcontext *vg, glm::vec4 span) const
 			nvgStrokeWidth(vg, 2.0f / (float)zoom);
 		}
 
-		draw_junction(vg, pos, j.pipes.size());
+
+		glm::vec2 size = j.get_size(false, false);
+		nvgTranslate(vg, j.pos.x + 0.0f, j.pos.y + 0.0f);
+		if(j.rotation == 1)
+		{
+			nvgTranslate(vg, (float)size.y, 0.0f);
+		}
+		else if(j.rotation == 2)
+		{
+			nvgTranslate(vg, (float)size.x, (float)size.y);
+		}
+		else if(j.rotation == 3)
+		{
+			nvgTranslate(vg, 0.0f, (float)size.x);
+		}
+		nvgRotate(vg, glm::half_pi<float>() * (float)j.rotation);
+
+		draw_junction(vg, glm::vec2(0.5f, 0.5f), j.pipes.size());
 	}
 }
 

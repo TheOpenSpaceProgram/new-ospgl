@@ -440,7 +440,6 @@ void PipeJunction::add_pipe(Pipe* p)
 	// Otherwise add new pipe
 	pipes.push_back(p);
 	pipes_id.push_back(p->id);
-
 }
 
 glm::vec2 PipeJunction::get_port_position(const Pipe *p)
@@ -483,7 +482,45 @@ glm::vec2 PipeJunction::get_port_position(const Pipe *p)
 		// Algorithmic procedure for ports to the right
 	}
 
-	return offset * f + (glm::vec2)pos + glm::vec2(0.5f);
+	// Rotation
+	offset += glm::vec2(0.5f);
+	glm::ivec2 size = get_size(false, false);
+	if(rotation == 1)
+	{
+		std::swap(offset.x, offset.y);
+		offset.x = size.x - offset.x;
+	}
+	else if(rotation == 2)
+	{
+		offset.x = (float)size.x - offset.x;
+		offset.y = (float)size.y - offset.y;
+	}
+	else if(rotation == 3)
+	{
+		std::swap(offset.x, offset.y);
+		offset.y = (float)size.y - offset.y;
+	}
+
+	return offset * f + (glm::vec2)pos;
+
+}
+
+// This works even for vacant pipes!
+size_t PipeJunction::get_port_id(const Pipe* p)
+{
+	int fid = -1;
+	for(size_t i = 0; i < pipes.size(); i++)
+	{
+		if(pipes[i] == p)
+		{
+			fid = (int)i;
+			break;
+		}
+	}
+
+	logger->check(fid != -1, "Could not find pipe for port id");
+
+	return (size_t)fid;
 
 }
 
@@ -625,12 +662,12 @@ std::vector<std::pair<FluidPort, glm::vec2>> PlumbingElement::get_ports()
 	}
 	else if(type == JUNCTION)
 	{
-		// TODO: Generate them
 		for(const Pipe* p : as_junction->pipes)
 		{
 			glm::vec2 pos = as_junction->get_port_position(p);
 			FluidPort port = FluidPort();
 			port.id = "__junction";
+			port.numer_id = as_junction->get_port_id(p);
 			port.gui_name = "Junction Port";
 			port.marker = "";
 			out.emplace_back(port, pos);
