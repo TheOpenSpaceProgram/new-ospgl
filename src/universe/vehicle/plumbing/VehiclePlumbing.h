@@ -147,6 +147,9 @@ public:
 	// WARNING: Invalidates all pointers!
 	PipeJunction* create_pipe_junction();
 
+	void rebuild_pipe_pointers();
+	void rebuild_junction_pointers();
+
 	void remove_pipe(size_t id);
 	void remove_junction(size_t id);
 

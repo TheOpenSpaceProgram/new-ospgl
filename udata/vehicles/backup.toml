@@ -1,0 +1,101 @@
+part_id = 4
+piece_id = 4
+[[wire]]
+to = 2
+fmachine = "engine"
+tmachine = "oxidizer_tank"
+from = 4
+[[wire]]
+to = 2
+fmachine = "fuel_tank"
+tmachine = "oxidizer_tank"
+from = 2
+[[wire]]
+to = 2
+fmachine = "oxidizer_tank"
+tmachine = "oxidizer_tank"
+from = 1
+[[wire]]
+to = 3
+fmachine = "oxidizer_tank"
+tmachine = "capsule"
+from = 2
+[[wire]]
+to = 1
+fmachine = "oxidizer_tank"
+tmachine = "fuel_tank"
+from = 2
+[[piece]]
+node = "p_root"
+part = 4
+transform = [1.0000000000000027, -6.2919830269372051e-17, -2.3849764663192476e-8, 0.0000000000000000, -4.9035223324717557e-31, 1.0000000000000000, -2.0560044794920125e-23, 0.0000000000000000, 2.3849764829711530e-8, 1.9001260503050044e-23, 1.0000000000000027, 0.0000000000000000, -0.010537717358855078, 0.16377955670555103, -5.0906785098380780, 1.0000000000000000]
+id = 4
+[piece.link]
+to_attachment = "m_attach_bottom"
+from_attachment = "m_attach_top"
+welded = true
+to = 3
+[[piece]]
+node = "p_root"
+part = 2
+transform = [0.99999999999998779, -6.2919830269371089e-17, -1.7484556719127721e-7, 0.0000000000000000, -3.5948326970695037e-30, 1.0000000000000000, -2.0560044794919819e-23, 0.0000000000000000, 1.7484556735779627e-7, 9.5006302365953638e-24, 0.99999999999998779, 0.0000000000000000, -0.010537500869225941, 0.16377955670555103, -2.3445790377921676, 1.0000000000000000]
+id = 3
+[piece.link]
+to_attachment = "m_attach_bottom"
+from_attachment = "m_attach_top"
+welded = true
+to = 2
+[[piece]]
+node = "p_root"
+part = 1
+transform = [0.99999999999995004, -6.2919830269368723e-17, -3.2584136971935793e-7, 0.0000000000000000, -6.6993131608914829e-30, 1.0000000000000000, -2.0560044794918238e-23, 0.0000000000000000, 3.2584136988587698e-7, -2.9859853348353278e-32, 0.99999999999995004, 0.0000000000000000, -0.010537000182288698, 0.16377955670555103, -0.34457903779222754, 1.0000000000000000]
+id = 2
+[piece.link]
+to_attachment = "m_attach_bottom"
+from_attachment = "m_attach_top"
+welded = true
+to = 1
+[[piece]]
+node = "p_root"
+root = true
+part = 3
+transform = [1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, -0.010536674340919205, 0.16377955670555103, 1.6597363969299512, 1.0000000000000000]
+id = 1
+[[part]]
+proto = "test_parts:parts/engine/part_engine.toml"
+id = 4
+[part.engine]
+plumbing_rot = 0
+[part.engine.plumbing_pos]
+y = 8
+x = -1
+[[part]]
+proto = "test_parts:parts/capsule/part_capsule.toml"
+id = 3
+[part.capsule]
+[[part]]
+proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
+id = 2
+[part.oxidizer_tank]
+plumbing_rot = 0
+[part.oxidizer_tank.plumbing_pos]
+y = 0
+x = -7
+[part.fuel_tank]
+plumbing_rot = 0
+[part.fuel_tank.plumbing_pos]
+y = 0
+x = -12
+[[part]]
+proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
+id = 1
+[part.oxidizer_tank]
+plumbing_rot = 0
+[part.oxidizer_tank.plumbing_pos]
+y = 0
+x = 9
+[part.fuel_tank]
+plumbing_rot = 0
+[part.fuel_tank.plumbing_pos]
+y = 0
+x = 4

@@ -304,13 +304,7 @@ Pipe* VehiclePlumbing::create_pipe()
 	pipes.push_back(p);
 
 	// Rebuild the junctions as pointers may change in the vector
-	for(PipeJunction& jnc : junctions)
-	{
-		for(size_t i = 0; i < jnc.pipes.size(); i++)
-		{
-			jnc.pipes[i] = get_pipe(jnc.pipes_id[i]);
-		}
-	}
+	rebuild_pipe_pointers();
 
 	return &pipes[pipes.size() - 1];
 }
@@ -324,24 +318,7 @@ PipeJunction* VehiclePlumbing::create_pipe_junction()
 	junctions.push_back(j);
 
 	// Rebuild junctions in pipes as they may have changed pointer
-	for(Pipe& p : pipes)
-	{
-		if(p.junction_id != 0)
-		{
-			PipeJunction* found = nullptr;
-			for(PipeJunction& fj : junctions)
-			{
-				if(fj.id == p.junction_id)
-				{
-					found = &fj;
-					break;
-				}
-			}
-
-			logger->check(found != nullptr, "Couldn't find pipe junction with id = {}", p.junction_id);
-			p.junction = found;
-		}
-	}
+	rebuild_junction_pointers();
 
 	return &junctions[junctions.size() - 1];
 }
@@ -398,6 +375,38 @@ void VehiclePlumbing::remove_junction(size_t id)
 
 }
 
+void VehiclePlumbing::rebuild_junction_pointers()
+{
+	for(Pipe& p : pipes)
+	{
+		if(p.junction_id != 0)
+		{
+			PipeJunction* found = nullptr;
+			for(PipeJunction& fj : junctions)
+			{
+				if(fj.id == p.junction_id)
+				{
+					found = &fj;
+					break;
+				}
+			}
+
+			logger->check(found != nullptr, "Couldn't find pipe junction with id = {}", p.junction_id);
+			p.junction = found;
+		}
+	}
+}
+
+void VehiclePlumbing::rebuild_pipe_pointers()
+{
+	for(PipeJunction& jnc : junctions)
+	{
+		for(size_t i = 0; i < jnc.pipes.size(); i++)
+		{
+			jnc.pipes[i] = get_pipe(jnc.pipes_id[i]);
+		}
+	}
+}
 
 glm::ivec2 PipeJunction::get_size(bool extend, bool rotate) const
 {

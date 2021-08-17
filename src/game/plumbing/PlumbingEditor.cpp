@@ -538,6 +538,8 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 						hovering_pipe->invert();
 						hovering_pipe->connect_junction(jnc);
 
+						// TODO: Auto-rearrange the junction to avoid overlapping it
+
 						hovering_pipe = nullptr;
 						in_pipe_drag = false;
 						return true;
@@ -826,7 +828,23 @@ void PlumbingEditor::draw_junctions(NVGcontext *vg, glm::vec4 span) const
 
 
 		glm::vec2 size = j.get_size(false, false);
-		nvgTranslate(vg, j.pos.x + 0.0f, j.pos.y + 0.0f);
+		nvgTranslate(vg, j.pos.x, j.pos.y);
+		bool is_selected = false;
+		for(PlumbingElement elem : selected)
+		{
+			if(elem == &j)
+			{
+				is_selected = true;
+				break;
+			}
+		}
+
+		if(in_machine_drag && is_selected)
+		{
+			glm::vec2 offset = glm::round(mouse_current - mouse_start);
+			nvgTranslate(vg, offset.x, offset.y);
+		}
+
 		if(j.rotation == 1)
 		{
 			nvgTranslate(vg, (float)size.y, 0.0f);
@@ -841,7 +859,8 @@ void PlumbingEditor::draw_junctions(NVGcontext *vg, glm::vec4 span) const
 		}
 		nvgRotate(vg, glm::half_pi<float>() * (float)j.rotation);
 
-		draw_junction(vg, glm::vec2(0.5f, 0.5f), j.pipes.size());
+
+		draw_junction(vg, glm::vec2(0.5f), j.pipes.size());
 	}
 }
 
@@ -1046,7 +1065,7 @@ void PlumbingEditor::handle_vacant_junction()
 		p0->waypoints.insert(p0->waypoints.begin(),
 							 p1->waypoints.begin(), p1->waypoints.end());
 
-		// Remove the [1] pipe and the junction, invalidates pointers but we wont use them again!
+		// Remove the [1] pipe and the junction, invalidates pointers, but we won't use them again!
 		// We must re-create the hovering pipe!
 		size_t hovering_pipe_id = hovering_pipe->id;
 		veh->plumbing.remove_pipe(p1->id);
