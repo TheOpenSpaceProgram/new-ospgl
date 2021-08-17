@@ -279,7 +279,6 @@ void VehicleLoader::obtain_pipe_junctions(const cpptoml::table &root)
 		auto pipes = pjnc->get_array_qualified("pipes")->array_of<int64_t>();
 		for(auto& pipe : pipes)
 		{
-
 			junction.pipes_id.push_back((size_t)pipe.get()->get());
 		}
 

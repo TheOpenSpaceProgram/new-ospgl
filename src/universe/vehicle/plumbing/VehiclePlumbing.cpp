@@ -365,8 +365,7 @@ void VehiclePlumbing::remove_pipe(size_t id)
 	}
 
 	logger->check(found, "Couldn't find pipe with id= {} to remove", id);
-
-	// TODO: Check if any references remain?
+	rebuild_pipe_pointers();
 
 }
 
@@ -384,8 +383,7 @@ void VehiclePlumbing::remove_junction(size_t id)
 	}
 
 	logger->check(found, "Couldn't find junction with id= {} to remove", id);
-
-	// TODO: Check if any references remain?
+	rebuild_junction_pointers();
 
 }
 
