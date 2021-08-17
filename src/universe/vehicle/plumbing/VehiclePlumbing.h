@@ -110,6 +110,10 @@ class VehiclePlumbing
 {
 private:
 
+	// For storing the IDs
+	friend class VehicleLoader;
+	friend class VehicleSaver;
+
 	Vehicle* veh;
 	size_t pipe_id;
 	size_t junction_id;
@@ -140,6 +144,7 @@ public:
 	glm::ivec4 get_plumbing_bounds();
 
 	Pipe* get_pipe(size_t id);
+	PipeJunction* get_junction(size_t id);
 	// Creates a new pipe, rebuilds the tree
 	// WARNING: Invalidates all pointers!
 	Pipe* create_pipe();

@@ -5,10 +5,12 @@ void VehicleLoader::load_metadata(const cpptoml::table& root)
 	// TODO: Description and package check
 	vpart_id = *root.get_qualified_as<int64_t>("part_id");
 	vpiece_id = *root.get_qualified_as<int64_t>("piece_id");
+	n_vehicle->plumbing.pipe_id = *root.get_qualified_as<int64_t>("pipe_id");
+	n_vehicle->plumbing.junction_id = *root.get_qualified_as<int64_t>("junction_id");
 
 }
 
-void VehicleLoader::load_pipes(const cpptoml::table &root)
+void VehicleLoader::obtain_pipes(const cpptoml::table &root)
 {
 	auto pipes = root.get_table_array_qualified("pipe");
 	if(!pipes)
@@ -23,6 +25,8 @@ void VehicleLoader::load_pipes(const cpptoml::table &root)
 		if(pipe->contains("from_junction"))
 		{
 			p.junction_id = *pipe->get_qualified_as<size_t>("from_junction");
+			p.ma = nullptr;
+			p.port_a = "";
 		}
 		else
 		{
@@ -30,6 +34,8 @@ void VehicleLoader::load_pipes(const cpptoml::table &root)
 			Part* in_part = parts_by_id[*pipe->get_qualified_as<int64_t>("from_part")];
 			p.ma = in_part->machines[mname];
 			p.port_a = *pipe->get_qualified_as<std::string>("from_port");
+			p.junction = nullptr;
+			p.junction_id = 0;
 		}
 
 		std::string mname = *pipe->get_qualified_as<std::string>("to_machine");
@@ -252,6 +258,36 @@ void VehicleLoader::obtain_wires(const cpptoml::table& root)
 	}
 }
 
+void VehicleLoader::obtain_pipe_junctions(const cpptoml::table &root)
+{
+	auto pjncs = root.get_table_array_qualified("pipe_junction");
+	if(!pjncs)
+	{
+		return;
+	}
+
+	for(const auto& pjnc : *pjncs)
+	{
+		PipeJunction junction;
+
+		junction.id = *pjnc->get_qualified_as<size_t>("id");
+		auto pos_table = pjnc->get_table_qualified("pos");
+		deserialize(junction.pos, *pos_table);
+		junction.rotation = (int)*pjnc->get_qualified_as<int64_t>("rotation");
+
+		// Load pipe_ids only for now (as pipes are not yet loaded)
+		auto pipes = pjnc->get_array_qualified("pipes")->array_of<int64_t>();
+		for(auto& pipe : pipes)
+		{
+
+			junction.pipes_id.push_back((size_t)pipe.get()->get());
+		}
+
+		n_vehicle->plumbing.junctions.push_back(junction);
+	}
+}
+
+
 VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to)
 {
 	n_vehicle = &to;
@@ -261,7 +297,8 @@ VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to)
 	obtain_pieces(root);
 	copy_pieces(root);
 	obtain_wires(root);
-	load_pipes(root);
+	obtain_pipe_junctions(root);
+	obtain_pipes(root);
 
 	n_vehicle->id_to_part = parts_by_id;
 	n_vehicle->id_to_piece = pieces_by_id;
@@ -283,7 +320,6 @@ VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to)
 
 }
 
-
 VehicleSaver::VehicleSaver(cpptoml::table &target, const Vehicle &what)
 {
 	logger->check(what.is_packed(), "Cannot serialize a unpacked vehicle");
@@ -292,6 +328,7 @@ VehicleSaver::VehicleSaver(cpptoml::table &target, const Vehicle &what)
 	write_pieces(target, what);
 	write_wires(target, what);
 	write_pipes(target, what);
+	write_pipe_junctions(target, what);
 }
 
 void VehicleSaver::assign_ids(cpptoml::table& target, const Vehicle& what)
@@ -310,9 +347,11 @@ void VehicleSaver::assign_ids(cpptoml::table& target, const Vehicle& what)
 		part_to_id[p] = part_id;
 	}
 
-	// These are used as a sanity check
+	// Internal numbers to guarantee unique IDs
 	target.insert("piece_id", piece_id);
 	target.insert("part_id", part_id);
+	target.insert("pipe_id", what.plumbing.pipe_id);
+	target.insert("junction_id", what.plumbing.junction_id);
 }
 
 void VehicleSaver::write_parts(cpptoml::table &target, const Vehicle &what)
@@ -531,6 +570,18 @@ void VehicleSaver::write_pipe_junctions(cpptoml::table &target, const Vehicle &w
 	for(const PipeJunction& jnc : what.plumbing.junctions)
 	{
 		auto junction = cpptoml::make_table();
+		junction->insert("id", jnc.id);
+		junction->insert("rotation", jnc.rotation);
+		serialize_to_table(jnc.pos, *junction, "pos");
+
+		auto pipes = cpptoml::make_array();
+		// Now we insert the IDs of the pipes so they remain ordered
+		for(size_t i = 0; i < jnc.pipes_id.size(); i++)
+		{
+			pipes->push_back(jnc.pipes_id[i]);
+		}
+
+		junction->insert("pipes", pipes);
 
 		pjnc_array->push_back(junction);
 	}

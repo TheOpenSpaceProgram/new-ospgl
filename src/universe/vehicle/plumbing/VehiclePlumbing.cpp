@@ -337,6 +337,20 @@ Pipe* VehiclePlumbing::get_pipe(size_t id)
 	return nullptr;
 }
 
+PipeJunction* VehiclePlumbing::get_junction(size_t id)
+{
+	for(PipeJunction& p : junctions)
+	{
+		if(p.id == id)
+		{
+			return &p;
+		}
+	}
+
+	logger->fatal("Couldn't find pipe junction with id = {}", id);
+	return nullptr;
+}
+
 void VehiclePlumbing::remove_pipe(size_t id)
 {
 	bool found = false;
@@ -401,12 +415,19 @@ void VehiclePlumbing::rebuild_pipe_pointers()
 {
 	for(PipeJunction& jnc : junctions)
 	{
-		for(size_t i = 0; i < jnc.pipes.size(); i++)
+		if(jnc.pipes.size() == 0)
+		{
+			// This is the case during vehicle loading
+			jnc.pipes.resize(jnc.pipes_id.size());
+		}
+
+		for(size_t i = 0; i < jnc.pipes_id.size(); i++)
 		{
 			jnc.pipes[i] = get_pipe(jnc.pipes_id[i]);
 		}
 	}
 }
+
 
 glm::ivec2 PipeJunction::get_size(bool extend, bool rotate) const
 {
