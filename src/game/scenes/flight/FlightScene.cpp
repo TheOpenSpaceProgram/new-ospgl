@@ -13,7 +13,7 @@
 
 void FlightScene::load()
 {
-	logger->info("A");
+
 	game_state = osp->game_state;
 	universe = &game_state->universe;
 	
@@ -85,6 +85,10 @@ void FlightScene::load()
 
 	EnvMap* env = new EnvMap();
 	r->add_light(env);
+
+	gui.vg = osp->renderer->vg;
+	gui.init(this);
+
 }
 
 void FlightScene::unload()
@@ -97,7 +101,9 @@ void FlightScene::update()
 	gui_input.update();
 
 	// GUI preparation goes here
-	
+	prepare_gui();
+	do_gui();
+
 	input.keyboard_blocked = camera.keyboard_blocked || gui_input.keyboard_blocked;
 	input.update(osp->renderer->window, osp->game_dt);
 
@@ -112,4 +118,18 @@ void FlightScene::update()
 void FlightScene::render()
 {
 	osp->renderer->render(&osp->game_state->universe.system);
+}
+
+void FlightScene::do_gui()
+{
+	int width = osp->renderer->get_width(true);
+	int height = osp->renderer->get_height(true);
+	gui.do_gui(width, height);
+}
+
+void FlightScene::prepare_gui()
+{
+	int width = osp->renderer->get_width(true);
+	int height = osp->renderer->get_height(true);
+	gui.prepare_gui(width, height, &gui_input);
 }

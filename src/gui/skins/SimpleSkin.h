@@ -24,9 +24,7 @@ private:
 public:
 	
 
-	NVGcolor background_color = nvgRGB(40, 45, 50);
-
-	virtual void draw_button(NVGcontext* v, glm::ivec2 pos, glm::ivec2 size, const std::string& text, 
+	virtual void draw_button(NVGcontext* v, glm::ivec2 pos, glm::ivec2 size, const std::string& text,
 		ButtonState state, ButtonStyle style = ButtonStyle::NORMAL) override;
 	
 	virtual bool can_drag_window(GUIWindow* window, glm::ivec2 mpos) override;
@@ -37,6 +35,13 @@ public:
 	virtual glm::ivec4 get_window_aabb(GUIWindow* window) override;
 	
 	virtual void draw_window(NVGcontext* vg, GUIWindow* window) override;
+
+	NVGcolor get_background_color(bool bright = false) override;
+	NVGcolor get_stroke_color(ButtonState state) override;
+	NVGcolor get_fill_color(ButtonState state) override;
+	NVGcolor get_error_color() override;
+	NVGcolor get_highlight_color() override;
+	NVGcolor get_foreground_color(bool soft = false) override;
 
 	SimpleSkin();
 };

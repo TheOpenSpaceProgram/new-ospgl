@@ -28,10 +28,11 @@ bool PlumbingInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_st
 	// We draw a white background for the plumbing
 	nvgBeginPath(vg);
 	nvgRect(vg, span.x, span.y, span.z, span.w);
-	nvgFillColor(vg, nvgRGB(255, 255, 255));
+	nvgFillColor(vg, gui_skin->get_background_color());
 	nvgFill(vg);
 
-	pb_editor.show_editor(vg, gui_input, span);
+	pb_editor.prepare(gui_input, span);
+	pb_editor.do_editor(vg, span, gui_skin);
 
 	edveh->clear_meta();
 

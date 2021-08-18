@@ -1,42 +1,6 @@
 #include "PlumbingEditor.h"
 #include <lua/libs/LuaNanoVG.h>
 
-void PlumbingEditor::show_editor(NVGcontext* vg, GUIInput* gui_input, glm::vec4 span)
-{
-	if(veh == nullptr)
-	{
-		logger->warn("Plumbing editor shown without assigned vehicle");
-		return;
-	}
-
-	bool block = false;
-	hovered = PlumbingElement();
-	block |= update_mouse(gui_input, span);
-	block |= update_pipes(gui_input, span);
-	block |= update_selection(gui_input, span);
-
-	if(block)
-	{
-		gui_input->ext_mouse_blocked = true;
-		gui_input->ext_scroll_blocked = true;
-		gui_input->mouse_blocked = true;
-		gui_input->scroll_blocked = true;
-	}
-
-	nvgSave(vg);
-	nvgScissor(vg, span.x, span.y, span.z, span.w);
-
-	nvgStrokeColor(vg, nvgRGB(230, 230, 230));
-	draw_grid(vg, span);
-	draw_machines(vg, span);
-	draw_junctions(vg, span);
-	draw_pipes(vg, span);
-	draw_selection(vg, span);
-	draw_collisions(vg, span);
-
-	nvgRestore(vg);
-}
-
 PlumbingEditor::PlumbingEditor()
 {
 	cam_center = glm::vec2(0.0f, 0.0f);
@@ -112,8 +76,8 @@ void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span) const
 				}
 
 				nvgStrokeWidth(vg, 2.0f / (float)zoom);
-				nvgStrokeColor(vg, nvgRGB(0, 0, 0));
-				nvgFillColor(vg, nvgRGB(255, 255, 255));
+				nvgStrokeColor(vg, skin->get_foreground_color(true));
+				nvgFillColor(vg, skin->get_background_color(true));
 
 				if(hovered == pair.second || is_selected)
 				{
@@ -121,12 +85,12 @@ void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span) const
 				}
 				if(is_selected)
 				{
-					nvgFillColor(vg, nvgRGB(128, 128, 255));
+					nvgFillColor(vg, skin->get_highlight_color());
 				}
 
 				if(is_conflict)
 				{
-					nvgStrokeColor(vg, nvgRGB(255, 0, 0));
+					nvgStrokeColor(vg, skin->get_error_color());
 				}
 
 				nvgResetTransform(vg);
@@ -656,8 +620,8 @@ void PlumbingEditor::draw_selection(NVGcontext *vg, glm::vec4 span) const
 		nvgTranslate(vg, center.x - cam_center.x * (float) zoom, center.y - cam_center.y * (float) zoom);
 		nvgScale(vg, (float) zoom, (float) zoom);
 
-		nvgStrokeColor(vg, nvgRGB(0, 0, 255));
-		nvgFillColor(vg, nvgRGBA(0, 0, 255, 100));
+		nvgStrokeColor(vg, skin->get_highlight_color());
+		nvgFillColor(vg, nvgTransRGBA(skin->get_highlight_color(), 128));
 		nvgStrokeWidth(vg, 1.0f / (float)zoom);
 
 		nvgBeginPath(vg);
@@ -695,7 +659,7 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 
 	for(const Pipe& p : veh->plumbing.pipes)
 	{
-		nvgStrokeColor(vg, nvgRGB(0, 0, 0));
+		nvgStrokeColor(vg, skin->get_foreground_color());
 		float size = 1.0f;
 		// If we hover a port, the joined pipe gets in bold
 		if(hovering_port_user == &p)
@@ -766,13 +730,13 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 		{
 			if(&p == hovering_pipe)
 			{
-				nvgFillColor(vg, nvgRGB(0, 0, 0));
+				nvgFillColor(vg, skin->get_foreground_color());
 				nvgStrokeColor(vg, nvgRGBA(0, 0, 0, 0));
 			}
 			else
 			{
-				nvgFillColor(vg, nvgRGB(255, 255, 255));
-				nvgStrokeColor(vg, nvgRGBA(0, 0, 0, 255));
+				nvgFillColor(vg, skin->get_background_color());
+				nvgStrokeColor(vg, nvgTransRGBA(skin->get_foreground_color(), 255));
 			}
 
 			for(size_t i = 0; i < p.waypoints.size(); i++)
@@ -809,7 +773,7 @@ void PlumbingEditor::draw_junctions(NVGcontext *vg, glm::vec4 span) const
 		}
 		if(contains)
 		{
-			nvgStrokeColor(vg, nvgRGB(0, 0, 255));
+			nvgStrokeColor(vg, skin->get_highlight_color());
 			nvgStrokeWidth(vg, 2.0f / (float)zoom);
 			if(in_machine_drag)
 			{
@@ -818,7 +782,7 @@ void PlumbingEditor::draw_junctions(NVGcontext *vg, glm::vec4 span) const
 		}
 		else
 		{
-			nvgStrokeColor(vg, nvgRGB(0, 0, 0));
+			nvgStrokeColor(vg, skin->get_foreground_color());
 			nvgStrokeWidth(vg, 1.0f / (float)zoom);
 		}
 
@@ -893,7 +857,7 @@ void PlumbingEditor::draw_collisions(NVGcontext* vg, glm::vec4 span) const
 						continue;
 					}
 					nvgStrokeWidth(vg, 2.0f / (float)zoom);
-					nvgStrokeColor(vg, nvgRGB(255, 0, 0));
+					nvgStrokeColor(vg, skin->get_error_color());
 					nvgResetTransform(vg);
 
 					glm::vec2 ppos = pair.second->plumbing.editor_position;
@@ -1015,11 +979,11 @@ void PlumbingEditor::draw_port(NVGcontext *vg, glm::vec2 pos, bool hovered_port)
 {
 	if(hovered_port)
 	{
-		nvgFillColor(vg, nvgRGB(0, 0, 0));
+		nvgFillColor(vg, skin->get_foreground_color());
 	}
 	else
 	{
-		nvgFillColor(vg, nvgRGB(255, 255, 255));
+		nvgFillColor(vg, skin->get_background_color());
 	}
 
 	nvgBeginPath(vg);
@@ -1075,6 +1039,46 @@ void PlumbingEditor::handle_vacant_junction()
 		veh->plumbing.remove_pipe(p1->id);
 		hovering_pipe = veh->plumbing.get_pipe(hovering_pipe_id);
 	}
+}
+
+void PlumbingEditor::prepare(GUIInput *gui_input, glm::vec4 span)
+{
+	if(veh == nullptr)
+	{
+		logger->warn("Plumbing editor prepared without assigned vehicle");
+		return;
+	}
+
+	bool block = false;
+	hovered = PlumbingElement();
+	block |= update_mouse(gui_input, span);
+	block |= update_pipes(gui_input, span);
+	block |= update_selection(gui_input, span);
+
+	if(block)
+	{
+		gui_input->ext_mouse_blocked = true;
+		gui_input->ext_scroll_blocked = true;
+		gui_input->mouse_blocked = true;
+		gui_input->scroll_blocked = true;
+	}
+}
+
+void PlumbingEditor::do_editor(NVGcontext *vg, glm::vec4 span, GUISkin* skin)
+{
+	this->skin = skin;
+	nvgSave(vg);
+	nvgScissor(vg, span.x, span.y, span.z, span.w);
+
+	nvgStrokeColor(vg, skin->get_background_color(true));
+	draw_grid(vg, span);
+	draw_machines(vg, span);
+	draw_junctions(vg, span);
+	draw_pipes(vg, span);
+	draw_selection(vg, span);
+	draw_collisions(vg, span);
+
+	nvgRestore(vg);
 }
 
 

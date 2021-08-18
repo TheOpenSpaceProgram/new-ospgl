@@ -6,9 +6,13 @@
 #include <renderer/lighting/SunLight.h>
 #include <renderer/util/Skybox.h>
 
+#include "gui/FlightGUI.h"
+
 class FlightScene : public Scene
 {
 private:
+
+	friend class FlightGUI;
 
 	SimpleCamera camera;
 	Universe* universe;
@@ -17,15 +21,19 @@ private:
 	Skybox sky;
 	SunLight sun;
 
+	void do_gui();
+	void prepare_gui();
+
 public:
 
 	FlightInput input;
+	FlightGUI gui;
 
-	virtual void load() override;
-	virtual void update() override;
-	virtual void render() override;
+	void load() override;
+	void update() override;
+	void render() override;
 	// Called the frame the scene is unloaded
-	virtual void unload() override;
+	void unload() override;
 
 	FlightScene() : sky(AssetHandle<Cubemap>("debug_system:skybox.png")) {}
 };

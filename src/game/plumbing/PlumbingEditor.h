@@ -1,5 +1,6 @@
 #pragma once
 #include <gui/GUIInput.h>
+#include <gui/GUISkin.h>
 #include <nanovg/nanovg.h>
 #include <universe/vehicle/Vehicle.h>
 #include <util/Signal.h>
@@ -13,6 +14,9 @@
 class PlumbingEditor
 {
 private:
+
+	// For ease of access
+	GUISkin* skin;
 
 	// For rotation you must click and un-click fast enough
 	double time_held;
@@ -88,7 +92,8 @@ public:
 	// if gui_input is nullptr, it will be view only
 	// We don't draw the background
 	// span is a rectangle, (x,y, width, height)
-	void show_editor(NVGcontext* vg, GUIInput* gui_input, glm::vec4 span);
+	void prepare(GUIInput* gui_input, glm::vec4 span);
+	void do_editor(NVGcontext* vg, glm::vec4 span, GUISkin* skin);
 
 	const PlumbingElement get_hovered() const { return hovered; }
 	const std::vector<PlumbingElement> get_selected() const { return selected; }

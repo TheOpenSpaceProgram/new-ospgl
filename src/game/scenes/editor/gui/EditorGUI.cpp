@@ -41,7 +41,7 @@ void EditorGUI::do_gui(int width, int height)
 	// Draw the side pane
 	float swidth = (float)get_panel_width();
 
-	nvgFillColor(vg, skin.background_color);
+	nvgFillColor(vg, skin.get_background_color());
 
 	// Panel background
 	nvgBeginPath(vg);
@@ -85,7 +85,7 @@ void EditorGUI::do_toolset(int width, int height, float swidth)
 	nvgLineTo(vg, swidth + twidth, theight);
 	nvgLineTo(vg, swidth, theight);
 	nvgLineTo(vg, swidth, 0.0f);
-	nvgFillColor(vg, skin.background_color);
+	nvgFillColor(vg, skin.get_background_color());
 	nvgFill(vg);
 
 	toolset_canvas.draw(vg, &skin, glm::ivec4(0, 0, width, height));
@@ -110,7 +110,7 @@ void EditorGUI::do_file(int width, int height)
 	nvgLineTo(vg, width - fwidth, fheight);
 	nvgLineTo(vg, width, fheight);
 	nvgLineTo(vg, width, 0.0f);
-	nvgFillColor(vg, skin.background_color);
+	nvgFillColor(vg, skin.get_background_color());
 	nvgFill(vg);
 
 	file_canvas.child_0_pixels = fwidth - 18.0f * 5.0f;

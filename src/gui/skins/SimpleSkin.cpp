@@ -53,26 +53,8 @@ void SimpleSkin::draw_button(NVGcontext* v, glm::ivec2 pos, glm::ivec2 size, con
 	}
 	else
 	{
-		if(state == ButtonState::CLICKED)
-		{
-			nvgFillColor(v, nvgRGB(73, 73, 73));
-			nvgStrokeColor(v, nvgRGB(142, 142, 142));
-		}
-		else if(state == ButtonState::DISABLED)
-		{
-			nvgFillColor(v, nvgRGB(21, 21, 21));
-			nvgStrokeColor(v, nvgRGB(41, 41, 41));
-		}
-		else if(state == ButtonState::HOVERED)
-		{
-			nvgFillColor(v, nvgRGB(41, 41, 41));
-			nvgStrokeColor(v, nvgRGB(73, 73, 73));
-		}
-		else
-		{
-			nvgFillColor(v, nvgRGB(21, 21, 21));
-			nvgStrokeColor(v, nvgRGB(73, 73, 73));
-		}
+		nvgFillColor(v, get_fill_color(state));
+		nvgStrokeColor(v, get_stroke_color(state));
 	}
 
 	nvgFill(v);
@@ -206,7 +188,7 @@ void SimpleSkin::draw_window(NVGcontext* vg, GUIWindow* window)
 
 	float side_size = window_margins + window_edge_size;
 
-	NVGcolor body_background = nvgRGBA(40, 45, 50, window->alpha * 255);
+	NVGcolor body_background = nvgTransRGBA(get_background_color(), window->alpha * 255);
 	NVGcolor title_background;
 	if(window->drag_hovered)
 	{
@@ -214,7 +196,7 @@ void SimpleSkin::draw_window(NVGcontext* vg, GUIWindow* window)
 	}
 	else
 	{
-		title_background = nvgRGBA(61, 70, 79, window->alpha * 255);
+		title_background = nvgTransRGBA(get_background_color(true), window->alpha * 255);
 	}
 	NVGcolor outline_color;
 	if(window->is_focused())
@@ -344,4 +326,78 @@ SimpleSkin::SimpleSkin()
 	window_close = AssetHandle<Image>("core:gui/close.png");
 	window_min = AssetHandle<Image>("core:gui/minimize.png");
 	window_pin = AssetHandle<Image>("core:gui/pin.png");
+}
+
+NVGcolor SimpleSkin::get_background_color(bool bright)
+{
+	if(bright)
+	{
+		return nvgRGB(61, 70, 79);
+	}
+	else
+	{
+		return nvgRGB(40, 45, 50);
+	}
+}
+
+NVGcolor SimpleSkin::get_fill_color(GUISkin::ButtonState state)
+{
+	if(state == ButtonState::CLICKED)
+	{
+		return nvgRGB(73, 73, 73);
+	}
+	else if(state == ButtonState::DISABLED)
+	{
+		return nvgRGB(21, 21, 21);
+	}
+	else if(state == ButtonState::HOVERED)
+	{
+		return nvgRGB(41, 41, 41);
+	}
+	else
+	{
+		return nvgRGB(21, 21, 21);
+	}
+}
+
+NVGcolor SimpleSkin::get_stroke_color(GUISkin::ButtonState state)
+{
+	if(state == ButtonState::CLICKED)
+	{
+		return nvgRGB(142, 142, 142);
+	}
+	else if(state == ButtonState::DISABLED)
+	{
+		return nvgRGB(41, 41, 41);
+	}
+	else if(state == ButtonState::HOVERED)
+	{
+		return nvgRGB(73, 73, 73);
+	}
+	else
+	{
+		return nvgRGB(73, 73, 73);
+	}
+}
+
+NVGcolor SimpleSkin::get_error_color()
+{
+	return nvgRGB(255, 70, 70);
+}
+
+NVGcolor SimpleSkin::get_highlight_color()
+{
+	return nvgRGB(70, 70, 255);
+}
+
+NVGcolor SimpleSkin::get_foreground_color(bool soft)
+{
+	if(soft)
+	{
+		return nvgRGB(200, 200, 230);
+	}
+	else
+	{
+		return nvgRGB(240, 240, 240);
+	}
 }
