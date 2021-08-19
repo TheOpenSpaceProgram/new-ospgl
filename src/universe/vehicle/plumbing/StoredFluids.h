@@ -28,5 +28,6 @@ public:
 	// Fluids in b may be negative, in that case it will take away
 	// as much as possible and return the ammount taken
 	StoredFluids modify(const StoredFluids& b);
+	StoredFluids multiply(float value);
 };
 

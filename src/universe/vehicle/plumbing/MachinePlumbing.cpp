@@ -8,6 +8,11 @@ float MachinePlumbing::get_pressure(std::string port)
 	return 1.0f;
 }
 
+float MachinePlumbing::get_free_volume()
+{
+	return 1.0f;
+}
+
 // TODO: We could cache this too
 glm::ivec2 MachinePlumbing::get_editor_size(bool expand, bool rotate) const
 {
@@ -171,4 +176,15 @@ glm::vec2 MachinePlumbing::get_port_position(std::string id)
 	logger->fatal("Unknown port id={}", id);
 	return glm::vec2(0, 0);
 }
+
+StoredFluids MachinePlumbing::in_flow(std::string port, const StoredFluids &in)
+{
+	return StoredFluids();
+}
+
+StoredFluids MachinePlumbing::out_flow(std::string port, float volume)
+{
+	return StoredFluids();
+}
+
 

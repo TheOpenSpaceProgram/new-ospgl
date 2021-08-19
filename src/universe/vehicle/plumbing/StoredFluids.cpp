@@ -65,6 +65,20 @@ StoredFluids StoredFluids::modify(const StoredFluids &b)
 	return out;
 }
 
+StoredFluids StoredFluids::multiply(float value)
+{
+	StoredFluids out;
+
+	for(const auto& pair : contents)
+	{
+		out.contents[pair.first.duplicate()] = pair.second;
+		out.contents.at(pair.first).gas_mass *= value;
+		out.contents.at(pair.first).liquid_mass *= value;
+	}
+
+	return out;
+}
+
 StoredFluid::StoredFluid()
 {
 	liquid_mass = 0.0f;

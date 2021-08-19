@@ -6,7 +6,6 @@
 #include "game/scenes/flight/FlightScene.h"
 #include "game/scenes/editor/EditorScene.h"
 #include "game/GameState.h"
-#include "game/database/GameDatabase.h"
 #include <util/Profiler.h>
 
 #include <renderer/Renderer.h>
@@ -24,7 +23,7 @@ int main(int argc, char** argv)
 
 	PROFILE_FUNC();
 
-	osp->game_state->load_scene(new EditorScene());
+	osp->game_state->load_scene(new FlightScene());
 
 	while (osp->should_loop())
 	{

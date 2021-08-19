@@ -52,6 +52,10 @@ glm::dvec4 PlumbingInterface::get_vehicle_viewport()
 PlumbingInterface::PlumbingInterface(EditorVehicleInterface *edveh_int)
 {
 	pb_editor.veh = edveh_int->edveh->veh;
+	pb_editor.allow_editing = true;
+	pb_editor.allow_dragging = true;
+	pb_editor.show_flow_direction = true;
+
 	view_size = 0.35f;
 
 	last_focused = nullptr;

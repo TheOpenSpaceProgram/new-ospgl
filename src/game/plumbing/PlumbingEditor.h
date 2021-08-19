@@ -79,7 +79,18 @@ private:
 
 	void handle_vacant_junction();
 
+	void pipe_line_to(NVGcontext* vg, glm::vec2 pos, glm::vec2 old_pos, float flow) const;
+
 public:
+
+	bool allow_editing;
+	bool allow_dragging;
+	// Shows direction of flow in every pipe
+	bool show_flow_direction;
+	// Shows flow rate in every port
+	bool show_flowrates;
+	// Shows detailed tooltip for ports and machines on hovering
+	bool allow_tooltip;
 
 	Signal<void(Machine*&)> on_middle_click;
 

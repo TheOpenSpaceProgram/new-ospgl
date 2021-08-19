@@ -16,27 +16,58 @@ void VehiclePlumbing::update_pipes(float dt, Vehicle* veh)
 		float intake_liquid_volume = 0.0f;
 		junction_flow_rate(jnc, dt);
 
+		// Calculate what's the max that will be received (intake_liquid_volume), and the max
+		// than can be accepted (available_liquid_volume)
 		for(Pipe* p : jnc.pipes)
 		{
 			intake_liquid_volume += p->flow;
+			// Pipes with flow > 0.0f go from the junction to a machine
 			if(p->flow > 0.0f)
 			{
-				//available_liquid_volume += p->ma->plumbing.get_free_volume();
+				available_liquid_volume += p->mb->plumbing.get_free_volume();
 			}
 		}
 
 		StoredFluids in;
+		float sucked = 0.0;
+
+		// TODO: Instead of clamping when full, we could normalize the flow
+
+		// Suck from the pipes that go into the junction (flow < 0.0f)
+		for(Pipe* p : jnc.pipes)
+		{
+			if(p->flow < 0.0f)
+			{
+				if(sucked + p->flow > available_liquid_volume)
+				{
+					// We must clamp flow, sadly this is unrealistic but prevents fluid from disappearing
+					p->flow = available_liquid_volume - sucked;
+				}
+				sucked += p->flow;
+				in.modify(p->mb->plumbing.out_flow(p->port_b, p->flow));
+			}
+		}
+
+		// Give from the junction to the out pipes
 		for(Pipe* p : jnc.pipes)
 		{
 			if(p->flow > 0.0f)
 			{
-				//in.modify(p->ma->plumbing.out_flow(p->port_a, p->flow));
+				StoredFluids in_fraction = in.multiply(p->flow);
+				in = in.modify(in_fraction.multiply(-1.0f));
+				p->mb->plumbing.in_flow(p->port_b, in_fraction);
 			}
 		}
-		// It may happen that "in" is not enough as to satisfy all pipes
 	}
 
 	// Then we solve single pipes. They will query machines for pressure
+	for(const Pipe& p : pipes)
+	{
+		if(p.junction == nullptr)
+		{
+
+		}
+	}
 
 	// machines->fluid_update();
 
@@ -721,4 +752,19 @@ void Pipe::connect_junction(PipeJunction *jnc)
 	port_a = "";
 
 	jnc->add_pipe(this);
+}
+
+Pipe::Pipe()
+{
+	id = 0;
+	ma = nullptr;
+	mb = nullptr;
+	junction = nullptr;
+	junction_id = 0;
+	port_a = "";
+	port_b = "";
+
+	surface = 1.0f;
+	flow = 0.0f;
+
 }

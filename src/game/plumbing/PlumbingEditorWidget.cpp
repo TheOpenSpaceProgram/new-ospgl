@@ -12,3 +12,7 @@ void PlumbingEditorWidget::draw(NVGcontext* ctx, GUISkin* skin)
 {
 	pb_editor.do_editor(ctx, span, skin);
 }
+
+PlumbingEditorWidget::PlumbingEditorWidget()
+{
+}

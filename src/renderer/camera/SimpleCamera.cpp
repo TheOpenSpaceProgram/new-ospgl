@@ -5,6 +5,7 @@
 void SimpleCamera::update(double dt)
 {
 	keyboard_blocked = false;
+	mouse_blocked = false;
 
 	if (!ImGui::IsAnyItemFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsWindowFocused())
 	{
@@ -15,6 +16,7 @@ void SimpleCamera::update(double dt)
 		if (glfwGetMouseButton(input->window, GLFW_MOUSE_BUTTON_2))
 		{
 			keyboard_blocked = true;
+			mouse_blocked = true;
 
 			if (glfwGetKey(input->window, GLFW_KEY_W) == GLFW_PRESS)
 			{

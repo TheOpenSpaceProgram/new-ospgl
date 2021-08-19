@@ -10,6 +10,11 @@ PlumbingEditor::PlumbingEditor()
 	in_selection = false;
 	in_pipe_drag = false;
 	vacant_junction = nullptr;
+	allow_editing = false;
+	allow_dragging = false;
+	show_flow_direction = false;
+	show_flowrates = false;
+	allow_tooltip = false;
 }
 
 void PlumbingEditor::draw_grid(NVGcontext* vg, glm::vec4 span) const
@@ -75,7 +80,6 @@ void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span) const
 					}
 				}
 
-				nvgStrokeWidth(vg, 2.0f / (float)zoom);
 				nvgStrokeColor(vg, skin->get_foreground_color(true));
 				nvgFillColor(vg, skin->get_background_color(true));
 
@@ -83,6 +87,11 @@ void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span) const
 				{
 					nvgStrokeWidth(vg, 4.0f / (float)zoom);
 				}
+				else
+				{
+					nvgStrokeWidth(vg, 2.0f / (float)zoom);
+				}
+
 				if(is_selected)
 				{
 					nvgFillColor(vg, skin->get_highlight_color());
@@ -144,7 +153,7 @@ bool PlumbingEditor::update_mouse(GUIInput* gui_input, glm::vec4 span)
 	bool inside_and_not_blocked = is_inside_and_not_blocked(gui_input, span);
 
 	// Click and drag
-	if(inside_and_not_blocked || in_drag)
+	if((inside_and_not_blocked || in_drag) && allow_dragging)
 	{
 		if (gui_input->mouse_down(1))
 		{
@@ -168,7 +177,7 @@ bool PlumbingEditor::update_mouse(GUIInput* gui_input, glm::vec4 span)
 	}
 
 	// Zooming in and out
-	if(inside_and_not_blocked)
+	if(inside_and_not_blocked && allow_dragging)
 	{
 		block = true;
 		double delta = input->mouse_scroll_delta;
@@ -231,7 +240,7 @@ bool PlumbingEditor::update_dragging(GUIInput *gui_input, glm::vec2 mpos)
 		}
 		return true;
 	}
-	else if(!in_pipe_drag)
+	else if(!in_pipe_drag && allow_editing)
 	{
 		bool hovered_selected = false;
 		for (PlumbingElement elem : selected)
@@ -300,7 +309,7 @@ bool PlumbingEditor::update_selection(GUIInput *gui_input, glm::vec4 span)
 	// Left click + drag does box selection and unselects everything else
 	// Shift + Left click adds to selection with box
 
-	if(!in_drag && !in_selection && inside_and_not_blocked && !dragged && !in_pipe_drag)
+	if(!in_drag && !in_selection && inside_and_not_blocked && !dragged && !in_pipe_drag && allow_editing)
 	{
 		if(gui_input->mouse_down(0))
 		{
@@ -645,7 +654,39 @@ void PlumbingEditor::draw_pipe_cap(NVGcontext *vg, glm::vec2 pos) const
 	nvgLineTo(vg, pos.x + r, pos.y - r);
 }
 
-static bool test_test = false;
+void PlumbingEditor::pipe_line_to(NVGcontext *vg, glm::vec2 pos, glm::vec2 old_pos, float flow) const
+{
+	// Draw the line
+	nvgMoveTo(vg, old_pos.x, old_pos.y);
+	nvgLineTo(vg, pos.x, pos.y);
+
+	if(show_flow_direction)
+	{
+		float dist = glm::distance(pos, old_pos);
+		glm::vec2 dir = glm::normalize(pos - old_pos);
+		glm::vec2 norm = glm::vec2(-dir.y, dir.x);
+		float sign = (flow > 0.0f) ? 1.0f : -1.0f;
+		float size = 0.15f;
+		if(glm::abs(flow) < 0.1f)
+		{
+			size *= glm::abs(flow) * 10.0f;
+		}
+
+		for(float offset = 1.0f; offset <= dist - 1.0f; offset += 1.0f)
+		{
+			glm::vec2 cur_pos = old_pos + dir * offset;
+			glm::vec2 off1 = dir * size * sign + norm * size;
+			glm::vec2 off2 = dir * size * sign + norm * -size;
+			// Draw a little arrow
+			nvgMoveTo(vg, cur_pos.x, cur_pos.y);
+			nvgLineTo(vg, cur_pos.x + off1.x, cur_pos.y + off1.y);
+			nvgMoveTo(vg, cur_pos.x, cur_pos.y);
+			nvgLineTo(vg, cur_pos.x + off2.x, cur_pos.y + off2.y);
+		}
+
+	}
+
+}
 
 void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 {
@@ -695,10 +736,12 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 
 		draw_pipe_cap(vg, pos);
 		nvgMoveTo(vg, pos.x, pos.y);
+		glm::vec2 prev = pos;
 
 		for(auto waypoint : p.waypoints)
 		{
-			nvgLineTo(vg, waypoint.x + 0.5f, waypoint.y + 0.5f);
+			pipe_line_to(vg, (glm::vec2)waypoint + glm::vec2(0.5f), prev, p.flow);
+			prev = (glm::vec2)waypoint + glm::vec2(0.5f);
 		}
 
 		glm::vec2 end_pos;
@@ -720,7 +763,7 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 			end_pos = p.waypoints[p.waypoints.size() - 1];
 		}
 
-		nvgLineTo(vg, end_pos.x, end_pos.y);
+		pipe_line_to(vg, end_pos, prev, p.flow);
 		draw_pipe_cap(vg, end_pos);
 		nvgStroke(vg);
 
@@ -1080,6 +1123,7 @@ void PlumbingEditor::do_editor(NVGcontext *vg, glm::vec4 span, GUISkin* skin)
 
 	nvgRestore(vg);
 }
+
 
 
 

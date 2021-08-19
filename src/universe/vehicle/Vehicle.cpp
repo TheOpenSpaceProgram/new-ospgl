@@ -57,6 +57,8 @@ void Vehicle::update(double dt)
 		part->update(dt);
 	}
 
+	plumbing.update_pipes(dt, this);
+
 }
 
 void Vehicle::editor_update(double dt)

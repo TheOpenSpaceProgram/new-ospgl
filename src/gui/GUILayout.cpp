@@ -53,12 +53,13 @@ void GUILayout::prepare_wrapper(glm::ivec2 pos, glm::ivec2 size, GUIInput* gui_i
 	this->pos = pos;
 	this->size = size;
 
+	prepare(gui_input);
+
+	// TODO: Placement of this
 	if(gui_input->mouse_inside(get_pos(), get_size()) && block_mouse)
 	{
 		gui_input->mouse_blocked = true;
 	}
-
-	prepare(gui_input);
 
 	prepare_vscrollbar(gui_input);
 }

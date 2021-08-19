@@ -24,7 +24,7 @@ struct Pipe
 	std::string port_a, port_b;
 	float surface;
 
-	// Real-time updated
+	// Real-time updated, values greater than 0 mean going from a to b (or from junction to b)
 	float flow;
 
 	// Editor only but serialized
@@ -34,6 +34,8 @@ struct Pipe
 	void connect_junction(PipeJunction* jnc);
 
 	void invert();
+
+	Pipe();
 };
 
 struct PipeJunction

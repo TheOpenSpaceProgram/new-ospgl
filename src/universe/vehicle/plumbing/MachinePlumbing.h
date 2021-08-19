@@ -63,7 +63,7 @@ public:
 	// Return what you couldn't accept, ideally:
 	// - Accept gases as they are compressible
 	// - Feel free to refuse liquids if no more can fit
-	StoredFluids in_flow(std::string port, StoredFluids in);
+	StoredFluids in_flow(std::string port, const StoredFluids& in);
 
 	// Free volume for liquids (you should accept infinite gases, or explode...)
 	// Make sure in_flow accepts exactly this, otherwise fluids will break

@@ -100,18 +100,23 @@ void FlightScene::update()
 {
 	gui_input.update();
 
+	gui_input.ext_mouse_blocked = camera.mouse_blocked;
 	// GUI preparation goes here
+	prepare_gui();
+	input.keyboard_blocked = camera.keyboard_blocked || gui_input.keyboard_blocked;
+	input.update(osp->renderer->window, osp->game_dt);
 	prepare_gui();
 	do_gui();
 
-	input.keyboard_blocked = camera.keyboard_blocked || gui_input.keyboard_blocked;
-	input.update(osp->renderer->window, osp->game_dt);
 
 	VehicleEntity* v_ent =  universe->get_entity_as<VehicleEntity>(2);	
 	
 	camera.center = v_ent->vehicle->unpacked_veh.get_center_of_mass(true);
 
-	camera.update(osp->game_dt);
+	if(!gui_input.mouse_blocked)
+	{
+		camera.update(osp->game_dt);
+	}
 
 }
 
