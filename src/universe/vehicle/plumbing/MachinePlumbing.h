@@ -56,7 +56,7 @@ public:
 	bool is_requester();
 	void fluid_update();
 
-	float get_pressure(std::string port);
+	float get_pressure(const std::string& port);
 
 	// Volumes are in m^3, if you cannot supply enough, don't!
 	StoredFluids out_flow(std::string port, float volume);
@@ -67,7 +67,8 @@ public:
 
 	// Free volume for liquids (you should accept infinite gases, or explode...)
 	// Make sure in_flow accepts exactly this, otherwise fluids will break
-	float get_free_volume();
+	// Different ports do not neccesarily need to output different values
+	float get_free_volume(const std::string& port);
 
 	explicit MachinePlumbing(Machine* sm) : machine(sm) {}
 	void init(const cpptoml::table& toml);

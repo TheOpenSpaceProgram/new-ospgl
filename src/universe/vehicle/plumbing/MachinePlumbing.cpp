@@ -3,14 +3,34 @@
 #include <util/LuaUtil.h>
 #include <util/serializers/glm.h>
 
-float MachinePlumbing::get_pressure(std::string port)
+float MachinePlumbing::get_pressure(const std::string& port)
 {
-	return 1.0f;
+	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
+
+	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["get_pressure"], port);
+	logger->check(result.valid(), "get_pressure failed, this is fatal");
+
+	return result.get<float>();
 }
 
-float MachinePlumbing::get_free_volume()
+float MachinePlumbing::get_free_volume(const std::string& port)
 {
-	return 1.0f;
+	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
+
+	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["get_free_volume"], port);
+	logger->check(result.valid(), "get_free_volume failed, this is fatal");
+
+	return result.get<float>();
+}
+
+StoredFluids MachinePlumbing::in_flow(std::string port, const StoredFluids &in)
+{
+	return StoredFluids();
+}
+
+StoredFluids MachinePlumbing::out_flow(std::string port, float volume)
+{
+	return StoredFluids();
 }
 
 // TODO: We could cache this too
@@ -177,14 +197,5 @@ glm::vec2 MachinePlumbing::get_port_position(std::string id)
 	return glm::vec2(0, 0);
 }
 
-StoredFluids MachinePlumbing::in_flow(std::string port, const StoredFluids &in)
-{
-	return StoredFluids();
-}
-
-StoredFluids MachinePlumbing::out_flow(std::string port, float volume)
-{
-	return StoredFluids();
-}
 
 

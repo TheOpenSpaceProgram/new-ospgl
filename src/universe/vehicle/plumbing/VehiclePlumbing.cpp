@@ -24,7 +24,7 @@ void VehiclePlumbing::update_pipes(float dt, Vehicle* veh)
 			// Pipes with flow > 0.0f go from the junction to a machine
 			if(p->flow > 0.0f)
 			{
-				available_liquid_volume += p->mb->plumbing.get_free_volume();
+				available_liquid_volume += p->mb->plumbing.get_free_volume(p->port_b);
 			}
 		}
 
@@ -92,9 +92,14 @@ void VehiclePlumbing::junction_flow_rate(const PipeJunction& junction, float dt)
 	pipe_pressure.reserve(jsize);
 	for(auto& pipe : junction.pipes)
 	{
-		float pr = pipe->ma->plumbing.get_pressure(pipe->port_a);
+		float pr = pipe->mb->plumbing.get_pressure(pipe->port_b);
 		pipe_pressure.emplace_back(pipe, pr);
 	}
+
+	std::sort(pipe_pressure.begin(), pipe_pressure.end(), [](const std::pair<Pipe*, float>& a, const std::pair<Pipe*, float>& b)
+	{
+		return a.second > b.second;
+	});
 
 	// TODO: Obtain density by averaging or something
 	float sqrt_density = 1.0f;
@@ -107,23 +112,22 @@ void VehiclePlumbing::junction_flow_rate(const PipeJunction& junction, float dt)
 		for(size_t i = 0; i < jsize; i++)
 		{
 			float sign = i > (jsize - 2 - section) ? -1.0f : 1.0f;
-			float dP = sign * (pipe_pressure[i].second - x);
+			float dP = (pipe_pressure[i].second - x);
 			float constant = pipe_pressure[i].first->surface * sqrt(2.0f) / sqrt_density;
-			float radical = sqrt(dP);
+			float radical = sqrt(glm::abs(dP));
+
 			if(diff)
 			{
 				diff_sum -= constant / (2.0f * radical);
 			}
-			else
-			{
-				sum += sign * constant * radical;
-			}
+
+			sum += sign * constant * radical;
 		}
 		return std::make_pair(sum, diff_sum);
 	};
 
-	size_t solution_section;
-	float x, fx;
+	size_t solution_section = 0;
+	float x = 0.0f, fx;
 	for(size_t i = 0; i < jsize - 1; i++)
 	{
 		float lP = pipe_pressure[i].second;
@@ -147,9 +151,14 @@ void VehiclePlumbing::junction_flow_rate(const PipeJunction& junction, float dt)
 	// TODO:   converges (fast) too!
 	for(size_t it = 0; it < 2; it++)
 	{
-		auto pair = evaluate(x, solution_section, false);
+		auto pair = evaluate(x, solution_section, true);
 		fx = pair.first;
 		float dfx = pair.second;
+		// if the derivative is small, we are near constant and can early quit
+		if(glm::abs(dfx) < 0.0001)
+		{
+			break;
+		}
 		x = x - fx / dfx;
 	}
 
@@ -159,8 +168,9 @@ void VehiclePlumbing::junction_flow_rate(const PipeJunction& junction, float dt)
 		float sign = i > (jsize - 2 - solution_section) ? -1.0f : 1.0f;
 		float constant = pipe_pressure[i].first->surface * sqrt(2.0f) / sqrt_density;
 		// We multiply by dt to obtain flow in m^3 instead of flow rate
-		pipe_pressure[i].first->flow = sign * constant * sqrt(sign * (pipe_pressure[i].second - x)) * dt;
+		pipe_pressure[i].first->flow = sign * constant * sqrt(glm::abs(pipe_pressure[i].second - x)) * dt;
 	}
+
 
 
 }
