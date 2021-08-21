@@ -14,8 +14,8 @@ void FlightGUI::init(FlightScene* scene)
 	// Add the plumbing editor
 	pb_editor = new PlumbingEditorWidget();
 	pb_editor->pb_editor.allow_dragging = true;
+	pb_editor->pb_editor.allow_tooltip = true;
 	pb_editor->pb_editor.show_flow_direction = true;
-	pb_editor->pb_editor.show_flowrates = true;
 	VehicleEntity* v_ent =  scene->universe->get_entity_as<VehicleEntity>(2);
 	pb_editor->pb_editor.veh = v_ent->vehicle;
 	plumbing->canvas.layout = new GUISingleLayout();

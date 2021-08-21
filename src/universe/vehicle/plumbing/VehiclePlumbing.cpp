@@ -20,7 +20,7 @@ void VehiclePlumbing::update_pipes(float dt, Vehicle* veh)
 		// than can be accepted (available_liquid_volume)
 		for(Pipe* p : jnc.pipes)
 		{
-			intake_liquid_volume += p->flow;
+			intake_liquid_volume += p->flow * dt;
 			// Pipes with flow > 0.0f go from the junction to a machine
 			if(p->flow > 0.0f)
 			{
@@ -38,13 +38,13 @@ void VehiclePlumbing::update_pipes(float dt, Vehicle* veh)
 		{
 			if(p->flow < 0.0f)
 			{
-				if(sucked + p->flow > available_liquid_volume)
+				if(sucked + p->flow * dt > available_liquid_volume)
 				{
 					// We must clamp flow, sadly this is unrealistic but prevents fluid from disappearing
 					p->flow = available_liquid_volume - sucked;
 				}
-				sucked += p->flow;
-				in.modify(p->mb->plumbing.out_flow(p->port_b, p->flow));
+				sucked += p->flow * dt;
+				in.modify(p->mb->plumbing.out_flow(p->port_b, p->flow * dt));
 			}
 		}
 
@@ -53,7 +53,7 @@ void VehiclePlumbing::update_pipes(float dt, Vehicle* veh)
 		{
 			if(p->flow > 0.0f)
 			{
-				StoredFluids in_fraction = in.multiply(p->flow);
+				StoredFluids in_fraction = in.multiply(p->flow * dt);
 				in = in.modify(in_fraction.multiply(-1.0f));
 				p->mb->plumbing.in_flow(p->port_b, in_fraction);
 			}
@@ -167,8 +167,7 @@ void VehiclePlumbing::junction_flow_rate(const PipeJunction& junction, float dt)
 	{
 		float sign = i > (jsize - 2 - solution_section) ? -1.0f : 1.0f;
 		float constant = pipe_pressure[i].first->surface * sqrt(2.0f) / sqrt_density;
-		// We multiply by dt to obtain flow in m^3 instead of flow rate
-		pipe_pressure[i].first->flow = sign * constant * sqrt(glm::abs(pipe_pressure[i].second - x)) * dt;
+		pipe_pressure[i].first->flow = sign * constant * sqrt(glm::abs(pipe_pressure[i].second - x));
 	}
 
 

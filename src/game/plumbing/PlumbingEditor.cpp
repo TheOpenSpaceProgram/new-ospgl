@@ -13,8 +13,8 @@ PlumbingEditor::PlumbingEditor()
 	allow_editing = false;
 	allow_dragging = false;
 	show_flow_direction = false;
-	show_flowrates = false;
 	allow_tooltip = false;
+
 }
 
 void PlumbingEditor::draw_grid(NVGcontext* vg, glm::vec4 span) const
@@ -140,11 +140,73 @@ void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span) const
 					bool hover_port = hovering_port == port.id && hovered == pair.second;
 					draw_port(vg, port.pos, hover_port);
 				}
+
 			}
 		}
 		i += 3;
 	}
 
+}
+
+void PlumbingEditor::draw_tooltip(NVGcontext* vg, glm::vec4 span) const
+{
+	if(hovered.type == PlumbingElement::MACHINE && !hovering_port.empty())
+	{
+		Machine* m = hovered.as_machine;
+		glm::vec2 ppos = m->plumbing.editor_position;
+		glm::vec2 center = glm::vec2(span.x + span.z * 0.5f, span.y + span.w * 0.5f);
+		glm::vec2 mpos = glm::floor(get_mouse_pos(span)) + glm::vec2(0.8f);
+
+		nvgResetTransform(vg);
+		nvgTranslate(vg, center.x - cam_center.x * (float)zoom,
+					 center.y - cam_center.y * (float)zoom);
+		nvgStrokeColor(vg, skin->get_foreground_color(true));
+		nvgFillColor(vg, skin->get_background_color(true));
+		nvgStrokeWidth(vg, 2.0f);
+		// The tooltip is fixed size
+		// TODO: Rotation
+
+		for(const FluidPort& port : m->plumbing.fluid_ports)
+		{
+			if(port.id == hovering_port)
+			{
+				glm::vec2 pos = mpos * (float)zoom;
+				float pressure = m->plumbing.get_pressure(port.id);
+				float flow = 0.0f;
+				for(const Pipe& p : veh->plumbing.pipes)
+				{
+					if(p.ma == m && p.port_a == port.id)
+					{
+						flow = p.flow;
+						break;
+					}
+					else if(p.mb == m && p.port_b == port.id)
+					{
+						flow = -p.flow;
+						break;
+					}
+				}
+				std::stringstream pressure_stream;
+				std::stringstream flow_stream;
+				pressure_stream << "P: " << std::fixed << std::setprecision(2) << pressure << " atm";
+				flow_stream << "F: " << std::fixed << std::setprecision(2) << flow << " m³/s";
+				float size = std::max(pressure_stream.str().length(), flow_stream.str().length()) * 8.0f;
+
+				nvgBeginPath(vg);
+				nvgRect(vg, pos.x, pos.y, size, 50.0f);
+				nvgFill(vg);
+				nvgStroke(vg);
+
+				nvgFontSize(vg, 16.0f);
+				nvgFillColor(vg, skin->get_foreground_color());
+				nvgText(vg, pos.x + 5.0f, pos.y + 20.0f, pressure_stream.str().c_str(), nullptr);
+				nvgText(vg, pos.x + 5.0f, pos.y + 40.0f, flow_stream.str().c_str(), nullptr);
+
+				// TODO: Show composition of flow?
+				break;
+			}
+		}
+	}
 }
 
 bool PlumbingEditor::update_mouse(GUIInput* gui_input, glm::vec4 span)
@@ -1120,12 +1182,15 @@ void PlumbingEditor::do_editor(NVGcontext *vg, glm::vec4 span, GUISkin* skin)
 	draw_pipes(vg, span);
 	draw_selection(vg, span);
 	draw_collisions(vg, span);
+	if(allow_tooltip)
+	{
+		// The tooltip is not scissored
+		nvgResetScissor(vg);
+		draw_tooltip(vg, span);
+	}
 
 	nvgRestore(vg);
 }
-
-
-
 
 
 

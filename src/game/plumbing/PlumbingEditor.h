@@ -71,6 +71,8 @@ private:
 	void draw_collisions(NVGcontext* vg, glm::vec4 span) const;
 	void draw_port(NVGcontext* vg, glm::vec2 pos, bool hovered = false) const;
 	void draw_pipe_cap(NVGcontext* vg, glm::vec2 pos) const;
+	void draw_tooltip(NVGcontext* vg, glm::vec4 span) const;
+
 	// Junctions of more than 4 ports are drawn as a series of connected junctions
 	void draw_junction(NVGcontext* vg, glm::vec2 pos, size_t port_count, bool flip_three=false) const;
 
@@ -87,9 +89,7 @@ public:
 	bool allow_dragging;
 	// Shows direction of flow in every pipe
 	bool show_flow_direction;
-	// Shows flow rate in every port
-	bool show_flowrates;
-	// Shows detailed tooltip for ports and machines on hovering
+	// Shows detailed tooltip for ports on hovering them
 	bool allow_tooltip;
 
 	Signal<void(Machine*&)> on_middle_click;

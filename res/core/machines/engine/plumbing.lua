@@ -22,7 +22,7 @@ function plumbing.fluid_update()
 end
 
 function plumbing.get_pressure(port)
-    return 10.0
+    return 1.0
 end
 
 function plumbing.out_flow(port, volume)

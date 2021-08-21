@@ -12,7 +12,7 @@ function plumbing.fluid_update()
 end
 
 function plumbing.get_pressure(port)
-    return 10000.0
+    return 2.0
 end
 
 function plumbing.out_flow(port, volume)
@@ -28,7 +28,6 @@ function plumbing.get_free_volume(port)
 end
 
 function plumbing.draw_diagram(vg)
-
     nvg.begin_path(vg)
     nvg.rounded_rect(vg, 0, 0, 3, 3, 0.5)
     nvg.fill(vg)

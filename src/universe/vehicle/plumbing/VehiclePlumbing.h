@@ -25,6 +25,7 @@ struct Pipe
 	float surface;
 
 	// Real-time updated, values greater than 0 mean going from a to b (or from junction to b)
+	// Remember to multiply by dt before updating!
 	float flow;
 
 	// Editor only but serialized
