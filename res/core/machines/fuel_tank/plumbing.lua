@@ -4,6 +4,10 @@ require("toml")
 local logger = require("logger")
 local nvg = require("nano_vg")
 require("game_database")
+require("vehicle")
+require("plumbing")
+
+local fluid_container = dofile("machines/fuel_tank/fluid_container.lua").new()
 
 function plumbing.is_requester() return true end
 

@@ -1,5 +1,7 @@
 require("toml")
 require("game_database")
+require("vehicle")
+require("plumbing")
 
 -- Requirements for modders:
 --  You must assign the inlet marker names in the TOML given as

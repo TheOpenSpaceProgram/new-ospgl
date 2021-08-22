@@ -145,10 +145,5 @@ void LuaVehicle::load_to(sol::table& table)
 		
 	);
 
-	table.new_usertype<MachinePlumbing>("machine_plumbing",
-		"create_port", &MachinePlumbing::create_port
-	);
-
-
 
 }

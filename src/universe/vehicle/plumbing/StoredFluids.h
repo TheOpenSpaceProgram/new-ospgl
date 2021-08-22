@@ -15,13 +15,13 @@ struct StoredFluid
 };
 
 // This may not be particularly fast, if it proves too slow, rewrite
-// Low level handling of a list of fluids. Only interesting part is the add / sub function
+// (It may be slow due to the use of a asset handle as key, probably there's
+// a better way to do this)
 class StoredFluids
 {
 private:
 
 public:
-
 
 	std::unordered_map<AssetHandle<PhysicalMaterial>, StoredFluid> contents;
 
@@ -29,5 +29,7 @@ public:
 	// as much as possible and return the ammount taken
 	StoredFluids modify(const StoredFluids& b);
 	StoredFluids multiply(float value);
+	// Readonly physical material, but you may modify the StoredFluid
+	std::vector<std::pair<const PhysicalMaterial*, StoredFluid*>> get_contents();
 };
 

@@ -5,6 +5,9 @@
 /*
 	Lua functions to interact with the AssetManager subsystem,
 	allows loading of resource types which have a lua lib:
+
+ 	Note: You must also load the pertinent library for handling said asset,
+ 	this library only provides means to use the asset handles
 	
 	Paths are always given as package paths, we don't allow arbitrary
 	path access for safety.

@@ -1,16 +1,45 @@
 #include "LuaAssets.h"
+#include "../../assets/BitmapFont.h"
+#include "../../assets/BuildingPrototype.h"
+#include "../../assets/Config.h"
+#include "../../assets/Cubemap.h"
 #include "../../assets/Image.h"
+#include "../../assets/Material.h"
+#include "../../assets/Model.h"
+#include "../../assets/PartPrototype.h"
+#include "../../assets/PhysicalMaterial.h"
+#include "../../assets/Shader.h"
 
 void LuaAssets::load_to(sol::table& table)
 {
-    // TODO: Fix on Windows
-	table.new_usertype<LuaAssetHandle<Image>>("image_handle",
-		"move", &LuaAssetHandle<Image>::move,
-		"get", &LuaAssetHandle<Image>::get,
-		sol::meta_function::to_string, [](const LuaAssetHandle<Image>& img)
-	{
-		return fmt::format("path: {}:{}, res: {}", img.pkg, img.name, (void*)img.data);
-	});
+	// This huge macro is neccesary because lua doesn't allow templates, and there's no easy way to implement them
+	#define IMPLEMENT_ASSET(cls, cls_name) \
+	table.new_usertype<LuaAssetHandle<cls>>(cls_name "_handle", 												\
+		"move", &LuaAssetHandle<cls>::move,                                             						\
+		"get", &LuaAssetHandle<cls>::get,                                               						\
+		sol::meta_function::to_string, [](const LuaAssetHandle<cls>& ast)              							\
+		{                                                                               						\
+		return fmt::format("path: {}:{}, pointer: {}", ast.pkg, ast.name, (void*)ast.data);						\
+	});                                   																	\
+	table.set_function("get_" cls_name, [](sol::this_environment te, const std::string& path) 					\
+	{                                      																		\
+    	sol::environment& env = te;        																		\
+    	auto[pkg, name] = osp->assets->get_package_and_name(path, env["__pkg"].get_or(std::string("core"))); 	\
+        cls* ast = osp->assets->get<cls>(pkg, name, true);             											\
+        return std::move(LuaAssetHandle<cls>(pkg, name, ast));													\
+        																										\
+	});                                    																		\
+
+	IMPLEMENT_ASSET(BitmapFont, "bitmap_font");
+	IMPLEMENT_ASSET(BuildingPrototype, "building_prototype");
+	IMPLEMENT_ASSET(Config, "config");
+	IMPLEMENT_ASSET(Cubemap, "cubemap");
+	IMPLEMENT_ASSET(Image, "image");
+	IMPLEMENT_ASSET(Material, "material");
+	IMPLEMENT_ASSET(Model, "model");
+	IMPLEMENT_ASSET(PartPrototype, "part_prototype");
+	IMPLEMENT_ASSET(PhysicalMaterial, "physical_material");
+	IMPLEMENT_ASSET(Shader, "shader");
 
 	table.new_usertype<Image>("image",
 		"get_size", &Image::get_sized,
@@ -21,15 +50,6 @@ void LuaAssets::load_to(sol::table& table)
 			sol::resolve<glm::dvec4(double, double)>(&Image::sample_bilinear_double)
 		)
 		);
-
-	table.set_function(
-		"get_image", [](sol::this_environment te, const std::string& path)
-	{
-		sol::environment& env = te;
-		auto[pkg, name] = osp->assets->get_package_and_name(path, env["__pkg"].get_or<std::string>("core"));
-		Image* img = osp->assets->get<Image>(pkg, name, true);
-		return std::move(LuaAssetHandle<Image>(pkg, name, img));
-	});
 
 }
 

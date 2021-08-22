@@ -55,6 +55,7 @@ PlumbingInterface::PlumbingInterface(EditorVehicleInterface *edveh_int)
 	pb_editor.allow_editing = true;
 	pb_editor.allow_dragging = true;
 	pb_editor.show_flow_direction = true;
+	pb_editor.allow_tooltip = true;
 
 	view_size = 0.35f;
 

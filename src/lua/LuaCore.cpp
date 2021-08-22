@@ -13,6 +13,8 @@
 #include "libs/LuaFlightInput.h"
 #include "libs/LuaGameDatabase.h"
 #include "libs/LuaNanoVG.h"
+#include "libs/LuaPlumbing.h"
+
 
 LuaCore* lua_core;
 // This function is extremely hacky and contains multiple work-arounds
@@ -114,6 +116,10 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::NANO_VG;
 	}
+	else if(name == "plumbing")
+	{
+		return LibraryID::PLUMBING;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -207,6 +213,7 @@ LuaCore::LuaCore()
 	libraries[LibraryID::FLIGHT_INPUT] =  new LuaFlightInput();
 	libraries[LibraryID::GAME_DATABASE] = new LuaGameDatabase();
 	libraries[LibraryID::NANO_VG] = new LuaNanoVG();
+	libraries[LibraryID::PLUMBING] = new LuaPlumbing();
 }
 
 LuaCore::~LuaCore()

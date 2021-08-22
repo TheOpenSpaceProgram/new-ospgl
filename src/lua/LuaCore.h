@@ -19,6 +19,12 @@
 	This is the only lua library the programmer actually needs to instantiate as all other libraries
 	can be loaded from this one. You can set libraries to load by default, and libraries to block
 
+ 	Note: Importing something like require("vehicle") will simply load the symbols, but they wont have a name,
+ 		you must use local vehicle = require("vehicle") to have access to the symbols. Otherwise you may only
+ 		access instances created in C++ / other places, which may be appropiate in some cases!
+
+		-> require loads symbols into an unnamed table, and then returns that table!
+
 */
 class LuaCore
 {
@@ -39,6 +45,7 @@ public:
 		FLIGHT_INPUT,	// LuaFlightInput (InputContext)
 		GAME_DATABASE,	// LuaGameDatabase
 		NANO_VG,		// LuaNanoVG
+		PLUMBING,		// LuaPlumbing
 		COUNT,
 	};
 

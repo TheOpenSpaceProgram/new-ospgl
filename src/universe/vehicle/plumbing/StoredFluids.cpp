@@ -79,6 +79,15 @@ StoredFluids StoredFluids::multiply(float value)
 	return out;
 }
 
+std::vector<std::pair<const PhysicalMaterial*, StoredFluid*>> StoredFluids::get_contents()
+{
+	// TODO: We could cache this
+	std::vector<std::pair<const PhysicalMaterial*, StoredFluid*>> out;
+
+
+	return out;
+}
+
 StoredFluid::StoredFluid()
 {
 	liquid_mass = 0.0f;
