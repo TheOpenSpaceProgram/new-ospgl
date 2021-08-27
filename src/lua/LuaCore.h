@@ -11,13 +11,15 @@
 
 		- Upon loading LuaCore, all standard lua libraries, except I/O, OS, and Debug are loaded
 		  (See: https://www.lua.org/manual/5.3/manual.html#6)
+ 		- We delete the following functions as they are not appropiate:
+ 			- 'print', use logger functions instead! These show filename, line, etc...
 
 
 	'core' table:
 
-
 	This is the only lua library the programmer actually needs to instantiate as all other libraries
 	can be loaded from this one. You can set libraries to load by default, and libraries to block
+
 
  	Note: Importing something like require("vehicle") will simply load the symbols, but they wont have a name,
  		you must use local vehicle = require("vehicle") to have access to the symbols. Otherwise you may only

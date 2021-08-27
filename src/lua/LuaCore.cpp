@@ -138,6 +138,8 @@ void LuaCore::load(sol::state& to, const std::string& pkg)
 		sol::lib::string, sol::lib::math, sol::lib::table, sol::lib::utf8,
 		sol::lib::jit);
 
+	to["print"] = sol::nil;
+
 	to.create_named_table("__loaded_modules");
 	load((sol::table&)to.globals(), pkg);
 

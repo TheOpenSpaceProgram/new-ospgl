@@ -81,7 +81,7 @@ sol::table MachinePlumbing::get_lua_plumbing(bool silent_fail)
 
 void MachinePlumbing::init(const cpptoml::table& init)
 {
-	std::cout << init << std::endl;
+	// std::cout << init << std::endl;
 	// Read plumbing_pos and rot from init if present
 	bool found_pos = false;
 	auto pos_table = init.get_table("plumbing_pos");

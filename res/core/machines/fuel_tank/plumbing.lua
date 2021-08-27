@@ -16,6 +16,7 @@ function plumbing.fluid_update()
 end
 
 function plumbing.get_pressure(port)
+    fluid_container:update(1.0, 1.0)
     return 2.0
 end
 

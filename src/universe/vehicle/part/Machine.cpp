@@ -74,7 +74,7 @@ void Machine::init(sol::state* lua_state, Part* in_part)
 	if(!result.valid())
 	{
 		sol::error err = result;
-		logger->error("Lua Error loading machine:\n{}", err.what());
+		logger->fatal("Lua Error loading machine:\n{}", err.what());
 	}
 
 	// Then we simply move over the environment to an entry in the global lua_state

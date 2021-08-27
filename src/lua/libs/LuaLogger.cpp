@@ -24,7 +24,7 @@ static std::string get_debug_trace(lua_State* L)
 		file = file.substr(1);
 	}
 
-	return fmt::format("{} ({})", file, line);
+	return fmt::format("{}({})", file, line);
 }
 
 void LuaLogger::load_to(sol::table& table)

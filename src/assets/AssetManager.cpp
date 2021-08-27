@@ -271,3 +271,31 @@ AssetManager::pfr AssetManager::load_script_to(sol::state& target,
 	return std::move(result);
 
 }
+
+AssetManager::~AssetManager()
+{
+	logger->info("Asset manager is being destroyed");
+	for(const auto& pkg_pair : packages)
+	{
+		for(const auto& ast_pair : pkg_pair.second.assets)
+		{
+			for(const auto& asset_pair : ast_pair.second.second)
+			{
+				if(asset_pair.second.uses > 0 && !asset_pair.second.dont_unload)
+				{
+					if(asset_pair.second.dont_unload)
+					{
+						// TODO: We must unload the asset! Not strictly neccesary but should be good
+						logger->debug("Unloading asset '{}' that was set to not_unload", asset_pair.first);
+					}
+					else
+					{
+						// Memory leak warning! These assets are never unloaded and must be "stray pointers"
+						logger->warn("Asset '{}' still has {} users and is not set to not_unload",
+									 asset_pair.first, asset_pair.second.uses);
+					}
+				}
+			}
+		}
+	}
+}

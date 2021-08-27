@@ -12,6 +12,7 @@ struct StoredFluid
 
 	float get_total_mass();
 	StoredFluid();
+	StoredFluid(float liquid, float gas);
 };
 
 // This may not be particularly fast, if it proves too slow, rewrite
@@ -21,6 +22,13 @@ class StoredFluids
 {
 private:
 
+	// This vector allows fast access without allowing modifications to the material
+	// regenerated after adding or removing fluids to improve perfomance
+	std::vector<std::pair<const PhysicalMaterial*, StoredFluid*>> internal_contents;
+
+	void generate_internal_contents();
+	void remove_empty_fluids();
+
 public:
 
 	std::unordered_map<AssetHandle<PhysicalMaterial>, StoredFluid> contents;
@@ -29,7 +37,16 @@ public:
 	// as much as possible and return the ammount taken
 	StoredFluids modify(const StoredFluids& b);
 	StoredFluids multiply(float value);
-	// Readonly physical material, but you may modify the StoredFluid
-	std::vector<std::pair<const PhysicalMaterial*, StoredFluid*>> get_contents();
+
+	// TODO: This may leak memory? (In lua, not sure)
+	std::vector<std::pair<const PhysicalMaterial*, StoredFluid*>>* get_contents()
+	{
+		return &internal_contents;
+	};
+
+	// Modifies but without needing to manually create the StoredFluids, for lua
+	void add_fluid(const AssetHandle<PhysicalMaterial>& mat, float liquid_mass, float gas_mass);
+
+
 };
 

@@ -10,6 +10,9 @@
 #include "../../assets/PhysicalMaterial.h"
 #include "../../assets/Shader.h"
 
+// Useful while development to make sure assets are working correctly
+#define DEBUG_ENABLED
+
 void LuaAssets::load_to(sol::table& table)
 {
 	// This huge macro is neccesary because lua doesn't allow templates, and there's no easy way to implement them
@@ -19,15 +22,14 @@ void LuaAssets::load_to(sol::table& table)
 		"get", &LuaAssetHandle<cls>::get,                                               						\
 		sol::meta_function::to_string, [](const LuaAssetHandle<cls>& ast)              							\
 		{                                                                               						\
-		return fmt::format("path: {}:{}, pointer: {}", ast.pkg, ast.name, (void*)ast.data);						\
+		return fmt::format("Asset of type {}, path: {}:{}, pointer: {}", cls_name, ast.pkg, ast.name, (void*)ast.data);						\
 	});                                   																	\
 	table.set_function("get_" cls_name, [](sol::this_environment te, const std::string& path) 					\
-	{                                      																		\
+	{                                      \
     	sol::environment& env = te;        																		\
     	auto[pkg, name] = osp->assets->get_package_and_name(path, env["__pkg"].get_or(std::string("core"))); 	\
-        cls* ast = osp->assets->get<cls>(pkg, name, true);             											\
+        cls* ast = osp->assets->get<cls>(pkg, name, true);               \
         return std::move(LuaAssetHandle<cls>(pkg, name, ast));													\
-        																										\
 	});                                    																		\
 
 	IMPLEMENT_ASSET(BitmapFont, "bitmap_font");
@@ -72,6 +74,10 @@ LuaAssetHandle<T>::LuaAssetHandle(LuaAssetHandle<T>&& b)
 	b.name = "null";
 	b.data = nullptr;
 	b.ut = sol::nil;
+
+#ifdef DEBUG_ENABLED
+	logger->debug("Lua asset handle created (path={}:{}, pointer={}) by move", pkg, name, (void*)data);
+#endif
 }
 
 
@@ -84,6 +90,10 @@ LuaAssetHandle<T>::LuaAssetHandle(const LuaAssetHandle<T>& p2)
 	ut = p2.ut;
 
 	osp->assets->get<T>(pkg, name, true);
+
+#ifdef DEBUG_ENABLED
+	logger->debug("Lua asset handle created (path={}:{}, pointer={}) by copy", pkg, name, (void*)data);
+#endif
 }
 
 template<typename T>
@@ -92,6 +102,10 @@ LuaAssetHandle<T>::LuaAssetHandle(const std::string& pkg, const std::string& nam
 	this->pkg = pkg;
 	this->name = name;
 	this->data = data;
+
+#ifdef DEBUG_ENABLED
+	logger->debug("Lua asset handle created (path={}:{}, pointer={})", pkg, name, (void*)data);
+#endif
 }
 
 template<typename T>
@@ -99,6 +113,7 @@ LuaAssetHandle<T>::~LuaAssetHandle()
 {
 	if (data != nullptr)
 	{
+		logger->debug("Lua asset handle freed (path={}:{}, pointer={})", pkg, name, (void*)data);
 		osp->assets->free<T>(pkg, name);
 	}
 }

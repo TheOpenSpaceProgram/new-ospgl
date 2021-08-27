@@ -3,7 +3,9 @@
 -- of fluids.
 -- To be used like a class
 require("vehicle")
+local logger = require("logger")
 local plumbing = require("plumbing")
+local assets = require("assets")
 
 local fluid_container = {}
 fluid_container.__index = fluid_container
@@ -26,6 +28,9 @@ function fluid_container:new(volume)
     container.last_acceleration = 0
     -- Contents of the tank
     container.contents = plumbing.stored_fluids.new()
+    local mat = assets.get_physical_material("materials/water.toml")
+    logger.info(mat)
+    container.contents:add_fluid(mat, 100.0, 0.0)
 
     return container
 end
@@ -34,6 +39,7 @@ end
 function fluid_container:get_pressure()
 
 end
+
 
 function fluid_container:get_ullage_volume()
     return self.volume - self:get_fluid_volume()
@@ -76,11 +82,11 @@ function fluid_container:update(dt, acceleration)
     self.ullage_distribution = math.max(self.ullage_distribution, 0.0)
     self.ullage_distribution = math.min(self.ullage_distribution, 1.0)
 
-
-
+    local contents = self.contents:get_contents()
+    for k, v in contents:pairs() do
+        print(k .. v)
+    end
 end
-
-
 
 
 return fluid_container;

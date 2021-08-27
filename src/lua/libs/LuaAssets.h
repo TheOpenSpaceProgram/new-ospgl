@@ -51,11 +51,14 @@ public:
 	virtual void load_to(sol::table& table) override;
 };
 
+// Note to C++ programmers (and TODO if possible):
+// LuaAssetHandles for some reason cannot be casted to AssetHandles if passed by reference!
+// Implement a wrapper function or use pointers (better to use a wrapper for consistency in C++ side)
 template<typename T>
 struct LuaAssetHandle
 {
 	// Used when getting assets from lua where .data cannot be used
-	AssetHandle<T> get_asset_handle()
+	AssetHandle<T> get_asset_handle() const
 	{
 		if(data == nullptr)
 		{

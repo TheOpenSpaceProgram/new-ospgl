@@ -142,6 +142,8 @@ public:
 	std::string udata_path;
 
 	AssetManager(const std::string& res_path, const std::string& udata_path);
+	// We do a check to make sure all assets have been released, to prevent leaks!
+	~AssetManager();
 };
 
 template<typename T>
@@ -327,6 +329,7 @@ inline bool AssetManager::load(const std::string& package, const std::string& na
 }
 
 
+
 struct AssetPointer
 {
 	std::string pkg, name;
@@ -490,3 +493,4 @@ namespace std
 	};
 
 }
+

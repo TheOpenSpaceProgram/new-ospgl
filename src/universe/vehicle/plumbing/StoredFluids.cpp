@@ -79,13 +79,22 @@ StoredFluids StoredFluids::multiply(float value)
 	return out;
 }
 
-std::vector<std::pair<const PhysicalMaterial*, StoredFluid*>> StoredFluids::get_contents()
+void StoredFluids::generate_internal_contents()
 {
-	// TODO: We could cache this
-	std::vector<std::pair<const PhysicalMaterial*, StoredFluid*>> out;
 
+}
 
-	return out;
+void StoredFluids::remove_empty_fluids()
+{
+
+	generate_internal_contents();
+}
+
+void StoredFluids::add_fluid(const AssetHandle<PhysicalMaterial>& mat, float liquid_mass, float gas_mass)
+{
+	StoredFluids tmp;
+	tmp.contents[mat.duplicate()] = StoredFluid(liquid_mass, gas_mass);
+	modify(tmp);
 }
 
 StoredFluid::StoredFluid()
@@ -97,4 +106,10 @@ StoredFluid::StoredFluid()
 float StoredFluid::get_total_mass()
 {
 	return liquid_mass + gas_mass;
+}
+
+StoredFluid::StoredFluid(float liquid, float gas)
+{
+	liquid_mass = liquid;
+	gas_mass = gas;
 }
