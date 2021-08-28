@@ -22,13 +22,13 @@ set(FASTNOISEC_SOURCES "dep/FastNoiseC/FastNoise.c")
 set(NANOVG_SOURCES "dep/nanovg/nanovg_ext.cpp")
 set(TINY_GLTF_SOURCES "dep/tiny_gltf/tiny_gltf.cpp")
 set(BACKWARD_SOURCES "dep/tiny_gltf/tiny_gltf.cpp")
-
+set(MINIAUDIO_SOURCES "dep/miniaudio/miniaudio.c")
 
 # Create the OSPGL executable
 
 add_executable(OSPGL ${OSP_SOURCES} ${IMGUI_SOURCES} ${GLAD_SOURCES} 
 	${FASTNOISEC_SOURCES} ${STB_SOURCES} ${NANOVG_SOURCES} ${TINY_GLTF_SOURCES}
-	${BACKWARD_SOURCES})
+	${BACKWARD_SOURCES} ${MINIAUDIO_SOURCES})
 
 # Name it ospgl (lowercase)
 set_target_properties(OSPGL PROPERTIES OUTPUT_NAME "ospgl")
