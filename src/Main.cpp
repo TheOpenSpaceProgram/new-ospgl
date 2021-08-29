@@ -11,6 +11,8 @@
 #include <renderer/Renderer.h>
 #include <universe/vehicle/plumbing/VehiclePlumbing.h>
 
+#include <assets/AudioClip.h>
+
 int main(int argc, char** argv)
 {
 	osp = new OSP();
@@ -22,6 +24,8 @@ int main(int argc, char** argv)
 	double dt_avg = 0.0;
 
 	PROFILE_FUNC();
+
+	AssetHandle<AudioClip> audio = AssetHandle<AudioClip>("debug_system:test_audio.wav");
 
 	osp->game_state->load_scene(new FlightScene());
 

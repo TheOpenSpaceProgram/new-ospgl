@@ -14,6 +14,7 @@ class Renderer;
 class LuaCore;
 class GameState;
 class GameDatabase;
+class AudioEngine;
 
 // Initializes the different subsystems OSP has
 // It's a global class, only one OSP may exist at once (filesystem related)
@@ -33,6 +34,7 @@ public:
 
 	AssetManager* assets{};
 	Renderer* renderer{};
+	AudioEngine* audio_engine{};
 	GameState* game_state{};
 	GameDatabase* game_database{};
 

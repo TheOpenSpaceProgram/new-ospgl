@@ -7,6 +7,8 @@
 	scale = 1.0
 	type = "windowed"	# "windowed", "fullscreen" or "windowed fullscreen"
 
+[audio_engine]
+
 [renderer.quality]
 	sun_shadow_size = 1024
 	sun_terrain_shadow_size = 1024

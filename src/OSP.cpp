@@ -3,6 +3,7 @@
 #include <renderer/util/TextDrawer.h>
 #include <util/Profiler.h>
 #include <assets/AssetManager.h>
+#include <audio/AudioEngine.h>
 #include <renderer/Renderer.h>
 #include <lua/LuaCore.h>
 #include <game/GameState.h>
@@ -168,6 +169,7 @@ void OSP::init(int argc, char** argv)
 
 		assets = new AssetManager(res_path, udata_path);
 		renderer = new Renderer(*config);
+		audio_engine = new AudioEngine(*config);
 		create_global_debug_drawer();
 		create_global_texture_drawer();
 		create_global_text_drawer();
@@ -198,6 +200,7 @@ void OSP::finish()
 	destroy_global_texture_drawer();
 	destroy_global_debug_drawer();
 	delete renderer;
+	delete audio_engine;
 	delete assets;
 	destroy_global_logger();
 }
