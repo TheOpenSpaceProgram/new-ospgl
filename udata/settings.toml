@@ -8,6 +8,19 @@
 	type = "windowed"	# "windowed", "fullscreen" or "windowed fullscreen"
 
 [audio_engine]
+	channel_0_int_gain = 1.0
+	channel_0_ext_gain = 1.0
+
+	channel_1_int_gain = 0.3
+	channel_1_ext_gain = 1.0
+
+	channel_2_int_gain = 0.6
+	channel_2_ext_gain = 1.0
+
+	channel_3_int_gain = 1.0
+	channel_3_ext_gain = 0.0
+
+	panning_mode = "simple"
 
 [renderer.quality]
 	sun_shadow_size = 1024

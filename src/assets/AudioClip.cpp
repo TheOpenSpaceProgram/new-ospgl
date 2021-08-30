@@ -70,14 +70,68 @@ AudioClip* load_audio_clip(ASSET_INFO, const cpptoml::table &cfg)
 	return new AudioClip(ASSET_INFO_P, total_buffer, total_written, output_channels);
 }
 
-AudioClip::AudioClip(ASSET_INFO, void *samples, size_t sample_count, size_t channel_count) : Asset(ASSET_INFO_P)
+AudioClip::AudioClip(ASSET_INFO, void *samples, size_t frame_count, size_t channel_count) : Asset(ASSET_INFO_P)
 {
 	this->samples = samples;
-	this->sample_count = sample_count;
+	this->frame_count = frame_count;
 	this->channel_count = channel_count;
 }
 
 AudioClip::~AudioClip()
 {
 	free(samples);
+}
+
+// Count includes stereo!
+int32_t AudioClip::mix_samples(float* target, uint32_t count, uint32_t cur_frame,
+							bool loop, uint32_t sample_rate, uint32_t target_sample_rate)
+{
+	// May contain one or two samples per frame
+	float* fsamples = (float*)get_samples();
+
+	if(sample_rate == target_sample_rate)
+	{
+		// Simple, we must add the two arrays
+		uint32_t frm_ptr = cur_frame;
+		for(size_t i = 0; i < count; i++)
+		{
+			if(channel_count == 1)
+			{
+				target[i * 2 + 0] = fsamples[frm_ptr];
+				target[i * 2 + 1] = fsamples[frm_ptr];
+			}
+			else
+			{
+				target[i * 2 + 0] = fsamples[frm_ptr * 2 + 0];
+				target[i * 2 + 1] = fsamples[frm_ptr * 2 + 1];
+			}
+			frm_ptr++;
+			if(frm_ptr >= frame_count / 2)
+			{
+				if(loop)
+				{
+					frm_ptr = 0;
+				}
+				else
+				{
+					// We dont mix nothing more, fill with zeros and early exit
+					for(; i < count; i++)
+					{
+						target[i * 2 + 0] = 0.0f;
+						target[i * 2 + 1] = 0.0f;
+					}
+
+					return -1;
+				}
+			}
+		}
+
+		return (int32_t)frm_ptr;
+	}
+	else
+	{
+		// TODO: Frequency mixing
+	}
+
+	return false;
 }
