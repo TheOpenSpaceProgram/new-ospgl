@@ -121,7 +121,7 @@ std::pair<float, float> AudioEngine::get_panning(glm::dvec3 pos)
 		// here we use a more advanced formula that doesnt zero out one ear
 		// on full stereo and that slightly lowers the volume when the sound is behind
 		// the head, attempting to "simulate" a head transfer function, but with flat frequency response
-		// (The number's were chosen to satisfy tatjam's ears, and may not be appropiate for everybody!)
+		// (The numbers were chosen to satisfy tatjam's ears, and may not be appropiate for everybody!)
 		float bx = glm::abs(glm::sin(cangle));
 		float ox = -glm::sin(glm::min(cangle, 0.0)) * 0.3;
 		left = glm::max(bx - ox, 0.15f);

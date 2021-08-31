@@ -2,6 +2,7 @@
 #include <cpptoml.h>
 #include <miniaudio/miniaudio.h>
 #include <mutex>
+#include <array>
 #include <glm/glm.hpp>
 
 class AudioSource;
