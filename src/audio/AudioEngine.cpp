@@ -118,14 +118,17 @@ std::pair<float, float> AudioEngine::get_panning(glm::dvec3 pos)
 	}
 	else
 	{
-		// here we use a more advanced formula that doesnt zero out one ear
-		// on full stereo and that slightly lowers the volume when the sound is behind
-		// the head, attempting to "simulate" a head transfer function, but with flat frequency response
+		// TODO: Tune this
 		// (The numbers were chosen to satisfy tatjam's ears, and may not be appropiate for everybody!)
 		float bx = glm::abs(glm::sin(cangle));
-		float ox = -glm::sin(glm::min(cangle, 0.0)) * 0.3;
-		left = glm::max(bx - ox, 0.15f);
+		float ox = -glm::sin(glm::min(cangle, 0.0)) * 0.7f;
+		left = glm::max(bx - ox, 0.25f);
 		right = 1.0f - ox;
+		// We now normalize to keep loudness more or less regular. This seems to work fine, the
+		// root two is to avoid lowering volumes relative to non-normalized, but may clip loud sounds!
+		float lng = sqrtf(left * left + right * right) + ox * 0.4f;
+		left *= glm::root_two<float>() / lng;
+		right *= glm::root_two<float>() / lng;
 	}
 
 	if(!cangle_right)
@@ -134,18 +137,18 @@ std::pair<float, float> AudioEngine::get_panning(glm::dvec3 pos)
 	}
 
 
-	logger->info("Right: {}, Left: {}", right, left);
-
 	return std::make_pair(left, right);
 }
 
-void AudioEngine::set_listener(glm::dvec3 pos, glm::dvec3 fwd, glm::dvec3 up)
+void AudioEngine::set_listener(glm::dvec3 pos, glm::dvec3 fwd, glm::dvec3 up, glm::dvec3 vel, double sos)
 {
 	mtx.lock();
 	listener_pos = pos;
 	listener_fwd = fwd;
 	listener_up = up;
 	listener_right = glm::cross(listener_fwd, listener_up);
+	listener_vel = vel;
+	speed_of_sound = sos;
 	mtx.unlock();
 }
 

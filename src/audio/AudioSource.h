@@ -24,11 +24,12 @@ private:
 	AudioEngine* engine;
 	uint32_t in_channel;
 	bool source_3d;
-	glm::dvec3 pos;
 	bool playing;
 	bool loops;
 
 	uint32_t cur_sample;
+
+	glm::dvec3 pos, vel;
 
 public:
 

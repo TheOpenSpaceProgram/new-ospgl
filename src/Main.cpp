@@ -27,17 +27,19 @@ int main(int argc, char** argv)
 
 	PROFILE_FUNC();
 
-	AssetHandle<AudioClip> audio = AssetHandle<AudioClip>("debug_system:test_audio_mono.wav");
+
+	auto* audio = new AssetHandle<AudioClip>("debug_system:test_audio.wav");
 	std::weak_ptr<AudioSource> src2 = osp->audio_engine->create_audio_source(1);
 	src2.lock()->set_position(glm::dvec3(1.0, 0.0, 2.0));
-	src2.lock()->set_source_clip(audio);
+	src2.lock()->set_source_clip(*audio);
 	src2.lock()->set_looping(true);
 	src2.lock()->set_3d_source(true);
-	src2.lock()->set_playing(true);
 
 	osp->audio_engine->set_listener(glm::dvec3(0.0, 0.0, 0.0),
 									glm::dvec3(1.0, 0.0, 0.0),
-									glm::dvec3(0.0, 1.0, 0.0));
+									glm::dvec3(0.0, 1.0, 0.0),
+									glm::dvec3(0.0, 0.0, 0.0),
+									360.0);
 
 	osp->game_state->load_scene(new FlightScene());
 
@@ -55,6 +57,8 @@ int main(int argc, char** argv)
 
 		t+=osp->game_dt*0.4f;
 	}
+
+	delete audio;
 
 	osp->finish();
 }

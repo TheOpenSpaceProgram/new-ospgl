@@ -46,9 +46,13 @@ private:
 
 	glm::dvec3 listener_pos;
 	glm::dvec3 listener_fwd;
+	glm::dvec3 listener_vel;
+	double speed_of_sound;
 	// Precomputed
 	glm::dvec3 listener_right;
 	glm::dvec3 listener_up;
+
+
 
 	ma_context context;
 	ma_device device;
@@ -97,7 +101,7 @@ public:
 	float get_channel_gain(int channel) const { return channels[channel].gain; }
 	void set_channel_gain(int channel, float val) { mtx.lock(); channels[channel].gain = val; mtx.unlock(); }
 
-	void set_listener(glm::dvec3 pos, glm::dvec3 fwd, glm::dvec3 up);
+	void set_listener(glm::dvec3 pos, glm::dvec3 fwd, glm::dvec3 up, glm::dvec3 vel, double speed_of_sound);
 	glm::dvec3 get_listener_pos() const { return listener_pos; }
 	glm::dvec3 get_listener_fwd() const { return listener_fwd; }
 	glm::dvec3 get_listener_up() const { return listener_up; }
