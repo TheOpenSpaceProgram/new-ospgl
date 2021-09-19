@@ -188,7 +188,7 @@ void PlumbingEditor::draw_tooltip(NVGcontext* vg, glm::vec4 span) const
 				}
 				std::stringstream pressure_stream;
 				std::stringstream flow_stream;
-				pressure_stream << "P: " << std::fixed << std::setprecision(2) << pressure << " atm";
+				pressure_stream << "P: " << std::fixed << std::setprecision(2) << pressure / 101325.0 << " atm";
 				flow_stream << "F: " << std::fixed << std::setprecision(2) << flow << " m³/s";
 				float size = std::max(pressure_stream.str().length(), flow_stream.str().length()) * 8.0f;
 

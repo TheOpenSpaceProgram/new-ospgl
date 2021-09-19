@@ -7,7 +7,7 @@ require("game_database")
 require("vehicle")
 require("plumbing")
 
-local fluid_container = dofile("machines/fuel_tank/fluid_container.lua").new()
+local fluid_container = dofile("machines/fuel_tank/fluid_container.lua").new(1000.0)
 
 function plumbing.is_requester() return true end
 
@@ -16,8 +16,7 @@ function plumbing.fluid_update()
 end
 
 function plumbing.get_pressure(port)
-    fluid_container:update(1.0, 1.0)
-    return 2.0
+    return fluid_container:get_pressure()
 end
 
 function plumbing.out_flow(port, volume)
@@ -43,6 +42,10 @@ function plumbing.draw_diagram(vg)
     nvg.line_to(vg, 1.5, 3.5)
     nvg.stroke(vg)
 
+end
+
+function plumbing.update(dt)
+    fluid_container:update(dt, 1.0)
 end
 
 local port_str = database:get_string("inlet")

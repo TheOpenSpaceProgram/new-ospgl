@@ -38,7 +38,9 @@ public:
 	StoredFluids modify(const StoredFluids& b);
 	StoredFluids multiply(float value);
 
-	// TODO: This may leak memory? (In lua, not sure)
+	// Note, iterate over pairs in lua like this:
+	// for _, physical_material, stored_fluid = contents:pairs() do end
+	// This is not noted anywhere on sol docs, so its useful to leave here
 	std::vector<std::pair<const PhysicalMaterial*, StoredFluid*>>* get_contents()
 	{
 		return &internal_contents;

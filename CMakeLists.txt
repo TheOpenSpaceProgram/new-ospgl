@@ -5,6 +5,7 @@ cmake_minimum_required (VERSION 3.2.3)
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set (OSPGL_STACKTRACES ON)
+set (OSPGL_LRDB ON)
 
 ##################################################################################
 # OSPGL - The game engine
@@ -48,6 +49,11 @@ else()
 	endif()
 
 	link_libraries(${CMAKE_DL_LIBS})
+endif()
+
+if(OSPGL_LRDB)
+	add_definitions(-DOSPGL_LRDB)
+	include_directories(OSPGL PRIVATE dep/LRDB/third_party/asio)
 endif()
 
 include_directories(dep)

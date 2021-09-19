@@ -24,5 +24,24 @@ void LuaPlumbing::load_to(sol::table &table)
 		"gas_mass", &StoredFluid::gas_mass,
 		"get_total_mass", &StoredFluid::get_total_mass);
 
+	// TODO: Move this to another file
+	table.new_usertype<PhysicalMaterial>("physical_material",
+		 "name", &PhysicalMaterial::name,
+		 "formula", &PhysicalMaterial::formula,
+		 "std_bp", &PhysicalMaterial::std_bp,
+		 "dH_vaporization", &PhysicalMaterial::dH_vaporization,
+		 "dH_fusion", &PhysicalMaterial::dH_fusion,
+		 "dH_formation", &PhysicalMaterial::dH_formation,
+		 "heat_capacity_solid", &PhysicalMaterial::heat_capacity_solid,
+		 "heat_capacity_liquid", &PhysicalMaterial::heat_capacity_liquid,
+		 "heat_capacity_gas", &PhysicalMaterial::heat_capacity_gas,
+		 "molar_mass", &PhysicalMaterial::molar_mass,
+		 "liquid_density", &PhysicalMaterial::liquid_density,
+		 "solid_density", &PhysicalMaterial::solid_density,
+		 "get_vapor_pressure", &PhysicalMaterial::get_vapor_pressure,
+		 "get_boiling_point", &PhysicalMaterial::get_boiling_point,
+		 "get_heat_capacity_increase", &PhysicalMaterial::get_heat_capacity_increase,
+		 "get_moles", &PhysicalMaterial::get_moles,
+		 "get_mass", &PhysicalMaterial::get_mass);
 
 }

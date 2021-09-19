@@ -1,5 +1,9 @@
 #include "Universe.h"
 
+#ifdef OSPGL_LRDB
+#include <LRDB/server.hpp>
+#endif
+
 static void bullet_tick(btDynamicsWorld* world, btScalar tstep)
 {
 	Universe* uv = (Universe*)world->getWorldUserInfo();
@@ -125,6 +129,9 @@ Universe::Universe() : system(this)
 
 	lua_core->load(lua_state, "__UNDEFINED__");
 
+#ifdef OSPGL_LRDB
+	lua_debug_server = nullptr;
+#endif
 }
 
 
@@ -134,4 +141,31 @@ Universe::~Universe()
 	{
 		delete ent;
 	}
+
+#ifdef OSPGL_LRDB
+	disable_debugging();
+#endif
 }
+
+#ifdef OSPGL_LRDB
+void Universe::enable_debugging()
+{
+	logger->info("Enabling lua debugger. Make sure to connect via the debugger as the game will be blocked!");
+	lrdb::server* lua_debug_server_tmp = new lrdb::server(21110);
+	lua_debug_server_tmp->reset(lua_state.lua_state());
+	// We assign the void* to be able to free it later, but not expose the type to the exterior!
+	lua_debug_server = lua_debug_server_tmp;
+}
+
+void Universe::disable_debugging()
+{
+	if(lua_debug_server)
+	{
+		lrdb::server *lua_debug_server_tmp = (lrdb::server *) lua_debug_server;
+		lua_debug_server_tmp->reset();
+		delete lua_debug_server_tmp;
+		lua_debug_server = nullptr;
+	}
+}
+
+#endif

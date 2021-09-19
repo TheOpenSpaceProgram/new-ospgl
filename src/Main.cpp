@@ -34,6 +34,7 @@ int main(int argc, char** argv)
 	src2.lock()->set_source_clip(*audio);
 	src2.lock()->set_looping(true);
 	src2.lock()->set_3d_source(true);
+	src2.lock()->set_playing(false);
 
 	osp->audio_engine->set_listener(glm::dvec3(0.0, 0.0, 0.0),
 									glm::dvec3(1.0, 0.0, 0.0),
@@ -48,6 +49,20 @@ int main(int argc, char** argv)
 	{
 		PROFILE_BLOCK("frame");
 
+#ifdef OSPGL_LRDB
+		if(input->key_down(GLFW_KEY_PAUSE))
+		{
+			if(osp->game_state->universe.lua_debug_server)
+			{
+				osp->game_state->universe.disable_debugging();
+			}
+			else
+			{
+				osp->game_state->universe.enable_debugging();
+			}
+
+		}
+#endif
 		osp->start_frame();
 		osp->update();
 		osp->render();

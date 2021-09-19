@@ -65,6 +65,13 @@ public:
 	// any data with the rest of the universe
 	sol::state lua_state;
 
+#ifdef OSPGL_LRDB
+	void* lua_debug_server;
+	// This function will block until the debugger is connected!
+	void enable_debugging();
+	void disable_debugging();
+#endif
+
 	void sign_up_for_event(const std::string& event_id, EventHandler id);
 	void drop_out_of_event(const std::string& event_id, EventHandler id);
 	void emit_event(const std::string& event_id, EventArguments args = EventArguments());

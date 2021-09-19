@@ -62,6 +62,8 @@ StoredFluids StoredFluids::modify(const StoredFluids &b)
 		}
 	}
 
+	generate_internal_contents();
+
 	return out;
 }
 
@@ -81,6 +83,17 @@ StoredFluids StoredFluids::multiply(float value)
 
 void StoredFluids::generate_internal_contents()
 {
+	internal_contents.clear();
+
+	for(auto& pair : contents)
+	{
+		std::pair<const PhysicalMaterial*, StoredFluid*> spair;
+		spair.first = pair.first.get();
+		// We take a pointer here but it's fine for it will not change until this function
+		// is called again!
+		spair.second = &pair.second;
+		internal_contents.push_back(spair);
+	}
 
 }
 
