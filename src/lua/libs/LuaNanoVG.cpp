@@ -8,21 +8,10 @@ void LuaNanoVG::load_to(sol::table &table)
 
 	// Load all the FFI stuff
 	sview.script("ffi.cdef[["
-	  	"struct NVGcolor nvgRGB(unsigned char r, unsigned char g, unsigned char b);"
-	 	"struct NVGcolor nvgRGBf(float r, float g, float b);"
-   		"struct NVGcolor nvgRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a);"
-		"struct NVGcolor nvgRGBAf(float r, float g, float b, float a);"
-  		"struct NVGcolor nvgLerpRGBA(struct NVGcolor c0, struct NVGcolor c1, float u);"
-  		"struct NVGcolor nvgTransRGBA(struct NVGcolor c0, unsigned char a);"
-  		"struct NVGcolor nvgTransRGBAf(struct NVGcolor c0, float a);"
-  		"struct NVGcolor nvgHSL(float h, float s, float l);"
-		"struct NVGcolor nvgHSLA(float h, float s, float l, unsigned char a);"
   		"void nvgSave(struct NVGcontext* ctx);"
   		"void nvgRestore(struct NVGcontext* ctx);"
 		"void nvgReset(struct NVGcontext* ctx);"
-  		"void nvgStrokeColor(struct NVGcontext* ctx, struct NVGcolor color);"
 		"void nvgStrokePaint(struct NVGcontext* ctx, struct NVGpaint paint);"
-  		"void nvgFillColor(struct NVGcontext* ctx, struct NVGcolor color);"
 		"void nvgFillPaint(struct NVGcontext* ctx, struct NVGpaint paint);"
   		"void nvgStrokeWidth(struct NVGcontext* ctx, float size);"
 		"void nvgResetTransform(struct NVGcontext* ctx);"
@@ -71,21 +60,10 @@ void LuaNanoVG::load_to(sol::table &table)
 
 
 	// Export the functions
-	EXPORT_FFI("nvgRGB", "rgb");
-	EXPORT_FFI("nvgRGBf", "rgbf");
-	EXPORT_FFI("nvgRGBA", "rgba");
-	EXPORT_FFI("nvgRGBAf", "rgbaf");
-	EXPORT_FFI("nvgLerpRGBA", "lerp_rgba");
-	EXPORT_FFI("nvgTransRGBA", "trans_rgba");
-	EXPORT_FFI("nvgTransRGBAf", "trans_rgbaf");
-	EXPORT_FFI("nvgHSL", "hsl");
-	EXPORT_FFI("nvgHSLA", "hsla");
 
 	EXPORT_FFI("nvgSave", "save");
 	EXPORT_FFI("nvgRestore", "restore");
-	EXPORT_FFI("nvgStrokeColor", "stroke_color");
 	EXPORT_FFI("nvgStrokePaint", "stroke_paint");
-	EXPORT_FFI("nvgFillColor", "fill_color");
 	EXPORT_FFI("nvgFillPaint", "fill_paint");
 	EXPORT_FFI("nvgStrokeWidth", "stroke_width");
 
@@ -133,5 +111,52 @@ void LuaNanoVG::load_to(sol::table &table)
 
 	// Unload ffi to avoid security risks
 	sview["ffi"] = sol::nil;
+
+	// For some reason, the color related functions dont work very well so
+	// we implement them manually. This prevents runtime crashes
+	table["rgb"] = [](unsigned char r, unsigned char g, unsigned char b)
+	{
+		return nvgRGB(r, g, b);
+	};
+	table["rgbf"] = [](float r, float g, float b)
+	{
+		return nvgRGBf(r, g, b);
+	};
+	table["rgba"] = [](unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+	{
+		return nvgRGBA(r, g, b, a);
+	};
+	table["rgbaf"] = [](float r, float g, float b, float a)
+	{
+		return nvgRGBAf(r, g, b, a);
+	};
+	table["fill_color"] = [](void* vg, NVGcolor color)
+	{
+		nvgFillColor((NVGcontext*)vg, color);
+	};
+	table["stroke_color"] = [](void* vg, NVGcolor color)
+	{
+		nvgStrokeColor((NVGcontext*)vg, color);
+	};
+	table["lerp_rgba"] = [](NVGcolor a, NVGcolor b, float u)
+	{
+		return nvgLerpRGBA(a, b, u);
+	};
+	table["trans_rgba"] = [](NVGcolor c, unsigned char a)
+	{
+		return nvgTransRGBA(c, a);
+	};
+	table["trans_rgbaf"] = [](NVGcolor c, float a)
+	{
+		return nvgTransRGBAf(c, a);
+	};
+	table["hsl"] = [](float h, float s, float l)
+	{
+		return nvgHSL(h, s, l);
+	};
+	table["hsla"] = [](float h, float s, float l, unsigned char a)
+	{
+		return nvgHSLA(h, s, l, a);
+	};
 
 }

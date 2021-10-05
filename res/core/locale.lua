@@ -4,6 +4,12 @@ local locale =
 -- Some useful core words
 {"inlet", "Inlet", "Entrada"},
 {"outlet", "Outlet", "Salida"},
+{"gas_inlet", "Gas Inlet", "Entrada de gases"},
+{"gas_outlet", "Gas Outlet", "Salida de gases"},
+{"liquid_inlet", "Liquid Inlet", "Entrada de liquidos"},
+{"liquid_outlet", "Liquid Outlet", "Salida de liquidos"},
+{"gas_port", "Gas Port", "Conector de gases"},
+{"liquid_port", "Liquid Port", "Conector de liquidos"},
 {"top_attachment", "Top Attachment", "Acoplamiento Superior"},
 {"bottom_attachment", "Bottom Attachment", "Acoplamiento Inferior"},
 {"radial_attachment", "Radial Attachment", "Acoplamiento Radial"},

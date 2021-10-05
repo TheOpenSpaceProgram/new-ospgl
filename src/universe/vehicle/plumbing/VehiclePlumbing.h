@@ -24,7 +24,7 @@ struct Pipe
 	std::string port_a, port_b;
 	float surface;
 
-	// Real-time updated, values greater than 0 mean going from a to b (or from junction to b)
+	// Real-time updated, values greater than 0 mean going from a to b, or going into the junction
 	// Remember to multiply by dt before updating!
 	float flow;
 
@@ -120,6 +120,14 @@ private:
 	Vehicle* veh;
 	size_t pipe_id;
 	size_t junction_id;
+
+	// Assigns flows to every pipe, depending on reported pressure
+	void assign_flows(float dt);
+	// Simulates how the step would carry out, querying how much is each machine going to give and
+	// how much will each target machine accept, and accepts flow so everything stays within limits
+	void sanify_flow(float dt);
+	// Does the actual flow simulation, making sure no fluid is lost
+	void simulate_flow(float dt);
 
 public:
 

@@ -2,6 +2,7 @@
 #include "../part/Machine.h"
 #include <util/LuaUtil.h>
 #include <util/serializers/glm.h>
+#include <gui/GUISkin.h>
 
 float MachinePlumbing::get_pressure(const std::string& port)
 {
@@ -13,24 +14,24 @@ float MachinePlumbing::get_pressure(const std::string& port)
 	return result.get<float>();
 }
 
-float MachinePlumbing::get_free_volume(const std::string& port)
+StoredFluids MachinePlumbing::in_flow(std::string port, const StoredFluids &in, bool do_flow)
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 
-	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["get_free_volume"], port);
-	logger->check(result.valid(), "get_free_volume failed, this is fatal");
+	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["in_flow"], port, in, do_flow);
+	logger->check(result.valid(), "in_flow failed, this is fatal");
 
-	return result.get<float>();
+	return std::move(result.get<StoredFluids>());
 }
 
-StoredFluids MachinePlumbing::in_flow(std::string port, const StoredFluids &in)
+StoredFluids MachinePlumbing::out_flow(std::string port, float volume, bool do_flow)
 {
-	return StoredFluids();
-}
+	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 
-StoredFluids MachinePlumbing::out_flow(std::string port, float volume)
-{
-	return StoredFluids();
+	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["out_flow"], port, volume, do_flow);
+	logger->check(result.valid(), "out_flow failed, this is fatal");
+
+	return std::move(result.get<StoredFluids>());
 }
 
 // TODO: We could cache this too
@@ -56,10 +57,10 @@ glm::ivec2 MachinePlumbing::get_editor_size(bool expand, bool rotate) const
 	return ret;
 }
 
-void MachinePlumbing::draw_diagram(void *vg)
+void MachinePlumbing::draw_diagram(void* vg, GUISkin* gui_skin)
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
-	LuaUtil::safe_call_function(get_lua_plumbing()["draw_diagram"], vg);
+	LuaUtil::safe_call_function(get_lua_plumbing()["draw_diagram"], vg, gui_skin);
 }
 
 sol::table MachinePlumbing::get_lua_plumbing(bool silent_fail)

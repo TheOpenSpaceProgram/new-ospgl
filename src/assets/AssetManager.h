@@ -354,6 +354,8 @@ struct AssetPointer
 
 
 // Automatically frees the asset when done using it
+// TODO: We could make this ALWAYS load the asset and implement an AssetPointer which
+// only loads it when required? Probably a good idea for consistency
 template<typename T>
 struct AssetHandle
 {

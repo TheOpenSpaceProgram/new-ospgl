@@ -106,4 +106,10 @@ struct LuaAssetHandle
 
 	LuaAssetHandle(const std::string& pkg, const std::string& name, T* data);
 	~LuaAssetHandle();
+
+	bool operator==(const LuaAssetHandle<T>& other) const
+	{
+		return pkg == other.pkg && name == other.name;
+	}
 };
+

@@ -132,7 +132,7 @@ void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span) const
 				}
 				nvgRotate(vg, glm::half_pi<float>() * (float)pair.second->plumbing.editor_rotation);
 
-				pair.second->plumbing.draw_diagram((void*)vg);
+				pair.second->plumbing.draw_diagram((void*)vg, skin);
 
 				// Draw the ports
 				for(const FluidPort& port : pair.second->plumbing.fluid_ports)
@@ -163,7 +163,6 @@ void PlumbingEditor::draw_tooltip(NVGcontext* vg, glm::vec4 span) const
 		nvgStrokeColor(vg, skin->get_foreground_color(true));
 		nvgFillColor(vg, skin->get_background_color(true));
 		nvgStrokeWidth(vg, 2.0f);
-		// The tooltip is fixed size
 		// TODO: Rotation
 
 		for(const FluidPort& port : m->plumbing.fluid_ports)
@@ -189,18 +188,21 @@ void PlumbingEditor::draw_tooltip(NVGcontext* vg, glm::vec4 span) const
 				std::stringstream pressure_stream;
 				std::stringstream flow_stream;
 				pressure_stream << "P: " << std::fixed << std::setprecision(2) << pressure / 101325.0 << " atm";
-				flow_stream << "F: " << std::fixed << std::setprecision(2) << flow << " m³/s";
-				float size = std::max(pressure_stream.str().length(), flow_stream.str().length()) * 8.0f;
+				flow_stream << "F: " << std::fixed << std::setprecision(2) << flow * 1000.0 << " L/s";
+				float size = std::max(pressure_stream.str().length(), flow_stream.str().length());
+				size = std::max(size, (float)port.gui_name.length());
+				size *= 8.0f;
 
 				nvgBeginPath(vg);
-				nvgRect(vg, pos.x, pos.y, size, 50.0f);
+				nvgRect(vg, pos.x, pos.y, size, 80.0f);
 				nvgFill(vg);
 				nvgStroke(vg);
 
 				nvgFontSize(vg, 16.0f);
 				nvgFillColor(vg, skin->get_foreground_color());
-				nvgText(vg, pos.x + 5.0f, pos.y + 20.0f, pressure_stream.str().c_str(), nullptr);
-				nvgText(vg, pos.x + 5.0f, pos.y + 40.0f, flow_stream.str().c_str(), nullptr);
+				nvgText(vg, pos.x + 5.0f, pos.y + 20.0f, port.gui_name.c_str(), nullptr);
+				nvgText(vg, pos.x + 5.0f, pos.y + 40.0f, pressure_stream.str().c_str(), nullptr);
+				nvgText(vg, pos.x + 5.0f, pos.y + 60.0f, flow_stream.str().c_str(), nullptr);
 
 				// TODO: Show composition of flow?
 				break;

@@ -5,6 +5,7 @@
 
 class Machine;
 class MachinePlumbing;
+class GUISkin;
 
 struct FluidPort
 {
@@ -42,7 +43,7 @@ public:
 	// Expand extends the size by 1 in both directions so parts must be spaced out
 	glm::ivec2 get_editor_size(bool expand = false, bool rotate = true) const;
 	// Does not include rotation!
-	void draw_diagram(void* vg);
+	void draw_diagram(void* vg, GUISkin* skin);
 
 	std::vector<FluidPort> fluid_ports;
 
@@ -59,16 +60,11 @@ public:
 	float get_pressure(const std::string& port);
 
 	// Volumes are in m^3, if you cannot supply enough, don't!
-	StoredFluids out_flow(std::string port, float volume);
+	StoredFluids out_flow(std::string port, float volume, bool do_flow);
 	// Return what you couldn't accept, ideally:
 	// - Accept gases as they are compressible
 	// - Feel free to refuse liquids if no more can fit
-	StoredFluids in_flow(std::string port, const StoredFluids& in);
-
-	// Free volume for liquids (you should accept infinite gases, or explode...)
-	// Make sure in_flow accepts exactly this, otherwise fluids will break
-	// Different ports do not neccesarily need to output different values
-	float get_free_volume(const std::string& port);
+	StoredFluids in_flow(std::string port, const StoredFluids& in, bool do_flow);
 
 	explicit MachinePlumbing(Machine* sm) : machine(sm) {}
 	void init(const cpptoml::table& toml);

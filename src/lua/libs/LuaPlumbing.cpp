@@ -9,14 +9,26 @@ void LuaPlumbing::load_to(sol::table &table)
 	);
 
 	table.new_usertype<StoredFluids>("stored_fluids",
-	 sol::constructors<StoredFluids>(),
+	 sol::constructors<StoredFluids()>(),
  		"get_contents", &StoredFluids::get_contents,
  		"add_fluid", [](StoredFluids& self, const LuaAssetHandle<PhysicalMaterial>& mat, float liquid, float gas)
  		{
 			self.add_fluid(mat.get_asset_handle(), liquid, gas);
  		},
  		"modify", &StoredFluids::modify,
- 		"multiply", &StoredFluids::multiply
+ 		"multiply", &StoredFluids::multiply,
+	 	"drain_to", &StoredFluids::drain_to,
+		sol::meta_function::to_string, [](const StoredFluids& f)
+		{
+			std::string list = "Fluid contents: ";
+			for(const auto& pair : f.contents)
+			{
+				std::string substr = fmt::format("{}: {{{} kg liquid, {} kg gas}}; ", pair.first->name,
+												 pair.second.liquid_mass, pair.second.gas_mass);
+				list += substr;
+			}
+			return list;
+		}
  	);
 
 	table.new_usertype<StoredFluid>("stored_fluid",

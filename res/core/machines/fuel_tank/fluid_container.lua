@@ -1,11 +1,12 @@
 -- Util file that handles storing of fluids in a vessel, simulating the liquid and gaseous phases,
 -- alongside thermodynamics (boiling of the fluids, condensation...) and allowing convenient extraction
--- of fluids.
+-- of fluids. It assumes the fluids wont mix or react together, which may be too simple for some use cases!
 -- To be used like a class
 require("vehicle")
 local logger = require("logger")
 local plumbing = require("plumbing")
 local assets = require("assets")
+local noise = require("noise")
 
 local fluid_container = {}
 fluid_container.__index = fluid_container
@@ -17,14 +18,16 @@ local function get_partial_pressure(temp, volume, phys_mat, stored_fluid)
     return phys_mat:get_moles(stored_fluid.gas_mass) * R * temp / volume;
 end
 
-
-
+-- Volume in m^3!
 function fluid_container.new(volume)
     assert(type(volume) == "number")
 
     local container = {}
     setmetatable(container, fluid_container)
 
+    -- Noise generator for gas flow TODO: Set the seed to some other value?
+    container.noise_gen = noise.new(0)
+    container.noise_t = 0.0
     -- Volume of the container in m^3
     container.volume = volume
     -- This extra volume can only have gases, useful to prevent infinite pressure
@@ -49,13 +52,32 @@ function fluid_container:get_pressure()
     local p = 0.0
     local total_ullage = self:get_ullage_volume() + self.extra_volume
     local contents = self.contents:get_contents()
-    for _, phys_mat, stored_fluid in contents:pairs() do
+    for phys_mat, stored_fluid in contents:pairs() do
         p = p + get_partial_pressure(self.temperature, total_ullage, phys_mat, stored_fluid)
     end
     return p
-
 end
 
+-- Obtains pressure due to the weight of the fluid, depends on acceleration last frame (Pa)
+-- Note that depth will depend on the geometry of the tank
+-- Negative accelerations will result in negative pressure!
+function fluid_container:get_column_pressure(depth)
+    local p = 0.0
+
+    -- We accumulate the pressure exerted by each liquid, assuming no mixing
+    local contents = self.contents:get_contents()
+    for phys_mat, stored_fluid in contents:pairs() do
+        -- We consider the thresold the ammount required to fill 1% of the tank
+        -- This prevents "droplets" from exerting full pressure on the tank
+        local thresold = self.volume * phys_mat.liquid_density * 0.01
+        local factor = stored_fluid.liquid_mass / thresold
+        factor = math.min(factor, 1.0)
+        p = p + phys_mat.liquid_density * depth * self.last_acceleration * factor
+    end
+
+    return p
+
+end
 
 function fluid_container:get_ullage_volume()
     return self.volume - self:get_fluid_volume()
@@ -64,7 +86,7 @@ end
 function fluid_container:get_fluid_volume()
     local v = 0.0
     local contents = self.contents:get_contents()
-    for _, phys_mat, stored_fluid in contents:pairs() do
+    for phys_mat, stored_fluid in contents:pairs() do
         v = v + stored_fluid.liquid_mass / phys_mat.liquid_density
     end
     return v
@@ -80,11 +102,11 @@ function fluid_container:go_to_equilibrium(max_dp)
     local it = 0
 
     while true do
-        self:update(12.0 * softening, 0.0)
+        self:update(5.0 * softening, 0.0)
         self.temperature = T0
         local P = self:get_pressure()
         local dP = P - P0
-        if math.abs(dP) < max_dP then
+        if math.abs(dP) < max_dp then
             break
         end
 
@@ -103,13 +125,13 @@ function fluid_container:go_to_equilibrium(max_dp)
 
 end
 
--- Positive values mean inputting heat into the system, TODO: Units?
+-- Positive values mean inputting heat into the system (In J)
 function fluid_container:exchange_heat(d)
     local cl_sum = 0.0
     local cg_sum = 0.0
 
     local contents = self.contents:get_contents()
-    for _, phys_mat, stored_fluid in contents:pairs() do
+    for phys_mat, stored_fluid in contents:pairs() do
         local cl = phys_mat.heat_capacity_liquid
         local cg = phys_mat.heat_capacity_gas
         cl_sum = cl_sum + cl * stored_fluid.liquid_mass
@@ -126,6 +148,7 @@ end
 -- We also assume all substances evaporate at the same rate if they have the
 -- same vapour pressure, we dont think about surface area as it would be overly complicated
 function fluid_container:update(dt, acceleration)
+    self.noise_t = self.noise_t + dt
     self.last_acceleration = math.max(acceleration, 0.0)
 
     local ullage_a_factor = 1.0
@@ -140,7 +163,7 @@ function fluid_container:update(dt, acceleration)
     local total_ullage = self:get_ullage_volume() + self.extra_volume;
 
     local contents = self.contents:get_contents()
-    for _, phys_mat, stored_fluid in contents:pairs() do
+    for phys_mat, stored_fluid in contents:pairs() do
         local cp = get_partial_pressure(self.temperature, total_ullage, phys_mat, stored_fluid)
         local vp = phys_mat:get_vapor_pressure(self.temperature)
         local dp = vp - cp;
@@ -162,6 +185,46 @@ function fluid_container:update(dt, acceleration)
         stored_fluid.liquid_mass = stored_fluid.liquid_mass - dm;
         stored_fluid.gas_mass = stored_fluid.gas_mass + dm;
     end
+end
+
+function fluid_container:get_total_pressure(depth)
+    depth = depth or 0.0
+    return self:get_pressure() + self:get_column_pressure(depth)
+end
+
+-- Attempts to get flow volume (m^3) of liquid out of the tank
+-- If ullage is not good, gas may also be drained!
+-- It may fail and return less than asked for if there's not enough materials
+-- Drains uniformly from all liquid layers (TODO: Maybe drain using density as if there were layers?)
+function fluid_container:get_liquid(flow, do_flow)
+    local contents = self.contents:get_contents()
+    local total_liquid_vol = 0.0
+    local result = plumbing.stored_fluids.new()
+
+    -- We do a weighted average for liquids, gases are drained relative to ullage volume
+    for phys_mat, stored_fluid in contents:pairs() do
+        total_liquid_vol = total_liquid_vol + stored_fluid.liquid_mass / phys_mat.liquid_density
+    end
+
+
+    if total_liquid_vol == 0.0 then
+        -- We can only drain gases now
+        for phys_mat, stored_fluid in contents:pairs() do
+            -- We adjust the flow to current gas density
+            local flow_mass = flow * stored_fluid.gas_mass / self:get_ullage_volume()
+            self.contents:drain_to(result, phys_mat, 0.0, flow_mass, do_flow)
+        end
+
+    else
+        for phys_mat, stored_fluid in contents:pairs() do
+            local liquid_mass = flow * stored_fluid.liquid_mass / total_liquid_vol
+            -- We drain gases on a pseudorandom phasion using the noise generator
+            local gas_mass = noise.perlin2(self.noise_gen, self.noise_t * 50.0, 0.0) * self.ullage_distribution
+            self.contents:drain_to(result, phys_mat, liquid_mass, gas_mass, do_flow)
+        end
+    end
+
+    return result
 
 end
 

@@ -48,6 +48,7 @@ public:
 		GAME_DATABASE,	// LuaGameDatabase
 		NANO_VG,		// LuaNanoVG
 		PLUMBING,		// LuaPlumbing
+		GUI,			// LuaGUI
 		COUNT,
 	};
 

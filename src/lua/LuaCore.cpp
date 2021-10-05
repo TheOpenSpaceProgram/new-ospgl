@@ -14,6 +14,7 @@
 #include "libs/LuaGameDatabase.h"
 #include "libs/LuaNanoVG.h"
 #include "libs/LuaPlumbing.h"
+#include "libs/LuaGUI.h"
 
 
 LuaCore* lua_core;
@@ -120,6 +121,10 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::PLUMBING;
 	}
+	else if(name == "gui")
+	{
+		return LibraryID::GUI;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -216,6 +221,7 @@ LuaCore::LuaCore()
 	libraries[LibraryID::GAME_DATABASE] = new LuaGameDatabase();
 	libraries[LibraryID::NANO_VG] = new LuaNanoVG();
 	libraries[LibraryID::PLUMBING] = new LuaPlumbing();
+	libraries[LibraryID::GUI] = new LuaGUI();
 }
 
 LuaCore::~LuaCore()

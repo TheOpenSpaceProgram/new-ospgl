@@ -1,7 +1,7 @@
 require("toml")
 require("game_database")
 require("vehicle")
-require("plumbing")
+local plumbing_lib = require("plumbing")
 
 -- Requirements for modders:
 --  You must assign the inlet marker names in the TOML given as
@@ -24,22 +24,23 @@ function plumbing.fluid_update()
 end
 
 function plumbing.get_pressure(port)
-    return 1.0
+    return 91000.0
 end
 
-function plumbing.out_flow(port, volume)
-
+function plumbing.out_flow(port, volume, do_flow)
+    return plumbing_lib.stored_fluids.new()
 end
 
-function plumbing.in_flow(port, fluids)
-
+function plumbing.in_flow(port, fluids, do_flow)
+    logger.info(fluids)
+    return plumbing_lib.stored_fluids.new()
 end
 
 function plumbing.get_free_volume(port)
     return 100.0
 end
 
-function plumbing.draw_diagram(vg)
+function plumbing.draw_diagram(vg, skin)
 
     nvg.begin_path(vg)
     -- Chamber part

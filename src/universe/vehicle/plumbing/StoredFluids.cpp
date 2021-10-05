@@ -10,7 +10,15 @@ StoredFluids StoredFluids::modify(const StoredFluids &b)
 		if(it == contents.end())
 		{
 			// We create a new AssetHandle here to store it as we are creating the key
-			contents[pair.first.duplicate()] = pair.second;
+			for(auto& ast : b.mat_ptrs)
+			{
+				if(ast.data == pair.first)
+				{
+					mat_ptrs.insert(ast.duplicate());
+				}
+			}
+
+			contents[pair.first] = pair.second;
 			if(pair.second.gas_mass < 0.0f)
 			{
 				contents.at(pair.first).gas_mass = 0.0f;
@@ -22,7 +30,15 @@ StoredFluids StoredFluids::modify(const StoredFluids &b)
 		}
 		else
 		{
-			out.contents[pair.first.duplicate()] = StoredFluid();
+			out.contents[pair.first] = StoredFluid();
+			// We create a new AssetHandle in out to store it as we are creating the key
+			for(auto& ast : b.mat_ptrs)
+			{
+				if(ast.data == pair.first)
+				{
+					out.mat_ptrs.insert(ast.duplicate());
+				}
+			}
 
 			if(pair.second.gas_mass < 0.0f)
 			{
@@ -62,7 +78,6 @@ StoredFluids StoredFluids::modify(const StoredFluids &b)
 		}
 	}
 
-	generate_internal_contents();
 
 	return out;
 }
@@ -73,7 +88,15 @@ StoredFluids StoredFluids::multiply(float value)
 
 	for(const auto& pair : contents)
 	{
-		out.contents[pair.first.duplicate()] = pair.second;
+		out.contents[pair.first] = pair.second;
+		// we create a new assethandle in out to store it as we are creating the key
+		for(auto& ast : mat_ptrs)
+		{
+			if(ast.data == pair.first)
+			{
+				out.mat_ptrs.insert(ast.duplicate());
+			}
+		}
 		out.contents.at(pair.first).gas_mass *= value;
 		out.contents.at(pair.first).liquid_mass *= value;
 	}
@@ -81,33 +104,117 @@ StoredFluids StoredFluids::multiply(float value)
 	return out;
 }
 
-void StoredFluids::generate_internal_contents()
-{
-	internal_contents.clear();
-
-	for(auto& pair : contents)
-	{
-		std::pair<const PhysicalMaterial*, StoredFluid*> spair;
-		spair.first = pair.first.get();
-		// We take a pointer here but it's fine for it will not change until this function
-		// is called again!
-		spair.second = &pair.second;
-		internal_contents.push_back(spair);
-	}
-
-}
-
 void StoredFluids::remove_empty_fluids()
 {
 
-	generate_internal_contents();
 }
 
 void StoredFluids::add_fluid(const AssetHandle<PhysicalMaterial>& mat, float liquid_mass, float gas_mass)
 {
 	StoredFluids tmp;
-	tmp.contents[mat.duplicate()] = StoredFluid(liquid_mass, gas_mass);
+	if(mat_ptrs.count(mat) == 0)
+	{
+		// We must introduce a new asset handle
+		mat_ptrs.insert(mat.duplicate());
+	}
+
+	tmp.contents[mat.data] = StoredFluid(liquid_mass, gas_mass);
 	modify(tmp);
+}
+
+void StoredFluids::drain_to(StoredFluids* target, PhysicalMaterial* mat, float liquid_mass, float gas_mass, bool do_flow)
+{
+	auto it = target->contents.find(mat);
+	StoredFluid* target_fluids;
+	if(it == target->contents.end())
+	{
+		// we create a new assethandle in out to store it as we are creating the key
+		for(auto& ast : mat_ptrs)
+		{
+			if(ast.data == mat)
+			{
+				target->mat_ptrs.insert(ast.duplicate());
+			}
+		}
+
+		target->contents[mat] = StoredFluid();
+		target_fluids = &target->contents[mat];
+	}
+	else
+	{
+		target_fluids = &it->second;
+	}
+
+	// Drain from our tank
+	auto self_it = contents.find(mat);
+	logger->check(self_it != contents.end(), "Could not find material in drain_to, this is not allowed!");
+
+	float tmp_liquid = self_it->second.liquid_mass;
+	float tmp_gas = self_it->second.gas_mass;
+
+	self_it->second.gas_mass -= gas_mass;
+	self_it->second.liquid_mass -= liquid_mass;
+	float tfer_gas = gas_mass;
+	float tfer_liq = liquid_mass;
+	if(self_it->second.liquid_mass < 0.0f)
+	{
+		tfer_liq = -self_it->second.liquid_mass;
+	}
+	if(self_it->second.gas_mass < 0.0f)
+	{
+		tfer_gas = -self_it->second.gas_mass;
+	}
+
+	self_it->second.gas_mass = glm::max(self_it->second.gas_mass, 0.0f);
+	self_it->second.liquid_mass = glm::max(self_it->second.liquid_mass, 0.0f);
+
+	target_fluids->gas_mass += tfer_gas;
+	target_fluids->liquid_mass += tfer_liq;
+
+	// Restore the original fluids
+	if(!do_flow)
+	{
+		self_it->second.gas_mass = tmp_gas;
+		self_it->second.liquid_mass = tmp_liquid;
+	}
+
+	remove_empty_fluids();
+
+}
+
+float StoredFluids::get_total_liquid_mass() const
+{
+	float total = 0.0f;
+	for(const auto& pair : contents)
+	{
+		total += pair.second.liquid_mass;
+	}
+	return total;
+}
+
+float StoredFluids::get_total_liquid_volume() const
+{
+	float total = 0.0f;
+	for(const auto& pair : contents)
+	{
+		total += pair.second.liquid_mass / pair.first->liquid_density;
+	}
+	return total;
+}
+
+float StoredFluids::get_average_liquid_density() const
+{
+	return get_total_liquid_mass() / get_total_liquid_volume();
+}
+
+float StoredFluids::get_total_gas_mass() const
+{
+	float total = 0.0f;
+	for(const auto& pair : contents)
+	{
+		total += pair.second.gas_mass;
+	}
+	return total;
 }
 
 StoredFluid::StoredFluid()

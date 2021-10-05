@@ -1,78 +1,134 @@
 #include "VehiclePlumbing.h"
 #include "../Vehicle.h"
 
-void VehiclePlumbing::update_pipes(float dt, Vehicle* veh)
+// A reasonable multiplier to prevent extreme flow velocities
+// I don't know enough fluid mechanics as to determine a reasonable value
+// so it's arbitrary, chosen to approximate real life rocket values
+#define FLOW_MULTIPLIER 0.0002
+
+void VehiclePlumbing::update_pipes(float dt, Vehicle* in_veh)
 {
-	// machines->fluid_preupdate();
+	assign_flows(dt);
+	sanify_flow(dt);
+	simulate_flow(dt);
 
-	// First we solve junctions. They will query machines for pressure
-	for(const auto& jnc : junctions)
+}
+
+void VehiclePlumbing::assign_flows(float dt)
+{
+	for(const PipeJunction& jnc : junctions)
 	{
-		// First we do a pass to see how much can be accepted by the receivers
-		// This is to prevent "sucking" too much from the suppliers and then
-		// having to give back
-		// We assume gases can be accepted in infinite ammount as they are compressible
-		float available_liquid_volume = 0.0f;
-		float intake_liquid_volume = 0.0f;
 		junction_flow_rate(jnc, dt);
+	}
 
-		// Calculate what's the max that will be received (intake_liquid_volume), and the max
-		// than can be accepted (available_liquid_volume)
-		for(Pipe* p : jnc.pipes)
-		{
-			intake_liquid_volume += p->flow * dt;
-			// Pipes with flow > 0.0f go from the junction to a machine
-			if(p->flow > 0.0f)
-			{
-				available_liquid_volume += p->mb->plumbing.get_free_volume(p->port_b);
-			}
-		}
+	for(Pipe& p : pipes)
+	{
+		if(p.junction != nullptr)
+			continue;
+		// TODO: Obtain density by averaging or something
+		float sqrt_density = 1.0f;
+		float pa = p.ma->plumbing.get_pressure(p.port_a);
+		float pb = p.mb->plumbing.get_pressure(p.port_b);
+		float sign = pa > pb ? -1.0f : 1.0f;
+		float constant = p.surface * sqrt(2.0f) / sqrt_density;
+		p.flow = sign * constant * sqrt(glm::abs(pb - pa)) * FLOW_MULTIPLIER;
+	}
+}
 
-		StoredFluids in;
-		float sucked = 0.0;
-
-		// TODO: Instead of clamping when full, we could normalize the flow
-
-		// Suck from the pipes that go into the junction (flow < 0.0f)
+void VehiclePlumbing::sanify_flow(float dt)
+{
+	for(PipeJunction& jnc : junctions)
+	{
+		// Liquid volume, gases always fit as they are compressible!
+		float total_accepted_volume = 0.0f;
+		float total_given_volume = 0.0f;
+		StoredFluids f_total = StoredFluids();
+		// Find how much will be given
 		for(Pipe* p : jnc.pipes)
 		{
 			if(p->flow < 0.0f)
+				continue;
+			// This pipe gives to the junction, find how much would it give
+			StoredFluids f = p->mb->plumbing.out_flow(p->port_b, p->flow * dt, false);
+			float vol = f.get_total_liquid_volume();
+			if(vol == 0.0f && f.get_total_gas_mass() != 0.0f && f.get_total_liquid_mass() == 0.0f)
 			{
-				if(sucked + p->flow * dt > available_liquid_volume)
-				{
-					// We must clamp flow, sadly this is unrealistic but prevents fluid from disappearing
-					p->flow = available_liquid_volume - sucked;
-				}
-				sucked += p->flow * dt;
-				in.modify(p->mb->plumbing.out_flow(p->port_b, p->flow * dt));
+				// We are draining gases, no need to change flow
 			}
+			else if(vol < p->flow * dt)
+			{
+				// This pipe cannot supply enough, flow is clamped
+				p->flow = vol;
+			}
+			total_given_volume += vol;
+			f_total.modify(f);
 		}
 
-		// Give from the junction to the out pipes
-		for(Pipe* p : jnc.pipes)
+		// Find how much will be taken
+		for(const Pipe* p : jnc.pipes)
 		{
 			if(p->flow > 0.0f)
+				continue;
+			// This pipe takes from the junction, find how much would it take
+			// We don't care about gases here as they can be taken in infinite ammounts
+			StoredFluids in = f_total.modify(f_total.multiply(-p->flow * dt));
+			StoredFluids not_taken = p->mb->plumbing.in_flow(p->port_b, in, false);
+			total_accepted_volume += -dt * p->flow - not_taken.get_total_liquid_volume();
+		}
+
+		if(total_accepted_volume < total_given_volume)
+		{
+			// Sanify flow, the giving pipes must give less. This is done
+			// in a uniform manner, by multiplying flow of every pipe
+			float factor = total_accepted_volume / total_given_volume;
+			for(Pipe* p : jnc.pipes)
 			{
-				StoredFluids in_fraction = in.multiply(p->flow * dt);
-				in = in.modify(in_fraction.multiply(-1.0f));
-				p->mb->plumbing.in_flow(p->port_b, in_fraction);
+				if(p->flow < 0.0f)
+					p->flow *= factor;
 			}
 		}
+
 	}
 
-	// Then we solve single pipes. They will query machines for pressure
-	for(const Pipe& p : pipes)
+	for(Pipe& p : pipes)
 	{
-		if(p.junction == nullptr)
-		{
+		if(p.junction != nullptr)
+			continue;
+	}
+}
 
+// Very similar to sanify but does the actual flow and handles gases
+void VehiclePlumbing::simulate_flow(float dt)
+{
+	for(PipeJunction& jnc : junctions)
+	{
+		StoredFluids f_total = StoredFluids();
+		// Take from pipes
+		for(const Pipe* p : jnc.pipes)
+		{
+			if(p->flow < 0.0f)
+				continue;
+			StoredFluids f = p->mb->plumbing.out_flow(p->port_b, p->flow * dt, true);
+			f_total.modify(f);
+		}
+
+		for(const Pipe* p : jnc.pipes)
+		{
+			if(p->flow > 0.0f)
+				continue;
+			StoredFluids in = f_total.modify(f_total.multiply(-p->flow * dt));
+			StoredFluids not_taken = p->mb->plumbing.in_flow(p->port_b, in, true);
+			// TODO: Handle gases?
+			logger->check(not_taken.get_total_liquid_mass() < 0.001f, "Fluids were not conserved!");
 		}
 	}
 
-	// machines->fluid_update();
+	for(Pipe& p : pipes)
+	{
 
-
+	}
 }
+
 
 void VehiclePlumbing::junction_flow_rate(const PipeJunction& junction, float dt)
 {
@@ -167,7 +223,7 @@ void VehiclePlumbing::junction_flow_rate(const PipeJunction& junction, float dt)
 	{
 		float sign = i > (jsize - 2 - solution_section) ? -1.0f : 1.0f;
 		float constant = pipe_pressure[i].first->surface * sqrt(2.0f) / sqrt_density;
-		pipe_pressure[i].first->flow = sign * constant * sqrt(glm::abs(pipe_pressure[i].second - x));
+		pipe_pressure[i].first->flow = sign * constant * sqrt(glm::abs(pipe_pressure[i].second - x)) * FLOW_MULTIPLIER;
 	}
 
 
@@ -465,6 +521,7 @@ void VehiclePlumbing::rebuild_pipe_pointers()
 		}
 	}
 }
+
 
 
 glm::ivec2 PipeJunction::get_size(bool extend, bool rotate) const
