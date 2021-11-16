@@ -17,7 +17,7 @@ local outlet_id = "outlet"
 
 local inlet_count = 0
 
-function plumbing.is_requester() return true end
+function plumbing.is_inline_element() return false end
 
 function plumbing.fluid_update()
 

@@ -44,7 +44,6 @@ private:
 	btTransform get_global_transform_internal(bool use_mstate);
 
 public:
-	
 	// Transform used while the piece is packed
 	// (aka, physics simulation is off)
 	// They are root relative coordinates

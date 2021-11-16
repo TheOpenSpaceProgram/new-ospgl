@@ -47,7 +47,7 @@ else()
 		set(STACKTRACE_LINK "bfd")
 	endif()
 
-	link_libraries(${CMAKE_DL_LIBS})
+	link_libraries(${CMAKE_DL_LIBS} GL)
 endif()
 
 include_directories(dep)

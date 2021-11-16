@@ -194,7 +194,7 @@ void PlumbingEditor::draw_tooltip(NVGcontext* vg, glm::vec4 span) const
 				size *= 8.0f;
 
 				nvgBeginPath(vg);
-				nvgRect(vg, pos.x, pos.y, size, 80.0f);
+				nvgRect(vg, pos.x, pos.y, size, 70.0f);
 				nvgFill(vg);
 				nvgStroke(vg);
 

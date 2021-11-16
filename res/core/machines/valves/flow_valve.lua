@@ -1,17 +1,15 @@
-local plumbing = {};
-
-require("toml")
 local logger = require("logger")
 local nvg = require("nano_vg")
-require("game_database")
-require("vehicle")
 local plumbing_lib = require("plumbing")
-require("gui")
+require("toml")
+require("game_database")
 
-local fluid_container = dofile("machines/fuel_tank/fluid_container.lua").new(0.3)
-fluid_container:go_to_equilibrium(0.1)
+local icon = assets.get_image("machines/icons/engine.png")
+function get_icon() return icon end
 
-function plumbing.is_inline_element() return false end
+plumbing = {}
+
+function plumbing.is_inline_element() return true end
 
 function plumbing.fluid_update()
 

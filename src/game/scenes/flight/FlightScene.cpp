@@ -63,6 +63,7 @@ void FlightScene::load()
 	st.cartesian.vel = stt.cartesian.vel;
 	st.rotation = stt.rotation;
 	st.cartesian.pos += stt.rotation * glm::dvec3(0, 0.0, 1) * 10.0;
+	st.cartesian.vel += glm::dvec3(3000.0, 0.0, 0.0);
 
 	n_vehicle->packed_veh.set_world_state(st);
 	n_vehicle->unpack();
