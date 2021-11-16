@@ -40,7 +40,7 @@ You may want to speed up the build using `cmake --build . -- -j [Number of CPUs]
 **Note**: If you run cmake in a subdirectory (for example, `build`), then you may want to copy the `compile_commands.json` file to the root directory for code completion in VIM and other tools. 
 If your executable is not in the root directory, move it there as the game requires the `res` folder and the `udata` folder. You can always change these running `./osp` with command line arguments (check `OSP.cpp`) if you want to keep the executables on a different folder.
 
-
+**Note 2**: If you are running a very modern version of GCC (>= gcc-11), you may experience build issues on our dependencies. You can fix this issue by downgrading to gcc-10, or by waiting until the dependencies fix the errors. 
 
 ## Windows
 
