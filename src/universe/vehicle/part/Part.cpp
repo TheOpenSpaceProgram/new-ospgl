@@ -31,6 +31,30 @@ Part::Part(AssetHandle<PartPrototype>& part_proto, std::shared_ptr<cpptoml::tabl
 		machines[id] = n_machine;
 
 	}
+
+	// We must also loaded attached machines
+	size_t i = 0;
+	for(std::string& scr : to_load_attached_machines)
+	{
+		// We create a basic config toml with just pkg and id
+		auto config_toml = cpptoml::make_table();
+		auto[id, pkg] = osp->assets->get_package_and_name(scr, "core");
+		config_toml->insert("id", id);
+		config_toml->insert("pkg", pkg);
+		if(our_table)
+		{
+			std::string attch_id = "_attach_";
+			attch_id += std::to_string(i);
+			auto override_toml = our_table->get_table(attch_id);
+			if(override_toml)
+			{
+				SerializeUtil::override(*config_toml, *override_toml);
+			}
+		}
+		Machine* n_machine = new Machine(config_toml, "core");
+		attached_machines.push_back(n_machine);
+		i++;
+	}
 }
 
 void Part::pre_update(double dt)
@@ -39,6 +63,10 @@ void Part::pre_update(double dt)
 	{
 		machine_pair.second->pre_update(dt);
 	}
+	for(auto* machine : attached_machines)
+	{
+		machine->pre_update(dt);
+	}
 }
 
 void Part::update(double dt)
@@ -46,6 +74,10 @@ void Part::update(double dt)
 	for(auto& machine_pair : machines)
 	{
 		machine_pair.second->update(dt);
+	}
+	for(auto* machine : attached_machines)
+	{
+		machine->update(dt);
 	}
 }
 
@@ -56,6 +88,10 @@ void Part::editor_update(double dt)
 		machine_pair.second->editor_update(dt);
 	}
 
+	for(auto* machine : attached_machines)
+	{
+		machine->editor_update(dt);
+	}
 }
 
 
@@ -64,10 +100,14 @@ void Part::init(sol::state* st, Vehicle* in_vehicle)
 	this->vehicle = in_vehicle;
 
 	// Load machines
-
 	for(auto& machine_pair : machines)
 	{
 		machine_pair.second->init(st, this);
+	}
+
+	for(auto* machine : attached_machines)
+	{
+		machine->init(st, this);
 	}
 
 }
@@ -81,8 +121,9 @@ Piece* Part::get_piece(const std::string& name)
 
 Machine* Part::get_machine(const std::string& id)
 {
-	auto it = machines.find(id);
-	logger->check(it != machines.end(), "Invalid machine ID '{}'", id);
+	auto all_machines = get_all_machines();
+	auto it = all_machines.find(id);
+	logger->check(it != all_machines.end(), "Invalid machine ID '{}'", id);
 	return it->second;
 }
 
@@ -132,4 +173,30 @@ Part::~Part()
 	{
 		delete machine_pair.second;
 	}
+
+	for(auto* machine : attached_machines)
+	{
+		delete machine;
+	}
+}
+
+std::unordered_map<std::string, Machine*> Part::get_all_machines()
+{
+	std::unordered_map<std::string, Machine*> out;
+
+	for(auto& machine_pair : machines)
+	{
+		out[machine_pair.first] = machine_pair.second;
+	}
+
+	size_t i = 0;
+	for(auto* machine : attached_machines)
+	{
+		std::string str = "_attached_";
+		str += std::to_string(i);
+		out[str] = machine;
+		i++;
+	}
+
+	return out;
 }

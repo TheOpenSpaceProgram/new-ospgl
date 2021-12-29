@@ -7,8 +7,12 @@ class Machine;
 class MachinePlumbing;
 class GUISkin;
 
+class MachinePlumbing;
+
 struct FluidPort
 {
+	// Useful pointer to have around
+	MachinePlumbing* in_machine;
 	std::string id;
 	// Numeric id is only used for junctions
 	size_t numer_id;
@@ -17,6 +21,8 @@ struct FluidPort
 	std::string marker;
 	// Position relative to the part
 	glm::vec2 pos;
+	// If true, the port is used as a flow port instead of true port (read fluid simulation notes)
+	bool is_flow_port;
 };
 
 
@@ -68,10 +74,11 @@ public:
 
 	explicit MachinePlumbing(Machine* sm) : machine(sm) {}
 	void init(const cpptoml::table& toml);
-	void create_port(std::string id, std::string marker, std::string ui_name, float x, float y);
+	void create_port(std::string id, std::string marker, std::string ui_name, float x, float y, bool is_flow_port);
+	// Return ports which are "physically" connected to the given one. Only called on flow ports.
+	std::vector<FluidPort*> get_connected_ports(std::string port);
 
 	glm::vec2 get_port_position(std::string id);
-
 
 };
 

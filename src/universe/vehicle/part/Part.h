@@ -25,6 +25,11 @@ public:
 
 	std::unordered_map<std::string, Machine*> machines;
 
+	// Attached machines are not in the part prototype, but attached by other means
+	std::vector<Machine*> attached_machines;
+	// Attached machines which must be loaded on init
+	std::vector<std::string> to_load_attached_machines;
+
 	// "p_root" is always the root, and is always present
 	// When a piece goes missing, it turns to null, but the map entry stays
 	std::unordered_map<std::string, Piece*> pieces;
@@ -47,6 +52,9 @@ public:
 	// All pieces assume p_root is untransformed for positioning
 	// Must be called in packed mode as we set packed_tform
 	std::vector<Piece*> create_pieces();
+
+	// Assigns special ids to attached_machines which start with _attached
+	std::unordered_map<std::string, Machine*> get_all_machines();
 
 	// We duplicate the asset handle
 	// our_table must contain any extra arguments to machines

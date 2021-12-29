@@ -23,13 +23,20 @@ private:
 
 	std::vector<Machine*> get_connected_if(std::function<bool(Machine*)> fnc, bool include_this);
 
-	std::string in_pkg;
+	std::string in_pkg, name;
 	AssetHandle<Image> default_icon;
 
 	// We precache this on Vehicle::remove_outdated
 	bool piece_missing;
 
 public:
+
+	// A virtual machine has no editor status, and cannot be wired
+	// Used for stuff like pipes
+	bool is_virtual_machine;
+	// An attached machine is not on the part, but is attached to it
+	// in realtime. Used for plumbing stuff
+	bool is_attached_machine;
 
 	// Always present, but may not be used if "has_plumbing" is false
 	MachinePlumbing plumbing;
@@ -69,6 +76,9 @@ public:
 	sol::table get_interface(const std::string& name);
 
 	AssetHandle<Image> get_icon();
+
+	std::string get_pkg();
+	std::string get_name();
 
 	// Make sure AssetManager's correct current package is set,
 	// otherwise script loading MAY fail!

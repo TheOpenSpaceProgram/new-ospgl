@@ -1,27 +1,21 @@
 #pragma once
 #include "../part/Machine.h"
 #include <unordered_map>
+#include <queue>
 
 class Vehicle;
 
 struct PipeJunction;
 
-// A pipe joins either a machine to a machine or
-// a junction to a machine (Junction-junction connections
-// are simplified to a single junction).
-// (Fluid tanks are machines)
+// Pipes are special and are not a machine, same with BASIC junctions
 struct Pipe
 {
 	// For serialization and re-generation of the tree on changes
 	size_t id;
 
-	// ma may be null, then junction must be present
-	// The pipe goes from a junction to mb, although during building ma may also not be present
-	// if the start of the pipe has been disconnected
-	Machine *ma, *mb;
-	PipeJunction* junction;
-	size_t junction_id;
-	std::string port_a, port_b;
+	// Orientation is only important for the value of flow
+	FluidPort *a, *b;
+
 	float surface;
 
 	// Real-time updated, values greater than 0 mean going from a to b, or going into the junction
@@ -113,6 +107,13 @@ class VehiclePlumbing
 {
 private:
 
+	// A flow path connects two ports
+	struct FlowPath
+	{
+		float delta_P;
+		std::vector<size_t> path;
+	};
+
 	// For storing the IDs
 	friend class VehicleLoader;
 	friend class VehicleSaver;
@@ -121,13 +122,11 @@ private:
 	size_t pipe_id;
 	size_t junction_id;
 
-	// Assigns flows to every pipe, depending on reported pressure
-	void assign_flows(float dt);
-	// Simulates how the step would carry out, querying how much is each machine going to give and
-	// how much will each target machine accept, and accepts flow so everything stays within limits
-	void sanify_flow(float dt);
-	// Does the actual flow simulation, making sure no fluid is lost
-	void simulate_flow(float dt);
+	std::vector<FlowPath> determine_flows();
+	void find_all_possible_paths(std::vector<FlowPath>& fws);
+	// Starts assuming start.a contains the true machine!
+	void find_all_possible_paths_from(std::vector<FlowPath>& fws, const Pipe& start);
+	void execute_flows(float dt, std::vector<FlowPath>& flows);
 
 public:
 
@@ -138,6 +137,7 @@ public:
 										  bool expand = false);
 
 	std::vector<PlumbingElement> get_all_elements();
+	std::vector<Machine*> get_all_true_ports();
 
 	std::vector<Pipe> pipes;
 	// Junction id to its pipes, generated on load / modify to speed up the algorithm

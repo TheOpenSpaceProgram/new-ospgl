@@ -54,6 +54,8 @@ void Machine::init(sol::state* lua_state, Part* in_part)
 
 	// Extract package from script path, as in_pkg is the PART's package
 	auto[pkg, name] = osp->assets->get_package_and_name(script_path, in_pkg);
+	this->in_pkg = pkg;
+	this->name = name;
 
 	// We create a new environment for our script
 	env = sol::environment(*lua_state, sol::create, lua_state->globals());
@@ -176,4 +178,14 @@ std::vector<Machine*> Machine::get_connected_if(std::function<bool(Machine*)> fn
 bool Machine::is_enabled()
 {
 	return !piece_missing;
+}
+
+std::string Machine::get_pkg()
+{
+	return in_pkg;
+}
+
+std::string Machine::get_name()
+{
+	return name;
 }

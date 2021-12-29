@@ -6,130 +6,6 @@
 // so it's arbitrary, chosen to approximate real life rocket values
 #define FLOW_MULTIPLIER 0.0002
 
-void VehiclePlumbing::update_pipes(float dt, Vehicle* in_veh)
-{
-	assign_flows(dt);
-	sanify_flow(dt);
-	simulate_flow(dt);
-
-}
-
-void VehiclePlumbing::assign_flows(float dt)
-{
-	for(const PipeJunction& jnc : junctions)
-	{
-		junction_flow_rate(jnc, dt);
-	}
-
-	for(Pipe& p : pipes)
-	{
-		if(p.junction != nullptr)
-			continue;
-		// TODO: Obtain density by averaging or something
-		float sqrt_density = 1.0f;
-		float pa = p.ma->plumbing.get_pressure(p.port_a);
-		float pb = p.mb->plumbing.get_pressure(p.port_b);
-		float sign = pa > pb ? -1.0f : 1.0f;
-		float constant = p.surface * sqrt(2.0f) / sqrt_density;
-		p.flow = sign * constant * sqrt(glm::abs(pb - pa)) * FLOW_MULTIPLIER;
-	}
-}
-
-void VehiclePlumbing::sanify_flow(float dt)
-{
-	for(PipeJunction& jnc : junctions)
-	{
-		// Liquid volume, gases always fit as they are compressible!
-		float total_accepted_volume = 0.0f;
-		float total_given_volume = 0.0f;
-		StoredFluids f_total = StoredFluids();
-		// Find how much will be given
-		for(Pipe* p : jnc.pipes)
-		{
-			if(p->flow < 0.0f)
-				continue;
-			// This pipe gives to the junction, find how much would it give
-			StoredFluids f = p->mb->plumbing.out_flow(p->port_b, p->flow * dt, false);
-			float vol = f.get_total_liquid_volume();
-			if(vol == 0.0f && f.get_total_gas_mass() != 0.0f && f.get_total_liquid_mass() == 0.0f)
-			{
-				// We are draining gases, no need to change flow
-			}
-			else if(vol < p->flow * dt)
-			{
-				// This pipe cannot supply enough, flow is clamped
-				p->flow = vol;
-			}
-			total_given_volume += vol;
-			f_total.modify(f);
-		}
-
-		// Find how much will be taken
-		for(const Pipe* p : jnc.pipes)
-		{
-			if(p->flow > 0.0f)
-				continue;
-			// This pipe takes from the junction, find how much would it take
-			// We don't care about gases here as they can be taken in infinite ammounts
-			StoredFluids in = f_total.modify(f_total.multiply(-p->flow * dt));
-			StoredFluids not_taken = p->mb->plumbing.in_flow(p->port_b, in, false);
-			total_accepted_volume += -dt * p->flow - not_taken.get_total_liquid_volume();
-		}
-
-		if(total_accepted_volume < total_given_volume)
-		{
-			// Sanify flow, the giving pipes must give less. This is done
-			// in a uniform manner, by multiplying flow of every pipe
-			float factor = total_accepted_volume / total_given_volume;
-			for(Pipe* p : jnc.pipes)
-			{
-				if(p->flow < 0.0f)
-					p->flow *= factor;
-			}
-		}
-
-	}
-
-	for(Pipe& p : pipes)
-	{
-		if(p.junction != nullptr)
-			continue;
-	}
-}
-
-// Very similar to sanify but does the actual flow and handles gases
-void VehiclePlumbing::simulate_flow(float dt)
-{
-	for(PipeJunction& jnc : junctions)
-	{
-		StoredFluids f_total = StoredFluids();
-		// Take from pipes
-		for(const Pipe* p : jnc.pipes)
-		{
-			if(p->flow < 0.0f)
-				continue;
-			StoredFluids f = p->mb->plumbing.out_flow(p->port_b, p->flow * dt, true);
-			f_total.modify(f);
-		}
-
-		for(const Pipe* p : jnc.pipes)
-		{
-			if(p->flow > 0.0f)
-				continue;
-			StoredFluids in = f_total.modify(f_total.multiply(-p->flow * dt));
-			StoredFluids not_taken = p->mb->plumbing.in_flow(p->port_b, in, true);
-			// TODO: Handle gases?
-			logger->check(not_taken.get_total_liquid_mass() < 0.001f, "Fluids were not conserved!");
-		}
-	}
-
-	for(Pipe& p : pipes)
-	{
-
-	}
-}
-
-
 void VehiclePlumbing::junction_flow_rate(const PipeJunction& junction, float dt)
 {
 	size_t jsize = junction.pipes.size();
@@ -522,7 +398,90 @@ void VehiclePlumbing::rebuild_pipe_pointers()
 	}
 }
 
+std::vector<VehiclePlumbing::FlowPath> VehiclePlumbing::determine_flows()
+{
+	std::vector<FlowPath> out;
 
+	return out;
+}
+
+void VehiclePlumbing::execute_flows(float dt, std::vector<FlowPath>& flows)
+{
+
+}
+
+
+void VehiclePlumbing::find_all_possible_paths(std::vector<FlowPath> &fws)
+{
+	// Find a new unvisited pipe to start from that's connected to a real port
+	for(const auto& pipe : pipes)
+	{
+		bool found_true = false;
+		// We only need to check one side for simmetry
+		for (const FluidPort &pa: pipe.a->in_machine->fluid_ports)
+		{
+			if (!pa.is_flow_port)
+			{
+				found_true = true;
+				break;
+			}
+		}
+
+		if (found_true)
+		{
+			find_all_possible_paths_from(fws, pipe);
+			break;
+		}
+	}
+
+}
+
+void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, const Pipe &start)
+{
+	// start.a contains a true port, so we just need to travel to port b now,
+	// this is a tree search algorithm
+	// We store the whole path to the open pipe so we can rebuild it later
+	std::queue<std::vector<size_t>> open;
+	std::vector<size_t> start_v;
+	start_v.push_back(start.id);
+	open.push(start_v);
+
+	while(!open.empty())
+	{
+		std::vector<size_t> open_chain = open.front();
+		size_t work = open_chain.back();
+		const Pipe* p = get_pipe(work);
+		open.pop();
+
+		if(p->b->is_flow_port)
+		{
+			// Find all connected ports to this port and propagate
+			std::vector<FluidPort*> connected = p->b->in_machine->get_connected_ports(p->b->id);
+			// Find the pipes connected as "a" to said ports, others are included in symmetric searches
+			for(const Pipe& pipe : pipes)
+			{
+				for(const FluidPort* port : connected)
+				{
+					if(pipe.a == port)
+					{
+						std::vector<size_t> new_open;
+						new_open.insert(new_open.begin(), open_chain.begin(), open_chain.end());
+						new_open.push_back(pipe.id);
+						open.push(new_open);
+					}
+				}
+			}
+		}
+		else
+		{
+			// We found a path to a real machine. We don't set delta_p just yet
+			FlowPath fpath;
+			fpath.path = open_chain;
+			fws.push_back(fpath);
+		}
+	}
+
+}
 
 glm::ivec2 PipeJunction::get_size(bool extend, bool rotate) const
 {
