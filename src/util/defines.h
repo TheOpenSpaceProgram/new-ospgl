@@ -39,3 +39,26 @@ static bool vector_contains(std::vector<T>& vec, T elem)
 	auto it = std::find(vec.begin(), vec.end(), elem);
 	return it != vec.end();
 }
+
+// https://stackoverflow.com/a/20583932
+// Modified the vector in place!
+template<typename T>
+static void vector_remove_indices(std::vector<T>& vector, const std::vector<size_t>& to_remove)
+{
+	auto vector_base = vector.begin();
+	size_t down_by = 0;
+
+	for (auto iter = to_remove.cbegin();
+		 iter < to_remove.cend();
+		 iter++, down_by++)
+	{
+		size_t next = (iter + 1 == to_remove.cend()
+				? vector.size()
+				: *(iter + 1));
+
+		std::move(vector_base + *iter + 1,
+				  vector_base + next,
+				  vector_base + *iter - down_by);
+	}
+	vector.resize(vector.size() - to_remove.size());
+}

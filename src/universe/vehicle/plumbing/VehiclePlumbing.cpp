@@ -474,14 +474,172 @@ void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, c
 		}
 		else
 		{
-			// We found a path to a real machine. We don't set delta_p just yet
 			FlowPath fpath;
 			fpath.path = open_chain;
-			fws.push_back(fpath);
+			calculate_delta_p(fpath);
+			// Early discard
+			if(fpath.delta_P > 0.0f)
+			{
+				fws.push_back(fpath);
+			}
 		}
 	}
 
+
 }
+
+void VehiclePlumbing::calculate_delta_p(FlowPath& fws)
+{
+	// It's guaranteed that all b ports are flow machines, so just follow them (except the end one)
+	FluidPort* start = get_pipe(fws.path[0])->a;
+	float start_P = start->in_machine->get_pressure(start->id);
+	FluidPort* end = get_pipe(fws.path[fws.path.size() - 1])->b;
+	float end_P = end->in_machine->get_pressure(end->id);
+
+	float P_drop = 0.0f;
+	// We travel through the flow machines, observing the pressure drop between their ports
+	// Note that the pressure drops happen to the start pressure (observe delta_P calculation)!
+	for(size_t i = 0; i < fws.path.size() - 1; i++)
+	{
+		float cur_P = start_P - P_drop;
+		FluidPort* in_port = get_pipe(fws.path[i])->b;
+		FluidPort* out_port = get_pipe(fws.path[i + 1])->a;
+		logger->check(in_port->in_machine == out_port->in_machine, "Something went wrong, machines don't match");
+		P_drop += in_port->in_machine->get_pressure_drop(in_port->id, out_port->id, cur_P);
+	}
+
+	fws.delta_P = end_P - (start_P - P_drop);
+	// If this is 0 or positive, it will be early discarded
+	// End pressure must be lower than start pressure!
+}
+
+std::vector<size_t> VehiclePlumbing::find_forced_paths(std::vector<FlowPath>& fws)
+{
+	std::vector<size_t> out;
+	// We must go over every path and check which paths start and end in unique places, these
+	// are the forced paths. The places are the port!
+	std::set<FluidPort*> seen_start;
+	std::set<FluidPort*> seen_end;
+
+	std::set<FluidPort*> multiple_start;
+	std::set<FluidPort*> multiple_end;
+
+	for(const FlowPath& path : fws)
+	{
+		Pipe* front = get_pipe(path.path.front());
+		Pipe* back = get_pipe(path.path.back());
+		logger->check(front->a->is_flow_port == false, "Start must not be flow port");
+		logger->check(front->b->is_flow_port == false, "End must not be flow port");
+
+		if(seen_start.count(front->a) >= 1)
+		{
+			multiple_start.insert(front->a);
+		}
+		else
+		{
+			seen_start.insert(front->a);
+		}
+
+		if(seen_end.count(back->b) >= 1)
+		{
+			multiple_end.insert(back->b);
+		}
+		else
+		{
+			seen_end.insert(back->b);
+		}
+	}
+
+	// Now, the elements which are not in multiple are unique
+	for(size_t idx = 0; idx < fws.size(); idx++)
+	{
+		Pipe* front = get_pipe(fws[idx].path.front());
+		Pipe* back = get_pipe(fws[idx].path.back());
+
+		// If this is a unique path, it must happen and thus is forced.
+		if(multiple_start.count(front->a) == 0 && multiple_end.count(back->b) == 0)
+		{
+			out.push_back(idx);
+		}
+	}
+
+	return out;
+}
+
+bool VehiclePlumbing::remove_paths_not_compatible_with_forced(std::vector<FlowPath> &fws)
+{
+	std::vector<size_t> forced = find_forced_paths(fws);
+	std::vector<size_t> to_remove;
+
+	for(size_t i = 0; i < fws.size(); i++)
+	{
+		for(size_t f = 0; f < forced.size(); f++)
+		{
+			if(forced[f] != i)
+			{
+				if(!are_paths_compatible(fws[i], fws[forced[f]]))
+				{
+					to_remove.push_back(i);
+				}
+			}
+		}
+	}
+
+	// Now we remove the given indices
+	vector_remove_indices(fws, to_remove);
+
+	return to_remove.empty();
+
+}
+
+bool VehiclePlumbing::are_paths_compatible(const VehiclePlumbing::FlowPath &a, const VehiclePlumbing::FlowPath &b)
+{
+	// We find shared points between the two paths
+	for(size_t i = 0; i < a.path.size(); i++)
+	{
+		auto it = std::find(b.path.begin(), b.path.end(), a.path[i]);
+		if(it != b.path.end())
+		{
+			// Check that the traverse direction is the same, ie, the next pipe is the same.
+			// if it's not, we have found an incompatibility
+			if((i == a.path.size() - 1 && it++ != b.path.end()) ||
+					(i != a.path.size() - 1 && it++ == b.path.end()))
+			{
+				// Path a ends, but path b doesn't. It must mean they diverge
+				// This prevents vector overflow
+				return false;
+			}
+
+			// Now it's safe to check next index
+			size_t next_a = a.path[i + 1];
+			size_t next_b = *(it++);
+			if(next_a != next_b)
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+void VehiclePlumbing::reduce_to_forced_paths(std::vector<FlowPath> &fws)
+{
+	size_t it = 0;
+	// This removes all non compatible paths
+	while(!remove_paths_not_compatible_with_forced(fws))
+	{
+		if(it > 100)
+		{
+			logger->fatal("Reducing to forced paths is taking too long!");
+		}
+		it++;
+	}
+
+	// Now only forced paths remain, we have solved the system
+
+}
+
 
 glm::ivec2 PipeJunction::get_size(bool extend, bool rotate) const
 {

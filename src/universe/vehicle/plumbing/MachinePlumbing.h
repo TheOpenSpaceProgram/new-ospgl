@@ -63,7 +63,10 @@ public:
 	bool is_requester();
 	void fluid_update();
 
+	// Only makes sense on true ports
 	float get_pressure(const std::string& port);
+	// Get the pressure DROP. You can return negative values if you are a pump, etc...
+	float get_pressure_drop(const std::string& from, const std::string& to, float cur_P);
 
 	// Volumes are in m^3, if you cannot supply enough, don't!
 	StoredFluids out_flow(std::string port, float volume, bool do_flow);
