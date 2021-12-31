@@ -38,23 +38,6 @@ StoredFluids MachinePlumbing::out_flow(std::string port, float volume, bool do_f
 glm::ivec2 MachinePlumbing::get_editor_size(bool expand, bool rotate) const
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
-	glm::ivec2 ret = base_size;
-
-	if(expand)
-	{
-		ret += glm::ivec2(2, 2);
-	}
-
-	// Rotation
-	if(rotate)
-	{
-		if (editor_rotation == 1 || editor_rotation == 3)
-		{
-			std::swap(ret.x, ret.y);
-		}
-	}
-
-	return ret;
 }
 
 void MachinePlumbing::draw_diagram(void* vg, GUISkin* gui_skin)
@@ -165,40 +148,65 @@ void MachinePlumbing::create_port(std::string id, std::string marker, std::strin
 
 }
 
-glm::vec2 MachinePlumbing::get_port_position(std::string id)
+FluidPort* MachinePlumbing::get_port_by_id(const std::string &name)
 {
-	for(const FluidPort& port : fluid_ports)
+	for(size_t i = 0; i < fluid_ports.size(); i++)
 	{
-		if(port.id == id)
+		if(fluid_ports[i].id == name)
 		{
-			glm::vec2 pos = port.pos;
-
-			glm::ivec2 size = get_editor_size();
-			if(editor_rotation == 1)
-			{
-				std::swap(pos.x, pos.y);
-				pos.x = size.x - pos.x;
-			}
-			else if(editor_rotation == 2)
-			{
-				pos.x = (float)size.x - pos.x;
-				pos.y = (float)size.y - pos.y;
-			}
-			else if(editor_rotation == 3)
-			{
-				std::swap(pos.x, pos.y);
-				pos.y = (float)size.y - pos.y;
-			}
-
-			pos += editor_position;
-
-			return pos;
+			return &fluid_ports[i];
 		}
 	}
 
-	logger->fatal("Unknown port id={}", id);
-	return glm::vec2(0, 0);
+	logger->fatal("Could not find port with id: {}", name);
+	return nullptr;
+}
+
+glm::ivec2 MachinePlumbing::correct_editor_pos(glm::ivec2 local_pos)
+{
+	glm::vec2 pos = local_pos;
+
+	glm::ivec2 size = get_size();
+	if(editor_rotation == 1)
+	{
+		std::swap(pos.x, pos.y);
+		pos.x = size.x - pos.x;
+	}
+	else if(editor_rotation == 2)
+	{
+		pos.x = (float)size.x - pos.x;
+		pos.y = (float)size.y - pos.y;
+	}
+	else if(editor_rotation == 3)
+	{
+		std::swap(pos.x, pos.y);
+		pos.y = (float)size.y - pos.y;
+	}
+
+	pos += editor_position;
+	return pos;
 }
 
 
+glm::ivec2 MachinePlumbing::get_size(bool expand, bool rotate)
+{
+	glm::ivec2 ret = base_size;
+
+	if(expand)
+	{
+		ret += glm::ivec2(2, 2);
+	}
+
+	// Rotation
+	if(rotate)
+	{
+		if (editor_rotation == 1 || editor_rotation == 3)
+		{
+			std::swap(ret.x, ret.y);
+		}
+	}
+
+	return ret;
+
+}
 

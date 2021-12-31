@@ -174,12 +174,12 @@ void PlumbingEditor::draw_tooltip(NVGcontext* vg, glm::vec4 span) const
 				float flow = 0.0f;
 				for(const Pipe& p : veh->plumbing.pipes)
 				{
-					if(p.ma == m && p.port_a == port.id)
+					if(p.a->in_machine->machine == m && p.a->id == port.id)
 					{
 						flow = p.flow;
 						break;
 					}
-					else if(p.mb == m && p.port_b == port.id)
+					else if(p.b->in_machine->machine == m && p.b->id == port.id)
 					{
 						flow = -p.flow;
 						break;
@@ -483,31 +483,6 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 			{
 				if(hovered.type == PlumbingElement::JUNCTION)
 				{
-					PipeJunction* jnc = hovered.as_junction;
-					// Do we have a vacant slot?
-					int vacant_slot = -1;
-					for(size_t i = 0; i < jnc->pipes.size(); i++)
-					{
-						if(jnc->pipes[i] == nullptr && jnc->pipes_id[i] == 0xDEADBEEF)
-						{
-							vacant_slot = (int)i;
-							break;
-						}
-					}
-
-					if(vacant_slot != -1 && hovering_port_numer != vacant_slot)
-					{
-						// We must first rearrange the pipe
-						std::swap(jnc->pipes[hovering_port_numer], jnc->pipes[vacant_slot]);
-						std::swap(jnc->pipes_id[hovering_port_numer], jnc->pipes_id[vacant_slot]);
-					}
-
-					// We can now simply add the pipe
-					hovering_pipe->invert();
-					hovering_pipe->connect_junction(jnc);
-					handle_vacant_junction();
-					in_pipe_drag = false;
-					hovering_pipe = nullptr;
 					return true;
 				}
 				else
@@ -515,8 +490,7 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 					// End a pipe in a port
 					handle_vacant_junction();
 					in_pipe_drag = false;
-					hovering_pipe->mb = hovered.as_machine;
-					hovering_pipe->port_b = hovering_port;
+					hovering_pipe->b = hovered.as_machine->plumbing.get_port_by_id(hovering_port);
 					hovering_pipe = nullptr;
 					return true;
 				}
@@ -561,6 +535,7 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 						hovering_pipe = veh->plumbing.get_pipe(hovering_id);
 						jnc->pos = found_in->waypoints[waypoint_i];
 						// Connect the new pipe to the old target and the junction
+						n_pipe->b = found_in-
 						n_pipe->mb = found_in->mb;
 						n_pipe->port_b = found_in->port_b;
 						n_pipe->connect_junction(jnc);

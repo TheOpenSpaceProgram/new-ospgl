@@ -8,11 +8,14 @@ class MachinePlumbing;
 class GUISkin;
 
 class MachinePlumbing;
+class PipeJunction;
+class Pipe;
 
 struct FluidPort
 {
-	// Useful pointer to have around
+	// Useful pointer to have around to avoid endless lookups
 	MachinePlumbing* in_machine;
+
 	std::string id;
 	// Numeric id is only used for junctions
 	size_t numer_id;
@@ -26,17 +29,11 @@ struct FluidPort
 };
 
 
-// Machine fluid ports are determined by the lua file (in init!), which may offer
-// customization options through the toml (for example, number of inlets in
-// an engine). Fluid ports may not change during flight, but they may change
-// in the editor, as this will break the fluid connections as a port may disappear
-// or change name.
-// A machine is considered to not have plumbing if it has no fluid ports
+// Implements generic code for plumbing. May or may not be contained in a real machine.
 class MachinePlumbing
 {
 private:
 
-	Machine* machine;
 	bool can_add_ports;
 	glm::ivec2 base_size;
 	bool has_lua;
@@ -44,10 +41,16 @@ private:
 public:
 
 	glm::ivec2 editor_position;
-	// 0 means no rotation, 1 90º, 2 180º, 3 270º
-	int editor_rotation = 0;
-	// Expand extends the size by 1 in both directions so parts must be spaced out
-	glm::ivec2 get_editor_size(bool expand = false, bool rotate = true) const;
+	int editor_rotation;
+
+	// If not null, this is a real machine. if null, we are a plumbing only machine, which
+	// are plumbing only machines which are serialized separately
+	Machine* in_machine;
+	// If not a machine this will be present and non-zero
+	size_t plumbing_machine_id;
+
+
+	glm::ivec2 get_base_size() { return base_size; }
 	// Does not include rotation!
 	void draw_diagram(void* vg, GUISkin* skin);
 
@@ -79,9 +82,10 @@ public:
 	void init(const cpptoml::table& toml);
 	void create_port(std::string id, std::string marker, std::string ui_name, float x, float y, bool is_flow_port);
 	// Return ports which are "physically" connected to the given one. Only called on flow ports.
-	std::vector<FluidPort*> get_connected_ports(std::string port);
-
-	glm::vec2 get_port_position(std::string id);
-
+	std::vector<FluidPort*> get_connected_ports(const std::string& port);
+	FluidPort* get_port_by_id(const std::string& name);
+	// Corrects a position in local coordinates to global in the editor. Used for ports
+	glm::ivec2 correct_editor_pos(glm::ivec2 pos);
+	glm::ivec2 get_size(bool expand = false, bool rotate = true);
 };
 
