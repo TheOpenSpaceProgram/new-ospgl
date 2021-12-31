@@ -84,7 +84,7 @@ public:
 	std::vector<FluidPort*> get_connected_ports(const std::string& port);
 	FluidPort* get_port_by_id(const std::string& name);
 	// Corrects a position in local coordinates to global in the editor. Used for ports
-	glm::ivec2 correct_editor_pos(glm::ivec2 pos);
+	glm::vec2 correct_editor_pos(glm::vec2 pos);
 	glm::ivec2 get_size(bool expand = false, bool rotate = true);
 };
 

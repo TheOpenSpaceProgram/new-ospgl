@@ -162,7 +162,7 @@ FluidPort* MachinePlumbing::get_port_by_id(const std::string &name)
 	return nullptr;
 }
 
-glm::ivec2 MachinePlumbing::correct_editor_pos(glm::ivec2 local_pos)
+glm::vec2 MachinePlumbing::correct_editor_pos(glm::vec2 local_pos)
 {
 	glm::vec2 pos = local_pos;
 

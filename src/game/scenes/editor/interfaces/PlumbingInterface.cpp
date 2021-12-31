@@ -71,26 +71,27 @@ PlumbingInterface::PlumbingInterface(EditorVehicleInterface *edveh_int)
 void PlumbingInterface::do_highlight()
 {
 	// Highlight the pieces from the editor, selected in blue, hovered in white
-	const PlumbingElement hovered = pb_editor.get_hovered();
-	const std::vector<PlumbingElement> selected = pb_editor.get_selected();
+	const MachinePlumbing* hovered = pb_editor.get_hovered();
+	const std::vector<MachinePlumbing*> selected = pb_editor.get_selected();
 
-	for(PlumbingElement elem : selected)
+	for(MachinePlumbing* elem : selected)
 	{
-		if(elem.type == PlumbingElement::MACHINE)
+		if(!elem->in_machine)
 		{
-			for (const auto &pair : elem.as_machine->in_part->pieces)
-			{
-				edveh->piece_meta[pair.second].highlight = glm::vec3(0.2f, 0.2f, 1.0f);
-			}
+			continue;
+		}
+
+		for (const auto &pair : elem->in_machine->in_part->pieces)
+		{
+			edveh->piece_meta[pair.second].highlight = glm::vec3(0.2f, 0.2f, 1.0f);
 		}
 	}
 
-	if(hovered.type == PlumbingElement::MACHINE)
+	if(hovered->in_machine)
 	{
-		for (const auto &pair : hovered.as_machine->in_part->pieces)
+		for (const auto &pair : hovered->in_machine->in_part->pieces)
 		{
 			edveh->piece_meta[pair.second].highlight = glm::vec3(1.0f, 1.0f, 1.0f);
-
 		}
 	}
 }
@@ -158,7 +159,7 @@ void PlumbingInterface::do_3d_to_2d(GUIInput* gui_input, glm::dvec3 ray_start, g
 void PlumbingInterface::focus_pb_editor(Machine *m)
 {
 	glm::vec2 topleft = m->plumbing.editor_position;
-	glm::vec2 size = m->plumbing.get_editor_size(false, true);
+	glm::vec2 size = m->plumbing.get_size(false, true);
 	pb_editor.cam_center = topleft + size * 0.5f;
 }
 

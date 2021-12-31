@@ -404,10 +404,10 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 	{
 		for (FluidPort& port : elem->fluid_ports)
 		{
-			glm::ivec2 port_pos = elem->correct_editor_pos(port.pos);
+			glm::vec2 port_pos = elem->correct_editor_pos(port.pos);
 			// If in pipe drag we just need to be in the same square to hover the port
-			if ((!in_pipe_drag && glm::distance(mpos, (glm::vec2)port_pos) <= port_radius * 1.15f) ||
-					(in_pipe_drag && round == glm::floor(port_pos)))
+			if ((!in_pipe_drag && glm::distance(mpos, port_pos) <= port_radius * 1.15f) ||
+					(in_pipe_drag && round == (glm::ivec2)glm::floor(port_pos)))
 			{
 				hovered_port = &port;
 				hovered = elem;
@@ -638,7 +638,7 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 
 		for(auto waypoint : p->waypoints)
 		{
-			pipe_line_to(vg, (glm::vec2)waypoint + glm::vec2(0.5f), prev, p.flow);
+			pipe_line_to(vg, (glm::vec2)waypoint + glm::vec2(0.5f), prev, p->flow);
 			prev = (glm::vec2)waypoint + glm::vec2(0.5f);
 		}
 
@@ -646,7 +646,7 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 		if(p->b != nullptr)
 		{
 			end_pos = p->b->in_machine->correct_editor_pos(p->b->pos);
-			if(in_machine_drag && std::find(selected.begin(), selected.end(), PlumbingElement(p->b->in_machine)) != selected.end())
+			if(in_machine_drag && std::find(selected.begin(), selected.end(), p->b->in_machine) != selected.end())
 			{
 				end_pos += glm::round(mpos - mouse_start);
 			}
@@ -661,7 +661,7 @@ void PlumbingEditor::draw_pipes(NVGcontext *vg, glm::vec4 span) const
 			end_pos = p->waypoints[p->waypoints.size() - 1];
 		}
 
-		pipe_line_to(vg, end_pos, prev, p.flow);
+		pipe_line_to(vg, end_pos, prev, p->flow);
 		draw_pipe_cap(vg, end_pos);
 		nvgStroke(vg);
 
