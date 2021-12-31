@@ -8,7 +8,6 @@ class MachinePlumbing;
 class GUISkin;
 
 class MachinePlumbing;
-class PipeJunction;
 class Pipe;
 
 struct FluidPort
@@ -78,7 +77,7 @@ public:
 	// - Feel free to refuse liquids if no more can fit
 	StoredFluids in_flow(std::string port, const StoredFluids& in, bool do_flow);
 
-	explicit MachinePlumbing(Machine* sm) : machine(sm) {}
+	explicit MachinePlumbing(Machine* sm) : in_machine(sm) {}
 	void init(const cpptoml::table& toml);
 	void create_port(std::string id, std::string marker, std::string ui_name, float x, float y, bool is_flow_port);
 	// Return ports which are "physically" connected to the given one. Only called on flow ports.

@@ -23,21 +23,14 @@ private:
 	double max_time_for_rotation = 0.2;
 	float port_radius = 0.18f;
 
-	PlumbingElement hovered;
+	MachinePlumbing* hovered;
 
-	// Hovered will be set if this is not "".
-	std::string hovering_port;
-	// if hovered is a junction, this contains the hovered port id
-	size_t hovering_port_numer;
-	// nullptr if no user
-	Pipe* hovering_port_user;
-	// We are hovering an unfinished pipe endpoint if this is not null, or... see in_pipe_drag
-	Pipe* hovering_pipe;
+	FluidPort* hovered_port;
+	// We are hovering an unfinished pipe endpoint if this is not negative, or... see in_pipe_drag
+	int hovering_pipe;
 	// If true, hovering_pipe contains the pipe we are working on, and the pipe-dragging UI will be at play
 	bool in_pipe_drag;
 
-	// A junction which has had a pipe removed from it
-	PipeJunction* vacant_junction;
 
 	bool in_selection;
 	// Pipe drags start by clicking a pipe end-cap. A pipe is automatically
@@ -47,8 +40,8 @@ private:
 	glm::vec2 mouse_start;
 	glm::vec2 mouse_current;
 	// We allow shift-selection and also box selection
-	std::vector<PlumbingElement> selected;
-	std::vector<PlumbingElement> drag_conflicts;
+	std::vector<MachinePlumbing*> selected;
+	std::vector<MachinePlumbing*> drag_conflicts;
 
 	glm::dvec2 last_click;
 	glm::vec2 last_center;
@@ -67,7 +60,6 @@ private:
 	void draw_machines(NVGcontext* vg, glm::vec4 span) const;
 	void draw_selection(NVGcontext* vg, glm::vec4 span) const;
 	void draw_pipes(NVGcontext* vg, glm::vec4 span) const;
-	void draw_junctions(NVGcontext* vg, glm::vec4 span) const;
 	void draw_collisions(NVGcontext* vg, glm::vec4 span) const;
 	void draw_port(NVGcontext* vg, glm::vec2 pos, bool hovered = false) const;
 	void draw_pipe_cap(NVGcontext* vg, glm::vec2 pos) const;
@@ -78,8 +70,6 @@ private:
 
 	// Handles both AABBs and ports
 	void handle_hovering(GUIInput* gui_input, glm::vec2 mpos);
-
-	void handle_vacant_junction();
 
 	void pipe_line_to(NVGcontext* vg, glm::vec2 pos, glm::vec2 old_pos, float flow) const;
 
@@ -106,8 +96,8 @@ public:
 	void prepare(GUIInput* gui_input, glm::vec4 span);
 	void do_editor(NVGcontext* vg, glm::vec4 span, GUISkin* skin);
 
-	const PlumbingElement get_hovered() const { return hovered; }
-	const std::vector<PlumbingElement> get_selected() const { return selected; }
+	const MachinePlumbing* get_hovered() const { return hovered; }
+	const std::vector<MachinePlumbing*> get_selected() const { return selected; }
 
 	PlumbingEditor();
 
