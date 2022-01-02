@@ -5,61 +5,60 @@ void VehicleLoader::load_metadata(const cpptoml::table& root)
 	// TODO: Description and package check
 	vpart_id = *root.get_qualified_as<int64_t>("part_id");
 	vpiece_id = *root.get_qualified_as<int64_t>("piece_id");
-	n_vehicle->plumbing.pipe_id = *root.get_qualified_as<int64_t>("pipe_id");
-	n_vehicle->plumbing.junction_id = *root.get_qualified_as<int64_t>("junction_id");
-
 }
 
 void VehicleLoader::obtain_pipes(const cpptoml::table &root)
 {
 	auto pipes = root.get_table_array_qualified("pipe");
-	if(!pipes)
+	if (!pipes)
 	{
 		return;
 	}
 
-	for(const auto& pipe : *pipes)
+	// To prevent weird errors, every pipe stores its index in the array, so it's built
+	// in this "weird way"
+	n_vehicle->plumbing.pipes.resize(pipes->end() - pipes->begin());
+	for (const auto &pipe: *pipes)
 	{
 		Pipe p = Pipe();
-		p.id = *pipe->get_qualified_as<size_t>("id");
-		if(pipe->contains("from_junction"))
-		{
-			p.junction_id = *pipe->get_qualified_as<size_t>("from_junction");
-			p.ma = nullptr;
-			p.port_a = "";
-		}
-		else
-		{
-			std::string mname = *pipe->get_qualified_as<std::string>("from_machine");
-			Part* in_part = parts_by_id[*pipe->get_qualified_as<int64_t>("from_part")];
-			p.ma = in_part->machines[mname];
-			p.port_a = *pipe->get_qualified_as<std::string>("from_port");
-			p.junction = nullptr;
-			p.junction_id = 0;
-		}
+		size_t index = *pipe->get_qualified_as<size_t>("index");
 
-		std::string mname = *pipe->get_qualified_as<std::string>("to_machine");
-		Part* in_part = parts_by_id[*pipe->get_qualified_as<int64_t>("to_part")];
-		p.mb = in_part->machines[mname];
-		p.port_b = *pipe->get_qualified_as<std::string>("to_port");
+
+		auto read_connection =
+				[pipe, this](PlumbingMachine* tget,
+				const std::string& part, const std::string& machine, const std::string& attached_machine)
+		{
+			int64_t part_id = *pipe->get_qualified_as<int64_t>(part);
+			if(pipe->contains(machine))
+			{
+				std::string mid = *pipe->get_qualified_as<std::string>(machine);
+				tget = &parts_by_id[part_id]->get_machine(mid)->plumbing;
+			}
+			else
+			{
+				size_t mid = *pipe->get_qualified_as<size_t>(attached_machine);
+				tget = &parts_by_id[part_id]->attached_machines[mid]->plumbing;
+			}
+		};
+
+		read_connection(p.amachine, "from_part", "from_machine", "from_attached_machine");
+		read_connection(p.bmachine, "to_part", "to_machine", "to_attached_machine");
+		p.aport = *pipe->get_qualified_as<std::string>("from_port");
+		p.bport = *pipe->get_qualified_as<std::string>("to_port");
 
 		// Load the waypoints
 		auto waypoints = pipe->get_array_qualified("waypoints")->array_of<int64_t>();
-		for(size_t i = 0; i < waypoints.size(); i+=2)
+		for (size_t i = 0; i < waypoints.size(); i += 2)
 		{
 			glm::ivec2 wp;
-			wp.x = (int)waypoints[i]->get();
-			wp.y = (int)waypoints[i + 1]->get();
+			wp.x = (int) waypoints[i]->get();
+			wp.y = (int) waypoints[i + 1]->get();
 			p.waypoints.push_back(wp);
 		}
 
-		n_vehicle->plumbing.pipes.push_back(p);
+		n_vehicle->plumbing.pipes[index] = p;
 
 	}
-
-	// We must build the pointer tree
-	n_vehicle->plumbing.rebuild_pipe_pointers();
-	n_vehicle->plumbing.rebuild_junction_pointers();
 }
 
 void VehicleLoader::obtain_parts(const cpptoml::table& root)
@@ -258,32 +257,14 @@ void VehicleLoader::obtain_wires(const cpptoml::table& root)
 	}
 }
 
-void VehicleLoader::obtain_pipe_junctions(const cpptoml::table &root)
+void VehicleLoader::obtain_plumbing_machines(const cpptoml::table &root)
 {
-	auto pjncs = root.get_table_array_qualified("pipe_junction");
-	if(!pjncs)
+	auto pmachines = root.get_table_array_qualified("plumbing_machines");
+	if(!pmachines)
 	{
 		return;
 	}
 
-	for(const auto& pjnc : *pjncs)
-	{
-		PipeJunction junction;
-
-		junction.id = *pjnc->get_qualified_as<size_t>("id");
-		auto pos_table = pjnc->get_table_qualified("pos");
-		deserialize(junction.pos, *pos_table);
-		junction.rotation = (int)*pjnc->get_qualified_as<int64_t>("rotation");
-
-		// Load pipe_ids only for now (as pipes are not yet loaded)
-		auto pipes = pjnc->get_array_qualified("pipes")->array_of<int64_t>();
-		for(auto& pipe : pipes)
-		{
-			junction.pipes_id.push_back((size_t)pipe.get()->get());
-		}
-
-		n_vehicle->plumbing.junctions.push_back(junction);
-	}
 }
 
 
@@ -296,7 +277,7 @@ VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to)
 	obtain_pieces(root);
 	copy_pieces(root);
 	obtain_wires(root);
-	obtain_pipe_junctions(root);
+	obtain_plumbing_machines(root);
 	obtain_pipes(root);
 
 	n_vehicle->id_to_part = parts_by_id;
@@ -327,7 +308,7 @@ VehicleSaver::VehicleSaver(cpptoml::table &target, const Vehicle &what)
 	write_pieces(target, what);
 	write_wires(target, what);
 	write_pipes(target, what);
-	write_pipe_junctions(target, what);
+	write_plumbing_machines(target, what);
 }
 
 void VehicleSaver::assign_ids(cpptoml::table& target, const Vehicle& what)
@@ -349,8 +330,6 @@ void VehicleSaver::assign_ids(cpptoml::table& target, const Vehicle& what)
 	// Internal numbers to guarantee unique IDs
 	target.insert("piece_id", piece_id);
 	target.insert("part_id", part_id);
-	target.insert("pipe_id", what.plumbing.pipe_id);
-	target.insert("junction_id", what.plumbing.junction_id);
 }
 
 void VehicleSaver::write_parts(cpptoml::table &target, const Vehicle &what)
@@ -503,55 +482,57 @@ void VehicleSaver::write_pipes(cpptoml::table &target, const Vehicle &what)
 {
 	auto pipe_array = cpptoml::make_table_array();
 
-	for(const Pipe& p : what.plumbing.pipes)
+	for(size_t index = 0; index < what.plumbing.pipes.size(); index++)
 	{
+		const Pipe& rpipe = what.plumbing.pipes[index];
 		auto pipe = cpptoml::make_table();
 
-		pipe->insert("id", p.id);
-		if(p.ma == nullptr)
+		pipe->insert("index", index);
+
+		auto write_connection = [pipe](const FluidPort* port,
+				const std::string& part, const std::string& real_machine, const std::string& attached_machine)
 		{
-			pipe->insert("from_junction", p.junction_id);
-		}
-		else
-		{
+			pipe->insert(part, port->in_machine->in_machine->in_part->id);
 			std::string fmachine = "";
-			for(auto m : p.ma->in_part->machines)
+			for(auto m : port->in_machine->in_machine->in_part->machines)
 			{
-				if(m.second == p.ma)
+				if(m.second == port->in_machine->in_machine)
 				{
 					fmachine = m.first;
 					break;
 				}
 			}
-
-			logger->check(fmachine != "", "Invalid pipe fmachine");
-
-			pipe->insert("from_part", part_to_id[p.ma->in_part]);
-			pipe->insert("from_machine", fmachine);
-			pipe->insert("from_port", p.port_a);
-		}
-
-		std::string tmachine = "";
-		for(auto m : p.mb->in_part->machines)
-		{
-			if(m.second == p.mb)
+			if(fmachine != "")
 			{
-				tmachine = m.first;
+				pipe->insert(real_machine, fmachine);
 			}
-		}
+			else
+			{
+				int amachine = -1;
+				for (int i = 0; i < port->in_machine->in_machine->in_part->attached_machines.size(); i++)
+				{
+					if (port->in_machine->in_machine == port->in_machine->in_machine->in_part->attached_machines[i])
+					{
+						amachine = i;
+						break;
+					}
+				}
 
-		logger->check(tmachine != "", "Invalid pipe tmachine");
+				logger->fatal("Could not find attached machine! Something is wrong");
+			}
+		};
 
-		pipe->insert("to_part", part_to_id[p.mb->in_part]);
-		pipe->insert("to_machine", tmachine);
-		pipe->insert("to_port", p.port_b);
+		write_connection(rpipe.a, "from_part", "from_machine", "from_attached_machine");
+		write_connection(rpipe.b, "to_part", "to_machine", "to_attached_machine");
+		pipe->insert("from_port", rpipe.a->id);
+		pipe->insert("to_port", rpipe.b->id);
 
 		// Insert all the waypoints as an array of ints (x, y, x, y, x, y...)
 		auto waypoints = cpptoml::make_array();
-		for(size_t i = 0; i < p.waypoints.size(); i++)
+		for(size_t i = 0; i < rpipe.waypoints.size(); i++)
 		{
-			waypoints->push_back(p.waypoints[i].x);
-			waypoints->push_back(p.waypoints[i].y);
+			waypoints->push_back(rpipe.waypoints[i].x);
+			waypoints->push_back(rpipe.waypoints[i].y);
 		}
 
 		pipe->insert("waypoints", waypoints);
@@ -562,28 +543,7 @@ void VehicleSaver::write_pipes(cpptoml::table &target, const Vehicle &what)
 	target.insert("pipe", pipe_array);
 }
 
-void VehicleSaver::write_pipe_junctions(cpptoml::table &target, const Vehicle &what)
+void VehicleSaver::write_plumbing_machines(cpptoml::table &target, const Vehicle &what)
 {
-	auto pjnc_array = cpptoml::make_table_array();
 
-	for(const PipeJunction& jnc : what.plumbing.junctions)
-	{
-		auto junction = cpptoml::make_table();
-		junction->insert("id", jnc.id);
-		junction->insert("rotation", jnc.rotation);
-		serialize_to_table(jnc.pos, *junction, "pos");
-
-		auto pipes = cpptoml::make_array();
-		// Now we insert the IDs of the pipes so they remain ordered
-		for(size_t i = 0; i < jnc.pipes_id.size(); i++)
-		{
-			pipes->push_back(jnc.pipes_id[i]);
-		}
-
-		junction->insert("pipes", pipes);
-
-		pjnc_array->push_back(junction);
-	}
-
-	target.insert("pipe_junction", pjnc_array);
 }

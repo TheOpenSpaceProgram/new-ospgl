@@ -13,6 +13,12 @@ struct Pipe
 	// Orientation is only important for the value of flow
 	FluidPort *a, *b;
 
+	// For pipe serialization as fluid ports are initialized a bit late, we hold these pointers and
+	// resolve them later
+	PlumbingMachine *amachine, *bmachine;
+	std::string aport, bport;
+
+
 	float surface;
 
 	// Real-time updated, values greater than 0 mean going from a to b, or going into the junction
@@ -64,18 +70,18 @@ private:
 public:
 
 	// These functions check and area of the plumbing grid for machines
-	std::vector<MachinePlumbing*> grid_aabb_check(glm::vec2 start, glm::vec2 end, bool expand = false)
+	std::vector<PlumbingMachine*> grid_aabb_check(glm::vec2 start, glm::vec2 end, bool expand = false)
 		{ return grid_aabb_check(start, end, {}, expand); }
-	std::vector<MachinePlumbing*> grid_aabb_check(glm::vec2 start, glm::vec2 end, const std::vector<MachinePlumbing*>& ignore,
-										  bool expand = false);
+	std::vector<PlumbingMachine*> grid_aabb_check(glm::vec2 start, glm::vec2 end, const std::vector<PlumbingMachine*>& ignore,
+												  bool expand = false);
 
 	// Combines virtual and real machines
-	std::vector<MachinePlumbing*> get_all_elements();
+	std::vector<PlumbingMachine*> get_all_elements();
 	std::vector<Machine*> get_all_true_ports();
 
 	std::vector<Pipe> pipes;
 	// Includes stuff such as virtual pumps and junctions
-	std::vector<MachinePlumbing*> plumbing_machines;
+	std::vector<PlumbingMachine*> plumbing_machines;
 
 	void update_pipes(float dt, Vehicle* in_vehicle);
 	// Called when adding new parts, or merging vehicles (etc...)

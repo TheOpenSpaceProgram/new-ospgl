@@ -43,7 +43,7 @@ void Machine::editor_update(double dt)
 	LuaUtil::call_function_if_present(env["editor_update"], dt);
 }
 
-void Machine::init(sol::state* lua_state, Part* in_part) 
+void Machine::init(sol::state* lua_state, Part* in_part)
 {
 	logger->check(init_toml != nullptr, "Malformed init_toml");
 	cpptoml::table& init_toml_p = *init_toml;

@@ -17,7 +17,7 @@ private:
 	void write_pieces(cpptoml::table& target, const Vehicle& what);
 	void write_wires(cpptoml::table& target, const Vehicle& what);
 	void write_pipes(cpptoml::table& target, const Vehicle& what);
-	void write_pipe_junctions(cpptoml::table& target, const Vehicle& what);
+	void write_plumbing_machines(cpptoml::table& target, const Vehicle& what);
 
 public:
 	VehicleSaver(cpptoml::table& target, const Vehicle& what);
@@ -47,7 +47,7 @@ private:
 	void copy_pieces(const cpptoml::table& root);
 	void obtain_wires(const cpptoml::table& root);
 	void obtain_pipes(const cpptoml::table& root);
-	void obtain_pipe_junctions(const cpptoml::table& root);
+	void obtain_plumbing_machines(const cpptoml::table& root);
 
 	Piece* load_piece(const cpptoml::table& piece);
 

@@ -53,13 +53,13 @@ void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span) const
 
 	int i = 0;
 
-	std::vector<MachinePlumbing*> elements = veh->plumbing.get_all_elements();
+	std::vector<PlumbingMachine*> elements = veh->plumbing.get_all_elements();
 
-	for(MachinePlumbing* pb : elements)
+	for(PlumbingMachine* pb : elements)
 	{
 		bool is_selected = false;
 		bool is_conflict = false;
-		for (MachinePlumbing* elem : selected)
+		for (PlumbingMachine* elem : selected)
 		{
 			if (elem == pb)
 			{
@@ -68,7 +68,7 @@ void PlumbingEditor::draw_machines(NVGcontext* vg, glm::vec4 span) const
 			}
 		}
 
-		for (MachinePlumbing* elem: drag_conflicts)
+		for (PlumbingMachine* elem: drag_conflicts)
 		{
 			if (elem == pb)
 			{
@@ -255,7 +255,7 @@ bool PlumbingEditor::update_dragging(GUIInput *gui_input, glm::vec2 mpos)
 		}
 
 		drag_conflicts.clear();
-		for(MachinePlumbing* elem : selected)
+		for(PlumbingMachine* elem : selected)
 		{
 			glm::ivec2 end_pos = elem->editor_position + glm::ivec2(offset);
 			if(!veh->plumbing.grid_aabb_check(end_pos,end_pos + elem->get_size(true),
@@ -270,7 +270,7 @@ bool PlumbingEditor::update_dragging(GUIInput *gui_input, glm::vec2 mpos)
 		{
 			if(drag_conflicts.empty())
 			{
-				for (MachinePlumbing* elem : selected)
+				for (PlumbingMachine* elem : selected)
 				{
 					elem->editor_position += glm::ivec2(offset);
 				}
@@ -288,7 +288,7 @@ bool PlumbingEditor::update_dragging(GUIInput *gui_input, glm::vec2 mpos)
 	else if(!in_pipe_drag && allow_editing)
 	{
 		bool hovered_selected = false;
-		for (MachinePlumbing* elem : selected)
+		for (PlumbingMachine* elem : selected)
 		{
 			if (elem == hovered)
 			{
@@ -319,7 +319,7 @@ void PlumbingEditor::handle_hovering(GUIInput *gui_input, glm::vec2 mpos)
 	auto hover_vec = veh->plumbing.grid_aabb_check(mpos, mpos);
 	if (hover_vec.size() >= 1)
 	{
-		MachinePlumbing* elem = hover_vec[0];
+		PlumbingMachine* elem = hover_vec[0];
 		hovered = elem;
 		if (gui_input->mouse_down(2) && elem->in_machine)
 		{
@@ -399,8 +399,8 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 	glm::vec2 mpos = get_mouse_pos(span);
 	glm::ivec2 round = glm::floor(mpos);
 	// Hovering ports
-	std::vector<MachinePlumbing*> all_elems = veh->plumbing.get_all_elements();
-	for (MachinePlumbing* elem : all_elems)
+	std::vector<PlumbingMachine*> all_elems = veh->plumbing.get_all_elements();
+	for (PlumbingMachine* elem : all_elems)
 	{
 		for (FluidPort& port : elem->fluid_ports)
 		{
@@ -701,8 +701,8 @@ void PlumbingEditor::draw_collisions(NVGcontext* vg, glm::vec4 span) const
 
 		int i = 0;
 
-		std::vector<MachinePlumbing*> elems = veh->plumbing.get_all_elements();
-		for(MachinePlumbing* elem : elems)
+		std::vector<PlumbingMachine*> elems = veh->plumbing.get_all_elements();
+		for(PlumbingMachine* elem : elems)
 		{
 			// If it's selected, we don't check collision!
 			if(std::find(selected.begin(), selected.end(), elem) != selected.end())

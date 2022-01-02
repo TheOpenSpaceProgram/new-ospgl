@@ -26,6 +26,7 @@ public:
 	std::unordered_map<std::string, Machine*> machines;
 
 	// Attached machines are not in the part prototype, but attached by other means
+	// They are serialized by array index
 	std::vector<Machine*> attached_machines;
 	// Attached machines which must be loaded on init
 	std::vector<std::string> to_load_attached_machines;

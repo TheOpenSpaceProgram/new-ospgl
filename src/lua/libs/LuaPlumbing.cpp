@@ -1,11 +1,11 @@
 #include "LuaPlumbing.h"
-#include <universe/vehicle/plumbing/MachinePlumbing.h>
+#include <universe/vehicle/plumbing/PlumbingMachine.h>
 #include "LuaAssets.h"
 
 void LuaPlumbing::load_to(sol::table &table)
 {
-	table.new_usertype<MachinePlumbing>("machine_plumbing",
-	"create_port", &MachinePlumbing::create_port
+	table.new_usertype<PlumbingMachine>("machine_plumbing",
+										"create_port", &PlumbingMachine::create_port
 	);
 
 	table.new_usertype<StoredFluids>("stored_fluids",

@@ -4,20 +4,18 @@
 #include "StoredFluids.h"
 
 class Machine;
-class MachinePlumbing;
+class PlumbingMachine;
 class GUISkin;
 
-class MachinePlumbing;
+class PlumbingMachine;
 class Pipe;
 
 struct FluidPort
 {
 	// Useful pointer to have around to avoid endless lookups
-	MachinePlumbing* in_machine;
+	PlumbingMachine* in_machine;
 
 	std::string id;
-	// Numeric id is only used for junctions
-	size_t numer_id;
 	std::string gui_name;
 	// Fluid ports must have a physical location
 	std::string marker;
@@ -29,7 +27,7 @@ struct FluidPort
 
 
 // Implements generic code for plumbing. May or may not be contained in a real machine.
-class MachinePlumbing
+class PlumbingMachine
 {
 private:
 
@@ -42,12 +40,7 @@ public:
 	glm::ivec2 editor_position;
 	int editor_rotation;
 
-	// If not null, this is a real machine. if null, we are a plumbing only machine, which
-	// are plumbing only machines which are serialized separately
 	Machine* in_machine;
-	// If not a machine this will be present and non-zero
-	size_t plumbing_machine_id;
-
 
 	glm::ivec2 get_base_size() { return base_size; }
 	// Does not include rotation!
@@ -77,7 +70,7 @@ public:
 	// - Feel free to refuse liquids if no more can fit
 	StoredFluids in_flow(std::string port, const StoredFluids& in, bool do_flow);
 
-	explicit MachinePlumbing(Machine* sm) : in_machine(sm) {}
+	explicit PlumbingMachine(Machine* sm) : in_machine(sm) {}
 	void init(const cpptoml::table& toml);
 	void create_port(std::string id, std::string marker, std::string ui_name, float x, float y, bool is_flow_port);
 	// Return ports which are "physically" connected to the given one. Only called on flow ports.

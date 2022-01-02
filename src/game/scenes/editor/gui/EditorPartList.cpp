@@ -92,7 +92,7 @@ void EditorPartList::create_part(AssetHandle<PartPrototype>& proto)
 		glm::ivec2 pos = veh->plumbing.find_free_space(part_pb_size);
 		for(const auto& pair : n_part->machines)
 		{
-			MachinePlumbing& pb = pair.second->plumbing;
+			PlumbingMachine& pb = pair.second->plumbing;
 			if(pb.has_lua_plumbing())
 			{
 				pb.editor_position += pos;

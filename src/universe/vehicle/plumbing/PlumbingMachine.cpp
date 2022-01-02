@@ -1,10 +1,10 @@
-#include "MachinePlumbing.h"
+#include "PlumbingMachine.h"
 #include "../part/Machine.h"
 #include <util/LuaUtil.h>
 #include <util/serializers/glm.h>
 #include <gui/GUISkin.h>
 
-float MachinePlumbing::get_pressure(const std::string& port)
+float PlumbingMachine::get_pressure(const std::string& port)
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 
@@ -14,7 +14,7 @@ float MachinePlumbing::get_pressure(const std::string& port)
 	return result.get<float>();
 }
 
-StoredFluids MachinePlumbing::in_flow(std::string port, const StoredFluids &in, bool do_flow)
+StoredFluids PlumbingMachine::in_flow(std::string port, const StoredFluids &in, bool do_flow)
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 
@@ -24,7 +24,7 @@ StoredFluids MachinePlumbing::in_flow(std::string port, const StoredFluids &in, 
 	return std::move(result.get<StoredFluids>());
 }
 
-StoredFluids MachinePlumbing::out_flow(std::string port, float volume, bool do_flow)
+StoredFluids PlumbingMachine::out_flow(std::string port, float volume, bool do_flow)
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 
@@ -34,21 +34,15 @@ StoredFluids MachinePlumbing::out_flow(std::string port, float volume, bool do_f
 	return std::move(result.get<StoredFluids>());
 }
 
-// TODO: We could cache this too
-glm::ivec2 MachinePlumbing::get_editor_size(bool expand, bool rotate) const
-{
-	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
-}
-
-void MachinePlumbing::draw_diagram(void* vg, GUISkin* gui_skin)
+void PlumbingMachine::draw_diagram(void* vg, GUISkin* gui_skin)
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 	LuaUtil::safe_call_function(get_lua_plumbing()["draw_diagram"], vg, gui_skin);
 }
 
-sol::table MachinePlumbing::get_lua_plumbing(bool silent_fail)
+sol::table PlumbingMachine::get_lua_plumbing(bool silent_fail)
 {
-	auto value = machine->env["plumbing"];
+	auto value = in_machine->env["plumbing"];
 	if(value.valid() && value.get_type() == sol::type::table)
 	{
 		return value.get<sol::table>();
@@ -63,7 +57,7 @@ sol::table MachinePlumbing::get_lua_plumbing(bool silent_fail)
 	}
 }
 
-void MachinePlumbing::init(const cpptoml::table& init)
+void PlumbingMachine::init(const cpptoml::table& init)
 {
 	// std::cout << init << std::endl;
 	// Read plumbing_pos and rot from init if present
@@ -94,7 +88,7 @@ void MachinePlumbing::init(const cpptoml::table& init)
 
 
 	has_lua = false;
-	auto value = machine->env["plumbing"];
+	auto value = in_machine->env["plumbing"];
 	if(value.valid() && value.get_type() == sol::type::table)
 	{
 		has_lua = true;
@@ -123,7 +117,7 @@ void MachinePlumbing::init(const cpptoml::table& init)
 	}
 }
 
-void MachinePlumbing::create_port(std::string id, std::string marker, std::string name, float x, float y, bool is_flow_port)
+void PlumbingMachine::create_port(std::string id, std::string marker, std::string name, float x, float y, bool is_flow_port)
 {
 	logger->check(can_add_ports, "Cannot add port ({}) currently, machine is already init", id);
 
@@ -148,7 +142,7 @@ void MachinePlumbing::create_port(std::string id, std::string marker, std::strin
 
 }
 
-FluidPort* MachinePlumbing::get_port_by_id(const std::string &name)
+FluidPort* PlumbingMachine::get_port_by_id(const std::string &name)
 {
 	for(size_t i = 0; i < fluid_ports.size(); i++)
 	{
@@ -162,7 +156,7 @@ FluidPort* MachinePlumbing::get_port_by_id(const std::string &name)
 	return nullptr;
 }
 
-glm::vec2 MachinePlumbing::correct_editor_pos(glm::vec2 local_pos)
+glm::vec2 PlumbingMachine::correct_editor_pos(glm::vec2 local_pos)
 {
 	glm::vec2 pos = local_pos;
 
@@ -188,7 +182,7 @@ glm::vec2 MachinePlumbing::correct_editor_pos(glm::vec2 local_pos)
 }
 
 
-glm::ivec2 MachinePlumbing::get_size(bool expand, bool rotate)
+glm::ivec2 PlumbingMachine::get_size(bool expand, bool rotate)
 {
 	glm::ivec2 ret = base_size;
 
@@ -208,5 +202,15 @@ glm::ivec2 MachinePlumbing::get_size(bool expand, bool rotate)
 
 	return ret;
 
+}
+
+std::vector<FluidPort *> PlumbingMachine::get_connected_ports(const std::string &port)
+{
+	return std::vector<FluidPort *>();
+}
+
+float PlumbingMachine::get_pressure_drop(const std::string &from, const std::string &to, float cur_P)
+{
+	return 0;
 }
 

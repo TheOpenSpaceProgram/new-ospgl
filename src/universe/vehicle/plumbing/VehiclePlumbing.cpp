@@ -12,16 +12,16 @@ VehiclePlumbing::VehiclePlumbing(Vehicle *in_vehicle)
 	veh = in_vehicle;
 }
 
-std::vector<MachinePlumbing*> VehiclePlumbing::grid_aabb_check(glm::vec2 start, glm::vec2 end,
-												 const std::vector<MachinePlumbing*>& ignore, bool expand)
+std::vector<PlumbingMachine*> VehiclePlumbing::grid_aabb_check(glm::vec2 start, glm::vec2 end,
+															   const std::vector<PlumbingMachine*>& ignore, bool expand)
 {
-	std::vector<MachinePlumbing*> out;
-	std::vector<MachinePlumbing*> all_elems = get_all_elements();
+	std::vector<PlumbingMachine*> out;
+	std::vector<PlumbingMachine*> all_elems = get_all_elements();
 
-	for(MachinePlumbing* pb : all_elems)
+	for(PlumbingMachine* pb : all_elems)
 	{
 		bool ignored = false;
-		for(MachinePlumbing* m : ignore)
+		for(PlumbingMachine* m : ignore)
 		{
 			if(m == pb)
 			{
@@ -32,7 +32,7 @@ std::vector<MachinePlumbing*> VehiclePlumbing::grid_aabb_check(glm::vec2 start, 
 
 		if(!ignored)
 		{
-			glm::ivec2 min = pb.editor_position;
+			glm::ivec2 min = pb->editor_position;
 			glm::ivec2 max = min + pb->get_size(expand);
 
 			if (min.x < end.x && max.x > start.x && min.y < end.y && max.y > start.y)
@@ -51,9 +51,9 @@ glm::ivec4 VehiclePlumbing::get_plumbing_bounds()
 	glm::ivec2 amin = glm::ivec2(INT_MAX, INT_MAX);
 	glm::ivec2 amax = glm::ivec2(INT_MIN, INT_MIN);
 
-	std::vector<MachinePlumbing*> all_elems = get_all_elements();
+	std::vector<PlumbingMachine*> all_elems = get_all_elements();
 	bool any = false;
-	for (MachinePlumbing* pb : all_elems)
+	for (PlumbingMachine* pb : all_elems)
 	{
 		glm::ivec2 min = pb->editor_position;
 		glm::ivec2 max = pb->get_size(true);
@@ -93,7 +93,7 @@ glm::ivec2 VehiclePlumbing::get_plumbing_size_of(Part* p)
 
 	for(const auto& pair : p->machines)
 	{
-		MachinePlumbing& pb = pair.second->plumbing;
+		PlumbingMachine& pb = pair.second->plumbing;
 		if(pb.has_lua_plumbing())
 		{
 			found_any = true;
@@ -112,9 +112,9 @@ glm::ivec2 VehiclePlumbing::get_plumbing_size_of(Part* p)
 
 }
 
-std::vector<MachinePlumbing*> VehiclePlumbing::get_all_elements()
+std::vector<PlumbingMachine*> VehiclePlumbing::get_all_elements()
 {
-	std::vector<MachinePlumbing*> out;
+	std::vector<PlumbingMachine*> out;
 
 	// Machines
 	for(const Part* p : veh->parts)
@@ -234,7 +234,7 @@ void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, s
 void VehiclePlumbing::calculate_delta_p(FlowPath& fws)
 {
 	// It's guaranteed that all b ports are flow machines, so just follow them (except the end one)
-	FluidPort* start = pipes[fws.path[0]]->a;
+	FluidPort* start = pipes[fws.path[0]].a;
 	float start_P = start->in_machine->get_pressure(start->id);
 	FluidPort* end = pipes[fws.path[fws.path.size() - 1]].b;
 	float end_P = end->in_machine->get_pressure(end->id);
@@ -395,6 +395,11 @@ int VehiclePlumbing::find_pipe_connected_to(FluidPort *port)
 	}
 
 	return -1;
+}
+
+void VehiclePlumbing::update_pipes(float dt, Vehicle *in_vehicle)
+{
+
 }
 
 

@@ -71,10 +71,10 @@ PlumbingInterface::PlumbingInterface(EditorVehicleInterface *edveh_int)
 void PlumbingInterface::do_highlight()
 {
 	// Highlight the pieces from the editor, selected in blue, hovered in white
-	const MachinePlumbing* hovered = pb_editor.get_hovered();
-	const std::vector<MachinePlumbing*> selected = pb_editor.get_selected();
+	const PlumbingMachine* hovered = pb_editor.get_hovered();
+	const std::vector<PlumbingMachine*> selected = pb_editor.get_selected();
 
-	for(MachinePlumbing* elem : selected)
+	for(PlumbingMachine* elem : selected)
 	{
 		if(!elem->in_machine)
 		{

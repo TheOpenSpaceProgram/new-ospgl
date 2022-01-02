@@ -23,7 +23,7 @@ private:
 	double max_time_for_rotation = 0.2;
 	float port_radius = 0.18f;
 
-	MachinePlumbing* hovered;
+	PlumbingMachine* hovered;
 
 	FluidPort* hovered_port;
 	// We are hovering an unfinished pipe endpoint if this is not negative, or... see in_pipe_drag
@@ -40,8 +40,8 @@ private:
 	glm::vec2 mouse_start;
 	glm::vec2 mouse_current;
 	// We allow shift-selection and also box selection
-	std::vector<MachinePlumbing*> selected;
-	std::vector<MachinePlumbing*> drag_conflicts;
+	std::vector<PlumbingMachine*> selected;
+	std::vector<PlumbingMachine*> drag_conflicts;
 
 	glm::dvec2 last_click;
 	glm::vec2 last_center;
@@ -96,8 +96,8 @@ public:
 	void prepare(GUIInput* gui_input, glm::vec4 span);
 	void do_editor(NVGcontext* vg, glm::vec4 span, GUISkin* skin);
 
-	const MachinePlumbing* get_hovered() const { return hovered; }
-	const std::vector<MachinePlumbing*> get_selected() const { return selected; }
+	const PlumbingMachine* get_hovered() const { return hovered; }
+	const std::vector<PlumbingMachine*> get_selected() const { return selected; }
 
 	PlumbingEditor();
 

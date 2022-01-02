@@ -1,10 +1,9 @@
 #pragma once
-#include <sol/sol.hpp>
 #include <cpptoml.h>
 #include <universe/Universe.h>
 #include <util/LuaUtil.h>
 #include <lua/LuaCore.h>
-#include "../plumbing/MachinePlumbing.h"
+#include "../plumbing/PlumbingMachine.h"
 
 class Vehicle;
 class Part;
@@ -31,22 +30,14 @@ private:
 
 public:
 
-	// A virtual machine has no editor status, and cannot be wired
-	// Used for stuff like pipes
-	bool is_virtual_machine;
-	// An attached machine is not on the part, but is attached to it
-	// in realtime. Used for plumbing stuff
-	bool is_attached_machine;
+	// Always present, but may not be used
+	PlumbingMachine plumbing;
 
-	// Always present, but may not be used if "has_plumbing" is false
-	MachinePlumbing plumbing;
+	sol::environment env;
+	sol::state* lua_state;
 
 	Part* in_part;
 	std::string assigned_piece;
-
-	// All Machines share the same lua_state to allow sharing data
-	sol::state* lua_state;
-	sol::environment env;
 
 	std::shared_ptr<cpptoml::table> init_toml;
 
