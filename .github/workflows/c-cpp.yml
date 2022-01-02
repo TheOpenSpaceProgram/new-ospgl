@@ -33,10 +33,10 @@ jobs:
         sudo apt-get update
         sudo apt-get install libx11-dev xorg-dev libgl1-mesa-dev binutils-dev
     - uses: actions/checkout@v2
-    - name: Checkout submodules
-      uses: textbook/git-checkout-submodule-action@master
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v2
       with:
-        remote: true
+        submodules: recursive
     - name: configure twice
       run: |
         sudo cmake . -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9
