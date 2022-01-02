@@ -25,7 +25,7 @@ void VehicleLoader::obtain_pipes(const cpptoml::table &root)
 
 
 		auto read_connection =
-				[pipe, this](PlumbingMachine* tget,
+				[pipe, this](PlumbingMachine*& tget,
 				const std::string& part, const std::string& machine, const std::string& attached_machine)
 		{
 			int64_t part_id = *pipe->get_qualified_as<int64_t>(part);
@@ -319,12 +319,14 @@ void VehicleSaver::assign_ids(cpptoml::table& target, const Vehicle& what)
 	{
 		piece_id++;
 		piece_to_id[p] = piece_id;
+		p->id = piece_id;
 	}
 
 	for(Part* p : what.parts)
 	{
 		part_id++;
 		part_to_id[p] = part_id;
+		p->id = part_id;
 	}
 
 	// Internal numbers to guarantee unique IDs
@@ -517,6 +519,8 @@ void VehicleSaver::write_pipes(cpptoml::table &target, const Vehicle &what)
 						break;
 					}
 				}
+
+				pipe->insert(attached_machine, amachine);
 
 				logger->fatal("Could not find attached machine! Something is wrong");
 			}

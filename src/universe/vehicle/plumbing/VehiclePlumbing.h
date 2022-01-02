@@ -103,4 +103,7 @@ public:
 
 	explicit VehiclePlumbing(Vehicle* in_vehicle);
 
+	// Really creates the plumbing connections after loading a vehicle
+	void init();
+
 };

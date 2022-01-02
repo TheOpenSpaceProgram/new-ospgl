@@ -402,6 +402,26 @@ void VehiclePlumbing::update_pipes(float dt, Vehicle *in_vehicle)
 
 }
 
+void VehiclePlumbing::init()
+{
+	for(Pipe& p : pipes)
+	{
+		if(p.amachine)
+		{
+			p.a = p.amachine->get_port_by_id(p.aport);
+			p.amachine = nullptr;
+			p.aport = "";
+		}
+
+		if(p.bmachine)
+		{
+			p.b = p.bmachine->get_port_by_id(p.bport);
+			p.bmachine = nullptr;
+			p.bport = "";
+		}
+	}
+}
+
 
 void Pipe::invert()
 {

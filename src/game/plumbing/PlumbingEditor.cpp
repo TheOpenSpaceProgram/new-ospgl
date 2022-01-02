@@ -161,31 +161,36 @@ void PlumbingEditor::draw_tooltip(NVGcontext* vg, glm::vec4 span) const
 		float pressure = hovered->get_pressure(hovered_port->id);
 		float flow = 0.0f;
 		int connected_pipe = veh->plumbing.find_pipe_connected_to(hovered_port);
+		float size = (float)hovered_port->gui_name.length() * 8.5f;
+		float height = 30.0f;
+		std::stringstream pressure_stream;
+		std::stringstream flow_stream;
 		if (connected_pipe >= 0)
 		{
-			Pipe* p = &veh->plumbing.pipes[connected_pipe];
+			Pipe *p = &veh->plumbing.pipes[connected_pipe];
 			flow = p->flow;
 			if (p->b == hovered_port)
 			{
 				flow = -flow;
 			}
 
-			std::stringstream pressure_stream;
-			std::stringstream flow_stream;
 			pressure_stream << "P: " << std::fixed << std::setprecision(2) << pressure / 101325.0 << " atm";
 			flow_stream << "F: " << std::fixed << std::setprecision(2) << flow * 1000.0 << " L/s";
-			float size = std::max(pressure_stream.str().length(), flow_stream.str().length());
-			size = std::max(size, (float)hovered_port->gui_name.length());
+			size = std::max(pressure_stream.str().length(), flow_stream.str().length());
+			size = std::max(size, (float) hovered_port->gui_name.length());
 			size *= 8.0f;
+			height = 70.0f;
+		}
+		nvgBeginPath(vg);
+		nvgRect(vg, pos.x, pos.y, size, height);
+		nvgFill(vg);
+		nvgStroke(vg);
 
-			nvgBeginPath(vg);
-			nvgRect(vg, pos.x, pos.y, size, 70.0f);
-			nvgFill(vg);
-			nvgStroke(vg);
-
-			nvgFontSize(vg, 16.0f);
-			nvgFillColor(vg, skin->get_foreground_color());
-			nvgText(vg, pos.x + 5.0f, pos.y + 20.0f, hovered_port->gui_name.c_str(), nullptr);
+		nvgFontSize(vg, 16.0f);
+		nvgFillColor(vg, skin->get_foreground_color());
+		nvgText(vg, pos.x + 5.0f, pos.y + 20.0f, hovered_port->gui_name.c_str(), nullptr);
+		if(connected_pipe >= 0)
+		{
 			nvgText(vg, pos.x + 5.0f, pos.y + 40.0f, pressure_stream.str().c_str(), nullptr);
 			nvgText(vg, pos.x + 5.0f, pos.y + 60.0f, flow_stream.str().c_str(), nullptr);
 		}
@@ -321,7 +326,7 @@ void PlumbingEditor::handle_hovering(GUIInput *gui_input, glm::vec2 mpos)
 	{
 		PlumbingMachine* elem = hover_vec[0];
 		hovered = elem;
-		if (gui_input->mouse_down(2) && elem->in_machine)
+		if (gui_input->mouse_down(2))
 		{
 			on_middle_click(elem->in_machine);
 		}
@@ -850,6 +855,7 @@ void PlumbingEditor::prepare(GUIInput *gui_input, glm::vec4 span)
 
 	bool block = false;
 	hovered = nullptr;
+	hovered_port = nullptr;
 	block |= update_mouse(gui_input, span);
 	block |= update_pipes(gui_input, span);
 	block |= update_selection(gui_input, span);
@@ -875,7 +881,7 @@ void PlumbingEditor::do_editor(NVGcontext *vg, glm::vec4 span, GUISkin* skin)
 	draw_pipes(vg, span);
 	draw_selection(vg, span);
 	draw_collisions(vg, span);
-	if(allow_tooltip)
+	if(allow_tooltip && hovered)
 	{
 		// The tooltip is not scissored
 		nvgResetScissor(vg);

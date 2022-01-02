@@ -101,6 +101,8 @@ void Vehicle::init(sol::state* lua_state)
 	{
 		part->init(lua_state, this);
 	}
+
+	plumbing.init();
 }
 
 static bool find_machine(Machine* m, Vehicle* veh)

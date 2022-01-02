@@ -105,7 +105,7 @@ function plumbing.init()
         end
         local name = "inlet_" .. idx
         table.insert(inlets, name)
-        machine.plumbing:create_port(name, inlet, inlet_str, unpack(positions[idx]))
+        machine.plumbing:create_port(name, inlet, inlet_str, false, unpack(positions[idx]))
         inlet_count = inlet_count + 1
     end
 

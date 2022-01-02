@@ -117,7 +117,7 @@ void PlumbingMachine::init(const cpptoml::table& init)
 	}
 }
 
-void PlumbingMachine::create_port(std::string id, std::string marker, std::string name, float x, float y, bool is_flow_port)
+void PlumbingMachine::create_port(std::string id, std::string marker, std::string name, bool is_flow_port, float x, float y)
 {
 	logger->check(can_add_ports, "Cannot add port ({}) currently, machine is already init", id);
 

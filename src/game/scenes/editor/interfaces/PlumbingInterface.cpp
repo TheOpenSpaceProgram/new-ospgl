@@ -87,7 +87,7 @@ void PlumbingInterface::do_highlight()
 		}
 	}
 
-	if(hovered->in_machine)
+	if(hovered)
 	{
 		for (const auto &pair : hovered->in_machine->in_part->pieces)
 		{

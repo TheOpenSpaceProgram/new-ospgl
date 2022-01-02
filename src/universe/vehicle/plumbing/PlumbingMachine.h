@@ -72,8 +72,9 @@ public:
 
 	explicit PlumbingMachine(Machine* sm) : in_machine(sm) {}
 	void init(const cpptoml::table& toml);
-	void create_port(std::string id, std::string marker, std::string ui_name, float x, float y, bool is_flow_port);
+	void create_port(std::string id, std::string marker, std::string ui_name, bool is_flow_port, float x, float y);
 	// Return ports which are "physically" connected to the given one. Only called on flow ports.
+	// MAY change on runtime (for example, a burst valve)! This is why this is not cached
 	std::vector<FluidPort*> get_connected_ports(const std::string& port);
 	FluidPort* get_port_by_id(const std::string& name);
 	// Corrects a position in local coordinates to global in the editor. Used for ports

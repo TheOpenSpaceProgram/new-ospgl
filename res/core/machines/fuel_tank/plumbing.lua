@@ -65,8 +65,8 @@ local liq_port_str = database:get_string("liquid_port")
 local gas_port_str = database:get_string("gas_port")
 function plumbing.init(ports)
     local port_marker = machine.init_toml:get_string("port_marker")
-    machine.plumbing:create_port("liquid_port", port_marker, liq_port_str, 1.5, 3.5)
-    machine.plumbing:create_port("gas_port", port_marker, gas_port_str, 1.5, -0.5)
+    machine.plumbing:create_port("liquid_port", port_marker, liq_port_str, false, 1.5, 3.5)
+    machine.plumbing:create_port("gas_port", port_marker, gas_port_str, false, 1.5, -0.5)
 
     return 3, 3
 end
