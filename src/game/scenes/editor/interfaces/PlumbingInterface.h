@@ -12,7 +12,6 @@ private:
 	size_t last_focused_i;
 
 	float view_size;
-	PlumbingEditor pb_editor;
 	EditorVehicle* edveh;
 	EditorVehicleInterface* edveh_int;
 
@@ -24,6 +23,8 @@ private:
 	void focus_pb_editor(Machine* m);
 
 public:
+
+	PlumbingEditor pb_editor;
 
 	bool do_interface(const CameraUniforms& cu, glm::dvec3 ray_start, glm::dvec3 ray_end,
 					  glm::dvec4 viewport, NVGcontext* vg, GUIInput* gui_input, GUISkin* gui_skin) override;

@@ -228,11 +228,14 @@ void OSP::start_frame()
 
 void OSP::update()
 {
+	PROFILE_FUNC();
 	game_state->update();
 }
 
 void OSP::render()
 {
+	PROFILE_FUNC();
+
 	if(renderer != nullptr)
 	{
 		game_state->render();

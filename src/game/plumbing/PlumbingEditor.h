@@ -5,6 +5,8 @@
 #include <universe/vehicle/Vehicle.h>
 #include <util/Signal.h>
 
+class PlumbingPanel;
+
 // Display and editing of the plumbing of a vehicle
 // Maybe used in the editor to set up plumbing, and viewed
 // during flight (although cockpit instruments should be preferred)
@@ -14,6 +16,8 @@
 class PlumbingEditor
 {
 private:
+
+	friend class PlumbingPanel;
 
 	// For ease of access
 	GUISkin* skin;

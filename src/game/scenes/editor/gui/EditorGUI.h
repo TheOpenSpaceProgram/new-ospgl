@@ -13,6 +13,7 @@
 
 #include "EditorPartList.h"
 #include "EditorTrashcan.h"
+#include "PlumbingPanel.h"
 
 
 class EditorScene;
@@ -26,8 +27,8 @@ class EditorGUI
 private:
 
 	int prev_width, prev_height;
-	EditorVehicleInterface* edveh_int;
 
+	EditorVehicleInterface* edveh_int;
 	void create_toolset();
 	void create_file();
 
@@ -35,6 +36,7 @@ public:
 
 	friend class EditorTrashcan;
 	friend class EditorPartList;
+	friend class PlumbingPanel;
 
 	enum EditorMode
 	{
@@ -54,6 +56,7 @@ public:
 
 	EditorPartList part_list;
 	EditorTrashcan trashcan;
+	PlumbingPanel plumbing;
 
 	GUICanvas toolset_canvas;
 	GUICanvas file_canvas;

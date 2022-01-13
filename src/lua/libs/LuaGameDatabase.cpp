@@ -22,6 +22,12 @@ void LuaGameDatabase::load_to(sol::table& table)
 		std::string pkg = view["__pkg"];
 		self->add_material(path, pkg);
 	},
+	"add_plumbing_machine", [](GameDatabase* self, const std::string& path, sol::this_environment st)
+	{
+		sol::environment view = st;
+		std::string pkg = view["__pkg"];
+		self->add_plumbing_machine(path, pkg);
+	},
 	"load_locale", [](GameDatabase* self, const sol::table& table, sol::this_environment st)
 	{
 		sol::environment view = st;

@@ -31,8 +31,6 @@ public:
 private:
 
 	EditorCamera cam;
-	EditorVehicle vehicle;
-	EditorVehicleInterface vehicle_int;
 
 
 	// We need a world for the very simple colliders, but we have no 
@@ -49,8 +47,9 @@ private:
 	void do_edveh_gui();
 
 public:
+	EditorVehicle vehicle;
+	EditorVehicleInterface vehicle_int;
 
-	
 	// We hold a non-universe lua_state for all machines to interact
 	sol::state lua_state;
 	

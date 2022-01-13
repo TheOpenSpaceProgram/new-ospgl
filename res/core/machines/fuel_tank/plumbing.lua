@@ -18,7 +18,7 @@ function plumbing.fluid_update()
 end
 
 function plumbing.get_pressure(port)
-    logger.info(fluid_container.contents)
+    --logger.info(fluid_container.contents)
     return fluid_container:get_total_pressure(1.0)
 end
 

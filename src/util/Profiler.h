@@ -63,6 +63,8 @@ private:
 
 public:
 
+	int pos_x = 0, pos_y = 0;
+
 	ProfileBlock block(std::string name);
 
 	void push(std::string gate);

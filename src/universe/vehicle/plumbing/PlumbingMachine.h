@@ -26,7 +26,7 @@ struct FluidPort
 };
 
 
-// Implements generic code for plumbing. May or may not be contained in a real machine.
+// Implements generic code for plumbing.
 class PlumbingMachine
 {
 private:

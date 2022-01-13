@@ -4,7 +4,7 @@
 // A reasonable multiplier to prevent extreme flow velocities
 // I don't know enough fluid mechanics as to determine a reasonable value
 // so it's arbitrary, chosen to approximate real life rocket values
-#define FLOW_MULTIPLIER 0.0002
+#define FLOW_MULTIPLIER 0.000002
 
 
 VehiclePlumbing::VehiclePlumbing(Vehicle *in_vehicle)
@@ -127,6 +127,14 @@ std::vector<PlumbingMachine*> VehiclePlumbing::get_all_elements()
 				out.push_back(&pair.second->plumbing);
 			}
 		}
+
+		for(const auto &amac: p->attached_machines)
+		{
+			if(amac->plumbing.has_lua_plumbing())
+			{
+				out.push_back(&amac->plumbing);
+			}
+		}
 	}
 
 	return out;
@@ -139,15 +147,46 @@ int VehiclePlumbing::create_pipe()
 	return pipes.size() - 1;
 }
 
-std::vector<VehiclePlumbing::FlowPath> VehiclePlumbing::determine_flows()
-{
-	std::vector<FlowPath> out;
-
-	return out;
-}
-
 void VehiclePlumbing::execute_flows(float dt, std::vector<FlowPath>& flows)
 {
+	for(const FlowPath& path : flows)
+	{
+		// The real machine discards into the next (must be flow machine, except the last)
+		// This way we implement fluid movement and not just teletransportation
+		// (This allows buffer pipes, etc...)
+		float to_move = -path.delta_P * FLOW_MULTIPLIER * dt;
+		if(to_move == 0.0f)
+			continue;
+		StoredFluids buffer;
+		Pipe& start = pipes[path.path[0]];
+		Pipe& end = pipes[path.path.back()];
+		// Bleed into the buffer
+		FluidPort* from = path.backwards ? start.b : start.a;
+		FluidPort* to = path.backwards ? end.a : end.b;
+
+		logger->check(!from->is_flow_port && !to->is_flow_port, "A path starts/ends in a flow machine!");
+		buffer.modify(from->in_machine->out_flow(from->id, to_move, true));
+		float flow = buffer.get_total_gas_mass() + buffer.get_total_liquid_mass();
+		start.flow += path.backwards ? flow : -flow;
+		end.flow += path.backwards ? flow : -flow;
+
+		// Travel the path if there's one
+		if(path.path.size() > 1)
+		{
+			for (size_t i = 1; i < path.path.size() - 1; i++)
+			{
+				Pipe &p = pipes[path.path[i]];
+				p.flow += path.backwards ? flow : -flow;
+				FluidPort* from_p = path.backwards ? p.b : p.a;
+				FluidPort* to_p = path.backwards ? p.a : p.b;
+				logger->check(from_p->is_flow_port && to_p->is_flow_port, "True machine in middle of path!");
+				// TODO!
+			}
+		}
+
+		to->in_machine->in_flow(to->id, buffer, true);
+
+	}
 
 }
 
@@ -158,29 +197,32 @@ void VehiclePlumbing::find_all_possible_paths(std::vector<FlowPath> &fws)
 	for(size_t pipe_id = 0; pipe_id < pipes.size(); pipe_id++)
 	{
 		Pipe& pipe = pipes[pipe_id];
-		bool found_true = false;
-		// We only need to check one side for simmetry
+
 		for (const FluidPort &pa: pipe.a->in_machine->fluid_ports)
 		{
 			if (!pa.is_flow_port)
 			{
-				found_true = true;
+				find_all_possible_paths_from(fws, pipe_id, false);
 				break;
 			}
 		}
 
-		if (found_true)
+		for (const FluidPort &pb: pipe.b->in_machine->fluid_ports)
 		{
-			find_all_possible_paths_from(fws, pipe_id);
-			break;
+			if (!pb.is_flow_port)
+			{
+				find_all_possible_paths_from(fws, pipe_id, true);
+				break;
+			}
 		}
+
 	}
 
 }
 
-void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, size_t start)
+void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, size_t start, bool backwards)
 {
-	// start.a contains a true port, so we just need to travel to port b now,
+	// start.a/b contains a true port, so we just need to travel to port b/a now,
 	// this is a tree search algorithm
 	// We store the whole path to the open pipe so we can rebuild it later
 	std::queue<std::vector<size_t>> open;
@@ -193,19 +235,21 @@ void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, s
 		std::vector<size_t> open_chain = open.front();
 		size_t work = open_chain.back();
 		const Pipe* p = &pipes[work];
+		const FluidPort* next = backwards ? p->a : p->b;
+
 		open.pop();
 
-		if(p->b->is_flow_port)
+		if(next->is_flow_port)
 		{
-			// Find all connected ports to this port and propagate
-			std::vector<FluidPort*> connected = p->b->in_machine->get_connected_ports(p->b->id);
+			// Find all connected ports to this port and propagate in correct direction
+			std::vector<FluidPort*> connected = next->in_machine->get_connected_ports(next->id);
 			// Find the pipes connected as "a" to said ports, others are included in symmetric searches
 			for(size_t pipe_id = 0; pipe_id < pipes.size(); pipe_id++)
 			{
 				Pipe& pipe = pipes[pipe_id];
 				for(const FluidPort* port : connected)
 				{
-					if(pipe.a == port)
+					if(backwards ? pipe.b == port : pipe.a == port)
 					{
 						std::vector<size_t> new_open;
 						new_open.insert(new_open.begin(), open_chain.begin(), open_chain.end());
@@ -219,24 +263,25 @@ void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, s
 		{
 			FlowPath fpath;
 			fpath.path = open_chain;
-			calculate_delta_p(fpath);
-			// Early discard
-			if(fpath.delta_P > 0.0f)
+			fpath.backwards = backwards;
+			calculate_delta_p(fpath, backwards);
+			if(fpath.delta_P < 0.0f)
 			{
 				fws.push_back(fpath);
 			}
+
 		}
 	}
 
 
 }
 
-void VehiclePlumbing::calculate_delta_p(FlowPath& fws)
+void VehiclePlumbing::calculate_delta_p(FlowPath& fws, bool backwards)
 {
 	// It's guaranteed that all b ports are flow machines, so just follow them (except the end one)
-	FluidPort* start = pipes[fws.path[0]].a;
+	FluidPort* start = backwards ? pipes[fws.path[0]].b : pipes[fws.path[0]].a;
 	float start_P = start->in_machine->get_pressure(start->id);
-	FluidPort* end = pipes[fws.path[fws.path.size() - 1]].b;
+	FluidPort* end = backwards ? pipes[fws.path[fws.path.size() - 1]].a : pipes[fws.path[fws.path.size() - 1]].b;
 	float end_P = end->in_machine->get_pressure(end->id);
 
 	float P_drop = 0.0f;
@@ -247,7 +292,13 @@ void VehiclePlumbing::calculate_delta_p(FlowPath& fws)
 		float cur_P = start_P - P_drop;
 		FluidPort* in_port = pipes[fws.path[i]].b;
 		FluidPort* out_port = pipes[fws.path[i + 1]].a;
+		if(backwards)
+		{
+			std::swap(in_port, out_port);
+		}
+
 		logger->check(in_port->in_machine == out_port->in_machine, "Something went wrong, machines don't match");
+		logger->check(in_port->is_flow_port && out_port->is_flow_port, "Flow ports mismatched!");
 		P_drop += in_port->in_machine->get_pressure_drop(in_port->id, out_port->id, cur_P);
 	}
 
@@ -399,6 +450,15 @@ int VehiclePlumbing::find_pipe_connected_to(FluidPort *port)
 
 void VehiclePlumbing::update_pipes(float dt, Vehicle *in_vehicle)
 {
+	std::vector<FlowPath> paths;
+	// Clear flows in pipes
+	for(Pipe& p : pipes)
+	{
+		p.flow = 0.0f;
+	}
+	find_all_possible_paths(paths);
+	reduce_to_forced_paths(paths);
+	execute_flows(dt, paths);
 
 }
 

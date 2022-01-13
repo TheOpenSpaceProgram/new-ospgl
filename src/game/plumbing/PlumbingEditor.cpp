@@ -158,7 +158,15 @@ void PlumbingEditor::draw_tooltip(NVGcontext* vg, glm::vec4 span) const
 	if (hovered_port)
 	{
 		glm::vec2 pos = mpos * (float) zoom;
-		float pressure = hovered->get_pressure(hovered_port->id);
+		float pressure = 0.0f;
+		if(hovered_port->is_flow_port)
+		{
+			// TODO, read from the pipe or something
+		}
+		else
+		{
+			pressure = hovered->get_pressure(hovered_port->id);
+		}
 		float flow = 0.0f;
 		int connected_pipe = veh->plumbing.find_pipe_connected_to(hovered_port);
 		float size = (float)hovered_port->gui_name.length() * 8.5f;
@@ -445,9 +453,12 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 					bool found_in_other = false;
 					for(Pipe& other_p : veh->plumbing.pipes)
 					{
-						for(size_t i = 0; i < p->waypoints.size(); i++)
+						if(&other_p == p)
+							continue;
+
+						for(size_t j = 0; j < other_p.waypoints.size(); j++)
 						{
-							if (other_p.waypoints[i] == round)
+							if(other_p.waypoints[j] == round)
 							{
 								found_in_other = true;
 								break;
@@ -730,100 +741,6 @@ void PlumbingEditor::draw_collisions(NVGcontext* vg, glm::vec4 span) const
 			nvgBeginPath(vg);
 			nvgRect(vg, -1.0, -1.0, size.x + 2.0, size.y + 2.0);
 			nvgStroke(vg);
-		}
-	}
-}
-
-void PlumbingEditor::draw_junction(NVGcontext *vg, glm::vec2 pos, size_t port_count, bool flip_three) const
-{
-	float f = 1.0f;
-	if(port_count <= 4)
-	{
-		if (port_count >= 1)
-		{
-			nvgBeginPath(vg);
-			nvgMoveTo(vg, pos.x, pos.y);
-			nvgLineTo(vg, pos.x, pos.y - f);
-			nvgStroke(vg);
-			draw_port(vg, pos + glm::vec2(0.0f, -f));
-		}
-
-		if (port_count >= 2)
-		{
-			if(flip_three)
-			{
-				nvgBeginPath(vg);
-				nvgMoveTo(vg, pos.x, pos.y);
-				nvgLineTo(vg, pos.x + f, pos.y);
-				nvgStroke(vg);
-				draw_port(vg, pos + glm::vec2(f, 0.0));
-			}
-			else
-			{
-				nvgBeginPath(vg);
-				nvgMoveTo(vg, pos.x, pos.y);
-				nvgLineTo(vg, pos.x - f, pos.y);
-				nvgStroke(vg);
-				draw_port(vg, pos + glm::vec2(-f, 0.0));
-			}
-		}
-
-		if (port_count >= 3)
-		{
-			nvgBeginPath(vg);
-			nvgMoveTo(vg, pos.x, pos.y);
-			nvgLineTo(vg, pos.x, pos.y + f);
-			nvgStroke(vg);
-			draw_port(vg, pos + glm::vec2(0.0f, f));
-		}
-
-		if (port_count == 4)
-		{
-			nvgBeginPath(vg);
-			nvgMoveTo(vg, pos.x, pos.y);
-			nvgLineTo(vg, pos.x + f, pos.y);
-			nvgStroke(vg);
-			draw_port(vg, pos + glm::vec2(f, 0.0f));
-		}
-	}
-	else
-	{
-		// We draw sub junctions to the right, every 2 additional ports one additional subjunction
-		size_t put_ports = 0;
-		size_t num_subs = ((port_count - 5) / 2) + 2;
-		for(size_t i = 0; i < num_subs; i++)
-		{
-			glm::vec2 rpos = pos + glm::vec2(1.0f, 0.0f) * (float)i;
-			if(i == 0)
-			{
-				draw_junction(vg, rpos, 3);
-				put_ports += 3;
-			}
-			else if(i == num_subs - 1)
-			{
-				nvgBeginPath(vg);
-				nvgMoveTo(vg, pos.x + i - 1.0f, pos.y);
-				nvgLineTo(vg, pos.x + i, pos.y);
-				nvgStroke(vg);
-				draw_junction(vg, rpos, port_count - put_ports, true);
-				put_ports += port_count - put_ports;
-			}
-			else
-			{
-				nvgBeginPath(vg);
-				nvgMoveTo(vg, pos.x + i - 1.0f, pos.y);
-				nvgLineTo(vg, pos.x + i, pos.y);
-				nvgLineTo(vg, pos.x + i, pos.y - f);
-				nvgMoveTo(vg, pos.x + i, pos.y);
-				nvgLineTo(vg, pos.x + i, pos.y + f);
-				nvgStroke(vg);
-
-				size_t put = std::min<size_t>(port_count - put_ports, 2);
-				// Top and bottom
-				draw_port(vg, rpos + glm::vec2(0.0, -f));
-				draw_port(vg, rpos + glm::vec2(0.0, f));
-				put_ports += put;
-			}
 		}
 	}
 }

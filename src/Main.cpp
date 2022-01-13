@@ -49,20 +49,6 @@ int main(int argc, char** argv)
 	{
 		PROFILE_BLOCK("frame");
 
-#ifdef OSPGL_LRDB
-		if(input->key_down(GLFW_KEY_PAUSE))
-		{
-			if(osp->game_state->universe.lua_debug_server)
-			{
-				osp->game_state->universe.disable_debugging();
-			}
-			else
-			{
-				osp->game_state->universe.enable_debugging();
-			}
-
-		}
-#endif
 		osp->start_frame();
 		osp->update();
 		osp->render();
@@ -71,6 +57,7 @@ int main(int argc, char** argv)
 		src2.lock()->set_position(glm::dvec3(cos(t), 0.0, sin(t)));
 
 		t+=osp->game_dt*0.4f;
+
 	}
 
 	delete audio;

@@ -20,6 +20,15 @@ void GameDatabase::add_part(const std::string& path, const std::string& pkg)
 	parts.push_back(sane_path);
 }
 
+// Plumbing machines are machines which may exists as plumbing only
+// (but they may also be normal machines!)
+void GameDatabase::add_plumbing_machine(const std::string& path, const std::string& pkg)
+{
+	std::string sane_path = sanitize_path(path, pkg);
+	logger->debug("[DB] Adding plumbing machine with path '{}'", sane_path);
+	plumbing_machines.push_back(sane_path);
+}
+
 void GameDatabase::add_part_category(const std::string& path, const std::string& pkg)
 {
 	std::string sane_path = sanitize_path(path, pkg);

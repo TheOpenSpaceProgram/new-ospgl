@@ -211,6 +211,11 @@ std::vector<FluidPort *> PlumbingMachine::get_connected_ports(const std::string 
 
 float PlumbingMachine::get_pressure_drop(const std::string &from, const std::string &to, float cur_P)
 {
-	return 0;
+	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
+
+	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["get_pressure_drop"], from, to, cur_P);
+	logger->check(result.valid(), "get_pressure_drop failed, this is fatal");
+
+	return result.get<float>();
 }
 

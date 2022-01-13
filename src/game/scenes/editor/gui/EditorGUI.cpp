@@ -21,13 +21,20 @@ void EditorGUI::prepare_gui(int width, int height, GUIInput *gui_input)
 	// Prepare first so gui blocks stuff, but it's drawn last
 	window_manager.prepare(gui_input, &skin);
 
-	if(edveh_int->attach_interface.selected == nullptr)
+	if(editor_mode == ATTACHING)
 	{
-		part_list.prepare_gui(width, get_panel_width(), height, gui_input);
+		if(edveh_int->attach_interface.selected == nullptr)
+		{
+			part_list.prepare_gui(width, get_panel_width(), height, gui_input);
+		}
+		else
+		{
+			trashcan.prepare_gui(width, get_panel_width(), height, gui_input);
+		}
 	}
-	else
+	else if(editor_mode == PLUMBING)
 	{
-		trashcan.prepare_gui(width, get_panel_width(), height, gui_input);
+		plumbing.prepare_gui(width, get_panel_width(), height, gui_input);
 	}
 
 	prepare_toolset(width, height, swidth, gui_input);
@@ -49,13 +56,20 @@ void EditorGUI::do_gui(int width, int height)
 	nvgFill(vg);
 
 
-	if(edveh_int->attach_interface.selected == nullptr)
+	if(editor_mode == ATTACHING)
 	{
-		part_list.do_gui(width, get_panel_width(), height);
+		if(edveh_int->attach_interface.selected == nullptr)
+		{
+			part_list.do_gui(width, get_panel_width(), height);
+		}
+		else
+		{
+			trashcan.do_gui(width, get_panel_width(), height);
+		}
 	}
-	else
+	else if(editor_mode == PLUMBING)
 	{
-		trashcan.do_gui(width, get_panel_width(), height);
+		plumbing.do_gui(width, get_panel_width(), height);
 	}
 
 	do_toolset(width, height, swidth);
@@ -129,6 +143,7 @@ void EditorGUI::init(EditorScene* sc)
 
 	part_list.init(sc, vg, &skin);
 	trashcan.init(sc, vg, &skin);
+	plumbing.init(sc, vg, &skin);
 
 	create_toolset();
 	create_file();

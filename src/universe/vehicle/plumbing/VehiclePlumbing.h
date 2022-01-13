@@ -46,6 +46,7 @@ private:
 		// The pressure difference, considering flow machines, between start and end ports
 		float delta_P;
 		std::vector<size_t> path;
+		bool backwards;
 	};
 
 	// For storing the IDs
@@ -54,11 +55,10 @@ private:
 
 	Vehicle* veh;
 
-	std::vector<FlowPath> determine_flows();
 	void find_all_possible_paths(std::vector<FlowPath>& fws);
 	// Starts assuming start.a contains the true machine!
-	void find_all_possible_paths_from(std::vector<FlowPath>& fws, size_t start);
-	void calculate_delta_p(FlowPath& fpath);
+	void find_all_possible_paths_from(std::vector<FlowPath>& fws, size_t start, bool backwards);
+	void calculate_delta_p(FlowPath& fpath, bool backwards);
 	// Returns the indices of the paths that are forced
 	std::vector<size_t> find_forced_paths(std::vector<FlowPath>& fws);
 	bool remove_paths_not_compatible_with_forced(std::vector<FlowPath>& fws);

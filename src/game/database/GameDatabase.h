@@ -22,12 +22,14 @@ public:
 
 
 	std::vector<std::string> parts;
+	std::vector<std::string> plumbing_machines;
 	std::vector<std::string> systems;
 	std::vector<std::string> part_categories;
 	std::vector<std::string> materials;
 	std::unordered_map<std::string, std::string> current_locale;
 
 	void add_part(const std::string& path, const std::string& pkg);
+	void add_plumbing_machine(const std::string& path, const std::string& pkg);
 	void add_part_category(const std::string& path, const std::string& pkg);
 	void add_material(const std::string& path, const std::string& pkg);
 

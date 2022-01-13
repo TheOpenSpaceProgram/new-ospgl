@@ -60,8 +60,12 @@ void Profiler::show_results()
 void Profiler::show_imgui()
 {
 	// TODO: Think this out, we are showing results while we are generating them
-	ImGui::Begin("Profiler",nullptr,ImGuiWindowFlags_NoFocusOnAppearing|ImGuiWindowFlags_NoInputs);
+	ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Always);
+	ImGui::Begin("Profiler",nullptr,
+				 ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoInputs
+				 | ImGuiWindowFlags_NoDecoration);
 
+	bool first = true;
 #ifdef ENABLE_PROFILER
 	for(auto& pair : results)
 	{
@@ -74,8 +78,17 @@ void Profiler::show_imgui()
 				full += '.';
 			}
 		}
-		
-		ImGui::Text("%s -> %fms", full.c_str(), pair.second.avg * 1000.0);
+
+		float mils = pair.second.avg * 1000.0f;
+		if(first)
+		{
+			ImGui::Text("%s -> %fms (%f fps)", full.c_str(), mils, 1000.0f / mils);
+			first = false;
+		}
+		else
+		{
+			ImGui::Text("%s -> %fms", full.c_str(), mils);
+		}
 	}
 #else 
 	ImGui::Text("Profiler is compile-time disabled");

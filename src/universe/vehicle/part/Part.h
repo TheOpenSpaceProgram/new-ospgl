@@ -27,6 +27,7 @@ public:
 
 	// Attached machines are not in the part prototype, but attached by other means
 	// They are serialized by array index
+	// Used for plumbing machines
 	std::vector<Machine*> attached_machines;
 	// Attached machines which must be loaded on init
 	std::vector<std::string> to_load_attached_machines;

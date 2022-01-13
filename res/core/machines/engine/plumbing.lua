@@ -17,8 +17,6 @@ local outlet_id = "outlet"
 
 local inlet_count = 0
 
-function plumbing.is_inline_element() return false end
-
 function plumbing.fluid_update()
 
 end
@@ -32,7 +30,6 @@ function plumbing.out_flow(port, volume, do_flow)
 end
 
 function plumbing.in_flow(port, fluids, do_flow)
-    logger.info(fluids)
     return plumbing_lib.stored_fluids.new()
 end
 

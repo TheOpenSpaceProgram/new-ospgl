@@ -1,4 +1,5 @@
 #include "Universe.h"
+#include <util/Profiler.h>
 
 #ifdef OSPGL_LRDB
 #include <LRDB/server.hpp>
@@ -65,6 +66,8 @@ void Universe::physics_update(double pdt)
 
 void Universe::update(double dt)
 {
+	PROFILE_BLOCK("universe");
+
 	if(!paused)
 	{
 		// update BEFORE the physics!
