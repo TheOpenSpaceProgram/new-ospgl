@@ -1,0 +1,8 @@
+icon = "core:plumbing_machines/junction_4.png"
+name = "4_way_name"
+description = "4_way_desc"
+add_mass = 1.0
+
+[machine]
+script = "core:machines/junction/machine.lua"
+inlets = 4

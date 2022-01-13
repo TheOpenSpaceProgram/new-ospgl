@@ -40,13 +40,14 @@ class VehiclePlumbing
 {
 private:
 
+	// We travel from a->b unless the bool is true, then it's from b->a
+	using FlowStep = std::pair<size_t, bool>;
 	// A flow path connects two ports
 	struct FlowPath
 	{
 		// The pressure difference, considering flow machines, between start and end ports
 		float delta_P;
-		std::vector<size_t> path;
-		bool backwards;
+		std::vector<FlowStep> path;
 	};
 
 	// For storing the IDs
@@ -57,8 +58,8 @@ private:
 
 	void find_all_possible_paths(std::vector<FlowPath>& fws);
 	// Starts assuming start.a contains the true machine!
-	void find_all_possible_paths_from(std::vector<FlowPath>& fws, size_t start, bool backwards);
-	void calculate_delta_p(FlowPath& fpath, bool backwards);
+	void find_all_possible_paths_from(std::vector<FlowPath>& fws, FlowStep start);
+	void calculate_delta_p(FlowPath& fpath);
 	// Returns the indices of the paths that are forced
 	std::vector<size_t> find_forced_paths(std::vector<FlowPath>& fws);
 	bool remove_paths_not_compatible_with_forced(std::vector<FlowPath>& fws);

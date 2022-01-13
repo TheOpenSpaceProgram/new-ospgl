@@ -8,6 +8,8 @@ function load(database)
 	database:add_part_category("categories/all.toml")
 
     database:add_plumbing_machine("plumbing_machines/junction_3.toml")
+    database:add_plumbing_machine("plumbing_machines/junction_4.toml")
+    database:add_plumbing_machine("plumbing_machines/oneway.toml")
 
 	database:add_material("materials/hydrogen.toml")
 	database:add_material("materials/oxygen.toml")

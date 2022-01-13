@@ -204,9 +204,28 @@ glm::ivec2 PlumbingMachine::get_size(bool expand, bool rotate)
 
 }
 
-std::vector<FluidPort *> PlumbingMachine::get_connected_ports(const std::string &port)
+std::vector<FluidPort*> PlumbingMachine::get_connected_ports(const std::string &port)
 {
-	return std::vector<FluidPort *>();
+	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
+
+	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["get_connected_ports"], port);
+	logger->check(result.valid(), "get_connected_ports failed, this is fatal");
+
+	std::vector<std::string> res_str = result.get<std::vector<std::string>>();
+	std::vector<FluidPort*> ports;
+	for(std::string& id : res_str)
+	{
+		for(size_t i = 0; i < fluid_ports.size(); i++)
+		{
+			if(fluid_ports[i].id == id)
+			{
+				ports.push_back(&fluid_ports[i]);
+				break;
+			}
+		}
+	}
+
+	return ports;
 }
 
 float PlumbingMachine::get_pressure_drop(const std::string &from, const std::string &to, float cur_P)
@@ -216,6 +235,6 @@ float PlumbingMachine::get_pressure_drop(const std::string &from, const std::str
 	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["get_pressure_drop"], from, to, cur_P);
 	logger->check(result.valid(), "get_pressure_drop failed, this is fatal");
 
-	return result.get<float>();
+	return (float)result.get<double>();
 }
 

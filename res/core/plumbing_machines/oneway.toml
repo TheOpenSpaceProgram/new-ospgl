@@ -1,0 +1,7 @@
+icon = "core:plumbing_machines/oneway.png"
+name = "1_way_name"
+description = "1_way_desc"
+add_mass = 1.0
+
+[machine]
+script = "core:machines/oneway/machine.lua"

@@ -158,27 +158,27 @@ void VehiclePlumbing::execute_flows(float dt, std::vector<FlowPath>& flows)
 		if(to_move == 0.0f)
 			continue;
 		StoredFluids buffer;
-		Pipe& start = pipes[path.path[0]];
-		Pipe& end = pipes[path.path.back()];
+		Pipe& start = pipes[path.path.front().first];
+		Pipe& end = pipes[path.path.back().first];
 		// Bleed into the buffer
-		FluidPort* from = path.backwards ? start.b : start.a;
-		FluidPort* to = path.backwards ? end.a : end.b;
+		FluidPort* from = path.path.front().second ? start.b : start.a;
+		FluidPort* to = path.path.back().second ? end.a : end.b;
 
 		logger->check(!from->is_flow_port && !to->is_flow_port, "A path starts/ends in a flow machine!");
 		buffer.modify(from->in_machine->out_flow(from->id, to_move, true));
 		float flow = buffer.get_total_gas_mass() + buffer.get_total_liquid_mass();
-		start.flow += path.backwards ? flow : -flow;
-		end.flow += path.backwards ? flow : -flow;
+		start.flow += path.path.front().second ? flow : -flow;
+		end.flow += path.path.back().second ? flow : -flow;
 
 		// Travel the path if there's one
 		if(path.path.size() > 1)
 		{
 			for (size_t i = 1; i < path.path.size() - 1; i++)
 			{
-				Pipe &p = pipes[path.path[i]];
-				p.flow += path.backwards ? flow : -flow;
-				FluidPort* from_p = path.backwards ? p.b : p.a;
-				FluidPort* to_p = path.backwards ? p.a : p.b;
+				Pipe &p = pipes[path.path[i].first];
+				p.flow += path.path[i].second ? flow : -flow;
+				FluidPort* from_p = path.path[i].second ? p.b : p.a;
+				FluidPort* to_p = path.path[i].second ? p.a : p.b;
 				logger->check(from_p->is_flow_port && to_p->is_flow_port, "True machine in middle of path!");
 				// TODO!
 			}
@@ -197,43 +197,34 @@ void VehiclePlumbing::find_all_possible_paths(std::vector<FlowPath> &fws)
 	for(size_t pipe_id = 0; pipe_id < pipes.size(); pipe_id++)
 	{
 		Pipe& pipe = pipes[pipe_id];
-
-		for (const FluidPort &pa: pipe.a->in_machine->fluid_ports)
+		if(!pipe.a->is_flow_port)
 		{
-			if (!pa.is_flow_port)
-			{
-				find_all_possible_paths_from(fws, pipe_id, false);
-				break;
-			}
+			find_all_possible_paths_from(fws, std::make_pair(pipe_id, false));
 		}
 
-		for (const FluidPort &pb: pipe.b->in_machine->fluid_ports)
+		if(!pipe.b->is_flow_port)
 		{
-			if (!pb.is_flow_port)
-			{
-				find_all_possible_paths_from(fws, pipe_id, true);
-				break;
-			}
+			find_all_possible_paths_from(fws, std::make_pair(pipe_id, true));
 		}
-
 	}
 
 }
 
-void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, size_t start, bool backwards)
+void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, FlowStep start)
 {
 	// start.a/b contains a true port, so we just need to travel to port b/a now,
 	// this is a tree search algorithm
 	// We store the whole path to the open pipe so we can rebuild it later
-	std::queue<std::vector<size_t>> open;
-	std::vector<size_t> start_v;
+	std::queue<std::vector<FlowStep>> open;
+	std::vector<FlowStep> start_v;
 	start_v.push_back(start);
 	open.push(start_v);
 
 	while(!open.empty())
 	{
-		std::vector<size_t> open_chain = open.front();
-		size_t work = open_chain.back();
+		std::vector<FlowStep> open_chain = open.front();
+		size_t work = open_chain.back().first;
+		bool backwards = open_chain.back().second;
 		const Pipe* p = &pipes[work];
 		const FluidPort* next = backwards ? p->a : p->b;
 
@@ -249,11 +240,23 @@ void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, s
 				Pipe& pipe = pipes[pipe_id];
 				for(const FluidPort* port : connected)
 				{
-					if(backwards ? pipe.b == port : pipe.a == port)
+					std::vector<FlowStep> new_open;
+					new_open.insert(new_open.begin(), open_chain.begin(), open_chain.end());
+					bool found = false;
+					if(pipe.a == port)
 					{
-						std::vector<size_t> new_open;
-						new_open.insert(new_open.begin(), open_chain.begin(), open_chain.end());
-						new_open.push_back(pipe_id);
+						// Forward
+						new_open.push_back(std::make_pair(pipe_id, false));
+						found = true;
+					}
+					else if(pipe.b == port)
+					{
+						// Backward
+						new_open.push_back(std::make_pair(pipe_id, true));
+						found = true;
+					}
+					if(found)
+					{
 						open.push(new_open);
 					}
 				}
@@ -263,8 +266,7 @@ void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, s
 		{
 			FlowPath fpath;
 			fpath.path = open_chain;
-			fpath.backwards = backwards;
-			calculate_delta_p(fpath, backwards);
+			calculate_delta_p(fpath);
 			if(fpath.delta_P < 0.0f)
 			{
 				fws.push_back(fpath);
@@ -276,12 +278,12 @@ void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, s
 
 }
 
-void VehiclePlumbing::calculate_delta_p(FlowPath& fws, bool backwards)
+void VehiclePlumbing::calculate_delta_p(FlowPath& fws)
 {
 	// It's guaranteed that all b ports are flow machines, so just follow them (except the end one)
-	FluidPort* start = backwards ? pipes[fws.path[0]].b : pipes[fws.path[0]].a;
+	FluidPort* start = fws.path[0].second ? pipes[fws.path[0].first].b : pipes[fws.path[0].first].a;
 	float start_P = start->in_machine->get_pressure(start->id);
-	FluidPort* end = backwards ? pipes[fws.path[fws.path.size() - 1]].a : pipes[fws.path[fws.path.size() - 1]].b;
+	FluidPort* end = fws.path.back().second ? pipes[fws.path.back().first].a : pipes[fws.path.back().first].b;
 	float end_P = end->in_machine->get_pressure(end->id);
 
 	float P_drop = 0.0f;
@@ -290,12 +292,8 @@ void VehiclePlumbing::calculate_delta_p(FlowPath& fws, bool backwards)
 	for(size_t i = 0; i < fws.path.size() - 1; i++)
 	{
 		float cur_P = start_P - P_drop;
-		FluidPort* in_port = pipes[fws.path[i]].b;
-		FluidPort* out_port = pipes[fws.path[i + 1]].a;
-		if(backwards)
-		{
-			std::swap(in_port, out_port);
-		}
+		FluidPort* in_port = fws.path[i].second ? pipes[fws.path[i].first].a : pipes[fws.path[i].first].b;
+		FluidPort* out_port = fws.path[i + 1].second ? pipes[fws.path[i + 1].first].b : pipes[fws.path[i + 1].first].a;
 
 		logger->check(in_port->in_machine == out_port->in_machine, "Something went wrong, machines don't match");
 		logger->check(in_port->is_flow_port && out_port->is_flow_port, "Flow ports mismatched!");
@@ -320,38 +318,37 @@ std::vector<size_t> VehiclePlumbing::find_forced_paths(std::vector<FlowPath>& fw
 
 	for(const FlowPath& path : fws)
 	{
-		Pipe* front = &pipes[path.path.front()];
-		Pipe* back = &pipes[path.path.back()];
-		logger->check(front->a->is_flow_port == false, "Start must not be flow port");
-		logger->check(front->b->is_flow_port == false, "End must not be flow port");
+		Pipe* front = &pipes[path.path.front().first];
+		Pipe* back = &pipes[path.path.back().first];
 
-		if(seen_start.count(front->a) >= 1)
+		if(seen_start.count(path.path.front().second ? front->b : front->a) >= 1)
 		{
 			multiple_start.insert(front->a);
 		}
 		else
 		{
-			seen_start.insert(front->a);
+			seen_start.insert(path.path.front().second ? front->b : front->a);
 		}
 
-		if(seen_end.count(back->b) >= 1)
+		if(seen_end.count(path.path.back().second ? back->a : back->b) >= 1)
 		{
-			multiple_end.insert(back->b);
+			multiple_end.insert(path.path.back().second ? back->a : back->b);
 		}
 		else
 		{
-			seen_end.insert(back->b);
+			seen_end.insert(path.path.back().second ? back->a : back->b);
 		}
 	}
 
 	// Now, the elements which are not in multiple are unique
 	for(size_t idx = 0; idx < fws.size(); idx++)
 	{
-		Pipe* front = &pipes[fws[idx].path.front()];
-		Pipe* back = &pipes[fws[idx].path.back()];
+		Pipe* front = &pipes[fws[idx].path.front().first];
+		Pipe* back = &pipes[fws[idx].path.back().first];
 
 		// If this is a unique path, it must happen and thus is forced.
-		if(multiple_start.count(front->a) == 0 && multiple_end.count(back->b) == 0)
+		if(multiple_start.count(fws[idx].path.front().second ? front-> b: front->a) == 0 &&
+		multiple_end.count(fws[idx].path.back().second ? back->a : back->b) == 0)
 		{
 			out.push_back(idx);
 		}
@@ -391,23 +388,19 @@ bool VehiclePlumbing::are_paths_compatible(const VehiclePlumbing::FlowPath &a, c
 	// We find shared points between the two paths
 	for(size_t i = 0; i < a.path.size(); i++)
 	{
-		auto it = std::find(b.path.begin(), b.path.end(), a.path[i]);
-		if(it != b.path.end())
+		int pos = -1;
+		for(size_t j = 0; j < b.path.size(); j++)
 		{
-			// Check that the traverse direction is the same, ie, the next pipe is the same.
-			// if it's not, we have found an incompatibility
-			if((i == a.path.size() - 1 && it++ != b.path.end()) ||
-					(i != a.path.size() - 1 && it++ == b.path.end()))
+			if(a.path[i].first == b.path[j].first)
 			{
-				// Path a ends, but path b doesn't. It must mean they diverge
-				// This prevents vector overflow
-				return false;
+				pos = j;
+				break;
 			}
-
-			// Now it's safe to check next index
-			size_t next_a = a.path[i + 1];
-			size_t next_b = *(it++);
-			if(next_a != next_b)
+		}
+		if(pos >= 0)
+		{
+			// Check that the traverse direction is the same, ie, we go forwards or backwards
+			if(a.path[i].second != b.path[pos].second)
 			{
 				return false;
 			}
@@ -450,6 +443,9 @@ int VehiclePlumbing::find_pipe_connected_to(FluidPort *port)
 
 void VehiclePlumbing::update_pipes(float dt, Vehicle *in_vehicle)
 {
+	if(input->key_down(GLFW_KEY_K) || input->key_pressed(GLFW_KEY_L))
+	{
+
 	std::vector<FlowPath> paths;
 	// Clear flows in pipes
 	for(Pipe& p : pipes)
@@ -459,6 +455,7 @@ void VehiclePlumbing::update_pipes(float dt, Vehicle *in_vehicle)
 	find_all_possible_paths(paths);
 	reduce_to_forced_paths(paths);
 	execute_flows(dt, paths);
+	}
 
 }
 

@@ -228,6 +228,10 @@ function fluid_container:get_liquid(flow, do_flow)
 
 end
 
+function fluid_container:add_liquid(flow, do_flow)
+
+end
+
 -- TODO: implement imgui functions in LUA
 function fluid_container:draw_imgui()
 

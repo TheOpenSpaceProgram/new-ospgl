@@ -18,8 +18,11 @@ function plumbing.fluid_update()
 end
 
 function plumbing.get_pressure(port)
-    --logger.info(fluid_container.contents)
-    return fluid_container:get_total_pressure(1.0)
+    if port == "gas_port" then
+        return fluid_container:get_total_pressure(0.0)
+    else
+        return fluid_container:get_total_pressure(10.0)
+    end
 end
 
 function plumbing.out_flow(port, volume, do_flow)
