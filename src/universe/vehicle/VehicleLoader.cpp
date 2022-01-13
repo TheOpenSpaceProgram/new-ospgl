@@ -79,6 +79,26 @@ void VehicleLoader::obtain_parts(const cpptoml::table& root)
 		logger->check(n_part->id <= vpart_id, "Malformed vehicle, part ID too big ({}/{})", 
 				n_part->id, vpart_id);
 
+		// Load the attached machines (but not init yet!)
+		auto arr = part->get_table_array_qualified("attached_machine");
+		if(arr)
+		{
+			size_t count = 0;
+			for(auto& table : *arr)
+			{
+				count++;
+			}
+
+			n_part->attached_machines.resize(count);
+
+			for(auto& table : *arr)
+			{
+				auto* m = new Machine(table, "core");
+				int id = *table->get_as<int>("__attached_machine_id");
+				n_part->attached_machines[id] = m;
+			}
+		}
+
 		n_vehicle->parts.push_back(n_part);
 		parts_by_id[n_part->id] = n_part;
 	}
@@ -257,17 +277,6 @@ void VehicleLoader::obtain_wires(const cpptoml::table& root)
 	}
 }
 
-void VehicleLoader::obtain_plumbing_machines(const cpptoml::table &root)
-{
-	auto pmachines = root.get_table_array_qualified("plumbing_machines");
-	if(!pmachines)
-	{
-		return;
-	}
-
-}
-
-
 VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to)
 {
 	n_vehicle = &to;
@@ -277,7 +286,6 @@ VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to)
 	obtain_pieces(root);
 	copy_pieces(root);
 	obtain_wires(root);
-	obtain_plumbing_machines(root);
 	obtain_pipes(root);
 
 	n_vehicle->id_to_part = parts_by_id;
@@ -308,7 +316,6 @@ VehicleSaver::VehicleSaver(cpptoml::table &target, const Vehicle &what)
 	write_pieces(target, what);
 	write_wires(target, what);
 	write_pipes(target, what);
-	write_plumbing_machines(target, what);
 }
 
 void VehicleSaver::assign_ids(cpptoml::table& target, const Vehicle& what)
@@ -362,6 +369,27 @@ void VehicleSaver::write_parts(cpptoml::table &target, const Vehicle &what)
 			}
 		}
 
+		// Attached machine table array
+		auto arr = cpptoml::make_table_array();
+		for(size_t attached_id = 0; attached_id < pair.first->attached_machines.size(); attached_id++)
+		{
+			Machine* m = pair.first->attached_machines[attached_id];
+			auto m_table = m->init_toml->clone()->as_table();
+
+			// TODO: Allow machines to write wathever they want to the toml from lua
+
+			m_table->insert("__attached_machine_id", attached_id);
+			// Plumbing metadata
+			if(m->plumbing.has_lua_plumbing())
+			{
+				m_table->insert("plumbing_rot", m->plumbing.editor_rotation);
+				serialize_to_table(m->plumbing.editor_position, *m_table, "plumbing_pos");
+			}
+
+			arr->push_back(m_table);
+
+		}
+		table->insert("attached_machine", arr);
 		part_array->push_back(table);
 	}
 	target.insert("part", part_array);
@@ -522,7 +550,7 @@ void VehicleSaver::write_pipes(cpptoml::table &target, const Vehicle &what)
 
 				pipe->insert(attached_machine, amachine);
 
-				logger->fatal("Could not find attached machine! Something is wrong");
+				logger->check(amachine != -1,"Could not find attached machine! Something is wrong");
 			}
 		};
 
@@ -547,7 +575,3 @@ void VehicleSaver::write_pipes(cpptoml::table &target, const Vehicle &what)
 	target.insert("pipe", pipe_array);
 }
 
-void VehicleSaver::write_plumbing_machines(cpptoml::table &target, const Vehicle &what)
-{
-
-}

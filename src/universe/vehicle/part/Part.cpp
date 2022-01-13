@@ -32,29 +32,6 @@ Part::Part(AssetHandle<PartPrototype>& part_proto, std::shared_ptr<cpptoml::tabl
 
 	}
 
-	// We must also loaded attached machines
-	size_t i = 0;
-	for(std::string& scr : to_load_attached_machines)
-	{
-		// We create a basic config toml with just pkg and id
-		auto config_toml = cpptoml::make_table();
-		auto[id, pkg] = osp->assets->get_package_and_name(scr, "core");
-		config_toml->insert("id", id);
-		config_toml->insert("pkg", pkg);
-		if(our_table)
-		{
-			std::string attch_id = "_attach_";
-			attch_id += std::to_string(i);
-			auto override_toml = our_table->get_table(attch_id);
-			if(override_toml)
-			{
-				SerializeUtil::override(*config_toml, *override_toml);
-			}
-		}
-		Machine* n_machine = new Machine(config_toml, "core");
-		attached_machines.push_back(n_machine);
-		i++;
-	}
 }
 
 void Part::pre_update(double dt)

@@ -29,8 +29,6 @@ public:
 	// They are serialized by array index
 	// Used for plumbing machines
 	std::vector<Machine*> attached_machines;
-	// Attached machines which must be loaded on init
-	std::vector<std::string> to_load_attached_machines;
 
 	// "p_root" is always the root, and is always present
 	// When a piece goes missing, it turns to null, but the map entry stays
