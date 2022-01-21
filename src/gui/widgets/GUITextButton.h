@@ -9,6 +9,9 @@ private:
 	float ft_size;
 	AssetHandle<BitmapFont> bm_font;
 public:
+	// If set to true, the button will ignore skin colors and use given color
+	bool override_color = false;
+	NVGcolor color;
 
 	std::string text;
 	bool center_vertical = true;

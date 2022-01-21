@@ -238,3 +238,20 @@ float PlumbingMachine::get_pressure_drop(const std::string &from, const std::str
 	return (float)result.get<double>();
 }
 
+float PlumbingMachine::get_maximum_flowrate(std::string port)
+{
+	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
+
+	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["get_maximum_flowrate"]);
+	logger->check(result.valid(), "get_maximum_flowrate failed, this is fatal");
+
+	if(result.get_type() == sol::type::number)
+	{
+		return (float)result.get<double>();
+	}
+	else
+	{
+		return -1.0f;
+	}
+}
+

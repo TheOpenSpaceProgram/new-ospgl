@@ -37,6 +37,11 @@ function plumbing.get_free_volume(port)
     return 100.0
 end
 
+function plumbing.get_maximum_flowrate(port)
+    -- In cubic meters per second
+    return 500 * 1e-3
+end
+
 function plumbing.draw_diagram(vg, skin)
 
     nvg.begin_path(vg)

@@ -401,3 +401,25 @@ NVGcolor SimpleSkin::get_foreground_color(bool soft)
 		return nvgRGB(240, 240, 240);
 	}
 }
+
+NVGcolor SimpleSkin::get_button_color(GUISkin::ButtonState state)
+{
+	switch(state)
+	{
+		case ButtonState::NORMAL:
+			return nvgRGB(235, 235, 235);
+			break;
+		case ButtonState::DISABLED:
+			return nvgRGB(200, 200, 200);
+			break;
+		case ButtonState::HOVERED:
+			return nvgRGB(245, 245, 245);
+			break;
+		case ButtonState::CLICKED:
+			return nvgRGB(255, 255, 255);
+			break;
+	}
+
+	logger->fatal("Wrong ButtonState {}", state);
+	return nvgRGB(255, 0, 255);
+}

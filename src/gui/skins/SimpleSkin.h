@@ -42,6 +42,7 @@ public:
 	NVGcolor get_error_color() override;
 	NVGcolor get_highlight_color() override;
 	NVGcolor get_foreground_color(bool soft = false) override;
+	NVGcolor get_button_color(ButtonState state) override;
 
 	SimpleSkin();
 };

@@ -56,6 +56,9 @@ private:
 	{
 		// The pressure difference, considering flow machines, between start and end ports
 		float delta_P;
+		// Actual flow that will be done
+		float final_flow;
+		std::vector<std::pair<size_t, float>> rate_limiters;
 		std::vector<FlowStep> path;
 	};
 
@@ -65,17 +68,20 @@ private:
 
 	Vehicle* veh;
 
-	void find_all_possible_paths(std::vector<FlowPath>& fws);
+	std::vector<FlowPath> fws;
+
+	void find_all_possible_paths();
 	// Starts assuming start.a contains the true machine!
-	void find_all_possible_paths_from(std::vector<FlowPath>& fws, FlowStep start);
+	void find_all_possible_paths_from(FlowStep start);
 	void calculate_delta_p(FlowPath& fpath);
 	// Returns the indices of the paths that are forced
-	std::vector<size_t> find_forced_paths(std::vector<FlowPath>& fws);
-	bool remove_paths_not_compatible_with_forced(std::vector<FlowPath>& fws);
-	void reduce_to_forced_paths(std::vector<FlowPath>& fws);
+	std::vector<size_t> find_forced_paths();
+	bool remove_paths_not_compatible_with_forced();
+	void reduce_to_forced_paths();
 	// Two paths are considered to be compatible if they don't have a point in which they have opposite direction
 	bool are_paths_compatible(const FlowPath& a, const FlowPath& b);
-	void execute_flows(float dt, std::vector<FlowPath>& flows);
+	void calculate_flowrates();
+	void execute_flows(float dt);
 
 public:
 

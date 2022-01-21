@@ -61,7 +61,11 @@ public:
 	// Only makes sense on true ports
 	float get_pressure(const std::string& port);
 	// Get the pressure DROP. You can return negative values if you are a pump, etc...
+	// cur_P is the absolute pressure at the port
 	float get_pressure_drop(const std::string& from, const std::string& to, float cur_P);
+
+	// Gets the maximum flowrate of a given port, return nothing / negative if you don't have a maximum
+	float get_maximum_flowrate(std::string port);
 
 	// Volumes are in m^3, if you cannot supply enough, don't!
 	StoredFluids out_flow(std::string port, float volume, bool do_flow);

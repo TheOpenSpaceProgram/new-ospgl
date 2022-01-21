@@ -5,7 +5,14 @@ void GUITextButton::draw(NVGcontext *vg, GUISkin *skin)
 	skin->draw_button(vg, pos, size, "", get_button_state(), GUISkin::ButtonStyle::SYMMETRIC);
 
 	nvgResetScissor(vg);
-	nvgFillColor(vg, nvgRGB(255, 255, 255));
+	if(override_color)
+	{
+		nvgFillColor(vg, color);
+	}
+	else
+	{
+		nvgFillColor(vg, skin->get_button_color(get_button_state()));
+	}
 	if(uses_bitmap)
 	{
 		AssetHandle<BitmapFont> bfont = AssetHandle<BitmapFont>("core:fonts/ProggySquare.fnt");

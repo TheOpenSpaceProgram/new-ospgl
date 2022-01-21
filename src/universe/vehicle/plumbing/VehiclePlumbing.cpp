@@ -4,7 +4,7 @@
 // A reasonable multiplier to prevent extreme flow velocities
 // I don't know enough fluid mechanics as to determine a reasonable value
 // so it's arbitrary, chosen to approximate real life rocket values
-#define FLOW_MULTIPLIER 0.000002
+#define FLOW_MULTIPLIER 0.00002
 
 
 VehiclePlumbing::VehiclePlumbing(Vehicle *in_vehicle)
@@ -147,14 +147,14 @@ int VehiclePlumbing::create_pipe()
 	return pipes.size() - 1;
 }
 
-void VehiclePlumbing::execute_flows(float dt, std::vector<FlowPath>& flows)
+void VehiclePlumbing::execute_flows(float dt)
 {
-	for(const FlowPath& path : flows)
+	// We first normalize flows so that two equal flows from a machine
+	// equal a single flow that splits in two (realistic)
+
+	for(const FlowPath& path : fws)
 	{
-		// The real machine discards into the next (must be flow machine, except the last)
-		// This way we implement fluid movement and not just teletransportation
-		// (This allows buffer pipes, etc...)
-		float to_move = -path.delta_P * FLOW_MULTIPLIER * dt;
+		float to_move = path.final_flow * dt;
 		if(to_move == 0.0f)
 			continue;
 		StoredFluids buffer;
@@ -166,10 +166,13 @@ void VehiclePlumbing::execute_flows(float dt, std::vector<FlowPath>& flows)
 
 		logger->check(!from->is_flow_port && !to->is_flow_port, "A path starts/ends in a flow machine!");
 		buffer.modify(from->in_machine->out_flow(from->id, to_move, true));
-		float flow = buffer.get_total_gas_mass() + buffer.get_total_liquid_mass();
+		float flow = (buffer.get_total_gas_mass() + buffer.get_total_liquid_mass()) / dt;
 		start.flow += path.path.front().backwards ? flow : -flow;
-		end.flow += path.path.back().backwards ? flow : -flow;
-
+		// This happens on pipes of length 1
+		if(&end != &start)
+		{
+			end.flow += path.path.back().backwards ? flow : -flow;
+		}
 		// Travel the path if there's one
 		if(path.path.size() > 1)
 		{
@@ -191,7 +194,7 @@ void VehiclePlumbing::execute_flows(float dt, std::vector<FlowPath>& flows)
 }
 
 // TODO: Quit condition if we enter a loop
-void VehiclePlumbing::find_all_possible_paths(std::vector<FlowPath> &fws)
+void VehiclePlumbing::find_all_possible_paths()
 {
 	// Find a new unvisited pipe to start from that's connected to a real port
 	for(size_t pipe_id = 0; pipe_id < pipes.size(); pipe_id++)
@@ -199,18 +202,18 @@ void VehiclePlumbing::find_all_possible_paths(std::vector<FlowPath> &fws)
 		Pipe& pipe = pipes[pipe_id];
 		if(!pipe.a->is_flow_port)
 		{
-			find_all_possible_paths_from(fws, FlowStep(pipe_id, false, 0.0f));
+			find_all_possible_paths_from(FlowStep(pipe_id, false, 0.0f));
 		}
 
 		if(!pipe.b->is_flow_port)
 		{
-			find_all_possible_paths_from(fws, FlowStep(pipe_id, true, 0.0f));
+			find_all_possible_paths_from(FlowStep(pipe_id, true, 0.0f));
 		}
 	}
 
 }
 
-void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, FlowStep start)
+void VehiclePlumbing::find_all_possible_paths_from(FlowStep start)
 {
 	// start.a/b contains a true port, so we just need to travel to port b/a now,
 	// this is a tree search algorithm
@@ -279,34 +282,47 @@ void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, F
 
 }
 
-void VehiclePlumbing::calculate_delta_p(FlowPath& fws)
+void VehiclePlumbing::calculate_delta_p(FlowPath& fw)
 {
 	// It's guaranteed that all b ports are flow machines, so just follow them (except the end one)
-	FluidPort* start = fws.path[0].backwards ? pipes[fws.path[0].pipe].b : pipes[fws.path[0].pipe].a;
+	FluidPort* start = fw.path[0].backwards ? pipes[fw.path[0].pipe].b : pipes[fw.path[0].pipe].a;
 	float start_P = start->in_machine->get_pressure(start->id);
-	FluidPort* end = fws.path.back().backwards ? pipes[fws.path.back().pipe].a : pipes[fws.path.back().pipe].b;
+	FluidPort* end = fw.path.back().backwards ? pipes[fw.path.back().pipe].a : pipes[fw.path.back().pipe].b;
 	float end_P = end->in_machine->get_pressure(end->id);
 
 	float P_drop = 0.0f;
 	// We travel through the flow machines, observing the pressure drop between their ports
 	// Note that the pressure drops happen to the start pressure (observe delta_P calculation)!
-	for(size_t i = 0; i < fws.path.size() - 1; i++)
+	for(size_t i = 0; i < fw.path.size() - 1; i++)
 	{
 		float cur_P = start_P - P_drop;
-		FluidPort* in_port = fws.path[i].backwards ? pipes[fws.path[i].pipe].a : pipes[fws.path[i].pipe].b;
-		FluidPort* out_port = fws.path[i + 1].backwards ? pipes[fws.path[i + 1].pipe].b : pipes[fws.path[i + 1].pipe].a;
+		FluidPort* in_port = fw.path[i].backwards ? pipes[fw.path[i].pipe].a : pipes[fw.path[i].pipe].b;
+		FluidPort* out_port = fw.path[i + 1].backwards ? pipes[fw.path[i + 1].pipe].b : pipes[fw.path[i + 1].pipe].a;
 
 		logger->check(in_port->in_machine == out_port->in_machine, "Something went wrong, machines don't match");
 		logger->check(in_port->is_flow_port && out_port->is_flow_port, "Flow ports mismatched!");
 		P_drop += in_port->in_machine->get_pressure_drop(in_port->id, out_port->id, cur_P);
 	}
 
-	fws.delta_P = end_P - (start_P - P_drop);
+	for(size_t i = 0; i < fw.path.size(); i++)
+	{
+		FluidPort* in_port = fw.path[i].backwards ? pipes[fw.path[i].pipe].a : pipes[fw.path[i].pipe].b;
+		FluidPort* out_port = fw.path[i].backwards ? pipes[fw.path[i].pipe].b : pipes[fw.path[i].pipe].a;
+		float in_max = in_port->in_machine->get_maximum_flowrate(in_port->id);
+		float out_max = out_port->in_machine->get_maximum_flowrate(out_port->id);
+		if(in_max >= 0.0f || out_max >= 0.0f)
+		{
+			// We don't care about anything other than the pipe
+			fw.rate_limiters.emplace_back(fw.path[i].pipe, glm::max(in_max, out_max));
+		}
+	}
+
+	fw.delta_P = end_P - (start_P - P_drop);
 	// If this is 0 or positive, it will be early discarded
 	// End pressure must be lower than start pressure!
 }
 
-std::vector<size_t> VehiclePlumbing::find_forced_paths(std::vector<FlowPath>& fws)
+std::vector<size_t> VehiclePlumbing::find_forced_paths()
 {
 	std::vector<size_t> out;
 	// We must go over every path and check which paths start and end in unique places, these
@@ -358,9 +374,9 @@ std::vector<size_t> VehiclePlumbing::find_forced_paths(std::vector<FlowPath>& fw
 	return out;
 }
 
-bool VehiclePlumbing::remove_paths_not_compatible_with_forced(std::vector<FlowPath> &fws)
+bool VehiclePlumbing::remove_paths_not_compatible_with_forced()
 {
-	std::vector<size_t> forced = find_forced_paths(fws);
+	std::vector<size_t> forced = find_forced_paths();
 	std::vector<size_t> to_remove;
 
 	for(size_t i = 0; i < fws.size(); i++)
@@ -411,11 +427,11 @@ bool VehiclePlumbing::are_paths_compatible(const VehiclePlumbing::FlowPath &a, c
 	return true;
 }
 
-void VehiclePlumbing::reduce_to_forced_paths(std::vector<FlowPath> &fws)
+void VehiclePlumbing::reduce_to_forced_paths()
 {
 	size_t it = 0;
 	// This removes all non compatible paths
-	while(!remove_paths_not_compatible_with_forced(fws))
+	while(!remove_paths_not_compatible_with_forced())
 	{
 		if(it > 100)
 		{
@@ -447,15 +463,16 @@ void VehiclePlumbing::update_pipes(float dt, Vehicle *in_vehicle)
 	if(input->key_down(GLFW_KEY_K) || input->key_pressed(GLFW_KEY_L))
 	{
 
-	std::vector<FlowPath> paths;
 	// Clear flows in pipes
+	fws.clear();
 	for(Pipe& p : pipes)
 	{
 		p.flow = 0.0f;
 	}
-	find_all_possible_paths(paths);
-	reduce_to_forced_paths(paths);
-	execute_flows(dt, paths);
+	find_all_possible_paths();
+	reduce_to_forced_paths();
+	calculate_flowrates();
+	execute_flows(dt);
 	}
 
 }
@@ -477,6 +494,49 @@ void VehiclePlumbing::init()
 			p.bmachine = nullptr;
 			p.bport = "";
 		}
+	}
+}
+
+// We must make sure we don't exceed a limiting flow across all flows on a single port!
+void VehiclePlumbing::calculate_flowrates()
+{
+	// These ones have limited flowrates that MAY be shared between multiple FlowPaths
+	std::unordered_multimap<size_t, std::pair<FlowPath&, float>> rate_limited;
+
+	for(FlowPath& path : fws)
+	{
+		path.final_flow = sqrtf(-path.delta_P) * FLOW_MULTIPLIER;
+
+		if(!path.rate_limiters.empty())
+		{
+			for(auto limiter : path.rate_limiters)
+			{
+				rate_limited.insert({limiter.first, {path, limiter.second}});
+			}
+		}
+	}
+
+	for(auto i = rate_limited.begin(); i != rate_limited.end();)
+	{
+		auto range = rate_limited.equal_range(i->first);
+		float total_flow = 0.0f;
+		for(auto d = range.first; d != range.second; d++)
+		{
+			total_flow += d->second.first.final_flow;
+		}
+		float reduce_factor = glm::min(range.first->second.second / total_flow, 1.0f);
+		for(auto d = range.first; d != range.second; d++)
+		{
+			d->second.first.final_flow *= reduce_factor;
+		}
+
+		float new_total_flow = 0.0f;
+		for(auto d = range.first; d != range.second; d++)
+		{
+			 new_total_flow += d->second.first.final_flow;
+		}
+		float n_factor = range.first->second.second / new_total_flow;
+		i = range.second;
 	}
 }
 

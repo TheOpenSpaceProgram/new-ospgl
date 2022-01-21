@@ -33,6 +33,9 @@ function plumbing.in_flow(port, fluids, do_flow)
     return plumbing_lib.stored_fluids.new()
 end
 
+function plumbing.get_maximum_flowrate(port)
+end
+
 function plumbing.draw_diagram(vg, skin)
     nvg.begin_path(vg)
     nvg.move_to(vg, -0.5, 0.5)

@@ -39,7 +39,7 @@ function plumbing.get_connected_ports(port)
 end
 
 function plumbing.get_pressure_drop(from, to, cur_P)
-    return 0
+    return 0.0
 end
 
 function plumbing.out_flow(port, volume, do_flow)
@@ -48,6 +48,9 @@ end
 
 function plumbing.in_flow(port, fluids, do_flow)
     return plumbing_lib.stored_fluids.new()
+end
+
+function plumbing.get_maximum_flowrate(port)
 end
 
 function plumbing.draw_diagram(vg, skin)

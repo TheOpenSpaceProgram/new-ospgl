@@ -26,6 +26,7 @@ function plumbing.get_pressure(port)
 end
 
 function plumbing.out_flow(port, volume, do_flow)
+    logger.info("Asked for: " .. volume)
     return fluid_container:get_liquid(volume, do_flow)
 end
 
@@ -72,6 +73,9 @@ function plumbing.init(ports)
     machine.plumbing:create_port("gas_port", port_marker, gas_port_str, false, 1.5, -0.5)
 
     return 3, 3
+end
+
+function plumbing.get_maximum_flowrate(port)
 end
 
 return plumbing;

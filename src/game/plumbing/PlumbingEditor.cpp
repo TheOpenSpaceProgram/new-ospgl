@@ -183,7 +183,7 @@ void PlumbingEditor::draw_tooltip(NVGcontext* vg, glm::vec4 span) const
 			}
 
 			pressure_stream << "P: " << std::fixed << std::setprecision(2) << pressure / 101325.0 << " atm";
-			flow_stream << "F: " << std::fixed << std::setprecision(2) << flow * 1000.0 << " L/s";
+			flow_stream << "F: " << std::fixed << std::setprecision(2) << flow << " kg/s";
 			size = std::max(pressure_stream.str().length(), flow_stream.str().length());
 			size = std::max(size, (float) hovered_port->gui_name.length());
 			size *= 8.0f;
