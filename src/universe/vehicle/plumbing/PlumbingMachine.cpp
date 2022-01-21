@@ -68,7 +68,7 @@ void PlumbingMachine::init(const cpptoml::table& init)
 		deserialize(editor_position, *pos_table);
 		found_pos = true;
 	}
-	editor_rotation = init.get_as<int>("plumbing_rot").value_or(editor_rotation);
+	editor_rotation = init.get_as<int>("plumbing_rot").value_or(0);
 
 	if(!found_pos)
 	{

@@ -22,7 +22,7 @@ function plumbing.get_connected_ports(port)
 end
 
 function plumbing.get_pressure_drop(from, to, cur_P)
-    return 0.0
+    return cur_P * 0.0
 end
 
 function plumbing.out_flow(port, volume, do_flow)

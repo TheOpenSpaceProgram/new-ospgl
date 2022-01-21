@@ -47,6 +47,14 @@ public:
 		ELECTRIC_WIRING
 	};
 
+	enum ShowPanel
+	{
+		PART_LIST,
+		PLUMBING_PANEL,
+		TRASHCAN
+	};
+
+	ShowPanel show_panel;
 	EditorMode editor_mode;
 	GUIImageButton* current_editor_mode_button;
 

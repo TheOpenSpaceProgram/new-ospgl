@@ -3,7 +3,9 @@
 #include "universe/vehicle/plumbing/PlumbingMachine.h"
 
 #include <gui/widgets/GUIImageButton.h>
+#include <gui/widgets/GUITextButton.h>
 #include <gui/layouts/GUIListLayout.h>
+#include <gui/layouts/GUISingleLayout.h>
 #include <gui/layouts/GUIVerticalLayout.h>
 #include <gui/skins/SimpleSkin.h>
 #include <gui/GUICanvas.h>
@@ -21,12 +23,15 @@ private:
 	EditorScene* scene;
 	EditorVehicleInterface* edveh_int;
 	GUIInput* gui_input;
+	GUITextButton* trashcan_button;
 
 public:
 
 	Part* target_part;
 	GUICanvas def_panel;
 	GUIListLayout* part_list;
+	GUISingleLayout* trashcan;
+
 	int part_margin = 4;
 
 	void init(EditorScene* sc, NVGcontext* vg, GUISkin* skin) override;

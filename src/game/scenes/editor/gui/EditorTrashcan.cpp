@@ -45,29 +45,31 @@ void EditorTrashcan::on_trash(int button)
 {
 	if(button == GUI_LEFT_BUTTON)
 	{
-		// The editor vehicle is blocked, so we are responsible for "dropping" the piece
-		Piece* parent = edgui->edveh_int->attach_interface.selected;
-		edgui->edveh_int->attach_interface.selected = nullptr;	
-
-		EditorVehicle* edveh = edgui->edveh_int->edveh;
-
-		// Find all pieces attached to p (children) and remove them, and also
-		// remove them from the editor vehicle
-		auto all_pieces = edveh->veh->get_children_of(parent);
-		all_pieces.insert(all_pieces.begin(), parent);
-
-		for(Piece* p : all_pieces)
+		if(edgui->editor_mode == EditorGUI::ATTACHING)
 		{
-			// Remove from the vehicle
-			edveh->veh->remove_piece(p);
-			// Remove from the editor vehicle
-			edveh->remove_collider(p);
-			edveh->piece_meta.erase(p);
-			// And then delete the piece 
-			// TODO: Store it for later restoration
-			delete p;
-		}
+			// The editor vehicle is blocked, so we are responsible for "dropping" the piece
+			Piece* parent = edgui->edveh_int->attach_interface.selected;
+			edgui->edveh_int->attach_interface.selected = nullptr;
 
+			EditorVehicle* edveh = edgui->edveh_int->edveh;
+
+			// Find all pieces attached to p (children) and remove them, and also
+			// remove them from the editor vehicle
+			auto all_pieces = edveh->veh->get_children_of(parent);
+			all_pieces.insert(all_pieces.begin(), parent);
+
+			for(Piece* p : all_pieces)
+			{
+				// Remove from the vehicle
+				edveh->veh->remove_piece(p);
+				// Remove from the editor vehicle
+				edveh->remove_collider(p);
+				edveh->piece_meta.erase(p);
+				// And then delete the piece
+				// TODO: Store it for later restoration
+				delete p;
+			}
+		}
 	}
 }
 

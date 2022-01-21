@@ -15,9 +15,13 @@ void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg, GUISkin *skin)
 
 	part_list = new GUIListLayout(part_margin, part_margin);
 	part_list->margins = glm::ivec4(part_margin, part_margin, part_margin, part_margin);
+	trashcan = new GUISingleLayout();
+
 	def_panel.divide_v(0.4);
 	// Top is the part list
 	def_panel.child_0->layout = part_list;
+	def_panel.child_1->divide_v(0.2f);
+	def_panel.child_1->child_0->layout = trashcan;
 
 	for(auto& p : osp->game_database->plumbing_machines)
 	{
@@ -34,13 +38,31 @@ void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg, GUISkin *skin)
 		part_list->add_widget(btn);
 
 		btn->on_clicked.add_handler([p, this](int btn)
+		{
+			if(btn == GUI_LEFT_BUTTON)
 			{
-				if(btn == GUI_LEFT_BUTTON)
-				{
-					create_machine(p);
-				}
-			});
+				create_machine(p);
+			}
+		});
 	}
+
+	trashcan_button = new GUITextButton("", "medium");
+	trashcan_button->on_clicked.add_handler([this](int btn)
+	{
+		if(btn == 0)
+		{
+			auto selected = edveh_int->plumbing_interface.pb_editor.get_selected();
+			// We are certain they are all plumbing machines
+			for(PlumbingMachine* m : selected)
+			{
+				auto& mvec = m->in_machine->in_part->attached_machines;
+				auto pos = std::find(mvec.begin(), mvec.end(), m->in_machine);
+				logger->check(pos != mvec.end(), "Only plumbing machines can be deleted from plumbing");
+				mvec.erase(pos);
+			}
+		}
+	});
+	trashcan->add_widget(trashcan_button);
 
 	// Find a part to assign as target, will usually be root
 	// TODO: Serialize this for user experience improvement
@@ -57,6 +79,28 @@ void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg, GUISkin *skin)
 void PlumbingPanel::prepare_gui(int width, int panel_width, int height, GUIInput *gui_ipt)
 {
 	this->gui_input = gui_ipt;
+	auto selected = edveh_int->plumbing_interface.pb_editor.get_selected();
+	bool all_plumbing = !selected.empty();
+	for(PlumbingMachine* m : selected)
+	{
+		if(!vector_contains(m->in_machine->in_part->attached_machines, m->in_machine))
+		{
+			all_plumbing = false;
+			break;
+		}
+	}
+
+	if(all_plumbing)
+	{
+		trashcan_button->text = "Delete selected machines";
+		trashcan_button->disabled = false;
+	}
+	else
+	{
+		trashcan_button->text = "Select plumbing machines";
+		trashcan_button->disabled = true;
+	}
+
 	def_panel.prepare(glm::ivec2(0, 0), glm::ivec2(panel_width, height), gui_input);
 }
 

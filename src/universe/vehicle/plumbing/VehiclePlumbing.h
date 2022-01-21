@@ -41,7 +41,16 @@ class VehiclePlumbing
 private:
 
 	// We travel from a->b unless the bool is true, then it's from b->a
-	using FlowStep = std::pair<size_t, bool>;
+	struct FlowStep
+	{
+		size_t pipe;
+		bool backwards;
+		float pr;
+
+		FlowStep(size_t pi, bool b, float p) : pipe(pi), backwards(b), pr(p)
+		{
+		}
+	};
 	// A flow path connects two ports
 	struct FlowPath
 	{

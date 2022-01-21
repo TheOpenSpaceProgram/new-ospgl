@@ -56,7 +56,7 @@ glm::ivec4 VehiclePlumbing::get_plumbing_bounds()
 	for (PlumbingMachine* pb : all_elems)
 	{
 		glm::ivec2 min = pb->editor_position;
-		glm::ivec2 max = pb->get_size(true);
+		glm::ivec2 max = pb->get_size(true) + min;
 
 		amin = glm::min(amin, min);
 		amax = glm::max(amax, max);
@@ -158,27 +158,27 @@ void VehiclePlumbing::execute_flows(float dt, std::vector<FlowPath>& flows)
 		if(to_move == 0.0f)
 			continue;
 		StoredFluids buffer;
-		Pipe& start = pipes[path.path.front().first];
-		Pipe& end = pipes[path.path.back().first];
+		Pipe& start = pipes[path.path.front().pipe];
+		Pipe& end = pipes[path.path.back().pipe];
 		// Bleed into the buffer
-		FluidPort* from = path.path.front().second ? start.b : start.a;
-		FluidPort* to = path.path.back().second ? end.a : end.b;
+		FluidPort* from = path.path.front().backwards ? start.b : start.a;
+		FluidPort* to = path.path.back().backwards ? end.a : end.b;
 
 		logger->check(!from->is_flow_port && !to->is_flow_port, "A path starts/ends in a flow machine!");
 		buffer.modify(from->in_machine->out_flow(from->id, to_move, true));
 		float flow = buffer.get_total_gas_mass() + buffer.get_total_liquid_mass();
-		start.flow += path.path.front().second ? flow : -flow;
-		end.flow += path.path.back().second ? flow : -flow;
+		start.flow += path.path.front().backwards ? flow : -flow;
+		end.flow += path.path.back().backwards ? flow : -flow;
 
 		// Travel the path if there's one
 		if(path.path.size() > 1)
 		{
 			for (size_t i = 1; i < path.path.size() - 1; i++)
 			{
-				Pipe &p = pipes[path.path[i].first];
-				p.flow += path.path[i].second ? flow : -flow;
-				FluidPort* from_p = path.path[i].second ? p.b : p.a;
-				FluidPort* to_p = path.path[i].second ? p.a : p.b;
+				Pipe &p = pipes[path.path[i].pipe];
+				p.flow += path.path[i].backwards ? flow : -flow;
+				FluidPort* from_p = path.path[i].backwards ? p.b : p.a;
+				FluidPort* to_p = path.path[i].backwards ? p.a : p.b;
 				logger->check(from_p->is_flow_port && to_p->is_flow_port, "True machine in middle of path!");
 				// TODO!
 			}
@@ -190,7 +190,7 @@ void VehiclePlumbing::execute_flows(float dt, std::vector<FlowPath>& flows)
 
 }
 
-
+// TODO: Quit condition if we enter a loop
 void VehiclePlumbing::find_all_possible_paths(std::vector<FlowPath> &fws)
 {
 	// Find a new unvisited pipe to start from that's connected to a real port
@@ -199,12 +199,12 @@ void VehiclePlumbing::find_all_possible_paths(std::vector<FlowPath> &fws)
 		Pipe& pipe = pipes[pipe_id];
 		if(!pipe.a->is_flow_port)
 		{
-			find_all_possible_paths_from(fws, std::make_pair(pipe_id, false));
+			find_all_possible_paths_from(fws, FlowStep(pipe_id, false, 0.0f));
 		}
 
 		if(!pipe.b->is_flow_port)
 		{
-			find_all_possible_paths_from(fws, std::make_pair(pipe_id, true));
+			find_all_possible_paths_from(fws, FlowStep(pipe_id, true, 0.0f));
 		}
 	}
 
@@ -223,8 +223,8 @@ void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, F
 	while(!open.empty())
 	{
 		std::vector<FlowStep> open_chain = open.front();
-		size_t work = open_chain.back().first;
-		bool backwards = open_chain.back().second;
+		size_t work = open_chain.back().pipe;
+		bool backwards = open_chain.back().backwards;
 		const Pipe* p = &pipes[work];
 		const FluidPort* next = backwards ? p->a : p->b;
 
@@ -246,13 +246,13 @@ void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, F
 					if(pipe.a == port)
 					{
 						// Forward
-						new_open.push_back(std::make_pair(pipe_id, false));
+						new_open.push_back(FlowStep(pipe_id, false, 0.0f));
 						found = true;
 					}
 					else if(pipe.b == port)
 					{
 						// Backward
-						new_open.push_back(std::make_pair(pipe_id, true));
+						new_open.push_back(FlowStep(pipe_id, true, 0.0f));
 						found = true;
 					}
 					if(found)
@@ -267,7 +267,8 @@ void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, F
 			FlowPath fpath;
 			fpath.path = open_chain;
 			calculate_delta_p(fpath);
-			if(fpath.delta_P < 0.0f)
+			// We check that we don't end up where we started through a loop
+			if(fpath.delta_P < 0.0f && next != (start.backwards ? pipes[start.pipe].b : pipes[start.pipe].a))
 			{
 				fws.push_back(fpath);
 			}
@@ -281,9 +282,9 @@ void VehiclePlumbing::find_all_possible_paths_from(std::vector<FlowPath> &fws, F
 void VehiclePlumbing::calculate_delta_p(FlowPath& fws)
 {
 	// It's guaranteed that all b ports are flow machines, so just follow them (except the end one)
-	FluidPort* start = fws.path[0].second ? pipes[fws.path[0].first].b : pipes[fws.path[0].first].a;
+	FluidPort* start = fws.path[0].backwards ? pipes[fws.path[0].pipe].b : pipes[fws.path[0].pipe].a;
 	float start_P = start->in_machine->get_pressure(start->id);
-	FluidPort* end = fws.path.back().second ? pipes[fws.path.back().first].a : pipes[fws.path.back().first].b;
+	FluidPort* end = fws.path.back().backwards ? pipes[fws.path.back().pipe].a : pipes[fws.path.back().pipe].b;
 	float end_P = end->in_machine->get_pressure(end->id);
 
 	float P_drop = 0.0f;
@@ -292,8 +293,8 @@ void VehiclePlumbing::calculate_delta_p(FlowPath& fws)
 	for(size_t i = 0; i < fws.path.size() - 1; i++)
 	{
 		float cur_P = start_P - P_drop;
-		FluidPort* in_port = fws.path[i].second ? pipes[fws.path[i].first].a : pipes[fws.path[i].first].b;
-		FluidPort* out_port = fws.path[i + 1].second ? pipes[fws.path[i + 1].first].b : pipes[fws.path[i + 1].first].a;
+		FluidPort* in_port = fws.path[i].backwards ? pipes[fws.path[i].pipe].a : pipes[fws.path[i].pipe].b;
+		FluidPort* out_port = fws.path[i + 1].backwards ? pipes[fws.path[i + 1].pipe].b : pipes[fws.path[i + 1].pipe].a;
 
 		logger->check(in_port->in_machine == out_port->in_machine, "Something went wrong, machines don't match");
 		logger->check(in_port->is_flow_port && out_port->is_flow_port, "Flow ports mismatched!");
@@ -318,37 +319,37 @@ std::vector<size_t> VehiclePlumbing::find_forced_paths(std::vector<FlowPath>& fw
 
 	for(const FlowPath& path : fws)
 	{
-		Pipe* front = &pipes[path.path.front().first];
-		Pipe* back = &pipes[path.path.back().first];
+		Pipe* front = &pipes[path.path.front().pipe];
+		Pipe* back = &pipes[path.path.back().pipe];
 
-		if(seen_start.count(path.path.front().second ? front->b : front->a) >= 1)
+		if(seen_start.count(path.path.front().backwards ? front->b : front->a) >= 1)
 		{
 			multiple_start.insert(front->a);
 		}
 		else
 		{
-			seen_start.insert(path.path.front().second ? front->b : front->a);
+			seen_start.insert(path.path.front().backwards ? front->b : front->a);
 		}
 
-		if(seen_end.count(path.path.back().second ? back->a : back->b) >= 1)
+		if(seen_end.count(path.path.back().backwards ? back->a : back->b) >= 1)
 		{
-			multiple_end.insert(path.path.back().second ? back->a : back->b);
+			multiple_end.insert(path.path.back().backwards ? back->a : back->b);
 		}
 		else
 		{
-			seen_end.insert(path.path.back().second ? back->a : back->b);
+			seen_end.insert(path.path.back().backwards ? back->a : back->b);
 		}
 	}
 
 	// Now, the elements which are not in multiple are unique
 	for(size_t idx = 0; idx < fws.size(); idx++)
 	{
-		Pipe* front = &pipes[fws[idx].path.front().first];
-		Pipe* back = &pipes[fws[idx].path.back().first];
+		Pipe* front = &pipes[fws[idx].path.front().pipe];
+		Pipe* back = &pipes[fws[idx].path.back().pipe];
 
 		// If this is a unique path, it must happen and thus is forced.
-		if(multiple_start.count(fws[idx].path.front().second ? front-> b: front->a) == 0 &&
-		multiple_end.count(fws[idx].path.back().second ? back->a : back->b) == 0)
+		if(multiple_start.count(fws[idx].path.front().backwards ? front-> b: front->a) == 0 &&
+		multiple_end.count(fws[idx].path.back().backwards ? back->a : back->b) == 0)
 		{
 			out.push_back(idx);
 		}
@@ -391,7 +392,7 @@ bool VehiclePlumbing::are_paths_compatible(const VehiclePlumbing::FlowPath &a, c
 		int pos = -1;
 		for(size_t j = 0; j < b.path.size(); j++)
 		{
-			if(a.path[i].first == b.path[j].first)
+			if(a.path[i].pipe == b.path[j].pipe)
 			{
 				pos = j;
 				break;
@@ -400,7 +401,7 @@ bool VehiclePlumbing::are_paths_compatible(const VehiclePlumbing::FlowPath &a, c
 		if(pos >= 0)
 		{
 			// Check that the traverse direction is the same, ie, we go forwards or backwards
-			if(a.path[i].second != b.path[pos].second)
+			if(a.path[i].backwards != b.path[pos].backwards)
 			{
 				return false;
 			}

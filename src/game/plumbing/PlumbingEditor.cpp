@@ -437,8 +437,16 @@ bool PlumbingEditor::update_pipes(GUIInput *gui_input, glm::vec4 span)
 		{
 			if(hovered_port)
 			{
+				// If we end where we begin, we remove the pipe
+				if(hovered_port == p->a || hovered_port == p->b)
+				{
+					veh->plumbing.pipes.erase(veh->plumbing.pipes.begin() + hovering_pipe);
+				}
+				else
+				{
+					p->b = hovered_port;
+				}
 				in_pipe_drag = false;
-				p->b = hovered_port;
 				hovering_pipe = -1;
 				return true;
 			}

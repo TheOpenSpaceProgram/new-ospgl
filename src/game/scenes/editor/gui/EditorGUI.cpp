@@ -25,14 +25,28 @@ void EditorGUI::prepare_gui(int width, int height, GUIInput *gui_input)
 	{
 		if(edveh_int->attach_interface.selected == nullptr)
 		{
-			part_list.prepare_gui(width, get_panel_width(), height, gui_input);
+			show_panel = PART_LIST;
 		}
 		else
 		{
+			show_panel = TRASHCAN;
 			trashcan.prepare_gui(width, get_panel_width(), height, gui_input);
 		}
 	}
 	else if(editor_mode == PLUMBING)
+	{
+		show_panel = PLUMBING_PANEL;
+	}
+
+	if(show_panel == PART_LIST)
+	{
+		part_list.prepare_gui(width, get_panel_width(), height, gui_input);
+	}
+	else if(show_panel == TRASHCAN)
+	{
+		trashcan.prepare_gui(width, get_panel_width(), height, gui_input);
+	}
+	else if(show_panel == PLUMBING_PANEL)
 	{
 		plumbing.prepare_gui(width, get_panel_width(), height, gui_input);
 	}
@@ -55,19 +69,15 @@ void EditorGUI::do_gui(int width, int height)
 	nvgRect(vg, 0.0f, 0.0f, swidth, 1.0f * h);
 	nvgFill(vg);
 
-
-	if(editor_mode == ATTACHING)
+	if(show_panel == PART_LIST)
 	{
-		if(edveh_int->attach_interface.selected == nullptr)
-		{
-			part_list.do_gui(width, get_panel_width(), height);
-		}
-		else
-		{
-			trashcan.do_gui(width, get_panel_width(), height);
-		}
+		part_list.do_gui(width, get_panel_width(), height);
 	}
-	else if(editor_mode == PLUMBING)
+	else if(show_panel == TRASHCAN)
+	{
+		trashcan.do_gui(width, get_panel_width(), height);
+	}
+	else if(show_panel == PLUMBING_PANEL)
 	{
 		plumbing.do_gui(width, get_panel_width(), height);
 	}
