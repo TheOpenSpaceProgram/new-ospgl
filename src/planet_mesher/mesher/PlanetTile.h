@@ -16,6 +16,9 @@ struct PlanetTileVertex
 	glm::vec3 pos;
 	glm::vec3 nrm;
 	glm::vec3 col;
+	// UV map for surface details, used when on small tiles and faded out at distance (Parallax, etc...)
+	glm::vec4 detail_planet_uv;
+	glm::vec2 tilt_texture;
 };
 
 struct PlanetTileWaterVertex
@@ -64,6 +67,10 @@ struct PlanetTile
 	static const int VERTEX_COUNT = TILE_SIZE * TILE_SIZE + 4;
 	static const int INDEX_COUNT = (TILE_SIZE - 1) * (TILE_SIZE - 1) * 6 + (TILE_SIZE - 1) * 4 * 3;
 	static const int PHYSICS_INDEX_COUNT = (PHYSICS_SIZE - 1) * (PHYSICS_SIZE - 1) * 6;
+	// Depth at which the detail texture tiles
+	// TODO: May need to be adjustable per-planet
+	static const int DETAIL_DEPTH = 10;
+	static const int SHOW_DETAIL_DEPTH = 7;
 
 	template <typename T, size_t S>
 	using VertexArray = std::array<T, (S + 2) * (S + 2)>;

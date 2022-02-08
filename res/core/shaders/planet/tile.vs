@@ -3,7 +3,8 @@
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec3 aColor;
-layout (location = 3) in vec2 aTexture;
+layout (location = 3) in vec2 aTiltTexture;
+layout (location = 4) in vec4 aDetailGlobalUV;
 
 uniform mat4 tform;
 uniform mat4 m_tform;
@@ -14,7 +15,9 @@ uniform float f_coef;
 
 out vec3 vColor;
 out vec3 vNormal;
-out vec2 vTexture;
+out float vTilt;
+out vec2 vGlobalUV;
+out vec2 vDetailUV;
 
 // In planet coordinates, 0->1 origin centered
 out vec3 vPos;
@@ -23,17 +26,6 @@ out vec3 vPosNrm;
 out float flogz;
 
 uniform vec3 tile;
-
-vec2 get_real_uv()
-{
-	return (aTexture / pow(2, tile.z) + tile.xy * 1000.0) * 0.001;
-}
-
-vec2 get_projected_uv(vec3 p)
-{
-	const float pi = 3.14159265358979;
-	return vec2((atan(p.z, p.x) + pi) / (2.0 * pi), acos(p.y) / pi);
-}
 
 void main()
 {
@@ -45,7 +37,9 @@ void main()
 	vNormal = vec3(normal_tform * vec4(aNormal, 1.0));
 	vPosNrm = vec3(rotm_tform * vec4(aPos, 1.0));
 
-	vPos = (m_tform * vec4(aPos, 1.0)).xyz;
+	vTilt = aTiltTexture.x;
+	vDetailUV = aDetailGlobalUV.xy;
+	vGlobalUV = aDetailGlobalUV.zw;
 
-	vTexture =  get_projected_uv(normalize(vPos));
+	vPos = (m_tform * vec4(aPos, 1.0)).xyz;
 }

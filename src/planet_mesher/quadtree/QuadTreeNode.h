@@ -14,8 +14,6 @@ private:
 	
 public:
 	
-
-
 	// Top-left bound of the node
 	glm::dvec2 min_point;
 	double size;

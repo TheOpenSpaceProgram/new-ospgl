@@ -85,6 +85,8 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 			glm::vec3 tile_i = glm::vec3(path.get_min(), (float)path.get_depth());
 
 			shader->setVec3("tile", tile_i);
+			// We show detail only on tiles at atleast DETAIL_DEPTH
+			shader->setInt("show_detail", path.get_depth() >= PlanetTile::SHOW_DETAIL_DEPTH);
 
 			glBindVertexArray(vao);
 			glBindVertexBuffer(0, tile->vbo, 0, sizeof(PlanetTileVertex));
@@ -222,11 +224,20 @@ void PlanetRenderer::generate_and_upload_index_buffer()
 	glEnableVertexAttribArray(2);
 	glVertexAttribFormat(2, 3, GL_FLOAT, GL_FALSE, offsetof(PlanetTileVertex, col));
 	glVertexAttribBinding(2, 0);
-
-	// UV sourced from buffer 1
+	// 2D coordinate map (texture, tilt)
 	glEnableVertexAttribArray(3);
-	glVertexAttribFormat(3, 2, GL_FLOAT, GL_FALSE, 0);
-	glVertexAttribBinding(3, 1);
+	glVertexAttribFormat(3, 3, GL_FLOAT, GL_FALSE, offsetof(PlanetTileVertex, tilt_texture));
+	glVertexAttribBinding(3, 0);
+
+	// UV maps (detail, global equirrectangular)
+	glEnableVertexAttribArray(4);
+	glVertexAttribFormat(4, 4, GL_FLOAT, GL_FALSE, offsetof(PlanetTileVertex, detail_planet_uv));
+	glVertexAttribBinding(4, 0);
+
+	// PBR sourced from buffer 1 (PBR pipeline)
+	glEnableVertexAttribArray(5);
+	glVertexAttribFormat(5, 2, GL_FLOAT, GL_FALSE, 0);
+	glVertexAttribBinding(5, 1);
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -249,7 +260,7 @@ void PlanetRenderer::generate_and_upload_index_buffer()
 	glVertexAttribFormat(2, 1, GL_FLOAT, GL_FALSE, offsetof(PlanetTileWaterVertex, depth));
 	glVertexAttribBinding(2, 0);
 
-	// UV sourced from buffer 1
+	// PBR sourced from buffer 1
 	glEnableVertexAttribArray(3);
 	glVertexAttribFormat(3, 2, GL_FLOAT, GL_FALSE, 0);
 	glVertexAttribBinding(3, 1);

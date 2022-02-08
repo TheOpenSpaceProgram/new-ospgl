@@ -7,13 +7,17 @@ layout (location = 3) out vec3 gPbr;
 out vec4 FragColor;
 
 in vec3 vColor;
-in vec2 vTexture;
 in vec3 vNormal;
 in vec3 vPos;
 in vec3 vPosNrm;
 in vec3 vPosSphereNrm;
+in float vTilt;
+in vec2 vGlobalUV;
+in vec2 vDetailUV;
 
 in float flogz;
+
+uniform bool show_detail;
 
 uniform float f_coef;
 
@@ -35,6 +39,15 @@ void main()
     gPbr.b = 1.0;
     gPbr.g = 0.0;
     gPbr.r = 0.0;
+
+    if(show_detail)
+    {
+        vec2 detail;
+        detail.x = mod(vDetailUV.x, 1.0);
+        detail.y = mod(vDetailUV.y, 1.0);
+        gAlbedo = vec3(detail.x, detail.y, 0.0);
+        gPositionEmit.w = 1.0;
+    }
 
     // FragColor = vec4(diff * texture(tex, vTexture).xyz, 1.0);
     // FragColor = vec4(vTexture, 0.0, 1.0);
