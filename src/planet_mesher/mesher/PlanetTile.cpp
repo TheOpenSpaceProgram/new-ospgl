@@ -70,14 +70,6 @@ void generate_normals(T* verts, size_t verts_size, glm::dmat4 model_spheric, boo
 		v1->nrm += face_normal;
 		v2->nrm += face_normal;
 
-		// We can easily generate the tilt by comparing the normal to the normalized vertex position
-		// TODO: Maybe use the final sum of smooth normals? To be done if it seems jaggy or unsmooth
-		if constexpr (std::is_same<T, PlanetTileVertex>::value)
-		{
-			glm::vec3 normal_pos = glm::normalize(p0);
-			float tilt = 1.0f - glm::abs(glm::dot(normal_pos, face_normal));
-			v0->tilt_texture.x= tilt; v1->tilt_texture.x = tilt; v2->tilt_texture.x = tilt;
-		}
 	}
 
 
@@ -125,18 +117,11 @@ void generate_vertices(T* verts, glm::dmat4 model, glm::dmat4 inverse_model_sphe
 
 			if constexpr (std::is_same<T, PlanetTileVertex>::value)
 			{
-				// Generate UVs, both local and global
-				// Local UVs are generated in the previous step, just need to interpolate!
-				double x_prg = (double)(x + 1) / (S);
-				double y_prg = (double)(y + 1) / (S);
-				vert.detail_planet_uv.x = (float)(detail_start_x * (1 - x_prg) + x_prg * detail_end_x);
-				vert.detail_planet_uv.y = (float)(detail_start_y * (1 - y_prg) + y_prg * detail_end_y);
-
 				// We find the points spherical coordinates (= to the equirrectangular projection in our case!)
 				glm::vec2 sph = MathUtil::euclidean_to_spherical_r1(world_pos_spheric_nrm);
 				// Clip to 0->1
-				vert.detail_planet_uv.z = (sph.x + glm::half_pi<float>()) / glm::pi<float>();
-				vert.detail_planet_uv.w = sph.y / glm::pi<float>();
+				vert.planet_uv_tex.x = (sph.x + glm::half_pi<float>()) / glm::pi<float>();
+				vert.planet_uv_tex.y = sph.y / glm::pi<float>();
 			}
 
 			verts[r_index] = vert;
@@ -196,8 +181,7 @@ void copy_vertices(T* origin, Q* destination)
 				else
 				{
 					destination[f_index].col = origin[o_index].col;
-					destination[f_index].tilt_texture = origin[o_index].tilt_texture;
-					destination[f_index].detail_planet_uv = origin[o_index].detail_planet_uv;
+					destination[f_index].planet_uv_tex = origin[o_index].planet_uv_tex;
 				}
 			}
 		}
@@ -346,6 +330,12 @@ bool PlanetTile::generate(PlanetTilePath path, double planet_radius, sol::state&
 		water_vertices = new std::array<PlanetTileWaterVertex, VERTEX_COUNT>();
 		copy_vertices<TILE_SIZE>(work_array.data(), water_vertices->data());
 	}
+
+	// We generate the up vector easily
+	glm::dvec3 world_pos_cubic = glm::normalize(model * glm::vec4(0.5, 0.5, 0.0, 1.0));
+	glm::dvec3 world_pos_spheric = MathUtil::cube_to_sphere(world_pos_cubic);
+	glm::dvec3 world_pos_center = world_pos_spheric * 0.5;
+	up = glm::normalize(world_pos_spheric);
 
 	std::array<PlanetTileVertex, 4> skirts;
 	// Up

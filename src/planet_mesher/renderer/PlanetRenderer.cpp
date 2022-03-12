@@ -2,12 +2,14 @@
 #include "../../util/Logger.h"
 #include "../../assets/AssetManager.h"
 
+#include <util/DebugDrawer.h>
 #include <imgui/imgui.h>
 
 void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view,
 							glm::dmat4 wmodel, glm::dmat4 normal_matrix, glm::dmat4 rot_tform,
 							float far_plane, glm::dvec3 camera_pos,
-							ElementConfig& config, double time, glm::vec3 light_dir)
+							ElementConfig& config, double time, glm::vec3 light_dir, glm::dmat4 dmodel,
+							double rot)
 {
 	/*ImGui::Begin("Planet Surface", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 	planet.do_imgui(nullptr);
@@ -23,6 +25,9 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 	// inside the loop so we expend less time locked
 	// at the cost of having to lock every iteration
 	{
+		float detail_scale = 10000.0f;
+		float triplanar_y_mult = 0.3f;
+		float triplanar_power = 2.0f;
 
 		auto tiles_w = server.tiles.get();
 
@@ -38,8 +43,52 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 		shader->setVec3("light_dir", light_dir);
 		shader->setMat4("normal_tform", normal_matrix);
 
+		// TODO: Handle non-spherical planets with some kind of ellipsoid
+		glm::dvec3 triplanar_up = camera_pos;
+		shader->setFloat("detail_scale", detail_scale);
+		shader->setFloat("triplanar_power", triplanar_power);
+		shader->setFloat("triplanar_y_mult", triplanar_y_mult);
+
+		// Triplanar textures
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, top_tex->id);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, cliff_tex->id);
+
+		shader->setInt("top_tex", 0);
+		shader->setInt("cliff_tex", 1);
+
 		bool cw_mode = false;
 		glFrontFace(GL_CCW);
+
+
+		// Adjust triplanar up so it's tiled
+		// TODO: This solution causes quite a bit of jumping when moving between
+		// TODO: "detail tile boundaries". Need to think a better way but works for now
+		// We rotate triplaner up with the planet to avoid offsets, remember the coordinate space
+		printf("%f %f %f\n", triplanar_up.x, triplanar_up.y, triplanar_up.z);
+		glm::dvec3 nds = glm::dvec3(detail_scale, detail_scale, detail_scale) * 100.0;
+		triplanar_up -= glm::mod(triplanar_up, nds);
+		triplanar_up = glm::normalize(triplanar_up);
+		// Now be careful, the planet is rotating, so need to keep that in mind and rotate
+		// the whole thing around the old y axis by rot
+		glm::dmat4 tri_matrix = MathUtil::rotate_from_to(triplanar_up, glm::dvec3(0, 1, 0));
+		// This is the cosine of the angle between the pole and our position
+		glm::dmat4 rot_offset = glm::rotate(-rot,  glm::dvec3(0, 1, 0));
+		tri_matrix = tri_matrix * rot_offset;
+		// tri_matrix now points into a weird direction but that's fixed with the planet
+		// I figured out using my fingers as axes that this is the correction factor!
+		// (Actually makes sense as the planet rotation will "weaken" the triplanar_up rotation
+		double a = glm::dot(glm::normalize(triplanar_up), glm::dvec3(0, 1, 0));
+		glm::dmat4 correction = glm::rotate(glm::acos(a), triplanar_up);
+		tri_matrix = correction * tri_matrix;
+
+
+
+		glm::dvec3 cam_offset = glm::dvec3(0);
+		shader->setMat4("tri_matrix", tri_matrix);
+		shader->setVec3("cam_offset", cam_offset);
+
 		for (size_t i = 0; i < render_tiles.size(); i++)
 		{
 			auto it = tiles_w->find(render_tiles[i]);
@@ -78,16 +127,16 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 
 
+
 			shader->setMat4("tform", (glm::mat4)(proj_view * wmodel * model));
 			shader->setMat4("m_tform", (glm::mat4)(deferred_model));
+
+			shader->setMat4("m_tform_scaled", (glm::mat4)(wmodel * model));
 			shader->setMat4("rotm_tform", (glm::mat4)(rot_tform * model));
 
 			glm::vec3 tile_i = glm::vec3(path.get_min(), (float)path.get_depth());
 
 			shader->setVec3("tile", tile_i);
-			// We show detail only on tiles at atleast DETAIL_DEPTH
-			shader->setInt("show_detail", path.get_depth() >= PlanetTile::SHOW_DETAIL_DEPTH);
-
 			glBindVertexArray(vao);
 			glBindVertexBuffer(0, tile->vbo, 0, sizeof(PlanetTileVertex));
 			glBindVertexBuffer(1, uv_bo, 0, sizeof(glm::vec2));
@@ -112,7 +161,6 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 			water_shader->setFloat("atmo_exponent", (float)config.atmo.exponent);
 			water_shader->setFloat("sunset_exponent", (float)config.atmo.sunset_exponent);
 			water_shader->setVec3("light_dir", light_dir);
-			water_shader->setMat4("normal_tform", normal_matrix);
 
 			cw_mode = false;
 			glFrontFace(GL_CCW);
@@ -224,20 +272,15 @@ void PlanetRenderer::generate_and_upload_index_buffer()
 	glEnableVertexAttribArray(2);
 	glVertexAttribFormat(2, 3, GL_FLOAT, GL_FALSE, offsetof(PlanetTileVertex, col));
 	glVertexAttribBinding(2, 0);
-	// 2D coordinate map (texture, tilt)
+	// Planet's global UV and texture chooser
 	glEnableVertexAttribArray(3);
-	glVertexAttribFormat(3, 3, GL_FLOAT, GL_FALSE, offsetof(PlanetTileVertex, tilt_texture));
+	glVertexAttribFormat(3, 3, GL_FLOAT, GL_FALSE, offsetof(PlanetTileVertex, planet_uv_tex));
 	glVertexAttribBinding(3, 0);
 
-	// UV maps (detail, global equirrectangular)
-	glEnableVertexAttribArray(4);
-	glVertexAttribFormat(4, 4, GL_FLOAT, GL_FALSE, offsetof(PlanetTileVertex, detail_planet_uv));
-	glVertexAttribBinding(4, 0);
-
 	// PBR sourced from buffer 1 (PBR pipeline)
-	glEnableVertexAttribArray(5);
-	glVertexAttribFormat(5, 2, GL_FLOAT, GL_FALSE, 0);
-	glVertexAttribBinding(5, 1);
+	glEnableVertexAttribArray(4);
+	glVertexAttribFormat(4, 2, GL_FLOAT, GL_FALSE, 0);
+	glVertexAttribBinding(4, 1);
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -275,6 +318,8 @@ PlanetRenderer::PlanetRenderer()
 	generate_and_upload_index_buffer();
 	shader = osp->assets->get<Shader>("core", "shaders/planet/tile.vs");
 	water_shader = osp->assets->get<Shader>("core", "shaders/planet/water.vs");
+	cliff_tex = AssetHandle<Image>("core:cliff.png");
+	top_tex = AssetHandle<Image>("core:grass.png");
 }
 
 

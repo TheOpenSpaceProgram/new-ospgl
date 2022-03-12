@@ -25,6 +25,11 @@ struct PlanetTilePath
 
 	glm::dmat4 get_model_matrix() const;
 	glm::dmat4 get_model_spheric_matrix() const;
+	// Used for details where we want the tile to remain more or less planar
+	// and don't care much about rotation
+	glm::dmat4 get_scaled_matrix() const;
+	// Gets the aproximated up vector of the tile
+	glm::dvec3 get_tile_up() const;
 
 
 

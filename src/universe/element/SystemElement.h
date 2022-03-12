@@ -48,6 +48,9 @@ public:
 
 	glm::dmat4 build_rotation_matrix(double t0, double t, bool include_rot_at_epoch = true) const;
 
+	double get_rotation_angle(double t0, double t, bool include_rot_at_epoch = true) const;
+	double get_small_rotation_angle(double t0, double t, bool include_rot_at_epoch = true) const;
+
 	// Coordimates are given relative to the rotated body
 	// (Real rotation axis)
 	glm::dvec3 get_tangential_speed(glm::dvec3 at_relative) const;
@@ -86,6 +89,7 @@ public:
 		SAFE_TOML_GET(rotation_period, "rotation_period", double);
 
 		to.rotation_speed = (1.0 / rotation_period) * REVS_PER_HOUR_TO_DEGREES_PER_SECOND;
+		//to.rotation_speed = 0.0;
 
 		SAFE_TOML_GET_TABLE(to.rotation_axis, "rotation_axis", glm::dvec3);
 		to.rotation_axis = glm::normalize(to.rotation_axis);

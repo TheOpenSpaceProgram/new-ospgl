@@ -28,16 +28,28 @@ glm::dmat4 SystemElement::build_rotation_matrix(double t0, double t, bool includ
 {
 	glm::dmat4 rot_matrix = glm::dmat4(1.0);
 
-	double offset = include_at_epoch ? rotation_at_epoch : 0.0;
-
-	double rot_angle = glm::mod(glm::radians(offset + t * rotation_speed), glm::two_pi<double>());
-	double big_rot_angle = glm::mod(glm::radians(offset + t0 * rotation_speed), glm::two_pi<double>());
-	rot_matrix = glm::rotate(rot_matrix, rot_angle + big_rot_angle, rotation_axis);
+	double rot_angle = get_rotation_angle(t0, t, include_at_epoch);
+	rot_matrix = glm::rotate(rot_matrix, rot_angle, rotation_axis);
 	// Align pole to rotation axis
 	rot_matrix = rot_matrix * MathUtil::rotate_from_to(glm::dvec3(0.0, 1.0, 0.0), rotation_axis);
 
 
 	return rot_matrix;
+}
+
+double SystemElement::get_rotation_angle(double t0, double t, bool include_rot_at_epoch) const
+{
+	double offset = include_rot_at_epoch ? rotation_at_epoch : 0.0;
+	double rot_angle = glm::mod(glm::radians(offset + t * rotation_speed), glm::two_pi<double>());
+	double big_rot_angle = glm::mod(glm::radians(offset + t0 * rotation_speed), glm::two_pi<double>());
+	return rot_angle + big_rot_angle;
+}
+
+double SystemElement::get_small_rotation_angle(double t0, double t, bool include_rot_at_epoch) const
+{
+	double offset = include_rot_at_epoch ? rotation_at_epoch : 0.0;
+	double rot_angle = glm::mod(glm::radians(offset + t * rotation_speed), glm::two_pi<double>());
+	return rot_angle;
 }
 
 glm::dvec3 SystemElement::get_tangential_speed(glm::dvec3 relative) const
@@ -61,3 +73,4 @@ SystemElement::SystemElement()
 SystemElement::~SystemElement()
 {
 }
+

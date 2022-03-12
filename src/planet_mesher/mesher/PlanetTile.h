@@ -16,9 +16,8 @@ struct PlanetTileVertex
 	glm::vec3 pos;
 	glm::vec3 nrm;
 	glm::vec3 col;
-	// UV map for surface details, used when on small tiles and faded out at distance (Parallax, etc...)
-	glm::vec4 detail_planet_uv;
-	glm::vec2 tilt_texture;
+	// Planet's global UV map and texture chooser float
+	glm::vec3 planet_uv_tex;
 };
 
 struct PlanetTileWaterVertex
@@ -57,6 +56,8 @@ struct PlanetTile
 	bool clockwise;
 
 	GLuint vbo, water_vbo;
+	// The average up vector of the tile, for texturing
+	glm::dvec3 up;
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
 	static const int TILE_SIZE = 32;

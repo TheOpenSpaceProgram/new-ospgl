@@ -37,8 +37,12 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 
 	glm::dmat4 rot_matrix = body->build_rotation_matrix(t0, t);
 
+	glm::dmat4 dmodel = glm::translate(glm::dmat4(1.0), -camera_pos + state.pos);
+	// We scale down to small coordinates
+	//dmodel = glm::scale(dmodel, glm::dvec3(1.0 / body->config.radius));
+
 	body->renderer.deferred(proj_view, model * rot_matrix, rot_matrix, far_plane, camera_pos_relative,
-		body->config, t, light_dir, body->dot_factor);
+		body->config, t, light_dir, body->dot_factor, model * rot_matrix, body->get_small_rotation_angle(t0, t));
 
 	if (debug_drawer->debug_enabled)
 	{

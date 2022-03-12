@@ -22,7 +22,7 @@ public:
 	void deferred(glm::dmat4 proj_view, glm::dmat4 model,
 				  glm::dmat4 rotation_matrix, double far_plane,
 				  glm::dvec3 camera_pos, ElementConfig& config, double time, glm::vec3 light_dir,
-				  float dot_factor) const;
+				  float dot_factor, glm::dmat4 dmodel, double rot) const;
 
 	void forward(glm::dmat4 proj_view, glm::dvec3 camera_pos,
 				 ElementConfig& config, double far_plane, glm::vec3 light_dir) const;

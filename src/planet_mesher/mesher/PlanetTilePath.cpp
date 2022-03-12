@@ -263,3 +263,33 @@ glm::dmat4 PlanetTilePath::get_model_spheric_matrix() const
 
 	return model_spheric;
 }
+
+glm::dmat4 PlanetTilePath::get_scaled_matrix() const
+{
+	//glm::dmat4 scale_mat = glm::scale(glm::dmat4(), glm::dvec3(2.0 * get_size()));
+	glm::dmat4 translation_mat_sph = glm::translate(glm::dmat4(), get_tile_translation(true));
+	glm::dmat4 scale_mat = glm::scale(glm::dmat4(), get_tile_scale());
+	glm::dmat4 origin_mat = glm::translate(glm::dmat4(), get_tile_origin());
+	glm::dmat4 rotation_mat = glm::toMat4(glm::dquat(get_tile_rotation()));
+	glm::dmat4 postscale_mat = glm::scale(glm::dmat4(), get_tile_postscale());
+	glm::dmat4 postrotate_mat = glm::toMat4(glm::dquat(get_tile_postrotation()));
+	glm::dmat4 sscale_mat = glm::scale(glm::dmat4(), glm::dvec3(2.0 * get_size()));
+	glm::dmat4 out = glm::dmat4(1.0);
+
+	double scale = get_size() * 2.0;
+
+	if(side == NX || side == PY)
+	{
+		out = glm::scale(glm::dmat4(1.0), glm::dvec3(0.0, 0.0, -1.0) * scale);
+	}
+
+	return get_model_matrix();
+	return out;
+	//scale_mat = glm::dmat4(1.0);
+	//return get_model_matrix();
+}
+
+glm::dvec3 PlanetTilePath::get_tile_up() const
+{
+	return glm::dvec4(0.0, 0.0, 1.0, 1.0) * get_scaled_matrix();
+}
