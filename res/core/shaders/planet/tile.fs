@@ -42,7 +42,7 @@ void main()
 
     // Adjusted triplanar mapping
     vec3 adjusted_pos = (vec3(tri_matrix * vec4(vPosScaled, 1.0))) * detail_scale + cam_offset;
-    vec3 adjusted_nrm = vec3(vec4(vNormalScaled, 1.0));
+    vec3 adjusted_nrm = vec3(tri_nrm_matrix * vec4(vNormal, 1.0));
 
     // Generate UVs and take samples
     vec2 top_uv = vec2(adjusted_pos.x, adjusted_pos.z);
@@ -54,13 +54,12 @@ void main()
 
     // Now combine the samples with the normal to obtian the color
     // Reduce the y contrution to make cliffs more noticeable
-   // adjusted_nrm.y *= triplanar_y_mult;
+    adjusted_nrm.y *= triplanar_y_mult;
     vec3 blend_weights = normalize(pow(abs(adjusted_nrm), vec3(triplanar_power)));
     vec3 triplanar_color = blend_weights.x * right_sample + blend_weights.y * top_sample + blend_weights.z * front_sample;
 
     float detailed_weight = min(505000.0 * detail_scale / dot(vPos, vPos), 1.0);
     vec3 col = vColor * detailed_weight * triplanar_color + vColor * (1.0 - detailed_weight);
-    col = vColor;
 
     gAlbedo = (col + atmoc) * 0.77;
     gNormal = vNormal;
@@ -68,8 +67,6 @@ void main()
     gPbr = vec3(0.0, 0.8, 0.2); // Occlusion, rougness, metallic
 
     gPositionEmit.w = 1.0;
-    gAlbedo = vPosScaled;
-    gAlbedo = top_sample;
     //gAlbedo = adjusted_pos;
     //gAlbedo = vec3(adjusted_pos.z);
     //gAlbedo = normalize(adjusted_pos * adjusted_pos * adjusted_pos);

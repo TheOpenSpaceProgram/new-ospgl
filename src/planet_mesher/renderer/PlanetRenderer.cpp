@@ -26,8 +26,8 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 	// at the cost of having to lock every iteration
 	{
 		float detail_scale = 10000.0f;
-		float triplanar_y_mult = 0.3f;
-		float triplanar_power = 2.0f;
+		float triplanar_y_mult = 0.15f;
+		float triplanar_power = 3.0f;
 
 		auto tiles_w = server.tiles.get();
 
@@ -73,6 +73,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 		// Now be careful, the planet is rotating, so need to keep that in mind and rotate
 		// the whole thing around the old y axis by rot
 		glm::dmat4 tri_matrix = MathUtil::rotate_from_to(triplanar_up, glm::dvec3(0, 1, 0));
+		glm::dmat4 tri_normal_matrix = MathUtil::rotate_from_to(glm::normalize(camera_pos), glm::dvec3(0, 1, 0));
 		// This is the cosine of the angle between the pole and our position
 		glm::dmat4 rot_offset = glm::rotate(-rot,  glm::dvec3(0, 1, 0));
 		tri_matrix = tri_matrix * rot_offset;
@@ -87,6 +88,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 		glm::dvec3 cam_offset = glm::dvec3(0);
 		shader->setMat4("tri_matrix", tri_matrix);
+		shader->setMat4("tri_nrm_matrix", tri_normal_matrix);
 		shader->setVec3("cam_offset", cam_offset);
 
 		for (size_t i = 0; i < render_tiles.size(); i++)
