@@ -3,25 +3,14 @@
 #include "../universe/element/SystemElement.h"
 
 
-void PlanetaryBodyRenderer::deferred(glm::dmat4 proj_view, glm::dmat4 model, glm::dmat4 rotation_matrix,
-									 double far_plane, glm::dvec3 camera_pos,
-									 ElementConfig & config, double time, glm::vec3 light_dir, float dot_factor,
-									 glm::dmat4 dmodel, double rot) const
+void PlanetaryBodyRenderer::deferred(const PlanetRenderer::PlanetRenderTforms& tforms, ElementConfig& config, float dot_factor) const
 {
-
-	glm::dmat4 normal_matrix = glm::transpose(glm::inverse(rotation_matrix));
-
 	if (rocky != nullptr)
 	{
-		// We have to give the renderer the rotation matrix so atmosphere
-		// can be rendered properly
-		rocky->renderer.render(*rocky->server, rocky->qtree, proj_view, model,
-			rotation_matrix, normal_matrix, (float)far_plane, camera_pos, config, time, light_dir, dmodel,
-			rot);
+		rocky->renderer.render(*rocky->server, rocky->qtree, tforms, config);
 	}
 	else if(gas != nullptr)
 	{
-		gas->render(proj_view, model, rotation_matrix, normal_matrix, (float)far_plane, camera_pos, config, time);
 	}
 }
 

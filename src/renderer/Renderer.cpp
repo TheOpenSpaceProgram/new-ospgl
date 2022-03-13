@@ -767,6 +767,7 @@ void Renderer::set_ibl_source(Cubemap* cubemap)
 void Renderer::env_map_sample()
 {
 	auto* vent = (VehicleEntity*)osp->game_state->universe.entities[1];
+	// TODO: Adjust so we avoid being underground, etc...
 	glm::dvec3 sample_pos = to_dvec3(vent->vehicle->root->get_global_transform().getOrigin());
 
 	size_t samples = quality.pbr.faces_per_sample;

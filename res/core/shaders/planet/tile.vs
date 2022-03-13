@@ -7,7 +7,6 @@ layout (location = 3) in vec3 aGlobalTex;
 
 uniform mat4 tform;
 uniform mat4 m_tform;
-uniform mat4 m_tform_scaled;
 uniform mat4 normal_tform;
 uniform mat4 rotm_tform;
 

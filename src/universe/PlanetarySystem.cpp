@@ -29,6 +29,7 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 	glm::dmat4 proj_view, float far_plane)
 {
 
+
 	glm::dvec3 camera_pos_relative = camera_pos - state.pos;
 	glm::dvec3 light_dir = glm::normalize(state.pos);
 
@@ -41,8 +42,19 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 	// We scale down to small coordinates
 	//dmodel = glm::scale(dmodel, glm::dvec3(1.0 / body->config.radius));
 
-	body->renderer.deferred(proj_view, model * rot_matrix, rot_matrix, far_plane, camera_pos_relative,
-		body->config, t, light_dir, body->dot_factor, model * rot_matrix, body->get_small_rotation_angle(t0, t));
+	PlanetRenderer::PlanetRenderTforms tforms;
+	tforms.wmodel = model * rot_matrix;
+	tforms.normal_matrix = rot_matrix;
+	tforms.far_plane = far_plane;
+	tforms.camera_pos = camera_pos_relative;
+	tforms.time = t;
+	tforms.light_dir = light_dir;
+	tforms.rot = body->get_small_rotation_angle(t0, t);
+	tforms.rot_tform = glm::transpose(glm::inverse(rot_matrix));
+	tforms.proj_view = proj_view;
+
+	body->renderer.deferred(tforms, body->config, body->dot_factor);
+
 
 	if (debug_drawer->debug_enabled)
 	{
@@ -396,6 +408,9 @@ PlanetarySystem::~PlanetarySystem()
 
 void PlanetarySystem::load(const cpptoml::table &root)
 {
+	t0 = root.get_qualified_as<double>("t").value_or(0);
+	bt = 0; t = 0;
+
 	auto toml_elements = root.get_table_array("element");
 	if(!toml_elements) return;
 

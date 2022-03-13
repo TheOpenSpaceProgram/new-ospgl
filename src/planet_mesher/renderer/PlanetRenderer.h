@@ -35,11 +35,15 @@ private:
 	glm::dvec3 current_detail_up;
 public:
 
+	struct PlanetRenderTforms
+	{
+		glm::dmat4 proj_view, wmodel, normal_matrix, rot_tform;
+		glm::dvec3 camera_pos, light_dir;
+		double rot, time;
+		float far_plane;
+	};
 	// Camera position should be given RELATIVE to the planet
-	void render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view, glm::dmat4 model,
-				glm::dmat4 no_rot_model, glm::dmat4 normal_matrix, float far_plane,
-				glm::dvec3 camera_pos, ElementConfig& config, double time, glm::vec3 light_dir, glm::dmat4 dmodel,
-				double rot);
+	void render(PlanetTileServer& server, QuadTreePlanet& planet, const PlanetRenderTforms& tforms, ElementConfig& config);
 
 	PlanetRenderer();
 	~PlanetRenderer();

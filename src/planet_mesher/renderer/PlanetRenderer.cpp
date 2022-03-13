@@ -6,11 +6,8 @@
 #include <imgui/imgui.h>
 #include <renderer/Renderer.h>
 
-void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view,
-							glm::dmat4 wmodel, glm::dmat4 normal_matrix, glm::dmat4 rot_tform,
-							float far_plane, glm::dvec3 camera_pos,
-							ElementConfig& config, double time, glm::vec3 light_dir, glm::dmat4 dmodel,
-							double rot)
+void PlanetRenderer::render(PlanetTileServer &server, QuadTreePlanet &planet,
+							const PlanetRenderer::PlanetRenderTforms &tforms, ElementConfig &config)
 {
 	/*ImGui::Begin("Planet Surface", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 	planet.do_imgui(nullptr);
@@ -26,6 +23,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 	// inside the loop so we expend less time locked
 	// at the cost of having to lock every iteration
 	{
+		printf("rot: %f\n", tforms.rot);
 		float detail_scale = 2000.0f;
 		float detail_fade = 45000.0f;
 		detail_fade = detail_fade * detail_fade;
@@ -35,19 +33,19 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 		auto tiles_w = server.tiles.get();
 
 		shader->use();
-		shader->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
-		shader->setVec3("camera_pos", (glm::vec3)(camera_pos / config.radius));
+		shader->setFloat("f_coef", 2.0f / glm::log2(tforms.far_plane + 1.0f));
+		shader->setVec3("camera_pos", (glm::vec3)(tforms.camera_pos / config.radius));
 		shader->setFloat("atmo_radius", (float)(config.atmo.radius / config.radius));
 		shader->setFloat("planet_radius", 1.0f);
 		shader->setVec3("kRlh", config.atmo.kRlh);
 		shader->setFloat("kMie", config.atmo.kMie);
 		shader->setFloat("atmo_exponent", (float)config.atmo.exponent);
 		shader->setFloat("sunset_exponent", (float)config.atmo.sunset_exponent);
-		shader->setVec3("light_dir", light_dir);
-		shader->setMat4("normal_tform", normal_matrix);
+		shader->setVec3("light_dir", tforms.light_dir);
+		shader->setMat4("normal_tform", tforms.normal_matrix);
 
 		// TODO: Handle non-spherical planets with some kind of ellipsoid
-		glm::dvec3 triplanar_up = camera_pos;
+		glm::dvec3 triplanar_up = tforms.camera_pos;
 		if(osp->renderer->quality.use_planet_detail_map || osp->renderer->quality.use_planet_detail_normal)
 		{
 			shader->setFloat("detail_scale", detail_scale);
@@ -86,9 +84,9 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 			// Now be careful, the planet is rotating, so need to keep that in mind and rotate
 			// the whole thing around the old y axis by rot
 			glm::dmat4 tri_matrix = MathUtil::rotate_from_to(triplanar_up, glm::dvec3(0, 1, 0));
-			glm::dmat4 tri_normal_matrix = MathUtil::rotate_from_to(glm::normalize(camera_pos), glm::dvec3(0, 1, 0));
+			glm::dmat4 tri_normal_matrix = MathUtil::rotate_from_to(glm::normalize(tforms.camera_pos), glm::dvec3(0, 1, 0));
 			// This is the cosine of the angle between the pole and our position
-			glm::dmat4 rot_offset = glm::rotate(-rot, glm::dvec3(0, 1, 0));
+			glm::dmat4 rot_offset = glm::rotate(-tforms.rot, glm::dvec3(0, 1, 0));
 			tri_matrix = tri_matrix * rot_offset;
 			// tri_matrix now points into a weird direction but that's fixed with the planet
 			// I figured out using my fingers as axes that this is the correction factor!
@@ -119,7 +117,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 			glm::dmat4 model = path.get_model_spheric_matrix();
 			// We also apply the camera tform, used by the deferred renderer
-			glm::dmat4 deferred_model = wmodel * model;
+			glm::dmat4 deferred_model = tforms.wmodel * model;
 
 			if (!tile->is_uploaded())
 			{
@@ -141,13 +139,11 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 
 
-			shader->setMat4("tform", (glm::mat4)(proj_view * wmodel * model));
+			shader->setMat4("tform", (glm::mat4)(tforms.proj_view * tforms.wmodel * model));
 			shader->setMat4("m_tform", (glm::mat4)(deferred_model));
+			shader->setMat4("rotm_tform", (glm::mat4)(tforms.rot_tform * model));
 
-			shader->setMat4("m_tform_scaled", (glm::mat4)(wmodel * model));
-			shader->setMat4("rotm_tform", (glm::mat4)(rot_tform * model));
-
-			glm::dvec3 tile_or = wmodel * model * glm::dvec4(0.5, 0.5, 0.0, 1.0);
+			glm::dvec3 tile_or = tforms.wmodel * model * glm::dvec4(0.5, 0.5, 0.0, 1.0);
 			// We use a reasonalbe distance to prevent gaps but also not show detail very far away
 			// to reduce GPU load
 			bool do_detail = glm::dot(tile_or, tile_or) < detail_fade * 20;
@@ -170,16 +166,16 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 		{
 			// Draw water, another pass to only switch shaders once
 			water_shader->use();
-			water_shader->setFloat("f_coef", 2.0f / glm::log2(far_plane + 1.0f));
-			water_shader->setVec3("camera_pos", (glm::vec3)(camera_pos / config.radius));
-			water_shader->setFloat("time", (float)time);
+			water_shader->setFloat("f_coef", 2.0f / glm::log2(tforms.far_plane + 1.0f));
+			water_shader->setVec3("camera_pos", (glm::vec3)(tforms.camera_pos / config.radius));
+			water_shader->setFloat("time", (float)tforms.time);
 			water_shader->setFloat("atmo_radius", (float)(config.atmo.radius / config.radius));
 			water_shader->setFloat("planet_radius", 1.0f);
 			water_shader->setVec3("kRlh", config.atmo.kRlh);
 			water_shader->setFloat("kMie", config.atmo.kMie);
 			water_shader->setFloat("atmo_exponent", (float)config.atmo.exponent);
 			water_shader->setFloat("sunset_exponent", (float)config.atmo.sunset_exponent);
-			water_shader->setVec3("light_dir", light_dir);
+			water_shader->setVec3("light_dir", tforms.light_dir);
 
 			cw_mode = false;
 			glFrontFace(GL_CCW);
@@ -194,7 +190,7 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 				auto path = it->first;
 
 				glm::dmat4 model = path.get_model_spheric_matrix();
-				glm::dmat4 deferred_model = wmodel * model;
+				glm::dmat4 deferred_model = tforms.wmodel * model;
 
 				if (tile->water_vbo == 0)
 				{
@@ -214,14 +210,14 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 				}
 
 				// Can be used for tides, or simple waves as we do here
-				double sfactor = 1.0 + sin(time * 0.3) * 0.000000025;
+				double sfactor = 1.0 + sin(tforms.time * 0.3) * 0.000000025;
 
 				glm::dmat4 t_model = glm::dmat4(1.0f);
 				t_model = glm::scale(t_model, glm::dvec3(sfactor, sfactor, sfactor));
 
-				water_shader->setMat4("tform", (glm::mat4)(proj_view * wmodel * t_model * model));
+				water_shader->setMat4("tform", (glm::mat4)(tforms.proj_view * tforms.wmodel * t_model * model));
 				water_shader->setMat4("deferred_tform", (glm::mat4)(deferred_model));
-				water_shader->setMat4("rotm_tform", (glm::mat4)(rot_tform * model));
+				water_shader->setMat4("rotm_tform", (glm::mat4)(tforms.rot_tform * model));
 				water_shader->setInt("clockwise", tile->clockwise ? 1 : 0);
 			
 				glm::vec3 tile_i = glm::vec3(path.get_min(), (float)path.get_depth());
@@ -233,8 +229,6 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 				glBindVertexBuffer(1, uv_bo, 0, sizeof(glm::vec2));
 				glDrawElements(GL_TRIANGLES, (GLsizei)bulk_index_count, GL_UNSIGNED_SHORT, (void*)0);
 				glBindVertexArray(0);
-
-
 
 			}
 		}
@@ -349,3 +343,5 @@ PlanetRenderer::~PlanetRenderer()
 	glDeleteBuffers(1, &ebo);
 	glDeleteVertexArrays(1, &vao);
 }
+
+
