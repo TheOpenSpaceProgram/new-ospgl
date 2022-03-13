@@ -4,13 +4,13 @@
 
 struct RendererQuality
 {
-
-
-
 	int sun_shadow_size;
 	int sun_terrain_shadow_size;
 	int secondary_shadow_size;
 	int env_map_size;
+
+	bool use_planet_detail_map;
+	bool use_planet_detail_normal;
 
 	struct PBR
 	{
@@ -76,6 +76,21 @@ struct RendererQuality
 		}
 
 
+		if(use_planet_detail_map)
+		{
+			out += "#define _USE_PLANET_DETAIL_MAP\n";
+		}
+
+		if(use_planet_detail_normal)
+		{
+			out += "#define _USE_PLANET_DETAIL_NORMAL\n";
+		}
+
+		if(use_planet_detail_map || use_planet_detail_normal)
+		{
+			out += "#define _USE_PLANET_DETAILS\n";
+		}
+
 		out += "#define _QUALITY_DEFINES_INCLUDED\n";
 		out += "#endif\n";
 
@@ -132,5 +147,8 @@ public:
 		SAFE_TOML_GET(to.atmosphere.iterations, "atmosphere.iterations", int);
 		SAFE_TOML_GET(to.atmosphere.sub_iterations, "atmosphere.sub_iterations", int);
 		SAFE_TOML_GET(to.atmosphere.low_end, "atmosphere.low_end", bool);
+
+		SAFE_TOML_GET(to.use_planet_detail_normal, "planet.use_detail_normal", bool);
+		SAFE_TOML_GET(to.use_planet_detail_map, "planet.use_detail_map", bool);
 	}
 };

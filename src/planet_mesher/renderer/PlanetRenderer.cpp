@@ -4,6 +4,7 @@
 
 #include <util/DebugDrawer.h>
 #include <imgui/imgui.h>
+#include <renderer/Renderer.h>
 
 void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, glm::dmat4 proj_view,
 							glm::dmat4 wmodel, glm::dmat4 normal_matrix, glm::dmat4 rot_tform,
@@ -25,9 +26,11 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 	// inside the loop so we expend less time locked
 	// at the cost of having to lock every iteration
 	{
-		float detail_scale = 10000.0f;
-		float triplanar_y_mult = 0.15f;
-		float triplanar_power = 3.0f;
+		float detail_scale = 2000.0f;
+		float detail_fade = 45000.0f;
+		detail_fade = detail_fade * detail_fade;
+		float triplanar_y_mult = 0.28f;
+		float triplanar_power = 4.0f;
 
 		auto tiles_w = server.tiles.get();
 
@@ -45,51 +48,59 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 		// TODO: Handle non-spherical planets with some kind of ellipsoid
 		glm::dvec3 triplanar_up = camera_pos;
-		shader->setFloat("detail_scale", detail_scale);
-		shader->setFloat("triplanar_power", triplanar_power);
-		shader->setFloat("triplanar_y_mult", triplanar_y_mult);
+		if(osp->renderer->quality.use_planet_detail_map || osp->renderer->quality.use_planet_detail_normal)
+		{
+			shader->setFloat("detail_scale", detail_scale);
+			shader->setFloat("detail_fade", detail_fade);
+			shader->setFloat("triplanar_power", triplanar_power);
+			shader->setFloat("triplanar_y_mult", triplanar_y_mult);
 
-		// Triplanar textures
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, top_tex->id);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, cliff_tex->id);
+			// Triplanar textures
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, top_tex->id);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, cliff_tex->id);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, top_nrm->id);
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, cliff_nrm->id);
 
-		shader->setInt("top_tex", 0);
-		shader->setInt("cliff_tex", 1);
+			shader->setInt("top_tex", 0);
+			shader->setInt("cliff_tex", 1);
+			shader->setInt("top_nrm", 2);
+			shader->setInt("cliff_nrm", 3);
+		}
 
 		bool cw_mode = false;
 		glFrontFace(GL_CCW);
 
+		if(osp->renderer->quality.use_planet_detail_normal || osp->renderer->quality.use_planet_detail_map)
+		{
+			// Adjust triplanar up so it's tiled
+			// TODO: This solution causes quite a bit of jumping when moving between
+			// TODO: "detail tile boundaries". Need to think a better way but works for now
+			// We rotate triplaner up with the planet to avoid offsets, remember the coordinate space
+			glm::dvec3 nds = glm::dvec3(detail_scale, detail_scale, detail_scale) * 100.0;
+			triplanar_up -= glm::mod(triplanar_up, nds);
+			triplanar_up = glm::normalize(triplanar_up);
+			// Now be careful, the planet is rotating, so need to keep that in mind and rotate
+			// the whole thing around the old y axis by rot
+			glm::dmat4 tri_matrix = MathUtil::rotate_from_to(triplanar_up, glm::dvec3(0, 1, 0));
+			glm::dmat4 tri_normal_matrix = MathUtil::rotate_from_to(glm::normalize(camera_pos), glm::dvec3(0, 1, 0));
+			// This is the cosine of the angle between the pole and our position
+			glm::dmat4 rot_offset = glm::rotate(-rot, glm::dvec3(0, 1, 0));
+			tri_matrix = tri_matrix * rot_offset;
+			// tri_matrix now points into a weird direction but that's fixed with the planet
+			// I figured out using my fingers as axes that this is the correction factor!
+			// (Actually makes sense as the planet rotation will "weaken" the triplanar_up rotation
+			double a = glm::abs(glm::dot(glm::normalize(triplanar_up), glm::dvec3(0, 1, 0)));
+			glm::dmat4 correction = glm::rotate(glm::acos(a), glm::normalize(triplanar_up));
+			tri_matrix = correction * tri_matrix;
 
-		// Adjust triplanar up so it's tiled
-		// TODO: This solution causes quite a bit of jumping when moving between
-		// TODO: "detail tile boundaries". Need to think a better way but works for now
-		// We rotate triplaner up with the planet to avoid offsets, remember the coordinate space
-		printf("%f %f %f\n", triplanar_up.x, triplanar_up.y, triplanar_up.z);
-		glm::dvec3 nds = glm::dvec3(detail_scale, detail_scale, detail_scale) * 100.0;
-		triplanar_up -= glm::mod(triplanar_up, nds);
-		triplanar_up = glm::normalize(triplanar_up);
-		// Now be careful, the planet is rotating, so need to keep that in mind and rotate
-		// the whole thing around the old y axis by rot
-		glm::dmat4 tri_matrix = MathUtil::rotate_from_to(triplanar_up, glm::dvec3(0, 1, 0));
-		glm::dmat4 tri_normal_matrix = MathUtil::rotate_from_to(glm::normalize(camera_pos), glm::dvec3(0, 1, 0));
-		// This is the cosine of the angle between the pole and our position
-		glm::dmat4 rot_offset = glm::rotate(-rot,  glm::dvec3(0, 1, 0));
-		tri_matrix = tri_matrix * rot_offset;
-		// tri_matrix now points into a weird direction but that's fixed with the planet
-		// I figured out using my fingers as axes that this is the correction factor!
-		// (Actually makes sense as the planet rotation will "weaken" the triplanar_up rotation
-		double a = glm::dot(glm::normalize(triplanar_up), glm::dvec3(0, 1, 0));
-		glm::dmat4 correction = glm::rotate(glm::acos(a), triplanar_up);
-		tri_matrix = correction * tri_matrix;
-
-
-
-		glm::dvec3 cam_offset = glm::dvec3(0);
-		shader->setMat4("tri_matrix", tri_matrix);
-		shader->setMat4("tri_nrm_matrix", tri_normal_matrix);
-		shader->setVec3("cam_offset", cam_offset);
+			shader->setMat4("tri_matrix", tri_matrix);
+			shader->setMat4("tri_nrm_matrix", tri_normal_matrix);
+			shader->setMat4("inverse_tri_nrm_matrix", glm::inverse(tri_normal_matrix));
+		}
 
 		for (size_t i = 0; i < render_tiles.size(); i++)
 		{
@@ -135,6 +146,12 @@ void PlanetRenderer::render(PlanetTileServer& server, QuadTreePlanet& planet, gl
 
 			shader->setMat4("m_tform_scaled", (glm::mat4)(wmodel * model));
 			shader->setMat4("rotm_tform", (glm::mat4)(rot_tform * model));
+
+			glm::dvec3 tile_or = wmodel * model * glm::dvec4(0.5, 0.5, 0.0, 1.0);
+			// We use a reasonalbe distance to prevent gaps but also not show detail very far away
+			// to reduce GPU load
+			bool do_detail = glm::dot(tile_or, tile_or) < detail_fade * 20;
+			shader->setInt("do_detail", do_detail);
 
 			glm::vec3 tile_i = glm::vec3(path.get_min(), (float)path.get_depth());
 
@@ -320,8 +337,10 @@ PlanetRenderer::PlanetRenderer()
 	generate_and_upload_index_buffer();
 	shader = osp->assets->get<Shader>("core", "shaders/planet/tile.vs");
 	water_shader = osp->assets->get<Shader>("core", "shaders/planet/water.vs");
-	cliff_tex = AssetHandle<Image>("core:cliff.png");
-	top_tex = AssetHandle<Image>("core:grass.png");
+	cliff_tex = AssetHandle<Image>("debug_system:planets/earth/textures/cliff.png");
+	top_tex = AssetHandle<Image>("debug_system:planets/earth/textures/grass.png");
+	cliff_nrm = AssetHandle<Image>("debug_system:planets/earth/textures/cliff_nrm.png");
+	top_nrm= AssetHandle<Image>("debug_system:planets/earth/textures/grass_nrm.png");
 }
 
 

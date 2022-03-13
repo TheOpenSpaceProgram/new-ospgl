@@ -13,6 +13,8 @@ private:
 
 	AssetHandle<Image> top_tex;
 	AssetHandle<Image> cliff_tex;
+	AssetHandle<Image> top_nrm;
+	AssetHandle<Image> cliff_nrm;
 
 	Shader* shader;
 	Shader* water_shader;

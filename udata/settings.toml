@@ -37,3 +37,7 @@
 	iterations = 3
 	sub_iterations = 2
 	low_end = false
+
+[renderer.quality.planet]
+	use_detail_map = true
+	use_detail_normal = true
