@@ -3,6 +3,7 @@
 #include <string>
 #include <assets/AssetManager.h>
 #include <assets/PhysicalMaterial.h>
+#include <universe/vehicle/material/ChemicalReaction.h>
 
 // Stores different game assets, such as parts, planetary systems, toolbars...
 // that may be used by the user and not by code. This is different from assets
@@ -21,10 +22,15 @@ class GameDatabase
 public:
 
 
+	// We use this interesting data structure for reactions
+	// This way, to find all possible reactions for a combination of materials we need to check
+	// only one of them and we save the computation to load time
+	std::multimap<std::string, ChemicalReaction> material_to_reactions;
 	std::vector<std::string> parts;
 	std::vector<std::string> plumbing_machines;
 	std::vector<std::string> systems;
 	std::vector<std::string> part_categories;
+	std::vector<std::string> reactions;
 	std::vector<std::string> materials;
 	std::unordered_map<std::string, std::string> current_locale;
 
@@ -32,6 +38,9 @@ public:
 	void add_plumbing_machine(const std::string& path, const std::string& pkg);
 	void add_part_category(const std::string& path, const std::string& pkg);
 	void add_material(const std::string& path, const std::string& pkg);
+	void add_reaction(const std::string& path, const std::string& pkg);
+
+	void finish_loading();
 
 	// Expects a table of tables, in which the first table specifies which locales are provided
 	// (the first one being the default if the user locale is not detected) and the following table

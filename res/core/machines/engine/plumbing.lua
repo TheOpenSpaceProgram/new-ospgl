@@ -29,6 +29,7 @@ function plumbing.out_flow(port, volume, do_flow)
     return plumbing_lib.stored_fluids.new()
 end
 
+-- We accept everything
 function plumbing.in_flow(port, fluids, do_flow)
     return plumbing_lib.stored_fluids.new()
 end

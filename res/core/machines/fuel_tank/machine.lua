@@ -3,7 +3,7 @@ local vehicle = require("vehicle")
 local assets = require("assets")
 local logger = require("logger")
 
-local icon = assets.get_image("machines/icons/engine.png")
+local icon = assets.get_image("machines/icons/fluid_tank.png")
 function get_icon() return icon end
 
 plumbing = dofile("machines/fuel_tank/plumbing.lua")

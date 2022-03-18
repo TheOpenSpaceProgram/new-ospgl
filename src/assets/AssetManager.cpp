@@ -226,8 +226,9 @@ void AssetManager::load_packages(LuaCore* lua_core, GameDatabase* game_database)
 		{
 			LuaUtil::call_function((*lua)["load"], game_database);
 		}
-
 	}
+
+	game_database->finish_loading();
 
 }
 

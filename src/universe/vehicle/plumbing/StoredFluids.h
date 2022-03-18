@@ -52,6 +52,11 @@ public:
 	// Note that the quantities here represent draining, no negative needed
 	void drain_to(StoredFluids* target, PhysicalMaterial* mat, float liquid_mass, float gas_mass, bool do_flow);
 
+	// Carries out possible chemical reactions given the temperature
+	// Note that reactions with activation energy will either need the
+	// Returns heat released
+	float react(float T, float react_V, float dt);
+
 	// Assumes the fluids are uniformly mixed but dont dissolve, etc...
 	float get_average_liquid_density() const;
 	float get_total_liquid_mass() const;

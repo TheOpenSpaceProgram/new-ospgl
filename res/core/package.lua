@@ -15,6 +15,8 @@ function load(database)
 	database:add_material("materials/oxygen.toml")
 	database:add_material("materials/water.toml")
 
+    database:add_reaction("materials/reactions/hydrogen_combustion.toml")
+
 	-- The first locale is the default if selected one is not available
 	database:load_locale(dofile("locale.lua"))
 

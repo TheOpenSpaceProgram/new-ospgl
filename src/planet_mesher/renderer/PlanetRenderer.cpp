@@ -23,7 +23,6 @@ void PlanetRenderer::render(PlanetTileServer &server, QuadTreePlanet &planet,
 	// inside the loop so we expend less time locked
 	// at the cost of having to lock every iteration
 	{
-		printf("rot: %f\n", tforms.rot);
 		float detail_scale = 2000.0f;
 		float detail_fade = 45000.0f;
 		detail_fade = detail_fade * detail_fade;

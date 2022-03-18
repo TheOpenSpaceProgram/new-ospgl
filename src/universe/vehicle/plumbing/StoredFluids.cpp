@@ -1,4 +1,5 @@
 #include "StoredFluids.h"
+#include <game/database/GameDatabase.h>
 
 StoredFluids StoredFluids::modify(const StoredFluids &b)
 {
@@ -215,6 +216,53 @@ float StoredFluids::get_total_gas_mass() const
 		total += pair.second.gas_mass;
 	}
 	return total;
+}
+
+float StoredFluids::react(float T, float react_V, float dt)
+{
+	// TODO: Optimize the way we obtain the possible reactions. Maybe cache?
+	// Usually there will be 2 or 3 reactants and maybe 4 reactions per reactant so not too bad
+	std::vector<ChemicalReaction> reactions;
+	for(auto pair : contents)
+	{
+		auto lb = osp->game_database->material_to_reactions.lower_bound(pair.first->get_asset_id());
+		auto ub = osp->game_database->material_to_reactions.upper_bound(pair.first->get_asset_id());
+		for(auto it = lb; it != ub; it++)
+		{
+			bool found = false;
+			for (size_t i = 0; i < reactions.size(); i++)
+			{
+				if (reactions[i] == it->second)
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if(found)
+				break;
+
+			reactions.push_back(it->second);
+		}
+	}
+
+	// Now we move towards the equilibrium in substeps to achieve great precision
+	// when multiple reactions are competing. This is not really needed to be extremely
+	// precise as we are satisfied with approximate solutions to the equilibria
+	constexpr float sub_step = 0.01f;
+	for(float s = 0.0f; s < dt; s += sub_step)
+	{
+		for(auto& reaction : reactions)
+		{
+			// G = H - T * S
+			// If G is negative we must react forward (otherwise backwards), so this is very easy
+			float G = reaction.get_gibbs_free_energy(T);
+			float delta = -reaction.get_rate(T) * G * sub_step * react_V;
+			reaction.react(this, delta);
+		}
+	}
+
+	return 0.0f;
 }
 
 StoredFluid::StoredFluid()

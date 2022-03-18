@@ -9,5 +9,7 @@ heat_capacity_solid = 2117.0
 # Calculated from https://www.mathscinotes.com/wp-content/uploads/2016/01/Appendix_C.pdf at 20K
 heat_capacity_liquid = 4150.0
 heat_capacity_gas = 1850.0
-dH_formation = -16249.79
+dH_formation = -15866222.59 # We use the liquid one as the gaseous would be this plus the dH of vaporization
 dH_vaporization = 2453600
+dS_vaporization = 6599500
+S = 3882875.38 # Same as dH_formation, we can simply add dS_vaporization to obtain the gas one

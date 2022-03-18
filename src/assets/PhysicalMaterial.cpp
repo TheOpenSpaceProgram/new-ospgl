@@ -45,6 +45,8 @@ public:
 		SAFE_TOML_GET(to.heat_capacity_solid, "heat_capacity_solid", double);
 		SAFE_TOML_GET(to.dH_formation, "dH_formation", double);
 		SAFE_TOML_GET(to.dH_vaporization, "dH_vaporization", double);
+		SAFE_TOML_GET(to.S, "S", double);
+		SAFE_TOML_GET(to.dS_vaporization, "dS_vaporization", double);
 	}
 };
 

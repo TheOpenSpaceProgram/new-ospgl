@@ -9,5 +9,7 @@ heat_capacity_solid = 1673.09
 # Calculated from https://www.mathscinotes.com/wp-content/uploads/2016/01/Appendix_C.pdf at 50K
 heat_capacity_liquid = 1673.09
 heat_capacity_gas = 918.0
-dH_formation = 0.0
+dH_formation = -213138.3211
 dH_vaporization = 213138.3211
+S = 6403881.8 # Of the liquid phase
+dS_vaporization = 2368.2 # Same as hydrogen, approximated

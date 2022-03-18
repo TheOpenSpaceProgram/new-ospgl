@@ -12,18 +12,18 @@
 // You must have a cpptoml table named "from" to use these functions
 
 #define SAFE_TOML_GET_FROM(from, target, name, type) \
-	TOML_CHECK_FUNC((from).get_qualified_as<type>(name).operator bool(), "Data " name " of type " #type " was malformed"); \
+	TOML_CHECK_FUNC((from).get_qualified_as<type>(name).operator bool(), "Data " name " of type " #type " was malformed ({})", ::_serializer_path); \
 	target = *(from).get_qualified_as<type>(name);
 
 #define SAFE_TOML_GET(target, name, type) \
-	TOML_CHECK_FUNC(from.get_qualified_as<type>(name).operator bool(), "Data " name " of type " #type " was malformed"); \
+	TOML_CHECK_FUNC(from.get_qualified_as<type>(name).operator bool(), "Data " name " of type " #type " was malformed ({})", ::_serializer_path); \
 	target = *from.get_qualified_as<type>(name);
 
 #define SAFE_TOML_GET_OR(target, name, type, def) \
 	target = from.get_qualified_as<type>(name).value_or(def);
 
 #define SAFE_TOML_GET_TABLE(target, name, type) \
-	TOML_CHECK_FUNC(from.get_table_qualified(name).operator bool(), "Table " name " of type" #type " was malformed"); \
+	TOML_CHECK_FUNC(from.get_table_qualified(name).operator bool(), "Table " name " of type" #type " was malformed ({})", ::_serializer_path); \
 	{auto table = from.get_table_qualified(name); ::deserialize<type>(target, *table);}
 
 #define SAFE_TOML_GET_OR_IGNORE(target, name, type) \
@@ -32,10 +32,14 @@
 #define NOT_SERIALIZABLE(type) static void serialize(const type &, cpptoml::table& target) {\
 	logger->check(false, "Serialize called on non-serializable type: " #type); }
 
+
+thread_local static std::string _serializer_path;
+
 template<typename T>
 class GenericSerializer
 {
 public:
+
 
 	static void serialize(const T& what, cpptoml::table& target)
 	{
@@ -125,7 +129,6 @@ public:
 	template<typename T>
 	static void read_to(const cpptoml::table& root, T& target, const std::string& sub_path = "")
 	{;
-
 		if (sub_path != "")
 		{
 			deserialize(target, *root.get_table(sub_path));
@@ -144,6 +147,8 @@ public:
 	{
 		auto root = load_file(path);
 
+		_serializer_path = path;
+
 		std::shared_ptr<cpptoml::table> from;
 
 		if (sub_path != "")
@@ -156,12 +161,16 @@ public:
 		}
 
 		deserialize(target, *from);
+
+		_serializer_path = "memory";
 	}
 
 	// Optionally allows only overwriting a part of a file if sub_path != ""
 	template<typename T>
 	static void write_to(const std::string path, const T& source, const std::string& sub_path = "")
 	{
+		_serializer_path = path;
+
 		auto serialized = cpptoml::make_table();
 		serialize(source, *serialized);
 
@@ -183,6 +192,8 @@ public:
 			
 			write_to_file(*root, path);
 		}
+
+		_serializer_path = "memory";
 	}
 
 	// Overrides target with source, overwriting any entry when needed

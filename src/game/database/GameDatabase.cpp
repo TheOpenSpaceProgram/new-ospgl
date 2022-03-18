@@ -108,3 +108,28 @@ void GameDatabase::load_locale(const sol::table &locale, const std::string &in_p
 
 }
 
+void GameDatabase::add_reaction(const std::string &path, const std::string &pkg)
+{
+	std::string sane_path = sanitize_path(path, pkg);
+	logger->debug("[DB] Adding chemical reaction with path '{}'", sane_path);
+	reactions.push_back(sane_path);
+}
+
+void GameDatabase::finish_loading()
+{
+	// Build the reaction map
+	for(const std::string& react : reactions)
+	{
+		ChemicalReaction reaction;
+		std::string reaction_path = osp->assets->resolve_path(react);
+		SerializeUtil::read_file_to(reaction_path, reaction);
+
+		// Find the reactants / products (remember equilibria!)
+		for(StechiometricMaterial& mat : reaction.reactants)
+		{
+			material_to_reactions.insert({mat.reactant, reaction});
+		}
+	}
+
+}
+

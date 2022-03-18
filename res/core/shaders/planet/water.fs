@@ -1,7 +1,8 @@
 #version 430 core
-layout (location = 0) out vec4 gPosition;
+layout (location = 0) out vec4 gPositionEmit;
 layout (location = 1) out vec3 gNormal;
-layout (location = 2) out vec4 gAlbedoSpec;
+layout (location = 2) out vec3 gAlbedo;
+layout (location = 3) out vec3 gPbr;
 
 out vec4 FragColor;
 
@@ -46,9 +47,16 @@ void main()
 
     vec3 col = shallowcol * (1.0 - deepfactor) + deepcol * deepfactor;
 
-    gAlbedoSpec = vec4((col + atmoc) * 0.77, 1.0);
+    // Cute wave effect, should be very cheap?
+    //float wavefac = (sin((vDepth * 800.0 + sin(time * 0.5) * 0.0008) * 12000.0) + 1.0) * 0.5;
+    // Waves only happen on really shallow vertices
+    //wavefac *= -min(vDepth * 1000.0 - 0.01, 0) / 0.01;
+    //col = 13.0 * wavefac * veryshallowcol + col;
+
+    gAlbedo = (col + atmoc) * 0.77;
     gNormal = vNormal;
-    gPosition = vec4(vPos, length(atmoc) + spec);
+    gPbr = vec3(0.0, 0.8, 0.04); // Occlusion, rougness, metallic
+    gPositionEmit = vec4(vPos, length(atmoc) + spec);
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets
