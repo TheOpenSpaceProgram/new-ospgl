@@ -11,6 +11,9 @@ require("gui")
 local fluid_container = dofile("machines/fuel_tank/fluid_container.lua").new(0.3)
 fluid_container:go_to_equilibrium(0.1)
 
+-- We keep a copy just in case the machine is interested in something
+plumbing.fluid_container = fluid_container
+
 function plumbing.is_inline_element() return false end
 
 function plumbing.fluid_update()
@@ -62,7 +65,7 @@ end
 
 function plumbing.update(dt)
     fluid_container:update(dt, 9.81)
-    fluid_container.temperature = 373
+    --fluid_container.temperature = 373
 end
 
 local liq_port_str = database:get_string("liquid_port")

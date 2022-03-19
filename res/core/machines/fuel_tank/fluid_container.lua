@@ -7,6 +7,7 @@ local logger = require("logger")
 local plumbing = require("plumbing")
 local assets = require("assets")
 local noise = require("noise")
+local imgui = require("imgui")
 
 local fluid_container = {}
 fluid_container.__index = fluid_container
@@ -37,13 +38,13 @@ function fluid_container.new(volume)
     -- Last acceleration experienced by the tank, useful to simulate column pressure of the fluid
     container.last_acceleration = 0
     -- Temperature of the contents of the tank, assumed to be homogeneous
-    container.temperature = 373
+    container.temperature = 288
     -- Contents of the tank
     container.contents = plumbing.stored_fluids.new()
     local h2 = assets.get_physical_material("materials/hydrogen.toml")
     local o2 = assets.get_physical_material("materials/oxygen.toml")
-    container.contents:add_fluid(h2, 5.0, 0.0)
-    container.contents:add_fluid(o2, 5.0, 0.0)
+    container.contents:add_fluid(h2, 1.0 - 0.87, 0.0)
+    container.contents:add_fluid(o2, 1.0, 0.0)
 
     return container
 end
@@ -103,8 +104,7 @@ function fluid_container:go_to_equilibrium(max_dp)
     local it = 0
 
     while true do
-        self:update(5.0 * softening, 0.0)
-        self.temperature = T0
+        self:update(5.0 * softening, 0.0, false)
         local P = self:get_pressure()
         local dP = P - P0
         if math.abs(dP) < max_dp then
@@ -148,13 +148,15 @@ end
 -- TODO: All of the contents are assumed not to react chemically
 -- We also assume all substances evaporate at the same rate if they have the
 -- same vapour pressure, we dont think about surface area as it would be overly complicated
-function fluid_container:update(dt, acceleration)
+function fluid_container:update(dt, acceleration, react)
+    if react == nil then react = true end
+
     self.noise_t = self.noise_t + dt
     self.last_acceleration = math.max(acceleration, 0.0)
 
     local ullage_a_factor = 1.0
     local ullage_b_factor = 1.0
-    local evp_factor = 1.0
+    local evp_factor = 0.05
 
     local d_ullage = -ullage_a_factor * (acceleration ^ 3.0) + ullage_b_factor
     self.ullage_distribution = self.ullage_distribution + d_ullage * dt
@@ -164,6 +166,12 @@ function fluid_container:update(dt, acceleration)
     local total_ullage = self:get_ullage_volume() + self.extra_volume;
 
     local contents = self.contents:get_contents()
+    if react then
+        -- Simulate chemical reactions
+        local heat = self.contents:react(self.temperature, self.volume, 0.01, dt)
+        self:exchange_heat(heat)
+    end
+
     for phys_mat, stored_fluid in contents:pairs() do
         local cp = get_partial_pressure(self.temperature, total_ullage, phys_mat, stored_fluid)
         local vp = phys_mat:get_vapor_pressure(self.temperature)
@@ -186,6 +194,7 @@ function fluid_container:update(dt, acceleration)
         stored_fluid.liquid_mass = stored_fluid.liquid_mass - dm;
         stored_fluid.gas_mass = stored_fluid.gas_mass + dm;
     end
+
 end
 
 function fluid_container:get_total_pressure(depth)

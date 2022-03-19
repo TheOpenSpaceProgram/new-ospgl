@@ -8,10 +8,13 @@
 #include "../Vehicle.h"
 #include "Part.h"
 #include "sol/sol.hpp"
+#include <imgui/imgui.h>
 
 
 Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg) : plumbing(this)
-{	
+{
+	paused = false;
+	step = false;
 	this->init_toml = init_toml;
 	this->in_pkg = cur_pkg;
 	this->editor_location_marker = init_toml->get_as<std::string>("__editor_marker").value_or("");
@@ -20,6 +23,7 @@ Machine::Machine(std::shared_ptr<cpptoml::table> init_toml, std::string cur_pkg)
 	default_icon = AssetHandle<Image>("core:machines/icons/default_icon.png");
 
 	piece_missing = false;
+	runtime_uid = osp->get_runtime_uid();
 }
 
 void Machine::load_interface(const std::string& name, sol::table n_table) 
@@ -29,18 +33,29 @@ void Machine::load_interface(const std::string& name, sol::table n_table)
 
 void Machine::pre_update(double dt)
 {
-	LuaUtil::call_function_if_present(env["pre_update"], dt);
+	if(!paused || step)
+	{
+		LuaUtil::call_function_if_present(env["pre_update"], dt);
+	}
 }
 
 void Machine::update(double dt)
 {
-	LuaUtil::call_function_if_present(env["update"], dt);
+	if(!paused || step)
+	{
+		LuaUtil::call_function_if_present(env["update"], dt);
+		step = false;
+	}
 }
 
 void Machine::editor_update(double dt)
 {
-	// Called regardless of enabled status
-	LuaUtil::call_function_if_present(env["editor_update"], dt);
+	if(!paused || step)
+	{
+		// Called regardless of enabled status
+		LuaUtil::call_function_if_present(env["editor_update"], dt);
+		step = false;
+	}
 }
 
 void Machine::init(sol::state* lua_state, Part* in_part)
@@ -188,4 +203,35 @@ std::string Machine::get_pkg()
 std::string Machine::get_name()
 {
 	return name;
+}
+
+void Machine::draw_imgui(bool* open)
+{
+	std::string title = "M(" + in_pkg + ":" + name + "), ruid = " + std::to_string(runtime_uid);
+	ImGui::Begin(title.c_str(), open, ImGuiWindowFlags_MenuBar);
+	if(ImGui::BeginMenuBar())
+	{
+		ImGui::Button("Focus");
+		if(paused)
+		{
+			if(ImGui::Button("Unpause"))
+			{
+				paused = false;
+			}
+			if(ImGui::Button("Step"))
+			{
+				step = true;
+			}
+		}
+		else
+		{
+			if (ImGui::Button("Pause"))
+			{
+				paused = true;
+			}
+		}
+		ImGui::EndMenuBar();
+	}
+	LuaUtil::call_function_if_present(env["draw_imgui"]);
+	ImGui::End();
 }

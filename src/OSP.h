@@ -22,6 +22,8 @@ class OSP
 {
 public:
 
+	int64_t runtime_uid;
+
 	std::string current_locale;
 	Timer dtt;
 
@@ -53,6 +55,7 @@ public:
 
 	// Call after render
 	void finish_frame();
+	uint64_t get_runtime_uid();
 
 	OSP();
 };

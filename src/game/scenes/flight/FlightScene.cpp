@@ -111,8 +111,8 @@ void FlightScene::update()
 
 
 	VehicleEntity* v_ent =  universe->get_entity_as<VehicleEntity>(2);	
-	
 	camera.center = v_ent->vehicle->unpacked_veh.get_center_of_mass(true);
+	v_ent->debug.show_imgui();
 
 	if(!gui_input.mouse_blocked)
 	{

@@ -19,12 +19,12 @@ void VehicleEntity::physics_update(double pdt)
 	vehicle->physics_update(pdt);
 }
 
-VehicleEntity::VehicleEntity(Vehicle* vehicle)
+VehicleEntity::VehicleEntity(Vehicle* vehicle) : debug(this)
 {
 	this->vehicle = vehicle;
 }
 
-VehicleEntity::VehicleEntity(cpptoml::table& toml)
+VehicleEntity::VehicleEntity(cpptoml::table& toml) : debug(this)
 {
 
 }

@@ -28,7 +28,14 @@ private:
 	// We precache this on Vehicle::remove_outdated
 	bool piece_missing;
 
+	bool paused;
+	bool step;
+
 public:
+
+	// An unique id assigned at runtime to identify stuff like ImGui windows, etc...
+	// Not very elegant solution but useful for the debug stuff
+	int64_t runtime_uid;
 
 	// Always present, but may not be used
 	PlumbingMachine plumbing;
@@ -70,6 +77,8 @@ public:
 
 	std::string get_pkg();
 	std::string get_name();
+	// Don't create your own window in lua! We create a standard named one
+	void draw_imgui(bool* open);
 
 	// Make sure AssetManager's correct current package is set,
 	// otherwise script loading MAY fail!

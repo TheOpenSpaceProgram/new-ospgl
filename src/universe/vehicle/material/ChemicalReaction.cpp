@@ -66,7 +66,7 @@ float ChemicalReaction::react(StoredFluids* fluids, float gas_ammount, float liq
 	{
 		const PhysicalMaterial* mat = fluids->name_to_ptr[rct.reactant];
 		// Only react as much as we can (limiting reagent, adjust)
-		if(gas_ammount > 0)
+		if(gas_ammount > 0 || liquid_ammount > 0)
 		{
 			// We react to the right and thus reactants are limiting
 			if(rct.react_weight > 0 && fluids->contents[mat].gas_mass < rct.react_weight * gas_ammount)

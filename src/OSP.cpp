@@ -260,4 +260,11 @@ void OSP::finish_frame()
 
 OSP::OSP()
 {
+	runtime_uid = 0;
+}
+
+uint64_t OSP::get_runtime_uid()
+{
+	runtime_uid++;
+	return runtime_uid;
 }

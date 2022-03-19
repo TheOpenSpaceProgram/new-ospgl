@@ -49,6 +49,7 @@ public:
 		NANO_VG,		// LuaNanoVG
 		PLUMBING,		// LuaPlumbing
 		GUI,			// LuaGUI
+		IMGUI,			// LuaImGUI
 		COUNT,
 	};
 

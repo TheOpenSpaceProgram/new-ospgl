@@ -15,6 +15,7 @@
 #include "libs/LuaNanoVG.h"
 #include "libs/LuaPlumbing.h"
 #include "libs/LuaGUI.h"
+#include "libs/LuaImGUI.h"
 
 
 LuaCore* lua_core;
@@ -125,6 +126,10 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::GUI;
 	}
+	else if(name == "imgui")
+	{
+		return LibraryID::IMGUI;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -222,6 +227,7 @@ LuaCore::LuaCore()
 	libraries[LibraryID::NANO_VG] = new LuaNanoVG();
 	libraries[LibraryID::PLUMBING] = new LuaPlumbing();
 	libraries[LibraryID::GUI] = new LuaGUI();
+	libraries[LibraryID::IMGUI] = new LuaImGUI();
 }
 
 LuaCore::~LuaCore()

@@ -18,6 +18,7 @@ void LuaPlumbing::load_to(sol::table &table)
  		"modify", &StoredFluids::modify,
  		"multiply", &StoredFluids::multiply,
 	 	"drain_to", &StoredFluids::drain_to,
+		 "react", &StoredFluids::react,
 		sol::meta_function::to_string, [](const StoredFluids& f)
 		{
 			std::string list = "Fluid contents: ";

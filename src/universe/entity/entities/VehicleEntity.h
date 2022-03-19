@@ -1,6 +1,7 @@
 #pragma once
 #include "../Entity.h"
 #include "../../vehicle/Vehicle.h"
+#include "VehicleDebug.h"
 
 // We take ownership of the vehicle pointer (we will delete it)
 // so make sure it's heap allocated
@@ -11,6 +12,7 @@ public:
 	// This actually contains the representation of the vehicle,
 	// including pieces
 	Vehicle* vehicle;
+	VehicleDebug debug;
 
 
 	void enable_bullet(btDynamicsWorld * world) override;

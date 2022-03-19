@@ -274,7 +274,7 @@ float StoredFluids::react(float T, float react_V, float liq_fac, float dt)
 			float Q = reaction.get_Q(this, react_V);
 			float K = reaction.get_K(T);
 			float QmK = Q - K;
-			constexpr float MAX_RATE = 100.0f;
+			constexpr float MAX_RATE = 50000.0f;
 			// Clamp reaction rates
 			QmK = glm::max(QmK, -MAX_RATE);
 			QmK = glm::min(QmK, MAX_RATE);

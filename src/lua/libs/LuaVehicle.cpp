@@ -70,10 +70,12 @@ void LuaVehicle::load_to(sol::table& table)
 		});
 
 	table.new_usertype<Part>("part",
+		"id", &Part::id,
 		"get_piece", &Part::get_piece,
 		"get_machine", &Part::get_machine);
 
 	table.new_usertype<Machine>("machine",
+		"runtime_uid", &Machine::runtime_uid,
 		"init_toml", &Machine::init_toml,
 		"plumbing", &Machine::plumbing,
 		"load_interface", [](Machine* self, const std::string& iname, sol::this_state tst, sol::this_environment tenv)
