@@ -16,6 +16,7 @@ StoredFluids StoredFluids::modify(const StoredFluids &b)
 				if(ast.data == pair.first)
 				{
 					mat_ptrs.insert(ast.duplicate());
+					name_to_ptr[ast->get_asset_id()] = ast.data;
 				}
 			}
 
@@ -38,6 +39,7 @@ StoredFluids StoredFluids::modify(const StoredFluids &b)
 				if(ast.data == pair.first)
 				{
 					out.mat_ptrs.insert(ast.duplicate());
+					out.name_to_ptr[ast->get_asset_id()] = ast.data;
 				}
 			}
 
@@ -117,6 +119,7 @@ void StoredFluids::add_fluid(const AssetHandle<PhysicalMaterial>& mat, float liq
 	{
 		// We must introduce a new asset handle
 		mat_ptrs.insert(mat.duplicate());
+		name_to_ptr[mat->get_asset_id()] = mat.data;
 	}
 
 	tmp.contents[mat.data] = StoredFluid(liquid_mass, gas_mass);
@@ -218,7 +221,7 @@ float StoredFluids::get_total_gas_mass() const
 	return total;
 }
 
-float StoredFluids::react(float T, float react_V, float dt)
+float StoredFluids::react(float T, float react_V, float liq_fac, float dt)
 {
 	// TODO: Optimize the way we obtain the possible reactions. Maybe cache?
 	// Usually there will be 2 or 3 reactants and maybe 4 reactions per reactant so not too bad
@@ -246,23 +249,44 @@ float StoredFluids::react(float T, float react_V, float dt)
 		}
 	}
 
+	for(const ChemicalReaction& reaction : reactions)
+	{
+		for(auto& reactant : reaction.reactants)
+		{
+			auto it = name_to_ptr.find(reactant.reactant);
+			if (it == name_to_ptr.end())
+			{
+				// Add the material as it may be a product that's not yet there
+				add_fluid(AssetHandle<PhysicalMaterial>(reactant.reactant), 0.0f, 0.0f);
+			}
+		}
+	}
 	// Now we move towards the equilibrium in substeps to achieve great precision
 	// when multiple reactions are competing. This is not really needed to be extremely
 	// precise as we are satisfied with approximate solutions to the equilibria
 	constexpr float sub_step = 0.01f;
+	float total_h = 0.0f;
 	for(float s = 0.0f; s < dt; s += sub_step)
 	{
 		for(auto& reaction : reactions)
 		{
-			// G = H - T * S
-			// If G is negative we must react forward (otherwise backwards), so this is very easy
-			float G = reaction.get_gibbs_free_energy(T);
-			float delta = -reaction.get_rate(T) * G * sub_step * react_V;
-			reaction.react(this, delta);
+			// Obtain current reaction quotient
+			float Q = reaction.get_Q(this, react_V);
+			float K = reaction.get_K(T);
+			float QmK = Q - K;
+			constexpr float MAX_RATE = 100.0f;
+			// Clamp reaction rates
+			QmK = glm::max(QmK, -MAX_RATE);
+			QmK = glm::min(QmK, MAX_RATE);
+			// K must move towards Q. Reacting DECREASES K so we must do the opposite:
+			float diff = -QmK * reaction.get_rate(T) * react_V * sub_step;
+			float total_react = reaction.react(this, diff, diff * liq_fac);
+			total_h += reaction.dH * total_react;
 		}
 	}
 
-	return 0.0f;
+	// Heat released, so the opposite of enthalpy change
+	return -total_h;
 }
 
 StoredFluid::StoredFluid()

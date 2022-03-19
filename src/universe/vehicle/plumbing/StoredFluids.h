@@ -32,6 +32,7 @@ public:
 	// TODO: There should me a special asset type for stuff like this. Fow now this works
 	std::unordered_set<AssetHandle<PhysicalMaterial>> mat_ptrs;
 	std::unordered_map<const PhysicalMaterial*, StoredFluid> contents;
+	std::unordered_map<std::string, const PhysicalMaterial*> name_to_ptr;
 
 	// Fluids in b may be negative, in that case it will take away
 	// as much as possible and return the ammount taken
@@ -53,9 +54,8 @@ public:
 	void drain_to(StoredFluids* target, PhysicalMaterial* mat, float liquid_mass, float gas_mass, bool do_flow);
 
 	// Carries out possible chemical reactions given the temperature
-	// Note that reactions with activation energy will either need the
 	// Returns heat released
-	float react(float T, float react_V, float dt);
+	float react(float T, float react_V, float liquid_react_factor, float dt);
 
 	// Assumes the fluids are uniformly mixed but dont dissolve, etc...
 	float get_average_liquid_density() const;

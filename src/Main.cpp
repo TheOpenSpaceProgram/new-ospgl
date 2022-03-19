@@ -45,6 +45,8 @@ int main(int argc, char** argv)
 	osp->game_state->load_scene(new EditorScene());
 
 	double t = 0.0;
+
+
 	while (osp->should_loop())
 	{
 		PROFILE_BLOCK("frame");

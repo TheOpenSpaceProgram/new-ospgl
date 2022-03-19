@@ -19,10 +19,6 @@ struct PhysicalMaterial : public Asset
 	float dH_formation;
 
 	// J kg-1 K-1
-	float S;
-	float dS_vaporization;
-
-	// J kg-1 K-1
 	// For the isochoric process if possible
 	// TODO: Give the option of using a polynomial approximation? Scientific data is given like that
 	float heat_capacity_solid;

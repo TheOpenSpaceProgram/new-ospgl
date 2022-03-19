@@ -11,5 +11,3 @@ heat_capacity_liquid = 1673.09
 heat_capacity_gas = 918.0
 dH_formation = -213138.3211
 dH_vaporization = 213138.3211
-S = 6403881.8 # Of the liquid phase
-dS_vaporization = 2368.2 # Same as hydrogen, approximated

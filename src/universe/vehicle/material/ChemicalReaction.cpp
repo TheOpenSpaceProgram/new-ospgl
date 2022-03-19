@@ -1,11 +1,11 @@
 #include "ChemicalReaction.h"
 #include <assets/AssetManager.h>
 #include <assets/PhysicalMaterial.h>
+#include "../plumbing/StoredFluids.h"
 
 void ChemicalReaction::calculate_constants()
 {
 	float total_h = 0.0f;
-	float total_s = 0.0F;
 	// Total mass of reactants. Should be "equal" to mass of products
 	// within a small margin of error
 	float total_mass = 0.0f;
@@ -27,7 +27,6 @@ void ChemicalReaction::calculate_constants()
 		if(r.moles > 0)
 		{
 			total_h += mat->dH_formation * weight;
-			total_s += mat->S * weight;
 		}
 
 		if(weight > 0.0f)
@@ -58,20 +57,81 @@ void ChemicalReaction::calculate_constants()
 	average_cP /= tot;
 
 	dH = total_h / total_mass;
-	dS = total_s / total_mass;
 }
 
-float ChemicalReaction::get_gibbs_free_energy(float T) const
+float ChemicalReaction::react(StoredFluids* fluids, float gas_ammount, float liquid_ammount)
 {
-	return dH - dS * T;
-}
+	// Limiting reagent check
+	for(const auto& rct : reactants)
+	{
+		const PhysicalMaterial* mat = fluids->name_to_ptr[rct.reactant];
+		// Only react as much as we can (limiting reagent, adjust)
+		if(gas_ammount > 0)
+		{
+			// We react to the right and thus reactants are limiting
+			if(rct.react_weight > 0 && fluids->contents[mat].gas_mass < rct.react_weight * gas_ammount)
+			{
+				gas_ammount = fluids->contents[mat].gas_mass / rct.react_weight;
+			}
+			if(rct.react_weight > 0 && fluids->contents[mat].liquid_mass < rct.react_weight * liquid_ammount)
+			{
+				liquid_ammount = fluids->contents[mat].liquid_mass / rct.react_weight;
+			}
+		}
+		else
+		{
+			// We react to the left and thus products are limiting (reaction is inversed)
+			// Careful with the signs!
+			if(rct.react_weight < 0 && fluids->contents[mat].gas_mass < rct.react_weight * gas_ammount)
+			{
+				gas_ammount = fluids->contents[mat].gas_mass / rct.react_weight;
+			}
+			if(rct.react_weight < 0 && fluids->contents[mat].liquid_mass < rct.react_weight * liquid_ammount)
+			{
+				liquid_ammount = fluids->contents[mat].liquid_mass / rct.react_weight;
+			}
+		}
+	}
 
-void ChemicalReaction::react(StoredFluids* fluids, float ammount)
-{
+	for(const auto& rct : reactants)
+	{
+		const PhysicalMaterial* mat = fluids->name_to_ptr[rct.reactant];
+		fluids->contents[mat].gas_mass -= rct.react_weight * gas_ammount;
+		fluids->contents[mat].liquid_mass -= rct.react_weight * liquid_ammount;
+	}
 
+	return gas_ammount + liquid_ammount;
 }
 
 float ChemicalReaction::get_rate(float T)
 {
-	return 0;
+	return 1.0f;
+}
+
+float ChemicalReaction::get_Q(StoredFluids* fluids, float V)
+{
+	// Concentrations of everything is mol / L
+	float Q = 1.0f;
+
+	for(auto r : reactants)
+	{
+		auto mat = fluids->name_to_ptr[r.reactant];
+		float moles = fluids->contents[mat].gas_mass + fluids->contents[mat].liquid_mass;
+		moles /= mat->molar_mass;
+		if(glm::abs(moles) < 0.001f)
+		{
+			// To prevent singularity when there's nothing of a product
+			moles = 0.001f;
+		}
+		Q *= powf(moles / V, r.moles);
+	}
+
+	return Q;
+}
+
+float ChemicalReaction::get_K(float T)
+{
+	constexpr float R = 8.314462618f;
+	// k2 = k1 * e^((dH / R) * (1 / T1 - 1 / T2))
+	return K * expf((dH / R) * (1.0f / T_of_K - 1 / T));
 }

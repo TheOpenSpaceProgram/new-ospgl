@@ -11,5 +11,3 @@ heat_capacity_liquid = 25000.0
 heat_capacity_gas = 14300
 dH_formation = -222907.8823
 dH_vaporization = 222907.8823
-S = 65329003 # Careful, this is the liquid entropy!
-dS_vaporization = 10996.39 # Approximated via the boiling point of H (dS = dH / T)

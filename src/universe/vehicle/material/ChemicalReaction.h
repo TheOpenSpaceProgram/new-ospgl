@@ -16,27 +16,35 @@ class StoredFluids;
 
 // Note: We do simulate reversible chemical reactions! We use gibbs free energy for
 // this, and thus all reactions can be reversed!
+// We use the approximation that dS and dH are constant with temperature and thus
+// we can approximate the equlibrium at any temperature as:
+// ln(k2) - ln(k1) = (dH / R) * (1 / T1 - 1 / T2)
+// This way we avoid the need for inputting dS for materials, but add the task
+// of obtaining an equilibrium constant at a given temperature for reactions
+// For one-way only directions, you may use a really big k value to get a good approx
 class ChemicalReaction
 {
 public:
 
 	std::vector<StechiometricMaterial> reactants;
-	float eq_constant;
 
 	// precalculated values
-	float dH, dS, average_cP;
+	float dH, average_cP, K, T_of_K;
 
-
-	float get_gibbs_free_energy(float T) const;
 	// Gets the rate of the reaction given temperature of the mixture
 	// Rate in kg / (s * m^3), don't forget to account for the reaction volume
 	float get_rate(float T);
+
 
 	// Very approximate values!
 	void calculate_constants();
 
 	// Ammount refers to the total kgs of reactant that convert
-	void react(StoredFluids* fluids, float ammount);
+	// Returns total ammount converted
+	float react(StoredFluids* fluids, float gas_ammount, float liquid_ammount);
+
+	float get_Q(StoredFluids* fluids, float V);
+	float get_K(float T);
 
 };
 
@@ -72,6 +80,8 @@ public:
 
 	static void deserialize(ChemicalReaction& to, const cpptoml::table& from)
 	{
+		SAFE_TOML_GET(to.K, "K", double);
+		SAFE_TOML_GET(to.T_of_K, "T_of_K", double);
 		// Now get the array of reactants and their stechiometry
 		std::vector<int> stechiometry;
 		auto st_arr = *from.get_array_of<int64_t>("stechiometry");

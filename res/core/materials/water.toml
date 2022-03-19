@@ -11,5 +11,3 @@ heat_capacity_liquid = 4150.0
 heat_capacity_gas = 1850.0
 dH_formation = -15866222.59 # We use the liquid one as the gaseous would be this plus the dH of vaporization
 dH_vaporization = 2453600
-dS_vaporization = 6599500
-S = 3882875.38 # Same as dH_formation, we can simply add dS_vaporization to obtain the gas one

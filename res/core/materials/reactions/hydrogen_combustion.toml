@@ -1,6 +1,8 @@
 name = "Hydrogen-Oxygen combustion"
 stechiometry = [2, 1, -2]
 reactants = ["core:materials/hydrogen.toml", "core:materials/oxygen.toml", "core:materials/water.toml"]
+K = 1.02e-5
+T_of_K = 1800
 # calculated by obtaining the average kinetical energy of each molecule at auto-ignition temperature and
 # multiplying by the average molecular mass of the reactants or products and avogadro's number (should be the same)
 act_energy = 36224.85 # J / kg

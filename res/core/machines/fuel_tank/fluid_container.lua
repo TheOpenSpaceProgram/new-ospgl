@@ -40,9 +40,10 @@ function fluid_container.new(volume)
     container.temperature = 373
     -- Contents of the tank
     container.contents = plumbing.stored_fluids.new()
-    local mat = assets.get_physical_material("materials/water.toml")
-    logger.info(mat)
-    container.contents:add_fluid(mat, 100.0, 0.0)
+    local h2 = assets.get_physical_material("materials/hydrogen.toml")
+    local o2 = assets.get_physical_material("materials/oxygen.toml")
+    container.contents:add_fluid(h2, 5.0, 0.0)
+    container.contents:add_fluid(o2, 5.0, 0.0)
 
     return container
 end
