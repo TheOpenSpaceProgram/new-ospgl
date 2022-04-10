@@ -4,6 +4,7 @@
 StoredFluids StoredFluids::modify(const StoredFluids &b)
 {
 	StoredFluids out;
+	float final_heat = get_total_heat_capacity() * temperature + b.get_total_heat_capacity() * b.temperature;
 
 	for(const auto& pair : b.contents)
 	{
@@ -81,6 +82,14 @@ StoredFluids StoredFluids::modify(const StoredFluids &b)
 		}
 	}
 
+	// Now distribute heat again
+	temperature = final_heat / get_total_heat_capacity();
+
+	// Out is at the same temperature as ourselves
+	// TODO: This is technically wrong if we both accepted and drained, but it's ok
+	// as it's not common and the error is tiny
+	out.temperature = temperature;
+
 
 	return out;
 }
@@ -112,7 +121,7 @@ void StoredFluids::remove_empty_fluids()
 
 }
 
-void StoredFluids::add_fluid(const AssetHandle<PhysicalMaterial>& mat, float liquid_mass, float gas_mass)
+void StoredFluids::add_fluid(const AssetHandle<PhysicalMaterial>& mat, float liquid_mass, float gas_mass, float temp)
 {
 	StoredFluids tmp;
 	if(mat_ptrs.count(mat) == 0)
@@ -123,6 +132,11 @@ void StoredFluids::add_fluid(const AssetHandle<PhysicalMaterial>& mat, float liq
 	}
 
 	tmp.contents[mat.data] = StoredFluid(liquid_mass, gas_mass);
+	if(temp < 0.0f)
+	{
+		temp = temperature;
+	}
+	tmp.temperature = temp;
 	modify(tmp);
 }
 
@@ -172,8 +186,14 @@ void StoredFluids::drain_to(StoredFluids* target, PhysicalMaterial* mat, float l
 	self_it->second.gas_mass = glm::max(self_it->second.gas_mass, 0.0f);
 	self_it->second.liquid_mass = glm::max(self_it->second.liquid_mass, 0.0f);
 
+	float target_heat = target->get_total_heat_capacity() * target->temperature;
+
 	target_fluids->gas_mass += tfer_gas;
 	target_fluids->liquid_mass += tfer_liq;
+
+	float tfer_heat = mat->heat_capacity_gas * tfer_gas + mat->heat_capacity_liquid * tfer_liq;
+	// Temperature transfer, we remain the same but target will be modified
+	target->temperature = (target_heat + tfer_heat * temperature) / target->get_total_heat_capacity();
 
 	// Restore the original fluids
 	if(!do_flow)
@@ -300,8 +320,19 @@ float StoredFluid::get_total_mass()
 	return liquid_mass + gas_mass;
 }
 
+float StoredFluids::get_total_heat_capacity() const
+{
+	float total = 0.0f;
+	for(auto pair : contents)
+	{
+		total += pair.first->heat_capacity_gas * pair.second.gas_mass + pair.first->heat_capacity_liquid * pair.second.liquid_mass;
+	}
+	return total;
+}
+
 StoredFluid::StoredFluid(float liquid, float gas)
 {
 	liquid_mass = liquid;
 	gas_mass = gas;
 }
+

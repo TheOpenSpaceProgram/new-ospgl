@@ -29,6 +29,8 @@ private:
 
 public:
 
+	// Temperature of the fluids
+	float temperature;
 	// TODO: There should me a special asset type for stuff like this. Fow now this works
 	std::unordered_set<AssetHandle<PhysicalMaterial>> mat_ptrs;
 	std::unordered_map<const PhysicalMaterial*, StoredFluid> contents;
@@ -48,7 +50,8 @@ public:
 	};
 
 	// Introduces a new fluid (most used functionality) / modifies previously present fluid
-	void add_fluid(const AssetHandle<PhysicalMaterial>& mat, float liquid_mass, float gas_mass);
+	// Negative temperature means it's added at the temperature of the already existing fluids
+	void add_fluid(const AssetHandle<PhysicalMaterial>& mat, float liquid_mass, float gas_mass, float temp = -1.0f);
 
 	// Note that the quantities here represent draining, no negative needed
 	void drain_to(StoredFluids* target, PhysicalMaterial* mat, float liquid_mass, float gas_mass, bool do_flow);
@@ -62,5 +65,6 @@ public:
 	float get_total_liquid_mass() const;
 	float get_total_liquid_volume() const;
 	float get_total_gas_mass() const;
+	float get_total_heat_capacity() const;
 };
 

@@ -93,8 +93,6 @@ float ChemicalReaction::react(StoredFluids* fluids, float gas_ammount, float liq
 		}
 	}
 
-	logger->info("Gas: {}, Liquid: {}", gas_ammount, liquid_ammount);
-
 	for(const auto& rct : reactants)
 	{
 		const PhysicalMaterial* mat = fluids->name_to_ptr[rct.reactant];

@@ -9,7 +9,7 @@ function get_icon() return icon end
 
 plumbing = dofile("machines/fuel_tank/plumbing.lua")
 
-local debug_pause = true
+local debug_pause = false
 local pause_reaction = true
 
 local function rnts(n)
@@ -32,10 +32,13 @@ function draw_imgui()
         imgui.separator()
     end
     imgui.text("Properties: ")
-    imgui.bullet_text("T: " .. rnts(plumbing.fluid_container.temperature) .. "K")
-    imgui.bullet_text("P: " .. rnts(plumbing.fluid_container:get_pressure() / 101300) .. "atm")
+    imgui.bullet_text("T: " .. rnts(plumbing.fluid_container.contents.temperature) .. "K")
+    imgui.bullet_text("Ullage P: " .. rnts(plumbing.fluid_container:get_total_pressure(0.0) / 101300) .. "atm")
+    imgui.bullet_text("Bottom P: " .. rnts(plumbing.fluid_container:get_total_pressure(10.0) / 101300) .. "atm")
     imgui.bullet_text("Contents mass: " .. rnts(tmass) .. "kg")
     imgui.bullet_text("V: " .. rnts(plumbing.fluid_container.volume) * 1000.0 .. "L")
+    imgui.bullet_text("Ullage V: " .. rnts(plumbing.fluid_container:get_ullage_volume()) * 1000.0 .. "L")
+    imgui.bullet_text("Ullage %: " .. rnts(plumbing.fluid_container:get_ullage_volume() / plumbing.fluid_container.volume) * 100.0 .. "%")
 end
 
 function update(dt)

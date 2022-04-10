@@ -18,6 +18,10 @@ void LuaPlumbing::load_to(sol::table &table)
  		"modify", &StoredFluids::modify,
  		"multiply", &StoredFluids::multiply,
 	 	"drain_to", &StoredFluids::drain_to,
+		 "temperature", &StoredFluids::temperature,
+		 "get_total_liquid_volume", &StoredFluids::get_total_liquid_volume,
+		 "get_total_liquid_mass", &StoredFluids::get_total_liquid_mass,
+		 "get_average_liquid_density", &StoredFluids::get_average_liquid_density,
 		 "react", &StoredFluids::react,
 		sol::meta_function::to_string, [](const StoredFluids& f)
 		{

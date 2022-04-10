@@ -39,11 +39,11 @@ function fluid_container.new(volume, temperature, wall_mass, wall_c)
     container.ullage_distribution = 0
     -- Last acceleration experienced by the tank, useful to simulate column pressure of the fluid
     container.last_acceleration = 0
-    -- Temperature of the contents of the tank, assumed to be homogeneous
-    container.temperature = temperature
     container.wall_thermal_mass = wall_mass * wall_c -- J / K
     -- Contents of the tank
     container.contents = plumbing.stored_fluids.new()
+    -- Temperature of the contents of the tank, assumed to be homogeneous
+    container.contents.temperature = temperature
 
     return container
 end
@@ -54,7 +54,7 @@ function fluid_container:get_pressure()
     local total_ullage = self:get_ullage_volume() + self.extra_volume
     local contents = self.contents:get_contents()
     for phys_mat, stored_fluid in contents:pairs() do
-        p = p + get_partial_pressure(self.temperature, total_ullage, phys_mat, stored_fluid)
+        p = p + get_partial_pressure(self.contents.temperature, total_ullage, phys_mat, stored_fluid)
     end
     return p
 end
@@ -98,7 +98,7 @@ function fluid_container:go_to_equilibrium(max_dp)
     max_dp = max_dp or 0.1
     local ullage_0 = self.ullage_distribution
     local P0 = self:get_pressure()
-    local T0 = self.temperature
+    local T0 = self.contents.temperature
     local softening = 1.0
     local it = 0
 
@@ -139,7 +139,7 @@ function fluid_container:exchange_heat(d)
     end
 
     local c_sum = cl_sum + cg_sum + self.wall_thermal_mass
-    self.temperature = self.temperature + d / c_sum
+    self.contents.temperature = self.contents.temperature + d / c_sum
 
 end
 
@@ -162,7 +162,7 @@ function fluid_container:update(dt, acceleration, react)
 
     local ullage_a_factor = 1.0
     local ullage_b_factor = 1.0
-    local evp_factor = 0.05
+    local evp_factor = 0.5
 
     local d_ullage = -ullage_a_factor * (acceleration ^ 3.0) + ullage_b_factor
     self.ullage_distribution = self.ullage_distribution + d_ullage * dt
@@ -174,15 +174,15 @@ function fluid_container:update(dt, acceleration, react)
     local contents = self.contents:get_contents()
     if react then
         -- Simulate chemical reactions
-        local heat = self.contents:react(self.temperature, self.volume, 0.01, dt)
+        local heat = self.contents:react(self.contents.temperature, self.volume, 0.01, dt)
         self:exchange_heat(heat)
     end
 
     for phys_mat, stored_fluid in contents:pairs() do
-        local cp = get_partial_pressure(self.temperature, total_ullage, phys_mat, stored_fluid)
-        local vp = phys_mat:get_vapor_pressure(self.temperature)
+        local cp = get_partial_pressure(self.contents.temperature, total_ullage, phys_mat, stored_fluid)
+        local vp = phys_mat:get_vapor_pressure(self.contents.temperature)
         local dp = vp - cp;
-        local moles_needed = (dp * total_ullage) / (R * self.temperature)
+        local moles_needed = (dp * total_ullage) / (R * self.contents.temperature)
         local dm = phys_mat:get_mass(moles_needed) * evp_factor * dt
         if dm > 0 then
             dm = math.min(stored_fluid.liquid_mass, dm)

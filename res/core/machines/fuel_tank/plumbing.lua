@@ -32,7 +32,7 @@ if fluid_container:is_overfilled() then
     logger.fatal("Tank was overfilled! Check starting fuel tank contents")
 end
 
---fluid_container:go_to_equilibrium(0.1)
+fluid_container:go_to_equilibrium(0.1)
 
 -- We keep a copy just in case the machine is interested in something
 plumbing.fluid_container = fluid_container
@@ -52,11 +52,22 @@ function plumbing.get_pressure(port)
 end
 
 function plumbing.out_flow(port, volume, do_flow)
-    logger.info("Asked for: " .. volume)
+    logger.info("Asked for: " .. volume * 1000 .. "L")
     return fluid_container:get_liquid(volume, do_flow)
 end
 
 function plumbing.in_flow(port, fluids, do_flow)
+    -- Scale wathever we couldn't fit
+    local in_volume = fluids:get_total_liquid_volume()
+    logger.info("Received: " .. in_volume * 1000 .. "L")
+    local final_volume = fluid_container:get_fluid_volume() + in_volume
+    local accepted = fluids
+    if final_volume > fluid_container.volume then
+        logger.fatal("TODO: Implement rejection")
+    end
+
+    fluid_container.contents:modify(fluids)
+
     return plumbing_lib.stored_fluids.new()
 end
 
