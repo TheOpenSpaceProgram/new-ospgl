@@ -21,7 +21,7 @@ end
 
 -- Volume in m^3! wall_mass is the mass of the walls for thermal simulation,
 -- wall_c is the heat capacity of the wall materials, default is iron J / kg K
-function fluid_container.new(volume, wall_mass, wall_c)
+function fluid_container.new(volume, temperature, wall_mass, wall_c)
     if wall_c == nil then wall_c = 440 end
     assert(type(volume) == "number")
 
@@ -40,7 +40,7 @@ function fluid_container.new(volume, wall_mass, wall_c)
     -- Last acceleration experienced by the tank, useful to simulate column pressure of the fluid
     container.last_acceleration = 0
     -- Temperature of the contents of the tank, assumed to be homogeneous
-    container.temperature = 288
+    container.temperature = temperature
     container.wall_thermal_mass = wall_mass * wall_c -- J / K
     -- Contents of the tank
     container.contents = plumbing.stored_fluids.new()
@@ -141,6 +141,13 @@ function fluid_container:exchange_heat(d)
     local c_sum = cl_sum + cg_sum + self.wall_thermal_mass
     self.temperature = self.temperature + d / c_sum
 
+end
+
+-- Returns true if the tank is overfilled, in which case simulation may break-down
+-- This cannot happen during simulation but may be caused by errors in TOMLs or during vehicle editing
+-- Also returns the total volume
+function fluid_container:is_overfilled()
+    return self:get_fluid_volume() > self.volume
 end
 
 -- This implements an extremely simple vapour-liquid equilibrium simulation

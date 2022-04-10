@@ -10,13 +10,29 @@ local plumbing_lib = require("plumbing")
 require("gui")
 
 local volume = machine.init_toml:get_number("volume")
+local temperature = machine.init_toml:get_number("temperature")
 local wall_mass = machine.init_toml:get_number("wall_mass")
 local wall_mat = machine.init_toml:get_string("wall_material")
 local wall_c = nil
 if wall_mat ~= nil then wall_c = assets.get_physical_material(wall_mat).heat_capacity_solid end
 
-local fluid_container = dofile("machines/fuel_tank/fluid_container.lua").new(volume, wall_mass, wall_c)
-fluid_container:go_to_equilibrium(0.1)
+local fluid_container = dofile("machines/fuel_tank/fluid_container.lua").new(volume, temperature, wall_mass, wall_c)
+
+-- Load the contents
+local content_array = machine.init_toml:get_array_of_table("content")
+for _, content in ipairs(content_array) do
+    local mat = content:get_string("material")
+    local material = assets.get_physical_material(mat)
+    local liquid_mass = content:get_number_or("liquid_mass", 0)
+    local gas_mass = content:get_number_or("gas_mass", 0)
+    fluid_container.contents:add_fluid(material, liquid_mass, gas_mass)
+end
+
+if fluid_container:is_overfilled() then
+    logger.fatal("Tank was overfilled! Check starting fuel tank contents")
+end
+
+--fluid_container:go_to_equilibrium(0.1)
 
 -- We keep a copy just in case the machine is interested in something
 plumbing.fluid_container = fluid_container
@@ -70,8 +86,8 @@ function plumbing.draw_diagram(vg, skin)
     nvg.fill(vg)
 end
 
-function plumbing.update(dt)
-    fluid_container:update(dt, 9.81)
+function plumbing.update(dt, chemical_react)
+    fluid_container:update(dt, 9.81, chemical_react)
     --fluid_container.temperature = 373
 end
 

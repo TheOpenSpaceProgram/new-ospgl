@@ -103,6 +103,18 @@ void LuaToml::load_to(sol::table& table)
 		{
 			return sol::as_table(*self->get_array_of<double>(key));
 		},
+		"get_array_of_table", [](table_ptr self, const std::string& key)
+	   	{
+			// Here we simply return an empty array, not nil
+			auto val = self->get_table_array_qualified(key);
+			std::vector<std::shared_ptr<cpptoml::table>> tables;
+			if(val)
+			{
+				tables = val->get();
+			}
+
+			return sol::as_table(tables);
+	   	},
 		"erase", [](table_ptr self, const std::string& key)
 		{
 			self->erase(key);	

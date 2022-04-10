@@ -93,6 +93,8 @@ float ChemicalReaction::react(StoredFluids* fluids, float gas_ammount, float liq
 		}
 	}
 
+	logger->info("Gas: {}, Liquid: {}", gas_ammount, liquid_ammount);
+
 	for(const auto& rct : reactants)
 	{
 		const PhysicalMaterial* mat = fluids->name_to_ptr[rct.reactant];
@@ -121,7 +123,7 @@ float ChemicalReaction::get_Q(StoredFluids* fluids, float V)
 		if(glm::abs(moles) < 0.001f)
 		{
 			// To prevent singularity when there's nothing of a product
-			moles = 0.001f;
+			moles = 0.00001f;
 		}
 		Q *= powf(moles / V, r.moles);
 	}
