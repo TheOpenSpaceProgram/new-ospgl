@@ -19,8 +19,10 @@ local function get_partial_pressure(temp, volume, phys_mat, stored_fluid)
     return phys_mat:get_moles(stored_fluid.gas_mass) * R * temp / volume;
 end
 
--- Volume in m^3!
-function fluid_container.new(volume)
+-- Volume in m^3! wall_mass is the mass of the walls for thermal simulation,
+-- wall_c is the heat capacity of the wall materials, default is iron J / kg K
+function fluid_container.new(volume, wall_mass, wall_c)
+    if wall_c == nil then wall_c = 440 end
     assert(type(volume) == "number")
 
     local container = {}
@@ -39,17 +41,14 @@ function fluid_container.new(volume)
     container.last_acceleration = 0
     -- Temperature of the contents of the tank, assumed to be homogeneous
     container.temperature = 288
+    container.wall_thermal_mass = wall_mass * wall_c -- J / K
     -- Contents of the tank
     container.contents = plumbing.stored_fluids.new()
-    local h2 = assets.get_physical_material("materials/hydrogen.toml")
-    local o2 = assets.get_physical_material("materials/oxygen.toml")
-    container.contents:add_fluid(h2, 1.0 - 0.87, 0.0)
-    container.contents:add_fluid(o2, 1.0, 0.0)
 
     return container
 end
 
--- Pressure of the ullage portion (Pa)
+-- Pressure of the ullage portion
 function fluid_container:get_pressure()
     local p = 0.0
     local total_ullage = self:get_ullage_volume() + self.extra_volume
@@ -139,7 +138,7 @@ function fluid_container:exchange_heat(d)
         cg_sum = cg_sum + cg * stored_fluid.gas_mass
     end
 
-    local c_sum = cl_sum + cg_sum
+    local c_sum = cl_sum + cg_sum + self.wall_thermal_mass
     self.temperature = self.temperature + d / c_sum
 
 end

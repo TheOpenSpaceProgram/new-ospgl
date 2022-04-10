@@ -32,7 +32,8 @@ function draw_imgui()
     imgui.text("Properties: ")
     imgui.bullet_text("T: " .. rnts(plumbing.fluid_container.temperature) .. "K")
     imgui.bullet_text("P: " .. rnts(plumbing.fluid_container:get_pressure() / 101300) .. "atm")
-    imgui.bullet_text("Total mass: " .. rnts(tmass) .. "kg")
+    imgui.bullet_text("Contents mass: " .. rnts(tmass) .. "kg")
+    imgui.bullet_text("V: " .. rnts(plumbing.fluid_container.volume) * 1000.0 .. "L")
 end
 
 function update(dt)

@@ -3,12 +3,19 @@ local plumbing = {};
 require("toml")
 local logger = require("logger")
 local nvg = require("nano_vg")
+local assets = require("assets")
 require("game_database")
 require("vehicle")
 local plumbing_lib = require("plumbing")
 require("gui")
 
-local fluid_container = dofile("machines/fuel_tank/fluid_container.lua").new(0.3)
+local volume = machine.init_toml:get_number("volume")
+local wall_mass = machine.init_toml:get_number("wall_mass")
+local wall_mat = machine.init_toml:get_string("wall_material")
+local wall_c = nil
+if wall_mat ~= nil then wall_c = assets.get_physical_material(wall_mat).heat_capacity_solid end
+
+local fluid_container = dofile("machines/fuel_tank/fluid_container.lua").new(volume, wall_mass, wall_c)
 fluid_container:go_to_equilibrium(0.1)
 
 -- We keep a copy just in case the machine is interested in something

@@ -42,7 +42,11 @@ void LuaToml::load_to(sol::table& table)
 		},
 		"get_number", [](table_ptr self, const std::string& key)
 		{
-			return *self->get_qualified_as<double>(key);
+			auto t = self->get_qualified_as<double>(key);
+			if(t)
+				return sol::optional(*t);
+			else
+				return sol::optional<double>();
 		},
 		"get_number_or", [](table_ptr self, const std::string& key, double def_val)
 		{
@@ -50,7 +54,11 @@ void LuaToml::load_to(sol::table& table)
 		},
 		"get_string", [](table_ptr self, const std::string& key)
 		{
-			return *self->get_qualified_as<std::string>(key);
+			auto t = self->get_qualified_as<std::string>(key);
+			if(t)
+				return sol::optional(*t);
+			else
+				return sol::optional<std::string>();
 		},
 		"get_string_or", [](table_ptr self, const std::string& key, const std::string& def_val)
 		{
@@ -58,12 +66,17 @@ void LuaToml::load_to(sol::table& table)
 		},
 		"get_bool", [](table_ptr self, const std::string& key)
 		{
-			return *self->get_qualified_as<bool>(key);
+			auto t = self->get_qualified_as<bool>(key);
+			if(t)
+				return sol::optional(*t);
+			else
+				return sol::optional<bool>();
 		},
 		"get_bool_or", [](table_ptr self, const std::string& key, bool def_val)
 		{
 			return self->get_qualified_as<bool>(key).value_or(def_val);
 		},
+		// TODO: Implement nil return for these
 		"get_vec3", [](table_ptr self, const std::string& key)
 		{
 			glm::dvec3 v; deserialize(v, *self->get_table(key));
