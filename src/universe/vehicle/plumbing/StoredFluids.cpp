@@ -142,6 +142,9 @@ void StoredFluids::add_fluid(const AssetHandle<PhysicalMaterial>& mat, float liq
 
 void StoredFluids::drain_to(StoredFluids* target, PhysicalMaterial* mat, float liquid_mass, float gas_mass, bool do_flow)
 {
+	logger->check(target, "Trying to drain into nullptr");
+	logger->check(mat, "Trying to drain nullptr material");
+
 	auto it = target->contents.find(mat);
 	StoredFluid* target_fluids;
 	if(it == target->contents.end())
@@ -192,8 +195,12 @@ void StoredFluids::drain_to(StoredFluids* target, PhysicalMaterial* mat, float l
 	target_fluids->liquid_mass += tfer_liq;
 
 	float tfer_heat = mat->heat_capacity_gas * tfer_gas + mat->heat_capacity_liquid * tfer_liq;
-	// Temperature transfer, we remain the same but target will be modified
-	target->temperature = (target_heat + tfer_heat * temperature) / target->get_total_heat_capacity();
+	// This prevents NaN when transferring no heat to a 0 heat capacity target
+	if(tfer_heat != 0)
+	{
+		// Temperature transfer, we remain the same but target will be modified
+		target->temperature = (target_heat + tfer_heat * temperature) / target->get_total_heat_capacity();
+	}
 
 	// Restore the original fluids
 	if(!do_flow)

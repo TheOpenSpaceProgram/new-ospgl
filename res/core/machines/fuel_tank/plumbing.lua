@@ -53,7 +53,11 @@ end
 
 function plumbing.out_flow(port, volume, do_flow)
     logger.info("Asked for: " .. volume * 1000 .. "L")
-    return fluid_container:get_liquid(volume, do_flow)
+    if port == "liquid_port" then
+        return fluid_container:get_liquid(volume, do_flow)
+    else
+        return fluid_container:get_gas(volume, do_flow)
+    end
 end
 
 function plumbing.in_flow(port, fluids, do_flow)

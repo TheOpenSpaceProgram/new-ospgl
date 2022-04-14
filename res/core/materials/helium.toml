@@ -1,0 +1,15 @@
+name = "Helium"
+formula = "He"
+std_bp = 4.222
+molar_mass = 4.0026e-3
+liquid_density = 160
+solid_density = 214
+# TODO: Find this data, I copied the liquid
+heat_capacity_solid = 5000.0
+# https://doi.org/10.1080/23324309.2016.1156549
+# We don't simulate the famous lambda point ;) No superfluid helium II!
+# A value of 5000 is appropiate for the simulation
+heat_capacity_liquid = 5000.0
+heat_capacity_gas = 5193
+dH_formation = -21111.27
+dH_vaporization = 21111.27

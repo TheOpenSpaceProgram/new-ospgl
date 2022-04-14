@@ -212,7 +212,9 @@ end
 -- If ullage is not good, gas may also be drained!
 -- It may fail and return less than asked for if there's not enough materials
 -- Drains uniformly from all liquid layers (TODO: Maybe drain using density as if there were layers?)
-function fluid_container:get_liquid(flow, do_flow)
+function fluid_container:get_liquid(flow, do_flow, ignore_ullage)
+    if ignore_ullage == nil then ignore_ullage = false end
+
     local contents = self.contents:get_contents()
     local total_liquid_vol = 0.0
     local result = plumbing.stored_fluids.new()
@@ -225,10 +227,12 @@ function fluid_container:get_liquid(flow, do_flow)
 
     if total_liquid_vol == 0.0 then
         -- We can only drain gases now
-        for phys_mat, stored_fluid in contents:pairs() do
-            -- We adjust the flow to current gas density
-            local flow_mass = flow * stored_fluid.gas_mass / self:get_ullage_volume()
-            self.contents:drain_to(result, phys_mat, 0.0, flow_mass, do_flow)
+        if not ignore_ullage then
+            for phys_mat, stored_fluid in contents:pairs() do
+                -- We adjust the flow to current gas density
+                local flow_mass = flow * stored_fluid.gas_mass / self:get_ullage_volume()
+                self.contents:drain_to(result, phys_mat, 0.0, flow_mass, do_flow)
+            end
         end
 
     else
@@ -236,8 +240,31 @@ function fluid_container:get_liquid(flow, do_flow)
             local liquid_mass = flow * stored_fluid.liquid_mass / total_liquid_vol
             -- We drain gases on a pseudorandom phasion using the noise generator
             local gas_mass = noise.perlin2(self.noise_gen, self.noise_t * 50.0, 0.0) * self.ullage_distribution
+            if ignore_ullage then gas_mass = 0.0 end
             self.contents:drain_to(result, phys_mat, liquid_mass, gas_mass, do_flow)
         end
+    end
+
+    return result
+
+end
+
+-- Similar to before but simulates an outlet situated in the ullage
+-- If ullage distribution is bad, liquids may be drained too (small quantities)
+function fluid_container:get_gas(flow, do_flow, ignore_ullage)
+    if ignore_ullage == nil then ignore_ullage = false end
+
+    local contents = self.contents:get_contents()
+    local result = plumbing.stored_fluids.new()
+
+    for phys_mat, stored_fluid in contents:pairs() do
+        -- We adjust the flow to current gas density
+        local gas_mass = flow * stored_fluid.gas_mass / self:get_ullage_volume()
+        -- We drain liquids on a pseudorandom phasion using the noise generator
+        -- TODO: Tweak the numbers!
+        local liquid_mass = noise.perlin2(self.noise_gen, self.noise_t * 50.0, 0.0) * self.ullage_distribution
+        if ignore_ullage then liquid_mass = 0.0 end
+        self.contents:drain_to(result, phys_mat, liquid_mass, gas_mass, do_flow)
     end
 
     return result

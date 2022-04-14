@@ -39,6 +39,7 @@ function draw_imgui()
     imgui.bullet_text("V: " .. rnts(plumbing.fluid_container.volume) * 1000.0 .. "L")
     imgui.bullet_text("Ullage V: " .. rnts(plumbing.fluid_container:get_ullage_volume()) * 1000.0 .. "L")
     imgui.bullet_text("Ullage %: " .. rnts(plumbing.fluid_container:get_ullage_volume() / plumbing.fluid_container.volume) * 100.0 .. "%")
+    imgui.bullet_text("Liquid-Gas Mixing: " .. rnts(plumbing.fluid_container.ullage_distribution * 100.0) .. "%")
 end
 
 function update(dt)
