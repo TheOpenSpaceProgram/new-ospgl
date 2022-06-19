@@ -259,6 +259,7 @@ float StoredFluids::react(float T, float react_V, float liq_fac, float dt)
 		auto ub = osp->game_database->material_to_reactions.upper_bound(pair.first->get_asset_id());
 		for(auto it = lb; it != ub; it++)
 		{
+			// Check that it's not already added
 			bool found = false;
 			for (size_t i = 0; i < reactions.size(); i++)
 			{
@@ -272,7 +273,10 @@ float StoredFluids::react(float T, float react_V, float liq_fac, float dt)
 			if(found)
 				break;
 
+
+			// TODO: Check that either all products or all reactants are present!
 			reactions.push_back(it->second);
+
 		}
 	}
 
@@ -335,6 +339,25 @@ float StoredFluids::get_total_heat_capacity() const
 		total += pair.first->heat_capacity_gas * pair.second.gas_mass + pair.first->heat_capacity_liquid * pair.second.liquid_mass;
 	}
 	return total;
+}
+
+float StoredFluids::get_total_gas_moles() const
+{
+	float total = 0.0f;
+	for(const auto& pair : contents)
+	{
+		total += pair.first->get_moles(pair.second.gas_mass);
+	}
+	return total;
+}
+
+void StoredFluids::add_heat(float v)
+{
+	float heat_cap = get_total_heat_capacity();
+	if(heat_cap != 0)
+	{
+		temperature += v / get_total_heat_capacity();
+	}
 }
 
 StoredFluid::StoredFluid(float liquid, float gas)

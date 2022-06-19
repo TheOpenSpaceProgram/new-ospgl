@@ -1,6 +1,6 @@
 -- Util file that handles storing of fluids in a vessel, simulating the liquid and gaseous phases,
 -- alongside thermodynamics (boiling of the fluids, condensation...) and allowing convenient extraction
--- of fluids. It assumes the fluids wont mix or react together, which may be too simple for some use cases!
+-- of fluids. It assumes the fluids wont mix together, which may be too simple for some use cases!
 -- To be used like a class
 require("vehicle")
 local logger = require("logger")
@@ -14,6 +14,8 @@ fluid_container.__index = fluid_container
 
 -- m^3 Pa K^-1 mol^-1
 local R = 8.314462618153
+-- An empiric factor to scale gas flows relative to liquids
+local GAS_FLOW_FACTOR = 40.0
 
 local function get_partial_pressure(temp, volume, phys_mat, stored_fluid)
     return phys_mat:get_moles(stored_fluid.gas_mass) * R * temp / volume;
@@ -231,6 +233,7 @@ function fluid_container:get_liquid(flow, do_flow, ignore_ullage)
             for phys_mat, stored_fluid in contents:pairs() do
                 -- We adjust the flow to current gas density
                 local flow_mass = flow * stored_fluid.gas_mass / self:get_ullage_volume()
+                flow_mass = flow_mass * GAS_FLOW_FACTOR
                 self.contents:drain_to(result, phys_mat, 0.0, flow_mass, do_flow)
             end
         end
@@ -240,6 +243,7 @@ function fluid_container:get_liquid(flow, do_flow, ignore_ullage)
             local liquid_mass = flow * stored_fluid.liquid_mass / total_liquid_vol
             -- We drain gases on a pseudorandom phasion using the noise generator
             local gas_mass = noise.perlin2(self.noise_gen, self.noise_t * 50.0, 0.0) * self.ullage_distribution
+            gas_mass = gas_mass * GAS_FLOW_FACTOR
             if ignore_ullage then gas_mass = 0.0 end
             self.contents:drain_to(result, phys_mat, liquid_mass, gas_mass, do_flow)
         end
@@ -260,7 +264,8 @@ function fluid_container:get_gas(flow, do_flow, ignore_ullage)
     for phys_mat, stored_fluid in contents:pairs() do
         -- We adjust the flow to current gas density
         local gas_mass = flow * stored_fluid.gas_mass / self:get_ullage_volume()
-        -- We drain liquids on a pseudorandom phasion using the noise generator
+        gas_mass = gas_mass * GAS_FLOW_FACTOR
+        -- We drain liquids on a pseudorandom fashion using the noise generator
         -- TODO: Tweak the numbers!
         local liquid_mass = noise.perlin2(self.noise_gen, self.noise_t * 50.0, 0.0) * self.ullage_distribution
         if ignore_ullage then liquid_mass = 0.0 end
@@ -268,10 +273,6 @@ function fluid_container:get_gas(flow, do_flow, ignore_ullage)
     end
 
     return result
-
-end
-
-function fluid_container:add_liquid(flow, do_flow)
 
 end
 

@@ -1,0 +1,16 @@
+name = "Methane"
+formula = "CH_4"
+std_bp = 111.6
+molar_mass = 16.043e-3
+liquid_density = 422.8
+solid_density = 494
+# Find this data, it was made up!
+heat_capacity_solid = 5000.0
+heat_capacity_liquid = 4150.0
+heat_capacity_gas = 1850.0
+# https://atct.anl.gov/Thermochemical%20Data/version%201.118/species/?species_number=21
+# Keep in mind that's for gas, so simply substracted the vaporization value!
+dH_formation = -5175652.84
+# https://webbook.nist.gov/cgi/cbook.cgi?ID=C74828&Mask=4
+# Took the value of 8.5 kJ/mol
+dH_vaporization = 529826.0924

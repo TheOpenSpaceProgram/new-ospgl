@@ -38,6 +38,8 @@ public:
 	void update(double dt);
 	void editor_update(double dt);
 
+	void physics_update(double dt);
+
 	void init(sol::state* st, Vehicle* in_vehicle);
 
 	// Throws an error on the case of an invalid name,

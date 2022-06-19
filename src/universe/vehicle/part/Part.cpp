@@ -71,6 +71,18 @@ void Part::editor_update(double dt)
 	}
 }
 
+void Part::physics_update(double dt)
+{
+	for(auto& machine_pair : machines)
+	{
+		machine_pair.second->physics_update(dt);
+	}
+	for(auto* machine : attached_machines)
+	{
+		machine->physics_update(dt);
+	}
+}
+
 
 void Part::init(sol::state* st, Vehicle* in_vehicle)
 {
@@ -177,3 +189,4 @@ std::unordered_map<std::string, Machine*> Part::get_all_machines()
 
 	return out;
 }
+

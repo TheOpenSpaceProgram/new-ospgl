@@ -66,5 +66,7 @@ public:
 	float get_total_liquid_volume() const;
 	float get_total_gas_mass() const;
 	float get_total_heat_capacity() const;
+	float get_total_gas_moles() const;
+	void add_heat(float heat);
 };
 

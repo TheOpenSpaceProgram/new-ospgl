@@ -48,6 +48,15 @@ void Machine::update(double dt)
 	}
 }
 
+void Machine::physics_update(double dt)
+{
+	if(!paused || step)
+	{
+		LuaUtil::call_function_if_present(env["physics_update"], dt);
+		// TODO: Handle step properly?
+	}
+}
+
 void Machine::editor_update(double dt)
 {
 	if(!paused || step)
@@ -205,9 +214,18 @@ std::string Machine::get_name()
 	return name;
 }
 
+std::string Machine::get_id()
+{
+	std::string ret = in_pkg;
+	ret += ":";
+	ret += name;
+	return ret;
+}
+
 void Machine::draw_imgui(bool* open)
 {
 	std::string title = "M(" + in_pkg + ":" + name + "), ruid = " + std::to_string(runtime_uid);
+	ImGui::SetNextWindowSize(ImVec2(0, 0));
 	ImGui::Begin(title.c_str(), open, ImGuiWindowFlags_MenuBar);
 	if(ImGui::BeginMenuBar())
 	{

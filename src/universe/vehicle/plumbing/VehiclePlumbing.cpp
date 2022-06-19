@@ -458,6 +458,7 @@ int VehiclePlumbing::find_pipe_connected_to(FluidPort *port)
 	return -1;
 }
 
+// TODO: Run at a fixed-timestep, maybe alongside physics?
 void VehiclePlumbing::update_pipes(float dt, Vehicle *in_vehicle)
 {
 	if(input->key_down(GLFW_KEY_K) || input->key_pressed(GLFW_KEY_L))

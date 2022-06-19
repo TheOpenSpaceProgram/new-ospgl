@@ -63,6 +63,8 @@ public:
 	void update(double dt);
 	void editor_update(double dt);
 
+	void physics_update(double dt);
+
 	void init(sol::state* lua_state, Part* in_part);
 
 	void load_interface(const std::string& name, sol::table n_table);
@@ -77,6 +79,7 @@ public:
 
 	std::string get_pkg();
 	std::string get_name();
+	std::string get_id();
 	// Don't create your own window in lua! We create a standard named one
 	void draw_imgui(bool* open);
 

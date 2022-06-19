@@ -81,7 +81,12 @@ void Vehicle::physics_update(double dt)
 
 		unpacked_veh.apply_gravity(to_btVector3(grav)); 
 		unpacked_veh.update();
-	}	
+	}
+
+	for(Part* part : parts)
+	{
+		part->physics_update(dt);
+	}
 
 }
 

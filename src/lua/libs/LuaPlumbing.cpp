@@ -15,12 +15,20 @@ void LuaPlumbing::load_to(sol::table &table)
  		{
 			self.add_fluid(mat.get_asset_handle(), liquid, gas);
  		},
+		 // This one is meant to be used in loops that modify a tank
+	 	"modify_fluid", [](StoredFluids& self, const PhysicalMaterial* mat, float liquid, float gas)
+	 	{
+			self.add_fluid(AssetHandle<PhysicalMaterial>(mat->get_asset_id()), liquid, gas);
+	 	},
  		"modify", &StoredFluids::modify,
  		"multiply", &StoredFluids::multiply,
 	 	"drain_to", &StoredFluids::drain_to,
 		 "temperature", &StoredFluids::temperature,
 		 "get_total_liquid_volume", &StoredFluids::get_total_liquid_volume,
 		 "get_total_liquid_mass", &StoredFluids::get_total_liquid_mass,
+		 "get_total_gas_mass", &StoredFluids::get_total_gas_mass,
+		 "add_heat", &StoredFluids::add_heat,
+		 "get_total_gas_moles", &StoredFluids::get_total_gas_moles,
 		 "get_average_liquid_density", &StoredFluids::get_average_liquid_density,
 		 "react", &StoredFluids::react,
 		sol::meta_function::to_string, [](const StoredFluids& f)

@@ -28,6 +28,10 @@ void ChemicalReaction::calculate_constants()
 		{
 			total_h += mat->dH_formation * weight;
 		}
+		else
+		{
+			total_h -= mat->dH_formation * weight;
+		}
 
 		if(weight > 0.0f)
 		{

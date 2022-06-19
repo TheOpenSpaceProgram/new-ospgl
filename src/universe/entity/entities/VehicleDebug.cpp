@@ -68,7 +68,8 @@ void VehicleDebug::parts_tab()
 			for(auto pair : p->get_all_machines())
 			{
 				ImGui::PushID(pair.second);
-				ImGui::Text("\t%s", pair.first.c_str());
+				ImGui::Text("\t%s(%s)", pair.first.c_str(),
+							pair.second->get_id().c_str());
 				ImGui::SameLine();
 				if(vector_contains(shown_machines, pair.second))
 				{

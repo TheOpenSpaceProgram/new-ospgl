@@ -1,0 +1,7 @@
+icon = "core:plumbing_machines/oneway.png"
+name = "shutoff_name"
+description = "shutoff_desc"
+add_mass = 1.0
+
+[machine]
+script = "core:machines/valves/shutoff.lua"

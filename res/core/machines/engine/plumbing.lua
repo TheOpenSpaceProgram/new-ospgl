@@ -1,3 +1,5 @@
+-- Due to the conditions in the combustion chamber, we just simulate gases
+-- so we don't need a proper storage tank and just a gases approximation
 require("toml")
 require("game_database")
 require("vehicle")
@@ -12,25 +14,25 @@ local inlets = {}
 local logger = require("logger")
 local nvg = require("nano_vg")
 
--- Only one (do we have it for real???)
-local outlet_id = "outlet"
-
 local inlet_count = 0
+local internal_tank = plumbing_lib.stored_fluids.new()
+plumbing.internal_tank = internal_tank
 
 function plumbing.fluid_update()
 
 end
 
 function plumbing.get_pressure(port)
-    return 91000.0
+    return 0.0
 end
 
 function plumbing.out_flow(port, volume, do_flow)
     return plumbing_lib.stored_fluids.new()
 end
 
--- We accept everything
+-- Accumulate everything into the internal tank. We assume liquids take nearly no space
 function plumbing.in_flow(port, fluids, do_flow)
+    internal_tank:modify(fluids)
     return plumbing_lib.stored_fluids.new()
 end
 

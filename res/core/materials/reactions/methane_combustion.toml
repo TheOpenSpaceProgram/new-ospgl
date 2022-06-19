@@ -1,0 +1,10 @@
+
+name = "Methane-Oxygen combustion"
+stechiometry = [1, 2, -2, -1]
+reactants = ["core:materials/methane.toml", "core:materials/oxygen.toml", "core:materials/water.toml", "core:materials/carbon_dioxide.toml"]
+# TODO:
+K = 1.02e-5
+T_of_K = 1800
+# calculated by obtaining the average kinetical energy of each molecule at auto-ignition temperature and
+# multiplying by the average molecular mass of the reactants or products and avogadro's number (should be the same)
+act_energy = 36224.85 # J / kg
