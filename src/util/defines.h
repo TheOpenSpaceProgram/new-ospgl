@@ -34,7 +34,7 @@ static std::vector<std::string> split(const char *str, char c = ' ')
 }
 
 template<typename T>
-static bool vector_contains(std::vector<T>& vec, T elem)
+static bool vector_contains(const std::vector<T>& vec, T elem)
 {
 	auto it = std::find(vec.begin(), vec.end(), elem);
 	return it != vec.end();

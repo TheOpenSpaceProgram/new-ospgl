@@ -15,6 +15,8 @@ private:
 	EditorVehicle* edveh;
 	EditorVehicleInterface* edveh_int;
 
+	AssetHandle<BitmapFont> tiny_font;
+
 	void do_highlight();
 	void do_3d_to_2d(GUIInput* gui_input, glm::dvec3 ray_start, glm::dvec3 ray_end);
 	// Signal handler, called from PlumbingEditor's signal
@@ -22,7 +24,7 @@ private:
 
 	void focus_pb_editor(Machine* m);
 
-	void draw_icons(const Part* p, const PlumbingMachine* hovered, const std::vector<PlumbingMachine*> selected,
+	void draw_icons(NVGcontext* vg, const Part* p, const PlumbingMachine* hovered, const std::vector<PlumbingMachine*> selected,
 					const CameraUniforms& cu, glm::dvec4 viewport);
 
 public:

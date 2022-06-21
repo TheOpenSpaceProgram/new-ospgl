@@ -101,14 +101,14 @@ void Part::init(sol::state* st, Vehicle* in_vehicle)
 
 }
 
-Piece* Part::get_piece(const std::string& name)
+Piece* Part::get_piece(const std::string& name) const
 {
 	auto it = pieces.find(name);
 	logger->check(it != pieces.end(), "Tried to get a piece which does not exist on the part ({})", name);
 	return it->second;
 }
 
-Machine* Part::get_machine(const std::string& id)
+Machine* Part::get_machine(const std::string& id) const
 {
 	auto all_machines = get_all_machines();
 	auto it = all_machines.find(id);
@@ -169,7 +169,7 @@ Part::~Part()
 	}
 }
 
-std::unordered_map<std::string, Machine*> Part::get_all_machines()
+std::unordered_map<std::string, Machine*> Part::get_all_machines() const
 {
 	std::unordered_map<std::string, Machine*> out;
 

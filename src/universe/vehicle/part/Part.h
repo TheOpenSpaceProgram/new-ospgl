@@ -44,9 +44,9 @@ public:
 
 	// Throws an error on the case of an invalid name,
 	// return null if piece exists but is not present
-	Piece* get_piece(const std::string& name);
+	Piece* get_piece(const std::string& name) const;
 
-	Machine* get_machine(const std::string& id);
+	Machine* get_machine(const std::string& id) const;
 
 	// Creates all pieces neccesary
 	// Used by the editor as the parts are created from scratch
@@ -56,7 +56,7 @@ public:
 	std::vector<Piece*> create_pieces();
 
 	// Assigns special ids to attached_machines which start with _attached
-	std::unordered_map<std::string, Machine*> get_all_machines();
+	std::unordered_map<std::string, Machine*> get_all_machines() const;
 
 	// We duplicate the asset handle
 	// our_table must contain any extra arguments to machines
