@@ -11,7 +11,7 @@ function get_icon() return icon end
 
 plumbing = {}
 
-local open = true
+local open = false
 local force_open = false
 local force_close = false
 
@@ -125,3 +125,8 @@ function plumbing.init()
     machine.plumbing:create_port("port_2", "", in_str, true, -0.5, 0.5)
     return 1, 1
 end
+
+-- Implementation of activable interface
+local activable = machine:load_interface("core:interfaces/activable.lua")
+activable.on_activate = function () open = true end 
+activable.on_deactivate = function() open = false end

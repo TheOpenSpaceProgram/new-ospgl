@@ -478,7 +478,7 @@ void VehicleSaver::write_wires(cpptoml::table &target, const Vehicle &what)
 
 			std::string fmachine = "";
 			std::string tmachine = "";
-			for(auto m : pair.first->in_part->machines)
+			for(auto m : pair.first->in_part->get_all_machines())
 			{
 				if(m.second == pair.first)
 				{
@@ -486,7 +486,7 @@ void VehicleSaver::write_wires(cpptoml::table &target, const Vehicle &what)
 					break;
 				}
 			}
-			for(auto m : pair.second->in_part->machines)
+			for(auto m : pair.second->in_part->get_all_machines())
 			{
 				if(m.second == pair.second)
 				{

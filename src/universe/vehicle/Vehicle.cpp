@@ -120,7 +120,7 @@ static bool find_machine(Machine* m, Vehicle* veh)
 
 	for(auto& part : veh->parts)
 	{
-		for(auto& machine : part->machines)
+		for(auto& machine : part->get_all_machines())
 		{
 			if(machine.second == m)
 			{
