@@ -41,3 +41,10 @@
 [renderer.quality.planet]
 	use_detail_map = true
 	use_detail_normal = true
+
+[editor]
+	binding_attach = 49 # Number 1
+	binding_move = 50 # Number 1
+	binding_link = 51 # Number 2
+	binding_plumbing = 52 # Number 3
+	binding_electric = 52 # Number 4

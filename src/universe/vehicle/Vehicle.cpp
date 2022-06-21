@@ -57,7 +57,6 @@ void Vehicle::update(double dt)
 		part->update(dt);
 	}
 
-	plumbing.update_pipes(dt, this);
 
 }
 
@@ -82,6 +81,10 @@ void Vehicle::physics_update(double dt)
 		unpacked_veh.apply_gravity(to_btVector3(grav)); 
 		unpacked_veh.update();
 	}
+
+	// TODO: Maybe add a pre_plumbing update or sort this stuff?
+
+	plumbing.update_pipes(dt, this);
 
 	for(Part* part : parts)
 	{

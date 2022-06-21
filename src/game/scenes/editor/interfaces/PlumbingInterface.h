@@ -22,6 +22,9 @@ private:
 
 	void focus_pb_editor(Machine* m);
 
+	void draw_icons(const Part* p, const PlumbingMachine* hovered, const std::vector<PlumbingMachine*> selected,
+					const CameraUniforms& cu, glm::dvec4 viewport);
+
 public:
 
 	PlumbingEditor pb_editor;

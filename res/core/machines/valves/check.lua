@@ -4,7 +4,7 @@ require("vehicle")
 local nvg = require("nano_vg")
 local plumbing_lib = require("plumbing")
 local assets = require("assets")
-local icon = assets.get_image("machines/icons/default_icon.png")
+local icon = assets.get_image("machines/icons/valve.png")
 function get_icon() return icon end
 
 plumbing = {}

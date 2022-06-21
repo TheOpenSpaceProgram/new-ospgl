@@ -37,10 +37,27 @@ bool PlumbingInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_st
 	edveh->clear_meta();
 
 	do_highlight();
+
+	// Draw machine icons of hovered / selected parts
+	std::set<Part*> all_parts;
+	const PlumbingMachine* hovered = pb_editor.get_hovered();
+	const std::vector<PlumbingMachine*> selected = pb_editor.get_selected();
+	all_parts.insert(hovered->in_machine->in_part);
+	for(PlumbingMachine* m : selected)
+	{
+		all_parts.insert(m->in_machine->in_part);
+	}
+
+	for(Part* p : all_parts)
+	{
+		draw_icons(p, hovered, selected, cu, viewport);
+	}
+
 	if(!gui_input->mouse_blocked)
 	{
 		do_3d_to_2d(gui_input, ray_start, ray_end);
 	}
+
 	return false;
 }
 
@@ -162,4 +179,14 @@ void PlumbingInterface::focus_pb_editor(Machine *m)
 	glm::vec2 size = m->plumbing.get_size(false, true);
 	pb_editor.cam_center = topleft + size * 0.5f;
 }
+
+void PlumbingInterface::draw_icons(const Part *p, const PlumbingMachine *hovered,
+								   const std::vector<PlumbingMachine *> selected, const CameraUniforms &cu,
+								   glm::dvec4 vport)
+{
+	// We draw the machines in their physical location or use the same polygon system as
+	// the editor
+}
+
+
 

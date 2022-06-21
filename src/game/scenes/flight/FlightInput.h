@@ -10,6 +10,7 @@
 // InputContexts are defined in a config, controllable machines have a function named
 // get_input_context which returns the context to use so the user can select which machine
 // to control
+// TODO: Control multiple machines at once? Priority must be implemented for conflicting inputs
 //
 // This is only used in the Flight scene (it controls machines)
 class FlightInput

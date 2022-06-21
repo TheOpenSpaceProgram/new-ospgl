@@ -24,6 +24,14 @@ private:
 
 	void see_part(Part* p);
 
+	template <typename F>
+	// Type of lambda F:
+	// bool (was visible) F(Machine* m, glm::dvec2 final_pos, glm::dvec3 pos, bool in_front)
+	// Extracted from the code to make it usable from other interfaces, but it's
+	// a bit of code smell!
+	static void draw_machine_polygon(NVGcontext* vg, Part* part, std::vector<Machine*> machines,
+							  int* rnd_idx, glm::dvec4 vport, const CameraUniforms& cu, F&& lambda);
+
 
 public:
 
@@ -41,8 +49,7 @@ public:
 	WireInterface(EditorVehicleInterface* edveh_int);
 
 	bool do_machine(NVGcontext *vg, GUIInput *gui_input, Machine *m, glm::vec2 final_pos, glm::dvec3 pos,
-				 glm::ivec4 vport, bool in_front, std::vector<glm::vec2> &seen_positions, int rnd_idx,
-				 int polygon_machines, Machine *&new_wire,
+				 glm::ivec4 vport, bool in_front, std::vector<glm::vec2> &seen_positions, int rnd_idx, Machine *&new_wire,
 				 std::unordered_map<Machine *, std::pair<glm::vec2, bool>>& machine_to_pos,
 				 bool mouse_blocked);
 };
