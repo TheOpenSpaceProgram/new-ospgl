@@ -12,28 +12,29 @@ engine.get_nozzle_position = nil
 -- (self) -> glm.vec3
 -- Returns the forward vector of the nozzle in world coordinates
 -- Forward means "fire" direction, not thrust force direction
--- Called on update only
+-- Called on physics_update only once
 engine.get_nozzle_forward = nil
 
 -- (self) -> Piece
 -- Returns the piece which generates the thrust, the one which contains the 
 -- nozzle marker
--- Called on update only
+-- Called on physics_update only once
 engine.get_piece = nil
 
 -- OPTIONAL
 -- (self, glm.vec3 final_thrust) -> void
 -- Useful for implementing visual effects
+-- Called on physics_update only once
 engine.after_thrust = nil
 
--- (self) -> float
--- Returns the thrust generated in newtons
--- Called on update only
+-- (self, dt) -> float
+-- Returns the thrust generated in newtons. Simulate the engine here
+-- Called on physics_update only once, result stored for further queries
 engine.get_thrust = nil
 
-
-function engine:update()
-	local f_thrust = self:get_thrust()
+-- You must manually call this function so all functionality is implemented
+function engine:physics_update(dt)
+	local f_thrust = self:get_thrust(dt)
 
 	if f_thrust > 0 then
 		local piece = self:get_piece()
