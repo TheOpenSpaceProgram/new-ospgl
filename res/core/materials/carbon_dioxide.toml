@@ -1,0 +1,15 @@
+name = "Carbon Dioxide"
+formula = "CO_2"
+std_bp = 194.67  
+molar_mass = 44.009e-3
+liquid_density = 1101
+solid_density = 1562
+# Find this data, it was made up!
+heat_capacity_solid = 5000.0
+heat_capacity_liquid = 4150.0
+heat_capacity_gas = 1850.0
+# https://atct.anl.gov/Thermochemical%20Data/version%201.118/species/?species_number=19
+# Keep in mind that's for gas, so simply substracted the vaporization value!
+dH_formation = -9289009
+# https://en.wikipedia.org/wiki/Carbon_dioxide_%28data_page%29
+dH_vaporization = 348247

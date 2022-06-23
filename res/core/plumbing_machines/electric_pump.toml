@@ -1,0 +1,7 @@
+icon = "core:plumbing_machines/junction_3.png"
+name = "electric_pump_name"
+description = "electric_pump_desc"
+add_mass = 1.0
+
+[machine]
+    script = "core:machines/pumps/electric_pump.lua"
