@@ -17,9 +17,11 @@ local locale =
 {"decoupled_attachment", "Decoupled Attachment", "Acoplamiento Separado"},
 {"4_way_name", "4-way Junction", "Cruce de 4 vías"},
 {"3_way_name", "3-way Junction", "Cruce de 3 vías"},
-{"3_way_description", "A lightweight way to split a pipe into two", "Una forma ligera de dividir en dos una tuberia"},
+{"3_way_desc", "A lightweight way to split a pipe into two", "Una forma ligera de dividir en dos una tuberia"},
 {"1_way_name", "Check valve", "Válvula antirretorno"},
-{"1_way_description", "A valve which allows flow in only one direction", "Una válvula que solo permite el flujo en una dirección"},
+{"1_way_desc", "A valve which allows flow in only one direction", "Una válvula que solo permite el flujo en una dirección"},
+{"electric_pump_name", "Electric Pump", "Bomba Eléctrica"},
+{"electric_pump_desc", "A pump that uses electricity", "Una bomba que utiliza electricidad"},
 -- Countries
 {"united_states", "United States of America", "Estados Unidos de América"}
 

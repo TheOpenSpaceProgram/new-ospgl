@@ -360,6 +360,17 @@ void StoredFluids::add_heat(float v)
 	}
 }
 
+void StoredFluids::set_vapor_fraction(const AssetHandle<PhysicalMaterial> &mat, float factor)
+{
+	auto it = contents.find(mat.get());
+	// TODO: Don't include this check and simply ignore the command silently?
+	logger->check(it != contents.end(), "Cannot modify liquid fraction of not-present fluid");
+
+	float total_mass = it->second.gas_mass + it->second.liquid_mass;
+	it->second.gas_mass = total_mass * factor;
+	it->second.liquid_mass = total_mass * (1.0f - factor);
+}
+
 StoredFluid::StoredFluid(float liquid, float gas)
 {
 	liquid_mass = liquid;

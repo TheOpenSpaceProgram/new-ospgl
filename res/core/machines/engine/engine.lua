@@ -29,7 +29,7 @@ local last_density = 0.0
 local R = 8.314462618153
 
 -- As fuel is nebulized, rate of evaporation is MASSIVE, not at all like on normal tanks
--- This will cool down the chamber, but make gases which react way quicker
+-- This is not a very realistic simulation! We could simulate it better approaching it like tanks d
 -- Returns remaining heat
 local function vaporize(tank, heat)
     local contents = tank:get_contents()
@@ -37,17 +37,23 @@ local function vaporize(tank, heat)
     -- "speed of evaporation", so that in low heat situations some fuel remains liquid
     local available_heat = heat * 0.9
 
-    -- Calculate total heat required for full evaporation    
+    -- Calculate total heat required for full evaporation, including 
+    -- heating up to the boiling point at current pressure 
     local required_heat = 0.0
     for phys_mat, stored_fluid in contents:pairs() do
         local evp = stored_fluid.liquid_mass
         required_heat = required_heat + evp * phys_mat.dH_vaporization
     end
 
+    -- Dont mind if its a small ammount
+    if required_heat <= 1000.0 then 
+        return heat
+    end
+
     if required_heat < available_heat then
         -- Total evaporation
         for phys_mat, stored_fluid in contents:pairs() do
-            tank:modify_fluid(phys_mat, -stored_fluid.liquid_mass, stored_fluid.liquid_mass)
+            tank:set_vapor_fraction(phys_mat, 1.0)
         end
 
         return heat - required_heat
@@ -57,7 +63,7 @@ local function vaporize(tank, heat)
             local evp = stored_fluid.liquid_mass
             local heat_for_this = evp * phys_mat.dH_vaporization
             evp = evp * (heat_for_this / required_heat)
-            tank:modify_fluid(phys_mat, -evp, evp)
+            tank:set_vapor_fraction(phys_mat, 1.0 - evp)
         end
 
         return heat - available_heat
@@ -86,14 +92,25 @@ function physics_update(dt)
     local tank = plumbing.internal_tank
     logger.info("it")
     logger.info(tank)
-    -- Liquid-liquid reactions are very quick as there's a nebulizer
-    local heat = tank:react(tank.temperature, chamber_volume, 0.85, dt)
-    last_heat_release = heat / dt
-    --tank:add_heat(heat)
-    heat = vaporize(tank, heat)
-    last_free_heat_release = heat / dt
-    -- Heat up the contents with remaining heat
-    tank:add_heat(heat)
+    -- We carry the "combustion" on a iterated process, reacting a small quantity,
+    -- evaporating, and repeating
+    local iterations = 3 
+    ldt = dt / iterations
+    last_heat_release = 0.0
+    last_free_heat_release = 0.0
+    for i=1,iterations do
+        -- Initial liquid-liquid reaction
+        local heat_released = tank:react(tank.temperature, chamber_volume, 0.001, ldt)
+        local heat = heat_released
+        last_heat_release = last_heat_release + heat_released
+        heat = vaporize(tank, heat)
+        tank:add_heat(heat)
+        last_free_heat_release = last_free_heat_release + heat
+        logger.info("Iteration (" .. i .. "): liquid = " .. tank:get_total_liquid_mass() .. " gas = " .. tank:get_total_gas_mass() .. " heat = " .. heat)
+    end
+
+    last_heat_release = last_heat_release / dt 
+    last_free_heat_release = last_free_heat_release / dt
     last_temperature = tank.temperature
 
     -- Now expell by the choked flow equilibrium through the De-Laval nozzle

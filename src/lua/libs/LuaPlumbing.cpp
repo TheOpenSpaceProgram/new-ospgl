@@ -10,16 +10,20 @@ void LuaPlumbing::load_to(sol::table &table)
 
 	table.new_usertype<StoredFluids>("stored_fluids",
 	 sol::constructors<StoredFluids()>(),
- 		"get_contents", &StoredFluids::get_contents,
- 		"add_fluid", [](StoredFluids& self, const LuaAssetHandle<PhysicalMaterial>& mat, float liquid, float gas)
- 		{
+		"get_contents", &StoredFluids::get_contents,
+		"add_fluid", [](StoredFluids& self, const LuaAssetHandle<PhysicalMaterial>& mat, float liquid, float gas)
+		{
 			self.add_fluid(mat.get_asset_handle(), liquid, gas);
- 		},
+		},
 		 // This one is meant to be used in loops that modify a tank
-	 	"modify_fluid", [](StoredFluids& self, const PhysicalMaterial* mat, float liquid, float gas)
-	 	{
+		"modify_fluid", [](StoredFluids& self, const PhysicalMaterial* mat, float liquid, float gas)
+		{
 			self.add_fluid(AssetHandle<PhysicalMaterial>(mat->get_asset_id()), liquid, gas);
-	 	},
+		},
+		 "set_vapor_fraction", [](StoredFluids& self, const PhysicalMaterial* mat, float factor)
+		 {
+			 self.set_vapor_fraction(AssetHandle<PhysicalMaterial>(mat->get_asset_id()), factor);
+		 },
  		"modify", &StoredFluids::modify,
  		"multiply", &StoredFluids::multiply,
 	 	"drain_to", &StoredFluids::drain_to,

@@ -24,14 +24,7 @@ void ChemicalReaction::calculate_constants()
 		average_cP += mat->heat_capacity_gas * abs(weight);
 		tot += weight;
 
-		if(r.moles > 0)
-		{
-			total_h += mat->dH_formation * weight;
-		}
-		else
-		{
-			total_h -= mat->dH_formation * weight;
-		}
+		total_h -= mat->dH_formation * weight;
 
 		if(weight > 0.0f)
 		{

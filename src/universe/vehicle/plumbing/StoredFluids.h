@@ -49,6 +49,11 @@ public:
 		return contents;
 	};
 
+	// Changes vapor / liquid distribution "aphysically", ie, it maintains temperature without
+	// the need for energy to be added.
+	// Do not use if effects of vaporization are expected to be significant!
+	void set_vapor_fraction(const AssetHandle<PhysicalMaterial>& mat, float factor);
+
 	// Introduces a new fluid (most used functionality) / modifies previously present fluid
 	// Negative temperature means it's added at the temperature of the already existing fluids
 	void add_fluid(const AssetHandle<PhysicalMaterial>& mat, float liquid_mass, float gas_mass, float temp = -1.0f);

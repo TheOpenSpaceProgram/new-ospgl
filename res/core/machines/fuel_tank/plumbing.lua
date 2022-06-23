@@ -52,7 +52,6 @@ function plumbing.get_pressure(port)
 end
 
 function plumbing.out_flow(port, volume, do_flow)
-    logger.info("Asked for: " .. volume * 1000 .. "L")
     if port == "liquid_port" then
         return fluid_container:get_liquid(volume, do_flow)
     else
