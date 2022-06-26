@@ -1,4 +1,4 @@
-icon = "core:plumbing_machines/oneway.png"
+icon = "core:plumbing_machines/shutoff.png"
 name = "shutoff_name"
 description = "shutoff_desc"
 add_mass = 1.0

@@ -1,4 +1,4 @@
-icon = "core:plumbing_machines/junction_3.png"
+icon = "core:plumbing_machines/pump.png"
 name = "electric_pump_name"
 description = "electric_pump_desc"
 add_mass = 1.0

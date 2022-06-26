@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 									glm::dvec3(0.0, 0.0, 0.0),
 									360.0);
 
-	osp->game_state->load_scene(new FlightScene());
+	osp->game_state->load_scene(new EditorScene());
 
 	double t = 0.0;
 

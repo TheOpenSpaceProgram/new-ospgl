@@ -88,8 +88,6 @@ end
 -- Call from physics_update, returns fluids to be moved to the nozzle
 function simulate_chamber(dt)
     local tank = plumbing.internal_tank
-    logger.info("it")
-    logger.info(tank)
     -- We carry the "combustion" on a iterated process, reacting a small quantity,
     -- evaporating, and repeating
     local iterations = 3 
@@ -104,7 +102,6 @@ function simulate_chamber(dt)
         heat = vaporize(tank, heat)
         tank:add_heat(heat)
         last_free_heat_release = last_free_heat_release + heat
-        logger.info("Iteration (" .. i .. "): liquid = " .. tank:get_total_liquid_mass() .. " gas = " .. tank:get_total_gas_mass() .. " heat = " .. heat)
     end
 
     last_heat_release = last_heat_release / dt 
@@ -170,6 +167,5 @@ function draw_chamber_imgui()
     imgui.text(str)
     str = "Chamber contents density: " .. tostring(last_density) .. "kg/m^3"
     imgui.text(str)
-
 
 end
