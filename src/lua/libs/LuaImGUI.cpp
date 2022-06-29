@@ -10,6 +10,10 @@ void LuaImGUI::load_to(sol::table &table)
 	{
 		ImGui::Text("%s", str.c_str());
 	});
+	table.set_function("text_colored", [](float r, float g, float b, const std::string& str)
+	{
+		ImGui::TextColored(ImVec4(r, g, b, 1.0), "%s", str.c_str());
+	});
 	table.set_function("bullet_text", [](const std::string& str)
 	{
 	   ImGui::BulletText("%s", str.c_str());

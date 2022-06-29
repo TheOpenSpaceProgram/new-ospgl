@@ -371,6 +371,24 @@ void StoredFluids::set_vapor_fraction(const AssetHandle<PhysicalMaterial> &mat, 
 	it->second.liquid_mass = total_mass * (1.0f - factor);
 }
 
+
+float StoredFluids::get_specific_gas_constant() const
+{
+	constexpr float R = 8.314462618f;
+
+	float total_mass = get_total_gas_mass();
+	float mass_sum = 0.0f;
+
+	for(const auto& pair : contents)
+	{
+		mass_sum += pair.second.gas_mass * pair.first->molar_mass;
+	}
+
+	mass_sum /= total_mass;
+
+	return R / mass_sum;
+}
+
 StoredFluid::StoredFluid(float liquid, float gas)
 {
 	liquid_mass = liquid;

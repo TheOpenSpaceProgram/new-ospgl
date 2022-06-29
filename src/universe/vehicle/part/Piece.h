@@ -137,6 +137,8 @@ public:
 
 	glm::dmat4 get_graphics_matrix();
 
+	double get_environment_pressure();
+
 	void set_dirty(bool update_now);
 	// The piece OWNS the link, which can be null
 	std::unique_ptr<Link> link;

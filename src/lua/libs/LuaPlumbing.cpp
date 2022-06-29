@@ -34,6 +34,7 @@ void LuaPlumbing::load_to(sol::table &table)
 		 "add_heat", &StoredFluids::add_heat,
 		 "get_total_gas_moles", &StoredFluids::get_total_gas_moles,
 		 "get_average_liquid_density", &StoredFluids::get_average_liquid_density,
+		 "get_specific_gas_constant", &StoredFluids::get_specific_gas_constant,
 		 "react", &StoredFluids::react,
 		sol::meta_function::to_string, [](const StoredFluids& f)
 		{

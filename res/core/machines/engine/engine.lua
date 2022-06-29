@@ -13,8 +13,11 @@ local nozzle_marker = machine.init_toml:get_string("nozzle_marker")
 
 local engine_interface = machine:load_interface("core:interfaces/engine.lua")
 
+local last_thrust = 0.0
+
 -- Include the simulators
 dofile("machines/engine/chamber.lua")
+dofile("machines/engine/nozzle.lua")
 
 function physics_update(dt)
     engine_interface:physics_update(dt)
@@ -38,11 +41,21 @@ engine_interface.get_piece = function(self)
 end
 
 engine_interface.get_thrust = function(self, dt) 
-    local to_nozzle = simulate_chamber(dt)
-    return to_nozzle:get_total_gas_mass() / dt * 300.0
+    local to_nozzle, pressure, is_choked = simulate_chamber(dt)
+    local v, T, P = get_exit_properties(to_nozzle.temperature, pressure, to_nozzle:get_specific_gas_constant(), is_choked) 
+    -- Thrust equation for a rocket engine
+    -- TODO: When atmospheres are simulated, we must include the ambient pressure!
+    local ambient_P = 0.0
+    local thrust = v * to_nozzle:get_total_gas_mass() / dt + (P - ambient_P) * exit_area 
+    last_thrust = thrust
+    return thrust
 end 
 
 function draw_imgui()
     draw_chamber_imgui()
+    imgui.separator()
+    draw_nozzle_imgui()
+    imgui.separator()
+    imgui.text("Thrust: " .. last_thrust .. "N")
 end
 

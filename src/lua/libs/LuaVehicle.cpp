@@ -67,7 +67,8 @@ void LuaVehicle::load_to(sol::table& table)
 		"get_attached_to_marker", [](Piece& self, const std::string& marker)
 		{
 			return self.in_vehicle->get_connected_with(&self, marker);
-		});
+		},
+		"get_environment_pressure", &Piece::get_environment_pressure);
 
 	table.new_usertype<Part>("part",
 		"id", &Part::id,

@@ -72,6 +72,8 @@ public:
 	float get_total_gas_mass() const;
 	float get_total_heat_capacity() const;
 	float get_total_gas_moles() const;
+	// Obtains R / Mm (Mm is the mean molar mass for the mixture)
+	float get_specific_gas_constant() const;
 	void add_heat(float heat);
 };
 
