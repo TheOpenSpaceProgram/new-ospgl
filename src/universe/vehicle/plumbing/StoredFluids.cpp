@@ -365,6 +365,7 @@ void StoredFluids::set_vapor_fraction(const AssetHandle<PhysicalMaterial> &mat, 
 	auto it = contents.find(mat.get());
 	// TODO: Don't include this check and simply ignore the command silently?
 	logger->check(it != contents.end(), "Cannot modify liquid fraction of not-present fluid");
+	logger->check(factor <= 1.0f && factor >= 0.0f, "Vapor fraction must be within 0 and 1 and its value is {}", factor);
 
 	float total_mass = it->second.gas_mass + it->second.liquid_mass;
 	it->second.gas_mass = total_mass * factor;

@@ -57,9 +57,8 @@ local function vaporize(tank, heat)
     else
         -- Consume all available heat proportionally
         for phys_mat, stored_fluid in contents:pairs() do
-            local evp = stored_fluid.liquid_mass
-            local heat_for_this = evp * phys_mat.dH_vaporization
-            evp = evp * (heat_for_this / required_heat)
+            local heat_for_this = stored_fluid.liquid_mass * phys_mat.dH_vaporization
+            local evp = heat_for_this / required_heat
             tank:set_vapor_fraction(phys_mat, 1.0 - evp)
         end
 
