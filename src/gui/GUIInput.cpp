@@ -60,6 +60,7 @@ void GUIInput::update()
 	ext_mouse_blocked = false;
 	ext_keyboard_blocked = false;
 	ext_scroll_blocked = false;
+	execute_user_actions = true;
 	
 	for(int i = 0; i < 3; i++)
 	{

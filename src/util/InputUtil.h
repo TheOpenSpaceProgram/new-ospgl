@@ -3,8 +3,12 @@
 #define GLFW_INCLUDE_NONE 
 #include <GLFW/glfw3.h>
 #include <cstring>
+#include <string>
+#include <utf8/utf8.h>
 
 static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+static void char_callback(GLFWwindow* window, unsigned int codepoint);
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 
 // Central class for making GLFW inputs easy to handle
@@ -16,6 +20,9 @@ private:
 	GLFWcursor* std_cursors[10];
 
 public:
+
+	// May contain unicode stuff! be careful
+	std::string input_text;
 
 	enum class Cursor
 	{
@@ -44,11 +51,16 @@ public:
 	bool current_key_status[KEY_LIST_SIZE] = {false};
 	bool prev_key_status[KEY_LIST_SIZE] = {false};
 
+	// if positive, a key is repeating this frame
+	int repeating_key;
+
 	GLFWwindow* window;
 
 	void setup(GLFWwindow* window)
 	{
 		glfwSetScrollCallback(window, scroll_callback);
+		glfwSetCharCallback(window, char_callback);
+		glfwSetKeyCallback(window, key_callback);
 		this->window = window;
 		std_cursors[(int)Cursor::NORMAL] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 		std_cursors[(int)Cursor::IBEAM] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
@@ -64,6 +76,8 @@ public:
 
 	void update(GLFWwindow* window)
 	{
+		// Remember we are called before glfwPolLEvents and all other game code!
+		repeating_key = -1;
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
@@ -114,6 +128,11 @@ public:
 		return current_key_status[key] && !prev_key_status[key];
 	}
 
+	bool key_down_or_repeating(int key)
+	{
+		return key_down(key) || repeating_key == key;
+	}
+
 	bool key_up(int key)
 	{
 		return !current_key_status[key] && prev_key_status[key];
@@ -138,6 +157,13 @@ public:
 	{
 		glfwSetCursor(window, std_cursors[(int)cursor]);
 	}
+	// Clears the text input and returns read keys
+	std::string get_input_text()
+	{
+		std::string out = input_text;
+		input_text.clear();
+		return out;
+	}
 };
 
 extern InputUtil* input;
@@ -147,3 +173,17 @@ static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	input->mouse_scroll = yoffset;
 }
 
+static void char_callback(GLFWwindow* window, unsigned int code_point)
+{
+	std::u32string in_str;
+	in_str += code_point;
+	input->input_text.append(utf8::utf32to8(in_str));
+}
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if(action == GLFW_REPEAT)
+	{
+		input->repeating_key = key;
+	}
+}

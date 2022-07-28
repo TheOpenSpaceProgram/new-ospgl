@@ -51,13 +51,16 @@ void GUIBaseButton::do_button(glm::ivec2 pos, glm::ivec2 size, glm::ivec4 viewpo
 				ipt->mouse_blocked = true;
 			}
 
-			if(ipt->mouse_down(0)){ set_down(0); }
-			if(ipt->mouse_down(1)){ set_down(1); }
-			if(ipt->mouse_up(0)){ set_up(0); }
-			if(ipt->mouse_up(1)){ set_up(1); }
+			if(ipt->execute_user_actions)
+			{
+				if(ipt->mouse_down(0)){ set_down(0); }
+				if(ipt->mouse_down(1)){ set_down(1); }
+				if(ipt->mouse_up(0)){ set_up(0); }
+				if(ipt->mouse_up(1)){ set_up(1); }
+				set_hover(true);
+				during_hover();
+			}
 
-			set_hover(true);
-			during_hover();
 		}
 		else
 		{
@@ -69,7 +72,7 @@ void GUIBaseButton::do_button(glm::ivec2 pos, glm::ivec2 size, glm::ivec4 viewpo
 		unset = true;
 	}
 
-	if(unset)
+	if(unset && ipt->execute_user_actions)
 	{
 		set_up(0);
 		set_up(1);

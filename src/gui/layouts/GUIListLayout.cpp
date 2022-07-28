@@ -20,7 +20,8 @@ void GUIListLayout::prepare(GUIInput* gui_input)
 	for(auto widget : widgets)
 	{
 		// Y size is free
-		glm::ivec2 used = widget->prepare(glm::ivec2(x_pos, y_pos), glm::ivec2(size.x, -1.0), get_aabb(), gui_input);
+		glm::ivec2 used = widget->prepare(glm::ivec2(x_pos, y_pos), glm::ivec2(size.x, -1.0),
+										  get_aabb(), gui_input);
 
 		// Culling
 		if(y_pos - pos.y > size.y || y_pos - pos.y < -used.y)

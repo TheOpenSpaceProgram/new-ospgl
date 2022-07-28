@@ -80,6 +80,7 @@ void EditorScene::update()
 
 
 	// We prepare a first time to block the interface
+	gui_input.execute_user_actions = false;
 	prepare_gui();
 	float gw = (float)gui.get_panel_width();
 	glm::vec4 gui_vport = glm::vec4(gw, 0, real_screen_size.x - gw, real_screen_size.y);
@@ -87,6 +88,7 @@ void EditorScene::update()
 							 viewport, gui_vport, real_screen_size, osp->renderer->vg, &gui_input, &gui.skin);
 
 	// We prepare again as do_interface may have blocked, for example, due to an ongoing drag
+	gui_input.execute_user_actions = true;
 	prepare_gui();
 
 	do_gui();

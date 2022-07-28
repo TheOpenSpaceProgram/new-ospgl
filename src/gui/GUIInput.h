@@ -21,6 +21,10 @@ public:
 	bool scroll_blocked = false;
 	bool keyboard_blocked = false;
 
+	// Should you actually execute user actions?
+	// This is done to allow multiple prepares
+	bool execute_user_actions;
+
 	// Blocks a mouse button from returning pressed until it's
 	// released. Useful for buttons which change the GUI so additional
 	// clicks aren't recorded

@@ -117,8 +117,8 @@ void EditorGUI::do_toolset(int width, int height, float swidth)
 
 void EditorGUI::prepare_file(int width, int height, GUIInput* gui_input)
 {
-	float fwidth = 300.0f;
-	float fheight = 25.0f;
+	float fwidth = 380.0f;
+	float fheight = 30.0f;
 
 	file_canvas.prepare(glm::ivec2(width - fwidth, 0), glm::ivec2(fwidth, fheight), gui_input);
 }
@@ -126,8 +126,8 @@ void EditorGUI::prepare_file(int width, int height, GUIInput* gui_input)
 void EditorGUI::do_file(int width, int height)
 {
 	// File canvas background
-	float fwidth = 300.0f;
-	float fheight = 25.0f;
+	float fwidth = 380.0f;
+	float fheight = 30.0f;
 	nvgBeginPath(vg);
 	nvgMoveTo(vg, width, 0.0f);
 	nvgLineTo(vg, width - fwidth - fheight, 0.0f);
@@ -137,7 +137,7 @@ void EditorGUI::do_file(int width, int height)
 	nvgFillColor(vg, skin.get_background_color());
 	nvgFill(vg);
 
-	file_canvas.child_0_pixels = fwidth - 18.0f * 5.0f;
+	file_canvas.child_0_pixels = fwidth - 26.0f * 5.0f;
 
 	file_canvas.draw(vg, &skin, glm::ivec4(0, 0, width, height));
 	
@@ -237,19 +237,36 @@ void EditorGUI::create_file()
 
 	// Right contains the small buttons
 
-	auto create_button = [right, this](const std::string& name)
+	auto create_button = [right, this](const std::string& name, std::function<void(int)> on_click)
 	{
 		GUIImageButton* button = new GUIImageButton();
 		button->set_image(vg, AssetHandle<Image>("core", name));
-		button->force_image_size = glm::ivec2(16, 16);
+		button->on_clicked.add_handler(on_click);
+		button->force_image_size = glm::ivec2(22, 22);
+		button->img_mode = GUIImageButton::CENTER;
 		right->layout->add_widget(button);
 	};
 
-	create_button("editor/new.png");
-	create_button("editor/load.png");
-	create_button("editor/save.png");
-	create_button("editor/launch.png");
-	create_button("editor/quit.png");
+	create_button("editor/new.png", [](int but)
+	{
+
+	});
+	create_button("editor/load.png", [](int but)
+	{
+
+	});
+	create_button("editor/save.png", [](int but)
+	{
+
+	});
+	create_button("editor/launch.png", [](int but)
+	{
+
+	});
+	create_button("editor/quit.png", [](int but)
+	{
+
+	});
 }
 
 
