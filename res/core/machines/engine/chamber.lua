@@ -26,7 +26,7 @@ local last_density = 0.0
 local R = 8.314462618153
 
 -- As fuel is nebulized, rate of evaporation is MASSIVE, not at all like on normal tanks
--- This is not a very realistic simulation! We could simulate it better approaching it like tanks d
+-- This is not a very realistic simulation! We could simulate it better approaching it like tanks do
 -- Returns remaining heat
 local function vaporize(tank, heat)
     local contents = tank:get_contents()
@@ -57,9 +57,8 @@ local function vaporize(tank, heat)
     else
         -- Consume all available heat proportionally
         for phys_mat, stored_fluid in contents:pairs() do
-            local evp = stored_fluid.liquid_mass
-            local heat_for_this = evp * phys_mat.dH_vaporization
-            evp = evp * (heat_for_this / required_heat)
+            local heat_for_this = stored_fluid.liquid_mass * phys_mat.dH_vaporization
+            local evp = heat_for_this / required_heat
             tank:set_vapor_fraction(phys_mat, 1.0 - evp)
         end
 
@@ -78,6 +77,9 @@ local function drain_to_nozzle(tank, mass)
 
     for phys_mat, stored_fluid in contents:pairs() do
         local proportion = mass * stored_fluid.gas_mass / total_gas_mass
+        if proportion < 0 then 
+            logger.info("mass= " .. mass .. ", stored_fluid.gas_mass = " .. stored_fluid.gas_mass .. ", total_gas_mass = " .. total_gas_mass)
+        end
         proportion = math.min(proportion, stored_fluid.gas_mass)
         tank:drain_to(expelled_fluid, phys_mat, stored_fluid.liquid_mass, proportion, true)
     end
@@ -85,11 +87,9 @@ local function drain_to_nozzle(tank, mass)
     return expelled_fluid
 end
 
--- Call from physics_update, returns fluids to be moved to the nozzle
+-- Call from physics_update, returns fluids to be moved to the nozzle, pressure, and whether the flow is choked
 function simulate_chamber(dt)
     local tank = plumbing.internal_tank
-    logger.info("it")
-    logger.info(tank)
     -- We carry the "combustion" on a iterated process, reacting a small quantity,
     -- evaporating, and repeating
     local iterations = 3 
@@ -104,7 +104,6 @@ function simulate_chamber(dt)
         heat = vaporize(tank, heat)
         tank:add_heat(heat)
         last_free_heat_release = last_free_heat_release + heat
-        logger.info("Iteration (" .. i .. "): liquid = " .. tank:get_total_liquid_mass() .. " gas = " .. tank:get_total_gas_mass() .. " heat = " .. heat)
     end
 
     last_heat_release = last_heat_release / dt 
@@ -145,7 +144,8 @@ function simulate_chamber(dt)
     --logger.info(tank.temperature)
     --logger.info(pressure)
 
-    return drained
+    -- A bit of safety margin for numeric precision
+    return drained, pressure, last_nozzle_gas_flow >= choked_mass_flow - 0.1 
 end
 
 function draw_chamber_imgui()
@@ -154,8 +154,15 @@ function draw_chamber_imgui()
     imgui.text(str)
     str = "Mass flow: " .. tostring(last_nozzle_liquid_flow + last_nozzle_gas_flow) .. "kg/s"
     imgui.text(str)
-    str = "Nozzle gas mass flow: " .. tostring(last_nozzle_gas_flow) .. "kg/s" .. " (" .. last_nozzle_gas_flow / last_choked_mass_flow * 100 .. "% satisfied)"
-    imgui.text(str)
+    
+    str = "Nozzle gas mass flow: " .. tostring(last_nozzle_gas_flow) .. "kg/s" .. 
+        " (" .. last_nozzle_gas_flow / last_choked_mass_flow * 100 .. "% satisfied)"
+    if last_nozzle_gas_flow / last_choked_mass_flow >= 0.99 then     
+        imgui.text_colored(0.0, 1.0, 0.0, str)
+    else 
+        imgui.text_colored(1.0, 0.0, 0.0, str)
+    end
+
     str = "Nozzle liquid mass flow: " .. tostring(last_nozzle_liquid_flow) .. "kg/s"
     imgui.text(str)
     str = "Total heat released: " .. tostring(last_heat_release / 1000000) .. "MW"
@@ -170,6 +177,5 @@ function draw_chamber_imgui()
     imgui.text(str)
     str = "Chamber contents density: " .. tostring(last_density) .. "kg/m^3"
     imgui.text(str)
-
 
 end

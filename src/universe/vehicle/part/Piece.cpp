@@ -274,3 +274,8 @@ Piece::~Piece()
 {
 	// TODO: Automatic removal of the part if we are root piece
 }
+
+double Piece::get_environment_pressure()
+{
+	return 0;
+}

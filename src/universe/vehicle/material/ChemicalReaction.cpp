@@ -59,36 +59,59 @@ void ChemicalReaction::calculate_constants()
 float ChemicalReaction::react(StoredFluids* fluids, float gas_ammount, float liquid_ammount)
 {
 	// Limiting reagent check
+	float min_gas_ammount = gas_ammount;
+	float min_liquid_ammount = liquid_ammount;
+
 	for(const auto& rct : reactants)
 	{
 		const PhysicalMaterial* mat = fluids->name_to_ptr[rct.reactant];
 		// Only react as much as we can (limiting reagent, adjust)
-		if(gas_ammount > 0 || liquid_ammount > 0)
+		// Reactions may go one way int he gas phase, and another in the liquid phase!
+		// (Positive values mean reacting to the right)
+		if(gas_ammount > 0)
 		{
-			// We react to the right and thus reactants are limiting
+			// If we react to the right and we are a reactant, we may be limited
 			if(rct.react_weight > 0 && fluids->contents[mat].gas_mass < rct.react_weight * gas_ammount)
 			{
-				gas_ammount = fluids->contents[mat].gas_mass / rct.react_weight;
-			}
-			if(rct.react_weight > 0 && fluids->contents[mat].liquid_mass < rct.react_weight * liquid_ammount)
-			{
-				liquid_ammount = fluids->contents[mat].liquid_mass / rct.react_weight;
+				min_gas_ammount = glm::min(fluids->contents[mat].gas_mass / rct.react_weight, min_gas_ammount);
 			}
 		}
 		else
 		{
-			// We react to the left and thus products are limiting (reaction is inversed)
-			// Careful with the signs!
+			// If we react to the left, everything is inverted
 			if(rct.react_weight < 0 && fluids->contents[mat].gas_mass < rct.react_weight * gas_ammount)
 			{
-				gas_ammount = fluids->contents[mat].gas_mass / rct.react_weight;
+				// Note that now, minimum is actually max as everything is negative
+				min_gas_ammount = glm::max(fluids->contents[mat].gas_mass / rct.react_weight, min_gas_ammount);
 			}
+		}
+
+		// Same as for gases
+		if(liquid_ammount > 0)
+		{
+			if(rct.react_weight > 0 && fluids->contents[mat].liquid_mass < rct.react_weight * liquid_ammount)
+			{
+				min_liquid_ammount = glm::min(fluids->contents[mat].liquid_mass / rct.react_weight, min_liquid_ammount);
+			}
+		}
+		else
+		{
 			if(rct.react_weight < 0 && fluids->contents[mat].liquid_mass < rct.react_weight * liquid_ammount)
 			{
-				liquid_ammount = fluids->contents[mat].liquid_mass / rct.react_weight;
+				min_liquid_ammount = glm::max(fluids->contents[mat].liquid_mass / rct.react_weight, min_liquid_ammount);
 			}
 		}
 	}
+
+	liquid_ammount = min_liquid_ammount;
+	gas_ammount = min_gas_ammount;
+
+	// Numerical and mass balance errors should be cancelled to avoid negative masses!
+	if(glm::abs(liquid_ammount) < 0.005f)
+		liquid_ammount = 0.0f;
+
+	if(glm::abs(gas_ammount) < 0.005f)
+		gas_ammount = 0.0f;
 
 	for(const auto& rct : reactants)
 	{

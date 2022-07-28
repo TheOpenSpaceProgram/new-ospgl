@@ -7,7 +7,7 @@ void LuaNanoVG::load_to(sol::table &table)
 	sview.open_libraries(sol::lib::ffi);
 
 	// Load all the FFI stuff
-	sview.script("ffi.cdef[["
+	auto res = sview.script("ffi.cdef[["
   		"void nvgSave(struct NVGcontext* ctx);"
   		"void nvgRestore(struct NVGcontext* ctx);"
 		"void nvgReset(struct NVGcontext* ctx);"
@@ -60,7 +60,6 @@ void LuaNanoVG::load_to(sol::table &table)
 
 
 	// Export the functions
-
 	EXPORT_FFI("nvgSave", "save");
 	EXPORT_FFI("nvgRestore", "restore");
 	EXPORT_FFI("nvgStrokePaint", "stroke_paint");
