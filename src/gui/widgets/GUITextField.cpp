@@ -96,16 +96,21 @@ glm::ivec2 GUITextField::prepare(glm::ivec2 wpos, glm::ivec2 wsize, glm::ivec4 v
 
 		if(input->key_down_or_repeating(GLFW_KEY_BACKSPACE))
 		{
-			auto it = string.begin();
-			auto prev = string.begin();
-			for (int i = 0; i < cursor_pos; i++)
+			if(!string.empty())
 			{
-				prev = it;
-				utf8::next(it, string.end());
+				auto it = string.begin();
+				auto prev = string.begin();
+				for (int i = 0; i < cursor_pos; i++)
+				{
+					prev = it;
+					utf8::next(it, string.end());
+				}
+				// This way we erase the whole codepoint, not just a byte
+				string.erase(prev, it);
+				cursor_pos--;
+
+				on_change.call(std::move(string));
 			}
-			// This way we erase the whole codepoint, not just a byte
-			string.erase(prev, it);
-			cursor_pos -= (it - prev);
 		}
 		else if(!in.empty())
 		{
@@ -116,20 +121,36 @@ glm::ivec2 GUITextField::prepare(glm::ivec2 wpos, glm::ivec2 wsize, glm::ivec4 v
 			}
 
 			string.insert(it, in.begin(), in.end());
-			int chars;
+			// Note that it may in some case be multiple codepoints, for example
+			// if the user writes faster than the framerate!
 			cursor_pos += UTF8Util::count_codepoints(in);
+
+			on_change.call(std::move(string));
+		}
+
+		if(input->key_down(GLFW_KEY_ESCAPE))
+		{
+			focused = false;
+			ipt->keyboard_blocked = false;
+			on_exit.call(std::move(string));
+		}
+
+		if(input->key_down(GLFW_KEY_ENTER))
+		{
+			focused = false;
+			ipt->keyboard_blocked = false;
+			on_intro.call(std::move(string));
 		}
 	}
 
 	return size;
 }
 
-void GUITextField::draw(NVGcontext* vg, GUISkin* skin) 
-{	
+void GUITextField::draw(NVGcontext* vg, GUISkin* skin)
+{
 	// TODO: Maybe write a new skin function for text fields?
 	skin->draw_button(vg, pos, size, "", GUISkin::ButtonState::NORMAL, GUISkin::ButtonStyle::SYMMETRIC);
 
-	nvgFillColor(vg, skin->get_foreground_color());
 	if(uses_bitmap)
 	{
 		AssetHandle<BitmapFont> bfont = AssetHandle<BitmapFont>("core:fonts/ProggySquare.fnt");
@@ -146,53 +167,65 @@ void GUITextField::draw(NVGcontext* vg, GUISkin* skin)
 		nvgTextMetrics(vg, &asc, &desc, &lh);
 		nvgTextAlign(vg, NVG_ALIGN_MIDDLE);
 
-		// This is unicode compatible, so glyphs may not exactly match string.size!
-		glyph_pos.resize(string.size());
-		int glyph_count = nvgTextGlyphPositions(vg, pos.x, pos.y, string.c_str(), nullptr,
-							  &glyph_pos[0], string.size());
-		glyph_pos.resize(glyph_count);
-
-		float cursor_x = 0.0f;
-
-		// Note that the cursor is drawn at the "left" (x) of the
-		// cursor_pos pointed glyph, so the last character is "virtual"
-		if(glyph_pos.empty())
+		if(string.empty() && !focused)
 		{
-			cursor_x = pos.x;
+			nvgFillColor(vg, skin->get_foreground_color(true));
+			nvgText(vg, pos.x + 2.0f, pos.y + size.y * 0.5f + 2.0f, default_string.c_str(), nullptr);
 		}
 		else
 		{
-			if (cursor_pos >= glyph_pos.size())
+			nvgFillColor(vg, skin->get_foreground_color());
+			// This is unicode compatible, so glyphs may not exactly match string.size!
+			glyph_pos.resize(string.size());
+			if(!string.empty())
 			{
-				cursor_x = glyph_pos[glyph_pos.size() - 1].maxx;
+				int glyph_count = nvgTextGlyphPositions(vg, pos.x, pos.y, string.c_str(), nullptr,
+														&glyph_pos[0], string.size());
+				glyph_pos.resize(glyph_count);
 			}
-			else if (cursor_pos < 0)
+
+			float cursor_x = 0.0f;
+
+			// Note that the cursor is drawn at the "left" (x) of the
+			// cursor_pos pointed glyph, so the last character is "virtual"
+			if(glyph_pos.empty())
 			{
-				cursor_x = glyph_pos[0].x;
+				cursor_x = pos.x;
 			}
 			else
 			{
-				cursor_x = glyph_pos[cursor_pos].x;
+				if (cursor_pos >= glyph_pos.size())
+				{
+					cursor_x = glyph_pos[glyph_pos.size() - 1].maxx;
+				}
+				else if (cursor_pos < 0)
+				{
+					cursor_x = glyph_pos[0].x;
+				}
+				else
+				{
+					cursor_x = glyph_pos[cursor_pos].x;
+				}
 			}
-		}
 
-		float offset = 0.0f;
-		if(cursor_x > pos.x + size.x)
-		{
-			offset = cursor_x - pos.x - size.x + 4.0f;
-		}
-		last_offset = offset;
+			float offset = 0.0f;
+			if(cursor_x > pos.x + size.x)
+			{
+				offset = cursor_x - pos.x - size.x + 4.0f;
+			}
+			last_offset = offset;
 
-		nvgText(vg, pos.x + 2.0f - offset, pos.y + size.y * 0.5f, string.c_str(), nullptr);
-		double time = glfwGetTime();
-		double timemod = fmod(time, 1.0);
-		if(timemod > 0.5 && focused)
-		{
-			nvgStrokeColor(vg, skin->get_foreground_color());
-			nvgBeginPath(vg);
-			nvgMoveTo(vg, cursor_x + 1.0f - offset, pos.y + 3.0f);
-			nvgLineTo(vg, cursor_x + 1.0f - offset, pos.y + size.y - 3.0f);
-			nvgStroke(vg);
+			nvgText(vg, pos.x + 2.0f - offset, pos.y + size.y * 0.5f + 2.0f, string.c_str(), nullptr);
+			double time = glfwGetTime();
+			double timemod = fmod(time, 1.0);
+			if(timemod > 0.5 && focused)
+			{
+				nvgStrokeColor(vg, skin->get_foreground_color());
+				nvgBeginPath(vg);
+				nvgMoveTo(vg, cursor_x + 1.0f - offset, pos.y + 3.0f);
+				nvgLineTo(vg, cursor_x + 1.0f - offset, pos.y + size.y - 3.0f);
+				nvgStroke(vg);
+			}
 		}
 
 		nvgResetScissor(vg);
@@ -202,7 +235,7 @@ void GUITextField::draw(NVGcontext* vg, GUISkin* skin)
 GUITextField::GUITextField(std::string font, float size)
 {
 	focused = false;
-	string = "Hello world";
+	string = "";
 	default_string = "";
 	uses_bitmap = false;
 	cursor_pos = 0;

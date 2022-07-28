@@ -4,7 +4,7 @@
 // A reasonable multiplier to prevent extreme flow velocities
 // I don't know enough fluid mechanics as to determine a reasonable value
 // so it's arbitrary, chosen to approximate real life rocket values
-#define FLOW_MULTIPLIER 0.00002
+#define FLOW_MULTIPLIER 0.0001
 
 
 VehiclePlumbing::VehiclePlumbing(Vehicle *in_vehicle)

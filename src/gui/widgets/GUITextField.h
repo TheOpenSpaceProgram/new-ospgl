@@ -9,6 +9,13 @@ private:
 	float last_offset;
 public:
 
+	// called when the enter key is clicked and the text field selected
+	Signal<void(std::string)> on_intro;
+	// called when the escape key is clicked and the text field selected
+	Signal<void(std::string)> on_exit;
+	// called when the string changes
+	Signal<void(std::string)> on_change;
+
 	std::string string;
 	std::string default_string;
 	float ft_size;

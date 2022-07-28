@@ -4,6 +4,8 @@
 #include <GLFW/glfw3.h>
 #include <cstring>
 #include <string>
+// For some reason Visual Studio compiler doesnt state correct C++ version, even if it's using >= C++11
+#define UTF_CPP_CPLUSPLUS 201103L
 #include <utf8/utf8.h>
 
 static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
