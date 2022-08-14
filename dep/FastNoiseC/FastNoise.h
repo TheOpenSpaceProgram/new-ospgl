@@ -58,6 +58,10 @@ typedef struct FastNoise
 	FN_DECIMAL cellular_jitter;
 	FN_DECIMAL gradient_perturb_amp;
 
+	FN_DECIMAL crater_chance;
+	int crater_layers;
+
+	FN_DECIMAL crater_rad;
 
 } FastNoise;
 
@@ -98,6 +102,38 @@ NO_IGNORE void fn_gradient_perturb3(FastNoise* fn, FN_DECIMAL* x, FN_DECIMAL* y,
 NO_IGNORE void fn_gradient_perturb_fractal3(FastNoise* fn, FN_DECIMAL* x, FN_DECIMAL* y, FN_DECIMAL* z);
 
 NO_IGNORE FN_DECIMAL fn_simplex4(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z, FN_DECIMAL w);
+
+// CRATER NOISE
+// (Custom method designed by Tatjam and not included in original FastNoise)
+// An implementation of "crater" noise, returns "distance" and radial pos respect to a set of points
+// randomly placed through a 3D grid. These points may never overlap as we use a grid method
+// so only one crater per grid. Use multiple samples to generate interesting patterns
+
+// Sets the chance of a grid location having a crater, from 0 to 1
+// Note that changing crater chance will change the whole distribution of craters, don't
+// use as a way to control craters locally! For that, multiply the craters by another noise map
+NO_IGNORE void fn_set_crater_chance(FastNoise* fn, FN_DECIMAL chance);
+// Set the number of passes to do with the crater generator.
+// The grid and seed will be changed during the process to populate craters
+// in a more natural way
+// If you use the radial components, you may be better off composing manually
+// so that overlapping craters are no issue
+NO_IGNORE void fn_set_crater_layers(FastNoise* fn, int num);
+
+// TODO: Profile if radial calculation boolean is a slow-down, so we could
+// make two functions instead of the bool parameter
+
+// Returns a value from 0 to 1 indicating clamped squared distance to the crater
+// if calculate_rad is not false, the radial position respect to the crater is written
+// to fn->crater_rad (This is used for easy lua interop without wrappers for speed!)
+// As the noise function is 3D, radial position is respect to the plane (x, y, z)
+// (Use this to make ejecta, etc...)
+// It returns the square value to reduce minimum computation to the absolute minimum, if you
+// want to use a linear function as crater shape, take the square root!
+// To layer craters, use whichever method looks good, a good one is min(layer1, layer2)
+NO_IGNORE FN_DECIMAL fn_crater3(FastNoise* fn, int calculate_rad, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z);
+// Call after fn_crater3 to obtain the radial component (if it was calculated)
+NO_IGNORE FN_DECIMAL fn_crater3_get_rad(FastNoise* fn);
 
 #ifdef __cplusplus
 };

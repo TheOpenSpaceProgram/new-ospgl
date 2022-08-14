@@ -37,7 +37,7 @@ void GUIImageButton::draw(NVGcontext* vg, GUISkin* skin)
 		else if(img_mode == CENTER)
 		{
 			glm::ivec2 imgpos = pos + size / 2 - img_size / 2;
-			img_fill = nvgImagePattern(vg, imgpos.y, imgpos.y, img_size.x, img_size.y, 0.0f, image, 1.0f);
+			img_fill = nvgImagePattern(vg, imgpos.x, imgpos.y, img_size.x, img_size.y, 0.0f, image, 1.0f);
 			// We just have to draw the center rectangle
 			nvgBeginPath(vg);
 			nvgFillPaint(vg, img_fill);

@@ -45,6 +45,10 @@ void LuaNoise::load_to(sol::table& table)
 	"void fn_gradient_perturb3(struct FastNoise* fn, double* x, double* y, double* z);"
 	"void fn_gradient_perturb_fractal3(struct FastNoise* fn, double* x, double* y, double* z);"
 	"double fn_simplex4(struct FastNoise* fn, double x, double y, double z, double w);"
+ 	"void fn_set_crater_chance(struct FastNoise* fn, double chance);"
+    "void fn_set_crater_layers(struct FastNoise* fn, int layers);"
+ 	"double fn_crater3(struct FastNoise* fn, int do_rad, double x, double y, double z);"
+  	"double fn_crater3_get_rad(struct FastNoise* fn);"
 	"struct FastNoise* fn_new(int seed);]]", "internal: LuaNoise");
 	// Little macro to shorten a bit the code
 #define EXPORT_FFI(ffi_name, table_name) table[table_name] = sview["ffi"]["C"][ffi_name]
@@ -81,6 +85,10 @@ void LuaNoise::load_to(sol::table& table)
 	//EXPORT_FFI("fn_cubic_fractal3", "cubic_fractal3");
 	//EXPORT_FFI("fn_gradient_perturb3", "gradient_perturb3");
 	//EXPORT_FFI("fn_gradient_perturb_fractal3", "gradient_perturb_fractal3");
+	EXPORT_FFI("fn_set_crater_chance", "set_crater_chance");
+	EXPORT_FFI("fn_set_crater_layers", "set_crater_layers");
+	EXPORT_FFI("fn_crater3_get_rad", "crater3_get_rad");
+	EXPORT_FFI("fn_crater3", "crater3");
 	EXPORT_FFI("fn_simplex4", "simplex4");
 	EXPORT_FFI("fn_new", "new");
 

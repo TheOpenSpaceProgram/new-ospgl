@@ -1117,4 +1117,178 @@ FN_DECIMAL fn_simplex4(FastNoise* fn, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z, 
 	return SingleSimplex4(fn, 0, x * fn->frequency, y * fn->frequency, z * fn->frequency, w * fn->frequency);
 }
 
-// Cubic Noise
+void fn_set_crater_chance(FastNoise* fn, FN_DECIMAL chance)
+{
+	fn->crater_chance = chance;
+}
+
+void fn_set_crater_layers(FastNoise* fn, int layers)
+{
+	fn->crater_layers = layers;
+}
+
+// Maps a value that goes from 0 to 1, so it goes from min to max
+static float map(float val, float min, float max)
+{
+	return val * (max - min) + min;
+}
+
+// Returns 1 if we are inside a crater
+// TODO: Write this in FN_DECIMALS too? Performance?
+// It should not really be needed as it's cell centered, but check it out!
+static int crater_cell(FastNoise* fn, float* out_dist2, float* out_rad, float* out_radius, int seed,
+						float cpx, float cpy, float cpz, int64_t cx, int64_t cy, int64_t cz)
+{
+	// We use this PCG for convenience, if it's slow we can use a simpler one
+	rnd_pcg_t pcg;
+	rnd_pcg_seed(&pcg, seed);
+	float crater_sample = rnd_pcg_nextf(&pcg);
+	if(crater_sample > fn->crater_chance)
+	{
+		return 0;
+	}
+
+	float radius = rnd_pcg_nextf(&pcg) * 0.5f;
+	float pos_x = rnd_pcg_nextf(&pcg);
+	float pos_y = rnd_pcg_nextf(&pcg);
+	float pos_z = rnd_pcg_nextf(&pcg);
+
+	float dist_x = cpx - pos_x;
+	float dist_y = cpy - pos_y;
+	float dist_z = cpz - pos_z;
+
+	float dist2 = dist_x * dist_x + dist_y * dist_y + dist_z * dist_z;
+	dist2 /= (radius * radius);
+	if(dist2 > 1.0)
+	{
+		return 0;
+	}
+
+	*out_dist2 = (FN_DECIMAL)dist2;
+	*out_radius = (FN_DECIMAL)radius;
+
+	if (out_rad)
+	{
+		// Vector cp center of the evaluation position respect to crater
+		// Vector base_dir is chosen at random for each crater, it's the cross product
+		// of the crater position and a random vector (rarely will it aim towards (x,y,z) too)
+		// in such a way that crater radials are aligned with the "planet surface"
+		float rndx = rnd_pcg_nextf(&pcg);
+		float rndy = rnd_pcg_nextf(&pcg);
+		float rndz = rnd_pcg_nextf(&pcg);
+		float cratx = pos_x + (float)cx;
+		float craty = pos_y + (float)cy;
+		float cratz = pos_z + (float)cz;
+		float cratlength = sqrtf(cratx * cratx + craty * craty + cratz * cratz);
+		cratx /= cratlength;
+		craty /= cratlength;
+		cratz /= cratlength;
+		// bd = rnd x crat
+		float bdx = rndy * cratz - rndz * craty;
+		float bdy = rndz * cratx - rndx * cratz;
+		float bdz = rndx * craty - rndy * cratx;
+		// Project the evaluation position into the crat-center plane
+		// we project dist
+		float dist_along_normal = dist_x * cratx + dist_y * craty + dist_z * cratz;
+		// eip = evaluation point in crat-center plane (bd is forcefully in the plane!)
+		float eipx = dist_x - dist_along_normal * cratx;
+		float eipy = dist_y - dist_along_normal * craty;
+		float eipz = dist_z - dist_along_normal * cratz;
+
+		float cplength = sqrtf(eipx * eipx + eipy * eipy + eipz * eipz);
+		float bdlength = sqrtf(bdx * bdx + bdy * bdy + bdz * bdz);
+		float dot = bdx * eipx + bdy * eipy + bdz * eipz;
+
+		*out_rad = acosf(dot / (cplength * bdlength));
+	}
+
+	return 1;
+
+}
+
+FN_DECIMAL fn_crater3(FastNoise* fn, int calculate_rad, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
+{
+	float acc_dist2 = 1.0f;
+	float acc_rad = 0.0f;
+	float cur_min_radius = 999.9f;
+
+	// The grid is always 1x1x1 so we use frequency to multiply x,y,z
+	x *= fn->frequency;
+	y *= fn->frequency;
+	z *= fn->frequency;
+
+	for(int i = 0; i < fn->crater_layers; i++)
+	{
+		// Shift the grid for more interesting generationbugged
+		// TODO: This breaks crater centering for wathever reason...
+		//x += 1.0f / (float)(fn->crater_layers);
+		//y += 1.0f / (float)(fn->crater_layers);
+		//z += 1.0f / (float)(fn->crater_layers);
+
+		// Craters may only be as big as a cell (radius = 0.5), and thus can only affect HALF
+		// of the neighboring cell. This greatly reduces the number of cells we have to check
+		// Cell coordinates (int64 may be overkill, allows REALLY small craters if using double)
+		int64_t cx = FastFloor(x);
+		int64_t cy = FastFloor(y);
+		int64_t cz = FastFloor(z);
+		float cpx = (float) (x - (FN_DECIMAL) cx);
+		float cpy = (float) (y - (FN_DECIMAL) cy);
+		float cpz = (float) (z - (FN_DECIMAL) cz);
+		// Sum contribution of neighbor cells and our own cell
+		int64_t scx = cpx < 0.5f ? cx - 1 : cx;
+		int64_t scy = cpy < 0.5f ? cy - 1 : cy;
+		int64_t scz = cpz < 0.5f ? cz - 1 : cz;
+		int64_t ecx = cpx < 0.5f ? cx : cx + 1;
+		int64_t ecy = cpy < 0.5f ? cy : cy + 1;
+		int64_t ecz = cpz < 0.5f ? cz : cz + 1;
+
+		for (int64_t icx = scx; icx <= ecx; icx++)
+		{
+			for (int64_t icy = scy; icy <= ecy; icy++)
+			{
+				for (int64_t icz = scz; icz <= ecz; icz++)
+				{
+					// TODO: Improve the seeding, this implies a periodicity N of the noise
+					// We could use a Z-curve for extra coolness!
+					int N = 10000;
+					int seed = (int) ((icz % N) * N * N + (icy % N) * N + (icx % N)) + fn->seed + i;
+					int x_off = (int) (icx - cx);
+					int y_off = (int) (icy - cy);
+					int z_off = (int) (icz - cz);
+					float c_cpx = cpx - (float) x_off;
+					float c_cpy = cpy - (float) y_off;
+					float c_cpz = cpz - (float) z_off;
+					float radius;
+					float dist2;
+					float rad;
+					float* rad_ptr = calculate_rad ? &rad : NULL;
+					if (crater_cell(fn, &dist2, rad_ptr, &radius,
+					 	seed, c_cpx, c_cpy, c_cpz, icx, icy, icz) == 1)
+					{
+						// Overlap mode: minimum of two
+						cur_min_radius = radius;
+						float minv = min(dist2, acc_dist2);
+						if(minv == dist2)
+						{
+							acc_dist2 = dist2;
+							acc_rad = rad;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if(calculate_rad)
+	{
+		fn->crater_rad = acc_rad;
+	}
+	return acc_dist2;
+
+}
+
+FN_DECIMAL fn_crater3_get_rad(FastNoise* fn)
+{
+	return fn->crater_rad;
+}
+

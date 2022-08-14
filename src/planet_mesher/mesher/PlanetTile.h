@@ -60,6 +60,7 @@ struct PlanetTile
 	glm::dvec3 up;
 
 	// Keep below ~128, for OpenGL reasons (index buffer too big)
+	// In debug, 32 is good for performance, but in Release 64 can be used just fine
 	static const int TILE_SIZE = 32;
 	static const size_t GEN_ARRAY_SIZE = (TILE_SIZE + 2) * (TILE_SIZE + 2);
 	// TODO: Make it possible for this number to be different, the whole tile is overkill
