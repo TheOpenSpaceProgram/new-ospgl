@@ -302,3 +302,5 @@ res/test_parts/**
 
 # Development vessel
 udata/vehicles/debug.toml
+/cmake-build-debug/
+/cmake-build-release/

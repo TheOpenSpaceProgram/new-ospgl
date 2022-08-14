@@ -23,9 +23,9 @@ end
 
 function plumbing.get_pressure_drop(from, to, cur_P)
     if from == "inlet" and  to == "outlet" then 
-        return -101300 * 60
+        return -101300 * 230
     else 
-        return 101300 * 60
+        return 101300 * 230
     end
 end
 
