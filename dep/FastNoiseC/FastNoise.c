@@ -1267,7 +1267,7 @@ FN_DECIMAL fn_crater3(FastNoise* fn, int calculate_rad, FN_DECIMAL x, FN_DECIMAL
 					{
 						// Overlap mode: minimum of two
 						cur_min_radius = radius;
-						float minv = min(dist2, acc_dist2);
+						float minv = fminf(dist2, acc_dist2);
 						if(minv == dist2)
 						{
 							acc_dist2 = dist2;
