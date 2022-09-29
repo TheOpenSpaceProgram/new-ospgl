@@ -112,3 +112,20 @@ void GameState::load_scene(Scene* n_scene)
 	scene->load();
 }
 
+void GameState::bootstrap()
+{
+	sol::environment env = sol::environment(universe.lua_state, sol::create, universe.lua_state.globals());
+	// We need to load LuaCore to it
+	lua_core->load((sol::table&)env, "core");
+
+	std::string full_path = osp->assets->res_path + "core/bootstrap.lua";
+	auto result = universe.lua_state.safe_script_file(full_path, env);
+	if(!result.valid())
+	{
+		sol::error err = result;
+		logger->fatal("Lua Error loading bootstrap:\n{}", err.what());
+	}
+
+	LuaUtil::call_function(env["bootstrap"]);
+}
+

@@ -27,24 +27,7 @@ int main(int argc, char** argv)
 
 	PROFILE_FUNC();
 
-
-	auto* audio = new AssetHandle<AudioClip>("debug_system:test_audio.wav");
-	std::weak_ptr<AudioSource> src2 = osp->audio_engine->create_audio_source(1);
-	src2.lock()->set_position(glm::dvec3(1.0, 0.0, 2.0));
-	src2.lock()->set_source_clip(*audio);
-	src2.lock()->set_looping(true);
-	src2.lock()->set_3d_source(true);
-	src2.lock()->set_playing(false);
-
-	osp->audio_engine->set_listener(glm::dvec3(0.0, 0.0, 0.0),
-									glm::dvec3(1.0, 0.0, 0.0),
-									glm::dvec3(0.0, 1.0, 0.0),
-									glm::dvec3(0.0, 0.0, 0.0),
-									360.0);
-
-	osp->game_state->load_scene(new EditorScene());
-
-	double t = 0.0;
+	osp->game_state->bootstrap();
 
 
 	while (osp->should_loop())
@@ -56,13 +39,7 @@ int main(int argc, char** argv)
 		osp->render();
 		osp->finish_frame();
 
-		src2.lock()->set_position(glm::dvec3(cos(t), 0.0, sin(t)));
-
-		t+=osp->game_dt*0.4f;
-
 	}
-
-	delete audio;
 
 	osp->finish();
 }

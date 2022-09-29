@@ -50,6 +50,8 @@ public:
 		PLUMBING,		// LuaPlumbing
 		GUI,			// LuaGUI
 		IMGUI,			// LuaImGUI
+		SCENE,			// LuaScene
+		RENDERER,		// LuaRenderer
 		COUNT,
 	};
 

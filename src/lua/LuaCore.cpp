@@ -16,6 +16,8 @@
 #include "libs/LuaPlumbing.h"
 #include "libs/LuaGUI.h"
 #include "libs/LuaImGUI.h"
+#include "libs/LuaSceneLib.h"
+#include "libs/LuaRenderer.h"
 
 
 LuaCore* lua_core;
@@ -130,6 +132,14 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::IMGUI;
 	}
+	else if(name == "scene")
+	{
+		return LibraryID::SCENE;
+	}
+	else if(name == "renderer")
+	{
+		return LibraryID::RENDERER;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -228,6 +238,8 @@ LuaCore::LuaCore()
 	libraries[LibraryID::PLUMBING] = new LuaPlumbing();
 	libraries[LibraryID::GUI] = new LuaGUI();
 	libraries[LibraryID::IMGUI] = new LuaImGUI();
+	libraries[LibraryID::SCENE] = new LuaSceneLib();
+	libraries[LibraryID::RENDERER] = new LuaRenderer();
 }
 
 LuaCore::~LuaCore()

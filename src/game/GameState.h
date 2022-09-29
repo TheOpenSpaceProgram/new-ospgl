@@ -26,6 +26,8 @@ public:
 	// Previous scene is deleted on next update
 	void load_scene(Scene* new_scene);
 
+	void bootstrap();
+
 	GameState();
 };
 

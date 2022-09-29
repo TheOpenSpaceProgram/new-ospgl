@@ -123,7 +123,7 @@ function simulate_chamber(dt)
     
     local gamma = 1.233
     -- TODO: Tunable "choked-flow-like" equation (for now expell everything)
-    local choked_mass_flow = 99999999999999.0
+    local choked_mass_flow = math.sqrt(pressure) * 0.047
     
     local drained = drain_to_nozzle(tank, choked_mass_flow * dt)
 

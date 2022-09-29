@@ -1,5 +1,5 @@
 require("game_database")
-
+local logger = require("logger")
 
 function load(database)
 
@@ -23,8 +23,5 @@ function load(database)
 	-- The first locale is the default if selected one is not available
 	database:load_locale(dofile("locale.lua"))
 
-
-
 end
-
 
