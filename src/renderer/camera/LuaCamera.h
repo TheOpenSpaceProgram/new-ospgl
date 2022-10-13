@@ -30,6 +30,8 @@ public:
 		CameraUniforms out = res.value().get<CameraUniforms>();
 		out.screen_size = glm::vec2((float)w, (float)h);
 		out.iscreen_size = glm::ivec2(w, h);
+
+		return out;
 	}
 
 	explicit LuaCamera(sol::environment* env)

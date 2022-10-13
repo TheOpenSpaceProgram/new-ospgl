@@ -10,6 +10,7 @@ class btRigidBody;
 class SystemElement
 {
 public:
+
 	size_t index;
 
 	std::string name;

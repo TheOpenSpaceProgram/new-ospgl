@@ -20,7 +20,7 @@ void LuaBullet::load_to(sol::table& table)
 
 	// Rigidbody
 	sol::usertype<btRigidBody> rigidbody_ut = table.new_usertype<btRigidBody>("rigidbody",
-		"new", [](double mass, btMotionState* mstate, btCollisionShape* col_shape, glm::dvec3 inertia = glm::dvec3(0, 0, 0))
+		"new", [](double mass, btMotionState* mstate, btCollisionShape* col_shape)
 		{
 			btRigidBody rg = btRigidBody(mass, mstate, col_shape, to_btVector3(inertia));	
 			rg.setActivationState(DISABLE_DEACTIVATION);			
