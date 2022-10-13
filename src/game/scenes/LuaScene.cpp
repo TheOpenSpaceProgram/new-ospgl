@@ -1,11 +1,16 @@
 #include "LuaScene.h"
 #include "lua/LuaCore.h"
 #include "../GameState.h"
+#include "renderer/Renderer.h"
 
-LuaScene::LuaScene(GameState* in_state, const std::string& scene_script, const std::string& in_pkg)
+LuaScene::LuaScene(GameState* in_state, const std::string& scene_script, const std::string& in_pkg,
+				   std::vector<sol::object> args) :
+	cam(&this->env)
 {
+	this->to_pass_args = args;
 	this->in_pkg = in_pkg;
 	this->lua_state = &in_state->universe.lua_state;
+	osp->renderer->cam = &cam;
 
 	auto[pkg, name] = osp->assets->get_package_and_name(scene_script, in_pkg);
 
@@ -15,6 +20,8 @@ LuaScene::LuaScene(GameState* in_state, const std::string& scene_script, const s
 	// We need to load LuaCore to it
 	lua_core->load((sol::table&)env, pkg);
 	env["universe"] = &in_state->universe;
+	env["renderer"] = osp->renderer;
+
 
 	std::string old = osp->assets->get_current_package();
 	std::string full_path = osp->assets->res_path + pkg + "/" + name;
@@ -30,7 +37,8 @@ LuaScene::LuaScene(GameState* in_state, const std::string& scene_script, const s
 
 void LuaScene::load()
 {
-	LuaUtil::call_function_if_present(env["load"]);
+	LuaUtil::call_function_if_present_args(env["load"], to_pass_args);
+	to_pass_args.clear();
 }
 
 void LuaScene::update()

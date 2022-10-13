@@ -68,6 +68,23 @@ public:
 		return result;	
 	}
 
+	template<typename T, typename K>
+	static sol::safe_function_result call_function_args(sol::table_proxy<T, K> path, std::vector<sol::object> args)
+	{
+		sol::safe_function fnc = path;
+
+
+		auto result = fnc(sol::as_args(args));
+
+		if(!result.valid())
+		{
+			sol::error err = result;
+			lua_error_handler(path.lua_state(), err);
+		}
+
+		return result;
+	}
+
 	// Crashes on error
 	template<typename T, typename K, typename... Args>
 	static sol::safe_function_result safe_call_function(sol::table_proxy<T, K> path, Args&&... args)
@@ -92,6 +109,20 @@ public:
 		if(path.valid())
 		{
 			return call_function(path, args...);
+		}
+		else
+		{
+			return {};
+		}
+	}
+
+	template<typename T, typename K>
+	static std::optional<sol::safe_function_result>
+	call_function_if_present_args(sol::table_proxy<T, K> path, std::vector<sol::object> args)
+	{
+		if(path.valid())
+		{
+			return call_function_args(path, args);
 		}
 		else
 		{

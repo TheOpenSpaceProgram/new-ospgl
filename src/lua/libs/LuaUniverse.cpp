@@ -41,7 +41,17 @@ void LuaUniverse::load_to(sol::table& table)
 				any_vec.push_back(EventArgument(v));
 			}
 
-			self->emit_event(event_id, any_vec);	
-		}	
+			self->emit_event(event_id, any_vec);
+		},
+		"bt_world", &Universe::bt_world,
+		"system", &Universe::system,
+		// We implement a getter, to modify entities use the given functions
+		"entities", sol::property([](Universe* uv)
+		  {
+			return sol::as_table(uv->entities);
+		  })
 	);
+
+	table.new_usertype<PlanetarySystem>("planetary_system", sol::base_classes, sol::bases<Drawable>());
+	table.new_usertype<Entity>("entity", sol::base_classes, sol::bases<Drawable>());
 }

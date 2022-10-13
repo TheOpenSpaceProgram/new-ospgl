@@ -787,4 +787,20 @@ void Renderer::env_map_sample()
 	}
 }
 
+void Renderer::remove_all_drawables()
+{
+	for(Drawable* d : all_drawables)
+	{
+		remove_drawable(d);
+	}
+}
+
+void Renderer::remove_all_lights()
+{
+	for(Light* l : lights)
+	{
+		remove_light(l);
+	}
+}
+
 

@@ -146,12 +146,26 @@ public:
 	void finish();
 
 
-	void add_drawable(Drawable* d, std::string n_id = "");
+	void add_drawable(Drawable* d, std::string n_id);
+	// Lua sadly cannot handle default arguments, so this is needed
+	void add_drawable(Drawable* d)
+	{
+		add_drawable(d, "");
+	}
 	void remove_drawable(Drawable* d);
+	void remove_all_drawables();
 
 	// Lights are different
 	void add_light(Light* light);
 	void remove_light(Light* light);
+	void remove_all_lights();
+
+	// removes all lights and drawables
+	void clear()
+	{
+		remove_all_drawables();
+		remove_all_lights();
+	}
 
 	int get_width(bool gui = false);
 	int get_height(bool gui = false);
