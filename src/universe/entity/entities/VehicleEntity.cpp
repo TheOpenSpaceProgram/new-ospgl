@@ -63,3 +63,29 @@ void VehicleEntity::shadow_pass(ShadowCamera& sh_cam)
 		p->model_node->draw_shadow(sh_cam, tform, true);
 	}
 }
+
+glm::dvec3 VehicleEntity::get_visual_origin()
+{
+	if(vehicle->is_packed())
+	{
+		//TODO
+		return glm::dvec3(0, 0, 0);
+	}
+	else
+	{
+		return vehicle->unpacked_veh.get_center_of_mass(true);
+	}
+}
+
+glm::dvec3 VehicleEntity::get_physics_origin()
+{
+	if(vehicle->is_packed())
+	{
+		//TODO
+		return glm::dvec3(0, 0, 0);
+	}
+	else
+	{
+		return vehicle->unpacked_veh.get_center_of_mass(false);
+	}
+}

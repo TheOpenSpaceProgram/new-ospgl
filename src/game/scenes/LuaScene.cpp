@@ -23,7 +23,6 @@ LuaScene::LuaScene(GameState* in_state, const std::string& scene_script, const s
 	env["renderer"] = osp->renderer;
 
 
-	std::string old = osp->assets->get_current_package();
 	std::string full_path = osp->assets->res_path + pkg + "/" + name;
 	auto result = (*lua_state).safe_script_file(full_path, env);
 	if(!result.valid())

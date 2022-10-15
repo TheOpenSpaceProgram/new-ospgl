@@ -3,6 +3,7 @@
 #pragma warning(push, 0)
 #include <btBulletDynamicsCommon.h>
 #pragma warning(pop)
+#include <sol/sol.hpp>
 
 #include <renderer/Drawable.h>
 #include <util/defines.h>
@@ -45,6 +46,9 @@ public:
 
 	// Return our position to be used by physics loading
 	virtual glm::dvec3 get_physics_origin() { return glm::dvec3(0, 0, 0); }
+
+	// Return position to be used as a sort of visual origin (for camera centering, etc...)
+	virtual glm::dvec3 get_visual_origin() { return glm::dvec3(0, 0, 0); }
 
 	// An approximation of our size, try to go higher than the real number
 	// Values of 0.0 means that we don't have a limit for physics loading

@@ -1,0 +1,1 @@
+-- A landed trajectory maintains fixed position relative to the surface of a body

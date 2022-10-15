@@ -8,7 +8,7 @@ float PlumbingMachine::get_pressure(const std::string& port)
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 
-	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["get_pressure"], port);
+	auto result = LuaUtil::call_function(get_lua_plumbing()["get_pressure"], port);
 	logger->check(result.valid(), "get_pressure failed, this is fatal");
 
 	return result.get<float>();
@@ -18,7 +18,7 @@ StoredFluids PlumbingMachine::in_flow(std::string port, const StoredFluids &in, 
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 
-	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["in_flow"], port, in, do_flow);
+	auto result = LuaUtil::call_function(get_lua_plumbing()["in_flow"], port, in, do_flow);
 	logger->check(result.valid(), "in_flow failed, this is fatal");
 
 	return std::move(result.get<StoredFluids>());
@@ -28,7 +28,7 @@ StoredFluids PlumbingMachine::out_flow(std::string port, float volume, bool do_f
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 
-	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["out_flow"], port, volume, do_flow);
+	auto result = LuaUtil::call_function(get_lua_plumbing()["out_flow"], port, volume, do_flow);
 	logger->check(result.valid(), "out_flow failed, this is fatal");
 
 	return std::move(result.get<StoredFluids>());
@@ -37,7 +37,7 @@ StoredFluids PlumbingMachine::out_flow(std::string port, float volume, bool do_f
 void PlumbingMachine::draw_diagram(void* vg, GUISkin* gui_skin)
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
-	LuaUtil::safe_call_function(get_lua_plumbing()["draw_diagram"], vg, gui_skin);
+	LuaUtil::call_function(get_lua_plumbing()["draw_diagram"], vg, gui_skin);
 }
 
 sol::table PlumbingMachine::get_lua_plumbing(bool silent_fail)
@@ -98,7 +98,7 @@ void PlumbingMachine::init(const cpptoml::table& init)
 	{
 
 		can_add_ports = true;
-		auto result = LuaUtil::safe_call_function_if_present(get_lua_plumbing()["init"]);
+		auto result = LuaUtil::call_function_if_present(get_lua_plumbing()["init"]);
 		if(result.has_value())
 		{
 			if(result->get_type() == sol::type::userdata)
@@ -208,7 +208,7 @@ std::vector<FluidPort*> PlumbingMachine::get_connected_ports(const std::string &
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 
-	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["get_connected_ports"], port);
+	auto result = LuaUtil::call_function(get_lua_plumbing()["get_connected_ports"], port);
 	logger->check(result.valid(), "get_connected_ports failed, this is fatal");
 
 	std::vector<std::string> res_str = result.get<std::vector<std::string>>();
@@ -232,7 +232,7 @@ float PlumbingMachine::get_pressure_drop(const std::string &from, const std::str
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 
-	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["get_pressure_drop"], from, to, cur_P);
+	auto result = LuaUtil::call_function(get_lua_plumbing()["get_pressure_drop"], from, to, cur_P);
 	logger->check(result.valid(), "get_pressure_drop failed, this is fatal");
 
 	return (float)result.get<double>();
@@ -242,7 +242,7 @@ float PlumbingMachine::get_maximum_flowrate(std::string port)
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 
-	auto result = LuaUtil::safe_call_function(get_lua_plumbing()["get_maximum_flowrate"]);
+	auto result = LuaUtil::call_function(get_lua_plumbing()["get_maximum_flowrate"]);
 	logger->check(result.valid(), "get_maximum_flowrate failed, this is fatal");
 
 	if(result.get_type() == sol::type::number)

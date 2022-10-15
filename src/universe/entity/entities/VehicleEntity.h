@@ -5,6 +5,8 @@
 
 // We take ownership of the vehicle pointer (we will delete it)
 // so make sure it's heap allocated
+// TODO: This could also be implemented in lua, but I've chosen against it
+// as there's not really any reason to have user code here
 class VehicleEntity : public Entity
 {
 public:
@@ -27,6 +29,9 @@ public:
 
 	void shadow_pass(ShadowCamera& sh_camera) override;
 	bool needs_shadow_pass() override { return true; }
+
+	glm::dvec3 get_physics_origin() override;
+	glm::dvec3 get_visual_origin() override;
 
 	VehicleEntity(Vehicle* vehicle);
 	VehicleEntity(cpptoml::table& toml);

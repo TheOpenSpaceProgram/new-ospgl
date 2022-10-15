@@ -85,22 +85,6 @@ public:
 		return result;
 	}
 
-	// Crashes on error
-	template<typename T, typename K, typename... Args>
-	static sol::safe_function_result safe_call_function(sol::table_proxy<T, K> path, Args&&... args)
-	{
-		sol::safe_function fnc = path;
-		auto result = fnc(std::forward<Args>(args)...);
-
-		if(!result.valid())
-		{
-			sol::error err = result;
-			lua_error_handler(path.lua_state(), err);
-		}
-
-		return result;	
-	}
-
 	// Same as call_function but only does it if function is present
 	template<typename T, typename K, typename... Args>
 	static std::optional<sol::safe_function_result> 
@@ -130,13 +114,21 @@ public:
 		}
 	}
 
-	template<typename T, typename K, typename... Args>
-	static std::optional<sol::safe_function_result>
-	safe_call_function_if_present(sol::table_proxy<T, K> path, Args&&... args)
+	template<typename RT, typename T, typename K, typename... Args>
+	static std::optional<RT>
+	call_function_if_present_returns(sol::table_proxy<T, K> path, Args&&... args)
 	{
 		if(path.valid())
 		{
-			return safe_call_function(path, args...);
+			auto res = call_function(path, args...);
+			if(res.valid() && res.get_type() == sol::type_of<RT>())
+			{
+				return res.get<RT>();
+			}
+			else
+			{
+				return {};
+			}
 		}
 		else
 		{

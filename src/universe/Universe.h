@@ -89,7 +89,7 @@ public:
 	std::vector<Entity*> entities;
 	std::unordered_map<int64_t, Entity*> entities_by_id;
 
-	template<typename T, typename... Args> 
+	template<typename T, typename... Args>
 	T* create_entity(Args&&... args);
 
 	template<typename T>
