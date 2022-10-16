@@ -123,7 +123,7 @@ public:
 			auto res = call_function(path, args...);
 			if(res.valid() && res.get_type() == sol::type_of<RT>())
 			{
-				return res.get<RT>();
+				return res.template get<RT>();
 			}
 			else
 			{

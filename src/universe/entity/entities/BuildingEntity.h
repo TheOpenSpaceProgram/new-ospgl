@@ -38,5 +38,7 @@ public:
 
 	virtual bool needs_deferred_pass() override { return true; }
 	virtual bool needs_shadow_pass() override { return true; }
+
+	void save(cpptoml::table& to) override {}
 };
 

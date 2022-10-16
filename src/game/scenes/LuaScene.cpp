@@ -19,9 +19,7 @@ LuaScene::LuaScene(GameState* in_state, const std::string& scene_script, const s
 	env = sol::environment(*lua_state, sol::create, lua_state->globals());
 	// We need to load LuaCore to it
 	lua_core->load((sol::table&)env, pkg);
-	env["universe"] = &in_state->universe;
-	env["renderer"] = osp->renderer;
-
+	env["osp"] = osp;
 
 	std::string full_path = osp->assets->res_path + pkg + "/" + name;
 	auto result = (*lua_state).safe_script_file(full_path, env);

@@ -15,7 +15,7 @@ Entity::~Entity()
 {
 }
 
-Entity* Entity::load_entity(std::string type, cpptoml::table& toml)
+Entity* Entity::load(std::string type, cpptoml::table& toml)
 {
 	Entity* n_ent = nullptr;
 

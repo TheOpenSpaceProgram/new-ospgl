@@ -10,9 +10,8 @@ class Part;
 class Piece;
 
 // Machines implement functionality for parts in lua
-// TODO: Think naming of the lua global variables, or 
-// even including a little table so they are not really
-// global as they may cause naming errors
+// They have the global "osp", and "machine" (themselves)
+// you may access the part from machine.in_part, and other stuff from osp.X
 class Machine
 {
 friend class Vehicle;

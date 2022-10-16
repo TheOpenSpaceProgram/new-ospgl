@@ -43,6 +43,9 @@
 		self, this is a limitation that seems hard to get around. (Typecasting overloading does not seem 
 		to work well with sol)
 
+		When a resource takes a LuaAssetHandle, it should be duplicated, not moved as usual in C++ code
+		(This is because in lua you can simply do resource = nil, but there's no move semantics!)
+
 */
 class LuaAssets : public LuaLib
 {

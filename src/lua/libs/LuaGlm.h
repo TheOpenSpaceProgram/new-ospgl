@@ -31,6 +31,7 @@ public:
 	static std::string glm_vec4_to_string(const glm::dvec4& v);
 	static std::string glm_mat3_to_string(const glm::dmat3& v);
 	static std::string glm_mat4_to_string(const glm::dmat4& v);
+	static std::string glm_quat_to_string(const glm::dquat& v);
 
 	virtual void load_to(sol::table& table) override;
 

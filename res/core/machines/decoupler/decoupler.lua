@@ -13,7 +13,7 @@ local d_point = machine.init_toml:get_string("decoupling_point")
 
 
 local function decouple()
-	local root = part:get_piece("p_root")
+	local root = machine.in_part:get_piece("p_root")
 	local attached = root:get_attached_to_marker(d_point)
 	local separated = attached
 

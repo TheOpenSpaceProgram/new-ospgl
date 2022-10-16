@@ -55,5 +55,5 @@ public:
 	std::string get_type() override;
 
 	explicit LuaEntity(std::string script_path, std::string in_pkg, std::shared_ptr<cpptoml::table> init_toml);
-
+	void save(cpptoml::table& to) override;
 };

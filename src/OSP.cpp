@@ -179,6 +179,7 @@ void OSP::init(int argc, char** argv)
 
 		game_database = new GameDatabase();
 		game_state = new GameState();
+		universe = &game_state->universe;
 
 		// Load packages now so they register all scripts...
 		assets->load_packages(lua_core, game_database);

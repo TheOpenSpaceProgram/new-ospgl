@@ -86,11 +86,7 @@ void Machine::init(sol::state* lua_state, Part* in_part)
 	// We need to load LuaCore to it
 	lua_core->load((sol::table&)env, pkg);
 	env["machine"] = this;
-	env["testing"] = 1;
-	env["part"] = in_part;
-	env["universe"] = in_part->vehicle->in_universe;
-	env["vehicle"] = in_part->vehicle;
-	env["database"] = osp->game_database;
+	env["osp"] = osp;
 
 	this->in_part = in_part;
 

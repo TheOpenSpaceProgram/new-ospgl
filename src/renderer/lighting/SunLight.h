@@ -39,7 +39,7 @@ public:
 	ShadowCamera near_shadow_cam;
 	ShadowCamera far_shadow_cam;
 
-	SunLight(int far_shadow_size = 512, int near_shadow_size = 512);
+	explicit SunLight(int far_shadow_size = 512, int near_shadow_size = 512);
 	~SunLight();
 
 	LightType get_type () override { return SUN; }

@@ -1,5 +1,6 @@
 #include "LuaGlm.h"
 #include <fmt/format.h>
+#include <glm/gtc/quaternion.hpp>
 
 
 #define TYPECHECK(a, table, tname, L, errmsg) if constexpr (LUA_GLM_TYPECHECKED) { \
@@ -39,6 +40,11 @@ std::string LuaGlm::glm_mat4_to_string(const glm::dmat4& v)
 		v[3][0], v[3][1], v[3][2], v[3][3]);
 }
 
+std::string LuaGlm::glm_quat_to_string(const glm::dquat& v)
+{
+	return fmt::format("q({}, {}, {}, {})", v.w, v.x, v.y, v.z);
+}
+
 void LuaGlm::load_to(sol::table& table)
 {
 
@@ -49,6 +55,8 @@ void LuaGlm::load_to(sol::table& table)
 
 	using MAT4 = const glm::dmat4&;
 	using MAT3 = const glm::dmat3&;
+
+	using QUAT = const glm::dquat&;
 		
 	sol::usertype<glm::dvec2> dvec2_ut = table.new_usertype<glm::dvec2>("vec2",
 		sol::constructors < glm::dvec2(), glm::dvec2(double, double), glm::dvec2(glm::dvec3), glm::dvec2(glm::dvec4)>(),
@@ -196,6 +204,21 @@ void LuaGlm::load_to(sol::table& table)
 			sol::resolve<glm::dvec4(const glm::dmat4&, const glm::dvec4&)>(glm::operator/)
 		),
 		sol::meta_function::to_string, &glm_mat4_to_string);
+		
+		sol::usertype<glm::dquat> dquat_ut = table.new_usertype<glm::dquat>("quat",
+		sol::constructors < glm::dquat(), glm::dquat(double, double, double, double),
+		glm::dquat(double, VEC3), glm::dquat(VEC3), glm::dquat(MAT3), glm::dquat(MAT4)>(),
+		sol::meta_function::multiplication, sol::overload(
+			sol::resolve<glm::dquat(const glm::dquat&, const glm::dquat&)>(glm::operator*),
+			sol::resolve<glm::dvec3(const glm::dquat&, const glm::dvec3&)>(glm::operator*),
+			sol::resolve<glm::dvec3(const glm::dvec3&, const glm::dquat&)>(glm::operator*),
+			sol::resolve<glm::dvec4(const glm::dquat&, const glm::dvec4&)>(glm::operator*),
+			sol::resolve<glm::dvec4(const glm::dvec4&, const glm::dquat&)>(glm::operator*)
+		),
+		sol::meta_function::unary_minus, sol::resolve<glm::dquat(const glm::dquat&)>(&glm::operator-),
+		sol::meta_function::to_string, &glm_quat_to_string,
+		"w", &glm::dquat::w, "x", &glm::dquat::x, "y", &glm::dquat::y, "z", &glm::dquat::z,
+		"unpack", [](glm::dquat v) {return std::make_tuple(v.w, v.x, v.y, v.z); });
 
 
 // ================================================================
@@ -282,6 +305,7 @@ void LuaGlm::load_to(sol::table& table)
 
 	table.set_function("mix", sol::overload
 	(
+		sol::resolve<glm::dquat(QUAT, QUAT, double)>(glm::mix),
 		sol::resolve<double(double, double, double)>(glm::mix),
 		sol::resolve<glm::dvec2(VEC2, VEC2, double)>(glm::mix),
 		sol::resolve<glm::dvec3(VEC3, VEC3, double)>(glm::mix),
@@ -390,8 +414,13 @@ void LuaGlm::load_to(sol::table& table)
 //	Geometric functions
 // ================================================================
 
+	table.set_function("conjugate", sol::resolve<glm::dquat(QUAT)>(glm::conjugate));
 
-	table.set_function("cross", sol::resolve<glm::dvec3(VEC3, VEC3)>(glm::cross));
+	table.set_function("cross", sol::overload
+	(
+		sol::resolve<glm::dquat(QUAT, QUAT)>(glm::cross),
+		sol::resolve<glm::dvec3(VEC3, VEC3)>(glm::cross)
+	));
 
 	table.set_function("distance", sol::overload
 	(
@@ -400,8 +429,10 @@ void LuaGlm::load_to(sol::table& table)
 		sol::resolve<double(VEC2, VEC2)>(glm::distance)
 	));
 
+
 	table.set_function("dot", sol::overload
 	(
+		sol::resolve<double(QUAT, QUAT)>(glm::dot),
 		sol::resolve<double(VEC4, VEC4)>(glm::dot),
 		sol::resolve<double(VEC3, VEC3)>(glm::dot),
 		sol::resolve<double(VEC2, VEC2)>(glm::dot)
@@ -416,6 +447,7 @@ void LuaGlm::load_to(sol::table& table)
 
 	table.set_function("normalize", sol::overload
 	(
+		sol::resolve<glm::dquat(QUAT)>(glm::normalize),
 		sol::resolve<glm::dvec4(VEC4)>(glm::normalize),
 		sol::resolve<glm::dvec3(VEC3)>(glm::normalize),
 		sol::resolve<glm::dvec2(VEC2)>(glm::normalize)
@@ -434,6 +466,11 @@ void LuaGlm::load_to(sol::table& table)
 		sol::resolve<glm::dvec3(VEC3, VEC3, double)>(glm::refract),
 		sol::resolve<glm::dvec2(VEC2, VEC2, double)>(glm::refract)
 	));
+	
+	table.set_function("rotate", sol::overload
+	(
+		sol::resolve<glm::dquat(QUAT, const double&, VEC3)>(glm::rotate)
+	));
 
 
 // ================================================================
@@ -448,6 +485,7 @@ void LuaGlm::load_to(sol::table& table)
 
 	table.set_function("inverse", sol::overload
 	(
+		sol::resolve<glm::dquat(QUAT)>(glm::inverse),
 		sol::resolve<glm::dmat4(MAT4)>(glm::inverse),
 		sol::resolve<glm::dmat3(MAT3)>(glm::inverse)
 	));

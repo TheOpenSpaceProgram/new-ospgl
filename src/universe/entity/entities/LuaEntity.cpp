@@ -88,3 +88,8 @@ LuaEntity::LuaEntity(std::string script_path, std::string in_pkg, std::shared_pt
 	}
 
 }
+
+void LuaEntity::save(cpptoml::table &to)
+{
+	LuaUtil::call_function_if_present(env["save"], to);
+}

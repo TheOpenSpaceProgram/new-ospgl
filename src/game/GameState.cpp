@@ -39,7 +39,7 @@ void GameState::load(const cpptoml::table& from)
 			}
 			std::string type = *entity->get_as<std::string>("type");
 
-			Entity* n_ent = Entity::load_entity(type, *entity);
+			Entity* n_ent = Entity::load(type, *entity);
 			universe.entities.push_back(n_ent);
 
 			ent_to_id[n_ent] = id;

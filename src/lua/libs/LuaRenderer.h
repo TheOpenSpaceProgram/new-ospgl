@@ -11,6 +11,7 @@
  *
  * Also includes functions to create CameraUniforms (ie, for writing cameras!)
  * but it's a better idea to use the functions in core/scenes/cameras.lua
+ * Finally, it includes access to functions to create lights and skyboxes
  */
 class LuaRenderer : public LuaLib
 {

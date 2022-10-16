@@ -105,8 +105,8 @@ function plumbing.update(dt, chemical_react)
     --fluid_container.temperature = 373
 end
 
-local liq_port_str = database:get_string("liquid_port")
-local gas_port_str = database:get_string("gas_port")
+local liq_port_str = osp.game_database:get_string("liquid_port")
+local gas_port_str = osp.game_database:get_string("gas_port")
 function plumbing.init(ports)
     local port_marker = machine.init_toml:get_string("port_marker")
     machine.plumbing:create_port("liquid_port", port_marker, liq_port_str, false, 1.5, 3.5)

@@ -103,7 +103,8 @@ public:
 	virtual std::string get_type() = 0;
 
 	// Used while loading saves 
-	static Entity* load_entity(std::string type, cpptoml::table& toml);
+	static Entity* load(std::string type, cpptoml::table& toml);
+	virtual void save(cpptoml::table& to) = 0;
 
 	virtual ~Entity();
 };

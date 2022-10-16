@@ -15,6 +15,7 @@ class LuaCore;
 class GameState;
 class GameDatabase;
 class AudioEngine;
+class Universe;
 
 // Initializes the different subsystems OSP has
 // It's a global class, only one OSP may exist at once (filesystem related)
@@ -39,6 +40,10 @@ public:
 	AudioEngine* audio_engine{};
 	GameState* game_state{};
 	GameDatabase* game_database{};
+	// Used for quick-access from lua as it doesn't know about game_state
+	// TODO: If we ever run multiple universes, it would be interesting for lua to know
+	// about GameState. This would be a fairly breaking change!
+	Universe* universe;
 
 	constexpr static const char* OSP_VERSION = "PRE-RELEASE";
 	void init(int argc, char** argv);

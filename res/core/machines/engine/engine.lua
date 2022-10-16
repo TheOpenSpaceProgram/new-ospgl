@@ -8,7 +8,7 @@ local imgui = require("imgui")
 local toml = require("toml")
 
 local nozzle_piece_str = machine.init_toml:get_string_or("nozzle_piece", "p_root")
-local nozzle_piece = part:get_piece(nozzle_piece_str)
+local nozzle_piece = machine.in_part:get_piece(nozzle_piece_str)
 local nozzle_marker = machine.init_toml:get_string("nozzle_marker")
 
 local engine_interface = machine:load_interface("core:interfaces/engine.lua")

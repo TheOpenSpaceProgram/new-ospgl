@@ -33,6 +33,8 @@ public:
 	glm::dvec3 get_physics_origin() override;
 	glm::dvec3 get_visual_origin() override;
 
+	void save(cpptoml::table& to) override {}
+
 	VehicleEntity(Vehicle* vehicle);
 	VehicleEntity(cpptoml::table& toml);
 	~VehicleEntity();

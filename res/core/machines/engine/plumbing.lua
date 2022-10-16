@@ -94,7 +94,7 @@ function plumbing.draw_diagram(vg, skin)
 end
 
 
-local inlet_str = database:get_string("inlet")
+local inlet_str = osp.game_database:get_string("inlet")
 logger.info(inlet_str)
 
 -- We create needed ports

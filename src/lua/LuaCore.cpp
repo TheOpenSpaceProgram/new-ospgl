@@ -19,6 +19,12 @@
 #include "libs/LuaSceneLib.h"
 #include "libs/LuaRenderer.h"
 
+// Used for setting up "osp" usertype
+#include "renderer/Renderer.h"
+#include "audio/AudioEngine.h"
+#include "universe/Universe.h"
+#include "game/database/GameDatabase.h"
+
 
 LuaCore* lua_core;
 // This function is extremely hacky and contains multiple work-arounds
@@ -164,6 +170,15 @@ void LuaCore::load(sol::state& to, const std::string& pkg)
 	load((sol::table&)to.globals(), pkg);
 
 	to.add_package_loader(LoadFileRequire, true);
+
+	// We also create OSP usertype (but don't actually set "osp" to a value)
+	// so that all subsystems can be accessed without having many globals
+	to.new_usertype<OSP>("__ut_osp", sol::no_constructor,
+		  "renderer", &OSP::renderer,
+		  "audio_engine", &OSP::audio_engine,
+		  "universe", &OSP::universe,
+		  "game_database", &OSP::game_database,
+		  "game_dt", sol::readonly(&OSP::game_dt));
 
 }
 

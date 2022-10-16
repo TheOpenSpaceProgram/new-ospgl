@@ -71,7 +71,7 @@ function plumbing.draw_diagram(vg, skin)
 end
 
 -- We create needed ports
-local port_str = database:get_string("junction_port")
+local port_str = osp.game_database:get_string("junction_port")
 function plumbing.init()
     machine.plumbing:create_port("port_1", "", port_str, true, 1.5, 0.5)
     machine.plumbing:create_port("port_2", "", port_str, true, 0.5, -0.5)
