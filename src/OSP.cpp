@@ -45,6 +45,7 @@ static void help_menu()
 	menu_item("settings", "path/to/settings.toml", "settings.toml", "What file to load as the configuration file, relative to the set udata folder");	
 	menu_item("res_path", "path/to/res/folder/", "./res/", "Path to the resource folder you want to use. End it with a \"/\"");
 	menu_item("udata_path", "path/to/udata/", "./udata/", "Path to the user data folder, ended with a \"/\"");
+	menu_item("load_state", "id_of_save", "(empty)", "ID of the save to load, skipping the main menu");
 	std::cout << rang::fgB::gray << "You can override any of the settings in the loaded settings file using this syntax: " << std::endl;
 	std::cout << rang::fgB::gray << "-" << rang::fgB::blue << "toml.path" << rang::fg::reset <<
 		   	"=" << rang::fgB::blue << "toml-value" << rang::fg::reset << std::endl;
@@ -80,6 +81,7 @@ void OSP::init(int argc, char** argv)
 		std::string settings_path = "settings.toml";
 		std::string res_path = "./res/";
 		std::string udata_path = "./udata/";
+		std::string to_load = "";
 
 		std::vector<std::pair<std::string, std::string>> toml_pairs;
 		
@@ -96,6 +98,10 @@ void OSP::init(int argc, char** argv)
 			else if(param.first == "udata_path")
 			{
 				udata_path = param.second;
+			}
+			else if(param.first == "load_state")
+			{
+				to_load = param.second;
 			}
 			else
 			{
@@ -178,16 +184,11 @@ void OSP::init(int argc, char** argv)
 
 
 		game_database = new GameDatabase();
-		game_state = new GameState();
-		universe = &game_state->universe;
-
-		// Load packages now so they register all scripts...
-		assets->load_packages(lua_core, game_database);
-
-		input = new InputUtil();	
+		input = new InputUtil();
 		input->setup(renderer->window);
 
 		dt = 0.0;
+		launch_menu(to_load);
 	}
 }
 
@@ -268,4 +269,28 @@ uint64_t OSP::get_runtime_uid()
 {
 	runtime_uid++;
 	return runtime_uid;
+}
+
+void OSP::launch_menu(const std::string& skip_to_save)
+{
+	launch_gamestate(GameState::create_main_menu(skip_to_save));
+}
+
+void OSP::end_gamestate()
+{
+	// This should clean up, including memory leaks from lua, etc...
+	delete game_state;
+	universe = nullptr;
+	// TODO: Proper cleanup of assets and game database
+	launch_menu("");
+}
+
+void OSP::launch_gamestate(GameState* g)
+{
+	game_state = g;
+
+	// Load packages now so they register all scripts...
+	osp->assets->load_packages(g->used_packages, lua_core, osp->game_database);
+
+	game_state->init();
 }

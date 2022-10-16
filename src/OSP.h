@@ -40,9 +40,6 @@ public:
 	AudioEngine* audio_engine{};
 	GameState* game_state{};
 	GameDatabase* game_database{};
-	// Used for quick-access from lua as it doesn't know about game_state
-	// TODO: If we ever run multiple universes, it would be interesting for lua to know
-	// about GameState. This would be a fairly breaking change!
 	Universe* universe;
 
 	constexpr static const char* OSP_VERSION = "PRE-RELEASE";
@@ -57,6 +54,15 @@ public:
 	void update();
 
 	void render();
+
+	// ASSUMES A GOOD CLEANUP OF PREVIOUS GAMESTATE!
+	void launch_gamestate(GameState* st);
+	// This basically launches the main menu, which may optionally directly
+	// skip to loading of a gamestate
+	// ASSUMES A GOOD CLEANUP OF PREVIOUS GAMESTATE (uses launch_gamestate)!
+	void launch_menu(const std::string& skip_to_save);
+	// Deletes the current game state and launches menu again
+	void end_gamestate();
 
 	// Call after render
 	void finish_frame();

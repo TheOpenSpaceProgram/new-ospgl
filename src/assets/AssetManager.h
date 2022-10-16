@@ -61,6 +61,7 @@ private:
 		PackageMetadata metadata;
 		std::unordered_map<std::type_index, AssetTypeAndAssets> assets;
 		sol::state* pkg_lua;
+		bool was_init;
 	};
 	
 	std::unordered_map<std::string, Package> packages;
@@ -124,7 +125,8 @@ public:
 
 	// Executes the package init lua file of all packages
 	// which have one
-	void load_packages(LuaCore* lua_core, GameDatabase* game_database);
+	// You must specify which packages to load
+	void load_packages(const std::vector<std::string>& to_use, LuaCore* lua_core, GameDatabase* game_database);
 
 	// Checks ../ ~/, and other "escaping" combinations
 	// TODO: Check that this is actually secure

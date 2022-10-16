@@ -23,8 +23,7 @@ local event_handlers = {}
 
 -- We get optionally passed the entity id of vehicle to control
 function load(veh_id)
-    renderer:add_drawable(universe.system)
-
+    --renderer:add_drawable(universe.system)
     for _, ent in pairs(universe.entities) do
         renderer:add_drawable(ent)
     end

@@ -15,10 +15,9 @@
 
 #include "sol/sol.hpp"
 
-
-
 #include <istream>
 #include <fstream>
+#include <algorithm>
 
 AssetManager* assets;
 
@@ -177,6 +176,7 @@ void AssetManager::preload()
 
 			PackageMetadata pkg_meta(SerializeUtil::load_file(as_str + "/package.toml"));
 			packages[sstr] = Package();
+			packages[sstr].was_init = false;
 			packages[sstr].metadata = pkg_meta;
 		}
 	}
@@ -185,7 +185,7 @@ void AssetManager::preload()
 
 #include "../util/LuaUtil.h"
 
-void AssetManager::load_packages(LuaCore* lua_core, GameDatabase* game_database)
+void AssetManager::load_packages(const std::vector<std::string>& to_load, LuaCore* lua_core, GameDatabase* game_database)
 {
 	// TODO: Think of a package loading system
 	// to allow behaviour similar to ModuleManager
@@ -196,6 +196,11 @@ void AssetManager::load_packages(LuaCore* lua_core, GameDatabase* game_database)
 	// Pre-init, create all lua files
 	for(auto& pkg_pair : packages)
 	{
+		if(!vector_contains(to_load, pkg_pair.first) || pkg_pair.second.was_init)
+		{
+			continue;
+		}
+
 		std::string pkg_lua_path = res_path + pkg_pair.first + "/" + pkg_pair.second.metadata.pkg_script_path;
 
 		if(file_exists(pkg_lua_path))
@@ -215,6 +220,8 @@ void AssetManager::load_packages(LuaCore* lua_core, GameDatabase* game_database)
 		{
 			pkg_pair.second.pkg_lua = nullptr;
 		}
+
+		pkg_pair.second.was_init = true;
 	}	
 
 
