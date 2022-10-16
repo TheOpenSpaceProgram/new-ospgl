@@ -1,6 +1,7 @@
 #include "LuaGlm.h"
 #include <fmt/format.h>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 
 #define TYPECHECK(a, table, tname, L, errmsg) if constexpr (LUA_GLM_TYPECHECKED) { \
@@ -51,7 +52,6 @@ void LuaGlm::load_to(sol::table& table)
 	using VEC4 = const glm::dvec4&;
 	using VEC3 = const glm::dvec3&;
 	using VEC2 = const glm::dvec2&;
-	using VEC1 = double;
 
 	using MAT4 = const glm::dmat4&;
 	using MAT3 = const glm::dmat3&;
@@ -626,6 +626,39 @@ void LuaGlm::load_to(sol::table& table)
 		sol::resolve<glm::dvec3(VEC3)>(glm::tanh),
 		sol::resolve<glm::dvec2(VEC2)>(glm::tanh)
 	));
+
+	////////////////////////////////////////////////////
+	/// Matrix transform functions
+	////////////////////////////////////////////////////
+	table.set_function("frustum",
+		sol::resolve<glm::dmat4(double, double, double, double, double, double)>(glm::frustum));
+
+	table.set_function("infinite_perspective",
+		sol::resolve<glm::dmat4(double, double, double)>(glm::infinitePerspective));
+
+	table.set_function("look_at",
+		sol::resolve<glm::dmat4(VEC3, VEC3, VEC3)>(glm::lookAt));
+
+	table.set_function("ortho", sol::overload(
+		sol::resolve<glm::dmat4(double, double, double, double)>(glm::ortho),
+		sol::resolve<glm::dmat4(double, double, double, double, double, double)>(glm::ortho)));
+
+	table.set_function("perspective",
+		sol::resolve<glm::dmat4(double, double, double, double)>(glm::perspective));
+
+	table.set_function("perspective_fov",
+		sol::resolve<glm::dmat4(double, double, double, double, double)>(glm::perspectiveFov));
+
+	// TODO: implemen pickMatrix, project, unproject, etc... (maybe they will never be used)
+
+	table.set_function("translate",
+		sol::resolve<glm::dmat4(MAT4, VEC3)>(glm::translate));
+
+	table.set_function("scale",
+	   	sol::resolve<glm::dmat4(MAT4, VEC3)>(glm::scale));
+
+	table.set_function("rotate",
+		sol::resolve<glm::dmat4(MAT4, double, VEC3)>(glm::rotate));
 
 	table["pi"] = glm::pi<double>();
 	table["half_pi"] = glm::half_pi<double>();

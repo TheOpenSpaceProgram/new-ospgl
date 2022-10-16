@@ -126,6 +126,10 @@ public:
 	// which have one
 	void load_packages(LuaCore* lua_core, GameDatabase* game_database);
 
+	// Checks ../ ~/, and other "escaping" combinations
+	// TODO: Check that this is actually secure
+	bool is_path_safe(const std::string& path);
+
 	// Scripts are a very special asset as they must be instantiated, you 
 	// cannot store a Script as a normal asset
 	// * Be careful with the returned "pfr", if you do anything to the state
@@ -328,6 +332,19 @@ inline bool AssetManager::load(const std::string& package, const std::string& na
 	return true;
 }
 
+inline bool AssetManager::is_path_safe(const std::string &path)
+{
+	if(path.find("../") != std::string::npos)
+	{
+		return false;
+	}
+	if(path.find("~/") != std::string::npos)
+	{
+		return false;
+	}
+
+	return true;
+}
 
 
 struct AssetPointer

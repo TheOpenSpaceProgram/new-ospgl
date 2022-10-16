@@ -1,13 +1,39 @@
 #include "LuaVehicle.h"
 #include "../../universe/vehicle/Vehicle.h"
 
+static WorldState decode_worldstate_table(sol::table table)
+{
+	WorldState out;
+	out.cartesian.pos = table["pos"].get<glm::dvec3>();
+	out.cartesian.vel = table["vel"].get<glm::dvec3>();
+	out.rotation = table["rot"].get<glm::dquat>();
+	glm::dvec3 v = glm::dvec3(0, 0, 0);
+	out.angular_velocity = table["angvel"].get_or<glm::dvec3>(v);
+
+	return out;
+}
+
+
 void LuaVehicle::load_to(sol::table& table)
 {
-	table.new_usertype<Vehicle>("vehicle");//,
+	// Note to coders: Vehicle is deallocated manually so we can return a raw pointer fine
+	table.new_usertype<Vehicle>("vehicle",
+		 "new", [](){return new Vehicle();},
+		 "sort", &Vehicle::sort,
+		 	"packed", &Vehicle::packed_veh,
+		 	"unpacked", &Vehicle::unpacked_veh,
+		 	"unpack", &Vehicle::unpack);//,
 		//"get_attached_to", sol::overload(
 		//	sol::resolve<std::vector<Piece*>(Piece*)>(Vehicle::get_attached_to),
 		//	sol::resolve<Piece*(Piece*, const std::string&)>(Vehicle::get_attached_to)
 		//));
+
+	table.new_usertype<PackedVehicle>("packed_vehicle", sol::no_constructor,
+	      "vehicle", sol::readonly(&PackedVehicle::vehicle),
+	      "set_world_state", [](PackedVehicle* self, sol::table wstate)
+		  {
+				self->set_world_state(decode_worldstate_table(wstate));
+		  });
 
 	table.new_usertype<Piece>("piece",
 		"rigid_body", &Piece::rigid_body,
@@ -79,6 +105,7 @@ void LuaVehicle::load_to(sol::table& table)
 		"runtime_uid", &Machine::runtime_uid,
 		"init_toml", &Machine::init_toml,
 		"plumbing", &Machine::plumbing,
+		"in_part", &Machine::in_part,
 		"load_interface", [](Machine* self, const std::string& iname, sol::this_state tst, sol::this_environment tenv)
 		{
 			sol::environment old_env = tenv;

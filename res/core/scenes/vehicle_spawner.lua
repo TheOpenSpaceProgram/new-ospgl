@@ -11,7 +11,7 @@ function vehicle_spawner.spawn_vehicle(universe, veh_toml, pos, vel, rot, angvel
     if unpack == nil then unpack = true end
 
     local vehicle = veh.vehicle.new()
-    toml.read_to(veh_toml, vehicle)
+    veh_toml:read_to_vehicle(vehicle)
     vehicle:sort()
 
     local nent = universe:create_vehicle_entity(vehicle)

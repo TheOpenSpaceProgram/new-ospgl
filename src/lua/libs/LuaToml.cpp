@@ -4,6 +4,10 @@
 #include "../../util/SerializeUtil.h"
 #include "../../util/serializers/glm.h"
 
+// We include some read_to_x functions
+#include "util/SerializeUtil.h"
+#include "universe/vehicle/Vehicle.h"
+
 void LuaToml::load_to(sol::table& table)
 {
 	using table_ptr = std::shared_ptr<cpptoml::table>;
@@ -115,10 +119,14 @@ void LuaToml::load_to(sol::table& table)
 
 			return sol::as_table(tables);
 	   	},
+	   	"read_to_vehicle", [](table_ptr self, Vehicle& target)
+	   	{
+			SerializeUtil::read_to(*self, target);
+	   	},
 		"erase", [](table_ptr self, const std::string& key)
 		{
-			self->erase(key);	
-		}	
+			self->erase(key);
+		}
 	);
 
 

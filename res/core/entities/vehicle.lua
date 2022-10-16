@@ -1,0 +1,1 @@
+-- Wraps a vehicle and converts it to an entity (ported from old VehicleEntity.cpp)

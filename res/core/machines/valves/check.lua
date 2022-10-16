@@ -67,8 +67,8 @@ function plumbing.draw_diagram(vg, skin)
 end
 
 -- We create needed ports
-local in_str = database:get_string("inlet")
-local out_str = database:get_string("outlet")
+local in_str = osp.game_database:get_string("inlet")
+local out_str = osp.game_database:get_string("outlet")
 function plumbing.init()
     machine.plumbing:create_port("port_1", "", out_str, true, 1.5, 0.5)
     machine.plumbing:create_port("port_2", "", in_str, true, -0.5, 0.5)

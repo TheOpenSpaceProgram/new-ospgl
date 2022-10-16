@@ -27,7 +27,16 @@ void LuaRenderer::load_to(sol::table& table)
 				rnd->render(&osp->game_state->universe.system);
 			 },
 		  "clear", &Renderer::clear,
-		  "quality", &Renderer::quality);
+		  "quality", &Renderer::quality,
+		  "get_size", sol::overload([](Renderer* rnd){
+		  	auto size = rnd->get_size(false);
+		  	return std::make_tuple(size.x, size.y);
+		  },
+		  [](Renderer* rnd, bool gui)
+		  {
+			auto size = rnd->get_size(gui);
+		  	return std::make_tuple(size.x, size.y);
+		  }));
 
 	// TODO: maybe set to sol::readonly?
 	table.new_usertype<RendererQuality>("renderer_quality", sol::no_constructor,
@@ -71,7 +80,16 @@ void LuaRenderer::load_to(sol::table& table)
 			"tform", &CameraUniforms::tform,
 			"proj_view", &CameraUniforms::proj_view,
 			"far_plane", &CameraUniforms::far_plane,
-			"cam_pos", &CameraUniforms::cam_pos);
+			"cam_pos", &CameraUniforms::cam_pos,
+			"screen_size", sol::property([](CameraUniforms* self)
+			 {
+				return glm::dvec2(self->screen_size.x, self->screen_size.y);
+			 },
+			 [](CameraUniforms* self, glm::dvec2 size)
+			 {
+				self->screen_size = glm::dvec2(size.x, size.y);
+				self->iscreen_size = glm::ivec2((int)size.x, (int)size.y);
+			 }));
 
 	table.new_usertype<Light>("light",
 		   "is_added_to_renderer", &Light::is_added_to_renderer,

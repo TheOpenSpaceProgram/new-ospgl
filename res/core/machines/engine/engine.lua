@@ -50,7 +50,7 @@ engine_interface.get_thrust = function(self, dt)
     local to_nozzle, pressure, choke_factor = simulate_chamber(dt)
     local is_choked = choke_factor > 0.999
 
-    logger.info(to_nozzle:get_specific_gas_constant())
+    --logger.info(to_nozzle:get_specific_gas_constant())
     local v, T, P, M = get_exit_properties(to_nozzle.temperature, pressure, to_nozzle:get_specific_gas_constant(), is_choked) 
     -- Thrust equation for a rocket engine
     -- TODO: When atmospheres are simulated, we must include the ambient pressure!

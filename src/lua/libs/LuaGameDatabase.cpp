@@ -45,5 +45,6 @@ void LuaGameDatabase::load_to(sol::table& table)
 		sol::environment view = st;
 		std::string pkg = view["__pkg"];
 		return self->get_string(id, pkg);
- 	});
+ 	}
+ 	);
 }

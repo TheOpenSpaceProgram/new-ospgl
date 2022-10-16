@@ -46,6 +46,8 @@
 		When a resource takes a LuaAssetHandle, it should be duplicated, not moved as usual in C++ code
 		(This is because in lua you can simply do resource = nil, but there's no move semantics!)
 
+ 	-> Furthermore, it allows reading / writing vehicle TOML files from udata
+
 */
 class LuaAssets : public LuaLib
 {

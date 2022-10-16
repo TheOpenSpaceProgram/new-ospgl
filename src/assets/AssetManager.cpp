@@ -115,6 +115,8 @@ std::pair<std::string, std::string> AssetManager::get_package_and_name(const std
 		name = name.substr(1);
 	}
 
+	logger->check(is_path_safe(name), "Path {} is unsafe and may access external files", full_path);
+
 	return std::make_pair(package, name);
 }
 

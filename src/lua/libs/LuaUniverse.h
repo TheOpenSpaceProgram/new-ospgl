@@ -2,8 +2,10 @@
 #include "../LuaLib.h"
 #include <universe/Universe.h>
 
-// So that the lua user doesn't have to manage 
+// So that the lua user doesn't have to manage
 // the lifetime of events
+// Regardless: the lua user must make sure the event handlers are stored somewhere
+// so they are not discarded by the GC
 struct LuaEventHandler
 {
 	Universe* universe;
