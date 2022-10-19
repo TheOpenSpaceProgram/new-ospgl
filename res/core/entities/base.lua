@@ -1,0 +1,1 @@
+-- The base entity works for stationary bases

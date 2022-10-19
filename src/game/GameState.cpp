@@ -56,8 +56,19 @@ GameState* GameState::create_empty(const std::string &planetary_system_package)
 {
 	GameState* out = new GameState();
 
-	out->used_packages.push_back("core");
+	out->used_packages.emplace_back("core");
 	out->used_packages.push_back(planetary_system_package);
+	auto [pkg, name] = osp->assets->get_package_and_name(planetary_system_package, "core");
+	out->system_used = pkg + ":" + name;
+	out->system_version = osp->assets->get_package_metadata(pkg).version;
+
+	auto root = osp->assets->load_toml(planetary_system_package);
+	// We may load the system, as it's just a gamestate file without the metadata
+	out->load_inner(*root);
+
+	// Now load the default main scene (which is determined in core:default_scene.toml)
+	auto scene_toml = osp->assets->load_toml("core:scenes/new_save_scene.toml");
+	out->load_scene_from_save(*scene_toml);
 
 	return out;
 }
@@ -84,70 +95,25 @@ GameState *GameState::load(const std::string &path)
 		out->used_packages.push_back(pkg);
 	}
 
-	// Read the system
-	out->universe.system.load(*root);
+	out->system_used = *root->get_as<std::string>("system_package");
+	out->system_version = *root->get_as<std::string>("system_version");
 
-	double t0 = *root->get_as<double>("t");
-	out->universe.system.t0 = t0;
-	Date start_date = Date(t0);
-	logger->info("Starting at: {}", start_date.to_string());
-
-	out->universe.system.init(out->universe.bt_world);
-
-	// These updates populate the element arrays
-	out->universe.system.update(0.0, out->universe.bt_world, false);
-	out->universe.system.update(0.0, out->universe.bt_world, true);
-
-	// Load entities
-	int64_t last_uid = *root->get_as<int64_t>("uid");
-
-
-	auto entities = root->get_table_array("entity");
-	std::unordered_map<Entity*, int64_t> ent_to_id;
-
-	if (entities)
+	auto [pkg, name] = osp->assets->get_package_and_name(out->system_used, "core");
+	// Check system version
+	const std::string& cur_version = osp->assets->get_package_metadata(pkg).version;
+	out->is_system_outdated = false;
+	if(cur_version != out->system_version)
 	{
-		for (const auto& entity : *entities)
-		{
-			int64_t id = entity->get_as<int64_t>("id").value_or(0);
-			if (id > last_uid || id <= 0)
-			{
-				logger->fatal("Invalid UID {} in save", id);
-			}
-			std::string type = *entity->get_as<std::string>("type");
-
-			Entity* n_ent = Entity::load(type, *entity);
-			out->universe.entities.push_back(n_ent);
-
-			out->ent_to_id[n_ent] = id;
-		}
+		logger->warn("Gamestate system version ({}) is not equal to current system version ({}) (system = {})",
+			   out->system_version, cur_version, pkg);
+		out->is_system_outdated = true;
 	}
 
-	// Init the universe entities (We have added them through special
-	// code)
-
-	// Init the hashtable
-	for(Entity* ent : out->universe.entities)
-	{
-		out->universe.entities_by_id[out->ent_to_id[ent]] = ent;
-	}
-
-	out->universe.uid = last_uid;
+	out->load_inner(*root);
 
 	// Finally, we may load the scene
 	auto scene_toml = root->get_table("scene");
-	const std::string scene_path = *scene_toml->get_as<std::string>("name");
-	if(scene_path == "editor")
-	{
-		out->scene =new EditorScene();
-	}
-	else
-	{
-		// TODO: create the args
-		std::vector<sol::object> args;
-		auto* sc = new LuaScene(out, scene_path, "", args);
-		out->scene = sc;
-	}
+	out->load_scene_from_save(*scene_toml);
 
 	return out;
 }
@@ -175,5 +141,76 @@ void GameState::init()
 
 	scene->load();
 
+}
+
+void GameState::reload_system(bool buildings, bool elements)
+{
+	// TODO :P
+}
+
+void GameState::load_inner(cpptoml::table &from)
+{
+	// Read the system
+	universe.system.load(from);
+
+	double t0 = *from.get_as<double>("t");
+	universe.system.t0 = t0;
+	Date start_date = Date(t0);
+	logger->info("Starting at: {}", start_date.to_string());
+
+	universe.system.init(universe.bt_world);
+
+	// These updates populate the element arrays
+	universe.system.update(0.0, universe.bt_world, false);
+	universe.system.update(0.0, universe.bt_world, true);
+
+	// Load entities
+	int64_t last_uid = *from.get_as<int64_t>("uid");
+	auto entities = from.get_table_array("entity");
+
+	if (entities)
+	{
+		for (const auto& entity : *entities)
+		{
+			int64_t id = entity->get_as<int64_t>("id").value_or(0);
+			if (id > last_uid || id <= 0)
+			{
+				logger->fatal("Invalid UID {} in save", id);
+			}
+			std::string type = *entity->get_as<std::string>("type");
+
+			Entity* n_ent = Entity::load(type, *entity);
+			universe.entities.push_back(n_ent);
+
+			ent_to_id[n_ent] = id;
+		}
+	}
+
+	// Init the universe entities (We have added them through special
+	// code)
+
+	// Init the hashtable
+	for(Entity* ent : universe.entities)
+	{
+		universe.entities_by_id[ent_to_id[ent]] = ent;
+	}
+
+	universe.uid = last_uid;
+}
+
+void GameState::load_scene_from_save(cpptoml::table& scene_toml)
+{
+	const std::string scene_path = *scene_toml.get_as<std::string>("name");
+	if(scene_path == "editor")
+	{
+		scene = new EditorScene();
+	}
+	else
+	{
+		// TODO: create the args
+		std::vector<sol::object> args;
+		auto* sc = new LuaScene(this, scene_path, "", args);
+		scene = sc;
+	}
 }
 

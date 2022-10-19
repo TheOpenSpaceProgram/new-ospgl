@@ -1,2 +1,4 @@
 -- Implements some common functionality alongside the barebones building
--- (If you need to extend some buildings, use the extension system!)
+-- Supports the following "settings" in the building.toml file:
+--  -> launchpad: [name, bounds, type]: for launchpads
+--  -> interact: [script]: script gets passed ID of the building

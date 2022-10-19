@@ -7,6 +7,8 @@ packages = [
 
 uid = 1
 t = 0.0
+system_package = "debug_system:systems/system.toml"
+system_version = "0.1.0"
 
 # Scenes may store here which arguments to be started with
 # (and other stuff via storage system if needed)

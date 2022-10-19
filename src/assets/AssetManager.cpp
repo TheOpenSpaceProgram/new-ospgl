@@ -311,3 +311,20 @@ AssetManager::~AssetManager()
 		}
 	}
 }
+
+const PackageMetadata& AssetManager::get_package_metadata(const std::string& name) const
+{
+	auto it = packages.find(name);
+	if(it == packages.end())
+	{
+		logger->fatal("Tried to get metadata for non existing package {}", name);
+	}
+	return it->second.metadata;
+}
+std::shared_ptr<cpptoml::table> AssetManager::load_toml(const std::string& full_path, const std::string& def)
+{
+	std::string resolved = resolve_path(full_path, def);
+	// TODO (patching)
+	return SerializeUtil::load_file(resolved);
+}
+

@@ -80,8 +80,13 @@ public:
 
 	static std::vector<uint8_t> load_binary_raw(const std::string& path);
 
+	const PackageMetadata& get_package_metadata(const std::string& name) const;
+
 	// load_string_raw, but package aware
 	std::string load_string(const std::string& full_path, const std::string& def = "");
+
+	// Loads a TOML file allowing patches to be applied
+	std::shared_ptr<cpptoml::table> load_toml(const std::string& full_path, const std::string& def = "");
 
 	template<typename T>
 	void create_asset_type(const std::string& name, LoadAssetPtr<T> loadPtr, bool preload = false, const std::string& regex = "");
@@ -279,11 +284,9 @@ inline bool AssetManager::load(const std::string& package, const std::string& na
 	// TODO: Search all folders up in the hierarchy up to package folder
 	// to accumulate changes!
 	// TODO: Think whether that is actually worth it, or even neccesary
-
-
+	// TODO: use load_toml to allow patching of this files
 	if (file_exists(full_folder + "folder.toml"))
 	{
-
 		folder_config = SerializeUtil::load_file(full_folder + "folder.toml");
 	}
 

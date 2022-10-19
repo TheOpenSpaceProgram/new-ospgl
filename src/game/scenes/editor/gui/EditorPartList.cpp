@@ -9,7 +9,7 @@ void EditorCategory::load_from_path(const std::string& path)
 	using table_ptr = std::shared_ptr<cpptoml::table>;
 	std::string pkg = osp->assets->get_package_and_name(path, "core").first;
 	
-	table_ptr root = SerializeUtil::load_file(osp->assets->resolve_path(path));
+	table_ptr root = osp->assets->load_toml(path);
 	name = root->get_as<std::string>("name").value_or("[NAME NOT SET]");
 	desc = root->get_as<std::string>("description").value_or("");
 	priority = root->get_as<int64_t>("priority").value_or(0);
