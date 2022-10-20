@@ -79,6 +79,7 @@ GameState *GameState::load(const std::string &path)
 	// TODO: This could be moved somewhere else, but it's important
 	// to run it quick, as otherwise lua environments get the wrong universe!
 	osp->universe = &out->universe;
+	osp->game_state = out;
 
 	out->to_delete = nullptr;
 	out->scene = nullptr;
@@ -179,7 +180,7 @@ void GameState::load_inner(cpptoml::table &from)
 			}
 			std::string type = *entity->get_as<std::string>("type");
 
-			Entity* n_ent = Entity::load(type, *entity);
+			Entity* n_ent = Entity::load(type, entity);
 			universe.entities.push_back(n_ent);
 
 			ent_to_id[n_ent] = id;

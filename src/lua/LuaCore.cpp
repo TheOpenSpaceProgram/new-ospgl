@@ -18,6 +18,7 @@
 #include "libs/LuaImGUI.h"
 #include "libs/LuaSceneLib.h"
 #include "libs/LuaRenderer.h"
+#include "libs/LuaModel.h"
 
 // Used for setting up "osp" usertype
 #include "renderer/Renderer.h"
@@ -146,6 +147,10 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::RENDERER;
 	}
+	else if(name == "model")
+	{
+		return LibraryID::MODEL;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -255,6 +260,7 @@ LuaCore::LuaCore()
 	libraries[LibraryID::IMGUI] = new LuaImGUI();
 	libraries[LibraryID::SCENE] = new LuaSceneLib();
 	libraries[LibraryID::RENDERER] = new LuaRenderer();
+	libraries[LibraryID::MODEL] = new LuaModel();
 }
 
 LuaCore::~LuaCore()

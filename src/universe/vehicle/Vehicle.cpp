@@ -93,10 +93,11 @@ void Vehicle::physics_update(double dt)
 
 }
 
-void Vehicle::init(Universe* universe)
+void Vehicle::init(Universe* universe, Entity* in_entity)
 {
 	init(&universe->lua_state);
 	this->in_universe = universe;
+	this->in_entity = in_entity;
 }
 
 void Vehicle::init(sol::state* lua_state)

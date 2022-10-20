@@ -52,6 +52,7 @@ public:
 		IMGUI,			// LuaImGUI
 		SCENE,			// LuaScene
 		RENDERER,		// LuaRenderer
+		MODEL,			// LuaModel
 		COUNT,
 	};
 

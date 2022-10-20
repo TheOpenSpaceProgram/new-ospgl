@@ -64,6 +64,7 @@ private:
 public:
 
 	Universe* in_universe;
+	Entity* in_entity;
 
 	UnpackedVehicle unpacked_veh;
 	PackedVehicle packed_veh;
@@ -104,7 +105,7 @@ public:
 	void physics_update(double pdt);
 	
 	// Called when the vehicle is added to the world
-	void init(Universe* into_universe);
+	void init(Universe* into_universe, Entity* in_entity);
 	// For the editor
 	void init(sol::state* lua_state);
 
@@ -114,6 +115,11 @@ public:
 
 	void set_world(btDynamicsWorld* world)
 	{	
+		unpacked_veh.world = world;
+	}
+
+	void set_world(btDiscreteDynamicsWorld* world)
+	{
 		unpacked_veh.world = world;
 	}
 

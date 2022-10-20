@@ -14,7 +14,7 @@ function vehicle_spawner.spawn_vehicle(universe, veh_toml, pos, vel, rot, angvel
     veh_toml:read_to_vehicle(vehicle)
     vehicle:sort()
 
-    local nent = universe:create_vehicle_entity(vehicle)
+    local nent = universe:create_entity("core:entities/vehicle.lua", vehicle)
     state = {pos = pos, vel = vel, rot = rot, angvel = angvel}
     vehicle.packed:set_world_state(state)
 
@@ -27,7 +27,7 @@ end
 
 -- unpack defaults to true, if false, vehicle will remain packed
 -- TODO: and in a landed trajectory alongside the launchpad
-function vehicle_spawner.spawn_vehicle_at_launchpad(universe, ent, unpack)
+function vehicle_spawner.spawn_vehicle_at_launchpad(universe, veh_toml, ent, unpack)
 
 end
 

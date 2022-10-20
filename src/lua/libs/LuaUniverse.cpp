@@ -1,8 +1,7 @@
 #include "LuaUniverse.h"
 
 #include <utility>
-
-#include "universe/entity/entities/VehicleEntity.h"
+#include <universe/entity/Entity.h>
 
 void LuaUniverse::load_to(sol::table& table)
 {
@@ -60,10 +59,20 @@ void LuaUniverse::load_to(sol::table& table)
 		  {
 			return sol::as_table(uv->entities);
 		  }),
-	    "create_vehicle_entity", [](Universe* uv, Vehicle* veh)
-		  {
-			return uv->create_entity<VehicleEntity>(veh);
-		  }
+	    "create_entity", [](Universe* uv, const std::string& script_path, sol::this_environment te, sol::variadic_args args)
+		 {
+			sol::environment& env = te;
+			 // Not sure if this is neccesary, maybe just pass args?
+			 std::vector<sol::object> args_v;
+			 for(auto v : args)
+			 {
+				 args_v.push_back(v);
+			 }
+			auto* ent = uv->create_entity<Entity>(script_path,
+				   env["__pkg"].get_or<std::string>("core"), nullptr, args_v, true);
+
+			return ent;
+		 }
 	);
 
 	table.new_usertype<PlanetarySystem>("planetary_system", sol::base_classes, sol::bases<Drawable>());
@@ -78,7 +87,7 @@ void LuaUniverse::load_to(sol::table& table)
 	        "timewarp_safe", &Entity::timewarp_safe,
 	        "uid", sol::property(&Entity::get_uid),
 	        "get_type", &Entity::get_type,
-	        "save", &Entity::save);
+	        "save", &Entity::save,
+	        "drawable_uid", sol::readonly(&Entity::drawable_uid));
 
-	table.new_usertype<VehicleEntity>("vehicle_entity", sol::base_classes, sol::bases<Drawable, Entity>());
 }

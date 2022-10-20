@@ -28,6 +28,7 @@ void LuaRenderer::load_to(sol::table& table)
 			 },
 		  "clear", &Renderer::clear,
 		  "quality", &Renderer::quality,
+		  "env_sample_pos", &Renderer::env_sample_pos,
 		  "get_size", sol::overload([](Renderer* rnd){
 		  	auto size = rnd->get_size(false);
 		  	return std::make_tuple(size.x, size.y);

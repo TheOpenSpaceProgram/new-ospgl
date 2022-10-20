@@ -3,8 +3,6 @@
 #include "assets/Model.h"
 #include "physics/ground/GroundShape.h"
 #include "OSP.h"
-#include "game/scenes/flight/FlightScene.h"
-#include "game/scenes/editor/EditorScene.h"
 #include "game/GameState.h"
 #include <util/Profiler.h>
 

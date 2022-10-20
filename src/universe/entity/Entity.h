@@ -37,42 +37,47 @@ private:
 
 	int64_t uid;
 
+	sol::state* lua_state;
+	std::string type_str;
+	std::shared_ptr<cpptoml::table> init_toml;
+
 public:
+	sol::environment env;
 
 	// You should start simulating bullet physics here
-	virtual void enable_bullet(btDynamicsWorld* world) {}
+	void enable_bullet(btDynamicsWorld* world);
 	// You must stop simulating bullet physics here
-	virtual void disable_bullet(btDynamicsWorld* world) {}
+	void disable_bullet(btDynamicsWorld* world);
 
 	// Return our position to be used by physics loading
-	virtual glm::dvec3 get_physics_origin() { return glm::dvec3(0, 0, 0); }
+	glm::dvec3 get_physics_origin();
 
 	// Return position to be used as a sort of visual origin (for camera centering, etc...)
-	virtual glm::dvec3 get_visual_origin() { return glm::dvec3(0, 0, 0); }
+	glm::dvec3 get_visual_origin();
 
 	// An approximation of our size, try to go higher than the real number
 	// Values of 0.0 means that we don't have a limit for physics loading
-	virtual double get_physics_radius() { return  0.0; }
+	double get_physics_radius();
 
 	// Return true if physics are required around this entity
 	// (This entity will also be loaded)
-	virtual bool is_physics_loader() { return false; }
+	bool is_physics_loader();
 
 	// Visual update, always realtime
-	virtual void update(double dt) {};
+	void update(double dt);
 
 	// Ticks alongside bullet (bullet tick callback)
 	// Note: Ticks before bullet update! (pretick)
-	virtual void physics_update(double pdt) {};
+	void physics_update(double pdt);
 
 	// Called when the entity is added into the universe
 	// Universe is already initialized
-	virtual void init() {};
+	void init();
 
 	// Return true if the physics have stabilized enough for timewarp
 	// Vehicles should return false when they are close enough to surfaces
 	// or in atmospheric flight
-	virtual bool timewarp_safe() { return true; }
+	bool timewarp_safe();
 
 	void setup(Universe* universe, int64_t uid);
 
@@ -99,12 +104,32 @@ public:
 			disable_bullet(world);
 		}
 	}
-	
-	virtual std::string get_type() = 0;
 
-	// Used while loading saves 
-	static Entity* load(std::string type, cpptoml::table& toml);
-	virtual void save(cpptoml::table& to) = 0;
+	std::string get_type();
 
-	virtual ~Entity();
+	// Used while loading saves
+	static Entity* load(std::string type, std::shared_ptr<cpptoml::table> toml);
+	void save(cpptoml::table& to);
+
+	explicit Entity(std::string script_path, std::string in_pkg, std::shared_ptr<cpptoml::table> init_toml,
+	std::vector<sol::object> args, bool is_create);
+
+	void deferred_pass(CameraUniforms& cu, bool is_env_map = false) override;
+	void forward_pass(CameraUniforms& cu, bool is_env_map = false) override;
+	void gui_pass(CameraUniforms& cu) override;
+	void shadow_pass(ShadowCamera& cu) override;
+	void far_shadow_pass(ShadowCamera& cu) override;
+	bool needs_deferred_pass() override;
+	bool needs_forward_pass() override;
+	bool needs_gui_pass() override;
+	bool needs_shadow_pass() override;
+	bool needs_far_shadow_pass() override;
+	bool needs_env_map_pass() override;
+
+
+	// Objects with higher priority get drawn first
+	virtual int get_forward_priority() { return 0.0; }
+
+	~Entity();
+
 };

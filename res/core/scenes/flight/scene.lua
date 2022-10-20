@@ -29,7 +29,7 @@ function load(veh_id)
     end
 
     table.insert(event_handlers, universe:sign_up_for_event("core:new_entity", 
-        function (id) renderer:add_drawable(universe.entities[id]) end))
+        function (id) logger.info(tostring(id)) renderer:add_drawable(universe.entities[id]) end))
     
     table.insert(event_handlers, universe:sign_up_for_event("core:remove_entity", 
         function (id) renderer:remove_drawable(universe.entities[id]) end))

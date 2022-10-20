@@ -19,10 +19,25 @@ void LuaVehicle::load_to(sol::table& table)
 	// Note to coders: Vehicle is deallocated manually so we can return a raw pointer fine
 	table.new_usertype<Vehicle>("vehicle",
 		 "new", [](){return new Vehicle();},
-		 "sort", &Vehicle::sort,
+		 	"is_packed", &Vehicle::is_packed,
 		 	"packed", &Vehicle::packed_veh,
 		 	"unpacked", &Vehicle::unpacked_veh,
-		 	"unpack", &Vehicle::unpack);//,
+		 	"unpack", &Vehicle::unpack,
+		 	"all_pieces", &Vehicle::all_pieces,
+		 	"root", &Vehicle::root,
+		 	"parts", &Vehicle::parts,
+		 	"update", &Vehicle::update,
+		 	"remove_piece", &Vehicle::remove_piece,
+		 	"physics_update", &Vehicle::physics_update,
+		 	"init", sol::resolve<void(Universe*, Entity*)>(&Vehicle::init),
+		 	"update_attachments", &Vehicle::update_attachments,
+		 	"set_world", sol::resolve<void(btDiscreteDynamicsWorld*)>(&Vehicle::set_world),
+		 	"sort", &Vehicle::sort,
+		 	"remove_outdated", &Vehicle::remove_outdated,
+		 	"get_children_of", &Vehicle::get_children_of,
+		 	"get_attached_to", &Vehicle::get_attached_to,
+		 	"get_connected_to", &Vehicle::get_connected_to,
+		 	"get_connected_with", &Vehicle::get_connected_with);//,
 		//"get_attached_to", sol::overload(
 		//	sol::resolve<std::vector<Piece*>(Piece*)>(Vehicle::get_attached_to),
 		//	sol::resolve<Piece*(Piece*, const std::string&)>(Vehicle::get_attached_to)
@@ -34,6 +49,9 @@ void LuaVehicle::load_to(sol::table& table)
 		  {
 				self->set_world_state(decode_worldstate_table(wstate));
 		  });
+
+	table.new_usertype<UnpackedVehicle>("unpacked_vehicle", sol::no_constructor,
+		 "get_center_of_mass", &UnpackedVehicle::get_center_of_mass);
 
 	table.new_usertype<Piece>("piece",
 		"rigid_body", &Piece::rigid_body,
@@ -94,7 +112,13 @@ void LuaVehicle::load_to(sol::table& table)
 		{
 			return self.in_vehicle->get_connected_with(&self, marker);
 		},
-		"get_environment_pressure", &Piece::get_environment_pressure);
+		"get_environment_pressure", &Piece::get_environment_pressure,
+		"collider_offset", &Piece::collider_offset,
+		// Do not hold the returned value! for inmediate calling only!
+		"get_model_node", [](Piece* p)
+		{
+			return p->model_node.sub_node;
+		});
 
 	table.new_usertype<Part>("part",
 		"id", &Part::id,

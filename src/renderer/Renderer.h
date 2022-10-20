@@ -104,6 +104,8 @@ private:
 	bool env_enabled;
 
 public:
+	glm::dvec3 env_sample_pos;
+
 	Cubemap* ibl_source = nullptr;
 
 	// If cubemap is nullptr, we will generate a ibl source cubemap

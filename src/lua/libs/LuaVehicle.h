@@ -9,6 +9,8 @@
 //   - vel: vec3 (must have)
 //   - rot: quat (must have)
 //   - angvel: vec3 (optional, defaults to (0,0,0))
+// WARNING: When drawing vehicles, do not hold the returned Node* from get_model_node as it may
+// disappear after long enough!
 class LuaVehicle : public LuaLib
 {
 public:

@@ -3,7 +3,6 @@
 #include "../../util/DebugDrawer.h"
 #include "../../physics/glm/BulletGlmCompat.h"
 #include "Vehicle.h"
-#include "../entity/entities/VehicleEntity.h"
 
 using WeldedGroupCreation = std::pair<std::unordered_set<Piece*>, bool>;
 
@@ -350,9 +349,11 @@ void UnpackedVehicle::update()
 
 	}
 
+	// We pass the responsability of spawning sub-vehicles to lua too
+	// (Vehicle entity lua function separate_vehicle(vehicle) so lua can hook)
 	for(Vehicle* n_vehicle : n_vehicles)
 	{
-		vehicle->in_universe->create_entity<VehicleEntity>(n_vehicle);
+		LuaUtil::call_function(vehicle->in_entity->env["separate_vehicle"], n_vehicle);
 	}
 
 }

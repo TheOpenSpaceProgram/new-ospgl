@@ -16,9 +16,9 @@ private:
 
 protected:
 
-	GLint drawable_uid;
 
 public:
+	GLint drawable_uid;
 
 	virtual void deferred_pass(CameraUniforms& cu, bool is_env_map = false){}
 	virtual void forward_pass(CameraUniforms& cu, bool is_env_map = false){}

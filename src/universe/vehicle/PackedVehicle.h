@@ -25,6 +25,9 @@ private:
 	// Center of mass relative to the root part
 	btVector3 com;
 
+	// A packed vehicle can either be landed or in an N-body trajectory
+	bool is_landed;
+
 public:
 
 	Vehicle* vehicle;
