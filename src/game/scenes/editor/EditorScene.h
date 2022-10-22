@@ -59,6 +59,14 @@ public:
 	virtual void update() override;
 	virtual void render() override;
 	virtual void unload() override;
+	const std::string& get_name() override
+	{
+		return "editor";
+	}
+	void do_imgui_debug() override
+	{
+
+	}
 
 	EditorScene();
 

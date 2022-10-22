@@ -18,6 +18,7 @@ public:
 	std::vector<sol::object> to_pass_args;
 
 	std::string in_pkg;
+	std::string name;
 	LuaCamera cam;
 
 	sol::environment env;
@@ -29,6 +30,10 @@ public:
 	void render() override;
 	// Called the frame the scene is unloaded
 	void unload() override;
+
+	void do_imgui_debug() override;
+
+	const std::string& get_name() override;
 
 	virtual ~LuaScene() {}
 

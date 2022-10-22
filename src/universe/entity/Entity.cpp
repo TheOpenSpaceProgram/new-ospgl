@@ -171,3 +171,8 @@ bool Entity::needs_env_map_pass()
 {
 	return LuaUtil::call_function_if_present_returns<bool>(env["needs_env_map_pass"]).value_or(false);
 }
+
+void Entity::do_debug_imgui()
+{
+	LuaUtil::call_function_if_present(env["do_debug_imgui"]);
+}

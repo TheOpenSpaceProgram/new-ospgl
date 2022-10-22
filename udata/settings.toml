@@ -6,6 +6,7 @@
 	height = 768
 	scale = 1.0
 	type = "windowed"	# "windowed", "fullscreen" or "windowed fullscreen"
+	swap_interval = 1
 
 [audio_engine]
 	channel_0_int_gain = 1.0

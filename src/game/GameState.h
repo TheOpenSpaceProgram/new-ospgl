@@ -3,6 +3,7 @@
 #include <util/SerializeUtil.h>
 #include "universe/Date.h"
 #include "scenes/Scene.h"
+#include "GameStateDebug.h"
 
 class OSP;
 
@@ -19,7 +20,9 @@ private:
 	void load_inner(cpptoml::table& from);
 	void load_scene_from_save(cpptoml::table& scene);
 
+
 public:
+	GameStateDebug debug;
 
 	// Path to save / load stuff from this save state (udata/path/this)
 	std::string path;

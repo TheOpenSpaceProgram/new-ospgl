@@ -126,6 +126,9 @@ public:
 	bool needs_far_shadow_pass() override;
 	bool needs_env_map_pass() override;
 
+	// This is called already within a window so don't create one
+	void do_debug_imgui();
+
 
 	// Objects with higher priority get drawn first
 	virtual int get_forward_priority() { return 0.0; }

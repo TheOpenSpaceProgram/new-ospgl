@@ -131,6 +131,8 @@ void Logger::log(int level, const char* format, fmt::format_args args)
 	std::cout << str << rang::fg::reset << rang::bg::reset;
 
 	toFile.push_back(str);
+	// TODO: Implement some mechanism to clean the log
+	saved_log.emplace_back(str, level);
 
 	if(level >= 3)
 	{

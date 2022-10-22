@@ -19,6 +19,8 @@ private:
 
 public:
 
+	std::vector<std::pair<std::string, int>> saved_log;
+
 	std::mutex mtx;
 
 	void stacktrace();

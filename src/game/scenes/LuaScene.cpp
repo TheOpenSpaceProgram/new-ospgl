@@ -13,6 +13,7 @@ LuaScene::LuaScene(GameState* in_state, const std::string& scene_script, const s
 	osp->renderer->cam = &cam;
 
 	auto[pkg, name] = osp->assets->get_package_and_name(scene_script, in_pkg);
+	this->name = pkg + ":" + name;
 
 	logger->info("Loading lua scene: {}:{}", pkg, name);
 
@@ -51,4 +52,14 @@ void LuaScene::render()
 void LuaScene::unload()
 {
 	LuaUtil::call_function_if_present(env["unload"]);
+}
+
+const std::string &LuaScene::get_name()
+{
+	return name;
+}
+
+void LuaScene::do_imgui_debug()
+{
+	LuaUtil::call_function_if_present(env["do_imgui_debug"]);
 }

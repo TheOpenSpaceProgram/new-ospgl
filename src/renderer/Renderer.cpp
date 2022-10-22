@@ -636,6 +636,7 @@ Renderer::Renderer(cpptoml::table& settings)
 	height = settings.get_qualified_as<int>("renderer.height").value_or(512);
 	scale = (float)settings.get_qualified_as<double>("renderer.scale").value_or(1.0);
 	type = settings.get_qualified_as<std::string>("renderer.type").value_or("windowed");
+	int swap_interval = settings.get_qualified_as<int>("renderer.swap_interval").value_or(1);
 
 
 
@@ -686,7 +687,8 @@ Renderer::Renderer(cpptoml::table& settings)
 	logger->info("GLSL Version: {}", glGetString(GL_SHADING_LANGUAGE_VERSION));
 	logger->info("OpenGL Vendor: {}",  glGetString(GL_VENDOR));
 	logger->info("OpenGL Renderer: {}", glGetString(GL_RENDERER));
-	
+
+	glfwSwapInterval(swap_interval);
 
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();

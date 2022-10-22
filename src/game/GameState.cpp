@@ -3,7 +3,7 @@
 #include <game/scenes/LuaScene.h>
 #include <OSP.h>
 
-GameState::GameState() : universe()
+GameState::GameState() : universe(), debug(this)
 {
 }
 
@@ -22,12 +22,25 @@ void GameState::update()
 	}
 	
 	universe.update(osp->dt);
-	
-	if(scene)
+
+	if(debug.override_camera)
 	{
+		debug.update_cam(osp->dt);
+		debug.cam.update(osp->dt);
+		if(scene)
+		{
+			scene->gui_input.ext_mouse_blocked = debug.cam.mouse_blocked;
+			scene->gui_input.ext_keyboard_blocked = debug.cam.keyboard_blocked;
+		}
+	}
+
+	if(scene && debug.allow_update)
+	{
+		scene->gui_input.update();
 		scene->update();
 	}
 
+	debug.update();
 
 }
 
