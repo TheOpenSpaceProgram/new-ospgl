@@ -54,7 +54,7 @@ void LuaScene::unload()
 	LuaUtil::call_function_if_present(env["unload"]);
 }
 
-const std::string &LuaScene::get_name()
+std::string LuaScene::get_name()
 {
 	return name;
 }

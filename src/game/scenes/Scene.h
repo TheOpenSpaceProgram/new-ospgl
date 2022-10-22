@@ -20,7 +20,7 @@ public:
 	virtual void unload() = 0;
 	virtual void do_imgui_debug() = 0;
 
-	virtual const std::string& get_name() = 0;
+	virtual std::string get_name() = 0;
 
 	virtual ~Scene() {}
 };

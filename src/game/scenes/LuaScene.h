@@ -33,7 +33,7 @@ public:
 
 	void do_imgui_debug() override;
 
-	const std::string& get_name() override;
+	std::string get_name() override;
 
 	virtual ~LuaScene() {}
 

@@ -59,7 +59,7 @@ public:
 	virtual void update() override;
 	virtual void render() override;
 	virtual void unload() override;
-	const std::string& get_name() override
+	std::string get_name() override
 	{
 		return "editor";
 	}
