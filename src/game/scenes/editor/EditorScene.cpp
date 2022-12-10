@@ -33,29 +33,27 @@ void EditorScene::load()
 	EnvMap* env = new EnvMap();
 	r->add_light(env);
 
-	gui.vg = osp->renderer->vg;
-	gui.init(this);
-
-	osp->game_state->universe.paused = true;
-	
-
 	// Create the bullet physics stuff
 	bt_brf_interface = new btDbvtBroadphase();
 	bt_collision_config = new btDefaultCollisionConfiguration();
 	bt_dispatcher = new btCollisionDispatcher(bt_collision_config);
-	bt_world = new btCollisionWorld(bt_dispatcher, bt_brf_interface, bt_collision_config);	
+	bt_world = new btCollisionWorld(bt_dispatcher, bt_brf_interface, bt_collision_config);
 	debug_draw = new BulletDebugDrawer();
 	debug_draw->setDebugMode(
-		btIDebugDraw::DBG_DrawConstraints |
-		btIDebugDraw::DBG_DrawWireframe |
-		btIDebugDraw::DBG_DrawFrames |
-		btIDebugDraw::DBG_DrawConstraintLimits |
-		btIDebugDraw::DBG_DrawAabb);
+			btIDebugDraw::DBG_DrawConstraints |
+			btIDebugDraw::DBG_DrawWireframe |
+			btIDebugDraw::DBG_DrawFrames |
+			btIDebugDraw::DBG_DrawConstraintLimits |
+			btIDebugDraw::DBG_DrawAabb);
 	bt_world->setDebugDrawer(debug_draw);
 
 	lua_core->load(lua_state, "__UNDEFINED__");
-
 	vehicle.init(&lua_state);
+
+	gui.vg = osp->renderer->vg;
+	gui.init(this);
+
+	osp->game_state->universe.paused = true;
 }
 
 double t = 0.0;

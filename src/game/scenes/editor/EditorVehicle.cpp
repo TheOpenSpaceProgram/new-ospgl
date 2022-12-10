@@ -148,6 +148,24 @@ void EditorVehicle::update(double dt)
 
 void EditorVehicle::init(sol::state* lua_state)
 {
+	veh = new Vehicle();
+	SerializeUtil::read_file_to("udata/vehicles/debug.toml", *veh);
+
+	// Load the different models
+	std::string model_path = *osp->assets->load_toml("core:meshes/editor_attachment.toml")
+			->get_as<std::string>("model");
+
+	AssetHandle<Model> model = AssetHandle<Model>(model_path);
+
+	stack_model = GPUModelNodePointer(model.duplicate(), "stack");
+	radial_model = GPUModelNodePointer(model.duplicate(), "radial");
+	stack_radial_model = GPUModelNodePointer(model.duplicate(), "stack_radial");
+	receive_model = GPUModelNodePointer(model.duplicate(), "receive");
+
+	mat_hover = AssetHandle<Material>("core:mat_hover.toml");
+
+	draw_attachments = false;
+
 	veh->init(lua_state);
 
 	// Load all colliders
@@ -162,24 +180,6 @@ void EditorVehicle::init(sol::state* lua_state)
 EditorVehicle::EditorVehicle(EditorScene* sc) 
 	: Drawable(), scene(sc)
 {
-	veh = new Vehicle();
-	SerializeUtil::read_file_to("udata/vehicles/debug.toml", *veh);
-	
-	// Load the different models
-	std::string model_path = *osp->assets->load_toml("core:meshes/editor_attachment.toml")
-		->get_as<std::string>("model");
-
-	AssetHandle<Model> model = AssetHandle<Model>(model_path);
-
-	stack_model = GPUModelNodePointer(model.duplicate(), "stack");
-	radial_model = GPUModelNodePointer(model.duplicate(), "radial");	
-	stack_radial_model = GPUModelNodePointer(model.duplicate(), "stack_radial");
-	receive_model = GPUModelNodePointer(model.duplicate(), "receive");
-
-	mat_hover = AssetHandle<Material>("core:mat_hover.toml");
-
-	draw_attachments = false;
-
 }
 
 void EditorVehicle::draw_highlight(Piece* p, glm::vec3 color, CameraUniforms& cu)

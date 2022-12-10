@@ -31,7 +31,7 @@ public:
 	// Delta time but is at maximum the physics framerate,
 	// use for stuff related to simulation
 	double dt{};
-	
+
 	// For use with user input unrelated to simulation (cameras and similar)
 	double game_dt{};
 

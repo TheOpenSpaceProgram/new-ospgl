@@ -15,6 +15,7 @@ local locale =
 {"bottom_attachment", "Bottom Attachment", "Acoplamiento Inferior"},
 {"radial_attachment", "Radial Attachment", "Acoplamiento Radial"},
 {"decoupled_attachment", "Decoupled Attachment", "Acoplamiento Separado"},
+{"shutoff_name", "Shut-off valve", "Válvula de cierre"},
 {"4_way_name", "4-way Junction", "Cruce de 4 vías"},
 {"3_way_name", "3-way Junction", "Cruce de 3 vías"},
 {"3_way_desc", "A lightweight way to split a pipe into two", "Una forma ligera de dividir en dos una tuberia"},
