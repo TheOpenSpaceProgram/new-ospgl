@@ -10,6 +10,7 @@ class EditorPanel
 {
 public:
 
+
 	virtual void init(EditorScene* sc, NVGcontext* vg, GUISkin* skin) = 0;
 
 	// TODO: These could be merged into a single function that checks gui_input != null or similar?

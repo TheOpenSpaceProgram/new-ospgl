@@ -37,6 +37,10 @@ void EditorGUI::prepare_gui(int width, int height, GUIInput *gui_input)
 	{
 		show_panel = PLUMBING_PANEL;
 	}
+	else if(editor_mode == WIRING)
+	{
+		show_panel = WIRING_PANEL;
+	}
 
 	if(show_panel == PART_LIST)
 	{
@@ -49,6 +53,10 @@ void EditorGUI::prepare_gui(int width, int height, GUIInput *gui_input)
 	else if(show_panel == PLUMBING_PANEL)
 	{
 		plumbing.prepare_gui(width, get_panel_width(), height, gui_input);
+	}
+	else if(show_panel == WIRING_PANEL)
+	{
+		wiring.prepare_gui(width, get_panel_width(), height, gui_input);
 	}
 
 	prepare_toolset(width, height, swidth, gui_input);
@@ -80,6 +88,10 @@ void EditorGUI::do_gui(int width, int height)
 	else if(show_panel == PLUMBING_PANEL)
 	{
 		plumbing.do_gui(width, get_panel_width(), height);
+	}
+	else if(show_panel == WIRING_PANEL)
+	{
+		wiring.do_gui(width, get_panel_width(), height);
 	}
 
 	do_toolset(width, height, swidth);
@@ -113,6 +125,26 @@ void EditorGUI::do_toolset(int width, int height, float swidth)
 	nvgFill(vg);
 
 	toolset_canvas.draw(vg, &skin, glm::ivec4(0, 0, width, height));
+
+	// Wiring mode indicator
+	if(editor_mode == EditorMode::ATTACHING || editor_mode == EditorMode::PLUMBING)
+	{
+		nvgFontFace(vg, "regular");
+		nvgTextAlign(vg, NVG_ALIGN_MIDDLE | NVG_ALIGN_LEFT);
+		// Calculate bounds for black background
+		float xpos = swidth + 8.0f;
+		float ypos = theight + 20.0f;
+		std::string str = osp->game_database->get_string("core:editor_auto_wire") + ": ";
+		float bounds[4];
+		nvgTextBounds(vg, xpos, ypos, str.c_str(), nullptr, bounds);
+		// Black background
+		nvgFillColor(vg, nvgRGBA(0, 0, 0, 140));
+		nvgBeginPath(vg);
+		nvgRect(vg, bounds[0] - 5.0f, bounds[1] - 5.0f, bounds[2] - bounds[0] + 10.0f,  bounds[3] - bounds[1] + 10.0f);
+		nvgFill(vg);
+		nvgFillColor(vg, nvgRGBA(255, 255, 255, 255));
+		nvgText(vg, xpos, ypos, str.c_str(), nullptr);
+	}
 }
 
 void EditorGUI::prepare_file(int width, int height, GUIInput* gui_input)

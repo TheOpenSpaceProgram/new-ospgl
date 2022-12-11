@@ -22,6 +22,10 @@ public:
 	std::string ft_font;
 	bool uses_bitmap;
 
+	bool escape_clears;
+	bool reselect_clears;
+	void clear();
+
 	int cursor_pos;
 	std::vector<NVGglyphPosition> glyph_pos;
 

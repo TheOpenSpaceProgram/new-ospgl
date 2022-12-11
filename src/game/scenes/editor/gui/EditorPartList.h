@@ -4,8 +4,10 @@
 #include "EditorPanel.h"
 
 #include <gui/widgets/GUIImageButton.h>
+#include <gui/widgets/GUITextField.h>
 #include <gui/layouts/GUIListLayout.h>
 #include <gui/layouts/GUIVerticalLayout.h>
+#include <gui/layouts/GUISingleLayout.h>
 #include <gui/skins/SimpleSkin.h>
 #include <gui/GUICanvas.h>
 
@@ -68,6 +70,9 @@ public:
 	GUICanvas def_panel;
 	GUIListLayout* part_list;
 	GUIVerticalLayout* category_list;
+
+	GUISingleLayout* group_selector;
+	GUISingleLayout* search_bar;
 	
 	// Called when changing category
 	void update_part_list();

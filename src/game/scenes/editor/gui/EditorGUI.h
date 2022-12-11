@@ -14,6 +14,7 @@
 #include "EditorPartList.h"
 #include "EditorTrashcan.h"
 #include "PlumbingPanel.h"
+#include "WiringPanel.h"
 
 
 class EditorScene;
@@ -51,6 +52,7 @@ public:
 	{
 		PART_LIST,
 		PLUMBING_PANEL,
+		WIRING_PANEL,
 		TRASHCAN
 	};
 
@@ -64,6 +66,7 @@ public:
 
 	EditorPartList part_list;
 	EditorTrashcan trashcan;
+	WiringPanel wiring;
 	PlumbingPanel plumbing;
 
 	GUICanvas toolset_canvas;

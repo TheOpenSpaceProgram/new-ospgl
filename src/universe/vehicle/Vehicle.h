@@ -78,6 +78,12 @@ public:
 
 	std::vector<Piece*> all_pieces;
 	Piece* root;
+	// The ID of the group is the index in teh array, this is handled
+	// nicely by the utility functions
+	std::vector<std::string> group_names;
+	std::vector<Part*> find_parts_in_group(int64_t group);
+	void remove_group(int64_t id);
+	void create_group(std::string name);
 
 	// Parts whose root piece is contained in this vehicle
 	std::vector<Part*> parts;

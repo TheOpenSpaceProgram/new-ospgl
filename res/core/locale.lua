@@ -24,8 +24,10 @@ local locale =
 {"electric_pump_name", "Electric Pump", "Bomba Eléctrica"},
 {"electric_pump_desc", "A pump that uses electricity", "Una bomba que utiliza electricidad"},
 -- Countries
-{"united_states", "United States of America", "Estados Unidos de América"}
-
+{"united_states", "United States of America", "Estados Unidos de América"},
+-- Editor
+{"editor_search_parts", "Search parts", "Buscar partes"},
+{"editor_auto_wire", "Auto-wire", "Cableado"}
 
 }
 

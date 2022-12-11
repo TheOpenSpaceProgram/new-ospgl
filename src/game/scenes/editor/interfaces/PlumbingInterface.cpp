@@ -15,12 +15,12 @@ void PlumbingInterface::leave()
 
 void PlumbingInterface::update(double dt)
 {
-
 }
 
 bool PlumbingInterface::do_interface(const CameraUniforms& cu, glm::dvec3 ray_start, glm::dvec3 ray_end,
 								   glm::dvec4 viewport, NVGcontext* vg, GUIInput* gui_input, GUISkin* gui_skin)
 {
+	pb_editor.veh = edveh_int->edveh->veh;
 	glm::vec4 span;
 	span.x = (float)(viewport.x + viewport.z * view_size);
 	span.y = (float)viewport.y;
@@ -80,7 +80,6 @@ glm::dvec4 PlumbingInterface::get_vehicle_viewport()
 
 PlumbingInterface::PlumbingInterface(EditorVehicleInterface *edveh_int)
 {
-	pb_editor.veh = edveh_int->edveh->veh;
 	pb_editor.allow_editing = true;
 	pb_editor.allow_dragging = true;
 	pb_editor.show_flow_direction = true;

@@ -32,6 +32,11 @@ glm::ivec2 GUITextField::prepare(glm::ivec2 wpos, glm::ivec2 wsize, glm::ivec4 v
 					ipt->mouse_blocked = true;
 				}
 
+				if(!focused && reselect_clears)
+				{
+					clear();
+				}
+
 				// Clear the input
 				input->get_input_text();
 				focused = true;
@@ -133,6 +138,10 @@ glm::ivec2 GUITextField::prepare(glm::ivec2 wpos, glm::ivec2 wsize, glm::ivec4 v
 			focused = false;
 			ipt->keyboard_blocked = false;
 			on_exit.call(std::move(string));
+			if(escape_clears)
+			{
+				clear();
+			}
 		}
 
 		if(input->key_down(GLFW_KEY_ENTER))
@@ -241,4 +250,12 @@ GUITextField::GUITextField(std::string font, float size)
 	cursor_pos = 0;
 	ft_size = size;
 	ft_font = font;
+	escape_clears = false;
+}
+
+void GUITextField::clear()
+{
+	string = "";
+	cursor_pos = 0;
+	glyph_pos.clear();
 }

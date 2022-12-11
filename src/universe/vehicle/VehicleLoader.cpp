@@ -5,6 +5,15 @@ void VehicleLoader::load_metadata(const cpptoml::table& root)
 	// TODO: Description and package check
 	vpart_id = *root.get_qualified_as<int64_t>("part_id");
 	vpiece_id = *root.get_qualified_as<int64_t>("piece_id");
+
+	auto gname_arr = root.get_qualified_array_of<std::string>("group_names");
+	if(gname_arr)
+	{
+		for (auto gname: *gname_arr)
+		{
+			n_vehicle->group_names.push_back(gname);
+		}
+	}
 }
 
 void VehicleLoader::obtain_pipes(const cpptoml::table &root)
@@ -76,7 +85,8 @@ void VehicleLoader::obtain_parts(const cpptoml::table& root)
 		Part* n_part = new Part(part_proto, part);
 
 		n_part->id = *part->get_qualified_as<int64_t>("id");
-		logger->check(n_part->id <= vpart_id, "Malformed vehicle, part ID too big ({}/{})", 
+		n_part->group_id = part->get_qualified_as<int64_t>("group_id").value_or(-1);
+		logger->check(n_part->id <= vpart_id, "Malformed vehicle, part ID too big ({}/{})",
 				n_part->id, vpart_id);
 
 		// Load the attached machines (but not init yet!)
@@ -311,6 +321,16 @@ VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to)
 VehicleSaver::VehicleSaver(cpptoml::table &target, const Vehicle &what)
 {
 	logger->check(what.is_packed(), "Cannot serialize a unpacked vehicle");
+
+	auto array = cpptoml::make_array();
+	// Group names
+	for(std::string n : what.group_names)
+	{
+		array->push_back(n);
+	}
+
+	target.insert("group_names", array);
+
 	assign_ids(target, what);
 	write_parts(target, what);
 	write_pieces(target, what);
@@ -349,6 +369,7 @@ void VehicleSaver::write_parts(cpptoml::table &target, const Vehicle &what)
 		auto table = cpptoml::make_table();
 
 		table->insert("id", pair.second);
+		table->insert("group_id", pair.first->group_id);
 		table->insert("proto", pair.first->part_proto.pkg + ":" + pair.first->part_proto.name);
 
 		for(auto m_pair : pair.first->machines)
