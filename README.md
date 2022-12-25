@@ -1,7 +1,8 @@
 # OSPGL
 This repo contains all code for the OSPGL program, despite being called 'new-ospgl', as the original ospgl is now legacy code.
 
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/TheOpenSpaceProgram/new-ospgl/Main%20Build/master?label=master&style=for-the-badge)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/TheOpenSpaceProgram/new-ospgl/c-cpp.yml?branch=master)
+![GitHub issues](https://img.shields.io/github/issues/TheOpenSpaceProgram/new-ospgl)
 
 
 ## Collaborating
