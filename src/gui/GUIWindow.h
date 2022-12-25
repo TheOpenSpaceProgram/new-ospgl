@@ -19,6 +19,7 @@ private:
 	bool minimized;
 	bool pinned;
 	bool passthrough;
+	GUIWindow** erase_ptr;
 public:
 
 	float alpha;

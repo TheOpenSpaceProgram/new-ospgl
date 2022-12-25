@@ -135,6 +135,8 @@ void GUILayout::draw_vscrollbar(NVGcontext* vg)
 		nvgFill(vg);
 		float scroll_h = (float)size.y * (float)size.y / (float)vscrollbar.max_scroll;
 		float scroll_y = (float)(size.y - scroll_h) * (float)vscrollbar.scroll / ((float)vscrollbar.max_scroll - size.y);
+		if(scroll_h > size.y)
+			scroll_h = size.y;
 
 		nvgBeginPath(vg);
 		nvgRect(vg, x + pos.x, pos.y + scroll_y, (float)vscrollbar.width, scroll_h);

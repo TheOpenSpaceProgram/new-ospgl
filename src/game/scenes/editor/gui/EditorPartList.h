@@ -5,6 +5,7 @@
 
 #include <gui/widgets/GUIImageButton.h>
 #include <gui/widgets/GUITextField.h>
+#include <gui/widgets/GUIDropDown.h>
 #include <gui/layouts/GUIListLayout.h>
 #include <gui/layouts/GUIVerticalLayout.h>
 #include <gui/layouts/GUISingleLayout.h>
@@ -48,8 +49,13 @@ private:
 	EditorScene* scene;
 	EditorVehicleInterface* edveh_int;
 	GUIInput* gui_input;
+	GUIWindow* group_manager;
 
 	void create_part(AssetHandle<PartPrototype>& proto);
+	GUIDropDown* group_dropdown;
+	void update_groups();
+
+	void try_show_group_manager();
 
 public:
 

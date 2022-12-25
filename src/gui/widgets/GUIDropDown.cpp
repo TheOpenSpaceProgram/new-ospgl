@@ -61,7 +61,7 @@ void GUIDropDown::draw(NVGcontext *ctx, GUISkin *skin)
 
 	if(item >= 0)
 	{
-		skin->draw_dropdown_header(ctx, pos, size, options[item], open, false, st);
+		skin->draw_dropdown_header(ctx, pos, size, options[item].second, open, false, st);
 	}
 	else
 	{
@@ -73,9 +73,10 @@ void GUIDropDown::draw(NVGcontext *ctx, GUISkin *skin)
 GUIDropDown::GUIDropDown()
 {
 	item = -1;
-	not_chosen_string = "Choose group";
+	open = false;
+	not_chosen_string = "";
 	chooser_canvas = new GUICanvas();
-	chooser_layout = new GUIVerticalLayout();
+	chooser_layout = new GUIVerticalLayout(0);
 	chooser_canvas->layout = chooser_layout;
 
 	may_drop_upwards = true;
@@ -98,9 +99,54 @@ void GUIDropDown::update_options()
 	chooser_layout->remove_all_widgets();
 	for(size_t i = 0; i < options.size(); i++)
 	{
-		GUITextButton* btn = new GUITextButton(options[i]);
+		GUITextButton* btn = new GUITextButton(options[i].second, "medium");
 		btn->button_size.y = item_size;
+		btn->on_clicked.add_handler([this, i](int _)
+		{
+			this->choose(i);
+		});
+		btn->on_enter_hover.add_handler([this, i]()
+		{
+			this->on_item_enter_hover.call(this->options[i]);
+		});
+		btn->on_leave_hover.add_handler([this, i]()
+		{
+			this->on_item_leave_hover.call(this->options[i]);
+		});
 		chooser_layout->add_widget(btn);
+	}
+
+}
+
+void GUIDropDown::choose(size_t i)
+{
+	open = false;
+	int old_item = item;
+	item = (int)i;
+	auto opt = options[i];
+	on_item_chosen.call(opt);
+	if(old_item != item)
+	{
+		if(old_item >= 0)
+		{
+			on_item_change.call(opt, options[old_item]);
+		}
+		else
+		{
+			on_item_change.call(opt, {"", ""});
+		}
+	}
+}
+
+void GUIDropDown::select(std::string id)
+{
+	for(int i = 0; i < options.size(); i++)
+	{
+		if(options[i].first == id)
+		{
+			item = i;
+			break;
+		}
 	}
 
 }

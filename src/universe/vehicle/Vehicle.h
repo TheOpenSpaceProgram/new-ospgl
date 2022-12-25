@@ -78,7 +78,7 @@ public:
 
 	std::vector<Piece*> all_pieces;
 	Piece* root;
-	// The ID of the group is the index in teh array, this is handled
+	// The ID of the group is the index in the array, this is handled
 	// nicely by the utility functions
 	std::vector<std::string> group_names;
 	std::vector<Part*> find_parts_in_group(int64_t group);

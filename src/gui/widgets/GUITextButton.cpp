@@ -22,12 +22,13 @@ void GUITextButton::draw(NVGcontext *vg, GUISkin *skin)
 	{
 		nvgFontSize(vg, ft_size);
 		nvgFontFace(vg, ft_font.c_str());
+		nvgTextAlign(vg, NVG_ALIGN_TOP | NVG_ALIGN_LEFT);
 		float asc, desc, lh, lwidth = size.x - 10.0f;
 		nvgTextMetrics(vg, &asc, &desc, &lh);
 		float bounds[4];
 		if(center_horizontal || center_vertical)
 		{
-			nvgTextBoxBounds(vg, pos.x + 6.0f, pos.y + lh + 8.0f, lwidth, text.c_str(), nullptr, bounds);
+			nvgTextBoxBounds(vg, pos.x + 6.0f, pos.y, lwidth, text.c_str(), nullptr, bounds);
 		}
 		if(center_horizontal)
 		{
@@ -37,11 +38,11 @@ void GUITextButton::draw(NVGcontext *vg, GUISkin *skin)
 		if(center_vertical)
 		{
 			float free_v = (size.y - 10.0f) - (bounds[3] - bounds[1]);
-			pos.y += free_v * 0.5f - lh * 0.25f;
+			pos.y += free_v * 0.5f + lh * 0.5f;
 		}
 		pos.x = glm::round(pos.x);
 		pos.y = glm::round(pos.y);
-		nvgTextBox(vg, pos.x + 6.0f, pos.y + lh + 8.0f, lwidth, text.c_str(), nullptr);
+		nvgTextBox(vg, pos.x + 6.0f, pos.y, lwidth, text.c_str(), nullptr);
 	}
 }
 

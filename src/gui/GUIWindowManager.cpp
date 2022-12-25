@@ -135,7 +135,9 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 					w->close_hovered = true;	
 					if(gui_input->mouse_down(0))
 					{ 
-						remove = true; 
+						remove = true;
+						if(w->erase_ptr != nullptr)
+							*w->erase_ptr = nullptr;
 						w->on_close(*w);
 					}
 				}
@@ -237,6 +239,9 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 			gui_input->ext_keyboard_blocked = true;
 			gui_input->ext_scroll_blocked = true;
 		}
+		// TODO: We position here because otherwise drags lags by 1 frame, but
+		// this could be called only on drag for a bit of optimizaton
+		w->position(screen, skin);
 		w->prepare(gui_input, screen);
 
 		gui_input->ext_mouse_blocked = old_mouse_block;
@@ -245,9 +250,6 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 	}
 
 	// Prevent click through to other GUIs and to other game features
-	gui_input->ext_mouse_blocked = any_hovered || original_block_mouse;
-	gui_input->ext_keyboard_blocked = any_hovered || original_block_keyboard;
-	gui_input->ext_scroll_blocked = any_hovered || original_block_scroll;
 	gui_input->mouse_blocked = any_hovered || gui_input->mouse_blocked;
 	gui_input->keyboard_blocked = any_hovered || gui_input->keyboard_blocked;
 	gui_input->scroll_blocked = any_hovered || gui_input->scroll_blocked;
@@ -262,9 +264,21 @@ void GUIWindowManager::draw(NVGcontext* vg, GUIScreen* screen)
 
 }
 
-GUIWindow* GUIWindowManager::create_window()
+GUIWindow* GUIWindowManager::create_window(GUIWindow** erase_ptr, glm::ivec2 pos, glm::ivec2 size)
 {
 	GUIWindow* n_window = new GUIWindow();
+	n_window->erase_ptr = erase_ptr;
+	if(pos.x < 0)
+		pos.x = default_pos.x;
+	if(pos.y < 0)
+		pos.y = default_pos.y;
+	if(size.x < 0)
+		size.x = default_size.x;
+	if(size.y < 0)
+		size.y = default_size.y;
+
+	n_window->pos = pos;
+	n_window->size = size;
 
 	n_window->focused = false;
 
@@ -295,5 +309,7 @@ GUIWindowManager::GUIWindowManager()
 	focused = nullptr;
 	dragging = false;
 	resizing = false;
-	
+
+	default_pos = glm::ivec2(400, 100);
+	default_size = glm::ivec2(400, 400);
 }

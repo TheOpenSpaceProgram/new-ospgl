@@ -32,7 +32,7 @@ public:
 		uses_bitmap = false;
 		ft_font = font;
 		ft_size = size;
-		button_size = glm::ivec2(400, 20);
+		button_size = glm::ivec2(400, 35);
 	}
 
 	// Warning: bitmap text doesn't support line breaking!
@@ -41,7 +41,7 @@ public:
 		this->text = text;
 		uses_bitmap = true;
 		bm_font = std::move(font);
-		button_size = glm::ivec2(400, 20);
+		button_size = glm::ivec2(400, 35);
 	}
 };
 

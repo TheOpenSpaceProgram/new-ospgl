@@ -21,7 +21,7 @@ glm::ivec2 GUITextField::position(glm::ivec2 wpos, glm::ivec2 wsize, GUIScreen *
 
 void GUITextField::prepare(glm::ivec4 viewport, GUIScreen* screen, GUIInput* ipt)
 {
-	if(ipt->ext_mouse_blocked)
+	if(ipt->ext_mouse_blocked || (ipt->mouse_blocked && ipt->execute_user_actions))
 	{
 		focused = false;
 	}
@@ -36,38 +36,41 @@ void GUITextField::prepare(glm::ivec4 viewport, GUIScreen* screen, GUIInput* ipt
 					ipt->mouse_blocked = true;
 				}
 
-				if(!focused && reselect_clears)
+				if(ipt->execute_user_actions)
 				{
-					clear();
-				}
-
-				// Clear the input
-				input->get_input_text();
-				focused = true;
-				ipt->keyboard_blocked = true;
-
-				// Focus where the user clicked
-				if(!glyph_pos.empty())
-				{
-					for (size_t glyph = 0; glyph < glyph_pos.size(); glyph++)
+					if (!focused && reselect_clears)
 					{
-						float left = glyph_pos[glyph].minx - last_offset;
-						float right = glyph_pos[glyph].maxx - last_offset;
+						clear();
+					}
 
-						if (input->mouse_pos.x > left && input->mouse_pos.y < right)
+					// Clear the input
+					input->get_input_text();
+					focused = true;
+					ipt->keyboard_blocked = true;
+
+					// Focus where the user clicked
+					if (!glyph_pos.empty())
+					{
+						for (size_t glyph = 0; glyph < glyph_pos.size(); glyph++)
 						{
-							cursor_pos = (int) glyph;
+							float left = glyph_pos[glyph].minx - last_offset;
+							float right = glyph_pos[glyph].maxx - last_offset;
+
+							if (input->mouse_pos.x > left && input->mouse_pos.y < right)
+							{
+								cursor_pos = (int) glyph;
+							}
 						}
-					}
-					float minx = glyph_pos[0].minx - last_offset;
-					float maxx = glyph_pos[glyph_pos.size() - 1].maxx - last_offset;
-					if (input->mouse_pos.x > maxx)
-					{
-						cursor_pos = glyph_pos.size();
-					}
-					else if(input->mouse_pos.x < minx)
-					{
-						cursor_pos = 0;
+						float minx = glyph_pos[0].minx - last_offset;
+						float maxx = glyph_pos[glyph_pos.size() - 1].maxx - last_offset;
+						if (input->mouse_pos.x > maxx)
+						{
+							cursor_pos = glyph_pos.size();
+						}
+						else if (input->mouse_pos.x < minx)
+						{
+							cursor_pos = 0;
+						}
 					}
 				}
 			}

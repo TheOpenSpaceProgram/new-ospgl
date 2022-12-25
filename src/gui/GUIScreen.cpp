@@ -18,6 +18,7 @@ void GUIScreen::prepare_pass()
 		c.first->pre_prepare(this);
 	}
 
+	win_manager.position(this);
 	// position_pass
 	for(auto o : post_canvas)
 	{
@@ -30,6 +31,7 @@ void GUIScreen::prepare_pass()
 
 	// first prepare without user actions, top to down
 	gui_input->execute_user_actions = false;
+	win_manager.prepare(gui_input, this);
 	for(auto o : post_canvas)
 	{
 		o.first->prepare(this, gui_input);
@@ -38,7 +40,7 @@ void GUIScreen::prepare_pass()
 	{
 		o.first->prepare(this, gui_input);
 	}
-	gui_input->debug();
+	//gui_input->debug();
 
 }
 
@@ -50,6 +52,7 @@ void GUIScreen::input_pass()
 	gui_input->scroll_blocked = false;
 
 	gui_input->execute_user_actions = true;
+	win_manager.prepare(gui_input, this);
 	for(auto o : post_canvas)
 	{
 		o.first->prepare(this, gui_input);
@@ -70,6 +73,7 @@ void GUIScreen::draw()
 	{
 		o.first->draw(osp->renderer->vg, skin, screen);
 	}
+	win_manager.draw(osp->renderer->vg, this);
 }
 
 void GUIScreen::add_canvas(GUICanvas *acanvas, glm::ivec2 pos, glm::ivec2 size)
