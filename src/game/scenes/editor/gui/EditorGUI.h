@@ -79,7 +79,7 @@ public:
 	void add_file(int width, int height);
 
 	// Call this before any canvas are drawn
-	void do_backgrounds(int width, int height, float swidth);
+	void do_backgrounds(int width, int height);
 
 	void init(EditorScene* scene);
 

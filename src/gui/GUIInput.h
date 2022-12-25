@@ -48,4 +48,6 @@ public:
 	bool mouse_pressed(int button = 0);
 	bool mouse_down(int button = 0);
 	bool mouse_up(int button = 0);
+
+	void debug();
 };

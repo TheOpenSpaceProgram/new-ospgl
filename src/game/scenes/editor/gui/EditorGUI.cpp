@@ -162,8 +162,10 @@ void EditorGUI::add_file(int width, int height)
 	scene->gui_screen.add_canvas(&file_canvas, glm::ivec2(width - fwidth, 0), glm::ivec2(fwidth, fheight));
 }
 
-void EditorGUI::do_backgrounds(int width, int height, float swidth)
+void EditorGUI::do_backgrounds(int width, int height)
 {
+	float swidth = (float)get_panel_width();
+
 	nvgResetScissor(vg);
 
 	nvgFillColor(vg, scene->gui_screen.skin->get_background_color());

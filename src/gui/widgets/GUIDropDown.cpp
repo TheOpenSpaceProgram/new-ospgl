@@ -99,6 +99,7 @@ void GUIDropDown::update_options()
 	for(size_t i = 0; i < options.size(); i++)
 	{
 		GUITextButton* btn = new GUITextButton(options[i]);
+		btn->button_size.y = item_size;
 		chooser_layout->add_widget(btn);
 	}
 

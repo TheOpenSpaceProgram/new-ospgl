@@ -42,7 +42,7 @@ void GUIBaseButton::set_up(int btn)
 void GUIBaseButton::do_button(glm::ivec2 pos, glm::ivec2 size, glm::ivec4 viewport, GUIInput* ipt)
 {
 	bool unset = false;
-	if(!ipt->ext_mouse_blocked && (!ipt->mouse_blocked && ipt->execute_user_actions))
+	if(!ipt->ext_mouse_blocked && !ipt->mouse_blocked)
 	{
 		if(ipt->mouse_inside(pos, size) && ipt->mouse_inside(viewport))
 		{

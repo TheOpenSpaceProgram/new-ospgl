@@ -42,6 +42,11 @@ void GUIVerticalLayout::prepare(GUIInput* gui_input, GUIScreen* screen)
 		widget->prepare(get_aabb(), screen, gui_input);
 	}
 
+	if(gui_input->mouse_inside(get_aabb()))
+	{
+		gui_input->scroll_blocked = true;
+	}
+
 }
 
 void GUIVerticalLayout::pre_prepare(GUIScreen *screen)

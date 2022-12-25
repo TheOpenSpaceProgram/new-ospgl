@@ -22,7 +22,6 @@ void EditorTrashcan::init(EditorScene* sc, NVGcontext* vg)
 
 	// Add a single button
 	trash_button = GUIImageButton();
-	trash_button.blocks_mouse = false;
 	trash_button.set_image(vg, trash_image.duplicate());
 	trash_button.img_mode = GUIImageButton::CENTER;
 	trash_button.on_clicked.add_handler([this](int btn)

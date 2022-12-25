@@ -61,9 +61,10 @@ double t = 0.0;
 void EditorScene::update()
 {
 	glm::ivec4 screen = glm::ivec4(0, 0, osp->renderer->get_width(true), osp->renderer->get_height(true));
-	gui_screen.new_frame(screen);
 
 	gui_input.update();
+	gui_screen.new_frame(screen);
+
 	if(cam.blocked)
 	{
 		gui_input.ext_mouse_blocked = true;
@@ -79,7 +80,7 @@ void EditorScene::update()
 	int rw = (viewport.z - viewport.x) * (int)real_screen_size.x;
 	int rh = (viewport.w - viewport.y) * (int)real_screen_size.y;
 
-
+	do_gui();
 	gui_screen.prepare_pass();
 
 	float gw = (float)gui.get_panel_width();
@@ -112,7 +113,8 @@ void EditorScene::do_gui()
 {
 	int width = osp->renderer->get_width(true);
 	int height = osp->renderer->get_height(true);
-	gui.add_gui(width, height);
+	gui.do_backgrounds(width, height);
+	gui.add_canvas(width, height);
 }
 
 void EditorScene::do_edveh_gui()

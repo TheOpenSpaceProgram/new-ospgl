@@ -128,6 +128,8 @@ void EditorPartList::create_part(AssetHandle<PartPrototype>& proto)
 void EditorPartList::add_gui(int width, int panel_width, int height, GUIScreen *screen)
 {
 	screen->add_canvas(&def_panel, glm::ivec2(0, 0), glm::ivec2(panel_width, height));
+	// Add for later because we need to block the double click on adding a part
+	this->gui_input = screen->gui_input;
 }
 
 void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
@@ -167,10 +169,12 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 
 	group_selector = new GUISingleLayout();
 	GUIDropDown* ddown = new GUIDropDown();
-	ddown->options.push_back("Test1");
-	ddown->options.push_back("Test2");
-	ddown->options.push_back("Test3");
-	ddown->options.push_back("Test4");
+	ddown->item_size = 50;
+	for(int i = 0; i < 50; i++)
+	{
+		ddown->options.push_back("Test Option");
+
+	}
 	ddown->update_options();
 
 	group_selector->add_widget(ddown);

@@ -38,12 +38,17 @@ void GUIScreen::prepare_pass()
 	{
 		o.first->prepare(this, gui_input);
 	}
+	gui_input->debug();
 
 }
 
 void GUIScreen::input_pass()
 {
-	// first prepare without user actions, top to down
+	// Reset GUI block status so it doesn't block itself from the previous pass
+	gui_input->mouse_blocked = false;
+	gui_input->keyboard_blocked = false;
+	gui_input->scroll_blocked = false;
+
 	gui_input->execute_user_actions = true;
 	for(auto o : post_canvas)
 	{

@@ -1,5 +1,6 @@
 #include "GUIInput.h"
 #include <util/InputUtil.h>
+#include <imgui/imgui.h>
 
 
 bool GUIInput::mouse_inside(glm::ivec2 pos, glm::ivec2 size)
@@ -69,4 +70,25 @@ void GUIInput::update()
 			block_mouse[i] = false;
 		}
 	}
+}
+
+void GUIInput::debug()
+{
+	ImGui::Begin("GUI Input debug");
+
+	ImGui::Text("ext_mouse_blocked = %i", ext_mouse_blocked);
+	ImGui::Text("ext_scroll_blocked = %i", ext_scroll_blocked);
+	ImGui::Text("ext_keyboard_blocked = %i", ext_keyboard_blocked);
+	ImGui::Separator();
+	ImGui::Text("mouse_blocked = %i", mouse_blocked);
+	ImGui::Text("scroll_blocked = %i", scroll_blocked);
+	ImGui::Text("keyboard_blocked = %i", keyboard_blocked);
+	ImGui::Separator();
+	ImGui::Text("execute_user_actions = %i", execute_user_actions);
+	ImGui::Text("block_mouse[0] = %i", block_mouse[0]);
+	ImGui::Text("block_mouse[1] = %i", block_mouse[1]);
+	ImGui::Text("block_mouse[2] = %i", block_mouse[2]);
+
+	ImGui::End();
+
 }
