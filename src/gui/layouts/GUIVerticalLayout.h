@@ -11,7 +11,9 @@ private:
 public:
 
 
-	virtual void prepare(GUIInput* gui_input) override;
+	void position(glm::ivec2 pos, glm::ivec2 size, GUIScreen* screen) override;
+	void prepare(GUIInput* gui_input, GUIScreen* screen) override;
+	void pre_prepare(GUIScreen* screen) override;
 
 	GUIVerticalLayout(int element_margin = 4)
 	{

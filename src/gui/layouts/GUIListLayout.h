@@ -12,7 +12,9 @@ private:
 public:
 
 
-	virtual void prepare(GUIInput* gui_input) override;
+	void position(glm::ivec2 pos, glm::ivec2 size, GUIScreen* screen) override;
+	void prepare(GUIInput* gui_input, GUIScreen* screen) override;
+	void pre_prepare(GUIScreen* screen) override;
 
 	GUIListLayout(int element_vmargin = 4, int element_hmargin = 4)
 	{

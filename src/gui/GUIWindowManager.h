@@ -24,8 +24,9 @@ public:
 	glm::ivec4 viewport;
 
 
-	void prepare(GUIInput* gui_input, GUISkin* skin);
-	void draw(NVGcontext* vg, GUISkin* skin);
+	void position(GUIScreen* screen);
+	void prepare(GUIInput* gui_input, GUIScreen* screen);
+	void draw(NVGcontext* vg, GUIScreen* screen);
 
 	GUIWindow* create_window();
 	void delete_window(GUIWindow* win);

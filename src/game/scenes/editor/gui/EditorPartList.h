@@ -44,7 +44,6 @@ private:
 
 	std::vector<GUIImageButton*> buttons;
 
-	GUISkin* gui_skin;
 	NVGcontext* vg;
 	EditorScene* scene;
 	EditorVehicleInterface* edveh_int;
@@ -77,10 +76,9 @@ public:
 	// Called when changing category
 	void update_part_list();
 
-	void init(EditorScene* sc, NVGcontext* vg, GUISkin* skin) override;
+	void init(EditorScene* sc, NVGcontext* vg) override;
 
-	void prepare_gui(int width, int panel_width, int height, GUIInput* gui_input) override;
-	void do_gui(int width, int panel_width, int height) override;
+	void add_gui(int width, int panel_width, int height, GUIScreen* screen) override;
 
 	int get_panel_width();
 	

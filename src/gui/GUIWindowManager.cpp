@@ -1,8 +1,19 @@
 #include "GUIWindowManager.h"
 #include <util/InputUtil.h>
+#include <gui/GUIScreen.h>
 
-void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
+void GUIWindowManager::position(GUIScreen *screen)
 {
+	// Order doesn't really matter for position as windows are independent
+	for(auto w : windows)
+	{
+		w->position(screen, screen->skin);
+	}
+}
+
+void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
+{
+	GUISkin* skin = screen->skin;
 	if(windows.size() == 0)
 	{
 		return;
@@ -212,17 +223,25 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
 	bool original_block_keyboard = gui_input->ext_keyboard_blocked;
 	bool original_block_scroll = gui_input->ext_scroll_blocked;
 
+	// Reverse order so top-windows block bottom ones
 	for(auto it = windows.rbegin(); it != windows.rend(); it++)
 	{
 		GUIWindow* w = *it;
+		bool old_mouse_block = gui_input->ext_mouse_blocked;
+		bool old_keyboard_block = gui_input->ext_keyboard_blocked;
+		bool old_scroll_block = gui_input->ext_scroll_blocked;
 		if(w != focused)
 		{
-			// Block user input
+			// Block user input for non focused windows
 			gui_input->ext_mouse_blocked = true;
 			gui_input->ext_keyboard_blocked = true;
 			gui_input->ext_scroll_blocked = true;
 		}
-		w->prepare(gui_input, skin);
+		w->prepare(gui_input, screen);
+
+		gui_input->ext_mouse_blocked = old_mouse_block;
+		gui_input->ext_keyboard_blocked = old_keyboard_block;
+		gui_input->ext_scroll_blocked = old_scroll_block;
 	}
 
 	// Prevent click through to other GUIs and to other game features
@@ -234,11 +253,11 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUISkin* skin)
 	gui_input->scroll_blocked = any_hovered || gui_input->scroll_blocked;
 }
 
-void GUIWindowManager::draw(NVGcontext* vg, GUISkin* skin)
+void GUIWindowManager::draw(NVGcontext* vg, GUIScreen* screen)
 {
 	for(GUIWindow* w : windows)
 	{
-		w->draw(vg, skin, viewport);
+		w->draw(vg, screen->skin, viewport);
 	}
 
 }

@@ -2,11 +2,16 @@
 #include "lua/LuaCore.h"
 #include "../GameState.h"
 #include "renderer/Renderer.h"
+#include <gui/skins/SimpleSkin.h>
 
 LuaScene::LuaScene(GameState* in_state, const std::string& scene_script, const std::string& in_pkg,
 				   std::vector<sol::object> args) :
 	cam(&this->env)
 {
+	// TODO: Allow lua to define the default GUIScreen, including skin
+	gui_screen.init(glm::ivec4(0, 0, osp->renderer->get_width(true), osp->renderer->get_height(true)),
+								 &skin, &gui_input);
+
 	this->to_pass_args = args;
 	this->in_pkg = in_pkg;
 	this->lua_state = &in_state->universe.lua_state;

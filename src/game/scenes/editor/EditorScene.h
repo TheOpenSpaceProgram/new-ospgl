@@ -29,7 +29,7 @@ public:
 	glm::dvec4 get_viewport();
 	
 private:
-
+	SimpleSkin skin;
 	EditorCamera cam;
 
 
@@ -43,7 +43,6 @@ private:
 	SunLight sun;
 
 	void do_gui();
-	void prepare_gui();
 	void do_edveh_gui();
 
 public:

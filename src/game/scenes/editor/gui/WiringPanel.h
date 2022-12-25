@@ -11,7 +11,7 @@ class EditorGUI;
 
 class WiringPanel : EditorPanel
 {
-	GUISkin* gui_skin;
+	EditorScene* scene;
 	NVGcontext* vg;
 
 	AssetHandle<Image> trash_image;
@@ -21,11 +21,9 @@ class WiringPanel : EditorPanel
 	GUIImageButton trash_button;
 
 	EditorGUI* edgui;
-	GUIInput* gui_input;
 
 public:
-	void init(EditorScene* sc, NVGcontext* vg, GUISkin* skin) override;
-	void prepare_gui(int width, int panel_width, int height, GUIInput* gui_input) override;
-	void do_gui(int width, int panel_width, int height) override;
+	void init(EditorScene* sc, NVGcontext* vg) override;
+	void add_gui(int width, int panel_width, int height, GUIScreen* screen) override;
 
 };

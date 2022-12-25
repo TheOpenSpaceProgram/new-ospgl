@@ -1,6 +1,7 @@
 #pragma once
 #include "Scene.h"
 #include <sol/sol.hpp>
+#include <gui/skins/SimpleSkin.h>
 #include "renderer/camera/LuaCamera.h"
 
 class GameState;
@@ -14,6 +15,8 @@ class GameState;
 class LuaScene : public Scene
 {
 public:
+
+	SimpleSkin skin;
 
 	std::vector<sol::object> to_pass_args;
 

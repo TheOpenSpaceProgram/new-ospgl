@@ -1,24 +1,19 @@
 #include "EditorTrashcan.h"
+#include <game/scenes/editor/EditorScene.h>
 #include "../EditorScene.h"
 #include "EditorGUI.h"
 #include <algorithm>
 
-void EditorTrashcan::prepare_gui(int width, int panel_width, int height, GUIInput *gui_input)
+void EditorTrashcan::add_gui(int width, int panel_width, int height, GUIScreen *screen)
 {
-	this->gui_input = gui_input;
-	panel.prepare(glm::ivec2(0, 0), glm::ivec2(panel_width, height), gui_input);
+	screen->add_canvas(&panel, glm::ivec2(0, 0), glm::ivec2(panel_width, height));
 }
 
-void EditorTrashcan::do_gui(int width, int panel_width, int height)
-{
-	panel.draw(vg, gui_skin, glm::ivec4(0, 0, width, height));
-}
-
-void EditorTrashcan::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
+void EditorTrashcan::init(EditorScene* sc, NVGcontext* vg)
 {
 	trash_image = AssetHandle<Image>("core:categories/trash.png");
-	this->gui_skin = skin;
 	this->vg = vg;
+	this->scene = sc;
 	this->edgui = &sc->gui;
 
 	trash_area_layout = new GUISingleLayout();

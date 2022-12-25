@@ -60,6 +60,14 @@ void SimpleSkin::draw_button(NVGcontext* v, glm::ivec2 pos, glm::ivec2 size, con
 	nvgFill(v);
 	nvgStroke(v);
 
+	// Basic, nonconfigurable text rendering for quick-&-dirty text buttons
+	if(!text.empty())
+	{
+		nvgFillColor(v, get_foreground_color());
+		nvgTextAlign(v, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+		nvgText(v, pos.x + size.x * 0.5f, pos.y + size.y * 0.5f, text.c_str(), nullptr);
+	}
+
 }
 
 bool SimpleSkin::can_drag_window(GUIWindow* window, glm::ivec2 mpos) 
@@ -318,7 +326,56 @@ void SimpleSkin::draw_window(NVGcontext* vg, GUIWindow* window)
 	}
 
 
-}	
+}
+
+void
+SimpleSkin::draw_dropdown_header(NVGcontext *v, glm::ivec2 pos, glm::ivec2 size, const std::string &text, bool is_open,
+								 bool default_text, ButtonState st)
+{
+	nvgBeginPath(v);
+	// Stylized dropdown, maybe really ugly but i like it
+
+	int bevel_pixels = 10;
+	// Main box
+	nvgMoveTo(v, pos.x + 0.5f, pos.y + size.y + 0.5f);
+	nvgLineTo(v, pos.x + size.x - bevel_pixels + 0.5f, pos.y + size.y + 0.5f);
+	nvgLineTo(v, pos.x + size.x + 0.5f, pos.y + size.y - bevel_pixels + 0.5f);
+	nvgLineTo(v, pos.x + size.x + 0.5f, pos.y + 0.5f);
+	nvgLineTo(v, pos.x + 0.5f, pos.y + 0.5f);
+	nvgLineTo(v, pos.x + 0.5f, pos.y + bevel_pixels + 0.5f);
+	nvgLineTo(v, pos.x + 0.5f, pos.y + size.y + 0.5f);
+
+	nvgFillColor(v, get_fill_color(st));
+	nvgStrokeColor(v, get_stroke_color(st));
+	nvgFill(v);
+	nvgStroke(v);
+
+	// Right drop down arrow
+	nvgBeginPath(v);
+	nvgMoveTo(v, pos.x + size.x - bevel_pixels + 0.5f, pos.y + size.y + 0.5f);
+	nvgLineTo(v, pos.x + size.x - bevel_pixels * 2.0f + 0.5f, pos.y + size.y - bevel_pixels + 0.5f);
+	nvgLineTo(v, pos.x + size.x - bevel_pixels * 2.0f + 0.5f, pos.y + 0.5f);
+	nvgLineTo(v, pos.x + size.x + 0.5f, pos.y + 0.5f);
+	nvgLineTo(v, pos.x + size.x + 0.5f, pos.y + size.y - bevel_pixels + 0.5f);
+	nvgLineTo(v, pos.x + size.x - bevel_pixels + 0.5f, pos.y + size.y + 0.5f);
+
+	nvgFillColor(v, get_fill_color(ButtonState::CLICKED));
+	nvgStrokeColor(v, get_stroke_color(ButtonState::CLICKED));
+	nvgFill(v);
+	nvgStroke(v);
+
+	// Text
+	nvgFillColor(v, get_foreground_color(default_text));
+	nvgTextAlign(v, NVG_ALIGN_MIDDLE | NVG_ALIGN_LEFT);
+	nvgText(v, pos.x + 3.5f, pos.y + size.y * 0.5f + 2.0f, text.c_str(), nullptr);
+
+}
+
+void
+SimpleSkin::draw_dropdown_body(NVGcontext *vg, glm::ivec2 pos, glm::ivec2 size, const std::vector<std::string> elems)
+{
+	// The dropdown body takes its whole canvas
+}
 
 SimpleSkin::SimpleSkin()
 {
@@ -423,3 +480,4 @@ NVGcolor SimpleSkin::get_button_color(GUISkin::ButtonState state)
 	logger->fatal("Wrong ButtonState {}", state);
 	return nvgRGB(255, 0, 255);
 }
+

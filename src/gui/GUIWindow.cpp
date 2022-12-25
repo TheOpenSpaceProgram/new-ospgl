@@ -1,13 +1,23 @@
 #include "GUIWindow.h"
 
-void GUIWindow::prepare(GUIInput* gui_input, GUISkin* skin)
+void GUIWindow::position(GUIScreen *screen, GUISkin *skin)
 {
 	if(is_minimized())
 	{
 		return;
 	}
 
-	canvas.prepare(pos, size, gui_input);
+	canvas.position_widgets(pos, size, screen);
+}
+
+void GUIWindow::prepare(GUIInput* gui_input, GUIScreen* screen)
+{
+	if(is_minimized())
+	{
+		return;
+	}
+
+	canvas.prepare(screen, gui_input);
 }
 
 void GUIWindow::draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor)

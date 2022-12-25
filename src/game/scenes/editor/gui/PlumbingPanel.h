@@ -18,11 +18,9 @@ class EditorVehicleInterface;
 class PlumbingPanel : EditorPanel
 {
 private:
-	GUISkin* gui_skin;
 	NVGcontext* vg;
 	EditorScene* scene;
 	EditorVehicleInterface* edveh_int;
-	GUIInput* gui_input;
 	GUITextButton* trashcan_button;
 
 public:
@@ -34,10 +32,9 @@ public:
 
 	int part_margin = 4;
 
-	void init(EditorScene* sc, NVGcontext* vg, GUISkin* skin) override;
+	void init(EditorScene* sc, NVGcontext* vg) override;
 
-	void prepare_gui(int width, int panel_width, int height, GUIInput* gui_input) override;
-	void do_gui(int width, int panel_width, int height) override;
+	void add_gui(int width, int panel_width, int height, GUIScreen* screen) override;
 	void create_machine(std::string database_id);
 
 };

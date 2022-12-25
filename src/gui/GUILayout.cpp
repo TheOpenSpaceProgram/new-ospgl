@@ -33,13 +33,13 @@ void GUILayout::draw(NVGcontext* ctx, GUISkin* skin)
 	glm::ivec2 pos = get_pos();
 	glm::ivec2 size = get_size();
 
-	nvgScissor(ctx, pos.x, pos.y, size.x, size.y);	
 
 	int count = 0;
 	for(auto widget : widgets)
 	{
 		if(widget->is_visible)
 		{
+			nvgScissor(ctx, pos.x, pos.y, size.x, size.y);
 			widget->draw(ctx, skin);
 			count++;
 		}
@@ -48,20 +48,26 @@ void GUILayout::draw(NVGcontext* ctx, GUISkin* skin)
 	draw_vscrollbar(ctx);
 }
 
-void GUILayout::prepare_wrapper(glm::ivec2 pos, glm::ivec2 size, GUIInput* gui_input)
+void GUILayout::position_wrapper(glm::ivec2 npos, glm::ivec2 nsize, GUIScreen* screen)
 {
-	this->pos = pos;
-	this->size = size;
+	pos = npos;
+	size = nsize;
 
-	prepare(gui_input);
+	position(pos, size, screen);
+}
 
-	// TODO: Placement of this
+void GUILayout::prepare_wrapper(GUIScreen* screen, GUIInput* gui_input)
+{
+	// Prepare is top-to-bottom so first the widgets, then scrollbar and finally the layout itself
+	prepare(gui_input, screen);
+
+	prepare_vscrollbar(gui_input);
+
 	if(gui_input->mouse_inside(get_pos(), get_size()) && block_mouse)
 	{
 		gui_input->mouse_blocked = true;
 	}
 
-	prepare_vscrollbar(gui_input);
 }
 
 void GUILayout::remove_all_widgets()
@@ -69,6 +75,11 @@ void GUILayout::remove_all_widgets()
 	for(GUIWidget* w : widgets)
 	{
 		on_remove_widget(w);
+	}
+
+	for(GUIWidget* w : widgets)
+	{
+		delete w;
 	}
 
 	widgets.clear();
@@ -112,9 +123,6 @@ void GUILayout::draw_vscrollbar(NVGcontext* vg)
 {
 	if(vscrollbar.draw)
 	{
-		glm::ivec2 pos = get_pos();
-		glm::ivec2 size = get_size();
-
 		float x = 0.0f;
 		if(vscrollbar.positive_pos)
 		{

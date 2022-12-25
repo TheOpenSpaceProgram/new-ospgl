@@ -59,11 +59,13 @@ std::pair<GUICanvas*, GUICanvas*> GUICanvas::divide_v(float nfac)
 	return std::make_pair(child_0, child_1);
 }
 
-void GUICanvas::prepare(glm::ivec2 pos, glm::ivec2 size, GUIInput* gui_input)
+void GUICanvas::position_widgets(glm::ivec2 pos, glm::ivec2 size, GUIScreen* screen)
 {
-	// Apply pixel sizes
+	// We first position our children (which will do the same)
+	// so the result is the canvas are prepared bottom-to-top
 	if(child_0 || child_1)
 	{
+		// Apply pixel sizes
 		if(child_0_pixels > 0)
 		{
 			float rsize;
@@ -80,8 +82,8 @@ void GUICanvas::prepare(glm::ivec2 pos, glm::ivec2 size, GUIInput* gui_input)
 			resize(nfac);
 		}
 
-		child_0->prepare(pos, size, gui_input);
-		child_1->prepare(pos, size, gui_input);	
+		child_0->position_widgets(pos, size, screen);
+		child_1->position_widgets(pos, size, screen);
 	}
 
 	if(layout)
@@ -89,12 +91,41 @@ void GUICanvas::prepare(glm::ivec2 pos, glm::ivec2 size, GUIInput* gui_input)
 		glm::ivec2 rpos = pos + glm::ivec2(position * glm::vec2(size));
 		glm::ivec2 rsize = glm::ivec2(glm::vec2(size) * factor);
 
-		layout->prepare_wrapper(rpos, rsize, gui_input);
+		layout->position_wrapper(rpos, rsize, screen);
 	}
 
 }
 
-void GUICanvas::debug(glm::ivec2 real_pos, glm::ivec2 real_size, NVGcontext* vg)
+void GUICanvas::prepare(GUIScreen* screen, GUIInput* gui_input) const
+{
+	// This is done top to bottom (although order is not really vital here!)
+	if(layout)
+	{
+		layout->prepare_wrapper(screen, gui_input);
+	}
+
+	if(child_0 || child_1)
+	{
+		child_0->prepare(screen, gui_input);
+		child_1->prepare(screen, gui_input);
+	}
+}
+
+void GUICanvas::pre_prepare(GUIScreen *screen) const
+{
+	if(child_0 || child_1)
+	{
+		child_0->pre_prepare(screen);
+		child_1->pre_prepare(screen);
+	}
+
+	if(layout)
+	{
+		layout->pre_prepare(screen);
+	}
+}
+
+void GUICanvas::debug(glm::ivec2 real_pos, glm::ivec2 real_size, NVGcontext* vg) const
 {
 	if(child_0 == nullptr && child_1 == nullptr)
 	{
@@ -119,13 +150,20 @@ void GUICanvas::debug(glm::ivec2 real_pos, glm::ivec2 real_size, NVGcontext* vg)
 
 }
 
-void GUICanvas::draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor)
+void GUICanvas::draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor) const
 {
 	if(layout)
 	{
 		layout->draw(vg, skin);
 		// Reset scissor test, the layout most likely used it
-		nvgScissor(vg, def_scissor.x, def_scissor.y, def_scissor.z, def_scissor.w);	
+		if(def_scissor == glm::ivec4(0, 0, 0, 0))
+		{
+			nvgResetScissor(vg);
+		}
+		else
+		{
+			nvgScissor(vg, def_scissor.x, def_scissor.y, def_scissor.z, def_scissor.w);
+		}
 	}
 
 	// Draw children
@@ -188,17 +226,9 @@ void GUICanvas::update_children()
 
 GUICanvas::~GUICanvas()
 {
-	if(layout)
-	{
 		delete layout;
-	}
-	if(child_0)
-	{
 		delete child_0;
-	}
-	if(child_1)
-	{
 		delete child_1;
-	}
 }
+
 

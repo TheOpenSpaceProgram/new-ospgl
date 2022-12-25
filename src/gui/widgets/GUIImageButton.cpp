@@ -1,6 +1,11 @@
 #include "GUIImageButton.h"
 
-glm::ivec2 GUIImageButton::prepare(glm::ivec2 wpos, glm::ivec2 wsize, glm::ivec4 viewport, GUIInput* ipt)
+void GUIImageButton::prepare(glm::ivec4 viewport, GUIScreen *screen, GUIInput *gui_input)
+{
+	do_button(pos, size, viewport, gui_input);
+}
+
+glm::ivec2 GUIImageButton::position(glm::ivec2 wpos, glm::ivec2 wsize, GUIScreen* screen)
 {	
 	pos = wpos;
 	size = force_image_size;
@@ -13,8 +18,6 @@ glm::ivec2 GUIImageButton::prepare(glm::ivec2 wpos, glm::ivec2 wsize, glm::ivec4
 	{
 		size.y = wsize.y;
 	}
-
-	do_button(pos, size, viewport, ipt);
 
 	return size;
 }

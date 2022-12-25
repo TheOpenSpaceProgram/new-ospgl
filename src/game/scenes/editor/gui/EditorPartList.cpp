@@ -2,6 +2,7 @@
 #include "../EditorScene.h"
 #include "../EditorVehicleInterface.h"
 #include <game/database/GameDatabase.h>
+#include <gui/widgets/GUIDropDown.h>
 #include <OSP.h>
 
 void EditorCategory::load_from_path(const std::string& path)
@@ -124,22 +125,13 @@ void EditorPartList::create_part(AssetHandle<PartPrototype>& proto)
 
 }
 
-void EditorPartList::prepare_gui(int width, int panel_width, int height, GUIInput* gui_ipt)
+void EditorPartList::add_gui(int width, int panel_width, int height, GUIScreen *screen)
 {
-	this->gui_input = gui_ipt;
-	def_panel.prepare(glm::ivec2(0, 0), glm::ivec2(panel_width, height), gui_input);
+	screen->add_canvas(&def_panel, glm::ivec2(0, 0), glm::ivec2(panel_width, height));
 }
 
-void EditorPartList::do_gui(int width, int panel_width, int height)
+void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 {
-	def_panel.draw(vg, gui_skin, glm::ivec4(0, 0, width, height));
-
-}
-
-
-void EditorPartList::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
-{
-	this->gui_skin = skin;
 	this->vg = vg;
 	this->edveh_int = sc->gui.edveh_int;
 	this->scene = sc;
@@ -174,6 +166,15 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg, GUISkin* skin)
 	def_panel.child_0->divide_v(0.5);
 
 	group_selector = new GUISingleLayout();
+	GUIDropDown* ddown = new GUIDropDown();
+	ddown->options.push_back("Test1");
+	ddown->options.push_back("Test2");
+	ddown->options.push_back("Test3");
+	ddown->options.push_back("Test4");
+	ddown->update_options();
+
+	group_selector->add_widget(ddown);
+
 	search_bar = new GUISingleLayout();
 	GUITextField* tfield = new GUITextField();
 	tfield->default_string = osp->game_database->get_string("core:editor_search_parts");

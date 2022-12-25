@@ -6,9 +6,8 @@
 #include <universe/Universe.h>
 #include <game/GameState.h>
 
-void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg, GUISkin *skin)
+void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg)
 {
-	this->gui_skin = skin;
 	this->vg = vg;
 	this->edveh_int = sc->gui.edveh_int;
 	this->scene = sc;
@@ -76,9 +75,8 @@ void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg, GUISkin *skin)
 	}
 }
 
-void PlumbingPanel::prepare_gui(int width, int panel_width, int height, GUIInput *gui_ipt)
+void PlumbingPanel::add_gui(int width, int panel_width, int height, GUIScreen* screen)
 {
-	this->gui_input = gui_ipt;
 	auto selected = edveh_int->plumbing_interface.pb_editor.get_selected();
 	bool all_plumbing = !selected.empty();
 	for(PlumbingMachine* m : selected)
@@ -101,12 +99,8 @@ void PlumbingPanel::prepare_gui(int width, int panel_width, int height, GUIInput
 		trashcan_button->disabled = true;
 	}
 
-	def_panel.prepare(glm::ivec2(0, 0), glm::ivec2(panel_width, height), gui_input);
-}
+	screen->add_canvas(&def_panel, glm::ivec2(0, 0), glm::ivec2(panel_width, height));
 
-void PlumbingPanel::do_gui(int width, int panel_width, int height)
-{
-	def_panel.draw(vg, gui_skin, glm::ivec4(0, 0, width, height));
 }
 
 void PlumbingPanel::create_machine(std::string db_id)

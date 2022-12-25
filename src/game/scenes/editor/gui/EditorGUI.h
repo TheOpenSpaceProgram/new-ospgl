@@ -56,11 +56,10 @@ public:
 		TRASHCAN
 	};
 
+	EditorScene* scene;
 	ShowPanel show_panel;
 	EditorMode editor_mode;
 	GUIImageButton* current_editor_mode_button;
-
-	SimpleSkin skin;
 
 	NVGcontext* vg;
 
@@ -71,14 +70,16 @@ public:
 
 	GUICanvas toolset_canvas;
 	GUICanvas file_canvas;
-	GUIWindowManager window_manager;
 
-	void prepare_gui(int width, int height, GUIInput* gui_input);
-	void prepare_toolset(int width, int height, float swidth, GUIInput* gui_input);
-	void prepare_file(int width, int height, GUIInput *gui_input);
-	void do_gui(int width, int height);
-	void do_toolset(int width, int height, float swidth);
-	void do_file(int width, int height);
+	// To be called everyframe so canvas are drawn
+	void add_canvas(int width, int height);
+
+	void add_gui(int width, int height);
+	void add_toolset(int width, int height, float swidth);
+	void add_file(int width, int height);
+
+	// Call this before any canvas are drawn
+	void do_backgrounds(int width, int height, float swidth);
 
 	void init(EditorScene* scene);
 

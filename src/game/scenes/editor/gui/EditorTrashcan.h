@@ -7,6 +7,7 @@
 #include <assets/Image.h>
 
 class EditorGUI;
+class EditorScene;
 
 // We allow dropping in stuff to be deleted, and also handle creation of subassemblies
 // TODO: Deleted stuff is kept in a buffer for later recovery, but up to a limit
@@ -15,8 +16,8 @@ class EditorGUI;
 class EditorTrashcan : public EditorPanel
 {
 private:
-	GUISkin* gui_skin;
 	NVGcontext* vg;
+	EditorScene* scene;
 
 	AssetHandle<Image> trash_image;
 
@@ -30,7 +31,6 @@ private:
 	void on_trash(int button);
 
 public:
-	void init(EditorScene* sc, NVGcontext* vg, GUISkin* skin) override;
-	void prepare_gui(int width, int panel_width, int height, GUIInput* gui_input) override;
-	void do_gui(int width, int panel_width, int height) override;
+	void init(EditorScene* sc, NVGcontext* vg) override;
+	void add_gui(int width, int panel_width, int height, GUIScreen* screen) override;
 };

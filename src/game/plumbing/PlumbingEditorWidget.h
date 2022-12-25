@@ -11,7 +11,8 @@ private:
 public:
 
 	PlumbingEditor pb_editor;
-	glm::ivec2 prepare(glm::ivec2 wpos, glm::ivec2 wsize, glm::ivec4 viewport, GUIInput* gui_input) override;
+	void prepare(glm::ivec4 viewport, GUIScreen* screen, GUIInput* gui_input) override;
+	glm::ivec2 position(glm::ivec2 wpos, glm::ivec2 wsize, GUIScreen* screen) override;
 	void draw(NVGcontext* ctx, GUISkin* skin) override;
 
 	PlumbingEditorWidget();

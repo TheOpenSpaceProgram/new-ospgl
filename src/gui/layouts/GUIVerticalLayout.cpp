@@ -2,28 +2,26 @@
 
 #include <util/Logger.h>
 
-void GUIVerticalLayout::prepare(GUIInput* gui_input)
+void GUIVerticalLayout::position(glm::ivec2 vpos, glm::ivec2 vsize, GUIScreen *screen)
 {
-	glm::ivec2 pos = get_pos();
-	glm::ivec2 size = get_size();
+	this->pos = vpos;
+	this->size = vsize;
 
-	pos += glm::ivec2(margins.x, margins.z);
-	size -= glm::ivec2(margins.y, margins.w) * 2; //< *2 because left and right are taken
+	vpos += glm::ivec2(margins.x, margins.z);
+	vsize -= glm::ivec2(margins.y, margins.w) * 2;
 
-	// Simply, we lay the widgets increasing only the y position
-	// We ignore maximum size in Y, we will use a scrollbar if needed
-	
 	int y_pos = pos.y - vscrollbar.scroll;
 	for(auto widget : widgets)
 	{
 		// Y size is free
-		glm::ivec2 used = widget->prepare(glm::ivec2(pos.x, y_pos), glm::ivec2(size.x, -1.0), get_aabb(), gui_input);
+		glm::ivec2 used = widget->position(glm::ivec2(pos.x, y_pos), glm::ivec2(size.x, -1.0),
+										   screen);
 
 		// Culling
 		if(y_pos - pos.y > size.y || y_pos - pos.y < -used.y)
 		{
 			widget->is_visible = false;
-		}	
+		}
 		else
 		{
 			widget->is_visible = true;
@@ -35,4 +33,21 @@ void GUIVerticalLayout::prepare(GUIInput* gui_input)
 
 	vscrollbar.max_scroll = y_pos - pos.y + vscrollbar.scroll;
 
+}
+
+void GUIVerticalLayout::prepare(GUIInput* gui_input, GUIScreen* screen)
+{
+	for(auto widget : widgets)
+	{
+		widget->prepare(get_aabb(), screen, gui_input);
+	}
+
+}
+
+void GUIVerticalLayout::pre_prepare(GUIScreen *screen)
+{
+	for(auto widget : widgets)
+	{
+		widget->pre_prepare(screen);
+	}
 }

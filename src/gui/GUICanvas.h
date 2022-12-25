@@ -5,10 +5,13 @@
 #include <tuple>
 #include "GUIInput.h"
 
+class GUIScreen;
+
 // A canvas can contain more canvases
 // A canvas with children cannot contain layouts
 // Note: We automatically delete the layout and all children!
 //  - Make sure you don't delete any children canvas or layouts
+//
 class GUICanvas
 {
 private:
@@ -16,7 +19,7 @@ private:
 
 public:
 
-	// Is null if we are splitted. 
+	// Is null if we are splitted.
 	// If one is present while splitting, child_1 will inherit it
 	GUILayout* layout;
 
@@ -42,17 +45,21 @@ public:
 	// Returns the children, first child_0, then child_1
 	std::pair<GUICanvas*, GUICanvas*> divide_v(float factor);
 
-	// Prepares all controls for the update, including resizing fixed-size canvases
-	void prepare(glm::ivec2 pos, glm::ivec2 size, GUIInput* gui_input);
+	// Called bottom-to-top to position widgets, same as draw order
+	void position_widgets(glm::ivec2 pos, glm::ivec2 size, GUIScreen* screen);
+	// Called top-to-bottom to handled input, opposite to draw order
+	void prepare(GUIScreen* screen, GUIInput* gui_input) const;
+	// For widgets that generate overlay canvases
+	void pre_prepare(GUIScreen* screen) const;
 
 	// Resizes children space distribution appropiately
 	void resize(float n_factor);
 
 	void update_children();
 
-	void debug(glm::ivec2 real_position, glm::ivec2 real_size, NVGcontext* vg);
+	void debug(glm::ivec2 real_position, glm::ivec2 real_size, NVGcontext* vg) const;
 
-	void draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor);
+	void draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor = glm::ivec4(0, 0, 0, 0)) const;
 
 	GUICanvas()
 	{

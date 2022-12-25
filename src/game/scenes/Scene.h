@@ -1,5 +1,6 @@
 #pragma once
 #include <gui/GUIInput.h>
+#include <gui/GUIScreen.h>
 #include <string>
 
 class OSP;
@@ -11,6 +12,8 @@ class Scene
 public:
 
 	GUIInput gui_input;
+	// You may create more if needed, but this is always provided
+	GUIScreen gui_screen;
 
 	// Called the frame the scene is loaded
 	virtual void load() = 0;
@@ -21,6 +24,5 @@ public:
 	virtual void do_imgui_debug() = 0;
 
 	virtual std::string get_name() = 0;
-
 	virtual ~Scene() {}
 };

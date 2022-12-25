@@ -60,6 +60,9 @@ double t = 0.0;
 
 void EditorScene::update()
 {
+	glm::ivec4 screen = glm::ivec4(0, 0, osp->renderer->get_width(true), osp->renderer->get_height(true));
+	gui_screen.new_frame(screen);
+
 	gui_input.update();
 	if(cam.blocked)
 	{
@@ -77,24 +80,19 @@ void EditorScene::update()
 	int rh = (viewport.w - viewport.y) * (int)real_screen_size.y;
 
 
-	// We prepare a first time to block the interface
-	gui_input.execute_user_actions = false;
-	prepare_gui();
+	gui_screen.prepare_pass();
+
 	float gw = (float)gui.get_panel_width();
 	glm::vec4 gui_vport = glm::vec4(gw, 0, real_screen_size.x - gw, real_screen_size.y);
 	vehicle_int.do_interface(cam.get_camera_uniforms(rw, rh),
-							 viewport, gui_vport, real_screen_size, osp->renderer->vg, &gui_input, &gui.skin);
-
-	// We prepare again as do_interface may have blocked, for example, due to an ongoing drag
-	gui_input.execute_user_actions = true;
-	prepare_gui();
-
-	do_gui();
-
+							 viewport, gui_vport, real_screen_size, osp->renderer->vg, &gui_input, gui_screen.skin);
 	cam.update(osp->game_dt, &gui_input);
 	gui_input.ext_mouse_blocked |= cam.blocked;
 	gui_input.ext_keyboard_blocked |= cam.blocked;
-	
+
+	gui_screen.input_pass();
+	gui_screen.draw();
+
 	bt_world->updateAabbs();
 
 	//bt_world->debugDrawWorld();
@@ -114,17 +112,10 @@ void EditorScene::do_gui()
 {
 	int width = osp->renderer->get_width(true);
 	int height = osp->renderer->get_height(true);
-	gui.do_gui(width, height);
+	gui.add_gui(width, height);
 }
 
-void EditorScene::prepare_gui()
-{
-	int width = osp->renderer->get_width(true);
-	int height = osp->renderer->get_height(true);
-	gui.prepare_gui(width, height, &gui_input);
-}
-
-void EditorScene::do_edveh_gui() 
+void EditorScene::do_edveh_gui()
 {
 }
 
@@ -144,6 +135,8 @@ void EditorScene::unload()
 EditorScene::EditorScene() : vehicle(this), vehicle_int(&vehicle, &cam),
 	sky(std::move(AssetHandle<Cubemap>("debug_system:skybox.hdr")))
 {
+	gui_screen.init(glm::ivec4(0, 0, osp->renderer->get_width(true), osp->renderer->get_height(true)),
+					&skin, &gui_input);
 }
 
 glm::dvec4 EditorScene::get_viewport()

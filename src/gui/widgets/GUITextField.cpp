@@ -2,7 +2,7 @@
 #include <utf8/utf8.h>
 #include "util/UTF8Util.h"
 
-glm::ivec2 GUITextField::prepare(glm::ivec2 wpos, glm::ivec2 wsize, glm::ivec4 viewport, GUIInput* ipt)
+glm::ivec2 GUITextField::position(glm::ivec2 wpos, glm::ivec2 wsize, GUIScreen *screen)
 {
 	pos = wpos;
 	size = wsize;
@@ -16,7 +16,11 @@ glm::ivec2 GUITextField::prepare(glm::ivec2 wpos, glm::ivec2 wsize, glm::ivec4 v
 		size.y = wsize.y;
 	}
 
+	return size;
+}
 
+void GUITextField::prepare(glm::ivec4 viewport, GUIScreen* screen, GUIInput* ipt)
+{
 	if(ipt->ext_mouse_blocked)
 	{
 		focused = false;
@@ -152,7 +156,6 @@ glm::ivec2 GUITextField::prepare(glm::ivec2 wpos, glm::ivec2 wsize, glm::ivec4 v
 		}
 	}
 
-	return size;
 }
 
 void GUITextField::draw(NVGcontext* vg, GUISkin* skin)
@@ -179,7 +182,7 @@ void GUITextField::draw(NVGcontext* vg, GUISkin* skin)
 		if(string.empty() && !focused)
 		{
 			nvgFillColor(vg, skin->get_foreground_color(true));
-			nvgText(vg, pos.x + 2.0f, pos.y + size.y * 0.5f + 2.0f, default_string.c_str(), nullptr);
+			nvgText(vg, pos.x + 3.0f, pos.y + size.y * 0.5f + 2.0f, default_string.c_str(), nullptr);
 		}
 		else
 		{
@@ -224,7 +227,7 @@ void GUITextField::draw(NVGcontext* vg, GUISkin* skin)
 			}
 			last_offset = offset;
 
-			nvgText(vg, pos.x + 2.0f - offset, pos.y + size.y * 0.5f + 2.0f, string.c_str(), nullptr);
+			nvgText(vg, pos.x + 3.0f - offset, pos.y + size.y * 0.5f + 2.0f, string.c_str(), nullptr);
 			double time = glfwGetTime();
 			double timemod = fmod(time, 1.0);
 			if(timemod > 0.5 && focused)

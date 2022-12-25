@@ -26,14 +26,20 @@ public:
 
 	virtual void draw_button(NVGcontext* v, glm::ivec2 pos, glm::ivec2 size, const std::string& text,
 		ButtonState state, ButtonStyle style = ButtonStyle::NORMAL) override;
-	
+
+	virtual void draw_dropdown_header(NVGcontext* vg, glm::ivec2 pos, glm::ivec2 size, const std::string& text,
+									  bool is_open, bool default_text, ButtonState st) override;
+
+	virtual void draw_dropdown_body(NVGcontext* vg, glm::ivec2 pos, glm::ivec2 size,
+									const std::vector<std::string> w) override;
+
 	virtual bool can_drag_window(GUIWindow* window, glm::ivec2 mpos) override;
 	virtual bool can_close_window(GUIWindow* window, glm::ivec2 mpos) override;
 	virtual bool can_minimize_window(GUIWindow* window, glm::ivec2 mpos) override;
 	virtual bool can_pin_window(GUIWindow* window, glm::ivec2 mpos) override;
 	virtual ResizePoint can_resize_window(GUIWindow* window, glm::ivec2 mpos) override;
 	virtual glm::ivec4 get_window_aabb(GUIWindow* window) override;
-	
+
 	virtual void draw_window(NVGcontext* vg, GUIWindow* window) override;
 
 	NVGcolor get_background_color(bool bright = false) override;

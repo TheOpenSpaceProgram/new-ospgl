@@ -59,7 +59,8 @@ public:
 	Signal<void(GUIWindow&)> on_close;
 
 	// We need the GUISkin on prepare to adjust sizings
-	void prepare(GUIInput* gui_input, GUISkin* skin);
+	void position(GUIScreen* screen, GUISkin* skin);
+	void prepare(GUIInput* gui_input, GUIScreen* screen);
 	void draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor);
 
 	bool is_focused() { return focused; }

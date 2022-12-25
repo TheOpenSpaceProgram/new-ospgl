@@ -45,21 +45,25 @@ void GUITextButton::draw(NVGcontext *vg, GUISkin *skin)
 	}
 }
 
-glm::ivec2 GUITextButton::prepare(glm::ivec2 wpos, glm::ivec2 wsize, glm::ivec4 viewport, GUIInput *ipt)
+void GUITextButton::prepare(glm::ivec4 viewport, GUIScreen *screen, GUIInput *gui_input)
+{
+	do_button(pos, size, viewport, gui_input);
+}
+
+glm::ivec2 GUITextButton::position(glm::ivec2 wpos, glm::ivec2 wsize, GUIScreen* screen)
 {
 	pos = wpos;
 	size = wsize;
 	if(size.x < 0)
 	{
-		size.x = wsize.x;
+		size.x = button_size.x;
 	}
 
 	if(size.y < 0)
 	{
-		size.y = wsize.y;
+		size.y = button_size.y;
 	}
 
-	do_button(pos, size, viewport, ipt);
 
 	return size;
 }

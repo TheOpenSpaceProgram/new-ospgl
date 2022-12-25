@@ -35,8 +35,15 @@ public:
 		BAD    		//< Normal but with BAD motives (red color, cross...)
 	};
 
-	virtual void draw_button(NVGcontext* vg, glm::ivec2 pos, glm::ivec2 size, const std::string& text, 
+	virtual void draw_button(NVGcontext* vg, glm::ivec2 pos, glm::ivec2 size, const std::string& text,
 			ButtonState state, ButtonStyle style = ButtonStyle::NORMAL) = 0;
+
+	// state == OPEN means the dropdown is open!
+	virtual void draw_dropdown_header(NVGcontext* vg, glm::ivec2 pos, glm::ivec2 size, const std::string& text,
+		  bool is_open, bool default_text, ButtonState state) = 0;
+
+	virtual void draw_dropdown_body(NVGcontext* vg, glm::ivec2 pos, glm::ivec2 size,
+									const std::vector<std::string> elems) = 0;
 
 	// These functions are only called if the window allows said functionality,
 	// so don't check it here. Return true if said action can be done, for example,
