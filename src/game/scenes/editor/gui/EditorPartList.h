@@ -11,6 +11,7 @@
 #include <gui/layouts/GUISingleLayout.h>
 #include <gui/skins/SimpleSkin.h>
 #include <gui/GUICanvas.h>
+#include "GroupManager.h"
 
 class EditorVehicleInterface;
 
@@ -49,13 +50,12 @@ private:
 	EditorScene* scene;
 	EditorVehicleInterface* edveh_int;
 	GUIInput* gui_input;
-	GUIWindow* group_manager;
 
 	void create_part(AssetHandle<PartPrototype>& proto);
 	GUIDropDown* group_dropdown;
 	void update_groups();
 
-	void try_show_group_manager();
+	GroupManager group_manager;
 
 public:
 

@@ -28,8 +28,6 @@ public:
 		TILE
 	};
 
-	// Use negative values to let that axis free, this changes the size of the button
-	glm::ivec2 force_image_size;
 	ImageMode img_mode;
 
 	void prepare(glm::ivec4 viewport, GUIScreen* screen, GUIInput* gui_input) override;
@@ -42,7 +40,7 @@ public:
 
 	GUIImageButton()
 	{
-		force_image_size = glm::ivec2(-1, -1);
+		default_size = glm::ivec2(-1, -1);
 		img_mode = STRETCH;
 		image = 0; 
 	}

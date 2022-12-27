@@ -84,6 +84,7 @@ public:
 	std::vector<Part*> find_parts_in_group(int64_t group);
 	void remove_group(int64_t id);
 	void create_group(std::string name);
+	std::string get_group_name(int64_t id);
 
 	// Parts whose root piece is contained in this vehicle
 	std::vector<Part*> parts;

@@ -228,11 +228,14 @@ void SimpleSkin::draw_window(NVGcontext* vg, GUIWindow* window)
 	glm::vec2 win_bbl = win_bl + glm::vec2(4.0f, 4.0f);
 	if(window->is_pinned())
 	{
+		// We ignore alpha and just use a fixed value for pinned windows
+		NVGcolor body_background_pinned = nvgTransRGBA(get_background_color(), 180);
+
 		glm::vec2 fsize = glm::vec2(size.x + side_size * 2.0f, size.y + side_size * 2.0f + titlebar_height);
 		// We draw a simple rect with the titlebar space
 		nvgBeginPath(vg);
 		nvgRect(vg, title_tl.x, title_tl.y, fsize.x, fsize.y);
-		nvgFillColor(vg, body_background);
+		nvgFillColor(vg, body_background_pinned);
 		nvgStrokeColor(vg, outline_color);
 		nvgFill(vg);
 		nvgStroke(vg);

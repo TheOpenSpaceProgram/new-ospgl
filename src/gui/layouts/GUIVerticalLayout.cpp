@@ -8,17 +8,18 @@ void GUIVerticalLayout::position(glm::ivec2 vpos, glm::ivec2 vsize, GUIScreen *s
 	this->size = vsize;
 
 	vpos += glm::ivec2(margins.x, margins.z);
-	vsize -= glm::ivec2(margins.y, margins.w) * 2;
+	vsize -= glm::ivec2(margins.x + margins.y, margins.z + margins.w);
+	vsize.x -= vscrollbar.width;
 
-	int y_pos = pos.y - vscrollbar.scroll;
+	int y_pos = vpos.y - vscrollbar.scroll;
 	for(auto widget : widgets)
 	{
 		// Y size is free
-		glm::ivec2 used = widget->position(glm::ivec2(pos.x, y_pos), glm::ivec2(size.x, -1.0),
+		glm::ivec2 used = widget->position(glm::ivec2(vpos.x, y_pos), glm::ivec2(vsize.x, -1.0),
 										   screen);
 
 		// Culling
-		if(y_pos - pos.y > size.y || y_pos - pos.y < -used.y)
+		if(y_pos - vpos.y > vsize.y || y_pos - vpos.y < -used.y)
 		{
 			widget->is_visible = false;
 		}
@@ -31,7 +32,7 @@ void GUIVerticalLayout::position(glm::ivec2 vpos, glm::ivec2 vsize, GUIScreen *s
 
 	}
 
-	vscrollbar.max_scroll = y_pos - pos.y + vscrollbar.scroll;
+	vscrollbar.max_scroll = y_pos - vpos.y + vscrollbar.scroll;
 
 }
 

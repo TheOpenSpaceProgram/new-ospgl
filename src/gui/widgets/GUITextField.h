@@ -9,6 +9,8 @@ private:
 	float last_offset;
 public:
 
+	bool disabled;
+
 	// called when the enter key is clicked and the text field selected
 	Signal<void(std::string)> on_intro;
 	// called when the escape key is clicked and the text field selected

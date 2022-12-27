@@ -61,7 +61,7 @@ int EditorGUI::get_panel_width()
 		{
 			GUIImageButton* button = new GUIImageButton();
 			button->set_image(vg, AssetHandle<Image>("core", name));
-			button->force_image_size = glm::ivec2(24, 24);
+			button->default_size = glm::ivec2(24, 24);
 			tlayout->add_widget(button);
 
 			button->on_clicked.add_handler([this, button, mode](int btn)
@@ -114,7 +114,7 @@ int EditorGUI::get_panel_width()
 			GUIImageButton* button = new GUIImageButton();
 			button->set_image(vg, AssetHandle<Image>("core", name));
 			button->on_clicked.add_handler(on_click);
-			button->force_image_size = glm::ivec2(22, 22);
+			button->default_size = glm::ivec2(22, 22);
 			button->img_mode = GUIImageButton::CENTER;
 			right->layout->add_widget(button);
 		};

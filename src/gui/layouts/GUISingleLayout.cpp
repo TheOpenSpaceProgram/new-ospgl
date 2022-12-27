@@ -9,7 +9,7 @@ void GUISingleLayout::position(glm::ivec2 vpos, glm::ivec2 vsize, GUIScreen *scr
 	size = vsize;
 
 	vpos += glm::ivec2(margins.x, margins.z);
-	vsize -= glm::ivec2(margins.y, margins.w) * 2; //< *2 because left and right are taken
+	vsize -= glm::ivec2(margins.x + margins.y, margins.z + margins.w);
 
 	widgets[0]->is_visible = true;
 	widgets[0]->position(glm::ivec2(vpos.x, vpos.y), glm::ivec2(vsize.x, vsize.y), screen);

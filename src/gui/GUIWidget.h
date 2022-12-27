@@ -20,11 +20,31 @@ protected:
 
 public:
 
+	// If the widget is allowed to be freely sized, what size should we use? (per_axis)
+	glm::ivec2 default_size;
+
 	// Set by the Layout during prepare
 	bool is_visible;	
 
 	// If the widget can block the mouse, this can disable that functionality
 	bool blocks_mouse = true;
+
+	glm::ivec2 default_position(glm::ivec2 wpos, glm::ivec2 wsize)
+	{
+		pos = wpos;
+		size = wsize;
+		if(size.x < 0)
+		{
+			size.x = default_size.x;
+		}
+
+		if(size.y < 0)
+		{
+			size.y = default_size.y;
+		}
+
+		return size;
+	}
 
 	// Return the size you used
 	// 'wsize' may have negative coordinates, these mean you are free to take

@@ -53,18 +53,5 @@ void GUITextButton::prepare(glm::ivec4 viewport, GUIScreen *screen, GUIInput *gu
 
 glm::ivec2 GUITextButton::position(glm::ivec2 wpos, glm::ivec2 wsize, GUIScreen* screen)
 {
-	pos = wpos;
-	size = wsize;
-	if(size.x < 0)
-	{
-		size.x = button_size.x;
-	}
-
-	if(size.y < 0)
-	{
-		size.y = button_size.y;
-	}
-
-
-	return size;
+	return default_position(wpos, wsize);
 }

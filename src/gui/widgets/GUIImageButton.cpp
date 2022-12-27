@@ -6,15 +6,16 @@ void GUIImageButton::prepare(glm::ivec4 viewport, GUIScreen *screen, GUIInput *g
 }
 
 glm::ivec2 GUIImageButton::position(glm::ivec2 wpos, glm::ivec2 wsize, GUIScreen* screen)
-{	
+{
+	// The image button is a bit different because it prioritizes forced size
 	pos = wpos;
-	size = force_image_size;
-	if(size.x < 0)
+	size = default_size;
+	if(size.x <= 0)
 	{
 		size.x = wsize.x;
 	}
 
-	if(size.y < 0)
+	if(size.y <= 0)
 	{
 		size.y = wsize.y;
 	}

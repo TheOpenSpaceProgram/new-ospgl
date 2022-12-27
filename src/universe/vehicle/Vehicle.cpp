@@ -394,6 +394,7 @@ std::vector<Part*> Vehicle::find_parts_in_group(int64_t group)
 	std::vector<Part*> out;
 	for(Part* p : parts)
 	{
+		// This automatically works with group = -1 (default group)
 		if(p->group_id == group)
 		{
 			out.push_back(p);
@@ -401,6 +402,19 @@ std::vector<Part*> Vehicle::find_parts_in_group(int64_t group)
 	}
 
 	return out;
+}
+
+std::string Vehicle::get_group_name(int64_t id)
+{
+	if(id < 0)
+	{
+		return osp->game_database->get_string("core:default_group");
+	}
+	else
+	{
+		logger->check(id < (int64_t)group_names.size(), "Invalid group ID");
+		return group_names[id];
+	}
 }
 
 #include "VehicleLoader.h"

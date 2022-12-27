@@ -4,19 +4,7 @@
 
 glm::ivec2 GUITextField::position(glm::ivec2 wpos, glm::ivec2 wsize, GUIScreen *screen)
 {
-	pos = wpos;
-	size = wsize;
-	if(size.x < 0)
-	{
-		size.x = wsize.x;
-	}
-
-	if(size.y < 0)
-	{
-		size.y = wsize.y;
-	}
-
-	return size;
+	return default_position(wpos, wsize);
 }
 
 void GUITextField::prepare(glm::ivec4 viewport, GUIScreen* screen, GUIInput* ipt)
@@ -257,6 +245,9 @@ GUITextField::GUITextField(std::string font, float size)
 	ft_size = size;
 	ft_font = font;
 	escape_clears = false;
+	reselect_clears = false;
+	disabled = false;
+	default_size = glm::ivec2(400, 24);
 }
 
 void GUITextField::clear()

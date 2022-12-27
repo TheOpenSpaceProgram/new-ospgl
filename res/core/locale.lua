@@ -27,7 +27,14 @@ local locale =
 {"united_states", "United States of America", "Estados Unidos de América"},
 -- Editor
 {"editor_search_parts", "Search parts", "Buscar partes"},
-{"editor_auto_wire", "Auto-wire", "Cableado"}
+{"editor_auto_wire", "Auto-wire", "Cableado"},
+{"default_group", "Default", "Por Defecto"},
+-- Group Manager
+{"group_manager", "Group Manager", "Administrador de Grupos"},
+{"gman_delete", "Delete Group (must be empty)", "Eliminar Grupo (vacío)"},
+{"gman_move_up", "Move Group Up", "Subir Grupo"},
+{"gman_move_down", "Move Group Down", "Bajar Grupo"},
+{"gman_move_all", "Move all parts to...", "Mover las partes a..."},
 
 }
 

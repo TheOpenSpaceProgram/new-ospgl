@@ -28,7 +28,7 @@ void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg)
 		// Load the machine icon
 		AssetHandle<Config> config = AssetHandle<Config>(p);
 		std::string icon = config->root->get_qualified_as<std::string>("icon").value_or("core:notex.png");
-		btn->force_image_size = glm::ivec2(64, 64);
+		btn->default_size = glm::ivec2(64, 64);
 		btn->name = config->root->get_qualified_as<std::string>("name").value_or("");
 		btn->name = osp->game_database->get_string(btn->name);
 		AssetHandle<Image> img = AssetHandle<Image>(icon);

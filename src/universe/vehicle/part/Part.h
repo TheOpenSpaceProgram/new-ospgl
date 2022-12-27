@@ -20,7 +20,7 @@ public:
 	Vehicle* vehicle;
 
 	int64_t id;
-	// Negative means no group
+	// -1 means no group (default group)
 	int64_t group_id;
 
 	AssetHandle<PartPrototype> part_proto;

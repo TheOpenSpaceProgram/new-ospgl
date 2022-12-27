@@ -34,7 +34,7 @@ void EditorPartList::update_part_list()
 		if(it != proto->categories.end())
 		{
 			GUIImageButton* btn = new GUIImageButton();
-			btn->force_image_size = part_icon_size;
+			btn->default_size = part_icon_size;
 			btn->name = proto->name;
 			btn->set_image(vg, p.icon, icon_renderer->size);
 			part_list->add_widget(btn);
@@ -137,6 +137,8 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 	this->edveh_int = sc->gui.edveh_int;
 	this->scene = sc;
 
+	group_manager.init(sc, this);
+
 	icon_renderer = new PartIconRenderer(part_icon_size);
 	// Load all exposed via the database parts
 	for(const std::string& path : osp->game_database->parts)
@@ -166,7 +168,6 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 	def_panel.child_0_pixels = 64;
 	def_panel.child_0->divide_v(0.5);
 
-	group_manager = nullptr;
 	group_selector = new GUISingleLayout();
 	group_dropdown = new GUIDropDown();
 	update_groups();
@@ -176,7 +177,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 			if(new_opt.first == "manage")
 			{
 				group_dropdown->select(old_opt.first);
-				try_show_group_manager();
+				group_manager.try_show();
 			}
 			else
 			{
@@ -220,7 +221,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 			old_category_toggled = btn;
 		}
 
-		btn->force_image_size = glm::ivec2(category_icon_size);
+		btn->default_size = glm::ivec2(category_icon_size);
 		btn->set_image(vg, categories[i].icon.duplicate());
 		category_list->add_widget(btn);
 		std::string id = categories[i].id;
@@ -268,40 +269,6 @@ void EditorPartList::update_groups()
 }
 
 
-void EditorPartList::try_show_group_manager()
-{
-	if(group_manager != nullptr)
-	{
-		return;
-	}
-
-	Vehicle* veh = edveh_int->edveh->veh;
-	group_manager = scene->gui_screen.win_manager.create_window(&group_manager,
-																glm::ivec2(-1, -1),
-																glm::ivec2(400, 200));
-	group_manager->title = "Group Manager";
-
-	group_manager->canvas.divide_h(0.25f);
-
-	// Left child: Group list and at the bottom new group button
-	group_manager->canvas.child_0->divide_v(0.8f);
-	GUIVerticalLayout* list_layout = new GUIVerticalLayout();
-	for(size_t id = 0; id < veh->group_names.size(); id++)
-	{
-		GUITextButton* btn = new GUITextButton(veh->group_names[id]);
-		list_layout->add_widget(btn);
-	}
-
-	GUISingleLayout* new_btn_layout = new GUISingleLayout();
-	GUITextButton* new_btn = new GUITextButton("Create new");
-	new_btn_layout->add_widget(new_btn);
-	group_manager->canvas.child_0->child_0->layout = list_layout;
-	group_manager->canvas.child_0->child_1->layout = new_btn_layout;
-	// Right child: Group options
-	GUIVerticalLayout* opts_layout = new GUIVerticalLayout();
-	group_manager->canvas.child_1->layout = opts_layout;
-
-}
 
 
 

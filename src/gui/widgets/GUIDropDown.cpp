@@ -37,18 +37,7 @@ void GUIDropDown::prepare(glm::ivec4 viewport, GUIScreen *screen, GUIInput *gui_
 
 glm::ivec2 GUIDropDown::position(glm::ivec2 wpos, glm::ivec2 wsize, GUIScreen* screen)
 {
-	pos = wpos;
-	size = wsize;
-	if(size.x < 0)
-	{
-		size.x = wsize.x;
-	}
-	if(size.y < 0)
-	{
-		size.y = wsize.y;
-	}
-
-	return size;
+	return default_position(wpos, wsize);
 }
 
 void GUIDropDown::draw(NVGcontext *ctx, GUISkin *skin)
@@ -72,6 +61,8 @@ void GUIDropDown::draw(NVGcontext *ctx, GUISkin *skin)
 
 GUIDropDown::GUIDropDown()
 {
+	default_size = glm::ivec2(400, 24);
+
 	item = -1;
 	open = false;
 	not_chosen_string = "";
@@ -100,7 +91,7 @@ void GUIDropDown::update_options()
 	for(size_t i = 0; i < options.size(); i++)
 	{
 		GUITextButton* btn = new GUITextButton(options[i].second, "medium");
-		btn->button_size.y = item_size;
+		btn->default_size.y = item_size;
 		btn->on_clicked.add_handler([this, i](int _)
 		{
 			this->choose(i);

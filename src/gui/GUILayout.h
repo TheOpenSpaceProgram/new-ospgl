@@ -34,7 +34,7 @@ public:
 	GUIScrollbar vscrollbar;
 
 	// (left, right, top, down)
-	glm::ivec4 margins = glm::ivec4(4.0, 6.0, 4.0, 4.0);
+	glm::ivec4 margins = glm::ivec4(4.0, 4.0, 4.0, 4.0);
 
 	// Blocks the mouse if it's over the layout
 	bool block_mouse;
