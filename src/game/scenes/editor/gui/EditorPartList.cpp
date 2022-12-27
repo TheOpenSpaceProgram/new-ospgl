@@ -258,14 +258,13 @@ int EditorPartList::get_panel_width()
 void EditorPartList::update_groups()
 {
 	Vehicle* veh = edveh_int->edveh->veh;
-	for(size_t id = 0; id < veh->group_names.size(); id++)
+	for(int id = -1; id < (int)veh->group_names.size(); id++)
 	{
-		group_dropdown->options.emplace_back(std::to_string(id), veh->group_names[id]);
+		group_dropdown->options.emplace_back(std::to_string(id), veh->get_group_name(id));
 	}
 	group_dropdown->options.emplace_back("manage", "Manage groups");
 	group_dropdown->update_options();
 
-	logger->check(group_dropdown->options.size() > 1, "Vehicle doesn't have any groups, there should be atleast one!");
 }
 
 
