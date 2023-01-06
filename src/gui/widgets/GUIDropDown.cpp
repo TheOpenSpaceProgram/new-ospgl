@@ -82,7 +82,6 @@ GUIDropDown::GUIDropDown()
 GUIDropDown::~GUIDropDown()
 {
 	delete chooser_canvas;
-	delete chooser_layout;
 }
 
 void GUIDropDown::update_options()
