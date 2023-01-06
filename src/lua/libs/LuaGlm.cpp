@@ -467,10 +467,6 @@ void LuaGlm::load_to(sol::table& table)
 		sol::resolve<glm::dvec2(VEC2, VEC2, double)>(glm::refract)
 	));
 	
-	table.set_function("rotate", sol::overload
-	(
-		sol::resolve<glm::dquat(QUAT, const double&, VEC3)>(glm::rotate)
-	));
 
 
 // ================================================================
@@ -490,7 +486,7 @@ void LuaGlm::load_to(sol::table& table)
 		sol::resolve<glm::dmat3(MAT3)>(glm::inverse)
 	));
 
-	table.set_function("matrixCompMult", sol::overload
+	table.set_function("matrix_comp_mult", sol::overload
 	(
 		sol::resolve<glm::dmat4(MAT4, MAT4)>(glm::matrixCompMult),
 		sol::resolve<glm::dmat3(MAT3, MAT3)>(glm::matrixCompMult)
@@ -546,12 +542,12 @@ void LuaGlm::load_to(sol::table& table)
 		sol::resolve<glm::dvec2(VEC2)>(glm::atan)
 	));
 
-	table.set_function("atan", sol::overload
+	table.set_function("atan2", sol::overload
 	(
-		sol::resolve<double(double, double)>(glm::atan),
-		sol::resolve<glm::dvec4(VEC4, VEC4)>(glm::atan),
-		sol::resolve<glm::dvec3(VEC3, VEC3)>(glm::atan),
-		sol::resolve<glm::dvec2(VEC2, VEC2)>(glm::atan)
+		sol::resolve<double(double, double)>(glm::atan2),
+		sol::resolve<glm::dvec4(VEC4, VEC4)>(glm::atan2),
+		sol::resolve<glm::dvec3(VEC3, VEC3)>(glm::atan2),
+		sol::resolve<glm::dvec2(VEC2, VEC2)>(glm::atan2)
 	));
 
 	table.set_function("atanh", sol::overload
@@ -657,8 +653,11 @@ void LuaGlm::load_to(sol::table& table)
 	table.set_function("scale",
 	   	sol::resolve<glm::dmat4(MAT4, VEC3)>(glm::scale));
 
-	table.set_function("rotate",
-		sol::resolve<glm::dmat4(MAT4, double, VEC3)>(glm::rotate));
+	table.set_function("rotate", sol::overload
+			(
+		sol::resolve<glm::dmat4(MAT4, double, VEC3)>(glm::rotate)
+	sol::resolve<glm::dquat(QUAT, const double&, VEC3)>(glm::rotate)
+	));
 
 	table["pi"] = glm::pi<double>();
 	table["half_pi"] = glm::half_pi<double>();
