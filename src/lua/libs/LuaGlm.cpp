@@ -655,8 +655,8 @@ void LuaGlm::load_to(sol::table& table)
 
 	table.set_function("rotate", sol::overload
 			(
-		sol::resolve<glm::dmat4(MAT4, double, VEC3)>(glm::rotate)
-	sol::resolve<glm::dquat(QUAT, const double&, VEC3)>(glm::rotate)
+		sol::resolve<glm::dmat4(MAT4, double, VEC3)>(glm::rotate),
+		sol::resolve<glm::dquat(QUAT, const double&, VEC3)>(glm::rotate)
 	));
 
 	table["pi"] = glm::pi<double>();
