@@ -304,3 +304,4 @@ res/test_parts/**
 udata/vehicles/debug.toml
 /cmake-build-debug/
 /cmake-build-release/
+.cache/
