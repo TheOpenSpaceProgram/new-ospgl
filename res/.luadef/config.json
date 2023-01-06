@@ -1,0 +1,8 @@
+{
+  "name": "OSPGL definitions",
+  "words": ["machine", "vehicle"],
+  "files": ["package.lua"],
+  "settings": {
+    "Lua.runtime.version": "LuaJIT",
+  }
+}

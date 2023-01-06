@@ -89,3 +89,7 @@ We don't have a very strict coding-style, but these rules must be followed:
 - Use `nullptr` instead of `NULL`
 - There is no need to mark member variables with anything (`m_name`, ...), unless it's absolutely neccesary
 - Using `auto` is recommended for long types such as iterators, but should not be abused as some editors may not be able to resolve them, making code confusing.
+
+# Creating mods
+
+There's an in-depth guide of the different OSPGL subsystems, available at the [OSPGL docs](https://github.com/tatjam/ospgl-docs) repo. 
