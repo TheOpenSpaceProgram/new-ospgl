@@ -542,14 +542,6 @@ void LuaGlm::load_to(sol::table& table)
 		sol::resolve<glm::dvec2(VEC2)>(glm::atan)
 	));
 
-	table.set_function("atan2", sol::overload
-	(
-		sol::resolve<double(double, double)>(glm::atan2),
-		sol::resolve<glm::dvec4(VEC4, VEC4)>(glm::atan2),
-		sol::resolve<glm::dvec3(VEC3, VEC3)>(glm::atan2),
-		sol::resolve<glm::dvec2(VEC2, VEC2)>(glm::atan2)
-	));
-
 	table.set_function("atanh", sol::overload
 	(
 		sol::resolve<double(double)>(glm::atanh),

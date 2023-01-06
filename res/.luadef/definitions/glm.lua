@@ -523,15 +523,6 @@ function glm.atan(a) end
 ---@overload fun(a: glm.vec3): glm.vec3
 ---@overload fun(a: glm.vec4): glm.vec4
 ---@nodiscard
-function glm.atan2(a) end
-
----@return number
----@param a number
----@overload fun(a: number): number
----@overload fun(a: glm.vec2): glm.vec2
----@overload fun(a: glm.vec3): glm.vec3
----@overload fun(a: glm.vec4): glm.vec4
----@nodiscard
 function glm.atanh(a) end
 
 ---@return number
