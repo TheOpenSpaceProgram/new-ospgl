@@ -1,57 +1,59 @@
 ---@meta 
 
+local container = {}
+
 ---@class vehicle
 ---@field packed vehicle.packed
 ---@field unpacked vehicle.unpacked
 ---@field all_pieces vehicle.piece[]
 ---@field parts vehicle.part[]
 ---@field root vehicle.piece
-local vehicle = {}
+container.vehicle = {}
 
 ---@return vehicle
 ---@nodiscard
-function vehicle.new() end
+function container.vehicle.new() end
 ---@return boolean
 ---@nodiscard
-function vehicle:is_packed() end
+function container.vehicle:is_packed() end
 
-function vehicle:unpack() end
-function vehicle:pack() end
+function container.vehicle:unpack() end
+function container.vehicle:pack() end
 
 ---@param dt number
-function vehicle:update(dt) end
+function container.vehicle:update(dt) end
 ---@param dt number
-function vehicle:physics_update(dt) end
+function container.vehicle:physics_update(dt) end
 
 ---@param universe universe
 ---@param entity universe.entity
-function vehicle:init(universe, entity) end
+function container.vehicle:init(universe, entity) end
 
-function vehicle:update_attachments() end
+function container.vehicle:update_attachments() end
 
 ---@param bt_world bullet.world
-function vehicle:set_world(bt_world) end
+function container.vehicle:set_world(bt_world) end
 
 ---@param p vehicle.piece
-function vehicle:remove_piece(p) end
+function container.vehicle:remove_piece(p) end
 
-function vehicle:sort() end
-function vehicle:remove_outdated() end
-
----@param p vehicle.piece
----@return vehicle.piece[]
----@nodiscard
-function vehicle:get_children_of(p) end
+function container.vehicle:sort() end
+function container.vehicle:remove_outdated() end
 
 ---@param p vehicle.piece
 ---@return vehicle.piece[]
 ---@nodiscard
-function vehicle:get_attached_to(p) end
+function container.vehicle:get_children_of(p) end
+
+---@param p vehicle.piece
+---@return vehicle.piece[]
+---@nodiscard
+function container.vehicle:get_attached_to(p) end
 
 
 ---@class vehicle.packed
 ---@field vehicle vehicle
-local packed_vehicle = {}
+ packed_vehicle = {}
 ---@param state table
 --- state must contain:
 ---  -> pos (glm.vec3)
@@ -149,7 +151,7 @@ function piece:transform_point_to_rigidbody(p) end
 ---@nodiscard
 function piece:get_attached_to_this() end
 
----@return vehicle.piece[]
+---@return vehicle.piece
 ---@nodiscard
 function piece:get_attached_to_marker(marker) end
 
@@ -186,21 +188,35 @@ local machine = {}
 ---@return table
 function machine:load_interface(iname) end
 
----@return vehicle.machine[]
+
+-- This is a bit of a workaround around sol limitations using LuaJIT...
+---@class vehicle.machine_array
+local machine_array = {}
+---@return integer
+---@return vehicle.machine
+function machine_array:pairs() end
+
+---@class vehicle.interface_array
+local interface_array = {}
+---@return integer
+---@return table
+function interface_array:pairs() end
+
+---@return vehicle.machine_array
 ---@param include_this boolean? Default to true
 function machine:get_all_wired_machines(include_this) end
 
----@return vehicle.machine[]
+---@return vehicle.machine_array
 --- Pass a list of interface names, and true / false for include_this (optional, default to true)
 function machine:get_wired_machines_with(...) end
 
----@return vehicle.machine[]
+---@return vehicle.interface_array
 ---@param int_type string Interface type
 ---@param include_this boolean? Include this machine in list? Defaults to true
-function machine:get_wired_machines(int_type, include_this) end
+function machine:get_wired_interfaces(int_type, include_this) end
 
 ---@return table
 ---@param iname string
 function machine:get_interface(iname) end
 
-return vehicle
+return container

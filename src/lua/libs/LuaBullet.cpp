@@ -37,12 +37,11 @@ void LuaBullet::load_to(sol::table& table)
 		{
 			return self.getMotionState();
 		},
-		"get_aabb", [](btRigidBody& self, glm::dvec3& aabb_min, glm::dvec3& aabb_max)
+		"get_aabb", [](btRigidBody& self)
 		{
 			btVector3 min, max;
 			self.getAabb(min, max);
-			aabb_min = to_dvec3(min);
-			aabb_max = to_dvec3(max);
+			return std::make_tuple(to_dvec3(min), to_dvec3(max));
 		},
 		"translate", [](btRigidBody& self, glm::dvec3& trans)
 		{
@@ -97,6 +96,10 @@ void LuaBullet::load_to(sol::table& table)
 		"apply_central_impulse", [](btRigidBody& self, glm::dvec3 force)
 		{
 			self.applyCentralImpulse(to_btVector3(force));
+		},
+		"apply_central_force", [](btRigidBody& self, glm::dvec3 force)
+		{
+			self.applyCentralForce(to_btVector3(force));
 		},
 		"apply_impulse", [](btRigidBody& self, glm::dvec3& imp, glm::dvec3& rel_pos)
 		{

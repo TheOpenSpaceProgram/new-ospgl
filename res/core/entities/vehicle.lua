@@ -1,3 +1,4 @@
+---@module 'entity_script'
 -- Wraps a vehicle and converts it to an entity (ported from old VehicleEntity.cpp)
 -- It's a very soft wrapper around Vehicle
 local toml = require("toml")
@@ -9,9 +10,9 @@ require("model")
 require("universe")
 
 vehicle = nil
-if init_toml ~= nil then
+if entity.init_toml ~= nil then
     -- vehicles are stored separately to improve the syntax of savefiles
-    local vehicle_toml_path = init_toml.get_string("save_vehicle")
+    local vehicle_toml_path = entity.init_toml:get_string("save_vehicle")
     local vehicle_toml = assets.get_save_vehicle(vehicle_toml_path)
     vehicle = veh.vehicle.new()
     vehicle_toml:read_to_vehicle(vehicle)
@@ -63,7 +64,7 @@ function get_physics_origin()
 end
 
 function separate_vehicle(veh)
-    osp.universe.create_entity("core:entities/vehicle.lua", veh)
+    osp.universe:create_entity("core:entities/vehicle.lua", veh)
 end
 
 -- Rendering functions:

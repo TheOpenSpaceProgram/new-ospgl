@@ -23,6 +23,7 @@ void LuaVehicle::load_to(sol::table& table)
 		 	"packed", &Vehicle::packed_veh,
 		 	"unpacked", &Vehicle::unpacked_veh,
 		 	"unpack", &Vehicle::unpack,
+		 	"pack", &Vehicle::pack,
 		 	"all_pieces", &Vehicle::all_pieces,
 		 	"root", &Vehicle::root,
 		 	"parts", &Vehicle::parts,

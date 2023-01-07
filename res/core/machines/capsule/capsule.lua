@@ -1,3 +1,4 @@
+---@module 'machine_script'
 require("vehicle")
 require("universe")
 local flight_input = require("flight_input")

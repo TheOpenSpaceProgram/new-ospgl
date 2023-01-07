@@ -1,5 +1,15 @@
 ---@meta 
 
+---@class vehicle.plumbing_machine
+local plumbing_machine = {} 
+---@param id string 
+---@param marker string 
+---@param ui_name string Displayed to the user, use localization!
+---@param is_flow_port boolean 
+---@param x number
+---@param y number
+function plumbing_machine:create_port(id, marker, ui_name, is_flow_port, x, y) end
+
 --
 ---@class plumbing.fluid_map
 local fluid_map = {}

@@ -39,10 +39,10 @@ private:
 
 	sol::state* lua_state;
 	std::string type_str;
-	std::shared_ptr<cpptoml::table> init_toml;
 
 public:
 	sol::environment env;
+	std::shared_ptr<cpptoml::table> init_toml;
 
 	// You should start simulating bullet physics here
 	void enable_bullet(btDynamicsWorld* world);

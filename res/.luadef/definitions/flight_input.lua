@@ -15,22 +15,22 @@ function flight_input.context.new(res) end
 ---@param name string 
 ---@nodiscard
 --- Returns value of axis
-function flight_input:get_axis(name) end
+function flight_input.context:get_axis(name) end
 ---@return boolean
 ---@param name string 
 ---@nodiscard
 --- Returns true if action is currently active
-function flight_input:get_action(name) end
+function flight_input.context:get_action(name) end
 ---@return boolean
 ---@param name string 
 ---@nodiscard
 --- Returns true if action was deactivated this frame
-function flight_input:get_action_down(name) end
+function flight_input.context:get_action_down(name) end
 ---@return boolean
 ---@param name string 
 ---@nodiscard
 --- Returns true if action was activated this frame
-function flight_input:get_action_up(name) end
+function flight_input.context:get_action_up(name) end
 ---@param name string 
 ---@param val number
 ---@param epsilon number
@@ -40,6 +40,6 @@ function flight_input:get_action_up(name) end
 --- from the joystick until it comes within epsilon of the set value.
 --- If you use val = 1.0 or val = 0.0, you may leave epsilon at 0 as these 
 --- can always be reached.
-function flight_input:set_axis(name, val, epsilon) end
+function flight_input.context:set_axis(name, val, epsilon) end
 
 return flight_input

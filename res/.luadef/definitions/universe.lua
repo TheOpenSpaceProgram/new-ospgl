@@ -22,7 +22,8 @@ function universe:emit_event(event_id, ...) end
 
 ---@param script_path string path to the script
 ---@return universe.entity
-function universe:creat_entity(script_path) end
+--- Passes extra arguments directly to the new entity
+function universe:create_entity(script_path, ...) end
 
 ---@class universe.planetary_system
 local planetary_system = {}
@@ -30,6 +31,9 @@ local planetary_system = {}
 ---@class universe.entity
 --- Entities are implemented in lua and work as tables!
 --- (ie, you can access all public stuff in their environment)
---- but some functions are also exposed, written in C++
+--- but some functions and variables are also exposed, written in C++
+---@field uid integer
+---@field drawable_uid integer
+---@field init_toml toml.table
 local entity = {}
 -- TODO: Do what's said in the comment
