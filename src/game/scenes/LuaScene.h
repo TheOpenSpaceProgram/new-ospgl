@@ -28,6 +28,9 @@ public:
 	sol::state* lua_state;
 
 	void load() override;
+	// It's your responsability to call universe->update(dt) (or not)
+	// Gets passed osp->dt
+	void pre_update() override;
 	// Aditionally, lua gets passed osp->dt
 	void update() override;
 	void render() override;

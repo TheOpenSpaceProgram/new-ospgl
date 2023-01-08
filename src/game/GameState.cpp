@@ -20,8 +20,9 @@ void GameState::update()
 		delete to_delete;
 		to_delete = nullptr;
 	}
-	
-	universe.update(osp->dt);
+
+	scene->pre_update();
+	//universe.update(osp->dt);
 
 	if(debug.override_camera)
 	{

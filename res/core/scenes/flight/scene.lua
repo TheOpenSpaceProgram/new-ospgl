@@ -39,11 +39,15 @@ function load(veh_id)
     renderer:add_light(sunlight)
 
     local veh = veh_spawner.spawn_vehicle(universe, assets.get_udata_vehicle("debug.toml"),
-        glm.vec3.new(-2.720318042296709e10 + 6500e3, 1.329407956490104e10, 5.764165538717468e10),
+        glm.vec3.new(-2.720318042296709e10 + 6400e3, 1.329407956490104e10, 5.764165538717468e10),
         glm.vec3.new(0, 0, 0), glm.quat.new(1, 0, 0, 0), glm.vec3.new(0, 0, 0), true)
 
     tracked_ent = veh
 
+end
+
+function pre_update(dt)
+  osp.universe:update(dt)
 end
 
 function update(dt)
@@ -61,7 +65,7 @@ local t = 0.0
 
 function get_camera_uniforms(width, height) 
     local offset = 10 * glm.vec3.new(math.cos(t), 0, math.sin(t))
-    t = t + 0.01
+    t = t + 0.00
     return cameras.from_pos_and_dir(tracked_ent:get_visual_origin() + offset,
         glm.vec3.new(0, 1, 0), -glm.normalize(offset), 50.0, renderer:get_size())
     

@@ -44,6 +44,12 @@ void LuaScene::load()
 	to_pass_args.clear();
 }
 
+void LuaScene::pre_update()
+{
+	LuaUtil::call_function_if_present(env["pre_update"], osp->dt);
+}
+
+
 void LuaScene::update()
 {
 	LuaUtil::call_function_if_present(env["update"], osp->dt);

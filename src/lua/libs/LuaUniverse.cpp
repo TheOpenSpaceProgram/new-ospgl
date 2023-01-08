@@ -52,6 +52,7 @@ void LuaUniverse::load_to(sol::table& table)
 
 			self->emit_event(event_id, any_vec);
 		},
+		"update", &Universe::update,
 		"bt_world", &Universe::bt_world,
 		"system", &Universe::system,
 		// We implement a getter, to modify entities use the given functions

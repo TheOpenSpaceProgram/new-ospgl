@@ -55,6 +55,7 @@ public:
 	btCollisionWorld* bt_world;
 
 	virtual void load() override;
+	virtual void pre_update() override;
 	virtual void update() override;
 	virtual void render() override;
 	virtual void unload() override;

@@ -25,6 +25,9 @@ function universe:emit_event(event_id, ...) end
 --- Passes extra arguments directly to the new entity
 function universe:create_entity(script_path, ...) end
 
+---@param dt number
+function universe:update(dt) end
+
 ---@class universe.planetary_system
 local planetary_system = {}
 

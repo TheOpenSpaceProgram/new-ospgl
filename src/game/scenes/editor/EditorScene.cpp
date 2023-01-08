@@ -58,6 +58,11 @@ void EditorScene::load()
 
 double t = 0.0;
 
+void EditorScene::pre_update()
+{
+	// Time is paused in the editor, so don't update the universe
+}
+
 void EditorScene::update()
 {
 	glm::ivec4 screen = glm::ivec4(0, 0, osp->renderer->get_width(true), osp->renderer->get_height(true));
