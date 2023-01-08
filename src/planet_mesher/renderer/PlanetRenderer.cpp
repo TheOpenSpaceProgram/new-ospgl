@@ -98,23 +98,12 @@ void PlanetRenderer::render(PlanetTileServer &server, QuadTreePlanet &planet,
 			shader->setMat4("tri_nrm_matrix", tri_normal_matrix);
 			shader->setMat4("inverse_tri_nrm_matrix", glm::inverse(tri_normal_matrix));
 		}
-        // this will sort the list of tiles so that ocean tiles come before non-ocean tiles.
-        std::sort(render_tiles.begin(), render_tiles.end(), [&](auto &a, auto &b) {
-             auto tile = tiles_w->find(a)->second;
-             bool has_water_a = tile->has_water();
-             tile = tiles_w->find(b)->second;
-             bool has_water_b = tile->has_water();
-             return has_water_a && !has_water_b;
-		});
 
         // improves the drawing order by sorting the list of tiles in ascending order of their distance from the camera
         // could alternatively use `std::stable_sort` function instead of `std::sort` (ocean and non-ocean tiles)
-		// note that tforms.camera_pos is already in the same coord space as get_tile_origin
         std::sort(render_tiles.begin(), render_tiles.end(), [&](auto &a, auto &b)
 		{
-             double dist_a = glm::length2(a.get_tile_origin() - tforms.camera_pos);
-             double dist_b = glm::length2(b.get_tile_origin() - tforms.camera_pos);
-             return dist_a < dist_b;
+             return a.get_depth() > b.get_depth();
 		});
 
 		for (size_t i = 0; i < render_tiles.size(); i++)

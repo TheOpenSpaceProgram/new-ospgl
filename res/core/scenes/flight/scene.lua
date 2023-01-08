@@ -23,7 +23,7 @@ local event_handlers = {}
 
 -- We get optionally passed the entity id of vehicle to control
 function load(veh_id)
-    --renderer:add_drawable(universe.system)
+    renderer:add_drawable(universe.system)
     for _, ent in pairs(universe.entities) do
         renderer:add_drawable(ent)
     end
@@ -38,8 +38,9 @@ function load(veh_id)
     renderer:add_drawable(skybox)
     renderer:add_light(sunlight)
 
-    local veh = veh_spawner.spawn_vehicle(universe, assets.get_udata_vehicle("debug.toml"), 
-        glm.vec3.new(1000000, 0, 0), glm.vec3.new(0, 0, 0), glm.quat.new(1, 0, 0, 0), glm.vec3.new(0, 0, 0), true)
+    local veh = veh_spawner.spawn_vehicle(universe, assets.get_udata_vehicle("debug.toml"),
+        glm.vec3.new(-2.720318042296709e10 + 6500e3, 1.329407956490104e10, 5.764165538717468e10),
+        glm.vec3.new(0, 0, 0), glm.quat.new(1, 0, 0, 0), glm.vec3.new(0, 0, 0), true)
 
     tracked_ent = veh
 
