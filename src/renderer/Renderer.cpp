@@ -734,6 +734,8 @@ Renderer::Renderer(cpptoml::table& settings)
 
 Renderer::~Renderer()
 {
+	// Remove images and other assets before deletion as otherwise OpenGL will crash
+	brdf = AssetHandle<Image>();
 	if (gbuffer != nullptr)
 	{
 		delete gbuffer;
@@ -786,7 +788,9 @@ void Renderer::env_map_sample()
 
 void Renderer::remove_all_drawables()
 {
-	for(Drawable* d : all_drawables)
+	// This could be done more efficiently
+	std::vector<Drawable*> drawable_copy = all_drawables;
+	for(Drawable* d : drawable_copy)
 	{
 		remove_drawable(d);
 	}
@@ -794,7 +798,8 @@ void Renderer::remove_all_drawables()
 
 void Renderer::remove_all_lights()
 {
-	for(Light* l : lights)
+	std::vector<Light*> lights_copy = lights;
+	for(Light* l : lights_copy)
 	{
 		remove_light(l);
 	}

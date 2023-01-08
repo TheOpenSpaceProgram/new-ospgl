@@ -403,6 +403,8 @@ PlanetarySystem::~PlanetarySystem()
 			delete elem->rigid_body;
 			delete elem->ground_shape;
 		}
+
+		delete elem;
 	}
 }
 

@@ -171,7 +171,7 @@ AssetHandle<Image> Machine::get_icon()
 Machine::~Machine()
 {
 	logger->info("Ending machine");
-	lua_state->collect_garbage();
+	env.clear();
 }
 
 std::vector<Machine*> Machine::get_connected_if(std::function<bool(Machine*)> fnc, bool include_this) 

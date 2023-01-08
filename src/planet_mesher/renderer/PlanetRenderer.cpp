@@ -346,6 +346,8 @@ PlanetRenderer::PlanetRenderer()
 
 PlanetRenderer::~PlanetRenderer()
 {
+	osp->assets->free<Shader>("core", "shaders/planet/tile.vs");
+	osp->assets->free<Shader>("core", "shaders/planet/water.vs");
 	glDeleteBuffers(1, &ebo);
 	glDeleteVertexArrays(1, &vao);
 }

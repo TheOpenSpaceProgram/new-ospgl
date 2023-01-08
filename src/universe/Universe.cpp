@@ -148,6 +148,8 @@ Universe::~Universe()
 #ifdef OSPGL_LRDB
 	disable_debugging();
 #endif
+
+	lua_state.collect_garbage();
 }
 
 #ifdef OSPGL_LRDB

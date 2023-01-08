@@ -58,7 +58,7 @@ function render()
 end
 
 function unload()
-    renderer.clear()
+  renderer:clear()
 end
 
 local t = 0.0

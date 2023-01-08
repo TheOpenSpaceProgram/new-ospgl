@@ -18,7 +18,8 @@ void LuaVehicle::load_to(sol::table& table)
 {
 	// Note to coders: Vehicle is deallocated manually so we can return a raw pointer fine
 	table.new_usertype<Vehicle>("vehicle",
-		 "new", [](){return new Vehicle();},
+		 // Returns a shared pointer so it's garbage collected by lua
+		 "new", [](){return std::make_shared<Vehicle>();},
 		 	"is_packed", &Vehicle::is_packed,
 		 	"packed", &Vehicle::packed_veh,
 		 	"unpacked", &Vehicle::unpacked_veh,

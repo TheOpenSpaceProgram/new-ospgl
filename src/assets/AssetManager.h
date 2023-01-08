@@ -456,6 +456,9 @@ public:
 
 	AssetHandle<T>& operator=(AssetHandle<T>&& other)
 	{
+		// If we contained anything, it gets overriden
+		unload();
+
 		this->pkg = other.pkg;
 		this->name = other.name;
 		this->data = other.data;

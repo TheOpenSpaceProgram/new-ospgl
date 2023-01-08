@@ -62,6 +62,7 @@ public:
 	void write();
 
 	GameState();
+	~GameState();
 };
 
 
