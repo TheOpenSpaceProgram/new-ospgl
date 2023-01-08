@@ -99,6 +99,13 @@ void PlanetRenderer::render(PlanetTileServer &server, QuadTreePlanet &planet,
 			shader->setMat4("inverse_tri_nrm_matrix", glm::inverse(tri_normal_matrix));
 		}
 
+        // improves the drawing order by sorting the list of tiles in ascending order of their distance from the camera
+        // could alternatively use `std::stable_sort` function instead of `std::sort` (ocean and non-ocean tiles)
+        std::sort(render_tiles.begin(), render_tiles.end(), [&](auto &a, auto &b)
+		{
+             return a.get_depth() > b.get_depth();
+		});
+
 		for (size_t i = 0; i < render_tiles.size(); i++)
 		{
 			auto it = tiles_w->find(render_tiles[i]);
@@ -342,5 +349,4 @@ PlanetRenderer::~PlanetRenderer()
 	glDeleteBuffers(1, &ebo);
 	glDeleteVertexArrays(1, &vao);
 }
-
 
