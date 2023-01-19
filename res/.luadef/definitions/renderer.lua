@@ -41,6 +41,22 @@ local renderer = {}
 ---@param draw renderer.drawable
 function renderer:add_drawable(draw) end
 
+---@param table table A table that conforms to the drawable standard, see documentation for this function
+---@return renderer.drawable The drawable that was created from the table
+--- Drawable tables:
+--- They may contain the following functions, which will sign them up for the respective rendering pass:
+---     - deferred_pass(camera_uniforms, is_env_map)
+---     - forward_pass(camera_uniforms, is_env_map)
+---     - gui_pass(camera_uniforms, is_env_map)
+---     - shadow_pass(camera_uniforms, is_env_map)
+---     - far_shadow_pass(camera_uniforms, is_env_map)
+--- Note that by default your renderer will not be included in env_maps, to enable it
+--- define drawable_env_map_enable = true inside the table
+--- Upon calling this function, table.drawable_uid will be set to the assigned uid by the renderer
+--- It returns the drawable so that you can remove it once it's not needed, note that unlike other 
+--- drawables, removing it will destroy the returned drawable (but not the table!)
+function renderer:add_table_as_drawable(table) end
+
 ---@param draw renderer.drawable
 function renderer:remove_drawable(draw) end
 

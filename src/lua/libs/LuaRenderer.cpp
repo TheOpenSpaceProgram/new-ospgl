@@ -1,4 +1,6 @@
 #include "LuaRenderer.h"
+
+#include <utility>
 #include "renderer/Renderer.h"
 #include "game/GameState.h"
 #include "universe/Universe.h"
@@ -15,6 +17,13 @@ void LuaRenderer::load_to(sol::table& table)
 {
 	table.new_usertype<Renderer>("renderer",
 		  "add_drawable", sol::resolve<void(Drawable*)>(&Renderer::add_drawable),
+		  "add_table_as_drawable", [](Renderer* renderer, sol::table table)
+		  {
+			auto drawable = new LuaDrawable(std::move(table));
+			renderer->add_drawable(drawable);
+			// Return the pointer to allow manual removal
+			return (Drawable*)drawable;
+		  },
 		  "remove_drawable", &Renderer::remove_drawable,
 		  "add_light", &Renderer::add_light,
 		  "remove_light", &Renderer::remove_light,

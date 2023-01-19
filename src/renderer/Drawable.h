@@ -37,6 +37,8 @@ public:
 	// Objects with higher priority get drawn first
 	virtual int get_forward_priority() { return 0.0; }
 
+	virtual void on_add_to_renderer() {}
+
 	bool is_in_renderer() 
 	{
 		return added;

@@ -13,7 +13,7 @@ system_version = "0.1.0"
 # Scenes may store here which arguments to be started with
 # (and other stuff via storage system if needed)
 [scene]
-	name = "core:scenes/flight/scene.lua"
+	name = "core:scenes/map/scene.lua"
 	arguments = [1]
 
 [[element]]

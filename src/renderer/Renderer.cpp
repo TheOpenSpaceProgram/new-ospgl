@@ -473,19 +473,26 @@ void Renderer::add_drawable(Drawable* d, std::string n_id)
 
 	all_drawables.push_back(d);
 }
-static void remove_from(std::vector<Drawable*>& array, Drawable* d)
+
+
+template<typename T>
+static bool remove_from(std::vector<T*>& array, Drawable* d)
 {
+	bool has_it = false;
 	for (auto it = array.begin(); it != array.end();)
 	{
 		if ((*it) == d)
 		{
 			it = array.erase(it);
+			has_it = true;
 		}
 		else
 		{
 			it++;
 		}
 	}
+
+	return has_it;
 }
 
 void Renderer::remove_drawable(Drawable* drawable)
@@ -524,6 +531,12 @@ void Renderer::remove_drawable(Drawable* drawable)
 	if(drawable->needs_env_map_pass())
 	{
 		remove_from(env_map, drawable);
+	}
+
+	if(remove_from(lua_drawables, drawable))
+	{
+		// We manage lua drawables!
+		delete drawable;
 	}
 }
 

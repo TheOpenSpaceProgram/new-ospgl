@@ -12,6 +12,7 @@
 
 #include "camera/Camera.h"
 #include "Drawable.h"
+#include "LuaDrawable.h"
 #include "lighting/ShadowCamera.h"
 #include "lighting/Light.h"
 #include <nanovg/nanovg.h>
@@ -84,6 +85,10 @@ private:
 	void prepare_gui();
 
 	void do_debug(CameraUniforms& cu);
+
+	// Unlike the other drawables, we manage these "thin" objects ourselves
+	// which are removed upon being removed as drawables
+	std::vector<LuaDrawable*> lua_drawables;
 
 	std::vector<Drawable*> deferred;
 	std::vector<Drawable*> forward;
