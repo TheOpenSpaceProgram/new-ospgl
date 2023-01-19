@@ -8,6 +8,7 @@
 #include <lua/LuaCore.h>
 #include <game/GameState.h>
 #include <game/database/GameDatabase.h>
+#include <util/ThreadUtil.h>
 
 InputUtil* input;
 
@@ -70,6 +71,7 @@ bool is_number(const std::string& s)
 
 void OSP::init(int argc, char** argv)
 {
+	set_this_thread_name("main");
 	argh::parser args(argc, argv);
 
 	if(args[{"-h", "--help"}])

@@ -1,6 +1,6 @@
 #pragma once
 #include <mutex>
-
+#include <string>
 
 // Automatically unlocks a mutex on destructor
 template<typename T>
@@ -108,4 +108,10 @@ public:
 	}
 
 };
+
+// Use to give meaningful names to thread to aid debugging
+// Call on the thread you want to name
+// May not work on some platforms!
+// Maximum of 15 characters for name
+void set_this_thread_name(const std::string& str);
 

@@ -198,6 +198,7 @@ void PlanetTileServer::do_imgui()
 
 void PlanetTileServer::thread_func(PlanetTileServer* server, PlanetTileThread* thread)
 {
+	set_this_thread_name("surfacegen");
 	PlanetTile::GeneratorArrays arrays;
 
 	while (server->threads_run)
