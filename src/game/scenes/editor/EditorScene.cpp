@@ -8,7 +8,7 @@
 
 void EditorScene::load()
 {
-
+	gui_screen.init(std::make_shared<SimpleSkin>(), &gui_input);
 	debug_drawer->debug_enabled = true;
 
 	Renderer* r = osp->renderer;
@@ -65,10 +65,8 @@ void EditorScene::pre_update()
 
 void EditorScene::update()
 {
-	glm::ivec4 screen = glm::ivec4(0, 0, osp->renderer->get_width(true), osp->renderer->get_height(true));
-
 	gui_input.update();
-	gui_screen.new_frame(screen);
+	gui_screen.new_frame();
 
 	if(cam.blocked)
 	{
@@ -91,7 +89,7 @@ void EditorScene::update()
 	float gw = (float)gui.get_panel_width();
 	glm::vec4 gui_vport = glm::vec4(gw, 0, real_screen_size.x - gw, real_screen_size.y);
 	vehicle_int.do_interface(cam.get_camera_uniforms(rw, rh),
-							 viewport, gui_vport, real_screen_size, osp->renderer->vg, &gui_input, gui_screen.skin);
+							 viewport, gui_vport, real_screen_size, osp->renderer->vg, &gui_input, gui_screen.skin.get());
 	cam.update(osp->game_dt, &gui_input);
 	gui_input.ext_mouse_blocked |= cam.blocked;
 	gui_input.ext_keyboard_blocked |= cam.blocked;
@@ -142,8 +140,6 @@ void EditorScene::unload()
 EditorScene::EditorScene() : vehicle(this), vehicle_int(&vehicle, &cam),
 	sky(std::move(AssetHandle<Cubemap>("debug_system:skybox.hdr")))
 {
-	gui_screen.init(glm::ivec4(0, 0, osp->renderer->get_width(true), osp->renderer->get_height(true)),
-					&skin, &gui_input);
 }
 
 glm::dvec4 EditorScene::get_viewport()

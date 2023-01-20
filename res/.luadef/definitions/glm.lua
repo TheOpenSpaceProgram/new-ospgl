@@ -1,5 +1,9 @@
 ---@meta 
 
+--- Known issue: You must right-multiply vectors by numbers, otherwise the lua language server 
+--- will not understand it and think it's the result is a number!
+--- Will be fixed eventually by sumneko as the issue is open on the github repo
+
 ---@class glm
 ---@field pi number 
 ---@field half_pi number

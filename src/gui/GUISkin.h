@@ -66,4 +66,6 @@ public:
 	// Foreground means opposite to background in this case! (white if background is black, etc...)
 	virtual NVGcolor get_foreground_color(bool soft = false) = 0;
 	virtual NVGcolor get_button_color(ButtonState state) = 0;
+
+	virtual ~GUISkin() {};
 };

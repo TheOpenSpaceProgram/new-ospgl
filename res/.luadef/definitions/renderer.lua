@@ -38,7 +38,7 @@ return_table.renderer_quality_pbr = {
 ---@field env_sample_pos glm.vec3
 local renderer = {}
 
----@param draw renderer.drawable
+---@param draw renderer.drawable|universe.planetary_system
 function renderer:add_drawable(draw) end
 
 ---@param table table A table that conforms to the drawable standard, see documentation for this function
@@ -60,7 +60,7 @@ function renderer:add_table_as_drawable(table) end
 ---@param draw renderer.drawable
 function renderer:remove_drawable(draw) end
 
----@param light renderer.light
+---@param light renderer.light|renderer.part_icon_light|renderer.point_light|renderer.sun_light
 function renderer:add_light(light) end
 
 ---@param light renderer.light

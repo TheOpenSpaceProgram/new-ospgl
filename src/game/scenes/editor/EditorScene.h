@@ -27,7 +27,8 @@ public:
 	Skybox sky;
 
 	glm::dvec4 get_viewport();
-	
+
+	GUIScreen gui_screen;
 private:
 	SimpleSkin skin;
 	EditorCamera cam;

@@ -11,9 +11,8 @@ class Scene
 {
 public:
 
+	// A global GUI input is required for all screens (so they are compatible with each other and debug tools)
 	GUIInput gui_input;
-	// You may create more if needed, but this is always provided
-	GUIScreen gui_screen;
 
 	// Called the frame the scene is loaded
 	virtual void load() = 0;

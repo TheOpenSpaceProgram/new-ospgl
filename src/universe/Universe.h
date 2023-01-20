@@ -10,6 +10,7 @@
 #pragma warning(pop)
 
 #include <physics/debug/BulletDebugDrawer.h>
+#include "game/database/SaveDatabase.h"
 #include <sol/sol.hpp>
 
 // The Universe is the central class of the game. It stores both the system
@@ -49,6 +50,8 @@ private:
 	int64_t uid;
 
 public:
+
+	SaveDatabase save_db;
 
 	// Should updates run?
 	bool paused;

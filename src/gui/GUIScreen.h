@@ -20,12 +20,16 @@ public:
 	// Space in the actual game screen to use for this GUIScreen
 	// (x, y, width, height)
 	glm::ivec4 screen;
-	GUISkin* skin;
+	// We hold a shared_ptr for lua automated gargabe collection
+	std::shared_ptr<GUISkin> skin;
+	// We hold a weak reference to gui_input which is managed externally
+	// (No need to use a weak_ptr, gui_input will always outlive screens!)
 	GUIInput* gui_input;
 	GUIWindowManager win_manager;
 
 
 	void new_frame(glm::ivec4 screen);
+	void new_frame();
 
 	// Called by widgets (or you if you need) to add overlay canvas
 	void add_post_canvas(GUICanvas* canvas, glm::ivec2 pos, glm::ivec2 size);
@@ -39,6 +43,6 @@ public:
 	// Uses NVG to draw everything
 	void draw();
 
-	void init(glm::ivec4 screen, GUISkin* skin, GUIInput* gui_input);
+	void init(std::shared_ptr<GUISkin> skin, GUIInput* gui_input);
 
 };

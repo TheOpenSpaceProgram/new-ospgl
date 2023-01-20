@@ -54,6 +54,7 @@ void LuaUniverse::load_to(sol::table& table)
 		},
 		"update", &Universe::update,
 		"bt_world", &Universe::bt_world,
+		"save_db", &Universe::save_db,
 		"system", &Universe::system,
 		// We implement a getter, to modify entities use the given functions
 		"entities", sol::property([](Universe* uv)
@@ -90,5 +91,13 @@ void LuaUniverse::load_to(sol::table& table)
 	        "get_type", &Entity::get_type,
 	        "save", &Entity::save,
 	        "drawable_uid", sol::readonly(&Entity::drawable_uid));
+
+	table.new_usertype<SaveDatabase>("save_database", sol::no_constructor,
+		"get_toml", sol::overload(&SaveDatabase::get_toml,
+	  [](SaveDatabase* db, const std::string path, sol::this_environment tenv)
+	  {
+			sol::environment env = tenv;
+			return db->get_toml(env["__pkg"].get_or<std::string>("core"), path);
+	  }));
 
 }

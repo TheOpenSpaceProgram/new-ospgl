@@ -18,23 +18,24 @@ void LuaToml::load_to(sol::table& table)
 		{
 			return cpptoml::make_table();
 		},
-		"insert_table", [](table_ptr self, const std::string& key, table_ptr tab)
+		// insert is a bit of a misnomer, so they are named "set" in lua for clarity
+		"set_table", [](table_ptr self, const std::string& key, table_ptr tab)
 		{
 			self->insert(key, tab);
 		},
-		"insert_number", [](table_ptr self, const std::string& key, double num)
+		"set_number", [](table_ptr self, const std::string& key, double num)
 		{
 			self->insert(key, num);
 		},
-		"insert_string", [](table_ptr self, const std::string& key, const std::string& str)
+		"set_string", [](table_ptr self, const std::string& key, const std::string& str)
 		{
 			self->insert(key, str);
 		},
-		"insert_bool", [](table_ptr self, const std::string& key, bool val)
+		"set_bool", [](table_ptr self, const std::string& key, bool val)
 		{
 			self->insert(key, val);
 		},
-		"insert_vec3", [](table_ptr self, const std::string key, glm::dvec3 val)
+		"set_vec3", [](table_ptr self, const std::string key, glm::dvec3 val)
 		{
 			table_ptr n_table = cpptoml::make_table();
 			serialize(val, *n_table);

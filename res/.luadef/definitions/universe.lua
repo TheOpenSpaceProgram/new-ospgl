@@ -9,6 +9,7 @@ function lua_event_handler:sign_out() end
 ---@field bt_world bullet.world
 ---@field system universe.planetary_system
 ---@field entities table Read only
+---@field save_db universe.save_database
 local universe = {}
 
 ---@param event_id string
@@ -40,3 +41,14 @@ local planetary_system = {}
 ---@field init_toml toml.table
 local entity = {}
 -- TODO: Do what's said in the comment
+
+
+---@class universe.save_database
+local save_db = {}
+
+---@param arg1 string Path to load (or package if 2 arguments are passed)
+---@param arg2? Path to load if 2 arguments are used
+---@return toml.table
+--- Obtains a persistent toml file. You can modify the contents and they will
+--- automatically be serialized on next save-game
+function save_db:get_toml(arg1, arg2) end

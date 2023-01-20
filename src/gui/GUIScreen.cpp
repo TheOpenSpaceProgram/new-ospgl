@@ -1,9 +1,8 @@
 #include "GUIScreen.h"
 #include <renderer/Renderer.h>
 
-void GUIScreen::init(glm::ivec4 nscreen, GUISkin *nskin, GUIInput* ngui_input)
+void GUIScreen::init(std::shared_ptr<GUISkin> nskin, GUIInput* ngui_input)
 {
-	screen = nscreen;
 	skin = nskin;
 	gui_input = ngui_input;
 }
@@ -67,11 +66,11 @@ void GUIScreen::draw()
 {
 	for(auto o : canvas)
 	{
-		o.first->draw(osp->renderer->vg, skin, screen);
+		o.first->draw(osp->renderer->vg, skin.get(), screen);
 	}
 	for(auto o : post_canvas)
 	{
-		o.first->draw(osp->renderer->vg, skin, screen);
+		o.first->draw(osp->renderer->vg, skin.get(), screen);
 	}
 	win_manager.draw(osp->renderer->vg, this);
 }
@@ -91,4 +90,9 @@ void GUIScreen::new_frame(glm::ivec4 nscreen)
 	screen = nscreen;
 	post_canvas.clear();
 	canvas.clear();
+}
+
+void GUIScreen::new_frame()
+{
+	new_frame(glm::ivec4(0, 0, osp->renderer->get_width(true), osp->renderer->get_height(true)));
 }

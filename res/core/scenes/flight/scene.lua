@@ -11,9 +11,7 @@ local renderer = osp.renderer
 local universe = osp.universe
 
 local cubemap = assets.get_cubemap("debug_system:skybox.png")
-local skybox = rnd.skybox.new(cubemap)
--- we don't need the cubemap anymore (skybox has a copy)
-cubemap = nil
+local skybox = rnd.skybox.new(cubemap:move())
 
 local sunlight = rnd.sun_light.new(osp.renderer.quality.sun_terrain_shadow_size, osp.renderer.quality.sun_shadow_size)
 
@@ -64,7 +62,7 @@ end
 local t = 0.0
 
 function get_camera_uniforms(width, height) 
-    local offset = 10 * glm.vec3.new(math.cos(t), 0, math.sin(t))
+    local offset = glm.vec3.new(math.cos(t), 0, math.sin(t)) * 10
     t = t + 0.00
     return cameras.from_pos_and_dir(tracked_ent:get_visual_origin() + offset,
         glm.vec3.new(0, 1, 0), -glm.normalize(offset), 50.0, renderer:get_size())

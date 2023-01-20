@@ -8,15 +8,13 @@ class GameState;
 
 // A scene that's implemented in lua. Most of the game scenes work like this
 // Scenes are created INSIDE the universe lua state
-// Scene lua files have a single global: osp
+// Scene lua files have the following globals: osp, gui_input
 // Furthermore, they may implement load, update, render, unload and get_camera_uniforms functions
 // For the get_camera_uniforms, you must return a CameraUniforms object (see examples in core/)
 // Passed arguments can be received on "load"
 class LuaScene : public Scene
 {
 public:
-
-	SimpleSkin skin;
 
 	std::vector<sol::object> to_pass_args;
 

@@ -9,19 +9,19 @@ toml.table = {}
 function toml.table.new() end
 ---@param key string
 ---@param table toml.table
-function toml.table:insert_table(key, table) end
+function toml.table:set_table(key, table) end
 ---@param key string
 ---@param num number
-function toml.table:insert_number(key, num) end
+function toml.table:set_number(key, num) end
 ---@param key string
 ---@param str string
-function toml.table:insert_string(key, str) end
+function toml.table:set_string(key, str) end
 ---@param key string
 ---@param bool boolean
-function toml.table:insert_bool(key, bool) end
+function toml.table:set_bool(key, bool) end
 ---@param key string
 ---@param vec glm.vec3
-function toml.table:insert_vec3(key, vec) end
+function toml.table:set_vec3(key, vec) end
 
 ---@return toml.table
 ---@param key string

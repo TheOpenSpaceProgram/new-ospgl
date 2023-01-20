@@ -7,13 +7,13 @@ void GUIWindowManager::position(GUIScreen *screen)
 	// Order doesn't really matter for position as windows are independent
 	for(auto w : windows)
 	{
-		w->position(screen, screen->skin);
+		w->position(screen, screen->skin.get());
 	}
 }
 
 void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 {
-	GUISkin* skin = screen->skin;
+	GUISkin* skin = screen->skin.get();
 	if(windows.size() == 0)
 	{
 		return;
@@ -263,7 +263,7 @@ void GUIWindowManager::draw(NVGcontext* vg, GUIScreen* screen)
 {
 	for(GUIWindow* w : windows)
 	{
-		w->draw(vg, screen->skin, viewport);
+		w->draw(vg, screen->skin.get(), viewport);
 	}
 
 }

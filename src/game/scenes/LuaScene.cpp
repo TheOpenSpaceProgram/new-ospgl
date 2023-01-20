@@ -8,9 +8,6 @@ LuaScene::LuaScene(GameState* in_state, const std::string& scene_script, const s
 				   std::vector<sol::object> args) :
 	cam(&this->env)
 {
-	// TODO: Allow lua to define the default GUIScreen, including skin
-	gui_screen.init(glm::ivec4(0, 0, osp->renderer->get_width(true), osp->renderer->get_height(true)),
-								 &skin, &gui_input);
 
 	this->to_pass_args = args;
 	this->in_pkg = in_pkg;
@@ -26,6 +23,7 @@ LuaScene::LuaScene(GameState* in_state, const std::string& scene_script, const s
 	// We need to load LuaCore to it
 	lua_core->load((sol::table&)env, pkg);
 	env["osp"] = osp;
+	env["gui_input"] = &gui_input;
 
 	std::string full_path = osp->assets->res_path + pkg + "/" + name;
 	auto result = (*lua_state).safe_script_file(full_path, env);
