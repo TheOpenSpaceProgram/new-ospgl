@@ -23,7 +23,7 @@ function load(database)
   database:add_reaction("materials/reactions/methane_combustion.toml")
 
 	-- The first locale is the default if selected one is not available
-	database:load_locale(dofile("locale.lua"))
+	database:load_locale(dofile("testy:test/locale.lua"))
 
 end
 
