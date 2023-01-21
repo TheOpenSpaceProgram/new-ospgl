@@ -4,7 +4,7 @@ cmake_minimum_required (VERSION 3.2.3)
 
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set (OSPGL_STACKTRACES ON)
+set (OSPGL_STACKTRACES OFF)
 
 ##################################################################################
 # OSPGL - The game engine
@@ -34,6 +34,9 @@ add_executable(OSPGL ${OSP_SOURCES} ${IMGUI_SOURCES} ${GLAD_SOURCES}
 set_target_properties(OSPGL PROPERTIES OUTPUT_NAME "ospgl")
 
 # Set compiler options for OSPGL
+if(OSPGL_STACKTRACES)
+	add_definitions(-DOSPGL_STACKTRACES=1)
+endif()
 
 if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -43,8 +46,8 @@ else()
 	target_compile_options(OSPGL PUBLIC -g -Werror -O0)
 	set(EXTRA_LINK "stdc++fs")
 	if(OSPGL_STACKTRACES)
-		add_definitions(-DBACKWARD_HAS_BFD=1)
-		set(STACKTRACE_LINK "bfd")
+		add_definitions(-DBACKWARD_HAS_DW=1)
+		set(STACKTRACE_LINK "dw")
 	endif()
 
 	link_libraries(${CMAKE_DL_LIBS} GL)

@@ -7,7 +7,10 @@
 #include <iomanip>
 #include <string>
 #include <chrono>
+
+#ifdef OSPGL_STACKTRACES
 #include <backward/backward.hpp>
+#endif
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -32,6 +35,7 @@ size_t get_console_width()
 // Pretty prints to the terminal and writes to the file too
 void Logger::stacktrace()
 {
+#ifdef OSPGL_STACKTRACES
 	using namespace backward;
 
 	size_t con_width = get_console_width();
@@ -41,7 +45,7 @@ void Logger::stacktrace()
 	std::cout << rang::fg::yellow << "Stacktrace: " << std::endl;
 	toFile.push_back("Stacktrace: \n");
 	// We start at 1 to ignore the backward.hpp call
-	for(size_t i = 1; i < st.size(); i++)
+	for(size_t i = 2; i < st.size(); i++)
 	{
 		ResolvedTrace trace = tr.resolve(st[i]);
 		std::string file = trace.source.filename;
@@ -67,7 +71,7 @@ void Logger::stacktrace()
 		}
 		std::string path = file + "(" + std::to_string(trace.source.line) + ")";
 		std::string fnc = trace.source.function;
-		if(fnc.find("Logger") != std::string::npos)
+		if(path.find("Logger") != std::string::npos || path.find("sol.hpp") != std::string::npos)
 		{
 			continue;
 		}
@@ -92,6 +96,7 @@ void Logger::stacktrace()
 		fstring += "\n";
 		toFile.push_back(fstring);
 	}
+#endif
 }
 
 void Logger::log(int level, const char* format, fmt::format_args args)
