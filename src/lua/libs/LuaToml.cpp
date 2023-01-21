@@ -127,7 +127,11 @@ void LuaToml::load_to(sol::table& table)
 		"erase", [](table_ptr self, const std::string& key)
 		{
 			self->erase(key);
-		}
+		},
+		"contains", [](table_ptr self, const std::string& key)
+	   	{
+			return self->contains(key);
+	   	}
 	);
 
 

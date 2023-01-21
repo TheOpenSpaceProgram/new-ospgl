@@ -18,7 +18,7 @@ local config = nil
 
 local cubemap = assets.get_cubemap("debug_system:skybox.png")
 local skybox = rnd.skybox.new(cubemap:move())
-local camera = dofile("core:scenes/map/map_camera.lua")
+local camera = dofile("core:scenes/map/map_camera.lua"):init(universe)
 
 ---@param animation core.map.anim
 ---@param map_id string
@@ -28,8 +28,15 @@ function load(animation, map_id, nconfig)
   -- Save the anim so it can be used on close too
   anim = animation
   config = nconfig
-  -- Load map position if saved for same map_id, or start at the sun
-  local sun_pos = glm.vec3.new(0.0, 0.0, 0.0)
+  -- Load map camera if saved for same map_id, or start at the sun
+  local sets = universe.save_db:get_toml("map")
+  if sets:contains("center_entity") then
+
+  else
+
+  end
+  camera.sensitivity = sets:get_number_or("cam_sensitivity", 0.1)
+
   -- We only draw the universe and markers
   renderer:add_drawable(universe.system)
   renderer:add_drawable(skybox)
@@ -37,7 +44,13 @@ function load(animation, map_id, nconfig)
 end
 
 function update(dt)
+  gui_screen:new_frame()
+  gui_screen:prepare_pass()
+  
+  camera:update()
 
+  gui_screen:input_pass()
+  gui_screen:draw()
 end
 
 function pre_update(dt)

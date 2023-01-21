@@ -5,10 +5,16 @@ local glm = require("glm")
 
 local cameras = {}
 
+---@param pos glm.vec3
+---@param up glm.vec3
+---@param dir glm.vec3
+---@param fov number
+---@param w number
+---@param h number
 function cameras.from_pos_and_dir(pos, up, dir, fov, w, h)
     local result = rnd.camera_uniforms.new()
 
-    local proj = glm.perspective(glm.radians(fov), w / h, 1e-6, 1e16)
+    local proj = glm.perspective(math.deg(fov), w / h, 1e-6, 1e16)
     local view = glm.look_at(glm.vec3.new(0, 0, 0), dir, up)
     local proj_view = proj * view 
 
@@ -24,5 +30,25 @@ function cameras.from_pos_and_dir(pos, up, dir, fov, w, h)
     return result
 end
 
+-- Angles assumed to be in radians, except fov which is in degrees
+--- @param center glm.vec3
+--- @param pole glm.vec3
+--- @param azimuth number in radians
+--- @param altitude number in radians
+--- @param radius number
+--- @param fov number in degrees
+--- @param w integer
+--- @param h integer
+function cameras.from_center_and_polar(center, pole, azimuth, altitude, radius, fov, w, h)
+  local pos = glm.spherical_to_euclidean(azimuth, altitude, radius)
+  -- Transform the vector (rotate to match pole, scale by radius, then translate to center)
+  local mat = glm.rotate_from_to(glm.vec3.new(0, 1, 0), pole)
+  mat = glm.scale(mat, glm.vec3.new(radius))
+  mat = glm.translate(mat, center)
+  pos = glm.vec3.new(mat * glm.vec4.new(pos, 1.0))
+  local view_dir = pos - center
+
+  return cameras.from_pos_and_dir(pos, pole, view_dir, fov, w, h)
+end
 
 return cameras

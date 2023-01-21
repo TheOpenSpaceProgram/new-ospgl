@@ -25,18 +25,17 @@ public:
 		}
 		else
 		{
-			auto res = LuaUtil::call_function_if_present((*env)["get_camera_uniforms"], w, h);
+			auto res = LuaUtil::call_function_if_present_returns<CameraUniforms>((*env)["get_camera_uniforms"], w, h);
 			if (!res.has_value())
 			{
 				if (!logged_error)
 				{
-					logger->error("Scene has no camera function, rendering will not work!");
+					logger->error("Scene has no camera function / didn't return CameraUniforms, rendering will not work!");
 					logged_error = true;
 				}
 				return CameraUniforms();
 			}
-
-			CameraUniforms out = res.value().get<CameraUniforms>();
+			CameraUniforms out = res.value();
 			out.screen_size = glm::vec2((float) w, (float) h);
 			out.iscreen_size = glm::ivec2(w, h);
 

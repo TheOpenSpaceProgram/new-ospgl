@@ -52,7 +52,7 @@ function update(dt)
 end
 
 function render()
-    renderer:render()
+  renderer:render()
 end
 
 function unload()

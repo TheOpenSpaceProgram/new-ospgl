@@ -682,5 +682,63 @@ function glm.scale(m, v) end
 --- or a vector quaternion rotation if called like rotate(quat, vector)
 function glm.rotate(param1, param2, param3) end
 
+
+----------------------------------
+-- Util functions from MathUtil
+-- Not really part of glm!
+---------------------------------
+
+---@param cubic glm.vec3 normalized cube coordinates
+---@return glm.vec3 normalized spherical coordinates
+--- Used by the planetary system to "move" vertices from cube space to sphere space
+function glm.cube_to_sphere(cubic) end
+
+---@param sphere glm.vec3 normalized spherical coordinates
+---@return glm.vec3 normalized cube coordinates
+--- Used by the planetary system to "move" vertices from sphere space to cube space
+function glm.sphere_to_cube(sphere) end
+
+---@param from glm.vec3 Origin vector
+---@param to glm.vec3 Destination vector
+---@return glm.mat4 Rotation matrix that rotates from to to
+function glm.rotate_from_to(from, to) end
+
+---@param azimuth number
+---@param altitude number
+---@param radius number
+---@return glm.vec3 3D vector that represents the spherical coordinates. Pole vector is y (0, 1, 0)
+function glm.spherical_to_euclidean(azimuth, altitude, radius) end
+
+---@param vec glm.vec3 Euclidean coordinates, pole must be y-up (0, 1, 0)
+---@return number azimuth
+---@return number altitude
+---@return number radius
+function glm.euclidean_to_spherical(vec) end
+
+---@param azimuth number
+---@param altitude number
+---@return glm.vec3 3D vector that represents the spherical coordinates. Pole vector is y (0, 1, 0)
+--- Assumes radius 1, slightly faster
+function glm.spherical_to_euclidean_r1(azimuth, altitude) end
+
+---@param vec glm.vec3 Euclidean coordinates, pole must be y-up (0, 1, 0). Must be normalized
+---@return number azimuth
+---@return number altitude
+--- Assumes radius to be 1 in vec!
+function glm.euclidean_to_spherical_r1(vec) end
+
+---@param from glm.vec3 Eye position
+---@param to glm.vec3 What to look at
+---@param up glm.vec3 Up vector to use
+---@param alt_up glm.vec3 Alternate up vector to use if we are looking in up direction
+---@return glm.quat
+function glm.quat_look_at(from, to, up, alt_up) end
+
+---@param line_a glm.vec3
+---@param line_b glm.vec3
+---@param from glm.vec3
+---@return number Distance of point from to line that goes from line_a to line_b
+function glm.distance_to_line(line_a, line_b, from) end
+
 return glm
 

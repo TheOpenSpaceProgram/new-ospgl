@@ -73,5 +73,9 @@ function toml.table:read_to_vehicle(target) end
 ---@param key string
 function toml.table:erase(key) end
 
+---@param key string
+---@return boolean
+function toml.table:contains(key) end
+
 
 return toml

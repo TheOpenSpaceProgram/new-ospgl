@@ -20,6 +20,7 @@ void LuaGUI::load_to(sol::table &table)
 		  {
 			auto ptr = std::make_shared<GUIScreen>();
 			ptr->init(skin, gui_input);
+			return ptr;
 		  },
 		  "new_frame", sol::overload(
 				  [](GUIScreen* screen, glm::vec4 screens)

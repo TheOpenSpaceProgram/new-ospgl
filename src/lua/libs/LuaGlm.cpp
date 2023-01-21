@@ -2,6 +2,7 @@
 #include <fmt/format.h>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <util/MathUtil.h>
 
 
 #define TYPECHECK(a, table, tname, L, errmsg) if constexpr (LUA_GLM_TYPECHECKED) { \
@@ -654,6 +655,25 @@ void LuaGlm::load_to(sol::table& table)
 	table["pi"] = glm::pi<double>();
 	table["half_pi"] = glm::half_pi<double>();
 	table["two_pi"] = glm::two_pi<double>();
+
+	// Util functions NOT GLM FUNCTIONS
+	table["cube_to_sphere"] = &MathUtil::cube_to_sphere;
+	table["sphere_to_cube"] = &MathUtil::sphere_to_cube;
+	table["rotate_from_to"] = &MathUtil::rotate_from_to;
+	table["spherical_to_euclidean"] = sol::resolve<glm::dvec3(double, double, double)>(MathUtil::spherical_to_euclidean);
+	table["euclidean_to_spherical"] = [](glm::dvec3 vec)
+	{
+		glm::dvec3 euc = MathUtil::euclidean_to_spherical(vec);
+		return std::make_tuple(euc.x, euc.y, euc.z);
+	};
+	table["spherical_to_euclidean_r1"] = sol::resolve<glm::dvec3(double, double)>(MathUtil::spherical_to_euclidean_r1);
+	table["euclidean_to_spherical_r1"] = [](glm::dvec3 vec)
+	{
+		glm::dvec2 euc = MathUtil::euclidean_to_spherical_r1(vec);
+		return std::make_tuple(euc.x, euc.y);
+	};
+	table["quat_look_at"] = &MathUtil::quat_look_at;
+	table["distance_to_line"] = &MathUtil::distance_to_line;
 }
 
 LuaGlm::LuaGlm()
