@@ -758,23 +758,27 @@ Renderer::~Renderer()
 	glfwTerminate();
 }
 
-void Renderer::set_ibl_source(Cubemap* cubemap)
+void Renderer::set_ibl_source(AssetHandle<Cubemap>&& cubemap)
 {
+	if(env_enabled)
+		delete this->ibl_source;
 	env_enabled = false;
 	delete env_fbuffer;
 	delete env_gbuffer;
 
-	if(cubemap == nullptr)
-	{
-		cubemap = new Cubemap(quality.env_map_size, true);
+	// This works regardless of cubemap being a null asset
+	this->ibl_source = cubemap.get_noconst();
+	this->ibl_source_asset = std::move(cubemap);
+}
 
-		env_gbuffer = new GBuffer(cubemap->resolution, cubemap->resolution);
-		env_fbuffer = new Framebuffer(cubemap->resolution, cubemap->resolution, env_gbuffer->rbo);
+void Renderer::enable_env_sampling()
+{
+	auto* cubemap = new Cubemap(quality.env_map_size, true);
 
-		env_enabled = true;
-	}
-
-	this->ibl_source = cubemap;
+	env_gbuffer = new GBuffer(cubemap->resolution, cubemap->resolution);
+	env_fbuffer = new Framebuffer(cubemap->resolution, cubemap->resolution, env_gbuffer->rbo);
+	ibl_source = cubemap;
+	env_enabled = true;
 }
 
 

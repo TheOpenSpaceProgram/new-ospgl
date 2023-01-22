@@ -41,6 +41,17 @@ local renderer = {}
 ---@param draw renderer.drawable|universe.planetary_system
 function renderer:add_drawable(draw) end
 
+---@param cubemap assets.cubemap_handle
+--- Sets the IBL source to be a cubemap (and thus disables env sampling)
+function renderer:set_ibl_source(cubemap) end
+
+--- Disables env map sampling
+function renderer:disable_env_sampling() end
+
+--- Activates the environment mapping generator. Remember to add a "envmap" light to the renderer 
+--- as otherwise it will have no effect.
+function renderer:enable_env_sampling() end
+
 ---@param table table A table that conforms to the drawable standard, see documentation for this function
 ---@return renderer.drawable The drawable that was created from the table
 --- Drawable tables:
@@ -60,7 +71,7 @@ function renderer:add_table_as_drawable(table) end
 ---@param draw renderer.drawable
 function renderer:remove_drawable(draw) end
 
----@param light renderer.light|renderer.part_icon_light|renderer.point_light|renderer.sun_light
+---@param light renderer.light|renderer.part_icon_light|renderer.point_light|renderer.sun_light|renderer.envmap
 function renderer:add_light(light) end
 
 ---@param light renderer.light
@@ -109,11 +120,6 @@ function light:is_added_to_renderer() end
 ---@return renderer.light_type
 function light:get_type() end
 
----@class renderer.env_map
-local env_map = {}
----@return renderer.light_type
-function env_map:get_type() end
-
 ---@class renderer.part_icon_light
 ---@field sun_dir glm.vec3
 ---@field color glm.vec3
@@ -153,5 +159,12 @@ return_table.sun_light = {}
 function return_table.sun_light:get_type() end
 ---@return renderer.sun_light
 function return_table.sun_light.new(far_shadow_size, near_shadow_size) end
+
+---@class renderer.envmap
+return_table.envmap = {}
+---@return renderer.light_type
+function return_table.envmap:get_type() end
+---@return renderer.envmap
+function return_table.envmap.new() end
 
 return return_table

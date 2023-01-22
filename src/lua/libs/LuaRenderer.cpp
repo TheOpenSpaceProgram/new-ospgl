@@ -38,6 +38,15 @@ void LuaRenderer::load_to(sol::table& table)
 		  "clear", &Renderer::clear,
 		  "quality", &Renderer::quality,
 		  "env_sample_pos", &Renderer::env_sample_pos,
+		  "disable_env_sampling", [](Renderer* rnd)
+		  {
+			rnd->set_ibl_source(AssetHandle<Cubemap>());
+		  },
+		  "set_ibl_source", [](Renderer* rnd, LuaAssetHandle<Cubemap>& cmap)
+		  {
+			rnd->set_ibl_source(cmap.get_asset_handle());
+		  },
+		  "enable_env_sampling", &Renderer::enable_env_sampling,
 		  "get_size", sol::overload([](Renderer* rnd){
 		  	auto size = rnd->get_size(false);
 		  	return std::make_tuple(size.x, size.y);
@@ -139,5 +148,11 @@ void LuaRenderer::load_to(sol::table& table)
 				// This duplicates the asset handle under the hood
 				AssetHandle<Cubemap> nhandle = cubemap.get_asset_handle();
 				return new Skybox(std::move(nhandle));
+		   });
+
+	table.new_usertype<EnvMap>("envmap", sol::base_classes, sol::bases<Light>(),
+	        "new", []()
+		   {
+				return new EnvMap();
 		   });
 }

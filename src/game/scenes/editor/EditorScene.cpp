@@ -20,7 +20,7 @@ void EditorScene::load()
 
 	r->add_drawable(&sky);
 	sky.cubemap.get_noconst()->generate_ibl_irradiance(32, 32);
-	r->set_ibl_source(sky.cubemap.data);
+	r->set_ibl_source(sky.cubemap.duplicate());
 
 	sun = SunLight(0, r->quality.sun_shadow_size);
 	sun.color = glm::vec3(1.0);

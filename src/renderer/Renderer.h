@@ -111,11 +111,15 @@ private:
 public:
 	glm::dvec3 env_sample_pos;
 
+	// Only if using a cubemap as ibl source, to prevent unloading
+	AssetHandle<Cubemap> ibl_source_asset;
 	Cubemap* ibl_source = nullptr;
 
-	// If cubemap is nullptr, we will generate a ibl source cubemap
-	// and render to it using env_map samples
-	void set_ibl_source(Cubemap* cubemap);
+	// If cubemap is a null asset, ibl is disabled. Takes ownership
+	void set_ibl_source(AssetHandle<Cubemap>&& cubemap);
+
+	// Enables dynamic env_sampling
+	void enable_env_sampling();
 
 	RendererQuality quality;
 

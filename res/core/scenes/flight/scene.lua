@@ -14,6 +14,7 @@ local cubemap = assets.get_cubemap("debug_system:skybox.png")
 local skybox = rnd.skybox.new(cubemap:move())
 
 local sunlight = rnd.sun_light.new(osp.renderer.quality.sun_terrain_shadow_size, osp.renderer.quality.sun_shadow_size)
+local envmap = rnd.envmap.new()
 
 local tracked_ent = nil
 
@@ -22,6 +23,7 @@ local event_handlers = {}
 -- We get optionally passed the entity id of vehicle to control
 function load(veh_id)
     renderer:add_drawable(universe.system)
+    renderer:enable_env_sampling()
     for _, ent in pairs(universe.entities) do
         renderer:add_drawable(ent)
     end
@@ -35,6 +37,7 @@ function load(veh_id)
     -- Skybox and IBL generation is enabled
     renderer:add_drawable(skybox)
     renderer:add_light(sunlight)
+    renderer:add_light(envmap)
 
     local veh = veh_spawner.spawn_vehicle(universe, assets.get_udata_vehicle("debug.toml"),
         glm.vec3.new(-2.720318042296709e10 + 6400e3, 1.329407956490104e10, 5.764165538717468e10),
@@ -52,6 +55,7 @@ function update(dt)
 end
 
 function render()
+  renderer.env_sample_pos = tracked_ent:get_visual_origin() + glm.vec3.new(10.0, 0.0, 0.0)
   renderer:render()
 end
 
@@ -62,8 +66,8 @@ end
 local t = 0.0
 
 function get_camera_uniforms(width, height) 
-    local offset = glm.vec3.new(math.cos(t), 0, math.sin(t)) * 10
-    t = t + 0.00
+    local offset = glm.vec3.new(math.cos(t), math.cos(t), math.sin(t)) * 40
+    t = t + 0.01
     return cameras.from_pos_and_dir(tracked_ent:get_visual_origin() + offset,
         glm.vec3.new(0, 1, 0), -glm.normalize(offset), 50.0, renderer:get_size())
     
