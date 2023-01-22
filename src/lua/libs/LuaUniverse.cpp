@@ -56,6 +56,7 @@ void LuaUniverse::load_to(sol::table& table)
 		"bt_world", &Universe::bt_world,
 		"save_db", &Universe::save_db,
 		"system", &Universe::system,
+		"get_entity", &Universe::get_entity,
 		// We implement a getter, to modify entities use the given functions
 		"entities", sol::property([](Universe* uv)
 		  {
@@ -77,7 +78,25 @@ void LuaUniverse::load_to(sol::table& table)
 		 }
 	);
 
-	table.new_usertype<PlanetarySystem>("planetary_system", sol::base_classes, sol::bases<Drawable>());
+	table.new_usertype<PlanetarySystem>("planetary_system", sol::base_classes, sol::bases<Drawable>(),
+	        "get_element_position", &PlanetarySystem::get_element_position,
+			"get_element_velocity", &PlanetarySystem::get_element_velocity,
+			"get_element", &PlanetarySystem::get_element
+	);
+
+	table.new_usertype<SystemElement>("system_element",
+			  "index", sol::readonly(&SystemElement::index),
+			  "name", sol::readonly(&SystemElement::name),
+			  "nbody", sol::readonly(&SystemElement::nbody),
+			  "config", sol::readonly(&SystemElement::config),
+			  "dot_factor", sol::readonly(&SystemElement::dot_factor)
+			  );
+
+	table.new_usertype<ElementConfig>("element_confg",
+			  "mass", sol::readonly(&ElementConfig::mass),
+			  "radius", sol::readonly(&ElementConfig::radius)
+	);
+
 	table.new_usertype<Entity>("entity", sol::no_constructor, sol::base_classes, sol::bases<Drawable>(),
 	        "enable_bullet", &Entity::enable_bullet,
 	        "disable_bullet", &Entity::disable_bullet,

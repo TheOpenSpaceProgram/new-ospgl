@@ -387,6 +387,8 @@ PlanetarySystem::PlanetarySystem(Universe* universe)
 
 	states_now.resize(0);
 	propagator = new RK4Propagator();
+
+	name_to_index["__default"] = 0;
 }
 
 
@@ -463,4 +465,35 @@ void PlanetarySystem::load(const cpptoml::table &root)
 		name_to_index[elements[i]->name] = i;
 	}
 
+}
+
+SystemElement* PlanetarySystem::get_element(const std::string &name)
+{
+	auto it = name_to_index.find(name);
+	logger->check(it != name_to_index.end());
+	return elements[it->second];
+}
+
+CartesianState PlanetarySystem::get_element_state(const std::string &name, bool physics)
+{
+	auto it = name_to_index.find(name);
+	logger->check(it != name_to_index.end());
+	if(physics)
+	{
+		return bullet_states[it->second];
+	}
+	else
+	{
+		return states_now[it->second];
+	}
+}
+
+glm::dvec3 PlanetarySystem::get_element_position(const std::string &name)
+{
+	return get_element_state(name, false).pos;
+}
+
+glm::dvec3 PlanetarySystem::get_element_velocity(const std::string &name)
+{
+	return get_element_state(name, false).vel;
 }

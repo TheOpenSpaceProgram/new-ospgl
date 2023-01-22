@@ -26,11 +26,24 @@ function universe:emit_event(event_id, ...) end
 --- Passes extra arguments directly to the new entity
 function universe:create_entity(script_path, ...) end
 
+---@param id integer
+---@return universe.entity
+--- Do not hold to the returned value for long, as it may go invalid pretty quickly!
+function universe:get_entity(id) end
+
 ---@param dt number
 function universe:update(dt) end
 
 ---@class universe.planetary_system
 local planetary_system = {}
+
+---@param name string Name of the element, or __default 
+---@return glm.vec3
+function planetary_system:get_element_position(name) end
+
+---@param name string Name of the element, or __default 
+---@return glm.vec3
+function planetary_system:get_element_velocity(name) end
 
 ---@class universe.entity
 --- Entities are implemented in lua and work as tables!
@@ -41,6 +54,9 @@ local planetary_system = {}
 ---@field init_toml toml.table
 local entity = {}
 -- TODO: Do what's said in the comment
+
+---@return glm.vec3
+function entity:get_visual_origin() end
 
 
 ---@class universe.save_database

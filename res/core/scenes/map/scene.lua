@@ -17,6 +17,7 @@ local config = nil
 
 
 local cubemap = assets.get_cubemap("debug_system:skybox.png")
+local sunlight = rnd.sun_light.new(osp.renderer.quality.sun_terrain_shadow_size, osp.renderer.quality.sun_shadow_size)
 local skybox = rnd.skybox.new(cubemap:move())
 local camera = dofile("core:scenes/map/map_camera.lua"):init(universe)
 
@@ -40,6 +41,7 @@ function load(animation, map_id, nconfig)
   -- We only draw the universe and markers
   renderer:add_drawable(universe.system)
   renderer:add_drawable(skybox)
+  renderer:add_light(sunlight)
 
 end
 
@@ -70,5 +72,5 @@ function close_map()
 end
 
 function get_camera_uniforms(width, height) 
-
+  return camera:get_camera_uniforms(width, height)
 end

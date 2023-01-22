@@ -3,6 +3,7 @@
 --- Known issue: You must right-multiply vectors by numbers, otherwise the lua language server 
 --- will not understand it and think it's the result is a number!
 --- Will be fixed eventually by sumneko as the issue is open on the github repo
+--- For now, you can add ---@cast wathever glm.vec3 next to the line to fix the warnings
 
 ---@class glm
 ---@field pi number 
@@ -417,11 +418,11 @@ function glm.dot(a, b) end
 ---@nodiscard
 function glm.length(a) end
 
----@return glm.vec3
 ---@param a glm.vec3
+---@return glm.vec3
+---@overload fun(a: glm.vec3): glm.vec3
 ---@overload fun(a: glm.quat): glm.quat
 ---@overload fun(a: glm.vec2): glm.vec2
----@overload fun(a: glm.vec3): glm.vec3
 ---@overload fun(a: glm.vec4): glm.vec4
 --- Normalizes a vector / quaternion
 ---@nodiscard

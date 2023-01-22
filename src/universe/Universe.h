@@ -99,6 +99,7 @@ public:
 	void remove_entity(T* ent);
 
 	// Returns nullptr if not found
+	// Do not hold the pointer for long, calling this each time you access the entity is better
 	Entity* get_entity(int64_t id);
 
 	template<typename T> 

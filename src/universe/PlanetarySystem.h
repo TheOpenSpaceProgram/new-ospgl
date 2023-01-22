@@ -50,6 +50,12 @@ public:
 	// Safer than directly indexing the array
 	size_t get_element_index_from_name(const std::string& name);
 
+	CartesianState get_element_state(const std::string& name, bool physics = false);
+	// Some short-hands, slight optimization for lua
+	glm::dvec3 get_element_position(const std::string& name);
+	glm::dvec3 get_element_velocity(const std::string& name);
+	SystemElement* get_element(const std::string& name);
+
 	StateVector states_now;
 	// Updates with bullet physics dt instead of normal dt
 	// TODO: Maybe the visual and physics states could
