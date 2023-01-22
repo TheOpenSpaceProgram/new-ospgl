@@ -49,7 +49,6 @@ function cameras.from_center_and_polar(center, pole, azimuth, altitude, radius, 
   local mat = glm.translate(glm.mat4.new(1.0), center)
   mat = mat * glm.rotate_from_to(glm.vec3.new(0, 1, 0), pole)
   pos = glm.vec3.new(mat * glm.vec4.new(pos, 1.0))
-  logger.info(pos)
 
   return cameras.from_pos_and_dir(pos, pole, view_dir, fov, w, h)
 end

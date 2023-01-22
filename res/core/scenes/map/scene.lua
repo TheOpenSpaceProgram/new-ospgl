@@ -36,7 +36,7 @@ function load(animation, map_id, nconfig)
   else
 
   end
-  camera.sensitivity = sets:get_number_or("cam_sensitivity", 0.1)
+  camera.sensitivity = sets:get_number_or("cam_sensitivity", 0.006)
 
   -- We only draw the universe and markers
   renderer:add_drawable(universe.system)
@@ -49,7 +49,7 @@ function update(dt)
   gui_screen:new_frame()
   gui_screen:prepare_pass()
   
-  camera:update()
+  camera:update(dt)
 
   gui_screen:input_pass()
   gui_screen:draw()

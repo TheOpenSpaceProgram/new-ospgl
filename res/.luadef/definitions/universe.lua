@@ -45,6 +45,24 @@ function planetary_system:get_element_position(name) end
 ---@return glm.vec3
 function planetary_system:get_element_velocity(name) end
 
+---@param name string Name of the element, or __default
+---@return universe.element
+function planetary_system:get_element(name) end
+
+---@class universe.element
+---@field index integer
+---@field name string
+---@field nbody boolean
+---@field config universe.element_config
+---@field dot_factor number
+local element = {}
+
+---@class universe.element_config
+---@field radius number
+---@field mass number
+local element_config = {}
+
+
 ---@class universe.entity
 --- Entities are implemented in lua and work as tables!
 --- (ie, you can access all public stuff in their environment)

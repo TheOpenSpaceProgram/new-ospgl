@@ -3,23 +3,24 @@
 
 void LuaInput::load_to(sol::table &table)
 {
-	table.new_usertype<InputUtil>("input_util_ut",
-		  "prev_mouse_pos", &InputUtil::prev_mouse_pos,
-		  "mouse_pos", &InputUtil::mouse_pos,
-		  "mouse_delta", &InputUtil::mouse_delta,
-		  "mouse_scroll_delta", &InputUtil::mouse_scroll_delta,
-		  "prev_mouse_scroll", &InputUtil::prev_mouse_scroll,
-		  "mouse_scroll", &InputUtil::mouse_scroll,
-		  "key_pressed", &InputUtil::key_pressed,
-		  "key_down", &InputUtil::key_down,
-		  "key_down_or_repeating", &InputUtil::key_down_or_repeating,
-		  "key_up", &InputUtil::key_up,
-		  "mouse_pressed", &InputUtil::mouse_pressed,
-		  "mouse_down", &InputUtil::mouse_down,
-		  "mouse_up", &InputUtil::mouse_up,
-		  "set_cursor", &InputUtil::set_cursor,
-		  "get_input_text", &InputUtil::get_input_text);
+	table.set_function("get_prev_mouse_pos", [](){return input->prev_mouse_pos;});
+	table.set_function("get_mouse_pos", [](){return input->mouse_pos;});
+	table.set_function("get_mouse_delta", [](){return input->mouse_delta;});
+	table.set_function("get_scroll_delta", [](){return input->mouse_scroll_delta;});
+	table.set_function("get_scroll", [](){return input->mouse_scroll;});
+	table.set_function("get_prev_scroll", [](){return input->prev_mouse_scroll;});
 
+	table.set_function("key_pressed", &InputUtil::key_pressed, input);
+	table.set_function("key_down", &InputUtil::key_down, input);
+	table.set_function("key_down_or_repeating", &InputUtil::key_down_or_repeating, input);
+	table.set_function("key_up", &InputUtil::key_up, input);
+	table.set_function("mouse_pressed", &InputUtil::mouse_pressed, input);
+	table.set_function("mouse_down", &InputUtil::mouse_down, input);
+	table.set_function("mouse_up", &InputUtil::mouse_up, input);
+	table.set_function("set_cursor", &InputUtil::set_cursor, input);
+	table.set_function("get_input_text", &InputUtil::get_input_text, input);
+
+	table["cursor"] = sol::new_table();
 	table["cursor"]["normal"] = InputUtil::Cursor::NORMAL;
 	table["cursor"]["ibeam"] = InputUtil::Cursor::IBEAM;
 	table["cursor"]["crosshair"] = InputUtil::Cursor::CROSSHAIR;
@@ -31,17 +32,14 @@ void LuaInput::load_to(sol::table &table)
 	table["cursor"]["resize_all"] = InputUtil::Cursor::RESIZE_ALL;
 	table["cursor"]["not_allowed"] = InputUtil::Cursor::NOT_ALLOWED;
 
+	table["btn"] = sol::new_table();
 	table["btn"]["left"] = GLFW_MOUSE_BUTTON_LEFT;
 	table["btn"]["right"] = GLFW_MOUSE_BUTTON_RIGHT;
 	table["btn"]["middle"] = GLFW_MOUSE_BUTTON_MIDDLE;
 
-	// Assign the global input_util
-	table["input_util"] = input;
-	// Assign __index to input_util so you can directly call the functions
-	table[sol::metatable_key]["__index"] = table["input_util"];
-
+	table["key"] = sol::new_table();
 	// Globals like key names, etc...
-#define SET_KEY(id, glfw_id) table["key_" id] = glfw_id
+#define SET_KEY(id, glfw_id) table["key"][id] = glfw_id
 	SET_KEY("unknown", GLFW_KEY_UNKNOWN);
 	SET_KEY("space", GLFW_KEY_SPACE);
 	SET_KEY("apostrophe", GLFW_KEY_APOSTROPHE);
@@ -49,16 +47,16 @@ void LuaInput::load_to(sol::table &table)
 	SET_KEY("minus", GLFW_KEY_MINUS);
 	SET_KEY("period", GLFW_KEY_PERIOD);
 	SET_KEY("slash", GLFW_KEY_SLASH);
-	SET_KEY("0", GLFW_KEY_0);
-	SET_KEY("1", GLFW_KEY_1);
-	SET_KEY("2", GLFW_KEY_2);
-	SET_KEY("3", GLFW_KEY_3);
-	SET_KEY("4", GLFW_KEY_4);
-	SET_KEY("5", GLFW_KEY_5);
-	SET_KEY("6", GLFW_KEY_6);
-	SET_KEY("7", GLFW_KEY_7);
-	SET_KEY("8", GLFW_KEY_8);
-	SET_KEY("9", GLFW_KEY_9);
+	SET_KEY("k0", GLFW_KEY_0);
+	SET_KEY("k1", GLFW_KEY_1);
+	SET_KEY("k2", GLFW_KEY_2);
+	SET_KEY("k3", GLFW_KEY_3);
+	SET_KEY("k4", GLFW_KEY_4);
+	SET_KEY("k5", GLFW_KEY_5);
+	SET_KEY("k6", GLFW_KEY_6);
+	SET_KEY("k7", GLFW_KEY_7);
+	SET_KEY("k8", GLFW_KEY_8);
+	SET_KEY("k9", GLFW_KEY_9);
 	SET_KEY("semicolon", GLFW_KEY_SEMICOLON);
 	SET_KEY("equal", GLFW_KEY_EQUAL);
 	SET_KEY("a", GLFW_KEY_A);
@@ -106,7 +104,7 @@ void LuaInput::load_to(sol::table &table)
 	SET_KEY("page_up", GLFW_KEY_PAGE_UP);
 	SET_KEY("page_down", GLFW_KEY_PAGE_DOWN);
 	SET_KEY("home", GLFW_KEY_HOME);
-	SET_KEY("end", GLFW_KEY_END);
+	SET_KEY("kend", GLFW_KEY_END);
 	SET_KEY("caps_lock", GLFW_KEY_CAPS_LOCK);
 	SET_KEY("scroll_lock", GLFW_KEY_SCROLL_LOCK);
 	SET_KEY("num_lock", GLFW_KEY_NUM_LOCK);
