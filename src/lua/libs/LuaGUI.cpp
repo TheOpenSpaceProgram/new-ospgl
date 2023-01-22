@@ -54,7 +54,9 @@ void LuaGUI::load_to(sol::table &table)
 			),
 		  "prepare_pass", &GUIScreen::prepare_pass,
 		  "input_pass", &GUIScreen::input_pass,
-		  "draw", &GUIScreen::draw
+		  "draw", &GUIScreen::draw,
+		  "input", &GUIScreen::gui_input
+
 	);
 
 	// We only expose what's needed! For 3D input use the normal input system, not GUIInput

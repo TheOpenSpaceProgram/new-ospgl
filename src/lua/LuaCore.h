@@ -53,6 +53,7 @@ public:
 		SCENE,			// LuaScene
 		RENDERER,		// LuaRenderer
 		MODEL,			// LuaModel
+		INPUT,			// LuaInput
 		COUNT,
 	};
 

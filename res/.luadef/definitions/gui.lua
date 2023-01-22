@@ -16,6 +16,7 @@ function gui.skin:get_background_color(bright) end
 function gui.skin.get_default_skin() end
 
 ---@class gui.screen
+---@field input gui.input
 gui.screen = {}
 
 ---@param skin gui.skin
