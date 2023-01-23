@@ -19,58 +19,58 @@ local config = nil
 local cubemap = assets.get_cubemap("debug_system:skybox.png")
 local sunlight = rnd.sun_light.new(osp.renderer.quality.sun_terrain_shadow_size, osp.renderer.quality.sun_shadow_size)
 local skybox = rnd.skybox.new(cubemap:move())
-local camera = dofile("core:scenes/map/map_camera.lua"):init(universe)
+local camera = dofile("core:scenes/map/map_camera.lua"):init(universe, gui_input)
 
 ---@param animation core.map.anim
 ---@param map_id string
 ---@param nconfig table
 function load(animation, map_id, nconfig)
-  if map_id == nil then map_id = "default" end
-  -- Save the anim so it can be used on close too
-  anim = animation
-  config = nconfig
-  -- Load map camera if saved for same map_id, or start at the sun
-  local sets = universe.save_db:get_toml("map")
-  if sets:contains("center_entity") then
+	if map_id == nil then map_id = "default" end
+	-- Save the anim so it can be used on close too
+	anim = animation
+	config = nconfig
+	-- Load map camera if saved for same map_id, or start at the sun
+	local sets = universe.save_db:get_toml("map")
+	if sets:contains("center_entity") then
 
-  else
+	else
 
-  end
-  camera.sensitivity = sets:get_number_or("cam_sensitivity", 0.006)
+	end
+	camera.sensitivity = sets:get_number_or("cam_sensitivity", 0.006)
 
-  -- We only draw the universe and markers
-  renderer:add_drawable(universe.system)
-  renderer:add_drawable(skybox)
-  renderer:add_light(sunlight)
+	-- We only draw the universe and markers
+	renderer:add_drawable(universe.system)
+	renderer:add_drawable(skybox)
+	renderer:add_light(sunlight)
 
 end
 
 function update(dt)
-  gui_screen:new_frame()
-  gui_screen:prepare_pass()
-  
-  camera:update(dt)
+	gui_screen:new_frame()
+	gui_screen:prepare_pass()
 
-  gui_screen:input_pass()
-  gui_screen:draw()
+	camera:update(dt)
+
+	gui_screen:input_pass()
+	gui_screen:draw()
 end
 
 function pre_update(dt)
-  osp.universe:update(dt)
+	osp.universe:update(dt)
 end
 
 function render()
-  renderer:render()
+	renderer:render()
 end
 
 function unload()
-  renderer:clear()
+	renderer:clear()
 end
 
-function close_map() 
+function close_map()
 
 end
 
-function get_camera_uniforms(width, height) 
-  return camera:get_camera_uniforms(width, height)
+function get_camera_uniforms(width, height)
+	return camera:get_camera_uniforms(width, height)
 end

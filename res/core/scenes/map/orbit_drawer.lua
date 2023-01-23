@@ -4,7 +4,7 @@
 
 local drawer = {}
 
-function drawer.new(element) 
+function drawer.new(element)
 
 
 end
@@ -13,7 +13,7 @@ function drawer:update()
 
 end
 
-function drawer:forward_pass(cu, is_env_map) 
+function drawer:forward_pass(cu, is_env_map)
 
 end
 

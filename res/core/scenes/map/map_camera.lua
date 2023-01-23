@@ -7,8 +7,8 @@ local logger = require("logger")
 local input = require("input")
 
 local map_camera = {}
-  
----@type string|nil 
+
+---@type string|nil
 --- If nil, then map_camera.center_entity must be present and be a number (entity id)
 --- If string is "__default", then the first system element will be focused, usually the star
 map_camera.center_element = "Earth"
@@ -31,97 +31,101 @@ map_camera.inertia_damp = 4.0
 map_camera.zoom_damp = 12.0
 ---@type function|nil
 --- If present, it will be called if focused entity disappears with the camera as first argument
---- You must set map_camera.center_element or map_camera.center_entity appropiately 
+--- You must set map_camera.center_element or map_camera.center_entity appropiately
 map_camera.on_focus_lost = nil
 
-function map_camera:update(dt) 
-  
-  self.zoom_speed = self.zoom_speed + input.get_scroll()
-  self.radius = self.radius * (1.0 - self.zoom_speed * dt * 0.5)
-  self.radius = math.max(self.radius, self:get_min_radius())
+function map_camera:update(dt)
 
-  if self.zoom_speed > 0 then
-    self.zoom_speed = self.zoom_speed - self.zoom_damp * dt
-    if self.zoom_speed < 0 then self.zoom_speed = 0 end
-  elseif self.zoom_speed < 0 then
-    self.zoom_speed = self.zoom_speed + self.zoom_damp * dt
-    if self.zoom_speed > 0 then self.zoom_speed = 0 end
-  end
+	if not self.gui_input.ext_mouse_blocked and not self.gui_input.mouse_blocked then
+		self.zoom_speed = self.zoom_speed + input.get_scroll()
+		self.radius = self.radius * (1.0 - self.zoom_speed * dt * 0.5)
+		self.radius = math.max(self.radius, self:get_min_radius())
 
-  if input.mouse_pressed(input.btn.left) then 
-    self.azimuth = self.azimuth + input.get_mouse_delta().x * self.sensitivity
-    self.altitude = self.altitude - input.get_mouse_delta().y * self.sensitivity
-    self.x_speed = input.get_mouse_delta().x * self.sensitivity * 10.0
-    self.y_speed = -input.get_mouse_delta().y * self.sensitivity * 10.0
-  else
-    if self.x_speed > 0 then
-      self.x_speed = self.x_speed - self.inertia_damp * dt
-      if self.x_speed < 0 then self.x_speed = 0 end
-    elseif self.x_speed < 0 then
-      self.x_speed = self.x_speed + self.inertia_damp * dt
-      if self.x_speed > 0 then self.x_speed = 0 end
-    end
-    if self.y_speed > 0 then
-      self.y_speed = self.y_speed - self.inertia_damp * dt
-      if self.y_speed < 0 then self.y_speed = 0 end
-    elseif self.y_speed < 0 then
-      self.y_speed = self.y_speed + self.inertia_damp * dt
-      if self.y_speed > 0 then self.y_speed = 0 end
-    end
+		if self.zoom_speed > 0 then
+			self.zoom_speed = self.zoom_speed - self.zoom_damp * dt
+			if self.zoom_speed < 0 then self.zoom_speed = 0 end
+		elseif self.zoom_speed < 0 then
+			self.zoom_speed = self.zoom_speed + self.zoom_damp * dt
+			if self.zoom_speed > 0 then self.zoom_speed = 0 end
+		end
 
-    self.azimuth = self.azimuth + self.x_speed * dt
-    self.altitude = self.altitude + self.y_speed * dt
-  end
-    
-  self.altitude = glm.clamp(self.altitude, 0.01, math.pi - 0.01)
+		if input.mouse_pressed(input.btn.right) then
+			self.azimuth = self.azimuth + input.get_mouse_delta().x * self.sensitivity
+			self.altitude = self.altitude - input.get_mouse_delta().y * self.sensitivity
+			self.x_speed = input.get_mouse_delta().x * self.sensitivity * 10.0
+			self.y_speed = -input.get_mouse_delta().y * self.sensitivity * 10.0
+		else
+			if self.x_speed > 0 then
+				self.x_speed = self.x_speed - self.inertia_damp * dt
+				if self.x_speed < 0 then self.x_speed = 0 end
+			elseif self.x_speed < 0 then
+				self.x_speed = self.x_speed + self.inertia_damp * dt
+				if self.x_speed > 0 then self.x_speed = 0 end
+			end
+			if self.y_speed > 0 then
+				self.y_speed = self.y_speed - self.inertia_damp * dt
+				if self.y_speed < 0 then self.y_speed = 0 end
+			elseif self.y_speed < 0 then
+				self.y_speed = self.y_speed + self.inertia_damp * dt
+				if self.y_speed > 0 then self.y_speed = 0 end
+			end
+
+			self.azimuth = self.azimuth + self.x_speed * dt
+			self.altitude = self.altitude + self.y_speed * dt
+		end
+
+		self.altitude = glm.clamp(self.altitude, 0.01, math.pi - 0.01)
+	end
 end
 
 function map_camera:get_center()
-  if self.center_element then 
-    return self.universe.system:get_element_position(self.center_element)
-  else
-    local ent = self.universe:get_entity(self.center_entity)
-    if ent then 
-      return ent:get_visual_origin()
-    else
-      self.center_entity = nil
-      self.center_element = "__default"
+	if self.center_element then
+		return self.universe.system:get_element_position(self.center_element)
+	else
+		local ent = self.universe:get_entity(self.center_entity)
+		if ent then
+			return ent:get_visual_origin()
+		else
+			self.center_entity = nil
+			self.center_element = "__default"
 
-      if self.on_focus_lost then 
-        self:on_focus_lost()
-      end
-      
-      -- Recursive call, as it should be properly set now
-      return map_camera:get_center()
-    end
-  end
+			if self.on_focus_lost then
+				self:on_focus_lost()
+			end
+
+			-- Recursive call, as it should be properly set now
+			return map_camera:get_center()
+		end
+	end
 end
 
 function map_camera:get_min_radius()
-  if self.center_element then 
-    return self.universe.system:get_element(self.center_element).config.radius * 3.0
-  end
-  
-  return 1000.0
+	if self.center_element then
+		return self.universe.system:get_element(self.center_element).config.radius * 3.0
+	end
+
+	return 1000.0
 end
 
 function map_camera:get_pole()
-  if self.center_pole then 
+	if self.center_pole then
 
-  else
-    return self.default_pole
-  end
+	else
+		return self.default_pole
+	end
 end
 
 function map_camera:get_camera_uniforms(width, height)
-  return cameras.from_center_and_polar(self:get_center(), self:get_pole(), 
-    self.azimuth, self.altitude, self.radius, self.fov, width, height)
+	return cameras.from_center_and_polar(self:get_center(), self:get_pole(),
+		self.azimuth, self.altitude, self.radius, self.fov, width, height)
 end
 
 ---@param universe universe
-function map_camera:init(universe)
-  self.universe = universe
-  return self
+---@param gui_input gui.input
+function map_camera:init(universe, gui_input)
+	self.universe = universe
+	self.gui_input = gui_input
+	return self
 end
 
 return map_camera

@@ -32,7 +32,7 @@ void main()
     vec3 viewDir = normalize(camera_pos - vNormal);
     vec3 reflectDir = reflect(light_dir, vNormal);
 
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256);
+    float spec = 0.0;
     float specular = 1.0 * spec;
 
     float spec_red = pow(diff, 0.3);

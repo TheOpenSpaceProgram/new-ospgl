@@ -50,6 +50,7 @@ void LuaScene::pre_update()
 
 void LuaScene::update()
 {
+	gui_input.update();
 	LuaUtil::call_function_if_present(env["update"], osp->dt);
 }
 
