@@ -17,6 +17,9 @@ public:
 
 	bool nbody;
 
+	// Does not stop the planetary surface from being generated if needed
+	bool render_enabled;
+
 	ElementConfig config;
 
 	PlanetaryBodyRenderer renderer;

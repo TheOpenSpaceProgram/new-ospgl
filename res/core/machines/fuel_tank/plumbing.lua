@@ -16,7 +16,7 @@ local wall_mat = machine.init_toml:get_string("wall_material")
 local wall_c = nil
 if wall_mat ~= nil then wall_c = assets.get_physical_material(wall_mat).heat_capacity_solid end
 
-local fluid_container = dofile("machines/fuel_tank/fluid_container.lua").new(volume, temperature, wall_mass, wall_c)
+local fluid_container = dofile("machines/fuel_tank/fluid_container.lua"):init(volume, temperature, wall_mass, wall_c)
 
 -- Load the contents
 local content_array = machine.init_toml:get_array_of_table("content")
@@ -25,7 +25,7 @@ for _, content in ipairs(content_array) do
     local material = assets.get_physical_material(mat)
     local liquid_mass = content:get_number_or("liquid_mass", 0)
     local gas_mass = content:get_number_or("gas_mass", 0)
-    fluid_container.contents:add_fluid(material, liquid_mass, gas_mass)
+    fluid_container.contents:add_fluid(material, liquid_mass, gas_mass, -1)
 end
 
 if fluid_container:is_overfilled() then

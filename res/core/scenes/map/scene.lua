@@ -7,6 +7,7 @@ require("universe")
 local glm = require("glm")
 local gui = require("gui")
 local assets = require("assets")
+local logger = require("logger")
 require("toml")
 
 local gui_screen = gui.screen.new(gui.skin.get_default_skin(), gui_input)
@@ -20,6 +21,7 @@ local cubemap = assets.get_cubemap("debug_system:skybox.png")
 local sunlight = rnd.sun_light.new(osp.renderer.quality.sun_terrain_shadow_size, osp.renderer.quality.sun_shadow_size)
 local skybox = rnd.skybox.new(cubemap:move())
 local camera = dofile("core:scenes/map/map_camera.lua"):init(universe, gui_input)
+
 
 ---@param animation core.map.anim
 ---@param map_id string
@@ -65,6 +67,10 @@ end
 
 function unload()
 	renderer:clear()
+	-- Make sure all elements are render enabled 
+	for _, elem in ipairs(osp.universe.system.elements) do 
+		elem.render_enabled = true
+	end
 end
 
 function close_map()

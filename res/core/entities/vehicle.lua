@@ -9,6 +9,7 @@ local glm = require("glm")
 require("model")
 require("universe")
 
+---@type vehicle|nil
 vehicle = nil
 if entity.init_toml ~= nil then
     -- vehicles are stored separately to improve the syntax of savefiles
@@ -78,14 +79,14 @@ function needs_shadow_pass()
 end
 
 function deferred_pass(cu, is_env)
-    for _, p in vehicle.all_pieces:pairs() do
+    for _, p in ipairs(vehicle.all_pieces) do
         local tform = p:get_graphics_transform():to_mat4() * glm.inverse(p.collider_offset)
         p:get_model_node():draw(cu, tform, entity.drawable_uid, true, false)
     end
 end
 
 function shadow_pass(cu, is_env)
-    for _, p in vehicle.all_pieces:pairs() do
+    for _, p in ipairs(vehicle.all_pieces) do
         local tform = p:get_graphics_transform():to_mat4() * glm.inverse(p.collider_offset)
         p:get_model_node():draw_shadow(cu, tform, true)
     end

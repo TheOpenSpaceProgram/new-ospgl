@@ -1,6 +1,7 @@
 ---@module 'machine_script'
 require("vehicle")
 require("universe")
+local logger = require("logger")
 local flight_input = require("flight_input")
 
 local input_ctx = flight_input.context.new("core:input/rocket.toml")
@@ -26,13 +27,13 @@ function pre_update(dt)
 	local in_throttle = (input_ctx:get_axis("throttle") + 1.0) * 0.5
 
 	local all_throttleable = machine:get_wired_interfaces("core:interfaces/throttleable.lua")
-	for _, throttleable in all_throttleable:pairs() do
+	for _, throttleable in ipairs(all_throttleable) do
 		throttleable.throttle = in_throttle
 	end
 
 	if input_ctx:get_action_down("stage") then 
 		local all_activables = machine:get_wired_interfaces("core:interfaces/activable.lua")
-		for _, activable in all_activables:pairs() do 
+		for _, activable in ipairs(all_activables) do 
 			activable:activate()
 		end
 	end

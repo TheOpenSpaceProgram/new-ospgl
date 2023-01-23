@@ -176,6 +176,13 @@ void LuaCore::load(sol::state& to, const std::string& pkg)
 
 	to["print"] = sol::nil;
 
+	// TODO: This may have a performance hit, but it's unlikely. Profile it?
+	// lua 5.3 compat for sol std containers
+	// sadly it's not possible right now for pairs() because sol only uses __ipairs
+	// so for std::map style types, use table:pairs() in lua, or pass as sol::as_table()
+	// Override ipairs so it works with standard containers
+	to.script("local function _ipairs(t, var)\nvar = var + 1\nlocal value = t[var]\nif value == nil then return end\nreturn var, value\nend\nfunction ipairs(t) return _ipairs, t, 0 end");
+
 	to.create_named_table("__loaded_modules");
 	load((sol::table&)to.globals(), pkg);
 

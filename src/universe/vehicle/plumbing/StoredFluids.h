@@ -41,9 +41,6 @@ public:
 	StoredFluids modify(const StoredFluids& b);
 	StoredFluids multiply(float value);
 
-	// Note, iterate over pairs in lua like this:
-	// for _, physical_material, stored_fluid = contents:pairs() do end
-	// This is not noted anywhere on sol docs, so its useful to leave here
 	const std::unordered_map<const PhysicalMaterial*, StoredFluid>& get_contents()
 	{
 		return contents;

@@ -23,31 +23,28 @@ end
 
 -- Volume in m^3! wall_mass is the mass of the walls for thermal simulation,
 -- wall_c is the heat capacity of the wall materials, default is iron J / kg K
-function fluid_container.new(volume, temperature, wall_mass, wall_c)
+function fluid_container:init(volume, temperature, wall_mass, wall_c)
     if wall_c == nil then wall_c = 440 end
     assert(type(volume) == "number")
 
-    local container = {}
-    setmetatable(container, fluid_container)
-
     -- Noise generator for gas flow TODO: Set the seed to some other value?
-    container.noise_gen = noise.new(0)
-    container.noise_t = 0.0
+    self.noise_gen = noise.new(0)
+    self.noise_t = 0.0
     -- Volume of the container in m^3
-    container.volume = volume
+    self.volume = volume
     -- This extra volume can only have gases, useful to prevent infinite pressure
-    container.extra_volume = 0.001
+    self.extra_volume = 0.001
     -- From 0 to 1, 1 meaning the ullage (Gas) is uniformly distributed and not separated from the liquid
-    container.ullage_distribution = 0
+    self.ullage_distribution = 0
     -- Last acceleration experienced by the tank, useful to simulate column pressure of the fluid
-    container.last_acceleration = 0
-    container.wall_thermal_mass = wall_mass * wall_c -- J / K
+    self.last_acceleration = 0
+    self.wall_thermal_mass = wall_mass * wall_c -- J / K
     -- Contents of the tank
-    container.contents = plumbing.stored_fluids.new()
+    self.contents = plumbing.stored_fluids.new()
     -- Temperature of the contents of the tank, assumed to be homogeneous
-    container.contents.temperature = temperature
+    self.contents.temperature = temperature
 
-    return container
+    return self
 end
 
 -- Pressure of the ullage portion

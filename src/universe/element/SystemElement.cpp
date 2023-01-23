@@ -67,6 +67,7 @@ glm::dvec3 SystemElement::get_tangential_speed(glm::dvec3 relative) const
 SystemElement::SystemElement()
 {
 	dot_factor = 1.0f;
+	render_enabled = true;
 }
 
 

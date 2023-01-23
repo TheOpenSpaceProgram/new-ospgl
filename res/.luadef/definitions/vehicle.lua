@@ -202,15 +202,15 @@ local interface_array = {}
 ---@return table
 function interface_array:pairs() end
 
----@return vehicle.machine_array
+---@return vehicle.machine[]
 ---@param include_this boolean? Default to true
 function machine:get_all_wired_machines(include_this) end
 
----@return vehicle.machine_array
+---@return vehicle.machine[]
 --- Pass a list of interface names, and true / false for include_this (optional, default to true)
 function machine:get_wired_machines_with(...) end
 
----@return vehicle.interface_array
+---@return table[]
 ---@param int_type string Interface type
 ---@param include_this boolean? Include this machine in list? Defaults to true
 function machine:get_wired_interfaces(int_type, include_this) end

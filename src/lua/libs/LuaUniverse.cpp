@@ -81,7 +81,8 @@ void LuaUniverse::load_to(sol::table& table)
 	table.new_usertype<PlanetarySystem>("planetary_system", sol::base_classes, sol::bases<Drawable>(),
 	        "get_element_position", &PlanetarySystem::get_element_position,
 			"get_element_velocity", &PlanetarySystem::get_element_velocity,
-			"get_element", &PlanetarySystem::get_element
+			"get_element", &PlanetarySystem::get_element,
+			"elements", &PlanetarySystem::elements
 	);
 
 	table.new_usertype<SystemElement>("system_element",
@@ -89,7 +90,8 @@ void LuaUniverse::load_to(sol::table& table)
 			  "name", sol::readonly(&SystemElement::name),
 			  "nbody", sol::readonly(&SystemElement::nbody),
 			  "config", sol::readonly(&SystemElement::config),
-			  "dot_factor", sol::readonly(&SystemElement::dot_factor)
+			  "dot_factor", sol::readonly(&SystemElement::dot_factor),
+			  "render_enabled", &SystemElement::render_enabled
 			  );
 
 	table.new_usertype<ElementConfig>("element_confg",

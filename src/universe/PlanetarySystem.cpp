@@ -29,6 +29,8 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 	glm::dmat4 proj_view, float far_plane)
 {
 
+	if(body->render_enabled == false)
+		return;
 
 	glm::dvec3 camera_pos_relative = camera_pos - state.pos;
 	glm::dvec3 light_dir = glm::normalize(state.pos);

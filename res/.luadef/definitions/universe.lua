@@ -35,6 +35,7 @@ function universe:get_entity(id) end
 function universe:update(dt) end
 
 ---@class universe.planetary_system
+---@field elements universe.element[]
 local planetary_system = {}
 
 ---@param name string Name of the element, or __default 
