@@ -78,16 +78,18 @@ function needs_shadow_pass()
     return true
 end
 
-function deferred_pass(cu, is_env)
+function deferred_pass(cu, _)
     for _, p in ipairs(vehicle.all_pieces) do
-        local tform = p:get_graphics_transform():to_mat4() * glm.inverse(p.collider_offset)
+		local i = glm.inverse(p.collider_offset) ---@cast i glm.mat4
+        local tform = p:get_graphics_transform():to_mat4() * i
         p:get_model_node():draw(cu, tform, entity.drawable_uid, true, false)
     end
 end
 
-function shadow_pass(cu, is_env)
+function shadow_pass(cu, _)
     for _, p in ipairs(vehicle.all_pieces) do
-        local tform = p:get_graphics_transform():to_mat4() * glm.inverse(p.collider_offset)
+		local i = glm.inverse(p.collider_offset) ---@cast i glm.mat4
+        local tform = p:get_graphics_transform():to_mat4() * i
         p:get_model_node():draw_shadow(cu, tform, true)
     end
 end

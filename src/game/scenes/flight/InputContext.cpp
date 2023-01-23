@@ -1,7 +1,7 @@
+#include <renderer/Renderer.h>
 #include "InputContext.h"
 #include <GLFW/glfw3.h>
 #include <util/Logger.h>
-#include "FlightInput.h"
 #include <cpptoml.h>
 #include <util/SerializeUtil.h>
 #include <assets/AssetManager.h>
@@ -164,8 +164,9 @@ double InputContext::get_joystick_axis(int jid, int axis)
 }
 
 
-void InputContext::update(GLFWwindow* window, double dt)
+void InputContext::update(bool keyboard_blocked, double dt)
 {
+	GLFWwindow* window = osp->renderer->window;
 	obtain_joystick_states();
 
 	for(auto pair : actions)
@@ -174,7 +175,7 @@ void InputContext::update(GLFWwindow* window, double dt)
 		actions[pair.first] = false;
 	}
 	
-	if(!input->keyboard_blocked)
+	if(!keyboard_blocked)
 	{	
 		for(auto& map : key_action_mappings)
 		{
@@ -211,7 +212,7 @@ void InputContext::update(GLFWwindow* window, double dt)
 		// Update current value
 		double change = 0.0;
 
-		if(!input->keyboard_blocked)
+		if(!keyboard_blocked)
 		{
 			if(glfwGetKey(window, map.plus_key) == GLFW_PRESS)
 			{
@@ -345,10 +346,6 @@ void InputContext::set_axis(const std::string& name, double value, double epsilo
 
 InputContext::~InputContext()
 {
-	if(input != nullptr)
-	{
-		input->set_ctx(nullptr);
-	}
 }
 
 void InputContext::load_from_file(const std::string& path)

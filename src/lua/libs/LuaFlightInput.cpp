@@ -1,5 +1,5 @@
 #include "LuaFlightInput.h"
-#include <game/scenes/flight/FlightInput.h>
+#include <game/scenes/flight/InputContext.h>
 #include <assets/AssetManager.h>
 
 void LuaFlightInput::load_to(sol::table& table)

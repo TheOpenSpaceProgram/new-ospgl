@@ -14,7 +14,6 @@ local gui_screen = gui.screen.new(gui.skin.get_default_skin(), gui_input)
 local universe = osp.universe
 local renderer = osp.renderer
 local anim = nil
-local config = nil
 
 
 local cubemap = assets.get_cubemap("debug_system:skybox.png")
@@ -22,15 +21,18 @@ local sunlight = rnd.sun_light.new(osp.renderer.quality.sun_terrain_shadow_size,
 local skybox = rnd.skybox.new(cubemap:move())
 local camera = dofile("core:scenes/map/map_camera.lua"):init(universe, gui_input)
 
+---@type universe.entity | nil
+--- If non-nil, then we are controlling an entity and will pass inputs to it
+--- and optionally draw navball, etc...
+local controlled_ent = nil
 
----@param animation core.map.anim
 ---@param map_id string
+---@param controlled_ent universe.entity|nil
 ---@param nconfig table
-function load(animation, map_id, nconfig)
+function load(map_id, ncontrolled_ent, nconfig)
 	if map_id == nil then map_id = "default" end
-	-- Save the anim so it can be used on close too
-	anim = animation
 	config = nconfig
+	controlled_ent = ncontrolled_ent
 	-- Load map camera if saved for same map_id, or start at the sun
 	local sets = universe.save_db:get_toml("map")
 	if sets:contains("center_entity") then
@@ -52,6 +54,12 @@ function update(dt)
 	gui_screen:prepare_pass()
 
 	camera:update(dt)
+	if controlled_ent then
+		local input_ctx = controlled_ent:get_input_ctx()
+		if input_ctx then
+			input_ctx:update(dt)
+		end
+	end
 
 	gui_screen:input_pass()
 	gui_screen:draw()

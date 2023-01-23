@@ -42,4 +42,9 @@ function flight_input.context:get_action_up(name) end
 --- can always be reached.
 function flight_input.context:set_axis(name, val, epsilon) end
 
+--- To be called by the scene
+---@param dt number
+---@param keyboard_blocked boolean
+function flight_input.context:update(keyboard_blocked, dt) end
+
 return flight_input

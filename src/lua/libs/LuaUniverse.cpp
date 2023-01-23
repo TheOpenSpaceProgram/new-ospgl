@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <universe/entity/Entity.h>
+#include <game/scenes/flight/InputContext.h>
 
 void LuaUniverse::load_to(sol::table& table)
 {
@@ -107,6 +108,7 @@ void LuaUniverse::load_to(sol::table& table)
 	        "get_physics_radius", &Entity::get_physics_radius,
 	        "get_visual_origin", &Entity::get_visual_origin,
 	        "is_physics_loader", &Entity::is_physics_loader,
+			"get_input_ctx", &Entity::get_input_ctx,
 	        "timewarp_safe", &Entity::timewarp_safe,
 	        "uid", sol::property(&Entity::get_uid),
 	        "get_type", &Entity::get_type,

@@ -11,6 +11,8 @@
 
 #include <cpptoml.h>
 
+class InputContext;
+
 // An entity is something which exists on the world, 
 // it has graphics, and can exists on the bullet physics
 // world.
@@ -65,6 +67,9 @@ public:
 
 	// Visual update, always realtime
 	void update(double dt);
+
+	// If it returns nullptr, then you don't have a input_ctx
+	InputContext* get_input_ctx();
 
 	// Ticks alongside bullet (bullet tick callback)
 	// Note: Ticks before bullet update! (pretick)

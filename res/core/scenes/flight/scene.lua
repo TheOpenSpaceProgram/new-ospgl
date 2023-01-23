@@ -16,6 +16,7 @@ local skybox = rnd.skybox.new(cubemap:move())
 local sunlight = rnd.sun_light.new(osp.renderer.quality.sun_terrain_shadow_size, osp.renderer.quality.sun_shadow_size)
 local envmap = rnd.envmap.new()
 
+---@type universe.entity
 local tracked_ent = nil
 
 local event_handlers = {}
@@ -52,6 +53,10 @@ function pre_update(dt)
 end
 
 function update(dt)
+	local ctx = tracked_ent:get_input_ctx()
+	if ctx then
+		ctx:update(false, dt)
+	end
 end
 
 function render()

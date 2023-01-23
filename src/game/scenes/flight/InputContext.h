@@ -6,7 +6,6 @@
 #include <cpptoml.h>
 
 struct GLFWwindow;
-class FlightInput;
 
 // All invalid names will result in an error, not default values
 // Once something is mapped it cannot be unmapped, you need to 
@@ -107,12 +106,8 @@ private:
 	
 	void init_config(cpptoml::table& base, cpptoml::table& target);
 
-	FlightInput* input;
-
-
 public:
 
-	friend class FlightInput;
 
 	double get_axis(const std::string& name);
 
@@ -135,13 +130,11 @@ public:
 	void map_action_to_joybutton(const std::string& name, int joystick_id, int button_id);
 
 	// Reads all inputs, make sure you call it before everything that needs inputs
-	void update(GLFWwindow* window, double dt);
-
-	bool is_active(){ return input != nullptr; }
+	void update(bool keyboard_blocked, double dt);
 
 	void load_from_file(const std::string& path);
 
-	InputContext() { input = nullptr; } 
+	InputContext() { }
 	~InputContext();
 
 };

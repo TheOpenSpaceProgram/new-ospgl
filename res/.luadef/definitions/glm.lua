@@ -125,9 +125,9 @@ function glm.mat3.new(param1, param2, param3) end
 ---@operator add(glm.mat4): glm.mat4 Adds the matrices component-wise
 ---@operator sub(glm.mat4): glm.mat4 Substracts the matrices component-wise
 ---@operator add(number): glm.mat4 Adds the number from all elements of the matrix
+---@operator mul(glm.mat4): glm.mat4 Performs matrix multiplication, OpenGL style
 ---@operator sub(number): glm.mat4 Substracts the number from all elements of the matrix
 ---@operator mul(number): glm.mat4 Multiplies the number by all elements of the matrix
----@operator mul(glm.mat4): glm.mat4 Performs matrix multiplication, OpenGL style
 ---@operator mul(glm.vec4): glm.vec4 Left-multiplies the vector with the matrix. This is what you typically use.
 ---@operator div(number): glm.mat4  Divides all elements of the matrix by the number
 ---@operator div(glm.mat4): glm.mat4 Performs matrix division (multiply by the inverse), OpenGL style

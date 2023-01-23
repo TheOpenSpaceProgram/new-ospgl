@@ -3,6 +3,7 @@
 #include <lua/LuaCore.h>
 #include <game/GameState.h>
 #include <utility>
+#include <game/scenes/flight/InputContext.h>
 
 void Entity::enable_bullet(btDynamicsWorld *world)
 {
@@ -175,4 +176,9 @@ bool Entity::needs_env_map_pass()
 void Entity::do_debug_imgui()
 {
 	LuaUtil::call_function_if_present(env["do_debug_imgui"]);
+}
+
+InputContext* Entity::get_input_ctx()
+{
+	return LuaUtil::call_function_if_present_returns<InputContext*>(env["get_input_ctx"]).value_or(nullptr);
 }

@@ -77,6 +77,9 @@ local entity = {}
 ---@return glm.vec3
 function entity:get_visual_origin() end
 
+---@return flight_input.context|nil
+function entity:get_input_ctx() end
+
 
 ---@class universe.save_database
 local save_db = {}
