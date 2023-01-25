@@ -5,7 +5,6 @@
 
 LandedTrajectory::LandedTrajectory()
 {
-	changed = true;
 	elem_name = "";	//< To crash on bad initialiations
 }
 
@@ -16,16 +15,11 @@ LandedTrajectory::~LandedTrajectory()
 
 WorldState LandedTrajectory::get_state(double _unused, double _unused2, bool use_bullet)
 {
-	if (changed)
-	{
-		elem_index = get_universe()->system.get_element_index_from_name(elem_name);
-		changed = false;
-	}
-
 
 	WorldState out;
 
-	SystemElement* elem = get_universe()->system.elements[elem_index];
+	size_t idx = get_universe()->system.name_to_index[elem_name];
+	SystemElement* elem = get_universe()->system.elements[idx];
 
 	double tnow;
 	if (use_bullet)
@@ -39,14 +33,8 @@ WorldState LandedTrajectory::get_state(double _unused, double _unused2, bool use
 
 	glm::dmat4 rot_matrix = elem->build_rotation_matrix(get_universe()->system.t0, tnow, false);
 	glm::dvec3 body_pos;
-	if (use_bullet)
-	{
-		body_pos = get_universe()->system.bullet_states[elem_index].pos;
-	}
-	else
-	{
-		body_pos = get_universe()->system.states_now[elem_index].pos;
-	}
+	auto st = get_universe()->system.get_element_state(idx, use_bullet);
+	body_pos = st.pos;
 
 	glm::dmat4 body_matrix = glm::translate(glm::dmat4(1.0), body_pos);
 
@@ -60,7 +48,7 @@ WorldState LandedTrajectory::get_state(double _unused, double _unused2, bool use
 	// Tangential velocity
 	glm::dvec3 tang = elem->get_tangential_speed(rel_pos);
 
-	out.cartesian.vel = get_universe()->system.bullet_states[elem_index].vel + tang;
+	out.cartesian.vel = st.vel + tang;
 
 	out.angular_velocity = glm::dvec3(0, 0, 0);
 
@@ -75,5 +63,4 @@ void LandedTrajectory::set_parameters(std::string in_body, glm::dvec3 rel_pos, g
 	this->elem_name = in_body;
 	this->initial_relative_pos = rel_pos;
 	this->initial_rotation = rel_rot;
-	changed = true;
 }

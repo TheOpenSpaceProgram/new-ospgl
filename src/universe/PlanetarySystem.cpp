@@ -5,15 +5,19 @@
 #include "../physics/ground/GroundShape.h"
 #include <game/GameState.h>
 
-glm::dvec3 PlanetarySystem::get_gravity_vector(glm::dvec3 p, StateVector* states)
+glm::dvec3 PlanetarySystem::get_gravity_vector(glm::dvec3 p, bool physics)
 {
 	glm::dvec3 result = glm::dvec3(0, 0, 0);
-	for(size_t i = 0; i < states->size(); i++)
+	for(size_t i = 0; i < states_now.size(); i++)
 	{
 		double mass = elements[i]->get_mass();
-		
-		glm::dvec3 pos = states->at(i).pos;
-		glm::dvec3 diff = pos - p;
+
+		CartesianState st = states_now[i];
+		if(physics)
+		{
+			interp_pos(st);
+		}
+		glm::dvec3 diff = st.pos - p;
 
 		double dist2 = glm::length2(diff);
 
@@ -144,17 +148,12 @@ void PlanetarySystem::forward_pass(CameraUniforms& cu, bool is_env_map)
 
 void PlanetarySystem::update_physics(double dt, bool bullet)
 {
-	StateVector* v;
-	if (bullet)
+	if(!bullet)
 	{
-		v = &bullet_states;
+		lock.lock();
+		propagator->propagate(dt);
+		lock.unlock();
 	}
-	else
-	{
-		v = &states_now;
-	}
-
-	propagator->propagate(*v, dt);
 
 	if (bullet)
 	{
@@ -166,7 +165,7 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 			if(elem->config.has_surface)
 			{
 				btTransform tform = btTransform::getIdentity();
-				tform.setOrigin(to_btVector3(bullet_states[i].pos));
+				tform.setOrigin(to_btVector3(interp_pos(i)));
 				glm::dmat4 mat = elem->build_rotation_matrix(t0, bt);
 				glm::dquat quat = glm::dquat(mat);
 
@@ -223,14 +222,10 @@ void PlanetarySystem::update(double dt, btDynamicsWorld* world, bool bullet)
 	// TODO: This could be moved to load?
 	if (states_now.empty())
 	{
-		bullet_states.resize(elements.size());
 		states_now.resize(elements.size());
 		// Load the initial positions and speeds
 		for(size_t i = 0; i < elements.size(); i++)
 		{
-			bullet_states[i].pos = elements[i]->position_at_epoch;
-			bullet_states[i].vel = elements[i]->velocity_at_epoch;
-			bullet_states[i].mass = elements[i]->get_mass();
 			states_now[i].pos = elements[i]->position_at_epoch;
 			states_now[i].vel = elements[i]->velocity_at_epoch;
 			states_now[i].mass = elements[i]->get_mass();
@@ -245,7 +240,7 @@ void PlanetarySystem::update(double dt, btDynamicsWorld* world, bool bullet)
 
 void PlanetarySystem::init(btDynamicsWorld* world)
 {
-	propagator->initialize(this);
+	propagator->bind_to(this);
 
 }
 
@@ -480,13 +475,20 @@ CartesianState PlanetarySystem::get_element_state(const std::string &name, bool 
 {
 	auto it = name_to_index.find(name);
 	logger->check(it != name_to_index.end());
+	return get_element_state(it->second, physics);
+}
+
+CartesianState PlanetarySystem::get_element_state(size_t elem_id, bool physics)
+{
 	if(physics)
 	{
-		return bullet_states[it->second];
+		CartesianState st = states_now[elem_id];
+		interp_pos(st);
+		return st;
 	}
 	else
 	{
-		return states_now[it->second];
+		return states_now[elem_id];
 	}
 }
 
@@ -499,3 +501,20 @@ glm::dvec3 PlanetarySystem::get_element_velocity(const std::string &name)
 {
 	return get_element_state(name, false).vel;
 }
+
+glm::dvec3 PlanetarySystem::interp_pos(size_t elem_id)
+{
+	double tdiff = t - bt;
+	glm::dvec3 pos = states_now[elem_id].pos;
+	glm::dvec3 vel = states_now[elem_id].vel;
+
+	return pos + vel * tdiff;
+}
+
+void PlanetarySystem::interp_pos(CartesianState &st)
+{
+	double tdiff = t - bt;
+	st.pos = st.pos + st.vel * tdiff;
+}
+
+

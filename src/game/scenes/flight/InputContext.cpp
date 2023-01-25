@@ -164,7 +164,7 @@ double InputContext::get_joystick_axis(int jid, int axis)
 }
 
 
-void InputContext::update(bool keyboard_blocked, double dt)
+bool InputContext::update(bool keyboard_blocked, double dt)
 {
 	GLFWwindow* window = osp->renderer->window;
 	obtain_joystick_states();
@@ -174,7 +174,8 @@ void InputContext::update(bool keyboard_blocked, double dt)
 		actions_previous[pair.first] = pair.second;
 		actions[pair.first] = false;
 	}
-	
+
+	bool kb_blocked = false;
 	if(!keyboard_blocked)
 	{	
 		for(auto& map : key_action_mappings)
@@ -182,6 +183,7 @@ void InputContext::update(bool keyboard_blocked, double dt)
 			if(glfwGetKey(window, map.key) == GLFW_PRESS)
 			{
 				actions[map.to_action] = true;
+				kb_blocked = true;
 			}
 		}
 	}
@@ -217,11 +219,13 @@ void InputContext::update(bool keyboard_blocked, double dt)
 			if(glfwGetKey(window, map.plus_key) == GLFW_PRESS)
 			{
 				change += 1.0;
+				kb_blocked = true;
 			}
 
 			if(glfwGetKey(window, map.minus_key) == GLFW_PRESS)
 			{
 				change -= 1.0;
+				kb_blocked = true;
 			}
 		}
 
@@ -310,6 +314,7 @@ void InputContext::update(bool keyboard_blocked, double dt)
 		axes[map.to_axis] = fvalue;
 	}
 
+	return kb_blocked;
 }
 
 void InputContext::set_axis(const std::string& name, double value, double epsilon)

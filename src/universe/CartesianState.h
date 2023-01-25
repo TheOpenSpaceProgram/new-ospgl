@@ -2,6 +2,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+// Doesn't include mass, used for vessels and other non-attracting bodies
+struct LightCartesianState
+{
+	glm::dvec3 pos;
+	glm::dvec3 vel;
+};
+
 struct CartesianState
 {
 	glm::dvec3 pos;

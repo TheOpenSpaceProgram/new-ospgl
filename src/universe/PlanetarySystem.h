@@ -16,7 +16,7 @@
 class Universe;
 
 // The planetary system holds all the SystemElements and draws and updates them
-class PlanetarySystem : public Drawable
+class PlanetarySystem : public Drawable, public Propagable
 {
 private:
 
@@ -36,7 +36,14 @@ private:
 
 	std::vector<glm::dvec3> pts;
 
+	// We only interpolate position for bullet, as velocity is "implicit"
+	// (and wouldn't even change a measurable quantity)
+	glm::dvec3 interp_pos(size_t elem_id);
+	void interp_pos(CartesianState& st);
 public:
+
+	// Used to prevent predictors from getting garbage data
+	std::mutex lock;
 
 	double bt, t, t0;
 
@@ -51,22 +58,18 @@ public:
 	size_t get_element_index_from_name(const std::string& name);
 
 	CartesianState get_element_state(const std::string& name, bool physics = false);
+	CartesianState get_element_state(size_t elem_id, bool physics = false);
 	// Some short-hands, slight optimization for lua
 	glm::dvec3 get_element_position(const std::string& name);
 	glm::dvec3 get_element_velocity(const std::string& name);
 	SystemElement* get_element(const std::string& name);
 
 	StateVector states_now;
-	// Updates with bullet physics dt instead of normal dt
-	// TODO: Maybe the visual and physics states could
-	// simply be this interpolated to save some CPU cycles
-	// as planets don't really change direction much in the 
-	// span of at most a few milliseconds
-	StateVector bullet_states;
+	LightStateVector handled_states_now;
 
 	SystemPropagator* propagator;
 	
-	glm::dvec3 get_gravity_vector(glm::dvec3 point, StateVector* states);
+	glm::dvec3 get_gravity_vector(glm::dvec3 point, bool physics);
 
 	void deferred_pass(CameraUniforms& cu, bool is_env_map) override;
 	void forward_pass(CameraUniforms& cu, bool is_env_map) override;
@@ -83,6 +86,15 @@ public:
 
 	// Does the heavy loading of [[element]] objects
 	void load(const cpptoml::table& root);
+
+	StateVector* get_massful_states() override
+	{
+		return &states_now;
+	};
+	LightStateVector* get_light_states() override
+	{
+		return &handled_states_now;
+	}
 
 	explicit PlanetarySystem(Universe* universe);
 	~PlanetarySystem();

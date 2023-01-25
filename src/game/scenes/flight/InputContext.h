@@ -130,7 +130,8 @@ public:
 	void map_action_to_joybutton(const std::string& name, int joystick_id, int button_id);
 
 	// Reads all inputs, make sure you call it before everything that needs inputs
-	void update(bool keyboard_blocked, double dt);
+	// Return true if keyboard was blocked
+	bool update(bool keyboard_blocked, double dt);
 
 	void load_from_file(const std::string& path);
 

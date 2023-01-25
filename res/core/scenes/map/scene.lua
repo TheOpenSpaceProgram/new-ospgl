@@ -27,7 +27,7 @@ local camera = dofile("core:scenes/map/map_camera.lua"):init(universe, gui_input
 local controlled_ent = nil
 
 ---@param map_id string
----@param controlled_ent universe.entity|nil
+---@param ncontrolled_ent universe.entity|nil
 ---@param nconfig table
 function load(map_id, ncontrolled_ent, nconfig)
 	if map_id == nil then map_id = "default" end
@@ -54,12 +54,14 @@ function update(dt)
 	gui_screen:prepare_pass()
 
 	camera:update(dt)
+	local ent_blocked_kb = false
 	if controlled_ent then
 		local input_ctx = controlled_ent:get_input_ctx()
 		if input_ctx then
-			input_ctx:update(dt)
+			ent_blocked_kb = input_ctx:update(gui_input.keyboard_blocked, dt)
 		end
 	end
+	gui_input.ext_keyboard_blocked = gui_input.ext_keyboard_blocked or ent_blocked_kb
 
 	gui_screen:input_pass()
 	gui_screen:draw()

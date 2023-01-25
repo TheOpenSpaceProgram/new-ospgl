@@ -1,78 +1,49 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <vector>
+#include <string>
+#include "FrameOfReference.h"
 
-
-// Coordinates are GLOBAL, and are adjusted
-// to the plotting frame when creating
-// render-able (needs less points, so it's fast)
-// Changing the plotting frame just requires
-// re-doing the rendering stuff, not re-simulating
-// so that's faster
-struct Prediction
+// Doesn't support new system elements appearing / disappearing during simulation
+// If such a thing happens, it will not be noticed by the prediction
+struct QuickPredictedInterval
 {
-
-	// If true, then velocity for every single point
-	// is stored, alognside position. This is enabled
-	// for flight plan, as maneuvers need velocity.
-	// The flight path prediction just needs position 
-	// as it's a more coarse estimation, which doesn't 
-	// allow maneuvers
-	bool has_velocities;
-
-	double t0;
 	double tstep;
-	double t1;
-
-	std::vector<glm::dvec3> positions;
-	std::vector<glm::dvec3> velocities;
-
-	glm::dvec3 v_last;
-
-	glm::dvec3 p0;
-	glm::dvec3 v0;
-	
-	// nullptr if this is the end of the prediction
-	Prediction* next;
+	double t0;
+	std::vector<LightCartesianState> pred;
+	// Position of all elements at end of interval
+	std::vector<CartesianState> elems_at_end;
+};
+// In this case, coordinates are relative to a Frame of Reference
+// Meant to be quickly generated in real-time during burns or similar
+// (although it's done in a thread, we aim for a prediction every few frames!)
+struct ShortTermPrediction
+{
+	FrameOfReference ref;
+	std::vector<QuickPredictedInterval> intervals;
 };
 
-// Allows prediction of an orbit in arbitrary 
-// plotting frames 
-// Vessel centerd plotting frames are special
-// as the target vessel needs to be predicted too
+// Runs a prediction for an orbit starting at current state of the solar system
+// Each prediction will simulate the whole solar system, this could be greatly
+// improved by caching the solar system state but that would require high memory usage
 class OrbitPredictor
 {
+private:
+	PlanetarySystem* sys;
+
 public:
 
-	// Every how much is a point added to the history
-	// Maybe be bigger if timewarp is high!
-	double history_interval = 10.0;
+	// How much time can quick_predict run before it interrupts (approximate)
+	// Negative means it won't be interrupted
+	double quick_predict_timeout = 0.15;
+	// How much in-game time can quick_predict run before it interrupts
+	// Negative means it won't be interrupted
+	// Make sure atleast one of them is positive
+	double quick_predict_max_time = -1.0;
 
-	// A hundred thousands points ~= 2.4Mb
-	size_t max_history_points = 100000;
+	void quick_predict(ShortTermPrediction* pred, glm::dvec3 pos, glm::dvec3 vel, FrameOfReference ref);
 
-	// If >= 0, it indicates the point at which
-	// history is being rewritten from
-	int history_loop_point = -1;
-
-	// Only stores positions, we cannot create maneuvers
-	// in the past ;)
-	std::vector<glm::dvec3> history;
-
-	// Gets regenerated constantly while the vessel
-	// is experiencing considerable velocity changes
-	// and is automatically regenerated when we deviate
-	// enough from the prediction
-	// Relatively coarse prediction
-	Prediction flight_path;
-
-	// The planned prediction, including potential maneuvers
-	// or just a higher quality, build-on-command plot
-	Prediction planned;
-
-
-	
-	OrbitPredictor();
+	explicit OrbitPredictor(PlanetarySystem* sys);
 	~OrbitPredictor();
 };
 

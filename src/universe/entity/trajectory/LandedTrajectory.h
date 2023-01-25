@@ -9,15 +9,9 @@ class LandedTrajectory : public Trajectory
 {
 private:
 
-
-	size_t elem_index;
-
 	std::string elem_name;
 	glm::dvec3 initial_relative_pos;
 	glm::dquat initial_rotation;
-
-	bool changed;
-
 	Universe* universe;
 
 public:

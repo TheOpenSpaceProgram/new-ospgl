@@ -37,6 +37,9 @@ function physics_update(bdt)
     vehicle:physics_update(bdt)
 end
 
+function get_input_ctx()
+end
+
 function enable_bullet(world)
 
 end

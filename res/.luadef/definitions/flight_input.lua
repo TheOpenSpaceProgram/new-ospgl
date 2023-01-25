@@ -45,6 +45,7 @@ function flight_input.context:set_axis(name, val, epsilon) end
 --- To be called by the scene
 ---@param dt number
 ---@param keyboard_blocked boolean
+---@return boolean
 function flight_input.context:update(keyboard_blocked, dt) end
 
 return flight_input

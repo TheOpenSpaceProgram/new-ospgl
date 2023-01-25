@@ -3,20 +3,13 @@
 
 class RK4Propagator : public SystemPropagator
 {
-private:
-
-	PlanetarySystem* system;
-
-
 public:
 
-	void initialize(PlanetarySystem* system) override;
+	void init(Propagable* system) override {};
 	// Propagates the system, including non-nbody bodies
-	void propagate(StateVector& states, double dt) override;
-	// Propagates a vessel / non-attracting body, must return index of closest body
-	size_t propagate(CartesianState* state, const StateVector& states, double dt) override;
+	virtual void propagate(double dt) override;
 
-	~RK4Propagator() override = default;;
+	~RK4Propagator() override = default;
 
 };
 

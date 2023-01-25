@@ -76,7 +76,7 @@ void Vehicle::physics_update(double dt)
 		// Generate the gravity vector
 		// glm::dvec3 pos = unpacked_veh.get_center_of_mass(); 
 		glm::dvec3 pos = to_dvec3(root->get_global_transform().getOrigin());
-		glm::dvec3 grav = in_universe->system.get_gravity_vector(pos, &in_universe->system.bullet_states);
+		glm::dvec3 grav = in_universe->system.get_gravity_vector(pos, true);
 
 		unpacked_veh.apply_gravity(to_btVector3(grav)); 
 		unpacked_veh.update();
