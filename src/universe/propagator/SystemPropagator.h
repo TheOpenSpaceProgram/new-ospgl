@@ -6,7 +6,7 @@
 // Propagates N-body systems and can also handle vessels and non-attracting bodies
 class SystemPropagator
 {
-private:
+protected:
 	Propagable* prop;
 	StateVector* st_vector;
 	LightStateVector* lst_vector;
@@ -17,6 +17,8 @@ public:
 	void bind_to(Propagable* system)
 	{
 		this->prop = system;
+		this->st_vector = system->get_massful_states();
+		this->lst_vector = system->get_light_states();
 	}
 
 	virtual void init(Propagable* system) = 0;
