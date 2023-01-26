@@ -43,9 +43,11 @@ function load(map_id, ncontrolled_ent, nconfig)
 	camera.sensitivity = sets:get_number_or("cam_sensitivity", 0.006)
 
 	-- We only draw the universe and markers
+	logger.info(universe.system:get_element_position("Earth"))
 	renderer:add_drawable(universe.system)
 	renderer:add_drawable(skybox)
 	renderer:add_light(sunlight)
+	sunlight = nil
 
 end
 

@@ -89,6 +89,9 @@ public:
 	btDiscreteDynamicsWorld* bt_world;
 
 	PlanetarySystem system;
+	// Exposed to lua to be addable as a drawable
+	// TODO: This feels like a horrible hack
+	std::shared_ptr<PlanetarySystem> system_ptr;
 	std::vector<Entity*> entities;
 	std::unordered_map<int64_t, Entity*> entities_by_id;
 

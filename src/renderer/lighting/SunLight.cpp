@@ -46,6 +46,7 @@ SunLight::SunLight(int far_size, int near_size)
 
 SunLight::~SunLight()
 {
+
 }
 
 void SunLight::do_pass(CameraUniforms& cu, GBuffer* gbuf)

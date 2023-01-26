@@ -65,13 +65,13 @@ void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg)
 
 	// Find a part to assign as target, will usually be root
 	// TODO: Serialize this for user experience improvement
-	if(sc->vehicle.veh->root->part)
+	if(sc->vehicle->veh->root->part)
 	{
-		target_part = sc->vehicle.veh->root->part;
+		target_part = sc->vehicle->veh->root->part;
 	}
 	else
 	{
-		sc->vehicle.veh->parts[0];
+		sc->vehicle->veh->parts[0];
 	}
 }
 

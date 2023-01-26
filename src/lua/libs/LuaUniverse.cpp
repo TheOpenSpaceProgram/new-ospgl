@@ -56,7 +56,7 @@ void LuaUniverse::load_to(sol::table& table)
 		"update", &Universe::update,
 		"bt_world", &Universe::bt_world,
 		"save_db", &Universe::save_db,
-		"system", &Universe::system,
+		"system", &Universe::system_ptr,
 		"get_entity", &Universe::get_entity,
 		// We implement a getter, to modify entities use the given functions
 		"entities", sol::property([](Universe* uv)

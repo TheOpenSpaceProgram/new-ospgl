@@ -28,7 +28,6 @@ private:
 
 public:
 
-	void init(Propagable* system) override {};
 	// Propagates the system, including non-nbody bodies
 	virtual void propagate(double dt) override;
 

@@ -62,3 +62,6 @@ static void vector_remove_indices(std::vector<T>& vector, const std::vector<size
 	}
 	vector.resize(vector.size() - to_remove.size());
 }
+
+template<typename T>
+void null_deleter(T*){}

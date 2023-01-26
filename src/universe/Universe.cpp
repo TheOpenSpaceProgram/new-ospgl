@@ -135,6 +135,8 @@ Universe::Universe() : system(this)
 #ifdef OSPGL_LRDB
 	lua_debug_server = nullptr;
 #endif
+
+	system_ptr = std::shared_ptr<PlanetarySystem>(&system, &null_deleter<PlanetarySystem>);
 }
 
 

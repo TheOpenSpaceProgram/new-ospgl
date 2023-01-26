@@ -16,21 +16,21 @@ void EditorScene::load()
 	r->cam = &cam;
 
 
-	r->add_drawable(&vehicle);
+	r->add_drawable(vehicle, "");
 
-	r->add_drawable(&sky);
-	sky.cubemap.get_noconst()->generate_ibl_irradiance(32, 32);
-	r->set_ibl_source(sky.cubemap.duplicate());
+	r->add_drawable(sky, "");
+	sky->cubemap.get_noconst()->generate_ibl_irradiance(32, 32);
+	r->set_ibl_source(sky->cubemap.duplicate());
 
-	sun = SunLight(0, r->quality.sun_shadow_size);
-	sun.color = glm::vec3(1.0);
-	sun.position = glm::dvec3(1000.0, 0.0, 0.0);
-	sun.ambient_color = glm::vec3(0.4, 0.4, 0.4);
-	sun.near_shadow_span = 10.0;
+	sun = std::make_shared<SunLight>(0, r->quality.sun_shadow_size);
+	sun->color = glm::vec3(1.0);
+	sun->position = glm::dvec3(1000.0, 0.0, 0.0);
+	sun->ambient_color = glm::vec3(0.4, 0.4, 0.4);
+	sun->near_shadow_span = 10.0;
 
-	r->add_light(&sun);
+	r->add_light(sun);
 
-	EnvMap* env = new EnvMap();
+	auto env = std::make_shared<EnvMap>();
 	r->add_light(env);
 
 	// Create the bullet physics stuff
@@ -48,7 +48,7 @@ void EditorScene::load()
 	bt_world->setDebugDrawer(debug_draw);
 
 	lua_core->load(lua_state, "__UNDEFINED__");
-	vehicle.init(&lua_state);
+	vehicle->init(&lua_state);
 
 	gui.vg = osp->renderer->vg;
 	gui.init(this);
@@ -74,7 +74,7 @@ void EditorScene::update()
 		gui_input.ext_keyboard_blocked = true;
 	}
 
-	vehicle.update(osp->game_dt);
+	vehicle->update(osp->game_dt);
 	vehicle_int.update(osp->game_dt);
 
 	glm::dvec4 viewport = get_viewport();
@@ -126,7 +126,7 @@ void EditorScene::do_edveh_gui()
 
 void EditorScene::unload()
 {
-	osp->renderer->remove_drawable(&vehicle);
+	osp->renderer->remove_drawable(vehicle.get());
 	osp->renderer->override_viewport = glm::dvec4(0.0, 0.0, 1.0, 1.0);
 	osp->game_state->universe.paused = false;
 
@@ -137,8 +137,8 @@ void EditorScene::unload()
 	delete bt_collision_config;
 }
 
-EditorScene::EditorScene() : vehicle(this), vehicle_int(&vehicle, &cam),
-	sky(std::move(AssetHandle<Cubemap>("debug_system:skybox.hdr")))
+EditorScene::EditorScene() : vehicle(std::make_shared<EditorVehicle>(this)), vehicle_int(vehicle.get(), &cam),
+	sky(std::make_shared<Skybox>(std::move(AssetHandle<Cubemap>("debug_system:skybox.hdr"))))
 {
 }
 

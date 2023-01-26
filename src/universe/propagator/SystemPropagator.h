@@ -7,7 +7,6 @@
 class SystemPropagator
 {
 protected:
-	Propagable* prop;
 	StateVector* st_vector;
 	LightStateVector* lst_vector;
 
@@ -16,12 +15,20 @@ public:
 
 	void bind_to(Propagable* system)
 	{
-		this->prop = system;
 		this->st_vector = system->get_massful_states();
 		this->lst_vector = system->get_light_states();
+		init();
 	}
 
-	virtual void init(Propagable* system) = 0;
+	void bind_to(StateVector* s, LightStateVector* l)
+	{
+		this->st_vector = s;
+		this->lst_vector = l;
+		init();
+	}
+
+
+	virtual void init() {}
 	// Propagates the system, including non-nbody bodies
 	virtual void propagate(double dt) = 0;
 

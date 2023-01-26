@@ -89,7 +89,7 @@ void Renderer::do_shadows(PlanetarySystem* system, glm::dvec3 camera_pos)
 	// We disable depth clamping so that objects behind the lights are culled
 	glDisable(GL_DEPTH_CLAMP);
 	//glCullFace(GL_FRONT);
-	for(Light* light : lights)
+	for(auto light : lights)
 	{
 		if(light->casts_shadows())
 		{
@@ -142,7 +142,7 @@ void Renderer::forward_bind(CameraUniforms& cu, GBuffer* g_buffer, GLuint f_buff
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
 	// Do a pass for every light
-	for (Light* l : lights)
+	for (auto l : lights)
 	{
 		if(l->needs_fullscreen_viewport())
 		{
@@ -429,7 +429,7 @@ void Renderer::render(PlanetarySystem* system)
 }
 
 
-void Renderer::add_drawable(Drawable* d, std::string n_id)
+void Renderer::add_drawable(std::shared_ptr<Drawable> d, std::string n_id)
 {
 	logger->check(!d->is_in_renderer(), "Tried to add an already added drawable");
 
@@ -443,32 +443,32 @@ void Renderer::add_drawable(Drawable* d, std::string n_id)
 
 	if (d->needs_deferred_pass())
 	{
-		deferred.push_back(d);
+		deferred.push_back(d.get());
 	}
 
 	if (d->needs_forward_pass())
 	{
-		forward.push_back(d);
+		forward.push_back(d.get());
 	}
 
 	if (d->needs_gui_pass())
 	{
-		gui.push_back(d);
+		gui.push_back(d.get());
 	}
 
 	if(d->needs_shadow_pass())
 	{
-		shadow.push_back(d);
+		shadow.push_back(d.get());
 	}
 
 	if(d->needs_far_shadow_pass())
 	{
-		far_shadow.push_back(d);
+		far_shadow.push_back(d.get());
 	}
 
 	if(d->needs_env_map_pass())
 	{
-		env_map.push_back(d);
+		env_map.push_back(d.get());
 	}
 
 	all_drawables.push_back(d);
@@ -476,7 +476,7 @@ void Renderer::add_drawable(Drawable* d, std::string n_id)
 
 
 template<typename T>
-static bool remove_from(std::vector<T*>& array, Drawable* d)
+static bool remove_from(std::vector<T>& array, T d)
 {
 	bool has_it = false;
 	for (auto it = array.begin(); it != array.end();)
@@ -501,7 +501,6 @@ void Renderer::remove_drawable(Drawable* drawable)
 
 	drawable->notify_remove_from_renderer();
 
-	remove_from(all_drawables, drawable);
 
 	if (drawable->needs_deferred_pass())
 	{
@@ -533,14 +532,19 @@ void Renderer::remove_drawable(Drawable* drawable)
 		remove_from(env_map, drawable);
 	}
 
-	if(remove_from(lua_drawables, drawable))
+	// This may cause object deletion
+	for (auto it = all_drawables.begin(); it != all_drawables.end();)
 	{
-		// We manage lua drawables!
-		delete drawable;
+		if ((*it).get() == drawable)
+			it = all_drawables.erase(it);
+		else
+			it++;
 	}
+
+
 }
 
-void Renderer::add_light(Light* light)
+void Renderer::add_light(std::shared_ptr<Light> light)
 {
 	logger->check(!light->is_added_to_renderer(), "Tried to add an already added light");
 	light->set_added(true);
@@ -555,14 +559,10 @@ void Renderer::remove_light(Light* light)
 
 	for (auto it = lights.begin(); it != lights.end(); )
 	{
-		if (*it == light)
-		{
+		if ((*it).get() == light)
 			it = lights.erase(it);
-		}
 		else
-		{
 			it++;
-		}
 	}
 }
 
@@ -806,19 +806,20 @@ void Renderer::env_map_sample()
 void Renderer::remove_all_drawables()
 {
 	// This could be done more efficiently
-	std::vector<Drawable*> drawable_copy = all_drawables;
-	for(Drawable* d : drawable_copy)
+	std::vector<std::shared_ptr<Drawable>> drawable_copy = all_drawables;
+	for(auto d : drawable_copy)
 	{
-		remove_drawable(d);
+		remove_drawable(d.get());
 	}
+
 }
 
 void Renderer::remove_all_lights()
 {
-	std::vector<Light*> lights_copy = lights;
-	for(Light* l : lights_copy)
+	std::vector<std::shared_ptr<Light>> lights_copy = lights;
+	for(auto l : lights_copy)
 	{
-		remove_light(l);
+		remove_light(l.get());
 	}
 }
 

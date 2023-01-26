@@ -16,16 +16,26 @@
 void LuaRenderer::load_to(sol::table& table)
 {
 	table.new_usertype<Renderer>("renderer",
-		  "add_drawable", sol::resolve<void(Drawable*)>(&Renderer::add_drawable),
+		  // Sadly, luasol doesn't support shared_ptr casting, so this needs to be done for everything...
+		  "add_drawable", sol::overload(
+				  &Renderer::add_drawable_lua<Drawable>,
+				  &Renderer::add_drawable_lua<PlanetarySystem>,
+				  &Renderer::add_drawable_lua<Skybox>
+				  ),
+		  "add_light", sol::overload(
+				  &Renderer::add_light_lua<Light>,
+				  &Renderer::add_light_lua<PointLight>,
+				  &Renderer::add_light_lua<EnvMap>,
+				  &Renderer::add_light_lua<SunLight>
+				  ),
 		  "add_table_as_drawable", [](Renderer* renderer, sol::table table)
 		  {
-			auto drawable = new LuaDrawable(std::move(table));
-			renderer->add_drawable(drawable);
+			auto drawable = std::make_shared<LuaDrawable>(std::move(table));
+			renderer->add_drawable(drawable, "");
 			// Return the pointer to allow manual removal
-			return (Drawable*)drawable;
+			return (std::shared_ptr<Drawable>)drawable;
 		  },
 		  "remove_drawable", &Renderer::remove_drawable,
-		  "add_light", &Renderer::add_light,
 		  "remove_light", &Renderer::remove_light,
 		  "remove_all_drawables", &Renderer::remove_all_drawables,
 		  "remove_all_lights", &Renderer::remove_all_lights,
@@ -139,7 +149,10 @@ void LuaRenderer::load_to(sol::table& table)
 			  "color", &SunLight::color,
 			  "spec_color", &SunLight::spec_color,
 			  "ambient_color", &SunLight::ambient_color,
-			  "new", sol::constructors<SunLight(int, int)>());
+			  "new", [](int a, int b)
+			  {
+				return std::make_shared<SunLight>(a, b);
+			  });
 
 	table.new_usertype<Skybox>("skybox", sol::base_classes, sol::bases<Drawable>(),
 	        "intensity", &Skybox::intensity,
@@ -147,12 +160,12 @@ void LuaRenderer::load_to(sol::table& table)
 		   {
 				// This duplicates the asset handle under the hood
 				AssetHandle<Cubemap> nhandle = cubemap.get_asset_handle();
-				return new Skybox(std::move(nhandle));
+				return std::make_shared<Skybox>(std::move(nhandle));
 		   });
 
 	table.new_usertype<EnvMap>("envmap", sol::base_classes, sol::bases<Light>(),
 	        "new", []()
 		   {
-				return new EnvMap();
+				return std::make_shared<EnvMap>();
 		   });
 }

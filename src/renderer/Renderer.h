@@ -86,19 +86,18 @@ private:
 
 	void do_debug(CameraUniforms& cu);
 
-	// Unlike the other drawables, we manage these "thin" objects ourselves
-	// which are removed upon being removed as drawables
-	std::vector<LuaDrawable*> lua_drawables;
-
+	// Used for lua lifetime management, we don't manage memory here
+	// but as all drawables are created from lua they are eventually garbage
+	// collected once the shared_ptr goes null
 	std::vector<Drawable*> deferred;
 	std::vector<Drawable*> forward;
 	std::vector<Drawable*> gui;
 	std::vector<Drawable*> shadow;
 	std::vector<Drawable*> far_shadow;
 	std::vector<Drawable*> env_map;
-	std::vector<Drawable*> all_drawables;
+	std::vector<std::shared_ptr<Drawable>> all_drawables;
 
-	std::vector<Light*> lights;
+	std::vector<std::shared_ptr<Light>> lights;
 
 	// Used for env_map sampling
 	glm::dvec3 env_last_pos;
@@ -157,19 +156,21 @@ public:
 	void finish();
 
 
-	void add_drawable(Drawable* d, std::string n_id);
-	// Lua sadly cannot handle default arguments, so this is needed
-	void add_drawable(Drawable* d)
-	{
-		add_drawable(d, "");
-	}
+	void add_drawable(std::shared_ptr<Drawable> d, std::string n_id);
 	void remove_drawable(Drawable* d);
 	void remove_all_drawables();
 
 	// Lights are different
-	void add_light(Light* light);
+	void add_light(std::shared_ptr<Light> light);
 	void remove_light(Light* light);
 	void remove_all_lights();
+
+	// This is a workaround for an issue in sol where shared_ptr cannot be cast to one another
+	template<typename T>
+	void add_drawable_lua(std::shared_ptr<T> d){ add_drawable(d, "");}
+
+	template<typename T>
+	void add_light_lua(std::shared_ptr<T> d){ add_light(d); }
 
 	// removes all lights and drawables
 	void clear()

@@ -24,7 +24,7 @@ class EditorScene : public Scene
 public:	
 	friend class EditorGUI;
 	EditorGUI gui;
-	Skybox sky;
+	std::shared_ptr<Skybox> sky;
 
 	glm::dvec4 get_viewport();
 
@@ -41,13 +41,13 @@ private:
 	btCollisionDispatcher* bt_dispatcher;
 	BulletDebugDrawer* debug_draw;
 
-	SunLight sun;
+	std::shared_ptr<SunLight> sun;
 
 	void do_gui();
 	void do_edveh_gui();
 
 public:
-	EditorVehicle vehicle;
+	std::shared_ptr<EditorVehicle> vehicle;
 	EditorVehicleInterface vehicle_int;
 
 	// We hold a non-universe lua_state for all machines to interact
