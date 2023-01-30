@@ -54,6 +54,7 @@ public:
 		RENDERER,		// LuaRenderer
 		MODEL,			// LuaModel
 		INPUT,			// LuaInput
+		ORBIT,			// LuaOrbit
 		COUNT,
 	};
 

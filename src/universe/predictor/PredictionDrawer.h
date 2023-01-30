@@ -1,6 +1,6 @@
 #pragma once
 #include "renderer/Drawable.h"
-#include "QuickPredictor.h"
+#include "Prediction.h"
 
 // Draws orbits around their origin
 class PredictionDrawer : public Drawable
@@ -18,6 +18,8 @@ private:
 	GLuint ssbo;
 	GLuint vao;
 
+	bool rebuild;
+
 
 	void create_buffers();
 
@@ -27,7 +29,11 @@ public:
 	void resize_buffers();
 
 	// Checks prediction for changes, and updates GPU model if needed
+	// Should be very cheap to call as it checks dirty flag!
 	void update();
+
+	// Sets scale for next update, EXPENSIVE on next update as it rebuilds the whole orbit
+	void set_scale(double nval);
 
 	explicit PredictionDrawer(Prediction* pred, double scale);
 	~PredictionDrawer();

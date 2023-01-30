@@ -6,74 +6,155 @@
 QuickPredictor::QuickPredictor(PlanetarySystem* nsys)
 {
 	this->sys = nsys;
+	this->drawer = nullptr;
 }
 
 
-QuickPredictor::~QuickPredictor() = default;
+QuickPredictor::~QuickPredictor()
+{
+	stop();
+	delete drawer;
+};
 
-void QuickPredictor::sterm_predict(ShortTermPrediction *pr, glm::dvec3 pos, glm::dvec3 vel)
+void QuickPredictor::sterm_predict(glm::dvec3 spos, glm::dvec3 svel)
 {
 	double start_time = glfwGetTime();
 	StateVector st;
 	LightStateVector ls;
 	LightCartesianState to_predict;
-	QuickPredictedInterval interval;
 
-	if(pr->intervals.empty())
-	{
-		// Fetch the solar system state
-		sys->lock.lock();
-		st = sys->states_now;
-		sys->lock.unlock();
-		// Start the predictor at given position and velocity
-		to_predict.pos = pos;
-		to_predict.vel = vel;
-		interval.t0 = 0.0;
-	}
-	else
-	{
-		st = pr->intervals.back().elems_at_end;
-		to_predict = pr->intervals.back().pred_at_end;
-	}
+	// Fetch the solar system state
+	sys->lock.lock();
+	double t0 = sys->t;
+	double t00 = sys->t0;
+	st = sys->states_now;
+	sys->lock.unlock();
+	// Start the predictor at given position and velocity
+	to_predict.pos = spos;
+	to_predict.vel = svel;
 	ls.push_back(to_predict);
+	// Fetch prediction
+	pred.lock.lock();
+	FrameOfReference pred_ref = pred.ref;
+	pred.lock.unlock();
 
 	RK4Propagator prop;
 	prop.bind_to(&st, &ls);
 
-	constexpr size_t TIME_CHECK_INTERVAL = 5000;
-	// TODO: Adaptive timestep
-	double dt = 0.1;
-	interval.tstep = dt;
+	size_t it = 0;
 
-	double r_time = 0.0;
+	std::vector<QuickPredictedInterval> intervals;
+	intervals.emplace_back();
+
+	// TODO: Adaptive timestep
+	double tstep = 0.1;
+	double t = 0.0;
+	double stime = glfwGetTime();
 	while(true)
 	{
-		for(size_t i = 0; i < TIME_CHECK_INTERVAL; i++)
-		{
-			prop.propagate(dt);
-			// Save states
-			auto state = st[pr->ref.center_id];
-			auto body_pos = state.pos;
-			// TODO: Rotations
-			double body_rot = 0.0;
-			auto npos = pr->ref.get_rel_pos(ls[0].pos, body_pos, body_rot);
-			interval.pred.push_back(npos);
-		}
-		r_time += dt * TIME_CHECK_INTERVAL;
-
-		double time = glfwGetTime();
-		if((quick_predict_timeout > 0 && time - start_time > quick_predict_timeout) ||
-		   (quick_predict_max_time > 0 && r_time > quick_predict_max_time))
-		{
+		tstep = predict_interval(&intervals[intervals.size() - 1], t, t0, t00, tstep, stime,
+								 pred_ref, it, prop, st, ls);
+		if(tstep > 0)
+			intervals.emplace_back();
+		else
 			break;
-		}
 	}
 
-	interval.elems_at_end = st;
-	interval.pred_at_end = ls[0];
 
+
+	pred.lock.lock();
+	pred.intervals = std::move(intervals);
+	pred.set_dirty(0);
+	for(size_t i = 0; i < pred.intervals.size(); i++)
+	{
+		pred.points = pred.points + pred.intervals[i].pred.size();
+	}
+	pred.lock.unlock();
 
 }
+
+PredictionDrawer *QuickPredictor::get_drawer()
+{
+	if (drawer == nullptr)
+	{
+		drawer = new PredictionDrawer((Prediction*)&pred, get_scale());
+	}
+	return drawer;
+}
+
+double QuickPredictor::get_scale()
+{
+	// TODO: Heuristic based on length of prediction, speed, etc...
+	return 0.01;
+}
+
+void QuickPredictor::stop()
+{
+	kill_thread = true;
+	thread.join();
+}
+
+void QuickPredictor::launch()
+{
+	kill_thread = false;
+
+	// Thread is already running?
+	if(thread.joinable())
+		return;
+
+	thread = std::thread([this]()
+	{
+		while(true)
+		{
+			this->mtx.lock();
+			if(this->kill_thread)
+				return;
+			glm::dvec3 spos = this->pos;
+			glm::dvec3 svel = this->vel;
+			this->mtx.unlock();
+			sterm_predict(spos, svel);
+		}
+	});
+}
+
+double
+QuickPredictor::predict_interval(QuickPredictedInterval* inter, double& t, double sys_t0, double sys_t00, double tstep,
+								 double stime, FrameOfReference ref, size_t& it, SystemPropagator& prop,
+								 StateVector& st, LightStateVector& ls)
+{
+	const size_t TIME_CHECK_INTERVAL = 5000;
+	while(true)
+	{
+		for(; it < TIME_CHECK_INTERVAL; it++)
+		{
+			prop.propagate(tstep);
+			// Save states
+			auto state = st[ref.center_id];
+			auto body_pos = state.pos;
+			// TODO: Rotations using sys_t0 and sys_t00
+			double body_rot = 0.0;
+			auto npos = ref.get_rel_pos(ls[0].pos, body_pos, body_rot);
+			inter->pred.push_back(npos);
+
+			t += tstep;
+		}
+
+		double time = glfwGetTime();
+		if((quick_predict_timeout > 0 && time - stime > quick_predict_timeout) ||
+		   (quick_predict_max_time > 0 && t > quick_predict_max_time))
+		{
+			// Interrupt
+			return -1.0;
+		}
+	}
+}
+
+void QuickPredictor::update(glm::dvec3 npos, glm::dvec3 nvel)
+{
+	this->pos = npos;
+	this->vel = nvel;
+}
+
 
 bool ShortTermPrediction::get_prediction_points(std::vector<glm::dvec3>** to)
 {
@@ -88,4 +169,9 @@ bool ShortTermPrediction::get_prediction_points(std::vector<glm::dvec3>** to)
 		ptr++;
 		return true;
 	}
+}
+
+size_t ShortTermPrediction::get_num_points()
+{
+	return std::max(min_points, points);
 }

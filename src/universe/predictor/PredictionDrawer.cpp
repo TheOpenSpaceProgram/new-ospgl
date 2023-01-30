@@ -1,4 +1,6 @@
 #include "PredictionDrawer.h"
+#include <vector>
+#include "FrameOfReference.h"
 
 
 
@@ -8,6 +10,7 @@ PredictionDrawer::PredictionDrawer(Prediction* pred, double nscale)
 	ssbo = 0;
 	vao = 0;
 	scale = nscale;
+	rebuild = false;
 }
 
 
@@ -16,6 +19,8 @@ PredictionDrawer::~PredictionDrawer()
 
 void PredictionDrawer::update()
 {
+	// TODO: This lock could be more "localized"
+	pr->lock.lock();
 	int dirty = pr->get_dirty_level();
 
 	if(dirty >= 0)
@@ -72,6 +77,8 @@ void PredictionDrawer::update()
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	}
+
+	pr->lock.unlock();
 }
 
 
@@ -91,4 +98,14 @@ void PredictionDrawer::resize_buffers()
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
 	size_of_ssbo = points;
+}
+
+void PredictionDrawer::set_scale(double nval)
+{
+	// Tiny scale changes are ignored for performance
+	if(scale / nval < 1.01 || scale / nval > 0.999)
+		return;
+
+	scale = nval;
+	rebuild = true;
 }

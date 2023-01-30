@@ -20,6 +20,7 @@
 #include "libs/LuaRenderer.h"
 #include "libs/LuaModel.h"
 #include "libs/LuaInput.h"
+#include "libs/LuaOrbit.h"
 
 // Used for setting up "osp" usertype
 #include "renderer/Renderer.h"
@@ -156,6 +157,10 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::INPUT;
 	}
+	else if(name == "orbit")
+	{
+		return LibraryID::ORBIT;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -274,6 +279,7 @@ LuaCore::LuaCore()
 	libraries[LibraryID::RENDERER] = new LuaRenderer();
 	libraries[LibraryID::MODEL] = new LuaModel();
 	libraries[LibraryID::INPUT] = new LuaInput();
+	libraries[LibraryID::ORBIT] = new LuaOrbit();
 }
 
 LuaCore::~LuaCore()

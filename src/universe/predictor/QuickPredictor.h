@@ -4,34 +4,8 @@
 #include <string>
 #include "FrameOfReference.h"
 #include "../propagator/SystemPropagator.h"
+#include "PredictionDrawer.h"
 
-class Prediction
-{
-private:
-	// If positive, the prediction needs to be sent to the GPU starting
-	// at index dirty in returned ptr from get_prediction_point
-	int dirty;
-public:
-
-	virtual FrameOfReference get_ref() = 0;
-	// Return true as long as there are more points to draw, set *ptr = &points
-	// Will always be called to completion
-	virtual bool get_prediction_points(std::vector<glm::dvec3>** ptr) = 0;
-	// Return the TOTAL number of points in the prediction. May be bigger than the
-	// actual value of points to pre-allocate space if you know num of points is going to grow
-	virtual size_t get_num_points() = 0;
-	// Return nullptr if points are already transformed into FrameOfReference
-	virtual std::vector<CartesianState>* get_element_points() = 0;
-	bool is_dirty(){ return dirty >= 0; }
-	int get_dirty_level() {return dirty; }
-	void unset_dirty() { dirty = -1; }
-	void set_dirty(int depth){ dirty = depth;}
-
-	Prediction()
-	{
-		dirty = -1;
-	}
-};
 
 // Doesn't support new system elements appearing / disappearing during simulation
 // If such a thing happens, it will not be noticed by the prediction
@@ -51,18 +25,23 @@ struct QuickPredictedInterval
 class ShortTermPrediction : public Prediction
 {
 public:
+	// Used to pre-allocate more points than actually needed in the GPU
+	size_t min_points;
+	size_t points;
 	FrameOfReference ref;
+	// Note: We always predict the whole thing at once, but this allows variable timestep
 	std::vector<QuickPredictedInterval> intervals;
 	size_t ptr;
 
 	FrameOfReference get_ref() override { return ref;}
 	// Return true as long as there are more points to draw
 	bool get_prediction_points(std::vector<glm::dvec3>** ptr) override;
+	size_t get_num_points() override;
 	std::vector<CartesianState>* get_element_points() override { return nullptr; };
 
 	ShortTermPrediction()
 	{
-		ptr = 0;
+		ptr = 0; points = 0; min_points = 0;
 	}
 };
 
@@ -75,6 +54,24 @@ class QuickPredictor
 {
 private:
 	PlanetarySystem* sys;
+	PredictionDrawer* drawer;
+	ShortTermPrediction pred;
+	std::thread thread;
+
+	glm::dvec3 pos, vel;
+	std::mutex mtx;
+	bool kill_thread;
+
+
+	// Runs a short term prediction, called from the thread
+	void sterm_predict(glm::dvec3 pos = glm::dvec3(0, 0, 0),
+					   glm::dvec3 vel = glm::dvec3(0, 0, 0));
+
+	// Returns once a timestep change is needed, with the new value
+	// can also return if interrupt is needed, then return value will be negative
+	double predict_interval(QuickPredictedInterval* inter, double& t, double sys_t0, double sys_t00, double tstep,
+							double stime, FrameOfReference ref, size_t& it, SystemPropagator& prop,
+							StateVector& st, LightStateVector& ls);
 
 public:
 
@@ -86,15 +83,24 @@ public:
 	// Make sure atleast one of them is positive
 	double quick_predict_max_time = -1.0;
 
-	// Continues an existing prediction (or starts a new one if pred contains no intervals)
-	void sterm_predict(ShortTermPrediction* pred, glm::dvec3 pos = glm::dvec3(0, 0, 0),
-					   glm::dvec3 vel = glm::dvec3(0, 0, 0));
+	// If true, the prediction will fully stop (thread dies) once enough time is predicted
+	bool max_time_stops;
 
-	// Launches the worker thread
+
+	double get_scale();
+
+	// For convenience of use as this is the most common use
+	// The drawer is only created on first call to get_drawer, don't store the pointer!
+	// It lives as long as we do, and we update it automatically
+	PredictionDrawer* get_drawer();
+
+	// Note: both of these are relatively expensive as the create / destroy the thread
+	// TODO: Pause
 	void launch();
+	void stop();
 
-	void pause();
-	void resume();
+	// Call every frame, an orbit will only be predicted once the thread interrupts
+	void update(glm::dvec3 pos, glm::dvec3 vel);
 
 	explicit QuickPredictor(PlanetarySystem* sys);
 	~QuickPredictor();
