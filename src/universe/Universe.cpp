@@ -70,7 +70,6 @@ void Universe::update(double dt)
 
 	if(!paused)
 	{
-		// update BEFORE the physics!
 		system.update(dt, bt_world, false);
 
 		for (Entity* e : entities)

@@ -159,6 +159,7 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 	if (bullet)
 	{
 		bt += dt;
+		logger->info("bt: {}, t: {}, diff: {}", bt, t, bt - t);
 		// Give data to colliders
 		for(size_t i = 0; i < elements.size(); i++)
 		{
@@ -175,10 +176,6 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 				elem->rigid_body->setWorldTransform(tform);
 			}
 		}
-	}
-	else
-	{
-		t += dt;
 	}
 
 }
@@ -509,13 +506,13 @@ glm::dvec3 PlanetarySystem::interp_pos(size_t elem_id)
 	glm::dvec3 pos = states_now[elem_id].pos;
 	glm::dvec3 vel = states_now[elem_id].vel;
 
-	return pos + vel * tdiff;
+	return pos - vel * tdiff;
 }
 
 void PlanetarySystem::interp_pos(CartesianState &st)
 {
 	double tdiff = t - bt;
-	st.pos = st.pos + st.vel * tdiff;
+	st.pos = st.pos - st.vel * tdiff;
 }
 
 
