@@ -40,9 +40,13 @@ function load(veh_id)
 	renderer:add_light(sunlight)
 	renderer:add_light(envmap)
 
+	--local veh = veh_spawner.spawn_vehicle(universe, assets.get_udata_vehicle("debug.toml"),
+	--	glm.vec3.new(-2.720318042296709e10 + 6362e3, 1.329407956490104e10, 5.764165538717468e10),
+	--	glm.vec3.new(0, 0, 0), glm.quat.new(1, 0, 0, 0), glm.vec3.new(0, 0, 0), true)
+	
 	local veh = veh_spawner.spawn_vehicle(universe, assets.get_udata_vehicle("debug.toml"),
-		glm.vec3.new(-2.720318042296709e10 + 6362e3, 1.329407956490104e10, 5.764165538717468e10),
-		glm.vec3.new(0, 0, 0), glm.quat.new(1, 0, 0, 0), glm.vec3.new(0, 0, 0), true)
+		glm.vec3.new(-2.720318042296709e10 + 6465e3, 1.329407956490104e10, 5.764165538717468e10),
+		glm.vec3.new(-2.975363625e4, -5.189341029e3, -2.251484e3), glm.quat.new(1, 0, 0, 0), glm.vec3.new(0, 0, 0), true)
 
 	tracked_ent = veh
 

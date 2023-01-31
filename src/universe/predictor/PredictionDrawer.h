@@ -5,7 +5,8 @@
 // Draws orbits around their origin
 // TODO: Support OpenGL 3.3 by simply drawing non-thick lines instead of using the SSBO
 // 		 we may also use a texture or similar to pass the data to the shader?
-class PredictionDrawer : public Drawable
+// Contained by predictors, so it itself is not a drawable
+class PredictionDrawer
 {
 private:
 	AssetHandle<Shader> line_shader;
@@ -38,6 +39,8 @@ public:
 
 	// Sets scale for next update, EXPENSIVE on next update as it rebuilds the whole orbit
 	void set_scale(double nval);
+
+	void forward_pass(CameraUniforms& cu);
 
 	explicit PredictionDrawer(Prediction* pred, double scale);
 	~PredictionDrawer();

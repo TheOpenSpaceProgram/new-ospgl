@@ -47,7 +47,7 @@ void QuickPredictor::sterm_predict(glm::dvec3 spos, glm::dvec3 svel)
 	intervals.emplace_back();
 
 	// TODO: Adaptive timestep
-	double tstep = 0.1;
+	double tstep = 100.0;
 	double t = 0.0;
 	double stime = glfwGetTime();
 	while(true)
@@ -85,7 +85,7 @@ PredictionDrawer *QuickPredictor::get_drawer()
 double QuickPredictor::get_scale()
 {
 	// TODO: Heuristic based on length of prediction, speed, etc...
-	return 0.01;
+	return 1.0;
 }
 
 void QuickPredictor::stop()
@@ -137,7 +137,6 @@ QuickPredictor::predict_interval(QuickPredictedInterval* inter, double& t, doubl
 			double body_rot = 0.0;
 			auto npos = ref.get_rel_pos(ls[0].pos, body_pos, body_rot);
 			inter->pred.push_back(npos);
-
 			t += tstep;
 		}
 
@@ -157,6 +156,10 @@ void QuickPredictor::update(glm::dvec3 npos, glm::dvec3 nvel)
 	this->pos = npos;
 	this->vel = nvel;
 	mtx.unlock();
+	if(drawer)
+	{
+		drawer->update();
+	}
 }
 
 void QuickPredictor::on_add_to_renderer()
@@ -167,16 +170,14 @@ void QuickPredictor::on_add_to_renderer()
 
 void QuickPredictor::forward_pass(CameraUniforms &cu, bool is_env_map)
 {
-	if(drawer)
-	{
-		drawer->forward_pass(cu, is_env_map);
-	}
+	// Drawer will always be present if this is called
+	drawer->forward_pass(cu);
 }
 
 
 bool ShortTermPrediction::get_prediction_points(std::vector<glm::dvec3>** to)
 {
-	if((size_t)ptr > intervals.size())
+	if((size_t)ptr >= intervals.size())
 	{
 		ptr = 0;
 		return false;

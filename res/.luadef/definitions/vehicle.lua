@@ -174,7 +174,7 @@ function piece:get_model_node() end
 
 ---@class vehicle.part
 ---@field id integer
----@field machines vehicle.machine_map Don't hold for long as it may go outdated / machines may die
+---@field machines table<string, vehicle.machine> Don't hold for long as it may go outdated / machines may die
 local part = {}
 ---@return vehicle.piece
 ---@param name string
@@ -202,19 +202,6 @@ function machine:get_id() end
 
 ---@return boolean Was the window closed?
 function machine:draw_imgui() end
-
-
--- This is a bit of a workaround around sol limitations using LuaJIT...
----@class vehicle.machine_map
-local machine_map = {}
----@return fun(): string, vehicle.machine
-function machine_map:pairs() end
-
----@class vehicle.interface_array
-local interface_array = {}
----@return integer
----@return table
-function interface_array:pairs() end
 
 ---@return vehicle.machine[]
 ---@param include_this boolean? Default to true

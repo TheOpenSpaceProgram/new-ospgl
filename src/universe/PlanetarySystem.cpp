@@ -153,6 +153,7 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 		lock.lock();
 		propagator->propagate(dt);
 		lock.unlock();
+		t += dt;
 	}
 
 	if (bullet)
@@ -176,7 +177,7 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 		}
 	}
 	else
-	{ 
+	{
 		t += dt;
 	}
 

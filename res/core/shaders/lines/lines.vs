@@ -2,17 +2,22 @@
 // This shader is based on the work by user Rabbid76 (Gernot Steinegger, https://github.com/Rabbid76)
 // as published on stack overflow: https://stackoverflow.com/a/59688394
 
+// Vertices relative to central body and scaled down
 layout(std430, binding = 0) buffer TVertex
 {
 	// Always use vec4 in buffers! Otherwise, memory alignment will be hellish
 	vec4 vertex[];
 };
 
+// Premultiplied with center body
 uniform mat4 tform;
+
 uniform vec2 screen;
 // Given in pixel units
 uniform float thickness;
 uniform float f_coef;
+uniform float inv_scale;
+
 
 out float flogz;
 
@@ -23,7 +28,7 @@ void main()
 	int line_idx = gl_VertexID / 6;
 	int tri_idx = gl_VertexID % 6;
 
-	// Transform vertices into screen space, as thickness is given in pixel units
+	// Build the mesh first in scaled center body space
 	vec4 va[4];
 	for(int i = 0; i < 4; i++)
 	{

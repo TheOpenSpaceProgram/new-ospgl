@@ -21,4 +21,9 @@ public:
 	std::pair<glm::dvec3, glm::dvec3> get_rel_pos_vel(glm::dvec3 abs_pos, glm::dvec3 abs_vel, glm::dvec3 body_pos,
 													  glm::dvec3 body_vel, double body_rot, double body_rotvel);
 
+	// These use the universe
+	glm::dmat4 get_tform_matrix();
+
+	FrameOfReference();
+
 };
