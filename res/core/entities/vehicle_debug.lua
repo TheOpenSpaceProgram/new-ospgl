@@ -10,19 +10,15 @@ end
 
 function vehicle_debug:draw_machines()
 	for ruid, path in pairs(self.shown_machines) do 
-		local part = self.vehicle:get_part_by_id(path["part"])
-		if part ~= nil then 	
-			local machine = part:get_machine(path["machine"])
-			if machine ~= nil then 
-				if machine:draw_imgui(true) == false then 
-					self.shown_machines[ruid] = nil
-				end
-			else
-				self.shown_machines[ruid] = nil
-			end
-		else 
+		goto continue
+		::hide_machine::
 			self.shown_machines[ruid] = nil
-		end
+		::continue::
+			local part = self.vehicle:get_part_by_id(path["part"])
+			if part == nil then goto hide_machine end
+			local machine = part:get_machine(path["machine"])
+			if machine == nil then goto hide_machine end
+			if machine:draw_imgui() == false then goto hide_machine end
 	end
 end
 
@@ -32,7 +28,7 @@ function vehicle_debug:parts_tab()
 		local name = "Part (" .. part:get_part_proto():get_asset_id() .. ")" .. tostring(part.id)
 		if imgui.collapsing_header(name) then
 			imgui.text("Machines: ")
-			for id, machine in part.machines:pairs() do 
+			for id, machine in pairs(part.machines) do 
 				imgui.push_id(machine.runtime_uid)	
 				imgui.text("\t" .. id .. "(" .. machine:get_id() .. ")")
 				imgui.same_line()

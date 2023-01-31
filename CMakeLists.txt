@@ -38,6 +38,8 @@ if(OSPGL_STACKTRACES)
 	add_definitions(-DOSPGL_STACKTRACES=1)
 endif()
 
+add_definitions(-DLUAJIT_ENABLE_LUA52COMPAT)
+
 if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	add_definitions(-D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)

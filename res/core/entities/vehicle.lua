@@ -54,10 +54,6 @@ end
 function disable_bullet(world)
 end
 
-function deferred_pass(cu, is_env)
-
-end
-
 function get_visual_origin()
     if vehicle:is_packed() then
         return glm.vec3.new(0, 0, 0)
