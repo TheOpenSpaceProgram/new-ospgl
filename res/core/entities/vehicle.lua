@@ -9,19 +9,25 @@ local glm = require("glm")
 require("model")
 require("universe")
 
----@type vehicle|nil
+
+---@type vehicle
 vehicle = nil
+local veh_debug = nil 
+
 if entity.init_toml ~= nil then
     -- vehicles are stored separately to improve the syntax of savefiles
 	local vehicle_toml_path = entity.init_toml:get_string("save_vehicle")
     local vehicle_toml = assets.get_save_vehicle(vehicle_toml_path)
     vehicle = veh.vehicle.new()
     vehicle_toml:read_to_vehicle(vehicle)
+	veh_debug = dofile("core:entities/vehicle_debug.lua"):init(vehicle)
 end
 
 -- Gets passed the vehicle to use
+---@param nvehicle vehicle
 function create(nvehicle)
     vehicle = nvehicle
+	veh_debug = dofile("core:entities/vehicle_debug.lua"):init(vehicle)
 end
 
 function init()
@@ -31,6 +37,7 @@ end
 
 function update(dt)
     vehicle:update(dt)
+	veh_debug:draw_machines()
 end
 
 function physics_update(bdt)
@@ -67,8 +74,22 @@ function get_physics_origin()
     end
 end
 
+function get_velocity()
+	if vehicle:is_packed() then 
+		return glm.vec3.new(0, 0, 0)
+	else 
+		return vehicle.unpacked:get_velocity()
+	end
+end
+
 function separate_vehicle(veh)
     osp.universe:create_entity("core:entities/vehicle.lua", veh)
+end
+
+
+
+function do_debug_imgui()
+	veh_debug:draw_main()
 end
 
 -- Rendering functions:

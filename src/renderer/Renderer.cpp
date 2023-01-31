@@ -5,6 +5,7 @@
 #include <nanovg/nanovg_gl.h>
 //?
 #include "../universe/PlanetarySystem.h"
+#include <util/defines.h>
 
 // Enable to have detailed GL debugging. Causes very heavy perfomance hit
 // #define ENABLE_GL_DEBUG
@@ -821,6 +822,12 @@ void Renderer::remove_all_lights()
 	{
 		remove_light(l.get());
 	}
+}
+
+void Renderer::add_drawable_entity_lua(Entity* ent)
+{
+	auto ptr = std::shared_ptr<Drawable>((Drawable*)ent, &null_deleter<Drawable>);
+	add_drawable(ptr, "");
 }
 
 

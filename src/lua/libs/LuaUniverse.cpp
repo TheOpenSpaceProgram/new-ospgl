@@ -58,7 +58,6 @@ void LuaUniverse::load_to(sol::table& table)
 		"save_db", &Universe::save_db,
 		"system", &Universe::system_ptr,
 		"get_entity", &Universe::get_entity,
-		// We implement a getter, to modify entities use the given functions
 		"entities", sol::property([](Universe* uv)
 		  {
 			return sol::as_table(uv->entities);
@@ -105,6 +104,7 @@ void LuaUniverse::load_to(sol::table& table)
 	        "disable_bullet", &Entity::disable_bullet,
 	        "set_bullet_enabled", &Entity::enable_bullet_wrapper,
 	        "get_physics_origin", &Entity::get_physics_origin,
+			"get_velocity", &Entity::get_velocity,
 	        "get_physics_radius", &Entity::get_physics_radius,
 	        "get_visual_origin", &Entity::get_visual_origin,
 	        "is_physics_loader", &Entity::is_physics_loader,

@@ -50,6 +50,13 @@ function container.vehicle:get_children_of(p) end
 ---@nodiscard
 function container.vehicle:get_attached_to(p) end
 
+---@param id integer
+---@return vehicle.piece|nil
+function container.vehicle:get_piece_by_id(id) end
+
+---@param id integer
+---@return vehicle.part|nil
+function container.vehicle:get_part_by_id(id) end
 
 ---@class vehicle.packed
 ---@field vehicle vehicle
@@ -167,6 +174,7 @@ function piece:get_model_node() end
 
 ---@class vehicle.part
 ---@field id integer
+---@field machines vehicle.machine_map Don't hold for long as it may go outdated / machines may die
 local part = {}
 ---@return vehicle.piece
 ---@param name string
@@ -188,13 +196,19 @@ local machine = {}
 ---@return table
 function machine:load_interface(iname) end
 
+---@return string
+--- Returns the asset id of the script of the machine
+function machine:get_id() end
+
+---@return boolean Was the window closed?
+function machine:draw_imgui() end
+
 
 -- This is a bit of a workaround around sol limitations using LuaJIT...
----@class vehicle.machine_array
-local machine_array = {}
----@return integer
----@return vehicle.machine
-function machine_array:pairs() end
+---@class vehicle.machine_map
+local machine_map = {}
+---@return fun(): string, vehicle.machine
+function machine_map:pairs() end
 
 ---@class vehicle.interface_array
 local interface_array = {}

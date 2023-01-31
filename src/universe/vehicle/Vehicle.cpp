@@ -429,3 +429,21 @@ void GenericSerializer<Vehicle>::deserialize(Vehicle& to, const cpptoml::table& 
 {
 	VehicleLoader(from, to);
 }
+
+Part* Vehicle::get_part_by_id(int64_t id)
+{
+	auto it = id_to_part.find(id);
+	if(it == id_to_part.end())
+		return nullptr;
+	else
+		return it->second;
+}
+
+Piece* Vehicle::get_piece_by_id(int64_t id)
+{
+	auto it = id_to_piece.find(id);
+	if(it == id_to_piece.end())
+		return nullptr;
+	else
+		return it->second;
+}

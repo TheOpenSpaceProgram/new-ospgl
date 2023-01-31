@@ -57,6 +57,9 @@ public:
 	// Return position to be used as a sort of visual origin (for camera centering, etc...)
 	glm::dvec3 get_visual_origin();
 
+	// Returns a velocity to be used for orbit prediction and reference frames, etc...
+	glm::dvec3 get_velocity();
+
 	// An approximation of our size, try to go higher than the real number
 	// Values of 0.0 means that we don't have a limit for physics loading
 	double get_physics_radius();

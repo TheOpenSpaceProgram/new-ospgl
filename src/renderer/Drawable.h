@@ -48,6 +48,7 @@ public:
 	{
 		added = true;
 		drawable_uid = uid;
+		on_add_to_renderer();
 	}
 
 	void notify_remove_from_renderer()

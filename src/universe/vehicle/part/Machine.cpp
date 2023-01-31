@@ -218,11 +218,12 @@ std::string Machine::get_id()
 	return ret;
 }
 
-void Machine::draw_imgui(bool* open)
+bool Machine::draw_imgui()
 {
+	bool tval = true;
 	std::string title = "M(" + in_pkg + ":" + name + "), ruid = " + std::to_string(runtime_uid);
 	ImGui::SetNextWindowSize(ImVec2(0, 0));
-	ImGui::Begin(title.c_str(), open, ImGuiWindowFlags_MenuBar);
+	ImGui::Begin(title.c_str(), &tval, ImGuiWindowFlags_MenuBar);
 	if(ImGui::BeginMenuBar())
 	{
 		ImGui::Button("Focus");
@@ -248,4 +249,6 @@ void Machine::draw_imgui(bool* open)
 	}
 	LuaUtil::call_function_if_present(env["draw_imgui"]);
 	ImGui::End();
+
+	return tval;
 }

@@ -9,6 +9,7 @@ void LuaOrbit::load_to(sol::table &table)
 				return std::make_shared<QuickPredictor>(sys);
 			},
 			"get_drawer", &QuickPredictor::get_drawer,
+			"update", &QuickPredictor::update,
 			"launch", &QuickPredictor::launch);
 
 }

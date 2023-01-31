@@ -39,6 +39,8 @@ return_table.renderer_quality_pbr = {
 local renderer = {}
 
 ---@param draw renderer.drawable|universe.planetary_system
+--- Warning: If you add entities to the drawable via this method, make sure you 
+--- remove them once they are deleted as otherwise the game will crash!
 function renderer:add_drawable(draw) end
 
 ---@param cubemap assets.cubemap_handle

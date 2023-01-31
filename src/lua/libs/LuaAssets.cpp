@@ -10,16 +10,14 @@
 #include "../../assets/PhysicalMaterial.h"
 #include "../../assets/Shader.h"
 
-// Useful while development to make sure assets are working correctly
-#define DEBUG_ENABLED
-
 void LuaAssets::load_to(sol::table& table)
 {
 	// This huge macro is neccesary because lua doesn't allow templates, and there's no easy way to implement them
 	#define IMPLEMENT_ASSET(cls, cls_name) \
 	table.new_usertype<LuaAssetHandle<cls>>(cls_name "_handle", 												\
 		"move", &LuaAssetHandle<cls>::move,                                             						\
-		"get", &LuaAssetHandle<cls>::get,                                               						\
+		"get", &LuaAssetHandle<cls>::get,     \
+        "get_asset_id", &LuaAssetHandle<cls>::get_asset_id,                                \
 		sol::meta_function::to_string, [](const LuaAssetHandle<cls>& ast)              							\
 		{                                                                               						\
 		return fmt::format("Asset of type {}, path: {}:{}, pointer: {}", cls_name, ast.pkg, ast.name, (void*)ast.data);						\
@@ -89,7 +87,7 @@ LuaAssetHandle<T>::LuaAssetHandle(LuaAssetHandle<T>&& b)
 	b.data = nullptr;
 	b.ut = sol::nil;
 
-#ifdef DEBUG_ENABLED
+#ifdef LUA_ASSET_DEBUG_ENABLED
 	logger->debug("Lua asset handle created (path={}:{}, pointer={}) by move", pkg, name, (void*)data);
 #endif
 }
@@ -105,7 +103,7 @@ LuaAssetHandle<T>::LuaAssetHandle(const LuaAssetHandle<T>& p2)
 
 	osp->assets->get<T>(pkg, name, true);
 
-#ifdef DEBUG_ENABLED
+#ifdef LUA_ASSET_DEBUG_ENABLED
 	logger->debug("Lua asset handle created (path={}:{}, pointer={}) by copy", pkg, name, (void*)data);
 #endif
 }
@@ -117,17 +115,20 @@ LuaAssetHandle<T>::LuaAssetHandle(const std::string& pkg, const std::string& nam
 	this->name = name;
 	this->data = data;
 
-#ifdef DEBUG_ENABLED
+#ifdef LUA_ASSET_DEBUG_ENABLED
 	logger->debug("Lua asset handle created (path={}:{}, pointer={})", pkg, name, (void*)data);
 #endif
 }
+
 
 template<typename T>
 LuaAssetHandle<T>::~LuaAssetHandle()
 {
 	if (data != nullptr)
 	{
+#ifdef LUA_ASSET_DEBUG_ENABLED
 		logger->debug("Lua asset handle freed (path={}:{}, pointer={})", pkg, name, (void*)data);
+#endif
 		osp->assets->free<T>(pkg, name);
 	}
 }

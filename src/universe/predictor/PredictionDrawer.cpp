@@ -11,6 +11,7 @@ PredictionDrawer::PredictionDrawer(Prediction* pred, double nscale)
 	vao = 0;
 	scale = nscale;
 	rebuild = false;
+	line_shader = AssetHandle<Shader>("core:shaders/lines/lines.vs");
 }
 
 

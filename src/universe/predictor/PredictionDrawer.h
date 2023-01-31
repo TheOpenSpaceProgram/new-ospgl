@@ -3,9 +3,13 @@
 #include "Prediction.h"
 
 // Draws orbits around their origin
+// TODO: Support OpenGL 3.3 by simply drawing non-thick lines instead of using the SSBO
+// 		 we may also use a texture or similar to pass the data to the shader?
 class PredictionDrawer : public Drawable
 {
 private:
+	AssetHandle<Shader> line_shader;
+
 	Prediction* pr;
 	// We use a SSBO to store the points, and a dummy VAO to draw them
 	// This means we only need to do partial updates which is fast

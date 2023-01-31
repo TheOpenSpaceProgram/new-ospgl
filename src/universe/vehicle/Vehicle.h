@@ -92,6 +92,10 @@ public:
 	// Bidirectional wires, so if A is connected to B then B is connected to A
 	std::unordered_multimap<Machine*, Machine*> wires;
 
+	// These return nullptr if the part / piece is no longer present in this vehicle
+	Part* get_part_by_id(int64_t id);
+	Piece* get_piece_by_id(int64_t id);
+
 	void pack();
 
 	void unpack();

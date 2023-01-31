@@ -182,3 +182,8 @@ InputContext* Entity::get_input_ctx()
 {
 	return LuaUtil::call_function_if_present_returns<InputContext*>(env["get_input_ctx"]).value_or(nullptr);
 }
+
+glm::dvec3 Entity::get_velocity()
+{
+	return LuaUtil::call_function_if_present_returns<glm::dvec3>(env["get_velocity"]).value_or(glm::dvec3(0, 0, 0));
+}

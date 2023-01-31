@@ -10,6 +10,7 @@
 #include "renderer/lighting/PointLight.h"
 #include "renderer/lighting/SunLight.h"
 #include "renderer/util/Skybox.h"
+#include "universe/predictor/QuickPredictor.h"
 
 #include "LuaAssets.h"
 
@@ -20,7 +21,9 @@ void LuaRenderer::load_to(sol::table& table)
 		  "add_drawable", sol::overload(
 				  &Renderer::add_drawable_lua<Drawable>,
 				  &Renderer::add_drawable_lua<PlanetarySystem>,
-				  &Renderer::add_drawable_lua<Skybox>
+				  &Renderer::add_drawable_lua<Skybox>,
+				  &Renderer::add_drawable_lua<QuickPredictor>,
+				  &Renderer::add_drawable_entity_lua
 				  ),
 		  "add_light", sol::overload(
 				  &Renderer::add_light_lua<Light>,

@@ -738,3 +738,8 @@ void UnpackedVehicle::apply_gravity(btVector3 dir)
 		p->rigid_body->setGravity(dir);
 	}
 }
+
+glm::dvec3 UnpackedVehicle::get_velocity()
+{
+	return to_dvec3(vehicle->root->rigid_body->getLinearVelocity());
+}

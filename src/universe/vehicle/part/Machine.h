@@ -80,7 +80,8 @@ public:
 	std::string get_name();
 	std::string get_id();
 	// Don't create your own window in lua! We create a standard named one
-	void draw_imgui(bool* open);
+	// Returns wether we are still open
+	bool draw_imgui();
 
 	// Make sure AssetManager's correct current package is set,
 	// otherwise script loading MAY fail!

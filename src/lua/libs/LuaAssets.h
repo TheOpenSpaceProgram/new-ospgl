@@ -2,6 +2,11 @@
 #include "../LuaLib.h"
 #include <util/Logger.h>
 #include <assets/AssetManager.h>
+
+
+// Useful while development to make sure assets are working correctly
+#define LUA_ASSET_DEBUG_ENABLED
+
 /*
 	Lua functions to interact with the AssetManager subsystem,
 	allows loading of resource types which have a lua lib:
@@ -90,6 +95,11 @@ struct LuaAssetHandle
 		return data;
 	}
 
+	std::string get_asset_id()
+	{
+		return pkg + ":" + name;
+	}
+
 	T* get()
 	{
 		return data;
@@ -110,6 +120,8 @@ struct LuaAssetHandle
 	LuaAssetHandle(const LuaAssetHandle<T> &p2);
 
 	LuaAssetHandle(const std::string& pkg, const std::string& name, T* data);
+	// This "duplicates" the passed asset handle
+	LuaAssetHandle(const AssetHandle<T>& from);
 	~LuaAssetHandle();
 
 	bool operator==(const LuaAssetHandle<T>& other) const
@@ -117,4 +129,18 @@ struct LuaAssetHandle
 		return pkg == other.pkg && name == other.name;
 	}
 };
+
+template<typename T>
+LuaAssetHandle<T>::LuaAssetHandle(const AssetHandle<T>& from)
+{
+	pkg = from.pkg;
+	name = from.name;
+	data = from.data;
+
+	osp->assets->get<T>(pkg, name, true);
+
+#ifdef LUA_ASSET_DEBUG_ENABLED
+	logger->debug("Lua asset handle created (path={}:{}, pointer={}) by copy from asset handle", pkg, name, (void*)data);
+#endif
+}
 

@@ -1,5 +1,6 @@
 #include "LuaVehicle.h"
 #include "../../universe/vehicle/Vehicle.h"
+#include "LuaAssets.h"
 
 static WorldState decode_worldstate_table(sol::table table)
 {
@@ -39,7 +40,9 @@ void LuaVehicle::load_to(sol::table& table)
 		 	"get_children_of", &Vehicle::get_children_of,
 		 	"get_attached_to", &Vehicle::get_attached_to,
 		 	"get_connected_to", &Vehicle::get_connected_to,
-		 	"get_connected_with", &Vehicle::get_connected_with);//,
+		 	"get_connected_with", &Vehicle::get_connected_with,
+			 "get_part_by_id", &Vehicle::get_part_by_id,
+			 "get_piece_by_id", &Vehicle::get_piece_by_id);//,
 		//"get_attached_to", sol::overload(
 		//	sol::resolve<std::vector<Piece*>(Piece*)>(Vehicle::get_attached_to),
 		//	sol::resolve<Piece*(Piece*, const std::string&)>(Vehicle::get_attached_to)
@@ -53,7 +56,8 @@ void LuaVehicle::load_to(sol::table& table)
 		  });
 
 	table.new_usertype<UnpackedVehicle>("unpacked_vehicle", sol::no_constructor,
-		 "get_center_of_mass", &UnpackedVehicle::get_center_of_mass);
+		 "get_center_of_mass", &UnpackedVehicle::get_center_of_mass,
+		 "get_velocity", &UnpackedVehicle::get_velocity);
 
 	table.new_usertype<Piece>("piece",
 		"rigid_body", &Piece::rigid_body,
@@ -125,13 +129,21 @@ void LuaVehicle::load_to(sol::table& table)
 	table.new_usertype<Part>("part",
 		"id", &Part::id,
 		"get_piece", &Part::get_piece,
-		"get_machine", &Part::get_machine);
+		"get_machine", &Part::get_machine,
+		"machines", &Part::machines,
+		"get_part_proto", [](Part* p)
+		 {
+			auto asset = p->part_proto.duplicate();
+			return LuaAssetHandle<PartPrototype>(asset);
+		 });
 
 	table.new_usertype<Machine>("machine",
 		"runtime_uid", &Machine::runtime_uid,
 		"init_toml", &Machine::init_toml,
 		"plumbing", &Machine::plumbing,
+		"get_id", &Machine::get_id,
 		"in_part", &Machine::in_part,
+		"draw_imgui", &Machine::draw_imgui,
 		"load_interface", [](Machine* self, const std::string& iname, sol::this_state tst, sol::this_environment tenv)
 		{
 			sol::environment old_env = tenv;

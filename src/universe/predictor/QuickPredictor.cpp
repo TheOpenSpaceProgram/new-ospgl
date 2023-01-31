@@ -91,7 +91,8 @@ double QuickPredictor::get_scale()
 void QuickPredictor::stop()
 {
 	kill_thread = true;
-	thread.join();
+	if(thread.joinable())
+		thread.join();
 }
 
 void QuickPredictor::launch()
@@ -104,6 +105,7 @@ void QuickPredictor::launch()
 
 	thread = std::thread([this]()
 	{
+		set_this_thread_name("quick_pred");
 		while(true)
 		{
 			this->mtx.lock();
@@ -151,8 +153,24 @@ QuickPredictor::predict_interval(QuickPredictedInterval* inter, double& t, doubl
 
 void QuickPredictor::update(glm::dvec3 npos, glm::dvec3 nvel)
 {
+	mtx.lock();
 	this->pos = npos;
 	this->vel = nvel;
+	mtx.unlock();
+}
+
+void QuickPredictor::on_add_to_renderer()
+{
+	// Create the drawer if not present
+	get_drawer();
+}
+
+void QuickPredictor::forward_pass(CameraUniforms &cu, bool is_env_map)
+{
+	if(drawer)
+	{
+		drawer->forward_pass(cu, is_env_map);
+	}
 }
 
 

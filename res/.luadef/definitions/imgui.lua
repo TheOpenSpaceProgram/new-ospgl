@@ -3,7 +3,12 @@
 
 local imgui = {}
 
-function imgui.begin() end
+---@param name string
+---@param flags? imgui.window_flags
+---@param open? boolean If value is given, allows the window to be opened / closed, it will return a value then 
+---@return boolean Returns false if window was closed, and true if it's still open
+--- Slightly different usage than C++ ImGui
+function imgui.begin(name, flags, open) end
 --- Used as ImGui::End() as lua doesnt allow end keyword
 function imgui.endw() end
 
@@ -26,6 +31,10 @@ function imgui.same_line() end
 function imgui.tree_node(str) end
 
 function imgui.tree_pop() end
+
+---@param str string
+---@return boolean
+function imgui.button(str) end
 
 ---@param str string
 ---@param b boolean

@@ -8,12 +8,18 @@ local glm = require("glm")
 local gui = require("gui")
 local assets = require("assets")
 local logger = require("logger")
+local orbit = require("orbit")
+local veh_spawner = dofile("core:scenes/vehicle_spawner.lua")
+
 require("toml")
 
 local gui_screen = gui.screen.new(gui.skin.get_default_skin(), gui_input)
 local universe = osp.universe
 local renderer = osp.renderer
 local anim = nil
+
+local predictor = orbit.quick_predictor.new(universe.system)
+predictor:launch()
 
 
 local cubemap = assets.get_cubemap("debug_system:skybox.png")
@@ -25,6 +31,8 @@ local camera = dofile("core:scenes/map/map_camera.lua"):init(universe, gui_input
 --- If non-nil, then we are controlling an entity and will pass inputs to it
 --- and optionally draw navball, etc...
 local controlled_ent = nil
+
+local event_handlers = {}
 
 ---@param map_id string
 ---@param ncontrolled_ent universe.entity|nil
@@ -46,12 +54,20 @@ function load(map_id, ncontrolled_ent, nconfig)
 	logger.info(universe.system:get_element_position("Earth"))
 	renderer:add_drawable(universe.system)
 	renderer:add_drawable(skybox)
+	renderer:add_drawable(predictor)
 	renderer:add_light(sunlight)
-	sunlight = nil
+	
+	local veh = veh_spawner.spawn_vehicle(universe, assets.get_udata_vehicle("debug.toml"),
+		glm.vec3.new(-2.720318042296709e10 + 6362e3, 1.329407956490104e10, 5.764165538717468e10),
+		glm.vec3.new(0, 0, 0), glm.quat.new(1, 0, 0, 0), glm.vec3.new(0, 0, 0), true)
+
+	controlled_ent = veh
 
 end
 
 function update(dt)
+	predictor:update(controlled_ent:get_visual_origin(), controlled_ent:get_velocity())
+
 	gui_screen:new_frame()
 	gui_screen:prepare_pass()
 

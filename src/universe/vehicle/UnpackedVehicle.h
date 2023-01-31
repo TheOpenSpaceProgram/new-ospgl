@@ -64,6 +64,9 @@ public:
 	// Optionally returns rendering center of mass, for camera focusing
 	glm::dvec3 get_center_of_mass(bool renderer = false);
 
+	// Returns velocity of root part
+	glm::dvec3 get_velocity();
+
 	void set_breaking_enabled(bool value);
 
 	void set_world(btDynamicsWorld* n_world)

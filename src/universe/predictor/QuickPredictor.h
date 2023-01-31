@@ -50,7 +50,7 @@ public:
 // improved by caching the solar system state but that would require high memory usage
 // Note: To save on memory velocities are not stored, instead they are calculated from position when needed
 // This is performant because velocity is usually required at a few points, and not over the whole orbit
-class QuickPredictor
+class QuickPredictor : public Drawable
 {
 private:
 	PlanetarySystem* sys;
@@ -93,6 +93,10 @@ public:
 	// The drawer is only created on first call to get_drawer, don't store the pointer!
 	// It lives as long as we do, and we update it automatically
 	PredictionDrawer* get_drawer();
+
+	void on_add_to_renderer() override;
+	bool needs_forward_pass() override { return true; }
+	void forward_pass(CameraUniforms& cu, bool is_env_map = false) override;
 
 	// Note: both of these are relatively expensive as the create / destroy the thread
 	// TODO: Pause

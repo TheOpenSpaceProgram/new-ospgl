@@ -21,9 +21,11 @@
 
 #include "RendererQuality.h"
 
+
 //#define ENABLE_GL_DEBUG
 
 class PlanetarySystem;
+class Entity;
 // Allows scaled rendering of the 3D scene to a framebuffer
 // and then UI drawing (in real resolution) over it
 // It first does a deferred rendering pass, and then a
@@ -167,7 +169,9 @@ public:
 
 	// This is a workaround for an issue in sol where shared_ptr cannot be cast to one another
 	template<typename T>
-	void add_drawable_lua(std::shared_ptr<T> d){ add_drawable(d, "");}
+	void add_drawable_lua(std::shared_ptr<T> d){ add_drawable(d, ""); }
+
+	void add_drawable_entity_lua(Entity* ent);
 
 	template<typename T>
 	void add_light_lua(std::shared_ptr<T> d){ add_light(d); }
