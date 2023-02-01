@@ -5,7 +5,7 @@ packages = [
 	"test_parts"
 ]
 
-uid = 0
+uid = 1
 t = 0.0
 system_package = "debug_system:systems/system.toml"
 system_version = "0.1.0"
@@ -62,18 +62,18 @@ system_version = "0.1.0"
 		y = 1.0
 		z = 0.0
 
-#[[entity]]
-#	id = 1
-#	type = "building"
-#	building = "debug_system:buildings/launchpad.toml"
-#	in_body = "Earth"
-#	[entity.rel_pos]
-#		x = 6361_528.0
-#		y = 100.0
-#		z = 400.0
-#	[entity.rel_rot]
-#		x = 0.0
-#		y = 0.707
-#		z = 0.0
-#		w = 0.707
+[[entity]]
+	id = 1
+	type = "core:entities/building.lua"
+	building = "debug_system:buildings/launchpad.toml"
+	in_body = "Earth"
+	[entity.rel_pos]
+		x = 6361_528.0
+		y = 100.0
+		z = 400.0
+	[entity.rel_rot]
+		x = 0.0
+		y = 0.707
+		z = 0.0
+		w = 0.707
 

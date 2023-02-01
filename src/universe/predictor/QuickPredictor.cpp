@@ -47,7 +47,7 @@ void QuickPredictor::sterm_predict(glm::dvec3 spos, glm::dvec3 svel)
 	intervals.emplace_back();
 
 	// TODO: Adaptive timestep
-	double tstep = 100.0;
+	double tstep = 1.0;
 	double t = 0.0;
 	double stime = glfwGetTime();
 	while(true)
@@ -124,22 +124,33 @@ QuickPredictor::predict_interval(QuickPredictedInterval* inter, double& t, doubl
 								 double stime, FrameOfReference ref, size_t& it, SystemPropagator& prop,
 								 StateVector& st, LightStateVector& ls)
 {
-	const size_t TIME_CHECK_INTERVAL = 5000;
+	const size_t TIME_CHECK_INTERVAL = 10000;
+	// How much in-game time between drawn points?
+	// Useful to avoid sending massive ammount of points to the GPU
+	const double SAVE_INTERVAL = 10.0;
+	size_t save_it = 0;
+	size_t save_interval = SAVE_INTERVAL / tstep;
 	while(true)
 	{
 		for(; it < TIME_CHECK_INTERVAL; it++)
 		{
 			prop.propagate(tstep);
-			// Save states
-			auto state = st[ref.center_id];
-			auto body_pos = state.pos;
-			// TODO: Rotations using sys_t0 and sys_t00
-			double body_rot = 0.0;
-			auto npos = ref.get_rel_pos(ls[0].pos, body_pos, body_rot);
-			inter->pred.push_back(npos);
+			save_it++;
+			if(save_it > save_interval)
+			{
+				// Save states
+				auto state = st[ref.center_id];
+				auto body_pos = state.pos;
+				// TODO: Rotations using sys_t0 and sys_t00
+				double body_rot = 0.0;
+				auto npos = ref.get_rel_pos(ls[0].pos, body_pos, body_rot);
+				inter->pred.push_back(npos);
+				save_it = 0;
+			}
 			t += tstep;
 		}
 
+		it = 0;
 		double time = glfwGetTime();
 		if((quick_predict_timeout > 0 && time - stime > quick_predict_timeout) ||
 		   (quick_predict_max_time > 0 && t > quick_predict_max_time))

@@ -159,7 +159,6 @@ void PlanetarySystem::update_physics(double dt, bool bullet)
 	if (bullet)
 	{
 		bt += dt;
-		logger->info("bt: {}, t: {}, diff: {}", bt, t, bt - t);
 		// Give data to colliders
 		for(size_t i = 0; i < elements.size(); i++)
 		{

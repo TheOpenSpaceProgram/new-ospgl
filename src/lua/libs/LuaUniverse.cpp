@@ -112,6 +112,7 @@ void LuaUniverse::load_to(sol::table& table)
 	        "timewarp_safe", &Entity::timewarp_safe,
 	        "uid", sol::property(&Entity::get_uid),
 	        "get_type", &Entity::get_type,
+			"init_toml", &Entity::init_toml,
 	        "save", &Entity::save,
 	        "drawable_uid", sol::readonly(&Entity::drawable_uid));
 

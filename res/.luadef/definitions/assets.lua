@@ -38,7 +38,7 @@ local model_handle = {}
 --- Invalidates current handle, and returns a new one
 ---@return assets.model_handle 
 function model_handle:move() end
----@return assets.model
+---@return model.model
 function model_handle:get() end
 
 ---@class assets.physical_material_handle
@@ -48,6 +48,14 @@ local physical_material_handle = {}
 function physical_material_handle:move() end
 ---@return assets.physical_material
 function physical_material_handle:get() end
+
+---@class assets.config_handle
+local config_handle = {}
+--- Invalidates current handle, and returns a new one
+---@return assets.config_handle 
+function config_handle:move() end
+---@return assets.config
+function config_handle:get() end
 
 ---@param path string
 ---@return assets.bitmap_font_handle
@@ -72,6 +80,25 @@ function assets.get_model(path) end
 ---@param path string
 ---@return assets.physical_material_handle
 function assets.get_physical_material(path) end
+
+---@param path string
+---@return assets.config_handle
+--- Remember to use push_pkg and restore_pkg if loading assets from a config!
+function assets.get_config(path) end
+
+---@class assets.config
+---@field root toml.table
+assets.config = {}
+
+--- Pushes config pkg to the asset manager, so you can load elements from the package
+--- without worrying about package mismatches
+function assets.config:push_pkg() end
+
+--- Restores default package
+function assets.config:restore_pkg() end
+
+---@class assets.model
+assets.model = {}
 
 
 return assets

@@ -14,3 +14,21 @@ function node:draw(c_uniforms, model, did, ignore_our_subtform, increase_did) en
 ---@param model glm.mat4 Model matrix 
 ---@param ignore_our_subtform boolean Should our subtform be ignored? Use if you are drawing a children node directly, otherwise false
 function node:draw_shadow(sh_cam, model, ignore_our_subtform) end
+
+---@class model.model
+local model = {}
+
+---@return model.gpu_pointer
+function model:get_gpu() end
+
+---@class model.gpu_pointer
+local gpu_pointer = {}
+
+--- Invalidates current pointer, and returns a new one
+---@return model.gpu_pointer 
+function gpu_pointer:move() end
+
+---@param name? string Name of the node. If not given, returns root node
+---@return model.node|nil
+--- It's guaranteed this node is ready to draw and is uploaded to the GPU. Don't store the raw pointer for long!
+function gpu_pointer:get_node(name) end

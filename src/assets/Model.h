@@ -118,7 +118,6 @@ private:
 
 	bool uploaded;
 
-	Node* root;
 
 
 	void upload();
@@ -128,6 +127,7 @@ private:
 	void load_mesh(const tinygltf::Model& model, const tinygltf::Primitive& primitive, Model* rmodel, Node* node,
 				bool drawable, int mesh_idx, int prim_idx);
 public:
+	Node* root;
 
 	// Here lives all the data which needs to be upluaded to the GPU
 	tinygltf::Model gltf;

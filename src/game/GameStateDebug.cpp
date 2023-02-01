@@ -82,6 +82,7 @@ void GameStateDebug::do_entities()
 
 	for (Entity *e : osp->universe->entities)
 	{
+		ImGui::PushID(e);
 		ImGui::Text("%lld (%s)", e->get_uid(), e->get_type().c_str());
 		ImGui::SameLine();
 
@@ -106,6 +107,7 @@ void GameStateDebug::do_entities()
 				shown_entity.push_back(e);
 			}
 		}
+		ImGui::PopID();
 	}
 }
 void GameStateDebug::do_scene()

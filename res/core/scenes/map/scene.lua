@@ -62,10 +62,15 @@ function load(map_id, ncontrolled_ent, nconfig)
 
 	table.insert(event_handlers, universe:sign_up_for_event("core:remove_entity",
 		function(id) renderer:remove_drawable(universe.entities[id]) end))
+
+	-- Add already existing entities
+	for _, entity in ipairs(universe.entities) do 
+		renderer:add_drawable(entity) 
+	end
 	
 	local veh = veh_spawner.spawn_vehicle(universe, assets.get_udata_vehicle("debug.toml"),
-		glm.vec3.new(-2.720318042296709e10 + 6362.5e3, 1.329407956490104e10, 5.764165538717468e10),
-		glm.vec3.new(-2.975363625e4, -5.189341029e3, -2.251484e3 - 800.0), glm.quat.new(1, 0, 0, 0), glm.vec3.new(0, 0, 0), true)
+		glm.vec3.new(-2.720318042296709e10 + 9000e3, 1.329407956490104e10, 5.764165538717468e10),
+		glm.vec3.new(-2.975363625e4, -5.189341029e3 + 9000.0, -2.251484e3), glm.quat.new(1, 0, 0, 0), glm.vec3.new(0, 0, 0), true)
 
 	controlled_ent = veh
 

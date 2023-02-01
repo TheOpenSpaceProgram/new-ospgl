@@ -77,7 +77,8 @@ public:
 
 	// How much time can quick_predict run before it interrupts (approximate)
 	// Negative means it won't be interrupted
-	double quick_predict_timeout = 0.15;
+	// In practice, this is the update interval of the prediction
+	double quick_predict_timeout = 0.5;
 	// How much in-game time can quick_predict run before it interrupts
 	// Negative means it won't be interrupted
 	// Make sure atleast one of them is positive

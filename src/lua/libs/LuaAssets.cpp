@@ -51,6 +51,30 @@ void LuaAssets::load_to(sol::table& table)
 		)
 		);
 
+	table.new_usertype<Config>("config",
+		"root", &Config::root,
+		// This should work except in the most strange of cases
+		"push_pkg", [](Config* cfg, sol::this_environment tenv)
+	    {
+			sol::environment env = tenv;
+			if(env["__pkg_stack"] == sol::nil)
+			{
+				env["__pkg_stack"] = sol::new_table();
+			}
+			auto table = env["__pkg_stack"].get<sol::table>();
+			// Push into the stack
+			table[table.size()] = env["__pkg"];
+			env["__pkg"] = cfg->get_asset_pkg();
+	    },
+		"restore_pkg", [](Config* cfg, sol::this_environment tenv)
+		{
+			sol::environment  env = tenv;
+			auto table = env["__pkg_stack"].get<sol::table>();
+			// Pop from the table
+			env["__pkg"] = table[table.size()];
+			table[table.size()] = sol::nil;
+		});
+
 	table.set_function("get_udata_vehicle", [](const std::string& name)
 	{
 		logger->check(osp->assets->is_path_safe(name), "Path {} is unsafe and may access external files", name);
@@ -67,68 +91,3 @@ void LuaAssets::load_to(sol::table& table)
 
 }
 
-
-template<typename T>
-LuaAssetHandle<T> LuaAssetHandle<T>::move()
-{
-	return LuaAssetHandle<T>(std::move(*this));
-}
-
-template<typename T>
-LuaAssetHandle<T>::LuaAssetHandle(LuaAssetHandle<T>&& b)
-{
-	pkg = b.pkg;
-	name = b.name;
-	data = b.data;
-	ut = b.ut;
-
-	b.pkg = "null";
-	b.name = "null";
-	b.data = nullptr;
-	b.ut = sol::nil;
-
-#ifdef LUA_ASSET_DEBUG_ENABLED
-	logger->debug("Lua asset handle created (path={}:{}, pointer={}) by move", pkg, name, (void*)data);
-#endif
-}
-
-
-template<typename T>
-LuaAssetHandle<T>::LuaAssetHandle(const LuaAssetHandle<T>& p2)
-{
-	pkg = p2.pkg;
-	name = p2.name;
-	data = p2.data;
-	ut = p2.ut;
-
-	osp->assets->get<T>(pkg, name, true);
-
-#ifdef LUA_ASSET_DEBUG_ENABLED
-	logger->debug("Lua asset handle created (path={}:{}, pointer={}) by copy", pkg, name, (void*)data);
-#endif
-}
-
-template<typename T>
-LuaAssetHandle<T>::LuaAssetHandle(const std::string& pkg, const std::string& name, T* data)
-{
-	this->pkg = pkg;
-	this->name = name;
-	this->data = data;
-
-#ifdef LUA_ASSET_DEBUG_ENABLED
-	logger->debug("Lua asset handle created (path={}:{}, pointer={})", pkg, name, (void*)data);
-#endif
-}
-
-
-template<typename T>
-LuaAssetHandle<T>::~LuaAssetHandle()
-{
-	if (data != nullptr)
-	{
-#ifdef LUA_ASSET_DEBUG_ENABLED
-		logger->debug("Lua asset handle freed (path={}:{}, pointer={})", pkg, name, (void*)data);
-#endif
-		osp->assets->free<T>(pkg, name);
-	}
-}

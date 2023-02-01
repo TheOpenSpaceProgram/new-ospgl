@@ -144,3 +144,67 @@ LuaAssetHandle<T>::LuaAssetHandle(const AssetHandle<T>& from)
 #endif
 }
 
+template<typename T>
+LuaAssetHandle<T> LuaAssetHandle<T>::move()
+{
+	return LuaAssetHandle<T>(std::move(*this));
+}
+
+template<typename T>
+LuaAssetHandle<T>::LuaAssetHandle(LuaAssetHandle<T>&& b)
+{
+	pkg = b.pkg;
+	name = b.name;
+	data = b.data;
+	ut = b.ut;
+
+	b.pkg = "null";
+	b.name = "null";
+	b.data = nullptr;
+	b.ut = sol::nil;
+
+#ifdef LUA_ASSET_DEBUG_ENABLED
+	logger->debug("Lua asset handle created (path={}:{}, pointer={}) by move", pkg, name, (void*)data);
+#endif
+}
+
+
+template<typename T>
+LuaAssetHandle<T>::LuaAssetHandle(const LuaAssetHandle<T>& p2)
+{
+	pkg = p2.pkg;
+	name = p2.name;
+	data = p2.data;
+	ut = p2.ut;
+
+	osp->assets->get<T>(pkg, name, true);
+
+#ifdef LUA_ASSET_DEBUG_ENABLED
+	logger->debug("Lua asset handle created (path={}:{}, pointer={}) by copy", pkg, name, (void*)data);
+#endif
+}
+
+template<typename T>
+LuaAssetHandle<T>::LuaAssetHandle(const std::string& pkg, const std::string& name, T* data)
+{
+	this->pkg = pkg;
+	this->name = name;
+	this->data = data;
+
+#ifdef LUA_ASSET_DEBUG_ENABLED
+	logger->debug("Lua asset handle created (path={}:{}, pointer={})", pkg, name, (void*)data);
+#endif
+}
+
+
+template<typename T>
+LuaAssetHandle<T>::~LuaAssetHandle()
+{
+	if (data != nullptr)
+	{
+#ifdef LUA_ASSET_DEBUG_ENABLED
+		logger->debug("Lua asset handle freed (path={}:{}, pointer={})", pkg, name, (void*)data);
+#endif
+		osp->assets->free<T>(pkg, name);
+	}
+}

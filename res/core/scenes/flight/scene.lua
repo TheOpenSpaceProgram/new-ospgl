@@ -34,6 +34,11 @@ function load(veh_id)
 
 	table.insert(event_handlers, universe:sign_up_for_event("core:remove_entity",
 		function(id) renderer:remove_drawable(universe.entities[id]) end))
+	
+	-- Add already existing entities
+	for _, entity in ipairs(universe.entities) do 
+		renderer:add_drawable(entity) 
+	end
 
 	-- Skybox and IBL generation is enabled
 	renderer:add_drawable(skybox)
