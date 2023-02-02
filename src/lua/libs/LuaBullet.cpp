@@ -9,6 +9,28 @@
 #include <glm/glm.hpp>
 #include "../../physics/glm/BulletGlmCompat.h"
 
+
+// Pointers are held in rigid body to these, for lua usage and
+// cleanup
+// Mostly used for memory management, but the integrated table acts as
+// easy user data!
+struct BulletLuaData
+{
+	btDynamicsWorld* in_world;
+	// May be nullptr
+	btMotionState* mstate;
+	std::shared_ptr<btCollisionShape> shape;
+	// Lua may attach stuff here freely
+	sol::table assoc_table;
+
+	BulletLuaData(sol::table n_table)
+	{
+		in_world = nullptr;
+		mstate = nullptr;
+		assoc_table = n_table;
+	}
+};
+
 void LuaBullet::load_to(sol::table& table)
 {
 
@@ -20,10 +42,22 @@ void LuaBullet::load_to(sol::table& table)
 
 	// Rigidbody
 	sol::usertype<btRigidBody> rigidbody_ut = table.new_usertype<btRigidBody>("rigidbody",
-		"new", [](double mass, btMotionState* mstate, btCollisionShape* col_shape, glm::dvec3 inertia)
+		"new", [](double mass, bool has_mstate, std::shared_ptr<btCollisionShape> col_shape, glm::dvec3 inertia,
+				sol::this_state te)
 		{
-			btRigidBody rg = btRigidBody(mass, mstate, col_shape, to_btVector3(inertia));	
-			rg.setActivationState(DISABLE_DEACTIVATION);			
+			btMotionState* mstate = nullptr;
+			if(has_mstate)
+				mstate = new btDefaultMotionState();
+			btRigidBody::btRigidBodyConstructionInfo cinfo(mass, mstate, col_shape.get(),
+														   to_btVector3(inertia));
+			auto rg = std::make_shared<btRigidBody>(cinfo);
+			rg->setActivationState(DISABLE_DEACTIVATION);
+
+			auto rg_data = new BulletLuaData(sol::table(te.lua_state(), sol::create));
+			rg_data->shape = std::move(col_shape);
+			rg_data->mstate = mstate;
+			rg->setUserPointer((void*)rg_data);
+
 			return rg;
 		},
 		"get_collision_shape", [](btRigidBody& self){return self.getCollisionShape();},
@@ -105,14 +139,47 @@ void LuaBullet::load_to(sol::table& table)
 		{
 			self.applyImpulse(to_btVector3(imp), to_btVector3(rel_pos));
 		},
-		"add_to_world", [](btRigidBody* self, btDynamicsWorld& world)
+		"add_to_world", [](btRigidBody* self, btDiscreteDynamicsWorld* world)
 		{
-			world.addRigidBody(self);
+			world->addRigidBody(self);
+			if(self->getUserPointer())
+			{
+				auto d = (BulletLuaData*)self->getUserPointer();
+				if(d->in_world != nullptr)
+				{
+					// TODO: This may eventually be allowed
+					logger->fatal("Tried to add a rigidbody to many worlds, this is not allowed!");
+				}
+				d->in_world = world;
+			}
 		},
-		"remove_from_world", [](btRigidBody* self, btDynamicsWorld& world)
+		"remove_from_world", [](btRigidBody* self, btDiscreteDynamicsWorld* world)
 		{
-			world.removeRigidBody(self);
+			world->removeRigidBody(self);
+			if(self->getUserPointer())
+			{
+				auto d = (BulletLuaData*)self->getUserPointer();
+				d->in_world = nullptr;
+			}
+		},
+		"__gc", [](btRigidBody* self)
+		{
+			if(self->getUserPointer())
+			{
+				auto d = (BulletLuaData*)self->getUserPointer();
+				if(d->in_world)
+					d->in_world->removeRigidBody(self);
+				// Free the shape and motion state
+				d->shape.reset();
+				delete d->mstate;
+				delete d;
+			}
+			else
+			{
+				logger->warn("Rigidbody was gargage collected, and had no lua user data. This should not happen");
+			}
 		}
+
 
 	);
 

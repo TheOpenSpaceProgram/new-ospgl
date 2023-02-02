@@ -18,11 +18,14 @@ function bullet.transform:to_mat4() end
 ---@class bullet.rigidbody
 bullet.rigidbody = {}
 ---@param mass number
----@param mstate bullet.motion_state
+---@param has_mstate boolean The motion state allows interpolation of the movement
 ---@param col_shape bullet.collision_shape
----@param inertia glm.vec3
+---@param inertia glm.vec3 If the body is non-moving, you can use (0, 0, 0)
 ---@return bullet.rigidbody
-function bullet.rigidbody.new(mass, mstate, col_shape, inertia) end
+function bullet.rigidbody.new(mass, has_mstate, col_shape, inertia) end
+
+---@return table Userdata table, data is stored in the rigidbody itself
+function bullet.rigidbody:get_userdata() end
 
 ---@return bullet.collision_shape
 function bullet.rigidbody:get_collision_shape() end

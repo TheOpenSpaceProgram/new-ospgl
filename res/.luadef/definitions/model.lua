@@ -1,6 +1,8 @@
 ---@meta 
 
 ---@class model.node
+---@field children model.node[]
+---@field name string
 local node = {}
 
 ---@param c_uniforms renderer.camera_uniforms Camera uniforms from the camera
@@ -15,8 +17,19 @@ function node:draw(c_uniforms, model, did, ignore_our_subtform, increase_did) en
 ---@param ignore_our_subtform boolean Should our subtform be ignored? Use if you are drawing a children node directly, otherwise false
 function node:draw_shadow(sh_cam, model, ignore_our_subtform) end
 
+---@return bullet.collision_shape
+--- Forms a collision shape from the node using model properties (see documentation of modelling)
+--- Make sure target node is meant to have a collider, as otherwise this will throw an error
+function node:extract_collider() end
+
 ---@class model.model
 local model = {}
+
+---@param name? string If not given, returns root node
+---@return model.node|nil
+--- The node may not be ready to draw as it may not be on the GPU! To draw nodes
+--- use gpu_pointer. This is meant to be used to extract colliders, etc...
+function model:get_node(name) end
 
 ---@return model.gpu_pointer
 function model:get_gpu() end

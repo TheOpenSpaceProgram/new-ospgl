@@ -40,6 +40,7 @@ struct BulletTransform
 	}
 };
 
+
 // 
 // Unlike in C++, lua never sees the internal
 // bullet geometric classes, they always use glm
