@@ -73,6 +73,13 @@ function update(dt)
 	tform = wstate:get_tform()
 end
 
+function physics_update(dt)
+	if rg then
+		local pstate = traj:update(dt, true)
+		rg:set_world_transform(pstate:get_tform())
+	end
+end
+
 function needs_deferred_pass()
     return true
 end
@@ -86,6 +93,9 @@ function enable_bullet(world)
 	if collider then
 		rg = bullet.rigidbody.new(1000000.0, false, collider, glm.vec3.new(0, 0, 0))
 		rg:add_to_world(world)
+		rg:set_friction(1.0)
+		rg:set_restitution(1.0)
+		rg:set_kinematic()
 	end
 end
 

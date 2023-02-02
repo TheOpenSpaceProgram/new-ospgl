@@ -103,4 +103,22 @@ function bullet.rigidbody:add_to_world(world) end
 ---@param world bullet.world
 function bullet.rigidbody:remove_from_world(world) end
 
+---@param mat glm.mat4
+function bullet.rigidbody:set_world_transform(mat) end
+
+---@return glm.mat4
+function bullet.rigidbody:get_world_transform() end
+
+---@return number
+function bullet.rigidbody:get_friction() end
+---@return number
+function bullet.rigidbody:get_restitution() end
+
+---@param val number
+function bullet.rigidbody:set_friction(val) end
+---@param val number
+function bullet.rigidbody:set_restitution(val) end
+
+function bullet.rigidbody:set_kinematic() end
+
 return bullet

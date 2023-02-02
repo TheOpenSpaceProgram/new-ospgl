@@ -85,6 +85,14 @@ void LuaBullet::load_to(sol::table& table)
 		{
 			return to_dvec3(self.getVelocityInLocalPoint(to_btVector3(point)));	
 		},
+		"set_world_transform", [](btRigidBody& self, glm::dmat4 mat)
+		{
+			self.setWorldTransform(to_btTransform(mat));
+		},
+		"get_world_transform", [](btRigidBody& self)
+	    {
+			return to_dmat4(self.getWorldTransform());
+	    },
 		"set_linear_velocity", [](btRigidBody& self, glm::dvec3& vel)
 		{
 			self.setLinearVelocity(to_btVector3(vel));
@@ -138,6 +146,14 @@ void LuaBullet::load_to(sol::table& table)
 		"apply_impulse", [](btRigidBody& self, glm::dvec3& imp, glm::dvec3& rel_pos)
 		{
 			self.applyImpulse(to_btVector3(imp), to_btVector3(rel_pos));
+		},
+		"set_friction", &btRigidBody::setFriction,
+		"get_friction", &btRigidBody::getFriction,
+		"set_restitution", &btRigidBody::setRestitution,
+		"get_restitution", &btRigidBody::getRestitution,
+		"set_kinematic", [](btRigidBody& self)
+		{
+			self.setCollisionFlags(self.getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 		},
 		"add_to_world", [](btRigidBody* self, btDiscreteDynamicsWorld* world)
 		{
