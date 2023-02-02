@@ -12,8 +12,8 @@ void PackedVehicle::set_world_state(WorldState n_state)
 	root_state = n_state;
 
 	// Calculate new root
-	root_transform.setOrigin(to_btVector3(root_state.cartesian.pos));
-	root_transform.setRotation(to_btQuaternion(root_state.rotation));	
+	root_transform.setOrigin(to_btVector3(root_state.pos));
+	root_transform.setRotation(to_btQuaternion(root_state.rot));
 }
 
 void PackedVehicle::calculate_com()

@@ -3,37 +3,27 @@
 
 
 
-LandedTrajectory::LandedTrajectory()
+WorldState LandedTrajectory::update(double dt, bool use_bullet)
 {
-	elem_name = "";	//< To crash on bad initialiations
-}
-
-
-LandedTrajectory::~LandedTrajectory()
-{
-}
-
-WorldState LandedTrajectory::get_state(double _unused, double _unused2, bool use_bullet)
-{
-
+	Universe* uv = osp->universe;
+	PlanetarySystem& sys = uv->system;
 	WorldState out;
 
-	size_t idx = get_universe()->system.name_to_index[elem_name];
-	SystemElement* elem = get_universe()->system.elements[idx];
+	SystemElement* elem = sys.elements[cached_elem_index];
 
 	double tnow;
 	if (use_bullet)
 	{
-		tnow = get_universe()->system.bt;
+		tnow = sys.bt;
 	}
 	else
 	{
-		tnow = get_universe()->system.t;
+		tnow = sys.t;
 	}
 
-	glm::dmat4 rot_matrix = elem->build_rotation_matrix(get_universe()->system.t0, tnow, false);
+	glm::dmat4 rot_matrix = elem->build_rotation_matrix(sys.t0, tnow, false);
 	glm::dvec3 body_pos;
-	auto st = get_universe()->system.get_element_state(idx, use_bullet);
+	auto st = sys.get_element_state(cached_elem_index, use_bullet);
 	body_pos = st.pos;
 
 	glm::dmat4 body_matrix = glm::translate(glm::dmat4(1.0), body_pos);
@@ -42,25 +32,55 @@ WorldState LandedTrajectory::get_state(double _unused, double _unused2, bool use
 	glm::dvec3 tform_pos = glm::dvec3(body_matrix * glm::dvec4(rel_pos, 1.0));
 	glm::dquat tform_rot = glm::dquat(rot_matrix * glm::toMat4(initial_rotation));
 
-	out.cartesian.pos = tform_pos;
-	out.rotation = tform_rot;
+	out.pos = tform_pos;
+	out.rot = tform_rot;
 
 	// Tangential velocity
 	glm::dvec3 tang = elem->get_tangential_speed(rel_pos);
 
-	out.cartesian.vel = st.vel + tang;
+	out.vel = st.vel + tang;
 
-	out.angular_velocity = glm::dvec3(0, 0, 0);
+	out.ang_vel = glm::dvec3(0, 0, 0);
 
-	debug_drawer->add_line(out.cartesian.pos, out.cartesian.pos + tang, glm::vec3(1.0, 0.0, 1.0));
+	debug_drawer->add_line(out.pos, out.pos + tang, glm::vec3(1.0, 0.0, 1.0));
 
 	return out;
 }
 
 
-void LandedTrajectory::set_parameters(std::string in_body, glm::dvec3 rel_pos, glm::dquat rel_rot)
+void LandedTrajectory::update_element_idx()
 {
-	this->elem_name = in_body;
-	this->initial_relative_pos = rel_pos;
-	this->initial_rotation = rel_rot;
+	auto it = osp->universe->system.name_to_index.find(elem_name);
+	logger->check(it != osp->universe->system.name_to_index.end(), "Unable to find element named {}", elem_name);
+
+	cached_elem_index = it->second;
+
+}
+
+LandedTrajectory::~LandedTrajectory()
+{
+	osp->universe->drop_out_of_event("core:system_update_indices", hndl);
+}
+
+
+LandedTrajectory::LandedTrajectory()
+{
+	hndl = EventHandler(EventHandlerFnc([](EventArguments& args, const void* ud)
+	{
+		auto this_ptr = (LandedTrajectory*)ud;
+		this_ptr->update_element_idx();
+	}), this);
+	osp->universe->sign_up_for_event("core:system_update_indices", hndl);
+}
+
+void LandedTrajectory::propagate(double dt, const StateVector &mstates, const LightStateVector &lstates,
+								 LightCartesianState &our_state)
+{
+	// TODO
+}
+
+void LandedTrajectory::set_element(const std::string &elem)
+{
+	elem_name = elem;
+	update_element_idx();
 }

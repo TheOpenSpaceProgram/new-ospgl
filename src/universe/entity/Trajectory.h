@@ -1,39 +1,27 @@
 #pragma once
 #include "../CartesianState.h"
+#include "../UniverseDefinitions.h"
 #include <vector>
 
 class Universe;
 
-struct PredictedState
-{
-	// ABSOLUTE time
-	double t;
-	CartesianState st;
-};
-
-// Trajectories describe the spatial properties of objects
-// (Position and velocity)
-// Prediction is done externally to simplify the writing of 
-// trajectories
+// Trajectories are used to implement behaviour other than n-body physics
+// in prediction and propagation. A good example are landed vessels, which are
+// fixed to a point in a planet
+// Trajectories may also be used during real-time simulation in bullet
+// Iedally, implement them in C++ for performance as these are called a LOT
 class Trajectory
 {
-private:
-
-	Universe* universe = nullptr;
-
 public:
-	
-	// Some trajectories may also be used while bullet is loaded, 
-	// that's what the optional flag is for
-	virtual WorldState get_state(double t0, double t, bool use_bullet = false) = 0;
 
-	virtual void init() {}
+	// Called once per timestep, with values of the system elements, and light state vectors, after n-body simulation
+	// You are included in lstates, but you must modify the passed LightState
+	// t0 is the system start time, to allow massive times without floating point errors for planet rotations
+	virtual void propagate(double dt, const StateVector& mstates,
+						   const LightStateVector& lstates, LightCartesianState& our_state) = 0;
 
-	void setup(Universe* universe)
-	{
-		this->universe = universe;
-		init();
-	}
+	// Called in real-time, so that the trajectory can work for visually positioning the object
+	// and for positioning it in the physics engine (if use_bullet is true)
+	virtual WorldState update(double dt, bool use_bullet) = 0;
 
-	Universe* get_universe() { return universe; }
 };

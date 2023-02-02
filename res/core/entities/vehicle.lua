@@ -54,19 +54,11 @@ end
 function disable_bullet(world)
 end
 
-function get_visual_origin()
+function get_position(physics)
     if vehicle:is_packed() then
         return glm.vec3.new(0, 0, 0)
     else
-        return vehicle.unpacked:get_center_of_mass(true)
-    end
-end
-
-function get_physics_origin()
-    if vehicle:is_packed() then
-        return glm.vec3.new(0, 0, 0)
-    else
-        return vehicle.unpacked:get_center_of_mass(false)
+        return vehicle.unpacked:get_center_of_mass(not physics)
     end
 end
 

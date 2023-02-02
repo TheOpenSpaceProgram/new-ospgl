@@ -9,20 +9,28 @@ class LandedTrajectory : public Trajectory
 {
 private:
 
+	EventHandler hndl;
 	std::string elem_name;
-	glm::dvec3 initial_relative_pos;
-	glm::dquat initial_rotation;
-	Universe* universe;
+	// Updated in the event handler
+	size_t cached_elem_index;
+
+	void update_element_idx();
 
 public:
 
 
-	virtual WorldState get_state(double t0, double t, bool use_bullet = false) override;
-	void set_parameters(std::string body_name, glm::dvec3 rel_pos, glm::dquat rel_rot);
+	void propagate(double dt, const StateVector& mstates,
+						   const LightStateVector& lstates, LightCartesianState& our_state) override;
+
+	WorldState update(double dt, bool use_bullet) override;
+
+	glm::dvec3 initial_relative_pos;
+	glm::dquat initial_rotation;
+
+	void set_element(const std::string& elem);
 
 	LandedTrajectory();
 	~LandedTrajectory();
-
 
 };
 

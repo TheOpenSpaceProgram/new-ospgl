@@ -28,7 +28,8 @@ function universe:create_entity(script_path, ...) end
 
 ---@param id integer
 ---@return universe.entity
---- Do not hold to the returned value for long, as it may go invalid pretty quickly!
+--- If you hold the returned pointer, make sure you sign up for the entity removal event in case
+--- the entity gets removed, so you can invalidate the pointer safely
 function universe:get_entity(id) end
 
 ---@param dt number
@@ -38,17 +39,24 @@ function universe:update(dt) end
 ---@field elements universe.element[]
 local planetary_system = {}
 
----@param name string Name of the element, or __default 
+---@param name string|integer Name / index of the element, or __default 
 ---@return glm.vec3
+--- If called with indices, make sure you listen for planetary system events, as indices may be 
+--- outdated in the case of element creation / deletion
 function planetary_system:get_element_position(name) end
 
----@param name string Name of the element, or __default 
+---@param name string|integer Name / index of the element, or __default 
 ---@return glm.vec3
+--- If called with indices, make sure you listen for planetary system events, as indices may be 
+--- outdated in the case of element creation / deletion
 function planetary_system:get_element_velocity(name) end
 
----@param name string Name of the element, or __default
+---@param name string|integer Name / Index of the element, or __default
 ---@return universe.element
+--- If called with indices, make sure you listen for planetary system events, as indices may be 
+--- outdated in the case of element creation / deletion
 function planetary_system:get_element(name) end
+
 
 ---@class universe.element
 ---@field index integer
@@ -75,7 +83,16 @@ local entity = {}
 -- TODO: Do what's said in the comment
 
 ---@return glm.vec3
-function entity:get_visual_origin() end
+function entity:get_position() end
+
+---@return glm.vec3
+function entity:get_velocity() end
+
+---@return glm.quat
+function entity:get_orientation() end
+
+---@return glm.vec3
+function entity:get_angular_velocity() end
 
 ---@return flight_input.context|nil
 function entity:get_input_ctx() end
@@ -90,3 +107,14 @@ local save_db = {}
 --- Obtains a persistent toml file. You can modify the contents and they will
 --- automatically be serialized on next save-game
 function save_db:get_toml(arg1, arg2) end
+
+---@class universe.world_state
+---@field pos glm.vec3
+---@field vel glm.vec3
+---@field ang_vel glm.vec3
+---@field rotation glm.quat
+local world_state = {}
+
+---@return glm.mat4
+function world_state:get_tform() end
+

@@ -103,10 +103,11 @@ void LuaUniverse::load_to(sol::table& table)
 	        "enable_bullet", &Entity::enable_bullet,
 	        "disable_bullet", &Entity::disable_bullet,
 	        "set_bullet_enabled", &Entity::enable_bullet_wrapper,
-	        "get_physics_origin", &Entity::get_physics_origin,
+	        "get_position", &Entity::get_position,
 			"get_velocity", &Entity::get_velocity,
+	        "get_orientation", &Entity::get_orientation,
+			"get_angular_velocity", &Entity::get_angular_velocity,
 	        "get_physics_radius", &Entity::get_physics_radius,
-	        "get_visual_origin", &Entity::get_visual_origin,
 	        "is_physics_loader", &Entity::is_physics_loader,
 			"get_input_ctx", &Entity::get_input_ctx,
 	        "timewarp_safe", &Entity::timewarp_safe,
@@ -123,5 +124,17 @@ void LuaUniverse::load_to(sol::table& table)
 			sol::environment env = tenv;
 			return db->get_toml(env["__pkg"].get_or<std::string>("core"), path);
 	  }));
+
+	table.new_usertype<WorldState>("world_state", sol::no_constructor,
+	   "pos", &WorldState::pos,
+	   "vel", &WorldState::vel,
+	   "rot", &WorldState::rot,
+	   "ang_vel", &WorldState::ang_vel,
+	   "get_tform", [](WorldState* self)
+	   {
+			glm::dmat4 mat = glm::dmat4();
+			mat = glm::translate(mat, self->pos) * glm::toMat4(self->rot);
+			return mat;
+	   });
 
 }

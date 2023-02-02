@@ -22,6 +22,9 @@ function toml.table:set_bool(key, bool) end
 ---@param key string
 ---@param vec glm.vec3
 function toml.table:set_vec3(key, vec) end
+---@param key string
+---@param vec glm.quat
+function toml.table:set_vec3(key, vec) end
 
 ---@return toml.table
 ---@param key string
@@ -54,6 +57,14 @@ function toml.table:get_vec3(key) end
 ---@param key string
 ---@param def glm.vec3
 function toml.table:get_vec3_or(key, def) end
+
+---@return glm.quat
+---@param key string
+function toml.table:get_quat(key) end
+---@return glm.quat
+---@param key string
+---@param def glm.quat
+function toml.table:get_quat_or(key, def) end
 
 ---@return table
 ---@param key string

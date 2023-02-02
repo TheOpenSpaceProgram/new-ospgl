@@ -10,6 +10,7 @@ local assets = require("assets")
 local logger = require("logger")
 local orbit = require("orbit")
 local veh_spawner = dofile("core:scenes/vehicle_spawner.lua")
+local core_events = dofile("core:events.lua")
 
 require("toml")
 
@@ -57,10 +58,10 @@ function load(map_id, ncontrolled_ent, nconfig)
 	renderer:add_drawable(predictor)
 	renderer:add_light(sunlight)
 	
-	table.insert(event_handlers, universe:sign_up_for_event("core:new_entity",
+	table.insert(event_handlers, universe:sign_up_for_event(core_events.new_entity,
 		function(id) logger.info(tostring(id)) renderer:add_drawable(universe.entities[id]) end))
 
-	table.insert(event_handlers, universe:sign_up_for_event("core:remove_entity",
+	table.insert(event_handlers, universe:sign_up_for_event(core_events.remove_entity,
 		function(id) renderer:remove_drawable(universe.entities[id]) end))
 
 	-- Add already existing entities
@@ -77,7 +78,7 @@ function load(map_id, ncontrolled_ent, nconfig)
 end
 
 function update(dt)
-	predictor:update(controlled_ent:get_visual_origin(), controlled_ent:get_velocity())
+	predictor:update(controlled_ent:get_position(false), controlled_ent:get_velocity(false))
 
 	gui_screen:new_frame()
 	gui_screen:prepare_pass()

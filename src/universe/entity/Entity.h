@@ -9,6 +9,8 @@
 #include <util/defines.h>
 #include <set>
 
+#include "history/EntityHistory.h"
+
 #include <cpptoml.h>
 
 class InputContext;
@@ -30,19 +32,23 @@ class InputContext;
 // Physics can't be enabled while timewarp is high, but timewarp will warn the user
 // if any entity cannot currently timewarp because of physics (it can optionally
 // block or reduce timewarp)
+// We store history for entities. History is generated automaticaly, and configured
+// by the entity itself.
+// Predictions, as they are computationally expensive, are generated on demand externally to the entity
+// which may optionally not have n-body behaviour with the has_custom_propagation flag
 class Entity : public Drawable
 {
 private:
 
 	Universe* universe;
 	bool bullet_enabled;
-
 	int64_t uid;
-
 	sol::state* lua_state;
 	std::string type_str;
 
 public:
+	EntityHistory history;
+
 	sol::environment env;
 	std::shared_ptr<cpptoml::table> init_toml;
 
@@ -51,14 +57,18 @@ public:
 	// You must stop simulating bullet physics here
 	void disable_bullet(btDynamicsWorld* world);
 
-	// Return our position to be used by physics loading
-	glm::dvec3 get_physics_origin();
-
-	// Return position to be used as a sort of visual origin (for camera centering, etc...)
-	glm::dvec3 get_visual_origin();
-
-	// Returns a velocity to be used for orbit prediction and reference frames, etc...
+	// Give your current position, velocity and orientation
+	// Origin may be a representative point, for example, COM
+	glm::dvec3 get_position();
 	glm::dvec3 get_velocity();
+	glm::dquat get_orientation();
+	glm::dvec3 get_angular_velocity();
+
+	// If you return nullptr, it will be assumed you are n-body propagated
+	// Otherwise, return a valid Trajectory for the predictor / propagator
+	// Note that you need to manually call update() in the trajectory! This is only
+	// for timewarp and prediction
+	Trajectory* get_trajectory();
 
 	// An approximation of our size, try to go higher than the real number
 	// Values of 0.0 means that we don't have a limit for physics loading

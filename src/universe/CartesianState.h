@@ -24,17 +24,17 @@ struct CartesianState
 // Also includes orientation
 struct WorldState
 {
-	CartesianState cartesian;
-	glm::dquat rotation;
-	glm::dvec3 angular_velocity;
+	glm::dvec3 pos;
+	glm::dvec3 vel;
+	glm::dquat rot;
+	glm::dvec3 ang_vel;
 
 	WorldState()
 	{
 		// Sane defaults
-		cartesian.pos = glm::dvec3(0.0, 0.0, 0.0);
-		cartesian.vel = glm::dvec3(0.0, 0.0, 0.0);
-		cartesian.mass = 0.0;
-		rotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
-		angular_velocity = glm::dvec3(0.0, 0.0, 0.0);
+		pos = glm::dvec3(0.0, 0.0, 0.0);
+		vel = glm::dvec3(0.0, 0.0, 0.0);
+		rot = glm::dquat(1.0, 0.0, 0.0, 0.0);
+		ang_vel = glm::dvec3(0.0, 0.0, 0.0);
 	}
 };

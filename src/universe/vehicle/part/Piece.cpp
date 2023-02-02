@@ -69,7 +69,7 @@ btVector3 Piece::get_linear_velocity(bool ignore_tangential)
 {
 	if(in_vehicle->is_packed())
 	{
-		btVector3 base = to_btVector3(in_vehicle->packed_veh.get_root_state().cartesian.vel);
+		btVector3 base = to_btVector3(in_vehicle->packed_veh.get_root_state().vel);
 	
 		base += get_tangential_velocity();
 
@@ -91,7 +91,7 @@ btVector3 Piece::get_angular_velocity()
 {
 	if(in_vehicle->is_packed())
 	{
-		return to_btVector3(in_vehicle->packed_veh.get_root_state().angular_velocity);
+		return to_btVector3(in_vehicle->packed_veh.get_root_state().ang_vel);
 	}
 	else 
 	{

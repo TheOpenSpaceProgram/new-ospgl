@@ -21,6 +21,8 @@ void QuickPredictor::sterm_predict(glm::dvec3 spos, glm::dvec3 svel)
 	double start_time = glfwGetTime();
 	StateVector st;
 	LightStateVector ls;
+	TrajectoryVector tv;
+	tv.push_back(nullptr);
 	LightCartesianState to_predict;
 
 	// Fetch the solar system state
@@ -39,7 +41,7 @@ void QuickPredictor::sterm_predict(glm::dvec3 spos, glm::dvec3 svel)
 	pred.lock.unlock();
 
 	RK4Propagator prop;
-	prop.bind_to(&st, &ls);
+	prop.bind_to(&st, &ls, &tv);
 
 	size_t it = 0;
 

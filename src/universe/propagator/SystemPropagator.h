@@ -9,6 +9,8 @@ class SystemPropagator
 protected:
 	StateVector* st_vector;
 	LightStateVector* lst_vector;
+	// If nullptr, it's nbody. Same number of elements as lst_vector
+	TrajectoryVector* trj_vector;
 
 public:
 
@@ -17,13 +19,15 @@ public:
 	{
 		this->st_vector = system->get_massful_states();
 		this->lst_vector = system->get_light_states();
+		this->trj_vector = system->get_trajectories();
 		init();
 	}
 
-	void bind_to(StateVector* s, LightStateVector* l)
+	void bind_to(StateVector* s, LightStateVector* l, TrajectoryVector* t)
 	{
 		this->st_vector = s;
 		this->lst_vector = l;
+		this->trj_vector = t;
 		init();
 	}
 

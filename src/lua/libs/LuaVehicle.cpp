@@ -5,11 +5,11 @@
 static WorldState decode_worldstate_table(sol::table table)
 {
 	WorldState out;
-	out.cartesian.pos = table["pos"].get<glm::dvec3>();
-	out.cartesian.vel = table["vel"].get<glm::dvec3>();
-	out.rotation = table["rot"].get<glm::dquat>();
+	out.pos = table["pos"].get<glm::dvec3>();
+	out.vel = table["vel"].get<glm::dvec3>();
+	out.rot = table["rot"].get<glm::dquat>();
 	glm::dvec3 v = glm::dvec3(0, 0, 0);
-	out.angular_velocity = table["angvel"].get_or<glm::dvec3>(v);
+	out.ang_vel = table["angvel"].get_or<glm::dvec3>(v);
 
 	return out;
 }

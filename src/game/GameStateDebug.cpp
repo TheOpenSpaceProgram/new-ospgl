@@ -200,7 +200,7 @@ void GameStateDebug::update_cam(double dt)
 	}
 	else
 	{
-		cam.center = centered_camera->get_visual_origin();
+		cam.center = centered_camera->get_position();
 	}
 
 }

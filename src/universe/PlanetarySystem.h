@@ -16,10 +16,14 @@
 class Universe;
 
 // The planetary system holds all the SystemElements and draws and updates them
+// Emits events when any element is removed / created so anything which
+// holds elements can update indices:
+// core:system_update_indices() <- Called when indices need to be updated
+// core:system_element_removed(old_id, elem_name) <- Called when an element is removed
+// core:system_element_created(new_id, elem_name) <- Called when an element is created
 class PlanetarySystem : public Drawable, public Propagable
 {
 private:
-
 
 	PosVector physics_pos;
 
@@ -65,7 +69,9 @@ public:
 	SystemElement* get_element(const std::string& name);
 
 	StateVector states_now;
+	// Only used during time-warp, to propagate entities
 	LightStateVector handled_states_now;
+	TrajectoryVector handled_states_trj;
 
 	SystemPropagator* propagator;
 	
@@ -94,6 +100,10 @@ public:
 	LightStateVector* get_light_states() override
 	{
 		return &handled_states_now;
+	}
+	TrajectoryVector* get_trajectories() override
+	{
+		return &handled_states_trj;
 	}
 
 	explicit PlanetarySystem(Universe* universe);

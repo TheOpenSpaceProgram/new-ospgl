@@ -41,6 +41,12 @@ void LuaToml::load_to(sol::table& table)
 			serialize(val, *n_table);
 			self->insert(key, n_table);
 		},
+	    "set_quat", [](table_ptr self, const std::string key, glm::dquat val)
+	    {
+		   table_ptr n_table = cpptoml::make_table();
+		   serialize(val, *n_table);
+		   self->insert(key, n_table);
+	    },
 		"get_table", [](table_ptr self, const std::string& key)
 		{
 			return self->get_table_qualified(key);
@@ -87,6 +93,11 @@ void LuaToml::load_to(sol::table& table)
 			glm::dvec3 v; deserialize(v, *self->get_table(key));
 			return v;
 		},
+		"get_quat", [](table_ptr self, const std::string& key)
+	    {
+			glm::dquat q; deserialize(q, *self->get_table(key));
+			return q;
+	    },
 		"get_vec3_or", [](table_ptr self, const std::string& key, glm::dvec3 def_val)
 		{
 			table_ptr tbl = self->get_table(key);
@@ -100,6 +111,19 @@ void LuaToml::load_to(sol::table& table)
 				return def_val;
 			}
 		},
+	   "get_quat_or", [](table_ptr self, const std::string& key, glm::dquat def_val)
+	   {
+		   table_ptr tbl = self->get_table(key);
+		   if (tbl)
+		   {
+			   glm::dquat q; deserialize(q, *tbl);
+			   return q;
+		   }
+		   else
+		   {
+			   return def_val;
+		   }
+	   },
 		"get_array_of_string", [](table_ptr self, const std::string& key)
 		{
 			return sol::as_table(*self->get_array_of<std::string>(key));	
