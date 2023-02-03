@@ -14,14 +14,6 @@ require("universe")
 vehicle = nil
 local veh_debug = nil 
 
-if entity.init_toml ~= nil then
-    -- vehicles are stored separately to improve the syntax of savefiles
-	local vehicle_toml_path = entity.init_toml:get_string("save_vehicle")
-    local vehicle_toml = assets.get_save_vehicle(vehicle_toml_path)
-    vehicle = veh.vehicle.new()
-    vehicle_toml:read_to_vehicle(vehicle)
-	veh_debug = dofile("core:entities/vehicle_debug.lua"):init(vehicle)
-end
 
 -- Gets passed the vehicle to use
 ---@param nvehicle vehicle
@@ -31,6 +23,15 @@ function create(nvehicle)
 end
 
 function init()
+	if entity.init_toml ~= nil then
+    	-- vehicles are stored separately to improve the syntax of savefiles
+		local vehicle_toml_path = entity.init_toml:get_string("save_vehicle")
+    	local vehicle_toml = assets.get_save_vehicle(vehicle_toml_path)
+    	vehicle = veh.vehicle.new()
+    	vehicle_toml:read_to_vehicle(vehicle)
+		veh_debug = dofile("core:entities/vehicle_debug.lua"):init(vehicle)
+	end
+
     vehicle:set_world(osp.universe.bt_world)
     vehicle:init(osp.universe, entity)
 end

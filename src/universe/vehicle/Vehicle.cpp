@@ -13,6 +13,7 @@ void Vehicle::unpack()
 	//st.rotation *= st.angular_velocity * bdt;
 	packed_veh.set_world_state(st);
 
+	unpacked_veh.set_world(osp->universe->bt_world);
 	unpacked_veh.activate();	
 }
 

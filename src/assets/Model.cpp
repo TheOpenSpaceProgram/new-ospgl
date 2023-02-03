@@ -599,6 +599,12 @@ void Model::load_node(const tinygltf::Model &model, int node_idx, Node *parent, 
 	{
 		load_node(model, child, n_node, rmodel, drawable);
 	}
+
+	auto all_children = n_node->get_children_recursive();
+	for(Node* n : all_children)
+	{
+		n_node->child_names[n->name] = n;
+	}
 }
 
 Model::~Model()
@@ -748,12 +754,9 @@ void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &p
 
 }
 
-glm::dmat4 Model::get_tform(Node* n, Node* origin) const
+glm::dmat4 Node::get_tform(const Node* n) const
 {
-	if(origin == nullptr)
-		origin = root;
-
-	auto path = get_path(n, origin);
+	auto path = get_path(n, this);
 	glm::dmat4 tform = glm::dmat4();
 	// Iterate from end to top for correct matrix multiplication order
 	// tform = third * second * first
@@ -765,9 +768,9 @@ glm::dmat4 Model::get_tform(Node* n, Node* origin) const
 	return tform;
 }
 
-std::vector<Node*> Model::get_path(Node* to, Node* from) const
+std::vector<const Node*> Node::get_path(const Node* to, const Node* from) const
 {
-	std::vector<Node *> out;
+	std::vector<const Node*> out;
 	out.push_back(from);
 	bool found = false;
 	for (Node *child: from->children)
@@ -1012,6 +1015,22 @@ std::vector<Node*> Node::get_children_recursive() const
 	}
 
 	return out;
+}
+
+std::pair<glm::dvec3, glm::dvec3> Node::get_bounds(const Node *n) const
+{
+	auto tform = get_tform(n);
+	auto min = glm::dvec3(tform * glm::dvec4(n->min_bound, 1.0));
+	auto max = glm::dvec3(tform * glm::dvec4(n->max_bound, 1.0));
+
+	return std::make_pair(min, max);
+}
+
+Node* Node::get_child(const std::string& fname) const
+{
+	auto it = child_names.find(fname);
+	logger->check(it != child_names.end(), "Could not find children named: {}", fname);
+	return it->second;
 }
 
 void ModelColliderExtractor::load_collider(btCollisionShape** target, Node* n)

@@ -134,15 +134,10 @@ void LuaToml::load_to(sol::table& table)
 		},
 		"get_array_of_table", [](table_ptr self, const std::string& key)
 	   	{
-			// Here we simply return an empty array, not nil
 			auto val = self->get_table_array_qualified(key);
-			std::vector<std::shared_ptr<cpptoml::table>> tables;
 			if(val)
-			{
-				tables = val->get();
-			}
-
-			return tables;
+				return sol::optional(val->get());
+			return sol::optional<std::vector<table_ptr>>();
 	   	},
 	   	"read_to_vehicle", [](table_ptr self, Vehicle& target)
 	   	{

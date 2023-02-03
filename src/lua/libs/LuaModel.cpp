@@ -8,6 +8,19 @@ void LuaModel::load_to(sol::table &table)
 		  "draw_shadow", &Node::draw_shadow,
 		  "children", &Node::children,
 		  "get_children_recursive", &Node::get_children_recursive,
+		  "extract_collider", [](Node* base, Node* n)
+		  {
+			btCollisionShape *shape;
+			ModelColliderExtractor::load_collider(&shape, n);
+
+			glm::dmat4 tform = base->get_tform(n);
+			// For lua gargabe collection
+			auto shared_ptr = std::shared_ptr<btCollisionShape>(shape);
+			return std::make_pair(shared_ptr, tform);
+		   },
+	      "get_tform_of", &Node::get_tform,
+		  "get_bounds_of", &Node::get_bounds,
+		  "get_child_deep", &Node::get_child,
 		  "name", &Node::name);
 
 	table.new_usertype<Model>("model", sol::no_constructor,
@@ -28,17 +41,7 @@ void LuaModel::load_to(sol::table &table)
 		  [](Model* model)
 		  {
 			  return model->root;
-		  }),
-		  "extract_collider", [](const Model& m, Node* n, sol::optional<Node*> origin)
-		  {
-			  btCollisionShape *shape;
-			  ModelColliderExtractor::load_collider(&shape, n);
-
-			  glm::dmat4 tform = m.get_tform(n, origin.value_or(nullptr));
-			  // For lua gargabe collection
-			  auto shared_ptr = std::shared_ptr<btCollisionShape>(shape);
-			  return std::make_pair(shared_ptr, tform);
-		  });
+		  }));
 
 	table.new_usertype<LuaGPUModelPointer>("gpu_pointer", sol::no_constructor,
 		   "move", &LuaGPUModelPointer::move,

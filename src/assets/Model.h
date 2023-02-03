@@ -71,6 +71,7 @@ public:
 struct Node
 {
 	std::string name;
+	std::unordered_map<std::string, Node*> child_names;
 
 	std::vector<Mesh> meshes;
 	glm::dmat4 sub_transform;
@@ -85,6 +86,15 @@ struct Node
 	std::vector<const Mesh*> get_all_meshes_recursive(bool include_ours = true) const;
 
 	std::vector<Node*> get_children_recursive() const;
+
+	Node* get_child(const std::string& name) const;
+
+	// n must be a children / ourselves
+	glm::dmat4 get_tform(const Node* n) const;
+	// to/from must be a children / ourselves
+	std::vector<const Node*> get_path(const Node* to, const Node* from) const;
+	// n must be a children / ourselves
+	std::pair<glm::dvec3, glm::dvec3> get_bounds(const Node* n) const;
 
 	void draw_all_meshes(const CameraUniforms& uniforms, GLint drawable_id, glm::dmat4 model) const;
 	void draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model) const;
@@ -144,9 +154,6 @@ public:
 
 	void get_gpu();
 	void free_gpu();
-
-	glm::dmat4 get_tform(Node* n, Node* origin) const;
-	std::vector<Node*> get_path(Node* to, Node* from) const;
 
 	Model(tinygltf::Model&& model, ASSET_INFO);
 	~Model();

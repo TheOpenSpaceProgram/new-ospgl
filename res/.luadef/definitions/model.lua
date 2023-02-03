@@ -20,10 +20,30 @@ function node:draw_shadow(sh_cam, model, ignore_our_subtform) end
 ---@return model.node[]
 function node:get_children_recursive() end
 
----@param lc? boolean Obtain coordinates in node space? Defaults to false if not given
----@return glm.vec3 Minimum coordinate
----@return glm.vec3 Maximum coordinate
-function node:get_bounds(lc) end
+---@param name string
+---@return model.node
+--- Allows obtaining "children of children"
+function node:get_child_deep(name) end
+
+--- @param child model.node Children to get bounds of in our coordinate system
+function node:get_bounds_of(child) end
+---@param child model.node
+---@return glm.mat4
+--- Obtains the transform matrix that goes from our space to children-node space, use it to
+--- position colliders, etc...
+--- Try to cache the result, as this operation could be expensive on complex models
+function node:get_tform_of(child) end
+
+---@return bullet.collision_shape Collider
+---@return glm.mat4 Collider transform
+---@param n model.node Node to extract collider from, assumed to have a collider!
+--- Forms a collision shape from the node using model properties (see documentation of modelling)
+--- Make sure target node is meant to have a collider, as otherwise this will throw an error
+--- Note: The collider is generated in n coordinates, so to properly place the rigidbody it's on, you may 
+--- either create a compound collider (and offset it inside) or simply place the rigidbody offset by the returned matrix
+--- The returned matrix transforms from the collider space to the space of the node being called
+function node:extract_collider(n) end
+
 
 ---@class model.model
 local model = {}
@@ -33,24 +53,6 @@ local model = {}
 --- The node may not be ready to draw as it may not be on the GPU! To draw nodes
 --- use gpu_pointer. This is meant to be used to extract colliders, etc...
 function model:get_node(name) end
-
----@param n model.node
----@param origin? model.node If not given, assumed to be root
----@return glm.mat4
---- Obtains the transform matrix that goes from origin-space to node-space, use it to
---- position colliders, etc...
---- Try to cache the result, as this operation could be expensive on complex models
-function model:get_tform(n, origin) end
-
----@return bullet.collision_shape Collider
----@return glm.mat4 Collider transform
----@param n model.node Node to extract collider from, assumed to have a collider!
----@param base_node? model.node which will be drawn, so that collider offset is correct. If not given, assumes root
---- Forms a collision shape from the node using model properties (see documentation of modelling)
---- Make sure target node is meant to have a collider, as otherwise this will throw an error
---- Note: The collider is generated in n coordinates, so to properly place the rigidbody it's on, you may 
---- either create a compound collider (and offset it inside) or simply place the rigidbody offset by the returned matrix
-function model:extract_collider(n, base_node) end
 
 ---@return model.gpu_pointer
 function model:get_gpu() end

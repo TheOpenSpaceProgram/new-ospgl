@@ -148,12 +148,6 @@ GameState *GameState::create_main_menu(const std::string &skip_to_save)
 
 void GameState::init()
 {
-	// Init the entities
-	for(Entity* ent : universe.entities)
-	{
-		ent->setup(&universe, ent_to_id[ent]);
-	}
-
 	scene->load();
 
 }
@@ -201,8 +195,6 @@ void GameState::load_inner(cpptoml::table &from)
 		}
 	}
 
-	// Init the universe entities (We have added them through special
-	// code)
 
 	// Init the hashtable
 	for(Entity* ent : universe.entities)
@@ -211,6 +203,13 @@ void GameState::load_inner(cpptoml::table &from)
 	}
 
 	universe.uid = last_uid;
+
+	// Finally, init the entities
+	for(Entity* ent : universe.entities)
+	{
+		ent->setup(&universe, ent_to_id[ent]);
+	}
+
 }
 
 void GameState::load_scene_from_save(cpptoml::table& scene_toml)

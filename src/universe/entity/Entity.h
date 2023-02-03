@@ -90,6 +90,8 @@ public:
 
 	// Called when the entity is added into the universe
 	// Universe is already initialized
+	// Note: Not the same as create, this is called also on loading save-games
+	// but create only once when the entity is first created
 	void init();
 
 	// Return true if the physics have stabilized enough for timewarp
