@@ -34,6 +34,33 @@ function OnSetText(uri, text)
       text = "require"
     }
   end
+  
+  -- find all require(string) that end in .lua
+  -- We replace / by . so sumneko understands the code
+  for dofile_pos, begin_pos, pkg, name, end_pos in text:gmatch '()require%(()%"([%a_%-%./]*):?([%a_%.%-/]*)%.lua%"()%)' do 
+    --argage.lol()
+    if name == "" then 
+      local last = ""
+      for pkg in uri:gmatch '.-res/([%a_%-]*)/.*' do
+        last = pkg
+        break
+      end
+      -- only name, resolve uri
+      name = pkg
+      pkg = last
+    end
+
+    name = name:gsub("/", ".")
+    name = name:gsub(".lua", "")
+    local final_str = '"' .. pkg .. "." .. name .. '"'
+
+    -- Replace path
+    changes[#changes + 1] = {
+      start = begin_pos,
+      finish = end_pos - 1,
+      text = final_str
+    }
+  end
 
   return changes
 end

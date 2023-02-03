@@ -126,11 +126,11 @@ void LuaToml::load_to(sol::table& table)
 	   },
 		"get_array_of_string", [](table_ptr self, const std::string& key)
 		{
-			return sol::as_table(*self->get_array_of<std::string>(key));	
+			return *self->get_array_of<std::string>(key);
 		},
 		"get_array_of_number", [](table_ptr self, const std::string& key)
 		{
-			return sol::as_table(*self->get_array_of<double>(key));
+			return *self->get_array_of<double>(key);
 		},
 		"get_array_of_table", [](table_ptr self, const std::string& key)
 	   	{
@@ -142,7 +142,7 @@ void LuaToml::load_to(sol::table& table)
 				tables = val->get();
 			}
 
-			return sol::as_table(tables);
+			return tables;
 	   	},
 	   	"read_to_vehicle", [](table_ptr self, Vehicle& target)
 	   	{

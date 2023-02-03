@@ -66,15 +66,15 @@ function toml.table:get_quat(key) end
 ---@param def glm.quat
 function toml.table:get_quat_or(key, def) end
 
----@return table
+---@return string[]
 ---@param key string
 function toml.table:get_array_of_string(key) end
 
----@return table
+---@return number[]
 ---@param key string
 function toml.table:get_array_of_number(key) end
 
----@return table
+---@return toml.table[]
 ---@param key string
 function toml.table:get_array_of_table(key) end
 

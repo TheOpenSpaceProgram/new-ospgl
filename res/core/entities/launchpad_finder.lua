@@ -1,20 +1,17 @@
--- This file unifies the concept of launchpads, which are stored as a global array in the universe
--- launchpads must implement the get_launchpad() function
--- Launchpads may be added multiple times without problem
+-- INCLUDE USING REQUIRE! THIS LIBRARY USES A GLOBAL OBJECT TO STORE THE LAUNCHPADS
+-- Entities which have launchpads must provide a "get_launchpad(sub_id)" function which
+-- returns the launchpad table
 
-function add_launchpad(universe, entity_id)
-    universe.lua.launchpads[entity_id] = true 
+local launchpad_finder = {}
+
+launchpad_finder.launchpads = {}
+
+function launchpad_finder:add_launchpad(entity_uid)
+	self.launchpads[entity_uid] = true
 end
 
-function remove_launchpad(universe, entity_id)
-    universe.lua.launchpads[entity_id] = nil 
+function launchpad_finder:remove_launchpad(entity_uid)
+	self.launchpads[entity_uid] = nil
 end
 
--- Warning: This returns a reference! Remember that in lua tables are passed by reference
-function get_launchpads(universe)
-    return universe.lua.launchpads
-end
-
-function init()
-    universe.lua.launchpads = {}
-end
+return launchpad_finder

@@ -64,7 +64,7 @@ system_version = "0.1.0"
 
 [[entity]]
 	id = 1
-	type = "core:entities/building.lua"
+	type = "core:entities/building/building.lua"
 	building = "debug_system:buildings/launchpad.toml"
 	in_body = "Earth"
 	[entity.rel_pos]

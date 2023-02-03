@@ -68,12 +68,14 @@ int LoadFileRequire(lua_State* L)
 	}
 	else
 	{
-		// This is not what require is meant to be used for, so throw an error
-		// Remember that require creates only one instance of a file, so it will cause errors
-		// as files will be shared across many objects. This is appropiate for libraries, but not for
-		// single files, such as machines.
-		logger->error("Could not find library '{}'. Require is used for libraries, use dofile for files!", path);
-		sol::stack::push(L, "ERROR");
+		// WARNING FOR MODDERS: require creates only one instance, use for libraries!
+		std::string spath = osp->assets->resolve_path(path, sview["__pkg"]);
+
+		// The package loader is nothing more than the script itself
+		std::string script = osp->assets->load_string_raw(spath);
+		sol::load_result fx = sview.load(script);
+		sol::function ffx = fx;
+		sol::stack::push(L, ffx);
 		return 1;
 
 	}
