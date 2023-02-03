@@ -24,6 +24,8 @@ local wstate = nil
 local tform = nil
 ---@type bullet.collision_shape
 local collider = nil
+---@type glm.mat4
+local collider_offset = nil
 ---@type bullet.rigidbody|nil
 local rg = nil
 
@@ -45,17 +47,20 @@ local function init_from_toml(table)
 	building_config:restore_pkg()
 
 	-- Generate the collider
+	-- Everything is based of the node "building", so that 
 	local base_node = model:get():get_node("building")
 	assert(base_node, "Building doesn't have 'building' node in the model")
 	draw_node = base_node
 
-	-- 'building' node must contain a collider children
-	for _, child in ipairs(base_node.children) do
+	-- 'building' node must contain a collider children somewhere in the hierarchy
+	for _, child in ipairs(base_node:get_children_recursive()) do
 		if child.name:find("col_") then
-			collider = child:extract_collider()
+			collider, collider_offset = model:get():extract_collider(child, base_node)
 			break
 		end
 	end
+
+	-- it may contain a 'launchpad' marker
 
 	-- Upload the model to the GPU (TODO: Do this only when building is close to camera)
 	model_gpu = model:get():get_gpu()
@@ -76,7 +81,7 @@ end
 function physics_update(dt)
 	if rg then
 		local pstate = traj:update(dt, true)
-		rg:set_world_transform(pstate:get_tform())
+		rg:set_world_transform(pstate:get_tform() * collider_offset)
 	end
 end
 

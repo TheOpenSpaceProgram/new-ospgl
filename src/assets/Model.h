@@ -79,7 +79,12 @@ struct Node
 
 	std::unordered_map<std::string, std::string> properties;
 
+	glm::vec3 min_bound;
+	glm::vec3 max_bound;
+
 	std::vector<const Mesh*> get_all_meshes_recursive(bool include_ours = true) const;
+
+	std::vector<Node*> get_children_recursive() const;
 
 	void draw_all_meshes(const CameraUniforms& uniforms, GLint drawable_id, glm::dmat4 model) const;
 	void draw_all_meshes_shadow(const ShadowCamera& sh_cam, glm::dmat4 model) const;
@@ -139,6 +144,9 @@ public:
 
 	void get_gpu();
 	void free_gpu();
+
+	glm::dmat4 get_tform(Node* n, Node* origin) const;
+	std::vector<Node*> get_path(Node* to, Node* from) const;
 
 	Model(tinygltf::Model&& model, ASSET_INFO);
 	~Model();

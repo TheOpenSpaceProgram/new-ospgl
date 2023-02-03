@@ -577,6 +577,17 @@ void Model::load_node(const tinygltf::Model &model, int node_idx, Node *parent, 
 		}
 	}
 
+	// Generate bounds
+	n_node->min_bound = glm::vec3(HUGE_VALF);
+	n_node->max_bound = glm::vec3(-HUGE_VALF);
+	for(const Mesh& m : n_node->meshes)
+	{
+		n_node->min_bound.x = glm::min(n_node->min_bound.x, m.min_bound.x);
+		n_node->min_bound.y = glm::min(n_node->min_bound.y, m.min_bound.y);
+		n_node->max_bound.x = glm::max(n_node->max_bound.x, m.max_bound.x);
+		n_node->max_bound.y = glm::max(n_node->max_bound.y, m.max_bound.y);
+	}
+
 
 
 	if(parent != nullptr)
@@ -719,15 +730,69 @@ void Model::load_mesh(const tinygltf::Model& model, const tinygltf::Primitive &p
 		{
 			if(it->first == "POSITION")
 			{
-				for(int i = 0; i < 3; i++)
+				if(model.accessors[it->second].minValues.empty())
 				{
-					m->min_bound[i] = model.accessors[it->second].minValues[i];
-					m->max_bound[i] = model.accessors[it->second].maxValues[i];
+					logger->warn("Mesh in '{}' doesn't have max/min values, may cause issues", node->name);
+				}
+				else
+				{
+					for (int i = 0; i < 3; i++)
+					{
+						m->min_bound[i] = model.accessors[it->second].minValues[i];
+						m->max_bound[i] = model.accessors[it->second].maxValues[i];
+					}
 				}
 			}
 		}
 	}
 
+}
+
+glm::dmat4 Model::get_tform(Node* n, Node* origin) const
+{
+	if(origin == nullptr)
+		origin = root;
+
+	auto path = get_path(n, origin);
+	glm::dmat4 tform = glm::dmat4();
+	// Iterate from end to top for correct matrix multiplication order
+	// tform = third * second * first
+	for(size_t i = path.size() - 1; i > 0; i--)
+	{
+		tform *= path[i]->sub_transform;
+	}
+
+	return tform;
+}
+
+std::vector<Node*> Model::get_path(Node* to, Node* from) const
+{
+	std::vector<Node *> out;
+	out.push_back(from);
+	bool found = false;
+	for (Node *child: from->children)
+	{
+		if (child == to)
+		{
+			out.push_back(to);
+			found = true;
+			break;
+		}
+	}
+	if(found)
+		return out;
+
+	for(Node* child : from->children)
+	{
+		auto sub_path = get_path(to, child);
+		if(sub_path.size() > 1)
+		{
+			// We found the path
+			out.insert(out.end(), sub_path.begin(), sub_path.end());
+			break;
+		}
+	}
+	return out;
 }
 
 Model* load_model(ASSET_INFO, const cpptoml::table& cfg)
@@ -936,6 +1001,18 @@ void Node::draw_shadow(const ShadowCamera& sh_cam, glm::dmat4 model, bool ignore
 	}
 }
 
+std::vector<Node*> Node::get_children_recursive() const
+{
+	std::vector<Node*> out;
+	out.insert(out.end(), children.begin(), children.end());
+	for(const auto& child : children)
+	{
+		std::vector<Node*> child_of_child = child->get_children_recursive();
+		out.insert(out.end(), child_of_child.begin(), child_of_child.end());
+	}
+
+	return out;
+}
 
 void ModelColliderExtractor::load_collider(btCollisionShape** target, Node* n)
 {
