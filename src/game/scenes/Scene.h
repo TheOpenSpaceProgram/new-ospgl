@@ -18,6 +18,7 @@ public:
 	virtual void load() = 0;
 	// It's your responsability to call universe->update(dt) (or not)
 	virtual void pre_update() = 0;
+	// Called after pre_update, so entities have already run 1 update! (If you called universe->update)
 	virtual void update() = 0;
 	virtual void render() = 0;
 	// Called the frame the scene is unloaded

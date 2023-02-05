@@ -38,6 +38,9 @@ struct PiecePrototype
 	glm::dmat4 render_offset; //< Offset inside of the part, for rendering
 	glm::dmat4 piece_offset; //< Offset inside the part
 	btTransform collider_offset;
+	// In collider coordinates. Cached for performance
+	glm::dvec3 aabb_min;
+	glm::dvec3 aabb_max;
 	std::unordered_map<std::string, Marker> markers;
 	std::vector<PieceAttachment> attachments;
 	double mass;
@@ -72,6 +75,8 @@ struct PiecePrototype
 		this->editor_dettachable = b.editor_dettachable;
 		this->from_attachment = b.from_attachment;
 		this->to_attachment = b.to_attachment;
+		this->aabb_min = b.aabb_min;
+		this->aabb_max = b.aabb_max;
 	}
 
 	PiecePrototype(GPUModelNodePointer&& n) : model_node(std::move(n))

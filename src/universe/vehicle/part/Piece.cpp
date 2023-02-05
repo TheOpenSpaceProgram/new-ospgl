@@ -279,3 +279,18 @@ double Piece::get_environment_pressure()
 {
 	return 0;
 }
+
+glm::dmat4 Piece::get_in_vehicle_matrix()
+{
+	if(in_vehicle->is_packed())
+	{
+		return to_dmat4(packed_tform);
+	}
+	else
+	{
+		// We get the root transform and our transform to obtain the matrix
+		auto our_tform = to_dmat4(get_global_transform());
+		auto root_tform = to_dmat4(in_vehicle->root->get_global_transform());
+		return glm::inverse(our_tform) * root_tform;
+	}
+}

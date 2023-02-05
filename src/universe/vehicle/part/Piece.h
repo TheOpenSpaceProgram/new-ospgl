@@ -40,10 +40,11 @@ class Piece
 private:
 
 	bool dirty;
-	
+
 	btTransform get_global_transform_internal(bool use_mstate);
 
 public:
+
 	// Transform used while the piece is packed
 	// (aka, physics simulation is off)
 	// They are root relative coordinates
@@ -136,6 +137,9 @@ public:
 	glm::dvec3 get_right();
 
 	glm::dmat4 get_graphics_matrix();
+	// This matrix tranforms from piece space to vehicle space
+	// You may need to multiply by * glm::inverse(collider_offset) in certain cases
+	glm::dmat4 get_in_vehicle_matrix();
 
 	double get_environment_pressure();
 

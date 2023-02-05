@@ -115,7 +115,8 @@ void LuaUniverse::load_to(sol::table& table)
 	        "get_type", &Entity::get_type,
 			"init_toml", &Entity::init_toml,
 	        "save", &Entity::save,
-			"__index", [](Entity* ent, const std::string& idx){ return ent->env[idx]; },
+			"lua", &Entity::env,
+			//"__index", [](Entity* ent, const std::string& idx){ return ent->env[idx]; },
 	        "drawable_uid", sol::readonly(&Entity::drawable_uid));
 
 	table.new_usertype<SaveDatabase>("save_database", sol::no_constructor,

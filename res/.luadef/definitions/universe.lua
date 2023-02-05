@@ -8,7 +8,7 @@ function lua_event_handler:sign_out() end
 ---@class universe
 ---@field bt_world bullet.world
 ---@field system universe.planetary_system
----@field entities table Read only
+---@field entities universe.entity[] Read only
 ---@field save_db universe.save_database
 local universe = {}
 
@@ -79,8 +79,8 @@ local element_config = {}
 ---@field uid integer
 ---@field drawable_uid integer
 ---@field init_toml toml.table
+---@field lua table Direct access to the entity lua environment, contents depend on entity!
 local entity = {}
--- TODO: Do what's said in the comment
 
 ---@return glm.vec3
 function entity:get_position() end
@@ -112,7 +112,7 @@ function save_db:get_toml(arg1, arg2) end
 ---@field pos glm.vec3
 ---@field vel glm.vec3
 ---@field ang_vel glm.vec3
----@field rotation glm.quat
+---@field rot glm.quat
 local world_state = {}
 
 ---@return glm.mat4

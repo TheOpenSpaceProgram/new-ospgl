@@ -24,6 +24,7 @@ void LuaVehicle::load_to(sol::table& table)
 		 	"is_packed", &Vehicle::is_packed,
 		 	"packed", &Vehicle::packed_veh,
 		 	"unpacked", &Vehicle::unpacked_veh,
+		    "get_bounds", &Vehicle::get_bounds,
 		 	"unpack", &Vehicle::unpack,
 		 	"pack", &Vehicle::pack,
 		 	"all_pieces", &Vehicle::all_pieces,

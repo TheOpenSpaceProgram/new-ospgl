@@ -582,10 +582,9 @@ void Model::load_node(const tinygltf::Model &model, int node_idx, Node *parent, 
 	n_node->max_bound = glm::vec3(-HUGE_VALF);
 	for(const Mesh& m : n_node->meshes)
 	{
-		n_node->min_bound.x = glm::min(n_node->min_bound.x, m.min_bound.x);
-		n_node->min_bound.y = glm::min(n_node->min_bound.y, m.min_bound.y);
-		n_node->max_bound.x = glm::max(n_node->max_bound.x, m.max_bound.x);
-		n_node->max_bound.y = glm::max(n_node->max_bound.y, m.max_bound.y);
+		// As both are in same coordiante space, two checks are enough
+		n_node->min_bound = glm::min(n_node->min_bound, m.min_bound);
+		n_node->max_bound = glm::max(n_node->max_bound, m.max_bound);
 	}
 
 

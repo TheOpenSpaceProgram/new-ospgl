@@ -79,6 +79,10 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 				proto.collider->setLocalScaling(to_btVector3(scale));
 
 				proto.collider_offset = tform;
+				btVector3 aabb_min_bt, aabb_max_bt;
+				proto.collider->getAabb(tform, aabb_min_bt, aabb_max_bt);
+				proto.aabb_min = to_dvec3(aabb_min_bt);
+				proto.aabb_max = to_dvec3(aabb_max_bt);
 
 				if(n->name != ROOT_NAME)
 				{

@@ -138,6 +138,13 @@ public:
 
 	void remove_outdated();
 
+	// Gets the bounds of the vehicle relative to the root piece (which is used for positioning)
+	// in "editor / vehicle" coordinates.
+	// Returns lower bound (whose z value is minimum and represents the floor of the vehicle)
+	// and the upper bound (opposite of the floor, whose z value is maximum)
+	// Note: Bounds are calculated using colliders!
+	std::pair<glm::dvec3, glm::dvec3> get_bounds();
+
 	/// Vehicle structure functions:
 
 	// This one doesn't need the array to be sorted

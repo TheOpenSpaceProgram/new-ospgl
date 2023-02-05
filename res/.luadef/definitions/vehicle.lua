@@ -58,6 +58,10 @@ function container.vehicle:get_piece_by_id(id) end
 ---@return vehicle.part|nil
 function container.vehicle:get_part_by_id(id) end
 
+---@return glm.vec3 minimum bound (z is lower, floor of the vehicle)
+---@return glm.vec3 maximum bound (z is higher, ceiling of the vehicle)
+function container.vehicle:get_bounds() end
+
 ---@class vehicle.packed
 ---@field vehicle vehicle
  packed_vehicle = {}

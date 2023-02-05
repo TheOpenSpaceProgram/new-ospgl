@@ -84,14 +84,10 @@ function update(dt)
 			ent_blocked_kb = input_ctx:update(gui_input.keyboard_blocked, dt)
 		end
 	else	
-		local pad = universe.entities[1]
-		local lpads_in_lpad = pad.get_launchpads()
+		local pad = universe.entities[1]	
+		local lpads_in_lpad = pad.lua.get_launchpads()
 		local lpad = lpads_in_lpad["main"]
-		local pos, vel, orient, ang_vel = lpad:get_ground()
-		
-		logger.info("Spawning vehicle")
-		local veh = veh_spawner.spawn_vehicle(universe, assets.get_udata_vehicle("debug.toml"),
-			pos, vel, orient, ang_vel, true)
+		local veh = veh_spawner.spawn_vehicle_at_launchpad(universe, assets.get_udata_vehicle("debug.toml"), lpad, true)
 		controlled_ent = veh
 	end
 	gui_input.ext_keyboard_blocked = gui_input.ext_keyboard_blocked or ent_blocked_kb

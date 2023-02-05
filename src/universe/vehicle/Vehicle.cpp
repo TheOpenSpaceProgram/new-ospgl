@@ -13,8 +13,7 @@ void Vehicle::unpack()
 	//st.rotation *= st.angular_velocity * bdt;
 	packed_veh.set_world_state(st);
 
-	unpacked_veh.set_world(osp->universe->bt_world);
-	unpacked_veh.activate();	
+	unpacked_veh.activate();
 }
 
 void Vehicle::pack()
@@ -447,4 +446,28 @@ Piece* Vehicle::get_piece_by_id(int64_t id)
 		return nullptr;
 	else
 		return it->second;
+}
+
+std::pair<glm::dvec3, glm::dvec3> Vehicle::get_bounds()
+{
+	auto min = glm::dvec3(HUGE_VAL);
+	auto max = glm::dvec3(-HUGE_VAL);
+
+	for(Piece* p : all_pieces)
+	{
+		// aabb_min and aabb_max are in collider coordinates, move them to piece
+		// coordinates and then apply the in_vehicle_matrix
+		// TODO: This may not be correct, appears to be, but get_in_vehicle_matrix requires a bit of mathematical
+		// thinking to get it right
+		auto tform = p->get_in_vehicle_matrix() * glm::inverse(p->collider_offset);
+		glm::dvec3 trans_min = glm::dvec3(tform * glm::dvec4(p->piece_prototype->aabb_min, 1.0));
+		glm::dvec3 trans_max = glm::dvec3(tform * glm::dvec4(p->piece_prototype->aabb_max, 1.0));
+		// Due to transforms, anything may become max or min
+		min = glm::min(min, trans_min);
+		min = glm::min(min, trans_max);
+		max = glm::max(max, trans_min);
+		max = glm::max(max, trans_max);
+	}
+
+	return std::make_pair(min, max);
 }

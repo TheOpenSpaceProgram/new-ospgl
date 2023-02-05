@@ -29,4 +29,14 @@ void LuaDebugDrawer::load_to(sol::table& table)
 		debug_drawer->add_cone(base, tip, radius, (glm::vec3)color);
 	});
 
+	table.set_function("add_aabb", [](glm::dmat4 tform, glm::dvec3 half_extents, glm::dvec3 color)
+	{
+		debug_drawer->add_aabb(tform, half_extents, (glm::vec3)color);
+	});
+
+	table.set_function("add_box", [](glm::dmat4 tform, glm::dvec3 corner_1, glm::dvec3 corner_2, glm::dvec3 color)
+	{
+		debug_drawer->add_box(tform, corner_1, corner_2, (glm::vec3)color);
+	});
+
 }

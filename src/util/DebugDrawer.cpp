@@ -233,12 +233,66 @@ DebugDrawer::DebugDrawer()
 	point_size = 4.0f;
 	line_size = 1.0f;
 
-	debug_enabled = false;
+	debug_enabled = true;
 }
 
 
 DebugDrawer::~DebugDrawer()
 {
+}
+
+void DebugDrawer::add_aabb(glm::dmat4 tranform, glm::dvec3 half_extents, glm::vec3 color)
+{
+	// Top square
+	glm::dvec3 v0 = -half_extents;
+	glm::dvec3 v1 = v0 + 2.0 * glm::dvec3(half_extents.x, 0, 0);
+	glm::dvec3 v2 = v1 + 2.0 * glm::dvec3(0, half_extents.y, 0);
+	glm::dvec3 v3 = v2 - 2.0 * glm::dvec3(half_extents.x, 0, 0);
+	// Bottom square
+	glm::dvec3 b0 = v0 + 2.0 * glm::dvec3(0, 0, half_extents.z);
+	glm::dvec3 b1 = v1 + 2.0 * glm::dvec3(0, 0, half_extents.z);
+	glm::dvec3 b2 = v2 + 2.0 * glm::dvec3(0, 0, half_extents.z);
+	glm::dvec3 b3 = v3 + 2.0 * glm::dvec3(0, 0, half_extents.z);
+
+	// Transform the points
+	glm::dvec3 tv0 = glm::dvec3(tranform * glm::dvec4(v0, 1.0));
+	glm::dvec3 tv1 = glm::dvec3(tranform * glm::dvec4(v1, 1.0));
+	glm::dvec3 tv2 = glm::dvec3(tranform * glm::dvec4(v2, 1.0));
+	glm::dvec3 tv3 = glm::dvec3(tranform * glm::dvec4(v3, 1.0));
+
+	glm::dvec3 tb0 = glm::dvec3(tranform * glm::dvec4(b0, 1.0));
+	glm::dvec3 tb1 = glm::dvec3(tranform * glm::dvec4(b1, 1.0));
+	glm::dvec3 tb2 = glm::dvec3(tranform * glm::dvec4(b2, 1.0));
+	glm::dvec3 tb3 = glm::dvec3(tranform * glm::dvec4(b3, 1.0));
+
+	// Draw the top square
+	add_line(tv0, tv1, color);
+	add_line(tv1, tv2, color);
+	add_line(tv2, tv3, color);
+	add_line(tv3, tv0, color);
+
+	// Draw the bototm square
+	add_line(tb0, tb1, color);
+	add_line(tb1, tb2, color);
+	add_line(tb2, tb3, color);
+	add_line(tb3, tb0, color);
+
+	// Join both
+	add_line(tv0, tb0, color);
+	add_line(tv1, tb1, color);
+	add_line(tv2, tb2, color);
+	add_line(tv3, tb3, color);
+
+
+}
+
+void DebugDrawer::add_box(glm::dmat4 transform, glm::dvec3 corner_1, glm::dvec3 corner_2, glm::vec3 color)
+{
+	glm::dvec3 size = corner_2 - corner_1;
+	glm::dvec3 center = (corner_1 + corner_2) * 0.5;
+	// Move the transform to the new center
+	glm::dmat4 ftransform = transform * glm::translate(glm::dmat4(), -center);
+	add_aabb(ftransform, size * 0.5, color);
 }
 
 void create_global_debug_drawer()

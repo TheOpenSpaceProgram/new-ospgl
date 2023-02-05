@@ -38,7 +38,7 @@ return_table.renderer_quality_pbr = {
 ---@field env_sample_pos glm.vec3
 local renderer = {}
 
----@param draw renderer.drawable|universe.planetary_system
+---@param draw renderer.drawable|universe.planetary_system|universe.entity
 --- Warning: If you add entities to the drawable via this method, make sure you 
 --- remove them once they are deleted as otherwise the game will crash!
 function renderer:add_drawable(draw) end
@@ -70,7 +70,7 @@ function renderer:enable_env_sampling() end
 --- drawables, removing it will destroy the returned drawable (but not the table!)
 function renderer:add_table_as_drawable(table) end
 
----@param draw renderer.drawable
+---@param draw renderer.drawable|universe.planetary_system|universe.entity
 function renderer:remove_drawable(draw) end
 
 ---@param light renderer.light|renderer.part_icon_light|renderer.point_light|renderer.sun_light|renderer.envmap

@@ -61,6 +61,12 @@ public:
 	void add_line(glm::dvec3 a, glm::dvec3 b, glm::vec3 color);
 	void add_line(glm::dvec3 a, glm::dvec3 b, glm::vec3 acolor, glm::vec3 bcolor);
 	void add_arrow(glm::dvec3 a, glm::dvec3 b, glm::vec3 color);
+	// Adds an axis-aligned box in transform axes, with given half_extents and color
+	// (half-extents are also scaled by the transform matrix!)
+	void add_aabb(glm::dmat4 tranform, glm::dvec3 half_extents, glm::vec3 color);
+	// Adds an axis-aligned box in transform axes, given two corners in local coordinates
+	// of the given transform.
+	void add_box(glm::dmat4 transform, glm::dvec3 corner_1, glm::dvec3 corner_2, glm::vec3 color);
 
 	void add_cone(glm::dvec3 base, glm::dvec3 tip, double radius, glm::vec3 color, int verts = 16);
 
