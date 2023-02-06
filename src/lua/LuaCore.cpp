@@ -69,11 +69,18 @@ int LoadFileRequire(lua_State* L)
 	else
 	{
 		// WARNING FOR MODDERS: require creates only one instance, use for libraries!
+		auto name = osp->assets->get_filename(path);
+		// Enforce local / class files, which may not be "required"
+		if(name.rfind("l_", 0) == 0 || name.rfind("c_", 0) == 0)
+		{
+			logger->fatal("Tried to require {}, which is meant to be included with dofile / loadfile", path);
+		}
+
 		std::string spath = osp->assets->resolve_path(path, sview["__pkg"]);
 
 		// The package loader is nothing more than the script itself
 		std::string script = osp->assets->load_string_raw(spath);
-		sol::load_result fx = sview.load(script);
+		sol::load_result fx = sview.load(script, spath);
 		sol::function ffx = fx;
 		sol::stack::push(L, ffx);
 		return 1;
@@ -210,6 +217,12 @@ void LuaCore::load(sol::table& to, const std::string& pkg)
 	{
 		sol::environment env = te;
 		sol::state_view sv = ts;
+		auto name = osp->assets->get_filename(path);
+		// Enforce global files, which may not be "dofiled"
+		if(name.rfind("g_", 0) == 0)
+		{
+			logger->fatal("Tried to dofile {}, which is meant to be included with require", path);
+		}
 		std::string spath = osp->assets->resolve_path(path, env["__pkg"]);
 
 		// We load and execute the file, and return the result
@@ -237,6 +250,12 @@ void LuaCore::load(sol::table& to, const std::string& pkg)
 	{
 		sol::environment env = te;
 		sol::state_view sv = ts;
+		auto name = osp->assets->get_filename(path);
+		// Enforce global files, which may not be "dofiled"
+		if(name.rfind("g_", 0) == 0)
+		{
+			logger->fatal("Tried to loadfile {}, which is meant to be included with require", path);
+		}
 		std::string spath = osp->assets->resolve_path(path, env["__pkg"]);
 
 		sol::load_result lresult = sv.load_file(spath);

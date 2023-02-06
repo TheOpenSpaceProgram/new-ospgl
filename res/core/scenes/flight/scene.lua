@@ -1,24 +1,25 @@
 -- The flight scene
 local logger = require("logger")
 local rnd = require("renderer")
+local gui = require("gui")
 require("universe")
 local assets = require("assets")
-local glm = require("glm")
-local debug_drawer = require("debug_drawer")
-local cameras = dofile("core:scenes/camera_util.lua")
-local veh_spawner = dofile("core:scenes/vehicle_spawner.lua")
+local veh_spawner = require("core:scenes/vehicle_spawner.lua")
 
 local renderer = osp.renderer
 local universe = osp.universe
 
 local cubemap = assets.get_cubemap("debug_system:skybox.png")
 local skybox = rnd.skybox.new(cubemap:move())
-
+local gui_screen = gui.screen.new(gui.skin.get_default_skin(), gui_input)
 local sunlight = rnd.sun_light.new(osp.renderer.quality.sun_terrain_shadow_size, osp.renderer.quality.sun_shadow_size)
 local envmap = rnd.envmap.new()
 
+local camera = dofile("core:scenes/flight/flight_camera.lua"):init(universe, gui_input)
+
 ---@type universe.entity
 local tracked_ent = nil
+local interactable_veh = nil
 
 local event_handlers = {}
 
@@ -49,8 +50,11 @@ local function late_init()
 	local lpads_in_lpad = pad.lua.get_launchpads()
 	local lpad = lpads_in_lpad["main"]
 	local veh = veh_spawner.spawn_vehicle_at_launchpad(universe, assets.get_udata_vehicle("debug.toml"), lpad, true)
+	assert(veh)
+
 	controlled_ent = veh
 	tracked_ent = veh
+	camera.tracked_veh = veh
 
 end
 
@@ -65,20 +69,25 @@ function update(dt)
 		late_init()
 		first_frame = false
 	end
+	
+	gui_screen:new_frame()
+	gui_screen:prepare_pass()
 
-	local ctx = tracked_ent:get_input_ctx()
-	if ctx then
-		ctx:update(false, dt)
+	camera:update(dt)
+	local ent_blocked_kb = false
+	if controlled_ent then
+		local input_ctx = controlled_ent:get_input_ctx()
+		if input_ctx then
+			ent_blocked_kb = input_ctx:update(gui_input.keyboard_blocked, dt)
+		end
 	end
+	gui_input.ext_keyboard_blocked = gui_input.ext_keyboard_blocked or ent_blocked_kb
 
-	---@type vehicle
-	local veh = tracked_ent.lua.vehicle
-	local root_tform = veh.root:get_graphics_transform():to_mat4()
-	local min, max = veh:get_bounds()
-	logger.info(min)
-	logger.info(max)
-	debug_drawer.add_box(root_tform, min, max, glm.vec3.new(1, 0, 1))
+	gui_screen:input_pass()
+	gui_screen:draw()
+
 end
+	
 
 function render()
 	renderer.env_sample_pos = tracked_ent:get_position()
@@ -89,12 +98,6 @@ function unload()
 	renderer:clear()
 end
 
-local t = 0.0
-
 function get_camera_uniforms(width, height)
-	local offset = glm.vec3.new(math.cos(t), math.cos(t), math.sin(t)) * 40
-	t = t + 0.01
-	return cameras.from_pos_and_dir(tracked_ent:get_position() + offset,
-		glm.vec3.new(0, 1, 0), -glm.normalize(offset), 50.0, renderer:get_size())
-
+	return camera:get_camera_uniforms(width, height)
 end

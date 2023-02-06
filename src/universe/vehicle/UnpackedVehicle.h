@@ -67,6 +67,9 @@ public:
 	// Returns velocity of root part
 	glm::dvec3 get_velocity();
 
+	// Returns orientation of the root part
+	glm::dquat get_orientation(bool renderer);
+
 	void set_breaking_enabled(bool value);
 
 	void set_world(btDynamicsWorld* n_world)

@@ -58,7 +58,8 @@ void LuaVehicle::load_to(sol::table& table)
 
 	table.new_usertype<UnpackedVehicle>("unpacked_vehicle", sol::no_constructor,
 		 "get_center_of_mass", &UnpackedVehicle::get_center_of_mass,
-		 "get_velocity", &UnpackedVehicle::get_velocity);
+		 "get_velocity", &UnpackedVehicle::get_velocity,
+		 "get_orientation", &UnpackedVehicle::get_orientation);
 
 	table.new_usertype<Piece>("piece",
 		"rigid_body", &Piece::rigid_body,

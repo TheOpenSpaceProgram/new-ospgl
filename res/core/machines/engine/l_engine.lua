@@ -22,8 +22,8 @@ local last_exhaust_mach = 0.0
 local last_exhaust_area = 0.0
 
 -- Include the simulators
-dofile("machines/engine/chamber.lua")
-dofile("machines/engine/nozzle.lua")
+dofile("machines/engine/l_chamber.lua")
+dofile("machines/engine/l_nozzle.lua")
 
 function physics_update(dt)
     engine_interface:physics_update(dt)

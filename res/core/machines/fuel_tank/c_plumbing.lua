@@ -16,7 +16,7 @@ local wall_mat = machine.init_toml:get_string("wall_material")
 local wall_c = nil
 if wall_mat ~= nil then wall_c = assets.get_physical_material(wall_mat).heat_capacity_solid end
 
-local fluid_container = dofile("machines/fuel_tank/fluid_container.lua"):init(volume, temperature, wall_mass, wall_c)
+local fluid_container = dofile("machines/fuel_tank/c_fluid_container.lua"):init(volume, temperature, wall_mass, wall_c)
 
 -- Load the contents
 local content_array = machine.init_toml:get_array_of_table("content")

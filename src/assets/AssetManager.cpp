@@ -328,3 +328,16 @@ std::shared_ptr<cpptoml::table> AssetManager::load_toml(const std::string& full_
 	return SerializeUtil::load_file(resolved);
 }
 
+std::string AssetManager::get_filename(const std::string &full_path)
+{
+	size_t bar_pos = full_path.find_last_of('/');
+	if(bar_pos == std::string::npos)
+	{
+		return full_path;
+	}
+	else
+	{
+		return full_path.substr(bar_pos + 1);
+	}
+}
+

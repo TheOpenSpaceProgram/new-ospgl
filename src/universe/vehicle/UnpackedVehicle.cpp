@@ -743,3 +743,17 @@ glm::dvec3 UnpackedVehicle::get_velocity()
 {
 	return to_dvec3(vehicle->root->rigid_body->getLinearVelocity());
 }
+
+glm::dquat UnpackedVehicle::get_orientation(bool renderer)
+{
+	if(renderer)
+	{
+		btTransform trans;
+		vehicle->root->motion_state->getWorldTransform(trans);
+		return to_dquat(trans.getRotation());
+	}
+	else
+	{
+		return to_dquat(vehicle->root->rigid_body->getOrientation());
+	}
+}

@@ -46,9 +46,14 @@ function cameras.from_center_and_polar(center, pole, azimuth, altitude, radius, 
 	pos = pos * radius
 	-- Transform the vector (rotate to match pole, scale by radius, then translate to center)
 	-- Remember, matrices are transformed in the opposite order you want the operations to apply!
+	local rot_mat = glm.rotate_from_to(glm.vec3.new(0, 1, 0), pole)
 	local mat = glm.translate(glm.mat4.new(1.0), center)
-	mat = mat * glm.rotate_from_to(glm.vec3.new(0, 1, 0), pole)
+	mat = mat * rot_mat
 	pos = glm.vec3.new(mat * glm.vec4.new(pos, 1.0))
+
+	-- Transform the view dir vector to correct pole
+	view_dir = glm.vec3.new(rot_mat * glm.vec4.new(view_dir, 1.0))
+
 
 	return cameras.from_pos_and_dir(pos, pole, view_dir, fov, w, h)
 end

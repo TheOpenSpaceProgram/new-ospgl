@@ -7,7 +7,7 @@ local imgui = require("imgui")
 local icon = assets.get_image("machines/icons/fluid_tank.png")
 function get_icon() return icon end
 
-plumbing = dofile("machines/fuel_tank/plumbing.lua")
+plumbing = dofile("machines/fuel_tank/c_plumbing.lua")
 
 local debug_pause = false
 local pause_reaction = true

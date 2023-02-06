@@ -82,6 +82,15 @@ local unpacked_vehicle = {}
 ---@nodiscard
 function unpacked_vehicle:get_center_of_mass(renderer) end
 
+---@return glm.vec3
+---@nodiscard
+function unpacked_vehicle:get_velocity() end
+
+---@param renderer boolean Return the orientation used for visuals if true, otherwise for physics
+---@return glm.quat
+---@nodiscard
+function unpacked_vehicle:get_orientation(renderer) end
+
 ---@class vehicle.piece
 ---@field rigid_body bullet.rigidbody
 ---@field welded boolean

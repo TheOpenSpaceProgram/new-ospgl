@@ -109,6 +109,8 @@ public:
 	// images/navball/navball.png -> def "images/navball/navball.png"
 	std::pair<std::string, std::string> get_package_and_name(const std::string& full_path, const std::string& def);
 
+	std::string get_filename(const std::string& full_path);
+
 	// Package used when not any is specified by default
 	// Simplifies loading code quite a bit
 	void set_current_package(const std::string& pkg);

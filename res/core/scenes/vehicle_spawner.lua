@@ -16,7 +16,7 @@ function vehicle_spawner.spawn_vehicle(universe, veh_toml, pos, vel, rot, angvel
 	veh_toml:read_to_vehicle(vehicle)
 	vehicle:sort()
 
-	local nent = universe:create_entity("core:entities/vehicle.lua", vehicle)
+	local nent = universe:create_entity("core:entities/vehicle/vehicle.lua", vehicle)
 	state = { pos = pos, vel = vel, rot = rot, angvel = angvel }
 	vehicle.packed:set_world_state(state)
 
@@ -62,7 +62,7 @@ function vehicle_spawner.spawn_vehicle_at_launchpad(universe, veh_toml, lpad, un
 	state.rot = orient
 	state.angvel = ang_vel
 
-	local nent = universe:create_entity("core:entities/vehicle.lua", vehicle)
+	local nent = universe:create_entity("core:entities/vehicle/vehicle.lua", vehicle)
 	vehicle.packed:set_world_state(state)
 
 	if unpack then vehicle:unpack() end

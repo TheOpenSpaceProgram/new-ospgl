@@ -59,17 +59,6 @@ function load(map_id, ncontrolled_ent, nconfig)
 	renderer:add_drawable(predictor)
 	renderer:add_light(sunlight)
 	
-	table.insert(event_handlers, universe:sign_up_for_event(core_events.new_entity,
-		function(id) logger.info(tostring(id)) renderer:add_drawable(universe.entities[id]) end))
-
-	table.insert(event_handlers, universe:sign_up_for_event(core_events.remove_entity,
-		function(id) renderer:remove_drawable(universe.entities[id]) end))
-
-	-- Add already existing entities
-	for _, entity in ipairs(universe.entities) do 
-		renderer:add_drawable(entity) 
-	end
-
 end
 
 function update(dt)
@@ -83,12 +72,6 @@ function update(dt)
 		if input_ctx then
 			ent_blocked_kb = input_ctx:update(gui_input.keyboard_blocked, dt)
 		end
-	else	
-		local pad = universe.entities[1]	
-		local lpads_in_lpad = pad.lua.get_launchpads()
-		local lpad = lpads_in_lpad["main"]
-		local veh = veh_spawner.spawn_vehicle_at_launchpad(universe, assets.get_udata_vehicle("debug.toml"), lpad, true)
-		controlled_ent = veh
 	end
 	gui_input.ext_keyboard_blocked = gui_input.ext_keyboard_blocked or ent_blocked_kb
 

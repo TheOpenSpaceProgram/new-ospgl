@@ -10,7 +10,6 @@ local noise = require("noise")
 local imgui = require("imgui")
 
 local fluid_container = {}
-fluid_container.__index = fluid_container
 
 -- m^3 Pa K^-1 mol^-1
 local R = 8.314462618153
