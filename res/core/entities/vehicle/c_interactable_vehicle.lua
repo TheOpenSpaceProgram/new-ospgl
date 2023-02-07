@@ -48,15 +48,34 @@ function interactable_vehicle:physics_update(cu)
 	local result = osp.universe.bt_world:raycast(rstart, rend)
 
 	local closest_hit = nil
+	local closest_type = nil
 	local closest_dist = math.huge
 	for id, hit in pairs(result) do
 		local dist = glm.length(hit.pos - rstart)
 		local hit_udata = hit.rg:get_udata_type()
 		if dist < closest_dist and hit_udata == "piece" or hit_udata == "welded_group" then
 			closest_dist = dist
+			closest_type = hit_udata
 			closest_hit = id
 		end
 	end
+
+	if not closest_hit then return end
+
+	local hit = result[closest_hit]
+	local piece = nil
+
+	-- Resolve it, pretty easy thanks to compound_id
+	if closest_type == "welded_group" then
+		local as_welded_group = hit.rg:get_udata_wgroup()
+		assert(as_welded_group)
+		piece = as_welded_group:get_piece(hit.compound_id)	
+	else 
+		piece = hit.rg:get_udata_piece()
+	end
+
+	assert(piece)
+
 
 end
 

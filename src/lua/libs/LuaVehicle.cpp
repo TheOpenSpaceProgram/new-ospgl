@@ -128,6 +128,9 @@ void LuaVehicle::load_to(sol::table& table)
 			return p->model_node.sub_node;
 		});
 
+	table.new_usertype<WeldedGroup>("welded_group",
+		"get_piece", &WeldedGroup::get_piece);
+
 	table.new_usertype<Part>("part",
 		"id", &Part::id,
 		"get_piece", &Part::get_piece,

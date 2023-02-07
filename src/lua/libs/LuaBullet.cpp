@@ -18,6 +18,7 @@ struct RaycastHit
 	btRigidBody* rg;
 	glm::dvec3 pos;
 	glm::dvec3 nrm;
+	int compound_id;
 };
 
 void LuaBullet::load_to(sol::table& table)
@@ -32,7 +33,8 @@ void LuaBullet::load_to(sol::table& table)
 	table.new_usertype<RaycastHit>("raycast_hit", sol::no_constructor,
 		   "pos", &RaycastHit::pos,
 		   "nrm", &RaycastHit::nrm,
-		   "rg", &RaycastHit::rg);
+		   "rg", &RaycastHit::rg,
+		   "compound_id", &RaycastHit::compound_id);
 
 	table.new_usertype<btDiscreteDynamicsWorld>("world", sol::no_constructor,
 		// TODO: Way more control over the raycast from lua!
@@ -58,6 +60,7 @@ void LuaBullet::load_to(sol::table& table)
 					hit.nrm = to_dvec3(cback.m_hitNormalWorld[i]);
 					// If we use anything other than rigid bodies, this may break!
 					hit.rg = (btRigidBody*)cback.m_collisionObjects[i];
+					hit.compound_id = cback.m_compoundIds[i];
 					hits.push_back(hit);
 				}
 			}

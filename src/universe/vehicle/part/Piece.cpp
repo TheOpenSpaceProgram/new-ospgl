@@ -294,3 +294,13 @@ glm::dmat4 Piece::get_in_vehicle_matrix()
 		return glm::inverse(our_tform) * root_tform;
 	}
 }
+
+Piece* WeldedGroup::get_piece(int id)
+{
+	if(id < 0 || id >= pieces.size())
+	{
+		return nullptr;
+	}
+
+	return pieces[id];
+}

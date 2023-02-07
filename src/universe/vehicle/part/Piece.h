@@ -25,6 +25,8 @@ struct WeldedGroup
 
 	// Should the rigidbody be rebuilt?
 	bool dirty;
+
+	Piece* get_piece(int id);
 };
 
 

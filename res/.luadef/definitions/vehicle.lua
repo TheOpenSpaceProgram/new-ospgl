@@ -91,6 +91,15 @@ function unpacked_vehicle:get_velocity() end
 ---@nodiscard
 function unpacked_vehicle:get_orientation(renderer) end
 
+
+---@class vehicle.welded_group
+local welded_group = {}
+
+--- Obtain a piece from collider id
+---@param id integer
+---@return vehicle.piece|nil
+function welded_group:get_piece(id) end
+
 ---@class vehicle.piece
 ---@field rigid_body bullet.rigidbody
 ---@field welded boolean

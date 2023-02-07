@@ -6,6 +6,9 @@ local bullet = {}
 ---@field pos glm.vec3 Point of the hit in world coordinates
 ---@field nrm glm.vec3 Normal of the hit in world coordinates
 ---@field rg bullet.rigidbody Rigidbody that was hit
+---@field compound_id integer If positive, indicates the sub-shape index of a compound collider (to resolve welded groups)
+--- Developer note: compound_id only works with compound colliders of depth 1! (This works for welded groups,
+---    but if you implement some weird feature that requires nested compound colliders, this wont work)
 bullet.raycast_hit = {}
 
 ---@class bullet.world

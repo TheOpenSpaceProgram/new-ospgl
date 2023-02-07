@@ -214,9 +214,12 @@ static void create_new_welded_group(
 
 		btVector3 total_angvel = btVector3(0, 0, 0);
 
+		size_t idx = 0;
 		for (Piece* p : wg.first)
 		{
+			p->collider->setUserIndex(idx);
 			n_group->pieces.push_back(p);
+			idx++;
 			p->in_group = n_group;
 
 			if (p->rigid_body != nullptr)
