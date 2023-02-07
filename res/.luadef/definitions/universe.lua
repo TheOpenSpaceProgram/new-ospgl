@@ -83,16 +83,20 @@ local element_config = {}
 local entity = {}
 
 ---@return glm.vec3
-function entity:get_position() end
+---@param physics boolean Obtain physical position instead of graphical position. Only valid during real-time
+function entity:get_position(physics) end
 
 ---@return glm.vec3
-function entity:get_velocity() end
+---@param physics boolean Obtain physical velocity instead of graphical velocity. Only valid during real-time
+function entity:get_velocity(physics) end
 
 ---@return glm.quat
-function entity:get_orientation() end
+---@param physics boolean Obtain physical orientation instead of graphical orientation. Only valid during real-time
+function entity:get_orientation(physics) end
 
 ---@return glm.vec3
-function entity:get_angular_velocity() end
+---@param physics boolean Obtain physical velocity instead of graphical velocity. Only valid during real-time
+function entity:get_angular_velocity(physics) end
 
 ---@return flight_input.context|nil
 function entity:get_input_ctx() end

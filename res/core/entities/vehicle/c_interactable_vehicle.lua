@@ -6,13 +6,12 @@ local glm = require("glm")
 local input = require("input")
 local bullet = require("bullet")
 local raycast = require("core:util/g_raycast.lua")
+local debug_drawer = require("debug_drawer")
 local logger = require("logger")
 
 ---@class core.interactable_vehicle
 local interactable_vehicle = {}
 
----@type universe
-interactable_vehicle.universe = nil
 ---@type universe.entity
 interactable_vehicle.veh_ent = nil
 ---@type vehicle
@@ -21,8 +20,7 @@ interactable_vehicle.veh = nil
 interactable_vehicle.piece_meta = {}
 
 ---@param veh_ent universe.entity
-function interactable_vehicle:init(universe, veh_ent) 
-	self.universe = universe
+function interactable_vehicle:init(veh_ent) 
 	self.veh_ent = veh_ent
 	self.veh = veh_ent.lua.vehicle
 	assert(self.veh, "Linked entity was not a vehicle, this is not allowed")
@@ -43,10 +41,11 @@ function interactable_vehicle:on_veh_dirty()
 	
 end
 
----@param cu renderer.camera_uniforms Use last frame camera uniforms
-function interactable_vehicle:update(cu)
+---@param cu renderer.camera_uniforms Camera uniforms for the raycast (generate on physics update)
+function interactable_vehicle:physics_update(cu)
 	local rstart, rend = raycast.get_mouse_ray(osp.renderer, cu, 1000.0) 
-	local result = self.universe.bt_world:raycast(rstart, rend)
+	debug_drawer.add_arrow(rstart, rend, glm.vec3.new(1, 0, 1))
+	local result = osp.universe.bt_world:raycast(rstart, rend)
 
 	local closest_hit = nil
 	local closest_dist = math.huge
@@ -58,10 +57,6 @@ function interactable_vehicle:update(cu)
 			closest_hit = id
 		end
 	end
-
-	logger.info(closest_dist)
-
-
 
 end
 

@@ -26,19 +26,27 @@ flight_camera.mode = "chase"
 --- If true, the chase modes will be aligned with the focused piece instead of reference
 flight_camera.chase_piece = false
 
+---@type boolean
+--- If true, the camera works in physics mode. Use for raycasting and the like
+flight_camera.physics = false
+
 function flight_camera:get_center()
 	if not self.tracked_veh then
 		return glm.vec3.new(0, 0, 0)
 	end
 		
 	if self.tracked_piece <= 0 then
-		return self.tracked_veh:get_position()
+		return self.tracked_veh:get_position(self.physics)
 	else
 		---@type vehicle
 		local veh = self.tracked_veh.lua.vehicle
 		local piece = veh:get_piece_by_id(self.tracked_piece)
 		if piece then
-			return piece:get_graphics_position()	
+			if self.physics then
+				return piece:get_global_position()
+			else
+				return piece:get_graphics_position()	
+			end
 		else
 			--- Refocus COM, piece was lost
 			self.tracked_piece = 0
@@ -58,7 +66,7 @@ function flight_camera:get_pole()
 	end
 		
 	if self.mode == "chase" then
-		return self.tracked_veh:get_orientation() * glm.vec3.new(1, 0, 0)
+		return self.tracked_veh:get_orientation(self.physics) * glm.vec3.new(1, 0, 0)
 	elseif self.mode == "schase" then
 
 	elseif self.mode == "ref" then

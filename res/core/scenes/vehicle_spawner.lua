@@ -56,7 +56,7 @@ function vehicle_spawner.spawn_vehicle_at_launchpad(universe, veh_toml, lpad, un
 	-- Make it so that vehicle min_bound.z matches lpad min_bound.z
 	local z_offset = lpad.min_bound.z - min_bound.z
 	local up_vector = orient * glm.vec3.new(0, 0, 1)
-	local off_pos = pos + z_offset * up_vector + glm.vec3.new(100.0, 100.0, 100.0)
+	local off_pos = pos + z_offset * up_vector
 	-- Center the vehicle otherwise in the launchpad
 
 	state.pos = off_pos

@@ -15,10 +15,10 @@ end
 
 function launchpad:get_ground()
 	local ent = osp.universe.entities[self.in_entity]
-	local origin_pos = ent:get_position()
-	local origin_vel = ent:get_velocity()
-	local origin_orient = ent:get_orientation()
-	local origin_ang_vel = ent:get_angular_velocity()
+	local origin_pos = ent:get_position(false)
+	local origin_vel = ent:get_velocity(false)
+	local origin_orient = ent:get_orientation(false)
+	local origin_ang_vel = ent:get_angular_velocity(false)
 	-- TODO: Transform these to the ground plane	
 	return origin_pos, origin_vel, origin_orient, origin_ang_vel
 end

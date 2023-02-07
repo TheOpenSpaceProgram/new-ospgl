@@ -59,10 +59,11 @@ public:
 
 	// Give your current position, velocity and orientation
 	// Origin may be a representative point, for example, COM
-	glm::dvec3 get_position();
-	glm::dvec3 get_velocity();
-	glm::dquat get_orientation();
-	glm::dvec3 get_angular_velocity();
+	// If physics is true, return data without interpolation / at bullet time
+	glm::dvec3 get_position(bool physics);
+	glm::dvec3 get_velocity(bool physics);
+	glm::dquat get_orientation(bool physics);
+	glm::dvec3 get_angular_velocity(bool physics);
 
 	// If you return nullptr, it will be assumed you are n-body propagated
 	// Otherwise, return a valid Trajectory for the predictor / propagator

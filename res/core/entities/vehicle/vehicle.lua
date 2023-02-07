@@ -62,7 +62,7 @@ function get_position(physics)
     end
 end
 
-function get_velocity()
+function get_velocity(physics)
 	if vehicle:is_packed() then 
 		return glm.vec3.new(0, 0, 0)
 	else 
@@ -70,7 +70,7 @@ function get_velocity()
 	end
 end
 
-function get_orientation()
+function get_orientation(physics)
 	if vehicle:is_packed() then
 		return glm.quat.new(1, 0, 0, 0)
 	else

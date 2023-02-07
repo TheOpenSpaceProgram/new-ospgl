@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include "../../util/DebugDrawer.h"
 #include "../../physics/glm/BulletGlmCompat.h"
+#include "../../physics/RigidBodyUserData.h"
 #include "Vehicle.h"
 
 using WeldedGroupCreation = std::pair<std::unordered_set<Piece*>, bool>;
@@ -198,6 +199,10 @@ static void create_new_welded_group(
 		btMotionState* motion_state = new btDefaultMotionState(principal);
 		btRigidBody::btRigidBodyConstructionInfo info(tot_mass, motion_state, collider, local_inertia);
 		btRigidBody* rigid_body = new btRigidBody(info);
+		RigidBodyUserData* udata = new RigidBodyUserData();
+		udata->type = RigidBodyType::WELDED_GROUP;
+		udata->as_wgroup = n_group;
+		rigid_body->setUserPointer(udata);
 
 		rigid_body->setActivationState(DISABLE_DEACTIVATION);
 
@@ -293,6 +298,11 @@ static void create_piece_physics(Piece* piece,
 	// Apply old impulses
 	rigid_body->setLinearVelocity(states_at_start[piece].linear_tang);
 	rigid_body->setAngularVelocity(states_at_start[piece].angular);
+
+	RigidBodyUserData* udata = new RigidBodyUserData();
+	udata->type = RigidBodyType::PIECE;
+	udata->as_piece = piece;
+	rigid_body->setUserPointer(udata);
 
 	world->addRigidBody(rigid_body);
 
@@ -676,6 +686,7 @@ void UnpackedVehicle::deactivate()
 {
 	for(WeldedGroup* group : welded)
 	{
+		delete (RigidBodyUserData*)group->rigid_body->getUserPointer();
 		world->removeRigidBody(group->rigid_body);
 		delete group->rigid_body;
 		delete group->motion_state;
@@ -684,6 +695,7 @@ void UnpackedVehicle::deactivate()
 
 	for(Piece* p : single_pieces)
 	{
+		delete (RigidBodyUserData*)p->rigid_body->getUserPointer();
 		world->removeRigidBody(p->rigid_body);
 		delete p->rigid_body;
 		delete p->motion_state;

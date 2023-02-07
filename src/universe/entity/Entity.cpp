@@ -15,26 +15,26 @@ void Entity::disable_bullet(btDynamicsWorld *world)
 	LuaUtil::call_function_if_present(env["disable_bullet"], world);
 }
 
-glm::dvec3 Entity::get_position()
+glm::dvec3 Entity::get_position(bool physics)
 {
-	return LuaUtil::call_function_if_present_returns<glm::dvec3>(env["get_position"])
+	return LuaUtil::call_function_if_present_returns<glm::dvec3>(env["get_position"], physics)
 	        .value_or(glm::dvec3(0, 0, 0));
 }
 
-glm::dvec3 Entity::get_velocity()
+glm::dvec3 Entity::get_velocity(bool physics)
 {
-	return LuaUtil::call_function_if_present_returns<glm::dvec3>(env["get_velocity"]).value_or(glm::dvec3(0, 0, 0));
+	return LuaUtil::call_function_if_present_returns<glm::dvec3>(env["get_velocity"], physics).value_or(glm::dvec3(0, 0, 0));
 }
 
-glm::dquat Entity::get_orientation()
+glm::dquat Entity::get_orientation(bool physics)
 {
-	return LuaUtil::call_function_if_present_returns<glm::dquat>(env["get_orientation"])
+	return LuaUtil::call_function_if_present_returns<glm::dquat>(env["get_orientation"], physics)
 	        .value_or(glm::dquat(1.0, 0.0, 0.0, 0.0));
 }
 
-glm::dvec3 Entity::get_angular_velocity()
+glm::dvec3 Entity::get_angular_velocity(bool physics)
 {
-	return LuaUtil::call_function_if_present_returns<glm::dvec3>(env["get_angular_velocity"])
+	return LuaUtil::call_function_if_present_returns<glm::dvec3>(env["get_angular_velocity"], physics)
 	        .value_or(glm::dvec3(0, 0, 0));
 }
 
