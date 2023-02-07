@@ -1,14 +1,13 @@
 #pragma once
 
-class Entity;
 class Piece;
 class WeldedGroup;
-
+class BulletLuaData;
 
 enum class RigidBodyType
 {
-	// Entities can handle rigid body events via the multiple functions there
-	ENTITY,
+	// These are present on rigid bodies created in lua
+	LUA,
 	// Pieces are different, they are handled externally
 	PIECE,
 	// Welded groups are even more special, the event can be resolved to a particular piece
@@ -23,7 +22,7 @@ struct RigidBodyUserData
 {
 	union
 	{
-		Entity* as_ent;
+		BulletLuaData* as_lua;
 		Piece* as_piece;
 		WeldedGroup* as_wgroup;
 	};
@@ -36,10 +35,10 @@ struct RigidBodyUserData
 		type = RigidBodyType::OTHER;
 	}
 
-	RigidBodyUserData(Entity* as_ent)
+	RigidBodyUserData(BulletLuaData* lua)
 	{
-		type = RigidBodyType::ENTITY;
-		this->as_ent = as_ent;
+		type = RigidBodyType::LUA;
+		this->as_lua = lua;
 	}
 
 	RigidBodyUserData(WeldedGroup* as_wgroup)

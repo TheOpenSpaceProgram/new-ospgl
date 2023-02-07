@@ -25,7 +25,8 @@ public:
 	glm::dvec3 cur_offset;
 
 	virtual void getAabb(const btTransform& t, btVector3& aabbMin, btVector3& aabbMax) const;
-	virtual void processAllTriangles(btTriangleCallback * callback, const btVector3& aabbMin, const btVector3& aabbMax) const;
+	virtual void processAllTriangles(btTriangleCallback* callback, const btVector3& aabbMin, const btVector3& aabbMax) const;
+	virtual void processRaycast(btTriangleCallback* callback, const btVector3& raySource, const btVector3& rayTarget) const;
 
 	void calculateLocalInertia(btScalar, btVector3& inertia) const
 	{

@@ -36,6 +36,7 @@ return_table.renderer_quality_pbr = {
 ---@class renderer
 ---@field quality renderer.quality
 ---@field env_sample_pos glm.vec3
+---@field override_viewport glm.vec4 Viewport, given as (x, y, w, h) as fraction of true screen size
 local renderer = {}
 
 ---@param draw renderer.drawable|universe.planetary_system|universe.entity

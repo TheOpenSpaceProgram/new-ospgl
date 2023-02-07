@@ -19,7 +19,6 @@ void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVect
 	btVector3 debug_b0(btScalar(-BT_LARGE_FLOAT), btScalar(-BT_LARGE_FLOAT), btScalar(-BT_LARGE_FLOAT));
 	btVector3 debug_b1(btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT), btScalar(BT_LARGE_FLOAT));
 
-
 	if (aabb_b0 == debug_b0 && aabb_b1 == debug_b1)
 	{
 		// We draw all loaded tiles
@@ -116,7 +115,7 @@ void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVect
 GroundShape::GroundShape(SystemElement* body)
 {
 	this->body = body;
-	// We have to use this instead of CUSTOM_CONCAVE_SHAPE_TYPE as 
+	// We have to use this instead of CUSTOM_CONCAVE_SHAPE_TYPE as
 	// otherwise bullet decides to simply not call us for triangles,
 	// and crashes with some weird errors, this works flawlessly
 	m_shapeType = TRIANGLE_MESH_SHAPE_PROXYTYPE;
@@ -128,4 +127,10 @@ GroundShape::GroundShape(SystemElement* body)
 GroundShape::~GroundShape()
 {
 	delete server;
+}
+
+void
+GroundShape::processRaycast(btTriangleCallback* callback, const btVector3& raySource, const btVector3& rayTarget) const
+{
+	logger->info("Processing raycast");
 }

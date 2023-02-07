@@ -697,10 +697,10 @@ Renderer::Renderer(cpptoml::table& settings)
 	}
 
 	// Print context info
-	logger->info("OpenGL Version: {}", glGetString(GL_VERSION));
-	logger->info("GLSL Version: {}", glGetString(GL_SHADING_LANGUAGE_VERSION));
-	logger->info("OpenGL Vendor: {}",  glGetString(GL_VENDOR));
-	logger->info("OpenGL Renderer: {}", glGetString(GL_RENDERER));
+	logger->info("OpenGL Version: {}", (char*)glGetString(GL_VERSION));
+	logger->info("GLSL Version: {}", (char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+	logger->info("OpenGL Vendor: {}",  (char*)glGetString(GL_VENDOR));
+	logger->info("OpenGL Renderer: {}", (char*)glGetString(GL_RENDERER));
 
 	glfwSwapInterval(swap_interval);
 

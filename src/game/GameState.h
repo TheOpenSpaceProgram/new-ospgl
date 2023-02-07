@@ -41,6 +41,8 @@ public:
 	void write(cpptoml::table& target) const;
 
 	void update();
+	// Called from universe
+	void physics_update(double bdt);
 
 	void render();
 	void init();

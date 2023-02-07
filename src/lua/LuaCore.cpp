@@ -195,7 +195,7 @@ void LuaCore::load(sol::state& to, const std::string& pkg)
 
 	to.add_package_loader(LoadFileRequire, true);
 
-	// We also create OSP usertype (but don't actually set "osp" to a value)
+	// We also create OSP usertype (but don't actually set "osp" to a value, as it may not be available)
 	// so that all subsystems can be accessed without having many globals
 	to.new_usertype<OSP>("__ut_osp", sol::no_constructor,
 		  "renderer", &OSP::renderer,

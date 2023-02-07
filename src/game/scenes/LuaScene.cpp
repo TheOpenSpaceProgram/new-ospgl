@@ -54,6 +54,11 @@ void LuaScene::update()
 	LuaUtil::call_function_if_present(env["update"], osp->dt);
 }
 
+void LuaScene::physics_update(double bdt)
+{
+	LuaUtil::call_function_if_present(env["physics_update"], bdt);
+}
+
 void LuaScene::render()
 {
 	LuaUtil::call_function_if_present(env["render"]);

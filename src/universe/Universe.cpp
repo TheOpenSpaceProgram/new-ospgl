@@ -1,5 +1,6 @@
 #include "Universe.h"
 #include <util/Profiler.h>
+#include <game/GameState.h>
 
 #ifdef OSPGL_LRDB
 #include <LRDB/server.hpp>
@@ -55,6 +56,7 @@ void Universe::drop_out_of_event(const std::string& event_id, EventHandler id)
 
 void Universe::physics_update(double pdt)
 {
+	osp->game_state->physics_update(pdt);
 	// Do the physics update on the system
 	system.update(pdt, bt_world, true);
 
@@ -106,6 +108,9 @@ Universe::Universe() : system(this)
 {
 	uid = 0;
 	paused = false;
+
+	// We set the global OSP so required modules can use it
+	lua_state["osp"] = osp;
 
 	bt_collision_config = new btDefaultCollisionConfiguration();
 	bt_dispatcher = new btCollisionDispatcher(bt_collision_config);

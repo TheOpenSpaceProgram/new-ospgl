@@ -60,6 +60,7 @@ public:
 	virtual void update() override;
 	virtual void render() override;
 	virtual void unload() override;
+	virtual void physics_update(double bdt) override {}
 	std::string get_name() override
 	{
 		return "editor";

@@ -4,6 +4,8 @@ local rnd = require("renderer")
 local gui = require("gui")
 require("universe")
 local assets = require("assets")
+local debug_drawer = require("debug_drawer")
+local glm = require("glm")
 local veh_spawner = require("core:scenes/vehicle_spawner.lua")
 
 local renderer = osp.renderer
@@ -19,7 +21,7 @@ local camera = dofile("core:scenes/flight/flight_camera.lua"):init(universe, gui
 
 ---@type universe.entity
 local tracked_ent = nil
-local interactable_veh = nil
+local interactable_veh = dofile("core:entities/vehicle/c_interactable_vehicle.lua")
 
 local event_handlers = {}
 
@@ -56,6 +58,8 @@ local function late_init()
 	tracked_ent = veh
 	camera.tracked_veh = veh
 
+	interactable_veh:init(universe, veh)
+
 end
 
 function pre_update(dt)
@@ -63,13 +67,16 @@ function pre_update(dt)
 end
 
 local first_frame = true
+local last_cu = nil
+
+local raycast = require("core:util/g_raycast.lua")
 
 function update(dt)
 	if first_frame then
 		late_init()
 		first_frame = false
 	end
-	
+
 	gui_screen:new_frame()
 	gui_screen:prepare_pass()
 
@@ -83,14 +90,32 @@ function update(dt)
 	end
 	gui_input.ext_keyboard_blocked = gui_input.ext_keyboard_blocked or ent_blocked_kb
 
+
 	gui_screen:input_pass()
 	gui_screen:draw()
 
 end
+
+local frame = 0
+
+function physics_update(dt)
+	frame = frame + 1
+	if last_cu and frame > 10 then
+		local rstart, rend = raycast.get_mouse_ray(osp.renderer, last_cu, 1000.0) 
+		debug_drawer.add_point(rend, glm.vec3.new(1, 1, 1))
+		logger.info("Raycast being called")
+		local result = universe.bt_world:raycast(rstart, rend)
+		for _, h in ipairs(result) do
+			logger.info(h.pos)
+		end
+	end
+end
 	
 
 function render()
-	renderer.env_sample_pos = tracked_ent:get_position()
+	if tracked_ent then
+		renderer.env_sample_pos = tracked_ent:get_position()
+	end
 	renderer:render()
 end
 
@@ -99,5 +124,6 @@ function unload()
 end
 
 function get_camera_uniforms(width, height)
-	return camera:get_camera_uniforms(width, height)
+	last_cu = camera:get_camera_uniforms(width, height)
+	return last_cu
 end

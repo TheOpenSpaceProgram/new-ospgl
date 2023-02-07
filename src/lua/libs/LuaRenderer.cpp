@@ -51,6 +51,7 @@ void LuaRenderer::load_to(sol::table& table)
 		  "clear", &Renderer::clear,
 		  "quality", &Renderer::quality,
 		  "env_sample_pos", &Renderer::env_sample_pos,
+		  "override_viewport", &Renderer::override_viewport,
 		  "disable_env_sampling", [](Renderer* rnd)
 		  {
 			rnd->set_ibl_source(AssetHandle<Cubemap>());

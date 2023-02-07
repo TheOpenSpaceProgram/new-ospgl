@@ -2,6 +2,9 @@
 -- Entities which have launchpads must provide a "get_launchpad(sub_id)" function which
 -- returns the launchpad table
 
+local logger = require("logger")
+logger.info(my_cool_global)
+
 local launchpad_finder = {}
 
 ---@type table<integer, boolean>

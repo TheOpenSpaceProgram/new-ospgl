@@ -1,34 +1,23 @@
 #include "LuaBullet.h"
+#include "../BulletLuaData.h"
+#include "physics/RigidBodyUserData.h"
+#include "universe/vehicle/part/Piece.h"
 
 #pragma warning(push, 0)
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
 #include <BulletDynamics/Dynamics/btRigidBody.h>
+#include <BulletCollision/NarrowPhaseCollision/btRaycastCallback.h>
 #pragma warning(pop)
 
 #include <glm/glm.hpp>
 #include "../../physics/glm/BulletGlmCompat.h"
 
-
-// Pointers are held in rigid body to these, for lua usage and
-// cleanup
-// Mostly used for memory management, but the integrated table acts as
-// easy user data!
-struct BulletLuaData
+struct RaycastHit
 {
-	btDynamicsWorld* in_world;
-	// May be nullptr
-	btMotionState* mstate;
-	std::shared_ptr<btCollisionShape> shape;
-	// Lua may attach stuff here freely
-	sol::table assoc_table;
-
-	BulletLuaData(sol::table n_table)
-	{
-		in_world = nullptr;
-		mstate = nullptr;
-		assoc_table = n_table;
-	}
+	btRigidBody* rg;
+	glm::dvec3 pos;
+	glm::dvec3 nrm;
 };
 
 void LuaBullet::load_to(sol::table& table)
@@ -39,6 +28,42 @@ void LuaBullet::load_to(sol::table& table)
 		"pos", &BulletTransform::pos,
 		"rot", &BulletTransform::rot,
 		"to_mat4", &BulletTransform::to_dmat4);
+
+	table.new_usertype<RaycastHit>("raycast_hit", sol::no_constructor,
+		   "pos", &RaycastHit::pos,
+		   "nrm", &RaycastHit::nrm,
+		   "rg", &RaycastHit::rg);
+
+	table.new_usertype<btDiscreteDynamicsWorld>("world", sol::no_constructor,
+		// TODO: Way more control over the raycast from lua!
+		"raycast", [](btDiscreteDynamicsWorld* self, glm::dvec3 start, glm::dvec3 end)
+		{
+			self->updateAabbs();
+			self->computeOverlappingPairs();
+
+			btCollisionWorld::AllHitsRayResultCallback cback(
+					to_btVector3(start), to_btVector3(end));
+			// This flags supposedly increases performance at the cost of slightly reduced precision
+			cback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest;
+			self->rayTest(to_btVector3(start), to_btVector3(end), cback);
+			std::vector<RaycastHit> hits;
+
+			if(cback.hasHit())
+			{
+				size_t hit_count = cback.m_hitPointWorld.size();
+				for(size_t i = 0; i < hit_count; i++)
+				{
+					RaycastHit hit;
+					hit.pos = to_dvec3(cback.m_hitPointWorld[i]);
+					hit.nrm = to_dvec3(cback.m_hitNormalWorld[i]);
+					// If we use anything other than rigid bodies, this may break!
+					hit.rg = (btRigidBody*)cback.m_collisionObjects[i];
+					hits.push_back(hit);
+				}
+			}
+
+			return hits;
+		});
 
 	// Rigidbody
 	sol::usertype<btRigidBody> rigidbody_ut = table.new_usertype<btRigidBody>("rigidbody",
@@ -56,9 +81,55 @@ void LuaBullet::load_to(sol::table& table)
 			auto rg_data = new BulletLuaData(sol::table(te.lua_state(), sol::create));
 			rg_data->shape = std::move(col_shape);
 			rg_data->mstate = mstate;
-			rg->setUserPointer((void*)rg_data);
+
+			// Create the shared C++ / Lua userdata
+			auto rg_udata = new RigidBodyUserData(rg_data);
+			rg_data->udata = rg_udata;
+
+			rg->setUserPointer((void*)rg_udata);
 
 			return rg;
+		},
+		"get_udata_type", [](btRigidBody& self)
+		{
+			auto ptr = (RigidBodyUserData*)self.getUserPointer();
+			if(ptr)
+			{
+				if(ptr->type == RigidBodyType::LUA)
+					return "lua";
+				else if(ptr->type == RigidBodyType::PIECE)
+					return "piece";
+				else if(ptr->type == RigidBodyType::WELDED_GROUP)
+					return "welded_group";
+				else
+					return "none";
+			}
+			else
+				return "none";
+	    },
+		"get_udata_lua", [](btRigidBody& self)
+		{
+			auto ptr = (RigidBodyUserData*)self.getUserPointer();
+			if(ptr && ptr->type == RigidBodyType::LUA)
+				return sol::optional(ptr->as_lua->assoc_table);
+			else
+				return sol::optional<sol::table>();
+		},
+	    "get_udata_piece", [](btRigidBody& self)
+	    {
+		    auto ptr = (RigidBodyUserData*)self.getUserPointer();
+		    if(ptr && ptr->type == RigidBodyType::PIECE)
+			    return sol::optional(ptr->as_piece);
+		    else
+			    return sol::optional<Piece*>();
+	    },
+		"get_udata_wgroup", [](btRigidBody& self)
+		{
+		  auto ptr = (RigidBodyUserData*)self.getUserPointer();
+		  if(ptr && ptr->type == RigidBodyType::WELDED_GROUP)
+			  return sol::optional(ptr->as_wgroup);
+		  else
+			  return sol::optional<WeldedGroup*>();
 		},
 		"get_collision_shape", [](btRigidBody& self){return self.getCollisionShape();},
 		"set_mass_props", [](btRigidBody& self, double mass, glm::dvec3& inertia)
@@ -160,13 +231,17 @@ void LuaBullet::load_to(sol::table& table)
 			world->addRigidBody(self);
 			if(self->getUserPointer())
 			{
-				auto d = (BulletLuaData*)self->getUserPointer();
-				if(d->in_world != nullptr)
+				auto d = (RigidBodyUserData*)self->getUserPointer();
+				if(d->type == RigidBodyType::LUA)
 				{
-					// TODO: This may eventually be allowed
-					logger->fatal("Tried to add a rigidbody to many worlds, this is not allowed!");
+					auto u = d->as_lua;
+					if(u->in_world != nullptr)
+					{
+						// TODO: This may eventually be allowed
+						logger->fatal("Tried to add a rigidbody to many worlds, this is not allowed!");
+					}
+					u->in_world = world;
 				}
-				d->in_world = world;
 			}
 		},
 		"remove_from_world", [](btRigidBody* self, btDiscreteDynamicsWorld* world)
@@ -174,21 +249,31 @@ void LuaBullet::load_to(sol::table& table)
 			world->removeRigidBody(self);
 			if(self->getUserPointer())
 			{
-				auto d = (BulletLuaData*)self->getUserPointer();
-				d->in_world = nullptr;
+				auto d = (RigidBodyUserData*)self->getUserPointer();
+				if(d->type == RigidBodyType::LUA)
+				{
+					auto u = d->as_lua;
+					u->in_world = nullptr;
+				}
 			}
 		},
 		"__gc", [](btRigidBody* self)
 		{
 			if(self->getUserPointer())
 			{
-				auto d = (BulletLuaData*)self->getUserPointer();
-				if(d->in_world)
-					d->in_world->removeRigidBody(self);
-				// Free the shape and motion state
-				d->shape.reset();
-				delete d->mstate;
-				delete d;
+				auto d = (RigidBodyUserData*)self->getUserPointer();
+				if(d->type == RigidBodyType::LUA)
+				{
+					auto u = d->as_lua;
+					if (u->in_world)
+						u->in_world->removeRigidBody(self);
+					// Free the shape and motion state
+					u->shape.reset();
+					delete u->mstate;
+					delete u->udata;
+					delete u;
+					delete d;
+				}
 			}
 			else
 			{

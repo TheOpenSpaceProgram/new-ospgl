@@ -60,7 +60,8 @@ void LuaGlm::load_to(sol::table& table)
 	using QUAT = const glm::dquat&;
 		
 	sol::usertype<glm::dvec2> dvec2_ut = table.new_usertype<glm::dvec2>("vec2",
-		sol::constructors < glm::dvec2(), glm::dvec2(double, double), glm::dvec2(glm::dvec3), glm::dvec2(glm::dvec4)>(),
+		sol::constructors < glm::dvec2(), glm::dvec2(double), glm::dvec2(double, double),
+			glm::dvec2(glm::dvec3), glm::dvec2(glm::dvec4)>(),
 		sol::meta_function::addition, sol::overload(
 			sol::resolve<glm::dvec2(const glm::dvec2&, const glm::dvec2&)>(glm::operator+),
 			sol::resolve<glm::dvec2(const glm::dvec2&, double)>(glm::operator+),
@@ -87,7 +88,7 @@ void LuaGlm::load_to(sol::table& table)
 		"unpack", [](glm::dvec2 v) {return std::make_tuple(v.x, v.y); });
 
 	sol::usertype<glm::dvec3> dvec3_ut = table.new_usertype<glm::dvec3>("vec3",
-		sol::constructors < glm::dvec3(), glm::dvec3(glm::dvec2, double),
+		sol::constructors < glm::dvec3(), glm::dvec3(double), glm::dvec3(glm::dvec2, double),
 		glm::dvec3(double, double, double), glm::dvec3(glm::dvec4)>(),
 		sol::meta_function::addition, sol::overload(
 			sol::resolve<glm::dvec3(const glm::dvec3&, const glm::dvec3&)>(glm::operator+),
@@ -118,7 +119,7 @@ void LuaGlm::load_to(sol::table& table)
 		"unpack", [](glm::dvec3 v) {return std::make_tuple(v.x, v.y, v.z); });
 
 	sol::usertype<glm::dvec4> dvec4_ut = table.new_usertype<glm::dvec4>("vec4",
-		sol::constructors < glm::dvec4(), glm::dvec4(glm::dvec3, double),
+		sol::constructors < glm::dvec4(), glm::dvec4(double), glm::dvec4(glm::dvec3, double),
 		glm::dvec4(double, double, double, double)>(),
 		sol::meta_function::addition, sol::overload(
 			sol::resolve<glm::dvec4(const glm::dvec4&, const glm::dvec4&)>(glm::operator+),
@@ -674,6 +675,8 @@ void LuaGlm::load_to(sol::table& table)
 	};
 	table["quat_look_at"] = &MathUtil::quat_look_at;
 	table["distance_to_line"] = &MathUtil::distance_to_line;
+
+	table["screen_raycast"] = &MathUtil::screen_raycast;
 }
 
 LuaGlm::LuaGlm()

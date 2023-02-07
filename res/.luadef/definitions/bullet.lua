@@ -2,7 +2,19 @@
 
 local bullet = {}
 
+---@class bullet.raycast_hit
+---@field pos glm.vec3 Point of the hit in world coordinates
+---@field nrm glm.vec3 Normal of the hit in world coordinates
+---@field rg bullet.rigidbody Rigidbody that was hit
+bullet.raycast_hit = {}
+
 ---@class bullet.world
+bullet.world = {}
+
+---@param start glm.vec3
+---@param rend glm.vec3
+---@return bullet.raycast_hit[]
+function bullet.world:raycast(start, rend) end
 
 ---@class bullet.motion_state
 
@@ -120,5 +132,17 @@ function bullet.rigidbody:set_friction(val) end
 function bullet.rigidbody:set_restitution(val) end
 
 function bullet.rigidbody:set_kinematic() end
+
+---@return string One of "lua", "piece", "welded_group" or "none"
+function bullet.rigidbody:get_udata_type() end
+
+---@return table|nil Userdata table, if userdata is of type lua
+function bullet.rigidbody:get_udata_lua() end
+
+---@return vehicle.piece|nil Userdata piece, if userdata is of type piece
+function bullet.rigidbody:get_udata_piece() end
+
+---@return vehicle.welded_group|nil Userdata welded group, if userdata is of type piece
+function bullet.rigidbody:get_udata_wgroup() end
 
 return bullet

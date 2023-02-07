@@ -31,6 +31,7 @@ public:
 	void pre_update() override;
 	// Aditionally, lua gets passed osp->dt
 	void update() override;
+	void physics_update(double bdt) override;
 	void render() override;
 	// Called the frame the scene is unloaded
 	void unload() override;

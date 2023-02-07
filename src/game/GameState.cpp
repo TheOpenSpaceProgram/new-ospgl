@@ -13,6 +13,11 @@ void GameState::write(cpptoml::table& target) const
 
 }
 
+void GameState::physics_update(double bdt)
+{
+	scene->physics_update(bdt);
+}
+
 void GameState::update()
 {
 	if(to_delete != nullptr)

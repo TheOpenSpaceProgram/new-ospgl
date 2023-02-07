@@ -480,7 +480,7 @@ NVGcolor SimpleSkin::get_button_color(GUISkin::ButtonState state)
 			break;
 	}
 
-	logger->fatal("Wrong ButtonState {}", state);
+	//logger->fatal("Wrong ButtonState {}", state);
 	return nvgRGB(255, 0, 255);
 }
 

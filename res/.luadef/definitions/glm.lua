@@ -23,7 +23,7 @@ local glm = {}
 ---@field y number
 glm.vec2 = {}
 ---@return glm.vec2
----@param param1? number|glm.vec3|glm.vec4 If number, initialize as (x, y). Otherwise, initialize from higher dimension vector by trimming
+---@param param1? number|glm.vec3|glm.vec4 If number, initialize as (x, y) or (x, x). Otherwise, initialize from higher dimension vector by trimming
 ---@param param2? number Only present if initializing as (x, y)
 function glm.vec2.new(param1, param2) end
 ---@return number x x component
@@ -49,7 +49,7 @@ function glm.vec2:unpack() end
 ---@field z number
 glm.vec3 = {}
 ---@return glm.vec3
----@param param1? number|glm.vec4|glm.vec2
+---@param param1? number|glm.vec4|glm.vec2 If only one number given, initialize as (x, x, x)
 ---@param param2? number Only present if initializing as (x, y, z) or (vec2, z)
 ---@param param3? number Only present if initializing as (x, y, z)
 function glm.vec3.new(param1, param2, param3) end
@@ -81,7 +81,7 @@ function glm.vec3:to_vec2() end
 glm.vec4 = {}
 
 ---@return glm.vec4
----@param param1? number|glm.vec3
+---@param param1? number|glm.vec3 If only one number present, initialize as (x, x, x)
 ---@param param2? number Only present if initializing as (x, y, z, w) or (vec3, w)
 ---@param param3? number Only present if initializing as (x, y, z, w)
 ---@param param4? number Only present if initializing as (x, y, z, w)
@@ -740,6 +740,13 @@ function glm.quat_look_at(from, to, up, alt_up) end
 ---@param from glm.vec3
 ---@return number Distance of point from to line that goes from line_a to line_b
 function glm.distance_to_line(line_a, line_b, from) end
+
+---@param mouse_pos glm.vec2 in normalized device coordinates (-1 -> 1) with y inverted
+---@param inv_tform glm.mat4 Inverse transform matrix of the camera (feel free to use c_tform and then displace)
+---@param dist number Maximum distance for the ray
+---@return glm.vec3 Start point
+---@return glm.vec3 End point
+function glm.screen_raycast(mouse_pos, inv_tform, dist) end
 
 return glm
 
