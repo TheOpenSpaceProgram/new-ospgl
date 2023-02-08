@@ -40,13 +40,13 @@ void LuaBullet::load_to(sol::table& table)
 		// TODO: Way more control over the raycast from lua!
 		"raycast", [](btDiscreteDynamicsWorld* self, glm::dvec3 start, glm::dvec3 end)
 		{
-			self->updateAabbs();
-			self->computeOverlappingPairs();
+			//self->updateAabbs();
+			//self->computeOverlappingPairs();
 
 			btCollisionWorld::AllHitsRayResultCallback cback(
 					to_btVector3(start), to_btVector3(end));
 			// This flags supposedly increases performance at the cost of slightly reduced precision
-			cback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest;
+			//cback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest;
 			self->rayTest(to_btVector3(start), to_btVector3(end), cback);
 			std::vector<RaycastHit> hits;
 

@@ -22,25 +22,25 @@ int LuaDrawable::get_forward_priority()
 
 void LuaDrawable::deferred_pass(CameraUniforms &cu, bool is_env_map)
 {
-	LuaUtil::call_function_if_present(table["deferred_pass"], cu, is_env_map);
+	LuaUtil::call_function_if_present(table["deferred_pass"], table, cu, is_env_map);
 }
 
 void LuaDrawable::forward_pass(CameraUniforms &cu, bool is_env_map)
 {
-	LuaUtil::call_function_if_present(table["forward_pass"], cu, is_env_map);
+	LuaUtil::call_function_if_present(table["forward_pass"], table, cu, is_env_map);
 }
 
 void LuaDrawable::gui_pass(CameraUniforms &cu)
 {
-	LuaUtil::call_function_if_present(table["gui_pass"], cu);
+	LuaUtil::call_function_if_present(table["gui_pass"], table, cu);
 }
 
 void LuaDrawable::shadow_pass(ShadowCamera &cu)
 {
-	LuaUtil::call_function_if_present(table["shadow_pass"], cu);
+	LuaUtil::call_function_if_present(table["shadow_pass"], table, cu);
 }
 
 void LuaDrawable::far_shadow_pass(ShadowCamera &cu)
 {
-	LuaUtil::call_function_if_present(table["far_shadow_pass"], cu);
+	LuaUtil::call_function_if_present(table["far_shadow_pass"], table, cu);
 }

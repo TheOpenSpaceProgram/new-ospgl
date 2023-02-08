@@ -65,6 +65,7 @@ void LuaVehicle::load_to(sol::table& table)
 		"rigid_body", &Piece::rigid_body,
 		"welded", &Piece::welded,
 		"attached_to", &Piece::attached_to,
+		"id", sol::readonly(&Piece::id),
 		"set_dirty", &Piece::set_dirty, 
 		"get_global_transform", [](Piece& self)
 		{

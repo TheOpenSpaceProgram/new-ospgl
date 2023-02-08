@@ -105,6 +105,7 @@ function welded_group:get_piece(id) end
 ---@field welded boolean
 ---@field attached_to vehicle.piece
 ---@field collider_offset glm.mat4
+---@field id integer Unique id of the piece, guaranteed to be unique in the vehicle
 local piece = {}
 
 ---@param update_now boolean
@@ -195,7 +196,7 @@ function piece:get_environment_pressure() end
 function piece:get_model_node() end
 
 ---@class vehicle.part
----@field id integer
+---@field id integer Unique id of the part. Guaranteed to be unique in the vehicle
 ---@field machines table<string, vehicle.machine> Don't hold for long as it may go outdated / machines may die
 local part = {}
 ---@return vehicle.piece

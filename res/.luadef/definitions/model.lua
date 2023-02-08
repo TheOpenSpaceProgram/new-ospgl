@@ -1,9 +1,38 @@
 ---@meta 
 
+local cont = {}
+
+---@class model.mat_override
+cont.mat_override = {}
+
+---@param table
+--- Initializes a material override from a table of uniforms, which may be of type: () = example
+--- number: (uniform = 24.1)
+--- integer: (uniform_i = 24) -> Note that uniform name doesnt include the _i
+--- vec2: (uniform = glm.vec2(1, 1))
+--- vec3: (uniform = glm.vec3(0, 0, 0))
+--- vec4: (uniform = glm.vec4(1, 1, 1, 0))
+--- tex: (uniform = assets.get_texture("core:notex.png"))
+--- @return model.mat_override
+function cont.mat_override.from_table(table) end
+
+---@class model.material
+local material = {}
+
 ---@class model.node
 ---@field children model.node[]
 ---@field name string
 local node = {}
+
+---@param c_uniforms renderer.camera_uniforms Camera uniforms from the camera
+---@param mat model.material
+---@param mat_override model.mat_override
+---@param tform glm.mat4 Model matrix
+---@param did integer Integer used for per-model effects, leave as 0 if you don't know what to set
+---@param ignore_our_subtform boolean Should our subtform be ignored? Use if you are drawing a children node directly, otherwise false
+---@param increase_did boolean Should did be increased when drawing children? Use to share per-model effects across children
+--- Allows drawing a node with a given material and material override
+function node:draw_override(c_uniforms, mat, tform, did, mat_override, ignore_our_subtform, increase_did) end
 
 ---@param c_uniforms renderer.camera_uniforms Camera uniforms from the camera
 ---@param model glm.mat4 Model matrix
@@ -68,3 +97,5 @@ function gpu_pointer:move() end
 ---@return model.node|nil
 --- It's guaranteed this node is ready to draw and is uploaded to the GPU. Don't store the raw pointer for long!
 function gpu_pointer:get_node(name) end
+
+return cont

@@ -30,7 +30,7 @@ local material_handle = {}
 --- Invalidates current handle, and returns a new one
 ---@return assets.material_handle 
 function material_handle:move() end
----@return assets.material
+---@return model.material
 function material_handle:get() end
 
 ---@class assets.model_handle

@@ -6,6 +6,7 @@ void LuaModel::load_to(sol::table &table)
 	table.new_usertype<Node>("node", sol::no_constructor,
 		  "draw", &Node::draw,
 		  "draw_shadow", &Node::draw_shadow,
+		  "draw_override", &Node::draw_override,
 		  "children", &Node::children,
 		  "get_children_recursive", &Node::get_children_recursive,
 		  "extract_collider", [](Node* base, Node* n)
@@ -22,6 +23,14 @@ void LuaModel::load_to(sol::table &table)
 		  "get_bounds_of", &Node::get_bounds,
 		  "get_child_deep", &Node::get_child,
 		  "name", &Node::name);
+
+	table.new_usertype<MaterialOverride>("mat_override", sol::no_constructor,
+		 "from_table", [](const sol::table& table)
+		 {
+			MaterialOverride out;
+
+			return out;
+		 });
 
 	table.new_usertype<Model>("model", sol::no_constructor,
 		  "get_gpu", [](Model* model)

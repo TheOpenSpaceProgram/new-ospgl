@@ -41,6 +41,7 @@ function load(veh_id)
 	
 	-- Skybox and IBL generation is enabled
 	renderer:add_drawable(skybox)
+	renderer:add_table_as_drawable(interactable_veh)
 	renderer:add_light(sunlight)
 	renderer:add_light(envmap)
 
