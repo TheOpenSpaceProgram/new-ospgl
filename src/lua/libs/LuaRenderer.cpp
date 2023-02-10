@@ -150,6 +150,7 @@ void LuaRenderer::load_to(sol::table& table)
 	table.new_usertype<SunLight>("sun_light", sol::base_classes, sol::bases<Light>(),
 			  "get_type", &SunLight::get_type,
 			  "pos", &SunLight::position,
+			  "track_star", &SunLight::track_star,
 			  "color", &SunLight::color,
 			  "spec_color", &SunLight::spec_color,
 			  "ambient_color", &SunLight::ambient_color,

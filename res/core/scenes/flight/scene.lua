@@ -15,6 +15,7 @@ local cubemap = assets.get_cubemap("debug_system:skybox.png")
 local skybox = rnd.skybox.new(cubemap:move())
 local gui_screen = gui.screen.new(gui.skin.get_default_skin(), gui_input)
 local sunlight = rnd.sun_light.new(osp.renderer.quality.sun_terrain_shadow_size, osp.renderer.quality.sun_shadow_size)
+sunlight.track_star = true
 local envmap = rnd.envmap.new()
 
 local camera = dofile("core:scenes/flight/flight_camera.lua"):init(universe, gui_input)
@@ -81,7 +82,8 @@ function update(dt)
 	gui_screen:new_frame()
 	gui_screen:prepare_pass()
 
-	camera:update(dt)
+	local block = camera:update(dt)
+	gui_input.ext_mouse_blocked = gui_input.ext_mouse_blocked or block
 	local ent_blocked_kb = false
 	if controlled_ent then
 		local input_ctx = controlled_ent:get_input_ctx()
@@ -90,6 +92,8 @@ function update(dt)
 		end
 	end
 	gui_input.ext_keyboard_blocked = gui_input.ext_keyboard_blocked or ent_blocked_kb
+	
+	interactable_veh:update(dt, gui_screen)
 
 
 	gui_screen:input_pass()

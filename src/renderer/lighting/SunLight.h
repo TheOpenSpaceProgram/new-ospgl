@@ -20,6 +20,7 @@ private:
 public:
 
 	glm::dvec3 position;
+	bool track_star;
 
 	glm::vec3 color;
 	glm::vec3 spec_color;

@@ -19,6 +19,7 @@ system_version = "0.1.0"
 [[element]]
 	name = "Sun"
 	nbody = true
+	star = true
 	config = "debug_system:planets/sun/config.toml"
 
 	rotation_period = 586.56
@@ -42,6 +43,7 @@ system_version = "0.1.0"
 [[element]]
 	name = "Earth"
 	nbody = true
+	star = false
 	config = "debug_system:planets/earth/config.toml"
 
 	rotation_period = 24.0

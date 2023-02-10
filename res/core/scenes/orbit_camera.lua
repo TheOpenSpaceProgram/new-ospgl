@@ -30,7 +30,10 @@ function orbit_camera:get_camera_uniforms(width, height)
 		self.azimuth, self.altitude, self.radius, self.fov, width, height)
 end
 
+---@return boolean Block the mouse
 function orbit_camera:update(dt)
+	local block_mouse = false
+
 	if not self.gui_input.ext_mouse_blocked and not self.gui_input.mouse_blocked then
 		self.zoom_speed = self.zoom_speed + input.get_scroll()
 		self.radius = self.radius * (1.0 - self.zoom_speed * dt * 0.5)
@@ -49,6 +52,7 @@ function orbit_camera:update(dt)
 			self.altitude = self.altitude - input.get_mouse_delta().y * self.sensitivity
 			self.x_speed = input.get_mouse_delta().x * self.sensitivity * 10.0
 			self.y_speed = -input.get_mouse_delta().y * self.sensitivity * 10.0
+			block_mouse = true
 		else
 			if self.x_speed > 0 then
 				self.x_speed = self.x_speed - self.inertia_damp * dt
@@ -71,6 +75,8 @@ function orbit_camera:update(dt)
 
 		self.altitude = glm.clamp(self.altitude, 0.01, math.pi - 0.01)
 	end
+
+	return block_mouse
 end
 
 return orbit_camera

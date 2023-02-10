@@ -2,6 +2,8 @@
 #include "../../assets/AssetManager.h"
 #include <renderer/util/TextureDrawer.h>
 
+#include <universe/Universe.h>
+#include <universe/PlanetarySystem.h>
 
 static void make_shadow_fbuffer(GLuint& fbo, GLuint& tex, int SIZE)
 {
@@ -38,9 +40,10 @@ SunLight::SunLight(int far_size, int near_size)
 	make_shadow_fbuffer(far_shadow_fbo, far_shadow_tex, far_size);
 	make_shadow_fbuffer(near_shadow_fbo, near_shadow_tex, near_size);
 
-	// Reasonable value 
-	near_shadow_span = 50.0;	
+	// Reasonable value
 	position = glm::dvec3(0, 0, 0);
+	track_star = false;
+	near_shadow_span = 50.0;	
 }
 
 
@@ -53,7 +56,12 @@ void SunLight::do_pass(CameraUniforms& cu, GBuffer* gbuf)
 {
 	prepare_shader(shader, gbuf, 0, 0, 0);
 
-	// Sun pso relative to the camera
+	// Sun pos relative to the camera
+	// TODO: Allow multiple stars somehow
+	if(track_star)
+	{
+		position = osp->universe->system.states_now[osp->universe->system.star].pos;
+	}
 	glm::dvec3 sun_pos = position - cu.cam_pos;
 	shader->setVec3("sun_pos", sun_pos);
 	shader->setVec3("color", color);

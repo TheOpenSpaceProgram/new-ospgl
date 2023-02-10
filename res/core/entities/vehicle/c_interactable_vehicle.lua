@@ -15,8 +15,6 @@ local logger = require("logger")
 local hover_material = assets.get_material("core:mat_hover.toml")
 local mat_override = model.mat_override.from_table({color = glm.vec3.new(1, 1, 1)})
 
-
-
 ---@class core.interactable_vehicle
 local interactable_vehicle = {}
 
@@ -27,6 +25,9 @@ interactable_vehicle.veh = nil
 
 ---@type integer Points to a piece, if negative means not hovering anything
 interactable_vehicle.hovered = -1
+
+--- Stores all active contextual menus
+interactable_vehicle.context_menus = {}
 
 ---@param veh_ent universe.entity
 function interactable_vehicle:init(veh_ent) 
@@ -49,8 +50,7 @@ function interactable_vehicle:on_veh_dirty()
 	
 end
 
----@param cu renderer.camera_uniforms Camera uniforms for the raycast (generate on physics update)
-function interactable_vehicle:physics_update(cu)
+function interactable_vehicle:update_hover(cu)
 	local rstart, rend = raycast.get_mouse_ray(osp.renderer, cu, 100.0) 
 	local result = osp.universe.bt_world:raycast(rstart, rend)
 
@@ -91,14 +91,64 @@ function interactable_vehicle:physics_update(cu)
 
 end
 
+function interactable_vehicle:new_context_menus() 
+	if self.hovered < 0 then return end
+	if not input.mouse_down(input.btn.left) then return end
+	
+	if self.context_menus[self.hovered] then
+		-- Context menu is already present, highlight it
+		self.context_menus[self.hovered].highlight_timer = 1.0
+		return
+	end
+
+	self.context_menus[self.hovered] = {highlight_timer = 1.0}
+
+	-- Remove all others if CTRL is not held
+	if not input.key_down(input.key.left_control) then
+		for k, _ in pairs(self.context_menus) do 
+			if k ~= self.hovered then 
+				self.context_menus[k] = nil
+			end
+		end
+	end
+
+end
+
+---@param gui gui.screen
+function interactable_vehicle:update_context_menus(dt, gui)
+	for p_id, menu in pairs(self.context_menus) do 
+		if menu.highlight_timer > 0.0 then
+			menu.highlight_timer = menu.highlight_timer - dt
+		end
+
+	end
+end
+
+---@param cu renderer.camera_uniforms Camera uniforms for the raycast (generate on physics update)
+function interactable_vehicle:physics_update(cu)
+	self:update_hover(cu)
+
+end
+
+---@param gui gui.screen
+function interactable_vehicle:update(dt, gui)
+	-- Prevent hovering if mouse is blocked, this effectively blocks everything else
+	if gui.input.mouse_blocked or gui_input.ext_mouse_blocked then
+		self.hovered = -1
+	end
+
+	-- Bring up context menus
+	self:new_context_menus()
+	self:update_context_menus(dt, gui)
+
+end
+
 function interactable_vehicle:forward_pass(cu, _)
 	if self.hovered < 0 then return end
 	local piece = self.veh:get_piece_by_id(self.hovered)
 	assert(piece)
 	local i = glm.inverse(piece.collider_offset) ---@cast i glm.mat4
-	-- This prevents z-fighting, not perfect but works for most parts
-	local make_bigger = glm.scale(glm.mat4.new(1.0), glm.vec3.new(1.001, 1.001, 1.001))
-	local tform = piece:get_graphics_transform():to_mat4() * make_bigger * i
+	local tform = piece:get_graphics_transform():to_mat4() * i
 	piece:get_model_node():draw_override(cu, hover_material:get(), tform, 0, mat_override, true, true)
 
 end

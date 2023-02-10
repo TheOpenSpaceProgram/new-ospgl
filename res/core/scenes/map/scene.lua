@@ -26,6 +26,7 @@ predictor:launch()
 
 local cubemap = assets.get_cubemap("debug_system:skybox.png")
 local sunlight = rnd.sun_light.new(osp.renderer.quality.sun_terrain_shadow_size, osp.renderer.quality.sun_shadow_size)
+sunlight.track_star = true
 local skybox = rnd.skybox.new(cubemap:move())
 local camera = dofile("core:scenes/map/map_camera.lua"):init(universe, gui_input)
 

@@ -16,6 +16,7 @@ public:
 	std::string name;
 
 	bool nbody;
+	bool star;
 
 	// Does not stop the planetary surface from being generated if needed
 	bool render_enabled;
@@ -79,6 +80,7 @@ public:
 	{
 		SAFE_TOML_GET_OR(to.name, "name", std::string, "");
 		SAFE_TOML_GET_OR(to.nbody, "nbody", bool, false);
+		SAFE_TOML_GET_OR(to.star, "star", bool, false);
 
 		std::string config;
 		SAFE_TOML_GET(config, "config", std::string);

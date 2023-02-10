@@ -28,10 +28,10 @@ private:
 	PosVector physics_pos;
 
 	static void render_body(CartesianState state, SystemElement* body, glm::dvec3 camera_pos, double t, double t0,
-		glm::dmat4 proj_view, float far_plane);
+		glm::dmat4 proj_view, float far_plane, glm::dvec3 sun_pos);
 
 	static void render_body_atmosphere(CartesianState state, SystemElement* body, glm::dvec3 camera_pos,
-		glm::dmat4 proj_view, float far_plane);
+		glm::dmat4 proj_view, float far_plane, glm::dvec3 sun_pos);
 
 	static void update_render_body_rocky(SystemElement* body, glm::dvec3 body_pos, glm::dvec3 camera_pos, double t, double t0);
 
@@ -56,8 +56,13 @@ public:
 	std::unordered_map<std::string, size_t> name_to_index{};
 	std::vector<SystemElement*> elements{};
 	// How many n-body interacting elements are there? (The others are simply attracted)
+	// Elements in elements vector up to nbody_count are attracting, afterwards non-attracting
+	// Note that all elements do attract light states! (vessels)
 	size_t nbody_count;
-	
+
+	// Which element is the star, used as a light source?
+	size_t star;
+
 	// Safer than directly indexing the array
 	size_t get_element_index_from_name(const std::string& name);
 

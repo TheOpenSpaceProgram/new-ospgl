@@ -157,6 +157,7 @@ function return_table.point_light:get_radius() end
 ---@field color glm.vec3
 ---@field spec_color glm.vec3
 ---@field ambient_color glm.vec3
+---@field track_star boolean
 return_table.sun_light = {}
 ---@return renderer.light_type
 function return_table.sun_light:get_type() end

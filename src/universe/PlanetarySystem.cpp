@@ -30,14 +30,14 @@ glm::dvec3 PlanetarySystem::get_gravity_vector(glm::dvec3 p, bool physics)
 }
 
 void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm::dvec3 camera_pos, double t, double t0,
-	glm::dmat4 proj_view, float far_plane)
+	glm::dmat4 proj_view, float far_plane, glm::dvec3 sun_pos)
 {
 
 	if(body->render_enabled == false)
 		return;
 
 	glm::dvec3 camera_pos_relative = camera_pos - state.pos;
-	glm::dvec3 light_dir = glm::normalize(state.pos);
+	glm::dvec3 light_dir = glm::normalize(state.pos - sun_pos);
 
 	glm::dmat4 model = glm::translate(glm::dmat4(1.0), -camera_pos + state.pos);
 	model = glm::scale(model, glm::dvec3(body->config.radius));
@@ -69,10 +69,10 @@ void PlanetarySystem::render_body(CartesianState state, SystemElement* body, glm
 }
 
 void PlanetarySystem::render_body_atmosphere(CartesianState state, SystemElement * body, glm::dvec3 camera_pos,
-											 glm::dmat4 proj_view, float far_plane)
+											 glm::dmat4 proj_view, float far_plane, glm::dvec3 sun_pos)
 {
 	glm::dvec3 camera_pos_relative = camera_pos - state.pos;
-	glm::dvec3 light_dir = glm::normalize(state.pos);
+	glm::dvec3 light_dir = glm::normalize(state.pos - sun_pos);
 
 	body->renderer.forward(proj_view, camera_pos_relative, body->config, far_plane, light_dir);
 }
@@ -99,9 +99,10 @@ void PlanetarySystem::deferred_pass(CameraUniforms& cu, bool is_env_map)
 	glm::dmat4 c_model = cu.c_model;
 	float far_plane = cu.far_plane;
 
+	glm::dvec3 sun_pos = states_now[star].pos;
 	for (size_t i = 0; i < elements.size(); i++)
 	{
-		render_body(states_now[i], elements[i], camera_pos, t, t0, proj_view, far_plane);
+		render_body(states_now[i], elements[i], camera_pos, t, t0, proj_view, far_plane, sun_pos);
 	}
 
 	if (debug_drawer->debug_enabled)
@@ -139,9 +140,11 @@ void PlanetarySystem::forward_pass(CameraUniforms& cu, bool is_env_map)
 		return glm::distance2(camera_pos, a.second.pos) > glm::distance2(camera_pos, b.second.pos);
 	});
 
+	glm::dvec3 sun_pos = states_now[star].pos;
+
 	for (size_t i = 0; i < sorted.size(); i++)
 	{
-		render_body_atmosphere(sorted[i].second, sorted[i].first, camera_pos, proj_view, far_plane);
+		render_body_atmosphere(sorted[i].second, sorted[i].first, camera_pos, proj_view, far_plane, sun_pos);
 	}
 }
 
@@ -431,25 +434,23 @@ void PlanetarySystem::load(const cpptoml::table &root)
 	// We sadly can't use std::sort as it requires weak ordering
 	std::vector<SystemElement*> ordered;
 	size_t all = elements.size();
-	while(ordered.size() != all)
+	for(auto it = elements.begin(); it != elements.end();)
 	{
-		for(auto it = elements.begin(); it != elements.end();)
+		if((*it)->nbody)
 		{
-			if((*it)->nbody)
-			{
-				ordered.push_back((*it));
-				it = elements.erase(it);
-			}
-			else
-			{
-				it++;
-			}
+			ordered.push_back((*it));
+			it = elements.erase(it);
+		}
+		else
+		{
+			it++;
 		}
 	}
 	ordered.insert(ordered.end(), elements.begin(), elements.end());
 	elements = ordered;
 
-	// Create the name list
+	bool found_star = false;
+	// Create the name list and find star
 	for(size_t i = 0; i < elements.size(); i++)
 	{
 		elements[i]->index = i;
@@ -457,7 +458,17 @@ void PlanetarySystem::load(const cpptoml::table &root)
 		if(elements[i]->name.empty()) continue;
 
 		name_to_index[elements[i]->name] = i;
+
+		if(elements[i]->star)
+		{
+			if(found_star)
+				logger->warn("Only one star element is allowed (See Issue #52 in Github)");
+			found_star = true;
+			star = i;
+		}
 	}
+
+	logger->check(found_star, "No star found, make sure the system has one");
 
 }
 
