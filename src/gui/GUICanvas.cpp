@@ -1,14 +1,14 @@
 #include "GUICanvas.h"
 #include <util/Logger.h>
 
-std::pair<GUICanvas*, GUICanvas*> GUICanvas::divide_h(float nfac)
+std::pair<std::shared_ptr<GUICanvas>, std::shared_ptr<GUICanvas>> GUICanvas::divide_h(float nfac)
 {
 	logger->check(child_0 == nullptr && child_1 == nullptr, "Tried to split a non-leaf GUICanvas");
 
 	fac = nfac;
 
-	child_0 = new GUICanvas();
-	child_1 = new GUICanvas();
+	child_0 = std::make_shared<GUICanvas>();
+	child_1 = std::make_shared<GUICanvas>();
 
 	float n_canvas_size = nfac * factor.x;
 	child_0->factor = glm::vec2(n_canvas_size, factor.y);
@@ -30,14 +30,14 @@ std::pair<GUICanvas*, GUICanvas*> GUICanvas::divide_h(float nfac)
 	return std::make_pair(child_0, child_1);
 }
 
-std::pair<GUICanvas*, GUICanvas*> GUICanvas::divide_v(float nfac)
+std::pair<std::shared_ptr<GUICanvas>, std::shared_ptr<GUICanvas>> GUICanvas::divide_v(float nfac)
 {
 	logger->check(child_0 == nullptr && child_1 == nullptr, "Tried to split a non-leaf GUICanvas");
 
 	fac = nfac;
 
-	child_0 = new GUICanvas();
-	child_1 = new GUICanvas();
+	child_0 = std::make_shared<GUICanvas>();
+	child_1 = std::make_shared<GUICanvas>();
 
 	float n_canvas_size = nfac * factor.y;
 	child_0->factor = glm::vec2(factor.x, n_canvas_size);
@@ -226,9 +226,6 @@ void GUICanvas::update_children()
 
 GUICanvas::~GUICanvas()
 {
-		delete layout;
-		delete child_0;
-		delete child_1;
 }
 
 

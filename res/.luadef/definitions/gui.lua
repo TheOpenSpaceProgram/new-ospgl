@@ -74,7 +74,26 @@ gui.input = {}
 --- Draws a ImGUI debug screen to visualize input status. Place tactically around code to debug issues.
 function gui.input:debug() end
 
+---@class gui.canvas
+gui.canvas = {}
 
+---@return gui.canvas
+--- If you add the canvas to a gui screen, make sure it lives long enough!
+function gui.canvas.new() end
+
+--- If children are set, they are removed
+---@param lyout gui.layout
+function gui.canvas:set_layout(lyout) end
+
+---@param fac number How much space should the left children take? (0->1)
+---@return gui.canvas Left children canvas
+---@return gui.canvas Right children canvas
+function gui.canvas:divide_h(fac) end
+
+---@param fac number How much space should the top children take? (0->1)
+---@return gui.canvas Top children canvas
+---@return gui.canvas Bottom children canvas
+function gui.canvas:divide_v(fac) end
 
 
 return gui

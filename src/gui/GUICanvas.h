@@ -9,9 +9,6 @@ class GUIScreen;
 
 // A canvas can contain more canvases
 // A canvas with children cannot contain layouts
-// Note: We automatically delete the layout and all children!
-//  - Make sure you don't delete any children canvas or layouts
-//
 class GUICanvas
 {
 private:
@@ -21,7 +18,7 @@ public:
 
 	// Is null if we are splitted.
 	// If one is present while splitting, child_1 will inherit it
-	GUILayout* layout;
+	std::shared_ptr<GUILayout> layout;
 
 	// Only makes sense on splitted canvas, was the split 
 	// horizontal or vertical?
@@ -32,18 +29,18 @@ public:
 	int child_0_pixels;
 
 	// child_0 is the top or left split
-	GUICanvas* child_0;
+	std::shared_ptr<GUICanvas> child_0;
 	// child_1 is the bottom or right split
-	GUICanvas* child_1;
+	std::shared_ptr<GUICanvas> child_1;
 
 	float fac;
 	glm::vec2 factor;
 	glm::vec2 position;
 
 	// Returns the children, first child_0, then child_1
-	std::pair<GUICanvas*, GUICanvas*> divide_h(float factor);
+	std::pair<std::shared_ptr<GUICanvas>, std::shared_ptr<GUICanvas>> divide_h(float factor);
 	// Returns the children, first child_0, then child_1
-	std::pair<GUICanvas*, GUICanvas*> divide_v(float factor);
+	std::pair<std::shared_ptr<GUICanvas>, std::shared_ptr<GUICanvas>> divide_v(float factor);
 
 	// Called bottom-to-top to position widgets, same as draw order
 	void position_widgets(glm::ivec2 pos, glm::ivec2 size, GUIScreen* screen);

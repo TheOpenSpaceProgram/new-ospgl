@@ -66,8 +66,8 @@ GUIDropDown::GUIDropDown()
 	item = -1;
 	open = false;
 	not_chosen_string = "";
-	chooser_canvas = new GUICanvas();
-	chooser_layout = new GUIVerticalLayout(0);
+	chooser_canvas = std::make_shared<GUICanvas>();
+	chooser_layout = std::make_shared<GUIVerticalLayout>(0);
 	chooser_canvas->layout = chooser_layout;
 
 	may_drop_upwards = true;
@@ -81,7 +81,6 @@ GUIDropDown::GUIDropDown()
 
 GUIDropDown::~GUIDropDown()
 {
-	delete chooser_canvas;
 }
 
 void GUIDropDown::update_options()
@@ -89,7 +88,7 @@ void GUIDropDown::update_options()
 	chooser_layout->remove_all_widgets();
 	for(size_t i = 0; i < options.size(); i++)
 	{
-		GUITextButton* btn = new GUITextButton(options[i].second, "medium");
+		auto btn = std::make_shared<GUITextButton>(options[i].second, "medium");
 		btn->default_size.y = item_size;
 		btn->on_clicked.add_handler([this, i](int _)
 		{

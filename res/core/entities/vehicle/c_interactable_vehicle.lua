@@ -7,6 +7,7 @@ local glm = require("glm")
 local input = require("input")
 local bullet = require("bullet")
 local model = require("model")
+local guilib = require("gui")
 local assets = require("assets")
 local raycast = require("core:util/g_raycast.lua")
 local debug_drawer = require("debug_drawer")
@@ -101,7 +102,12 @@ function interactable_vehicle:new_context_menus()
 		return
 	end
 
-	self.context_menus[self.hovered] = {highlight_timer = 1.0}
+	local n_menu = {}
+	n_menu.highlight_timer = 1.0
+	n_menu.canvas = guilib.canvas.new()
+	n_menu.pos = glm.vec2.new(0.0, 0.0)
+	n_menu.size = glm.vec2.new(1.0, 1.0)
+	self.context_menus[self.hovered] = n_menu
 
 	-- Remove all others if CTRL is not held
 	if not input.key_down(input.key.left_control) then
@@ -120,6 +126,8 @@ function interactable_vehicle:update_context_menus(dt, gui)
 		if menu.highlight_timer > 0.0 then
 			menu.highlight_timer = menu.highlight_timer - dt
 		end
+
+		gui:add_canvas(menu.canvas, menu.pos, menu.size)
 
 	end
 end

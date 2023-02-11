@@ -13,7 +13,6 @@ require("universe")
 vehicle = nil
 local veh_debug = nil 
 
-
 -- Gets passed the vehicle to use
 ---@param nvehicle vehicle
 function create(nvehicle)

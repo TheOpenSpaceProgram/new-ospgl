@@ -101,6 +101,8 @@ FastNoise* fn_new(int seed)
 	fn->cellular_distance_index_1 = 1;
 	fn->cellular_jitter = (FN_DECIMAL)(1);
 	fn->gradient_perturb_amp = (FN_DECIMAL)(1);
+	fn->crater_chance = 0.5;
+	fn->crater_layers = 3;
 
 	fn_set_seed(fn, seed);
 

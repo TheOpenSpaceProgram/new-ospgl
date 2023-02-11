@@ -52,14 +52,14 @@ private:
 	GUIInput* gui_input;
 
 	void create_part(AssetHandle<PartPrototype>& proto);
-	GUIDropDown* group_dropdown;
+	std::shared_ptr<GUIDropDown> group_dropdown;
 	void update_groups();
 
 	GroupManager group_manager;
 
 public:
 
-	GUIImageButton* old_category_toggled;
+	std::shared_ptr<GUIImageButton> old_category_toggled;
 	PartIconRenderer* icon_renderer;
 
 	std::string current_category = "command";
@@ -73,12 +73,12 @@ public:
 	int category_icon_size = 24;
 	
 	GUICanvas def_panel;
-	GUIListLayout* part_list;
-	GUIVerticalLayout* category_list;
+	std::shared_ptr<GUIListLayout> part_list;
+	std::shared_ptr<GUIVerticalLayout> category_list;
 
-	GUISingleLayout* group_selector;
-	GUISingleLayout* search_bar;
-	
+	std::shared_ptr<GUISingleLayout> group_selector;
+	std::shared_ptr<GUISingleLayout> search_bar;
+
 	// Called when changing category
 	void update_part_list();
 

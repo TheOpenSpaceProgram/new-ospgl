@@ -75,12 +75,12 @@ void GUIScreen::draw()
 	win_manager.draw(osp->renderer->vg, this);
 }
 
-void GUIScreen::add_canvas(GUICanvas *acanvas, glm::ivec2 pos, glm::ivec2 size)
+void GUIScreen::add_canvas(std::shared_ptr<GUICanvas> acanvas, glm::ivec2 pos, glm::ivec2 size)
 {
 	canvas.emplace_back(acanvas, std::make_pair(pos, size));
 }
 
-void GUIScreen::add_post_canvas(GUICanvas *acanvas, glm::ivec2 pos, glm::ivec2 size)
+void GUIScreen::add_post_canvas(std::shared_ptr<GUICanvas> acanvas, glm::ivec2 pos, glm::ivec2 size)
 {
 	post_canvas.emplace_back(acanvas, std::make_pair(pos, size));
 }
@@ -95,4 +95,18 @@ void GUIScreen::new_frame(glm::ivec4 nscreen)
 void GUIScreen::new_frame()
 {
 	new_frame(glm::ivec4(0, 0, osp->renderer->get_width(true), osp->renderer->get_height(true)));
+}
+
+void GUIScreen::add_canvas(GUICanvas* canvas, glm::ivec2 pos, glm::ivec2 size)
+{
+	// Create a dummy shared ptr that does no deletion
+	auto canvas_ptr = std::shared_ptr<GUICanvas>(canvas, null_deleter<GUICanvas>);
+	add_canvas(canvas_ptr, pos, size);
+}
+
+void GUIScreen::add_post_canvas(GUICanvas* canvas, glm::ivec2 pos, glm::ivec2 size)
+{
+	// Create a dummy shared ptr that does no deletion
+	auto canvas_ptr = std::shared_ptr<GUICanvas>(canvas, null_deleter<GUICanvas>);
+	add_post_canvas(canvas_ptr, pos, size);
 }

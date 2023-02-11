@@ -12,9 +12,9 @@ void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg)
 	this->edveh_int = sc->gui.edveh_int;
 	this->scene = sc;
 
-	part_list = new GUIListLayout(part_margin, part_margin);
+	part_list = std::make_shared<GUIListLayout>(part_margin, part_margin);
 	part_list->margins = glm::ivec4(part_margin, part_margin, part_margin, part_margin);
-	trashcan = new GUISingleLayout();
+	trashcan = std::make_shared<GUISingleLayout>();
 
 	def_panel.divide_v(0.4);
 	// Top is the part list
@@ -24,7 +24,7 @@ void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg)
 
 	for(auto& p : osp->game_database->plumbing_machines)
 	{
-		GUIImageButton* btn = new GUIImageButton();
+		auto btn = std::make_shared<GUIImageButton>();
 		// Load the machine icon
 		AssetHandle<Config> config = AssetHandle<Config>(p);
 		std::string icon = config->root->get_qualified_as<std::string>("icon").value_or("core:notex.png");
@@ -45,7 +45,7 @@ void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg)
 		});
 	}
 
-	trashcan_button = new GUITextButton("", "medium");
+	trashcan_button = std::make_shared<GUITextButton>("", "medium");
 	trashcan_button->on_clicked.add_handler([this](int btn)
 	{
 		if(btn == 0)

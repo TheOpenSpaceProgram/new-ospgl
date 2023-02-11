@@ -33,7 +33,7 @@ void EditorPartList::update_part_list()
 		auto it = std::find(proto->categories.begin(), proto->categories.end(), current_category);
 		if(it != proto->categories.end())
 		{
-			GUIImageButton* btn = new GUIImageButton();
+			auto btn = std::make_shared<GUIImageButton>();
 			btn->default_size = part_icon_size;
 			btn->name = proto->name;
 			btn->set_image(vg, p.icon, icon_renderer->size);
@@ -168,8 +168,8 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 	def_panel.child_0_pixels = 64;
 	def_panel.child_0->divide_v(0.5);
 
-	group_selector = new GUISingleLayout();
-	group_dropdown = new GUIDropDown();
+	group_selector = std::make_shared<GUISingleLayout>();
+	group_dropdown = std::make_shared<GUIDropDown>();
 	update_groups();
 	group_dropdown->on_item_change.add_handler(
 		[this](const GUIDropDown::IDNamePair& new_opt, const GUIDropDown::IDNamePair& old_opt)
@@ -187,8 +187,8 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 	group_dropdown->item = 0;
 	group_selector->add_widget(group_dropdown);
 
-	search_bar = new GUISingleLayout();
-	GUITextField* tfield = new GUITextField();
+	search_bar = std::make_shared<GUISingleLayout>();
+	auto tfield = std::make_shared<GUITextField>();
 	tfield->default_string = osp->game_database->get_string("core:editor_search_parts");
 	tfield->reselect_clears = true;
 	tfield->escape_clears = true;
@@ -200,11 +200,11 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 	def_panel.child_1->divide_h(0.03);
 	def_panel.child_1->child_0_pixels = category_icon_size + 4;
 
-	part_list = new GUIListLayout(part_margin, part_margin);
+	part_list = std::make_shared<GUIListLayout>(part_margin, part_margin);
 	part_list->margins = glm::ivec4(part_margin, part_margin, part_margin, part_margin);	
 	def_panel.child_1->child_1->layout = part_list;
 
-	category_list = new GUIVerticalLayout(part_margin);
+	category_list = std::make_shared<GUIVerticalLayout>(part_margin);
 	category_list->vscrollbar.width = 1;
 	category_list->margins = glm::ivec4(1, 2, part_margin, 0);
 	def_panel.child_1->child_0->layout = category_list;
@@ -214,7 +214,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 	// Category buttons
 	for(int i = 0; i < categories.size(); i++)
 	{
-		GUIImageButton* btn = new GUIImageButton();
+		auto btn = std::make_shared<GUIImageButton>();
 		if(i == 0)
 		{
 			btn->toggled = true;

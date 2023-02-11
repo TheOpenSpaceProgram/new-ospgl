@@ -2,6 +2,7 @@
 
 ---@class fast_noise
 
+
 local noise = {}
 
 ---@enum fast_noise.interp
@@ -275,5 +276,9 @@ function noise.crater3_get_rad(fn) end
 ---@param seed integer
 function noise.new(seed) end
 
+
+---@param seed integer
+---@return fast_noise
+function noise.new(seed) end
 
 return noise

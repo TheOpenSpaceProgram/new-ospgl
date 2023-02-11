@@ -20,8 +20,8 @@ public:
 	// Can the dropdown go up?
 	bool may_drop_upwards;
 
-	GUICanvas* chooser_canvas;
-	GUIVerticalLayout* chooser_layout;
+	std::shared_ptr<GUICanvas> chooser_canvas;
+	std::shared_ptr<GUIVerticalLayout> chooser_layout;
 
 	std::string not_chosen_string;
 	bool allow_no_selection;

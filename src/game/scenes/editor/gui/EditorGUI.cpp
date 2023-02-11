@@ -53,13 +53,13 @@ int EditorGUI::get_panel_width()
 	void EditorGUI::create_toolset()
 	{
 		// Prepare the toolset_canvas
-		GUIListLayout* tlayout = new GUIListLayout();
+		auto tlayout = std::make_shared<GUIListLayout>();
 		tlayout->vscrollbar.draw = false;
 		toolset_canvas.layout = tlayout;
 
 		auto create_button = [tlayout, this](const std::string& name, EditorMode mode)
 		{
-			GUIImageButton* button = new GUIImageButton();
+			auto button = std::make_shared<GUIImageButton>();
 			button->set_image(vg, AssetHandle<Image>("core", name));
 			button->default_size = glm::ivec2(24, 24);
 			tlayout->add_widget(button);
@@ -69,7 +69,7 @@ int EditorGUI::get_panel_width()
 				if(this->edveh_int->can_change_editor_mode())
 				{
 					this->current_editor_mode_button->toggled = false;
-					this->current_editor_mode_button = button;
+					this->current_editor_mode_button = button.get();
 					button->toggled = true;
 					this->set_editor_mode(mode);
 				}
@@ -79,7 +79,7 @@ int EditorGUI::get_panel_width()
 		};
 
 		editor_mode = ATTACHING;
-		current_editor_mode_button = create_button("editor/attach.png", ATTACHING);
+		current_editor_mode_button = create_button("editor/attach.png", ATTACHING).get();
 		current_editor_mode_button->toggled = true;
 		edveh_int->current_interface = &edveh_int->attach_interface;
 
@@ -93,25 +93,25 @@ int EditorGUI::get_panel_width()
 	{
 		// It doesn't matter as we later on set the fixed pixel ammount
 		auto pair = file_canvas.divide_h(0.5f);
-		GUICanvas* left = pair.first;
-		GUICanvas* right = pair.second;
+		auto left = pair.first;
+		auto right = pair.second;
 
-		left->layout = new GUISingleLayout();
+		left->layout = std::make_shared<GUISingleLayout>();
 
-		GUIListLayout* list = new GUIListLayout(0, 2);
+		auto list = std::make_shared<GUIListLayout>(0, 2);
 		list->vscrollbar.draw = false;
 		list->margins.x = 1; list->margins.y = 1;
 		right->layout = list;
 
 		// Left contains just the text field
-		GUITextField* text_field = new GUITextField();
+		auto text_field = std::make_shared<GUITextField>();
 		left->layout->add_widget(text_field);
 
 		// Right contains the small buttons
 
 		auto create_button = [right, this](const std::string& name, std::function<void(int)> on_click)
 		{
-			GUIImageButton* button = new GUIImageButton();
+			auto button = std::make_shared<GUIImageButton>();
 			button->set_image(vg, AssetHandle<Image>("core", name));
 			button->on_clicked.add_handler(on_click);
 			button->default_size = glm::ivec2(22, 22);

@@ -21,9 +21,10 @@ local glm = {}
 ---@operator unm(): glm.vec2 Obtains the opposite vector
 ---@field x number
 ---@field y number
+--- Note: To copy a vector use the vec.new(vec) constructor!
 glm.vec2 = {}
 ---@return glm.vec2
----@param param1? number|glm.vec3|glm.vec4 If number, initialize as (x, y) or (x, x). Otherwise, initialize from higher dimension vector by trimming
+---@param param1? number|glm.vec2|glm.vec3|glm.vec4 If number, initialize as (x, y) or (x, x). Otherwise, initialize from vector
 ---@param param2? number Only present if initializing as (x, y)
 function glm.vec2.new(param1, param2) end
 ---@return number x x component
@@ -47,6 +48,7 @@ function glm.vec2:unpack() end
 ---@field x number
 ---@field y number
 ---@field z number
+--- Note: To copy a vector use the vec.new(vec) constructor!
 glm.vec3 = {}
 ---@return glm.vec3
 ---@param param1? number|glm.vec4|glm.vec2 If only one number given, initialize as (x, x, x)
@@ -78,10 +80,11 @@ function glm.vec3:to_vec2() end
 ---@field y number
 ---@field z number
 ---@field w number
+--- Note: To copy a vector use the vec.new(vec) constructor!
 glm.vec4 = {}
 
 ---@return glm.vec4
----@param param1? number|glm.vec3 If only one number present, initialize as (x, x, x)
+---@param param1? number|glm.vec3|glm.vec4 If only one number present, initialize as (x, x, x)
 ---@param param2? number Only present if initializing as (x, y, z, w) or (vec3, w)
 ---@param param3? number Only present if initializing as (x, y, z, w)
 ---@param param4? number Only present if initializing as (x, y, z, w)
@@ -113,10 +116,11 @@ function glm.vec4:to_vec3() end
 ---@operator div(number): glm.mat3  Divides all elements of the matrix by the number
 ---@operator div(glm.mat3): glm.mat3 Performs matrix division (multiply by the inverse), OpenGL style
 ---@operator div(glm.vec3): glm.vec3 Left-divides the vector with the matrix. This is what you typically use.
+--- Note: To copy a matrix use the mat.new(mat) constructor!
 glm.mat3 = {}
 
 ---@return glm.mat3
----@param param1? number|glm.vec3
+---@param param1? number|glm.vec3|glm.mat3
 ---@param param2? glm.vec3 Only present if initializing as (vec3, vec3, vec3)
 ---@param param3? glm.vec3 Only present if initializing as (vec3, vec3, vec3)
 function glm.mat3.new(param1, param2, param3) end
@@ -132,10 +136,11 @@ function glm.mat3.new(param1, param2, param3) end
 ---@operator div(number): glm.mat4  Divides all elements of the matrix by the number
 ---@operator div(glm.mat4): glm.mat4 Performs matrix division (multiply by the inverse), OpenGL style
 ---@operator div(glm.vec4): glm.vec4 Left-divides the vector with the matrix. This is what you typically use.
+--- Note: To copy a matrix use the mat.new(mat) constructor!
 glm.mat4 = {}
 
 ---@return glm.mat4
----@param param1? number|glm.vec4
+---@param param1? number|glm.vec4|glm.mat4
 ---@param param2? glm.vec4 Only present if initializing as (vec4, vec4, vec4, vec4)
 ---@param param3? glm.vec4 Only present if initializing as (vec4, vec4, vec4, vec4)
 ---@param param4? glm.vec4 Only present if initializing as (vec4, vec4, vec4, vec4)
@@ -151,10 +156,11 @@ function glm.mat4.new(param1, param2, param3, param4) end
 ---@field y number
 ---@field z number
 ---@field w number
+--- Note: To copy a quaternion use the quat.new(quat) constructor!
 glm.quat = {}
 
 ---@return glm.quat
----@param param1? number|glm.vec3|glm.mat3|glm.mat4
+---@param param1? number|glm.vec3|glm.mat3|glm.mat4|glm.quat
 ---@param param2? number|glm.vec3
 ---@param param3? number
 ---@param param4? number

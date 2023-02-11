@@ -16,19 +16,19 @@ void EditorTrashcan::init(EditorScene* sc, NVGcontext* vg)
 	this->scene = sc;
 	this->edgui = &sc->gui;
 
-	trash_area_layout = new GUISingleLayout();
+	trash_area_layout = std::make_shared<GUISingleLayout>();
 	panel.divide_v(0.5f).first->layout = trash_area_layout;
 	//panel.layout = trash_area_layout;
 
 	// Add a single button
-	trash_button = GUIImageButton();
-	trash_button.set_image(vg, trash_image.duplicate());
-	trash_button.img_mode = GUIImageButton::CENTER;
-	trash_button.on_clicked.add_handler([this](int btn)
+	trash_button = std::make_shared<GUIImageButton>();
+	trash_button->set_image(vg, trash_image.duplicate());
+	trash_button->img_mode = GUIImageButton::CENTER;
+	trash_button->on_clicked.add_handler([this](int btn)
 	{
 		on_trash(btn);
 	});
-	trash_area_layout->add_widget(&trash_button);
+	trash_area_layout->add_widget(trash_button);
 
 	// It looks better this way
 	trash_area_layout->block_mouse = false;

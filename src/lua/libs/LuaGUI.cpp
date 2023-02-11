@@ -23,7 +23,7 @@ void LuaGUI::load_to(sol::table &table)
 			return ptr;
 		  },
 		  "new_frame", sol::overload(
-				  [](GUIScreen* screen, glm::vec4 screens)
+				  [](GUIScreen* screen, glm::dvec4 screens)
 				  {
 					  screen->new_frame(screens);
 				  },
@@ -33,11 +33,11 @@ void LuaGUI::load_to(sol::table &table)
 				  },
 				  sol::resolve<void()>(&GUIScreen::new_frame)),
 		  "add_canvas", sol::overload(
-				  [](GUIScreen* screen, GUICanvas* canvas, glm::vec2 pos, glm::vec2 size)
+				  [](GUIScreen* screen, std::shared_ptr<GUICanvas> canvas, glm::dvec2 pos, glm::dvec2 size)
 				  {
 					  screen->add_canvas(canvas, pos, size);
 				  },
-				  [](GUIScreen* screen, GUICanvas* canvas, int x, int y, int w, int h)
+				  [](GUIScreen* screen, std::shared_ptr<GUICanvas> canvas, int x, int y, int w, int h)
 				  {
 					  screen->add_canvas(canvas, glm::ivec2(x, y), glm::ivec2(w, h));
 				  }
@@ -69,6 +69,11 @@ void LuaGUI::load_to(sol::table &table)
 		 "keyboard_blocked", &GUIInput::keyboard_blocked,
 		 "debug", &GUIInput::debug
 		 );
+
+	table.new_usertype<GUICanvas>("canvas",
+		  "new", [](){
+			return std::make_shared<GUICanvas>();
+	});
 
 }
 

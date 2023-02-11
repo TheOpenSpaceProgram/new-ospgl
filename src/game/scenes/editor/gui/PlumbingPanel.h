@@ -21,14 +21,14 @@ private:
 	NVGcontext* vg;
 	EditorScene* scene;
 	EditorVehicleInterface* edveh_int;
-	GUITextButton* trashcan_button;
+	std::shared_ptr<GUITextButton> trashcan_button;
 
 public:
 
 	Part* target_part;
 	GUICanvas def_panel;
-	GUIListLayout* part_list;
-	GUISingleLayout* trashcan;
+	std::shared_ptr<GUIListLayout> part_list;
+	std::shared_ptr<GUISingleLayout> trashcan;
 
 	int part_margin = 4;
 

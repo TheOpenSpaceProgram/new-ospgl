@@ -13,8 +13,7 @@ class GUIScreen;
 // A layout contains widgets, which are rendered
 // in appropiate positions
 // This is the base class for all types
-// (We manage the lifetime of all added widgets)
-// Widgets are ordered in the same way the vector is 
+// Widgets are ordered in the same way the vector is
 // ordered, first added is first to appear on wathever
 // layout is used
 // Layouts are free to add scrollbars or wathever it's neccesary,
@@ -23,7 +22,7 @@ class GUILayout
 {
 protected:
 
-	std::vector<GUIWidget*> widgets;
+	std::vector<std::shared_ptr<GUIWidget>> widgets;
 	
 	glm::ivec2 pos, size;
 
@@ -45,13 +44,8 @@ public:
 
 	virtual void on_move_widget(GUIWidget* widget, int new_index) {}
 
-	// We will automatically delete the widget if we are 
-	// destroyed, so heap-allocate it
-	void add_widget(GUIWidget* widget);
-	
-	// We will NOT delete the widget, feel free to move it
-	// to another layout
-	// Will report an error if a not present widget is given
+	void add_widget(std::shared_ptr<GUIWidget> widget);
+	// Note: This will find a matching widget and remove it from the layout
 	void remove_widget(GUIWidget* widget);
 
 	void remove_all_widgets();

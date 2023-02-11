@@ -10,7 +10,8 @@ class GUIScreen
 {
 private:
 
-	using CanvasPosSize = std::pair<GUICanvas*, std::pair<glm::ivec2, glm::ivec2>>;
+	// We store shared_ptr to canvases so lua doesn't have lifetime problems
+	using CanvasPosSize = std::pair<std::shared_ptr<GUICanvas>, std::pair<glm::ivec2, glm::ivec2>>;
 
 	// Canvas to prepare/draw after everything else is finished (example: dropdowns)
 	std::vector<CanvasPosSize> post_canvas;
@@ -32,9 +33,13 @@ public:
 	void new_frame();
 
 	// Called by widgets (or you if you need) to add overlay canvas
-	void add_post_canvas(GUICanvas* canvas, glm::ivec2 pos, glm::ivec2 size);
+	void add_post_canvas(std::shared_ptr<GUICanvas> canvas, glm::ivec2 pos, glm::ivec2 size);
 	// Call on each canvas to do them this frame
+	void add_canvas(std::shared_ptr<GUICanvas> canvas, glm::ivec2 pos, glm::ivec2 size);
+
+	// Used by C++, as here we guarantee that the canvases always outlive the drawing command
 	void add_canvas(GUICanvas* canvas, glm::ivec2 pos, glm::ivec2 size);
+	void add_post_canvas(GUICanvas* canvas, glm::ivec2 pos, glm::ivec2 size);
 
 	// Call before any input handling by the 3D game, so the GUI can block the game
 	void prepare_pass();

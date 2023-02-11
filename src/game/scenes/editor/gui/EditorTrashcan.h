@@ -22,8 +22,8 @@ private:
 	AssetHandle<Image> trash_image;
 
 	GUICanvas panel;
-	GUISingleLayout* trash_area_layout;
-	GUIImageButton trash_button;
+	std::shared_ptr<GUISingleLayout> trash_area_layout;
+	std::shared_ptr<GUIImageButton> trash_button;
 
 	EditorGUI* edgui;
 	GUIInput* gui_input;

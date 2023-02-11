@@ -1,18 +1,18 @@
 #include "GUILayout.h"
 #include <util/Logger.h>
 
-void GUILayout::add_widget(GUIWidget* widget)
+void GUILayout::add_widget(std::shared_ptr<GUIWidget> widget)
 {
 	widgets.push_back(widget);
 
-	on_add_widget(widget);
+	on_add_widget(widget.get());
 }
 
 void GUILayout::remove_widget(GUIWidget* widget)
 {
 	for(auto it = widgets.begin(); it != widgets.end(); it++)
 	{
-		if(*it == widget)
+		if(it->get() == widget)
 		{
 			on_remove_widget(widget);
 			widgets.erase(it);
@@ -72,14 +72,9 @@ void GUILayout::prepare_wrapper(GUIScreen* screen, GUIInput* gui_input)
 
 void GUILayout::remove_all_widgets()
 {
-	for(GUIWidget* w : widgets)
+	for(std::shared_ptr<GUIWidget> w : widgets)
 	{
-		on_remove_widget(w);
-	}
-
-	for(GUIWidget* w : widgets)
-	{
-		delete w;
+		on_remove_widget(w.get());
 	}
 
 	widgets.clear();
@@ -155,8 +150,4 @@ GUILayout::GUILayout()
 
 GUILayout::~GUILayout()
 {
-	for(GUIWidget* w : widgets)
-	{
-		delete w;
-	}
 }

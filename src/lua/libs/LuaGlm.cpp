@@ -61,7 +61,7 @@ void LuaGlm::load_to(sol::table& table)
 		
 	sol::usertype<glm::dvec2> dvec2_ut = table.new_usertype<glm::dvec2>("vec2",
 		sol::constructors < glm::dvec2(), glm::dvec2(double), glm::dvec2(double, double),
-			glm::dvec2(glm::dvec3), glm::dvec2(glm::dvec4)>(),
+			glm::dvec2(glm::dvec3), glm::dvec2(glm::dvec4), glm::dvec2(glm::dvec2)>(),
 		sol::meta_function::addition, sol::overload(
 			sol::resolve<glm::dvec2(const glm::dvec2&, const glm::dvec2&)>(glm::operator+),
 			sol::resolve<glm::dvec2(const glm::dvec2&, double)>(glm::operator+),
@@ -89,7 +89,7 @@ void LuaGlm::load_to(sol::table& table)
 
 	sol::usertype<glm::dvec3> dvec3_ut = table.new_usertype<glm::dvec3>("vec3",
 		sol::constructors < glm::dvec3(), glm::dvec3(double), glm::dvec3(glm::dvec2, double),
-		glm::dvec3(double, double, double), glm::dvec3(glm::dvec4)>(),
+		glm::dvec3(double, double, double), glm::dvec3(glm::dvec4), glm::dvec3(glm::dvec3)>(),
 		sol::meta_function::addition, sol::overload(
 			sol::resolve<glm::dvec3(const glm::dvec3&, const glm::dvec3&)>(glm::operator+),
 			sol::resolve<glm::dvec3(const glm::dvec3&, double)>(glm::operator+),
@@ -120,7 +120,7 @@ void LuaGlm::load_to(sol::table& table)
 
 	sol::usertype<glm::dvec4> dvec4_ut = table.new_usertype<glm::dvec4>("vec4",
 		sol::constructors < glm::dvec4(), glm::dvec4(double), glm::dvec4(glm::dvec3, double),
-		glm::dvec4(double, double, double, double)>(),
+		glm::dvec4(double, double, double, double), glm::dvec4(glm::dvec4)>(),
 		sol::meta_function::addition, sol::overload(
 			sol::resolve<glm::dvec4(const glm::dvec4&, const glm::dvec4&)>(glm::operator+),
 			sol::resolve<glm::dvec4(const glm::dvec4&, double)>(glm::operator+),
@@ -155,7 +155,7 @@ void LuaGlm::load_to(sol::table& table)
 	// We only implement the typically used matrices, dmat3 and dmat4
 	sol::usertype<glm::dmat3> dmat3_ut = table.new_usertype<glm::dmat3>("mat3",
 		sol::constructors <glm::dmat3(), glm::dmat3(double), 
-		glm::dmat3(VEC3, VEC3, VEC3)>(),
+		glm::dmat3(VEC3, VEC3, VEC3), glm::dmat3(glm::dmat3)>(),
 		sol::meta_function::addition, sol::overload(
 			sol::resolve<glm::dmat3(const glm::dmat3&, const glm::dmat3&)>(glm::operator+),
 			sol::resolve<glm::dmat3(const glm::dmat3&, double)>(glm::operator+),
@@ -182,7 +182,7 @@ void LuaGlm::load_to(sol::table& table)
 	
 	sol::usertype<glm::dmat4> dmat4_ut = table.new_usertype<glm::dmat4>("mat4",
 		sol::constructors <glm::dmat4(), glm::dmat4(double),
-		glm::dmat4(VEC4, VEC4, VEC4, VEC4)>(),
+		glm::dmat4(VEC4, VEC4, VEC4, VEC4), glm::dmat4(glm::dmat4)>(),
 		sol::meta_function::addition, sol::overload(
 			sol::resolve<glm::dmat4(const glm::dmat4&, const glm::dmat4&)>(glm::operator+),
 			sol::resolve<glm::dmat4(const glm::dmat4&, const double&)>(glm::operator+),
@@ -209,7 +209,7 @@ void LuaGlm::load_to(sol::table& table)
 		
 		sol::usertype<glm::dquat> dquat_ut = table.new_usertype<glm::dquat>("quat",
 		sol::constructors < glm::dquat(), glm::dquat(double, double, double, double),
-		glm::dquat(double, VEC3), glm::dquat(VEC3), glm::dquat(MAT3), glm::dquat(MAT4)>(),
+		glm::dquat(double, VEC3), glm::dquat(VEC3), glm::dquat(MAT3), glm::dquat(MAT4), glm::dquat(glm::dquat)>(),
 		sol::meta_function::multiplication, sol::overload(
 			sol::resolve<glm::dquat(const glm::dquat&, const glm::dquat&)>(glm::operator*),
 			sol::resolve<glm::dvec3(const glm::dquat&, const glm::dvec3&)>(glm::operator*),
