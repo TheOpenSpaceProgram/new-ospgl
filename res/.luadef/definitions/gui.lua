@@ -17,6 +17,7 @@ function gui.skin.get_default_skin() end
 
 ---@class gui.screen
 ---@field input gui.input
+---@field win_manager gui.win_manager
 gui.screen = {}
 
 ---@param skin gui.skin
@@ -78,7 +79,6 @@ function gui.input:debug() end
 gui.canvas = {}
 
 ---@return gui.canvas
---- If you add the canvas to a gui screen, make sure it lives long enough!
 function gui.canvas.new() end
 
 --- If children are set, they are removed
@@ -95,5 +95,50 @@ function gui.canvas:divide_h(fac) end
 ---@return gui.canvas Bottom children canvas
 function gui.canvas:divide_v(fac) end
 
+---@param pixels integer How many pixels should the selected children take?
+---@param for_top? boolean Defaults to true, are the given pixels for the top canvas or bottom one?
+---@return gui.canvas Top children canvas
+---@return gui.canvas Bottom children canvas
+function gui.canvas:divide_v_pixels(pixels, for_top) end
+
+---@param pixels integer How many pixels should the selected children take?
+---@param for_left? boolean Defaults to true, are the given pixels for the left canvas or right one?
+---@return gui.canvas Left children canvas
+---@return gui.canvas Right children canvas
+function gui.canvas:divide_h_pixels(pixels, for_left) end
+
+---@class gui.layout
+gui.layout = {}
+
+---@class gui.win_manager
+gui.win_manager = {}
+
+---@param pos? glm.vec2 Starting position for the window, negative coordinates use default
+---@param size? glm.vec2 Starting size for the window, negative coordinates use default
+---@return gui.window
+function gui.win_manager:create_window(pos, size) end
+
+---@class gui.window
+---@field canvas gui.canvas
+---@field style gui.window_style
+---@field closeable boolean
+---@field pinable boolean
+---@field minimizable boolean
+---@field resizeable boolean
+---@field moveable boolean
+---@field pin_passthrough boolean
+---@field title string
+---@field has_titlebar boolean
+gui.window = {}
+
+---@return boolean
+--- You should remove any references to the window if this goes false to guarantee memory freeing
+function gui.window:is_open() end
+
+---@enum gui.window_style
+gui.window_style = {
+	normal = 0,
+	linked = 1
+}
 
 return gui

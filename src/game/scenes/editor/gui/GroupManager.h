@@ -9,7 +9,7 @@ class GroupManager
 private:
 	EditorScene* scene;
 	EditorPartList* pl;
-	GUIWindow* win;
+	std::weak_ptr<GUIWindow> win;
 	int selected_group;
 	void create_right_panel();
 

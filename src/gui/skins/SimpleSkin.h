@@ -42,6 +42,9 @@ public:
 
 	virtual void draw_window(NVGcontext* vg, GUIWindow* window) override;
 
+	virtual void draw_link(NVGcontext* vg, glm::ivec2 link_start, glm::ivec2 win_pos) override;
+	virtual bool can_cut_link(NVGcontext* vg, glm::ivec2 link_start, glm::ivec2 win_pos) override;
+
 	NVGcolor get_background_color(bool bright = false) override;
 	NVGcolor get_stroke_color(ButtonState state) override;
 	NVGcolor get_fill_color(ButtonState state) override;

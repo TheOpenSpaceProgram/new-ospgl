@@ -23,7 +23,7 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 	bool left_down = gui_input->mouse_down(0);
 
 	bool found_focus = false;
-	GUIWindow* new_top = nullptr;
+	std::shared_ptr<GUIWindow> new_top = nullptr;
 
 	bool any_hovered = false;
 
@@ -110,7 +110,7 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 			for (auto it = windows.rbegin(); it != windows.rend(); it++)
 			{
 				glm::ivec2 mouse_pos = input->mouse_pos;
-				GUIWindow *w = *it;
+				auto w = *it;
 
 				w->close_hovered = false;
 				w->minimize_hovered = false;
@@ -118,7 +118,7 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 				w->drag_hovered = false;
 
 				bool mouse_inside = false;
-				glm::ivec4 aabb = skin->get_window_aabb(w);
+				glm::ivec4 aabb = skin->get_window_aabb(w.get());
 				if (gui_input->mouse_inside(glm::vec2(aabb.x, aabb.y), glm::vec2(aabb.z, aabb.w)) && !found_focus)
 				{
 					any_hovered = true;
@@ -126,25 +126,24 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 					GUISkin::ResizePoint rpt;
 					if (w->resizeable)
 					{
-						rpt = skin->can_resize_window(w, mouse_pos);
+						rpt = skin->can_resize_window(w.get(), mouse_pos);
 					}
 					else
 					{
 						rpt = GUISkin::NONE;
 					}
 
-					if (w->closeable && skin->can_close_window(w, mouse_pos))
+					if (w->closeable && skin->can_close_window(w.get(), mouse_pos))
 					{
 						w->close_hovered = true;
 						if (gui_input->mouse_down(0) && gui_input->execute_user_actions)
 						{
 							remove = true;
-							if (w->erase_ptr != nullptr)
-								*w->erase_ptr = nullptr;
+							w->open = false;
 							w->on_close(*w);
 						}
 					}
-					else if (w->minimizable && skin->can_minimize_window(w, mouse_pos))
+					else if (w->minimizable && skin->can_minimize_window(w.get(), mouse_pos))
 					{
 						w->minimize_hovered = true;
 						if (gui_input->mouse_down(0) && gui_input->execute_user_actions)
@@ -152,7 +151,7 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 							w->minimized = !w->minimized;
 						}
 					}
-					else if (w->pinable && skin->can_pin_window(w, mouse_pos))
+					else if (w->pinable && skin->can_pin_window(w.get(), mouse_pos))
 					{
 						w->pin_hovered = true;
 
@@ -189,7 +188,7 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 							size_0 = w->size;
 						}
 					}
-					else if (w->moveable && skin->can_drag_window(w, mouse_pos))
+					else if (w->moveable && skin->can_drag_window(w.get(), mouse_pos))
 					{
 						w->drag_hovered = true;
 						if (left_down && gui_input->execute_user_actions)
@@ -202,7 +201,8 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 					if (w != focused && any_down && gui_input->execute_user_actions)
 					{
 						w->focused = true;
-						focused->focused = false;
+						if(focused)
+							focused->focused = false;
 						new_top = w;
 						focused = w;
 					}
@@ -212,7 +212,6 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 			if (remove)
 			{
 				windows.remove(focused);
-				delete focused;
 				new_top = nullptr;
 			}
 		}
@@ -232,7 +231,7 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 	// Reverse order so top-windows block bottom ones
 	for(auto it = windows.rbegin(); it != windows.rend(); it++)
 	{
-		GUIWindow* w = *it;
+		auto w = *it;
 		bool old_mouse_block = gui_input->ext_mouse_blocked;
 		bool old_keyboard_block = gui_input->ext_keyboard_blocked;
 		bool old_scroll_block = gui_input->ext_scroll_blocked;
@@ -261,17 +260,16 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 
 void GUIWindowManager::draw(NVGcontext* vg, GUIScreen* screen)
 {
-	for(GUIWindow* w : windows)
+	for(auto w : windows)
 	{
 		w->draw(vg, screen->skin.get(), viewport);
 	}
 
 }
 
-GUIWindow* GUIWindowManager::create_window(GUIWindow** erase_ptr, glm::ivec2 pos, glm::ivec2 size)
+std::weak_ptr<GUIWindow> GUIWindowManager::create_window(glm::ivec2 pos, glm::ivec2 size)
 {
-	GUIWindow* n_window = new GUIWindow();
-	n_window->erase_ptr = erase_ptr;
+	auto n_window = std::make_shared<GUIWindow>();
 	if(pos.x < 0)
 		pos.x = default_pos.x;
 	if(pos.y < 0)
@@ -283,8 +281,9 @@ GUIWindow* GUIWindowManager::create_window(GUIWindow** erase_ptr, glm::ivec2 pos
 
 	n_window->pos = pos;
 	n_window->size = size;
-
+	n_window->open = true;
 	n_window->focused = false;
+	n_window->wman = this;
 
 	windows.push_front(n_window);
 	if(windows.size() == 1)
@@ -298,18 +297,26 @@ GUIWindow* GUIWindowManager::create_window(GUIWindow** erase_ptr, glm::ivec2 pos
 
 void GUIWindowManager::delete_window(GUIWindow* win)
 {
-	windows.remove(win);
-	if(focused == win)
+	for(auto it = windows.begin(); it != windows.end(); it++)
+	{
+		if(it->get() == win)
+		{
+			windows.erase(it);
+			break;
+		}
+	}
+
+	win->open = false;
+	win->on_close(*win);
+	if(focused.get() == win)
 	{
 		focused = nullptr;
 	}
-
-	delete win;
 }
 
 GUIWindowManager::GUIWindowManager() 
 {
-	windows = std::list<GUIWindow*>();
+	windows = std::list<std::shared_ptr<GUIWindow>>();
 	focused = nullptr;
 	dragging = false;
 	resizing = false;

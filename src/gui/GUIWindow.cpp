@@ -1,4 +1,5 @@
 #include "GUIWindow.h"
+#include "GUIWindowManager.h"
 
 void GUIWindow::position(GUIScreen *screen, GUISkin *skin)
 {
@@ -7,7 +8,7 @@ void GUIWindow::position(GUIScreen *screen, GUISkin *skin)
 		return;
 	}
 
-	canvas.position_widgets(pos, size, screen);
+	canvas->position_widgets(pos, size, screen);
 }
 
 void GUIWindow::prepare(GUIInput* gui_input, GUIScreen* screen)
@@ -17,7 +18,7 @@ void GUIWindow::prepare(GUIInput* gui_input, GUIScreen* screen)
 		return;
 	}
 
-	canvas.prepare(screen, gui_input);
+	canvas->prepare(screen, gui_input);
 }
 
 void GUIWindow::draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor)
@@ -27,7 +28,7 @@ void GUIWindow::draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor)
 	{
 		return;
 	}
-	canvas.draw(vg, skin, def_scissor);
+	canvas->draw(vg, skin, def_scissor);
 }
 
 GUIWindow::GUIWindow() 
@@ -42,8 +43,15 @@ GUIWindow::GUIWindow()
 	moveable = true;
 	resizeable = true;
 	pin_passthrough = true;
-	has_titlebar = true;
 	min_size = glm::ivec2(50, 50);
 	alpha = 1.0f;
+	style = GUISkin::WindowStyle::NORMAL;
 
+	canvas = std::make_shared<GUICanvas>();
+
+}
+
+void GUIWindow::close()
+{
+	wman->delete_window(this);
 }

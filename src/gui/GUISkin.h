@@ -35,6 +35,12 @@ public:
 		BAD    		//< Normal but with BAD motives (red color, cross...)
 	};
 
+	enum class WindowStyle
+	{
+		NORMAL,		//< Window with typical titlebar styling
+		LINKED		//< Window with a link point to a 3D object (used for context menus)
+	};
+
 	virtual void draw_button(NVGcontext* vg, glm::ivec2 pos, glm::ivec2 size, const std::string& text,
 			ButtonState state, ButtonStyle style = ButtonStyle::NORMAL) = 0;
 
@@ -56,6 +62,9 @@ public:
 	virtual glm::ivec4 get_window_aabb(GUIWindow* window) = 0;
 
 	virtual void draw_window(NVGcontext* vg, GUIWindow* window) = 0;
+
+	virtual void draw_link(NVGcontext* vg, glm::ivec2 link_start, glm::ivec2 win_pos) = 0;
+	virtual bool can_cut_link(NVGcontext* vg, glm::ivec2 link_start, glm::ivec2 win_pos) = 0;
 
 	// These functions are meant so stylize advanced widgest, such as the plumbing editor
 	virtual NVGcolor get_background_color(bool bright = false) = 0;

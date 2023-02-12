@@ -16,6 +16,9 @@ local logger = require("logger")
 local hover_material = assets.get_material("core:mat_hover.toml")
 local mat_override = model.mat_override.from_table({color = glm.vec3.new(1, 1, 1)})
 
+---@class core.context_menu
+---@field window gui.window
+
 ---@class core.interactable_vehicle
 local interactable_vehicle = {}
 
@@ -28,6 +31,7 @@ interactable_vehicle.veh = nil
 interactable_vehicle.hovered = -1
 
 --- Stores all active contextual menus
+---@type core.context_menu
 interactable_vehicle.context_menus = {}
 
 ---@param veh_ent universe.entity
@@ -92,7 +96,13 @@ function interactable_vehicle:update_hover(cu)
 
 end
 
-function interactable_vehicle:new_context_menus() 
+function interactable_vehicle:close(k)
+	self.context_menus[k].window:close()
+	self.context_menus[k] = nil
+end
+
+---@param gui gui.screen
+function interactable_vehicle:new_context_menus(gui) 
 	if self.hovered < 0 then return end
 	if not input.mouse_down(input.btn.left) then return end
 	
@@ -104,32 +114,48 @@ function interactable_vehicle:new_context_menus()
 
 	local n_menu = {}
 	n_menu.highlight_timer = 1.0
-	n_menu.canvas = guilib.canvas.new()
+	local pos = input.get_mouse_pos()
+	pos = pos + glm.vec2.new(25.0, 25.0)
+	n_menu.window = gui.win_manager:create_window(pos)
+	-- By default the window is a "tooltip" like, if you cut the link it becomes proper
+	n_menu.window.style = guilib.window_style.linked
+	n_menu.window.minimizable = false
+	n_menu.window.closeable = false
+	n_menu.window.pinable = false
+	--[[local machine_bar, content = n_menu.window.canvas:divide_v_pixels(16)
+
+	local top_layout = guilib.horizontal_layout.new()
+	machine_bar:set_layout(top_layout)
+
+	local content_layout = guilib.vertical_layout.new()
+	content:set_layout(content_layout)
+
 	n_menu.pos = glm.vec2.new(0.0, 0.0)
-	n_menu.size = glm.vec2.new(1.0, 1.0)
+	n_menu.size = glm.vec2.new(100.0, 100.0)]]--
 	self.context_menus[self.hovered] = n_menu
 
 	-- Remove all others if CTRL is not held
-	if not input.key_down(input.key.left_control) then
+	if not input.key_pressed(input.key.left_control) then
 		for k, _ in pairs(self.context_menus) do 
 			if k ~= self.hovered then 
-				self.context_menus[k] = nil
+				self:close(k)
 			end
 		end
 	end
 
 end
 
----@param gui gui.screen
-function interactable_vehicle:update_context_menus(dt, gui)
-	for p_id, menu in pairs(self.context_menus) do 
-		if menu.highlight_timer > 0.0 then
-			menu.highlight_timer = menu.highlight_timer - dt
-		end
-
-		gui:add_canvas(menu.canvas, menu.pos, menu.size)
-
+---@param menu core.context_menu
+function interactable_vehicle:update_context_menu(p_id, menu, dt, gui) 
+	if not menu.window:is_open() then
+		self.context_menus[p_id] = nil
+		return
 	end
+	
+	if menu.highlight_timer > 0.0 then
+		menu.highlight_timer = menu.highlight_timer - dt
+	end
+
 end
 
 ---@param cu renderer.camera_uniforms Camera uniforms for the raycast (generate on physics update)
@@ -146,8 +172,10 @@ function interactable_vehicle:update(dt, gui)
 	end
 
 	-- Bring up context menus
-	self:new_context_menus()
-	self:update_context_menus(dt, gui)
+	self:new_context_menus(gui)
+	for p_id, menu in pairs(self.context_menus) do 
+		self:update_context_menu(p_id, menu, dt, gui)
+	end
 
 end
 

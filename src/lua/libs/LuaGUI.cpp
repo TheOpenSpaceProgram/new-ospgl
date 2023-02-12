@@ -55,7 +55,8 @@ void LuaGUI::load_to(sol::table &table)
 		  "prepare_pass", &GUIScreen::prepare_pass,
 		  "input_pass", &GUIScreen::input_pass,
 		  "draw", &GUIScreen::draw,
-		  "input", &GUIScreen::gui_input
+		  "input", &GUIScreen::gui_input,
+		  "win_manager", &GUIScreen::win_manager
 
 	);
 
@@ -74,6 +75,33 @@ void LuaGUI::load_to(sol::table &table)
 		  "new", [](){
 			return std::make_shared<GUICanvas>();
 	});
+
+	table.new_usertype<GUIWindowManager>("win_manager", sol::no_constructor,
+		 "create_window", [](GUIWindowManager* self, sol::optional<glm::dvec2> pos, sol::optional<glm::dvec2> size)
+			 {
+				glm::ivec2 posi = pos.value_or(glm::dvec2(-1.0, -1.0));
+				glm::ivec2 sizei = size.value_or(glm::dvec2(-1.0, -1.0));
+				auto win = self->create_window(posi, sizei);
+				// We always use shared_ptr in lua!
+				return win.lock();
+			 });
+
+	table.new_usertype<GUIWindow>("window", sol::no_constructor,
+			  "canvas", &GUIWindow::canvas,
+			  "is_open", &GUIWindow::is_open,
+			  "closeable", &GUIWindow::closeable,
+			  "pinable", &GUIWindow::pinable,
+			  "minimizable", &GUIWindow::minimizable,
+			  "resizeable", &GUIWindow::resizeable,
+			  "moveable", &GUIWindow::moveable,
+			  "pin_passthrough", &GUIWindow::pin_passthrough,
+			  "title", &GUIWindow::title,
+			  "style", &GUIWindow::style,
+			  "close", &GUIWindow::close);
+
+	table.new_enum("window_style",
+				   "normal", GUISkin::WindowStyle::NORMAL,
+				   "linked", GUISkin::WindowStyle::LINKED);
 
 }
 

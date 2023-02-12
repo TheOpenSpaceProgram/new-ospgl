@@ -8,11 +8,11 @@ class GUIWindowManager
 {
 private:
 
-	std::list<GUIWindow*> windows;
+	std::list<std::shared_ptr<GUIWindow>> windows;
 
 public:
 
-	GUIWindow* focused;
+	std::shared_ptr<GUIWindow> focused;
 	bool dragging;
 	bool resizing;
 	GUISkin::ResizePoint resize_point;
@@ -37,11 +37,10 @@ public:
 	void prepare(GUIInput* gui_input, GUIScreen* screen);
 	void draw(NVGcontext* vg, GUIScreen* screen);
 
-	// Use negative values to place on default pos / size
-	// You may pass a pointer (use nullptr if you dont want it)
-	// for it to be set to nullptr on window deletion.
-	GUIWindow* create_window(GUIWindow** erase_ptr = nullptr,
-			glm::ivec2 pos = glm::ivec2(-1, -1), glm::ivec2 size = glm::ivec2(-1, -1));
+	// As windows may be removed by the user at any time, we use weak_ptr
+	// (In lua we end up returning a shared_ptr anyway!)
+	std::weak_ptr<GUIWindow> create_window(glm::ivec2 pos = glm::ivec2(-1, -1),
+											 glm::ivec2 size = glm::ivec2(-1, -1));
 	void delete_window(GUIWindow* win);
 
 	GUIWindowManager();

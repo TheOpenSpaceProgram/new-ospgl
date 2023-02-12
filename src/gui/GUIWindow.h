@@ -19,9 +19,11 @@ private:
 	bool minimized;
 	bool pinned;
 	bool passthrough;
-	GUIWindow** erase_ptr;
+	bool open;
+	GUIWindowManager* wman;
 public:
 
+	GUISkin::WindowStyle style;
 	float alpha;
 
 	// These are in screen-space pixels. They may be adjusted by the window
@@ -29,7 +31,7 @@ public:
 	// due to decorations
 	glm::ivec2 pos;
 	glm::ivec2 size;
-	
+
 	// Only for resizeable windows
 	glm::ivec2 min_size;
 
@@ -38,7 +40,6 @@ public:
 	bool pin_hovered;
 	bool drag_hovered;
 
-	bool has_titlebar;
 	std::string title;
 
 	// These are only valid on windows with a titlebar
@@ -53,10 +54,8 @@ public:
 	bool resizeable;
 	bool moveable;
 
-	// The canvas is automatically handled by the window
-	GUICanvas canvas;
+	std::shared_ptr<GUICanvas> canvas;
 
-	// Useful for cleaning up (widgets are auto-deleted with the canvas!)
 	Signal<void(GUIWindow&)> on_close;
 
 	// We need the GUISkin on prepare to adjust sizings
@@ -68,6 +67,10 @@ public:
 	bool is_minimized() { return minimized; }
 	bool is_pinned() { return pinned; }
 	bool is_passthrough() { return passthrough; }
+
+	bool is_open(){ return open; }
+
+	void close();
 
 	GUIWindow();
 };
