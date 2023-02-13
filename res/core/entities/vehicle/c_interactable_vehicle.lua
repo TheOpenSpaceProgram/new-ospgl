@@ -105,10 +105,16 @@ end
 function interactable_vehicle:new_context_menus(gui) 
 	if self.hovered < 0 then return end
 	if not input.mouse_down(input.btn.left) then return end
+
+	local hovered_p = self.veh:get_piece_by_id(self.hovered)
+	assert(hovered_p)
+	local hovered_part = hovered_p:get_part()
+	-- TODO: Orphan pieces may still offer a context menu?
+	if hovered_part == nil then return end
 	
-	if self.context_menus[self.hovered] then
+	if self.context_menus[hovered_p.id] then
 		-- Context menu is already present, highlight it
-		self.context_menus[self.hovered].highlight_timer = 1.0
+		self.context_menus[hovered_p.id].highlight_timer = 1.0
 		return
 	end
 
@@ -119,6 +125,8 @@ function interactable_vehicle:new_context_menus(gui)
 	n_menu.window = gui.win_manager:create_window(pos)
 	-- By default the window is a "tooltip" like, if you cut the link it becomes proper
 	n_menu.window.style = guilib.window_style.linked
+	local proto = hovered_part:get_prototype()
+	n_menu.window.title = proto:get().name
 	n_menu.window.minimizable = false
 	n_menu.window.closeable = false
 	n_menu.window.pinable = false
@@ -132,7 +140,7 @@ function interactable_vehicle:new_context_menus(gui)
 
 	n_menu.pos = glm.vec2.new(0.0, 0.0)
 	n_menu.size = glm.vec2.new(100.0, 100.0)]]--
-	self.context_menus[self.hovered] = n_menu
+	self.context_menus[hovered_p.id] = n_menu
 
 	-- Remove all others if CTRL is not held
 	if not input.key_pressed(input.key.left_control) then

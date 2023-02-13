@@ -195,6 +195,12 @@ function piece:get_environment_pressure() end
 --- DO NOT HOLD THE MODEL NODE FOR LONG, it may be invalidad and this will cause a hard crash
 function piece:get_model_node() end
 
+---@return vehicle.part|nil
+--- If the piece is orphaned (the root piece of the part it belonged to is in another vehicle)
+--- then it returns nil
+--- Don't store the returned pointer for long!
+function piece:get_part() end
+
 ---@class vehicle.part
 ---@field id integer Unique id of the part. Guaranteed to be unique in the vehicle
 ---@field machines table<string, vehicle.machine> Don't hold for long as it may go outdated / machines may die
@@ -207,6 +213,9 @@ function part:get_piece(name) end
 ---@param id string
 ---@nodiscard
 function part:get_machine(id) end
+
+---@return assets.part_prototype_handle
+function part:get_prototype() end
 
 ---@class vehicle.machine
 ---@field runtime_uid integer
@@ -242,5 +251,9 @@ function machine:get_wired_interfaces(int_type, include_this) end
 ---@return table
 ---@param iname string
 function machine:get_interface(iname) end
+
+---@class vehicle.part_prototype
+---@field name string Presented ready to display, no need to localize (it's done in load time)
+local part_prototype = {}
 
 return container

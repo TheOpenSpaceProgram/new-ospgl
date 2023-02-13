@@ -144,7 +144,7 @@ public:
 
 	GPUModelPointer model;
 	// Note that these four strings are the true strings and not the localization id
-	// established in the toml file
+	// established in the toml file (They are resolved at load time)
 	std::string name;
 	std::string country;
 	std::string manufacturer;

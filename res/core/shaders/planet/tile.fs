@@ -106,7 +106,9 @@ void main()
     gAlbedo = (col + atmoc) * 0.77;
     gNormal = nrm;
     gPositionEmit = vec4(vPos, length(atmoc));
-    gPbr = vec3(0.0, 0.95, 0.05); // Occlusion, rougness, metallic
+    // We use Occlussion to hide the environment map
+    float dist = length(vPosNrm - camera_pos);
+    gPbr = vec3(max(1.0 - dist, 0.0), 1.0, 0.0); // Occlusion, rougness, metallic
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets

@@ -107,7 +107,13 @@ void LuaVehicle::load_to(sol::table& table)
 		"get_up", &Piece::get_up,
 		"get_right", &Piece::get_right,
 		"transform_axis", &Piece::transform_axis,
-			
+		"get_part", [](Piece* self)
+		{
+			if(self->part)
+				return sol::optional(self->part);
+			else
+				return sol::optional<Part*>();
+		},
 		"get_marker_position", &Piece::get_marker_position,
 		"get_marker_rotation", &Piece::get_marker_rotation,
 		"get_marker_transform", &Piece::get_marker_transform,
@@ -136,6 +142,11 @@ void LuaVehicle::load_to(sol::table& table)
 		"id", &Part::id,
 		"get_piece", &Part::get_piece,
 		"get_machine", &Part::get_machine,
+		"get_prototype", [](Part* self)
+		{
+			LuaAssetHandle<PartPrototype> hnd = LuaAssetHandle<PartPrototype>(self->part_proto.duplicate());
+			return hnd;
+		},
 		"machines", &Part::machines,
 		"get_part_proto", [](Part* p)
 		 {
@@ -218,6 +229,9 @@ void LuaVehicle::load_to(sol::table& table)
 		"get_interface", &Machine::get_interface
 		
 	);
+
+	table.new_usertype<PartPrototype>("part_prototype", sol::no_constructor,
+		  "name", &PartPrototype::name);
 
 
 }

@@ -57,6 +57,14 @@ function config_handle:move() end
 ---@return assets.config
 function config_handle:get() end
 
+---@class assets.part_prototype_handle
+local part_prototype_handle = {}
+--- Invalidates current handle, and returns a new one
+---@return assets.part_prototype_handle 
+function part_prototype_handle:move() end
+---@return vehicle.part_prototype
+function part_prototype_handle:get() end
+
 ---@param path string
 ---@return assets.bitmap_font_handle
 function assets.get_bitmap_font(path) end
