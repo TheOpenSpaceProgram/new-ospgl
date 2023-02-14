@@ -302,8 +302,6 @@ res/test_parts/**
 # And the debug save
 #!udata/saves
 
-# Development vessel
-udata/vehicles/debug.toml
 /cmake-build-debug/
 /cmake-build-release/
 .cache/

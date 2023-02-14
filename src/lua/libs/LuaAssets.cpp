@@ -84,7 +84,7 @@ void LuaAssets::load_to(sol::table& table)
 		{
 			fix_name = fix_name.substr(1);
 		}
-		std::string full_path = osp->assets->udata_path + "/vehicles/" + name;
+		std::string full_path = osp->assets->udata_path + "vehicles/" + name;
 
 		return SerializeUtil::load_file(full_path);
 	});

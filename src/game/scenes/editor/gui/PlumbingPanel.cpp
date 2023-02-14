@@ -66,13 +66,9 @@ void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg)
 	// Find a part to assign as target, will usually be root
 	// TODO: Serialize this for user experience improvement
 	if(sc->vehicle->veh->root->part)
-	{
 		target_part = sc->vehicle->veh->root->part;
-	}
 	else
-	{
-		sc->vehicle->veh->parts[0];
-	}
+		target_part = sc->vehicle->veh->parts[0];
 }
 
 void PlumbingPanel::add_gui(int width, int panel_width, int height, GUIScreen* screen)
