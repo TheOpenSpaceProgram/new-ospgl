@@ -165,7 +165,8 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 
 	// Group selector and search bar
 	def_panel.divide_v(0.05);
-	def_panel.child_0_pixels = 64;
+	def_panel.child_pixels = 64;
+	def_panel.pixels_for_child_1 = false;
 	def_panel.child_0->divide_v(0.5);
 
 	group_selector = std::make_shared<GUISingleLayout>();
@@ -198,7 +199,8 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 	def_panel.child_0->child_1->layout = search_bar;
 
 	def_panel.child_1->divide_h(0.03);
-	def_panel.child_1->child_0_pixels = category_icon_size + 4;
+	def_panel.child_1->child_pixels = category_icon_size + 4;
+	def_panel.child_1->pixels_for_child_1 = false;
 
 	part_list = std::make_shared<GUIListLayout>(part_margin, part_margin);
 	part_list->margins = glm::ivec4(part_margin, part_margin, part_margin, part_margin);	

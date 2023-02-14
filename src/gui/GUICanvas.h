@@ -26,7 +26,9 @@ public:
 
 	// Negative numbers are ignored, set to a positive number
 	// so child_0 gets exactly [x] pixels in the appropiate direction
-	int child_0_pixels;
+	int child_pixels;
+	// If true, pixels given are assigned to child_1
+	bool pixels_for_child_1;
 
 	// child_0 is the top or left split
 	std::shared_ptr<GUICanvas> child_0;
@@ -65,7 +67,8 @@ public:
 		child_0 = nullptr;
 		child_1 = nullptr;
 		layout = nullptr;
-		child_0_pixels = -1;
+		child_pixels = -1;
+		pixels_for_child_1 = false;
 	}
 
 	~GUICanvas();

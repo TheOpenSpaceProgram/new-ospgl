@@ -187,7 +187,8 @@ void EditorGUI::do_backgrounds(int width, int height)
 	nvgFillColor(vg, scene->gui_screen.skin->get_background_color());
 	nvgFill(vg);
 
-	file_canvas.child_0_pixels = fwidth - 26.0f * 5.0f;
+	file_canvas.child_pixels = fwidth - 26.0f * 5.0f;
+	file_canvas.pixels_for_child_1 = false;
 
 	float twidth = 152.0f;
 	float theight = 23.0f;

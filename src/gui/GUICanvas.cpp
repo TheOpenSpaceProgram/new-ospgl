@@ -66,7 +66,7 @@ void GUICanvas::position_widgets(glm::ivec2 pos, glm::ivec2 size, GUIScreen* scr
 	if(child_0 || child_1)
 	{
 		// Apply pixel sizes
-		if(child_0_pixels > 0)
+		if(child_pixels > 0)
 		{
 			float rsize;
 			if(horizontal)
@@ -78,7 +78,9 @@ void GUICanvas::position_widgets(glm::ivec2 pos, glm::ivec2 size, GUIScreen* scr
 				rsize = (float)size.y * factor.y;
 			}
 
-			float nfac = (float)child_0_pixels / rsize;
+			float nfac = (float)child_pixels / rsize;
+			if(pixels_for_child_1)
+				nfac = 1.0f - nfac;
 			resize(nfac);
 		}
 

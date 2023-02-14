@@ -69,6 +69,8 @@ void GroupManager::try_show()
 	new_btn_layout->add_widget(new_btn);
 	w->canvas->child_0->child_0->layout = list_layout;
 	w->canvas->child_0->child_1->layout = new_btn_layout;
+	w->canvas->child_0->pixels_for_child_1 = true;
+	w->canvas->child_0->child_pixels = 30;
 
 	create_right_panel();
 }
