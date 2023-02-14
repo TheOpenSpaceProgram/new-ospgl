@@ -31,7 +31,7 @@ interactable_vehicle.veh = nil
 interactable_vehicle.hovered = -1
 
 --- Stores all active contextual menus
----@type core.context_menu
+---@type core.context_menu[]
 interactable_vehicle.context_menus = {}
 
 ---@param veh_ent universe.entity
@@ -101,10 +101,19 @@ function interactable_vehicle:close(k)
 	self.context_menus[k] = nil
 end
 
+
 ---@param gui gui.screen
 function interactable_vehicle:new_context_menus(gui) 
-	if self.hovered < 0 then return end
 	if not input.mouse_down(input.btn.left) then return end
+	if self.hovered < 0 then  
+		-- A click in empty space may actually hide dialogs
+		if input.key_pressed(input.key.left_control) then return end
+		for k, _ in pairs(self.context_menus) do 
+			self:close(k)
+		end
+		return
+	end
+
 
 	local hovered_p = self.veh:get_piece_by_id(self.hovered)
 	assert(hovered_p)
@@ -121,8 +130,10 @@ function interactable_vehicle:new_context_menus(gui)
 	local n_menu = {}
 	n_menu.highlight_timer = 1.0
 	local pos = input.get_mouse_pos()
-	pos = pos + glm.vec2.new(25.0, 25.0)
-	n_menu.window = gui.win_manager:create_window(pos)
+	-- TODO: Find appropiate free location to spawn context menu
+	pos = pos + glm.vec2.new(90.0, 25.0)
+	size = glm.vec2.new(200.0, 400.0)
+	n_menu.window = gui.win_manager:create_window(pos, size)
 	-- By default the window is a "tooltip" like, if you cut the link it becomes proper
 	n_menu.window.style = guilib.window_style.linked
 	local proto = hovered_part:get_prototype()
@@ -130,6 +141,7 @@ function interactable_vehicle:new_context_menus(gui)
 	n_menu.window.minimizable = false
 	n_menu.window.closeable = false
 	n_menu.window.pinable = false
+	n_menu.window.alpha = 0.5
 	--[[local machine_bar, content = n_menu.window.canvas:divide_v_pixels(16)
 
 	local top_layout = guilib.horizontal_layout.new()
@@ -161,7 +173,9 @@ function interactable_vehicle:update_context_menu(p_id, menu, dt, gui)
 	end
 	
 	if menu.highlight_timer > 0.0 then
-		menu.highlight_timer = menu.highlight_timer - dt
+		menu.highlight_timer = menu.highlight_timer - dt * 10.0
+	else 
+	
 	end
 
 end
@@ -173,10 +187,27 @@ function interactable_vehicle:physics_update(cu)
 end
 
 ---@param gui gui.screen
+---@param cu renderer.camera_uniforms
+function interactable_vehicle:draw_gui(gui, cu)
+	-- Draw links
+	for p_id, menu in pairs(self.context_menus) do 
+		local p = self.veh:get_piece_by_id(p_id)
+		assert(p)
+		local p_pos_3d = p:get_graphics_position() - cu.cam_pos
+		local p_pos_2d, front = glm.world_to_clip(cu.proj_view, p_pos_3d)
+		if front then
+			p_pos_2d = glm.clip_to_screen(p_pos_2d, gui.viewport)
+			gui.skin:draw_link(osp.renderer.vg, p_pos_2d, menu.window.pos)
+		end
+	end
+end
+
+---@param gui gui.screen
 function interactable_vehicle:update(dt, gui)
 	-- Prevent hovering if mouse is blocked, this effectively blocks everything else
 	if gui.input.mouse_blocked or gui_input.ext_mouse_blocked then
 		self.hovered = -1
+		return
 	end
 
 	-- Bring up context menus

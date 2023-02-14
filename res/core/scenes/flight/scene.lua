@@ -97,6 +97,9 @@ function update(dt)
 
 
 	gui_screen:input_pass()
+	local cu = camera:get_camera_uniforms(lwidth, lheight)
+	-- Draw the links before anything else
+	interactable_veh:draw_gui(gui_screen, cu)
 	gui_screen:draw()
 
 end

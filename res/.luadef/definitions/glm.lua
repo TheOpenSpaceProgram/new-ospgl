@@ -754,5 +754,16 @@ function glm.distance_to_line(line_a, line_b, from) end
 ---@return glm.vec3 End point
 function glm.screen_raycast(mouse_pos, inv_tform, dist) end
 
+---@param proj_view glm.mat4
+---@param wpoint glm.vec3
+---@return glm.vec2 Clip position
+---@return boolean In front of screen?
+function glm.world_to_clip(proj_view, wpoint) end
+
+---@param clip_pos glm.vec2 As obtained from world_to_clip
+---@param viewport glm.vec4 Viewport in (x, y, w, h) to be used
+---@return glm.vec2 Position in screen space, ready to pass to NanoVG
+function glm.clip_to_screen(clip_pos, viewport) end
+
 return glm
 

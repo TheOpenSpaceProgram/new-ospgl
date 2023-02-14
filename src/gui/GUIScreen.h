@@ -20,7 +20,7 @@ private:
 public:
 	// Space in the actual game screen to use for this GUIScreen
 	// (x, y, width, height)
-	glm::ivec4 screen;
+	glm::ivec4 viewport;
 	// We hold a shared_ptr for lua automated gargabe collection
 	std::shared_ptr<GUISkin> skin;
 	// We hold a weak reference to gui_input which is managed externally

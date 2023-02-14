@@ -677,6 +677,12 @@ void LuaGlm::load_to(sol::table& table)
 	table["distance_to_line"] = &MathUtil::distance_to_line;
 
 	table["screen_raycast"] = &MathUtil::screen_raycast;
+
+	table["world_to_clip"] = &MathUtil::world_to_clip;
+	table["clip_to_screen"] = [](glm::dvec2 clip_pos, glm::dvec4 viewport)
+	{
+		return (glm::dvec2)MathUtil::clip_to_screen(clip_pos, viewport);
+	};
 }
 
 LuaGlm::LuaGlm()

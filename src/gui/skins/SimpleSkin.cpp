@@ -191,6 +191,7 @@ glm::ivec4 SimpleSkin::get_window_aabb(GUIWindow* window)
 
 void SimpleSkin::draw_window(NVGcontext* vg, GUIWindow* window) 
 {
+	nvgStrokeWidth(vg, 1.0);
 	glm::vec2 pos = window->pos;
 	glm::vec2 size = window->size;
 
@@ -494,7 +495,18 @@ NVGcolor SimpleSkin::get_button_color(GUISkin::ButtonState state)
 
 void SimpleSkin::draw_link(NVGcontext *vg, glm::ivec2 link_start, glm::ivec2 win_pos)
 {
-
+	float side_size = window_margins + window_edge_size;
+	glm::vec2 title_tl = glm::vec2(win_pos.x - side_size, win_pos.y - titlebar_height - side_size) + 0.5f;
+	nvgStrokeWidth(vg, 5.0);
+	nvgStrokeColor(vg, get_foreground_color());
+	nvgFillColor(vg, get_foreground_color());
+	nvgBeginPath(vg);
+	nvgMoveTo(vg, link_start.x, link_start.y);
+	nvgLineTo(vg, title_tl.x - 5.0, title_tl.y + 5.0);
+	nvgStroke(vg);
+	nvgBeginPath(vg);
+	nvgRect(vg, link_start.x - 5.0, link_start.y - 5.0, 10.0, 10.0);
+	nvgFill(vg);
 }
 
 bool SimpleSkin::can_cut_link(NVGcontext *vg, glm::ivec2 link_start, glm::ivec2 win_pos)

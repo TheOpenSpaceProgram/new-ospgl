@@ -18,6 +18,8 @@ function gui.skin.get_default_skin() end
 ---@class gui.screen
 ---@field input gui.input
 ---@field win_manager gui.win_manager
+---@field skin gui.skin
+---@field viewport glm.vec4 (x, y, w, h)
 gui.screen = {}
 
 ---@param skin gui.skin
@@ -76,6 +78,8 @@ gui.input = {}
 function gui.input:debug() end
 
 ---@class gui.canvas
+---@field child_pixels integer
+---@field pixels_for_child_1 boolean
 gui.canvas = {}
 
 ---@return gui.canvas
@@ -96,16 +100,16 @@ function gui.canvas:divide_h(fac) end
 function gui.canvas:divide_v(fac) end
 
 ---@param pixels integer How many pixels should the selected children take?
----@param for_top? boolean Defaults to true, are the given pixels for the top canvas or bottom one?
+---@param for_bottom? boolean Defaults to false, are the given pixels for the top canvas or bottom one?
 ---@return gui.canvas Top children canvas
 ---@return gui.canvas Bottom children canvas
-function gui.canvas:divide_v_pixels(pixels, for_top) end
+function gui.canvas:divide_v_pixels(pixels, for_bottom) end
 
 ---@param pixels integer How many pixels should the selected children take?
----@param for_left? boolean Defaults to true, are the given pixels for the left canvas or right one?
+---@param for_right? boolean Defaults to false, are the given pixels for the left canvas or right one?
 ---@return gui.canvas Left children canvas
 ---@return gui.canvas Right children canvas
-function gui.canvas:divide_h_pixels(pixels, for_left) end
+function gui.canvas:divide_h_pixels(pixels, for_right) end
 
 ---@class gui.layout
 gui.layout = {}
@@ -129,6 +133,9 @@ function gui.win_manager:create_window(pos, size) end
 ---@field pin_passthrough boolean
 ---@field title string
 ---@field has_titlebar boolean
+---@field alpha number
+---@field pos glm.vec2
+---@field size glm.vec2
 gui.window = {}
 
 ---@return boolean

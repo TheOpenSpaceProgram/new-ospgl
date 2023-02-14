@@ -61,6 +61,7 @@ void LuaRenderer::load_to(sol::table& table)
 			rnd->set_ibl_source(cmap.get_asset_handle());
 		  },
 		  "enable_env_sampling", &Renderer::enable_env_sampling,
+		  "vg", sol::property([](Renderer* rnd){ return (void*)rnd->vg; }),
 		  "get_size", sol::overload([](Renderer* rnd){
 		  	auto size = rnd->get_size(false);
 		  	return std::make_tuple(size.x, size.y);

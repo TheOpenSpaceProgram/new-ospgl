@@ -10,7 +10,7 @@ void GUIDropDown::pre_prepare(GUIScreen *screen)
 	{
 		glm::ivec2 cpos;
 		glm::ivec2 csize;
-		glm::ivec4 sbounds = screen->screen;
+		glm::ivec4 sbounds = screen->viewport;
 		bool drop_up = may_drop_upwards && pos.y > (sbounds.y + sbounds.w) / 2;
 		if(drop_up && false)
 		{

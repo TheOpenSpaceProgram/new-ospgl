@@ -66,11 +66,11 @@ void GUIScreen::draw()
 {
 	for(auto o : canvas)
 	{
-		o.first->draw(osp->renderer->vg, skin.get(), screen);
+		o.first->draw(osp->renderer->vg, skin.get(), viewport);
 	}
 	for(auto o : post_canvas)
 	{
-		o.first->draw(osp->renderer->vg, skin.get(), screen);
+		o.first->draw(osp->renderer->vg, skin.get(), viewport);
 	}
 	win_manager.draw(osp->renderer->vg, this);
 }
@@ -87,7 +87,7 @@ void GUIScreen::add_post_canvas(std::shared_ptr<GUICanvas> acanvas, glm::ivec2 p
 
 void GUIScreen::new_frame(glm::ivec4 nscreen)
 {
-	screen = nscreen;
+	viewport = nscreen;
 	post_canvas.clear();
 	canvas.clear();
 }
