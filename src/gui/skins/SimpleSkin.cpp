@@ -514,3 +514,18 @@ bool SimpleSkin::can_cut_link(NVGcontext *vg, glm::ivec2 link_start, glm::ivec2 
 	return false;
 }
 
+int SimpleSkin::get_scrollbar_width()
+{
+	return 4;
+}
+
+NVGcolor SimpleSkin::get_scrollbar_color()
+{
+	return nvgRGB(100, 100, 100);
+}
+
+NVGcolor SimpleSkin::get_scrollbar_scroller_color()
+{
+	return nvgRGB(180, 180, 180);
+}
+

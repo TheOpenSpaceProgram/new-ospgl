@@ -61,6 +61,10 @@ public:
 	virtual ResizePoint can_resize_window(GUIWindow* window, glm::ivec2 mpos) = 0;
 	virtual glm::ivec4 get_window_aabb(GUIWindow* window) = 0;
 
+	virtual int get_scrollbar_width() = 0;
+	virtual NVGcolor get_scrollbar_color() = 0;
+	virtual NVGcolor get_scrollbar_scroller_color() = 0;
+
 	virtual void draw_window(NVGcontext* vg, GUIWindow* window) = 0;
 
 	virtual void draw_link(NVGcontext* vg, glm::ivec2 link_start, glm::ivec2 win_pos) = 0;

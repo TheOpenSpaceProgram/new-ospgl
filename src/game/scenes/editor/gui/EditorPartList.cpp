@@ -208,6 +208,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 
 	category_list = std::make_shared<GUIVerticalLayout>(part_margin);
 	category_list->vscrollbar.width = 1;
+	category_list->vscrollbar.override_width = true;
 	category_list->margins = glm::ivec4(1, 2, part_margin, 0);
 	def_panel.child_1->child_0->layout = category_list;
 

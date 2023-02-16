@@ -35,9 +35,7 @@ public:
 	// child_1 is the bottom or right split
 	std::shared_ptr<GUICanvas> child_1;
 
-	float fac;
-	glm::vec2 factor;
-	glm::vec2 position;
+	float factor;
 
 	// Returns the children, first child_0, then child_1
 	std::pair<std::shared_ptr<GUICanvas>, std::shared_ptr<GUICanvas>> divide_h(float factor);
@@ -51,19 +49,11 @@ public:
 	// For widgets that generate overlay canvases
 	void pre_prepare(GUIScreen* screen) const;
 
-	// Resizes children space distribution appropiately
-	void resize(float n_factor);
-
-	void update_children();
-
-	void debug(glm::ivec2 real_position, glm::ivec2 real_size, NVGcontext* vg) const;
-
 	void draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor = glm::ivec4(0, 0, 0, 0)) const;
 
 	GUICanvas()
 	{
-		position = glm::vec2(0.0f, 0.0f);
-		factor = glm::vec2(1.0f, 1.0f);
+		factor = 1.0f;
 		child_0 = nullptr;
 		child_1 = nullptr;
 		layout = nullptr;

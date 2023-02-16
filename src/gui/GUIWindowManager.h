@@ -33,6 +33,7 @@ public:
 	glm::ivec2 default_size;
 
 
+	void pre_prepare(GUIScreen* screen);
 	void position(GUIScreen* screen);
 	void prepare(GUIInput* gui_input, GUIScreen* screen);
 	void draw(NVGcontext* vg, GUIScreen* screen);

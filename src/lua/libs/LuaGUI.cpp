@@ -3,6 +3,14 @@
 #include <gui/skins/SimpleSkin.h>
 #include <gui/GUIScreen.h>
 
+#include <gui/layouts/GUIListLayout.h>
+#include <gui/layouts/GUISingleLayout.h>
+#include <gui/layouts/GUIVerticalLayout.h>
+#include <gui/widgets/GUIDropDown.h>
+#include <gui/widgets/GUIImageButton.h>
+#include <gui/widgets/GUITextButton.h>
+#include <gui/widgets/GUITextField.h>
+
 void LuaGUI::load_to(sol::table &table)
 {
 	table.new_usertype<GUISkin>("skin",
@@ -138,6 +146,26 @@ void LuaGUI::load_to(sol::table &table)
 	table.new_enum("window_style",
 				   "normal", GUISkin::WindowStyle::NORMAL,
 				   "linked", GUISkin::WindowStyle::LINKED);
+
+#define WIDGET_HELPER(fun_name, base) sol::overload( \
+	&base::fun_name<GUIDropDown>,\
+    &base::fun_name<GUIImageButton>, \
+	&base::fun_name<GUITextButton>, \
+	&base::fun_name<GUITextField>	\
+    )
+
+#define LAYOUT_BASE(cname) \
+	"add_widget", WIDGET_HELPER(add_widget_lua, cname), \
+    "remove_widget", WIDGET_HELPER(remove_widget_lua, cname), \
+    "get_widget_count", &cname::get_widget_count,    \
+	"margins", sol::property([](const cname& self){ return (glm::dvec4)self.margins; }, \
+	                         [](cname& self, glm::dvec4 m){ self.margins = m; })\
+
+
+	table.new_usertype<GUISingleLayout>("single_layout",
+				sol::base_classes, sol::bases<GUILayout>(),
+				LAYOUT_BASE(GUISingleLayout),
+				"new", [](){ return std::make_shared<GUISingleLayout>(); });
 
 }
 

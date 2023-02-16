@@ -18,7 +18,7 @@ StoredFluids PlumbingMachine::in_flow(std::string port, const StoredFluids &in, 
 {
 	logger->check(has_lua_plumbing(), "Cannot use plumbing functions on machines without plumbing");
 
-	auto result = LuaUtil::call_function(get_lua_plumbing()["in_flow"], port, in, do_flow);
+	auto result = LuaUtil::call_function(get_lua_plumbing()["in_flow"], port, std::ref(in), do_flow);
 	logger->check(result.valid(), "in_flow failed, this is fatal");
 
 	return std::move(result.get<StoredFluids>());

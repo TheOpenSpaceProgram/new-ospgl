@@ -148,4 +148,29 @@ gui.window_style = {
 	linked = 1
 }
 
+---@class gui.widget
+gui.widget = {}
+
+---@class gui.layout
+---@field margins glm.vec4
+gui.layout = {}
+
+---@param widget gui.widget
+function gui.layout:add_widget(widget) end
+
+---@param widget gui.widget
+function gui.layout:remove_widget(widget) end
+
+---@return integer
+function gui.layout:get_widget_count() end
+
+---@class gui.single_layout:gui.layout
+gui.single_layout = {}
+
+---@class gui.vertical_layout:gui.layout
+gui.vertical_layout = {}
+
+---@class gui.list_layout:gui.layout
+gui.list_layout = {}
+
 return gui

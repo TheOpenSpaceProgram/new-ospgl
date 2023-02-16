@@ -31,6 +31,7 @@ protected:
 public:
 
 	GUIScrollbar vscrollbar;
+	GUIScrollbar hscrollbar;
 
 	// (left, right, top, down)
 	glm::ivec4 margins = glm::ivec4(4.0, 4.0, 4.0, 4.0);
@@ -47,11 +48,19 @@ public:
 	void add_widget(std::shared_ptr<GUIWidget> widget);
 	// Note: This will find a matching widget and remove it from the layout
 	void remove_widget(GUIWidget* widget);
+	template<typename T>
+	void remove_widget_lua(std::shared_ptr<T> widget)
+	{
+		remove_widget(widget.get());
+	}
+	template<typename T>
+	void add_widget_lua(std::shared_ptr<T> d){ add_widget(d); }
 
 	void remove_all_widgets();
 
-	void draw_vscrollbar(NVGcontext* vg);
-	void prepare_vscrollbar(GUIInput* gui_input);
+	void prepare_scrollbar(GUIInput* gui_input, GUIScrollbar* scroll, bool v);
+	void draw_vscrollbar(NVGcontext* vg, GUISkin* skin);
+	void draw_hscrollbar(NVGcontext* vg, GUISkin* skin);
 
 	// By default, the layout will glScissor its area and draw scrollbars if needed
 	void draw(NVGcontext* vg, GUISkin* skin);

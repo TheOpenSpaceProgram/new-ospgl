@@ -8,6 +8,9 @@ void GUIWindow::position(GUIScreen *screen, GUISkin *skin)
 		return;
 	}
 
+	pos = next_pos;
+	size = next_size;
+
 	canvas->position_widgets(pos, size, screen);
 }
 
@@ -54,4 +57,12 @@ GUIWindow::GUIWindow()
 void GUIWindow::close()
 {
 	wman->delete_window(this);
+}
+
+void GUIWindow::pre_prepare(GUIScreen* screen)
+{
+	if(is_minimized())
+		return;
+
+	canvas->pre_prepare(screen);
 }

@@ -11,19 +11,23 @@ void GUIScreen::prepare_pass()
 {
 	post_canvas.clear();
 
-	// pre-prepare generates post_canvas
+	// First position pass
+	win_manager.position(this);
+	for(auto o : canvas)
+	{
+		o.first->position_widgets(o.second.first, o.second.second, this);
+	}
+
+	// pre-prepare generates post_canvas, which will correctly be placed
 	for(auto c : canvas)
 	{
 		c.first->pre_prepare(this);
 	}
 
-	win_manager.position(this);
-	// position_pass
+	win_manager.pre_prepare(this);
+
+	// Post canvas position pass, these may not create further post-canvases!
 	for(auto o : post_canvas)
-	{
-		o.first->position_widgets(o.second.first, o.second.second, this);
-	}
-	for(auto o : canvas)
 	{
 		o.first->position_widgets(o.second.first, o.second.second, this);
 	}
@@ -51,11 +55,11 @@ void GUIScreen::input_pass()
 	gui_input->scroll_blocked = false;
 
 	gui_input->execute_user_actions = true;
-	win_manager.prepare(gui_input, this);
 	for(auto o : post_canvas)
 	{
 		o.first->prepare(this, gui_input);
 	}
+	win_manager.prepare(gui_input, this);
 	for(auto o : canvas)
 	{
 		o.first->prepare(this, gui_input);
@@ -68,11 +72,11 @@ void GUIScreen::draw()
 	{
 		o.first->draw(osp->renderer->vg, skin.get(), viewport);
 	}
+	win_manager.draw(osp->renderer->vg, this);
 	for(auto o : post_canvas)
 	{
 		o.first->draw(osp->renderer->vg, skin.get(), viewport);
 	}
-	win_manager.draw(osp->renderer->vg, this);
 }
 
 void GUIScreen::add_canvas(std::shared_ptr<GUICanvas> acanvas, glm::ivec2 pos, glm::ivec2 size)

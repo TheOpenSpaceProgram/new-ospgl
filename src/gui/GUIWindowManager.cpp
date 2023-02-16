@@ -11,6 +11,14 @@ void GUIWindowManager::position(GUIScreen *screen)
 	}
 }
 
+void GUIWindowManager::pre_prepare(GUIScreen *screen)
+{
+	for(auto w : windows)
+	{
+		w->pre_prepare(screen);
+	}
+}
+
 void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 {
 	GUISkin* skin = screen->skin.get();
@@ -32,7 +40,7 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 		if (dragging)
 		{
 			any_hovered = true;
-			focused->pos = glm::vec2(input->mouse_pos) - drag_point;
+			focused->next_pos = glm::vec2(input->mouse_pos) - drag_point;
 			if (gui_input->mouse_up(0))
 			{
 				dragging = false;
@@ -47,54 +55,54 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 
 			if (resize_point == GUISkin::BOTTOM)
 			{
-				focused->size.y = size_0.y + delta_mouse.y;
+				focused->next_size.y = size_0.y + delta_mouse.y;
 			}
 			else if (resize_point == GUISkin::BOTTOM_RIGHT)
 			{
-				focused->size = size_0 + delta_mouse;
+				focused->next_size = size_0 + delta_mouse;
 			}
 			else if (resize_point == GUISkin::RIGHT)
 			{
-				focused->size.x = size_0.x + delta_mouse.x;
+				focused->next_size.x = size_0.x + delta_mouse.x;
 			}
 			else if (resize_point == GUISkin::TOP_RIGHT)
 			{
-				focused->size.x = size_0.x + delta_mouse.x;
-				focused->size.y = size_0.y - delta_mouse.y;
-				focused->pos.y = pos_0.y + delta_mouse.y;
+				focused->next_size.x = size_0.x + delta_mouse.x;
+				focused->next_size.y = size_0.y - delta_mouse.y;
+				focused->next_pos.y = pos_0.y + delta_mouse.y;
 			}
 			else if (resize_point == GUISkin::TOP)
 			{
-				focused->size.y = size_0.y - delta_mouse.y;
-				focused->pos.y = pos_0.y + delta_mouse.y;
+				focused->next_size.y = size_0.y - delta_mouse.y;
+				focused->next_pos.y = pos_0.y + delta_mouse.y;
 			}
 			else if (resize_point == GUISkin::TOP_LEFT)
 			{
-				focused->size = size_0 - delta_mouse;
-				focused->pos = pos_0 + delta_mouse;
+				focused->next_size = size_0 - delta_mouse;
+				focused->next_pos = pos_0 + delta_mouse;
 			}
 			else if (resize_point == GUISkin::LEFT)
 			{
-				focused->size.x = size_0.x - delta_mouse.x;
-				focused->pos.x = pos_0.x + delta_mouse.x;
+				focused->next_size.x = size_0.x - delta_mouse.x;
+				focused->next_pos.x = pos_0.x + delta_mouse.x;
 			}
 			else if (resize_point == GUISkin::BOTTOM_LEFT)
 			{
-				focused->size.x = size_0.x - delta_mouse.x;
-				focused->size.y = size_0.y + delta_mouse.y;
-				focused->pos.x = pos_0.x + delta_mouse.x;
+				focused->next_size.x = size_0.x - delta_mouse.x;
+				focused->next_size.y = size_0.y + delta_mouse.y;
+				focused->next_pos.x = pos_0.x + delta_mouse.x;
 			}
 
-			if (focused->size.x < focused->min_size.x)
+			if (focused->next_size.x < focused->min_size.x)
 			{
-				focused->pos.x = old_pos.x;
-				focused->size.x = old_size.x;
+				focused->next_pos.x = old_pos.x;
+				focused->next_size.x = old_size.x;
 			}
 
-			if (focused->size.y < focused->min_size.y)
+			if (focused->next_size.y < focused->min_size.y)
 			{
-				focused->pos.y = old_pos.y;
-				focused->size.y = old_size.y;
+				focused->next_pos.y = old_pos.y;
+				focused->next_size.y = old_size.y;
 			}
 
 			if (gui_input->mouse_up(0))
@@ -242,9 +250,6 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 			gui_input->ext_keyboard_blocked = true;
 			gui_input->ext_scroll_blocked = true;
 		}
-		// TODO: We position here because otherwise drags lags by 1 frame, but
-		// this could be called only on drag for a bit of optimizaton
-		w->position(screen, skin);
 		w->prepare(gui_input, screen);
 
 		gui_input->ext_mouse_blocked = old_mouse_block;
@@ -280,7 +285,9 @@ std::weak_ptr<GUIWindow> GUIWindowManager::create_window(glm::ivec2 pos, glm::iv
 		size.y = default_size.y;
 
 	n_window->pos = pos;
+	n_window->next_pos = pos;
 	n_window->size = size;
+	n_window->next_size = size;
 	n_window->open = true;
 	n_window->focused = false;
 	n_window->wman = this;
@@ -324,3 +331,4 @@ GUIWindowManager::GUIWindowManager()
 	default_pos = glm::ivec2(400, 100);
 	default_size = glm::ivec2(400, 400);
 }
+

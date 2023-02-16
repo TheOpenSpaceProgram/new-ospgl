@@ -1,4 +1,5 @@
 #include "GUIListLayout.h"
+#include <gui/GUIScreen.h>
 
 void GUIListLayout::position(glm::ivec2 vpos, glm::ivec2 vsize, GUIScreen *screen)
 {
@@ -7,7 +8,7 @@ void GUIListLayout::position(glm::ivec2 vpos, glm::ivec2 vsize, GUIScreen *scree
 
 	vpos += glm::ivec2(margins.x, margins.z);
 	vsize -= glm::ivec2(margins.x + margins.y, margins.z + margins.w);
-	vsize.x -= vscrollbar.width;
+	vsize.x -= vscrollbar.get_width(screen->skin.get());
 
 	int y_pos = vpos.y - vscrollbar.scroll;
 	int x_pos = vpos.x;

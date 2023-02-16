@@ -18,6 +18,7 @@ local mat_override = model.mat_override.from_table({color = glm.vec3.new(1, 1, 1
 
 ---@class core.context_menu
 ---@field window gui.window
+---@field part_id integer
 
 ---@class core.interactable_vehicle
 local interactable_vehicle = {}
@@ -31,8 +32,12 @@ interactable_vehicle.veh = nil
 interactable_vehicle.hovered = -1
 
 --- Stores all active contextual menus
----@type core.context_menu[]
+---@type table<integer, core.context_menu>
 interactable_vehicle.context_menus = {}
+
+--- Stores which parts have context menu, as only one per part is allowed
+---@type table<integer, core.context_menu>
+interactable_vehicle.part_context_menus = {}
 
 ---@param veh_ent universe.entity
 function interactable_vehicle:init(veh_ent) 
@@ -98,6 +103,8 @@ end
 
 function interactable_vehicle:close(k)
 	self.context_menus[k].window:close()
+	local part = self.context_menus[k].part_id
+	self.part_context_menus[part] = nil
 	self.context_menus[k] = nil
 end
 
@@ -127,6 +134,12 @@ function interactable_vehicle:new_context_menus(gui)
 		return
 	end
 
+	if self.part_context_menus[hovered_part.id] then
+		-- Context menu is present for part, hightlight it too
+		self.part_context_menus[hovered_part.id].highligh_timer = 1.0
+		return
+	end
+
 	local n_menu = {}
 	n_menu.highlight_timer = 1.0
 	local pos = input.get_mouse_pos()
@@ -142,17 +155,14 @@ function interactable_vehicle:new_context_menus(gui)
 	n_menu.window.closeable = false
 	n_menu.window.pinable = false
 	n_menu.window.alpha = 0.5
-	--[[local machine_bar, content = n_menu.window.canvas:divide_v_pixels(16)
+	n_menu.part_id = hovered_part.id
+	local machine_bar, content = n_menu.window.canvas:divide_v_pixels(16)
 
 	local top_layout = guilib.horizontal_layout.new()
 	machine_bar:set_layout(top_layout)
 
-	local content_layout = guilib.vertical_layout.new()
-	content:set_layout(content_layout)
-
-	n_menu.pos = glm.vec2.new(0.0, 0.0)
-	n_menu.size = glm.vec2.new(100.0, 100.0)]]--
 	self.context_menus[hovered_p.id] = n_menu
+	self.part_context_menus[hovered_part.id] = n_menu
 
 	-- Remove all others if CTRL is not held
 	if not input.key_pressed(input.key.left_control) then

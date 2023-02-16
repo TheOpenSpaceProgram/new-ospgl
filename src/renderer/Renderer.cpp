@@ -750,6 +750,7 @@ Renderer::~Renderer()
 {
 	// Remove images and other assets before deletion as otherwise OpenGL will crash
 	brdf = AssetHandle<Image>();
+	clear();
 	if (gbuffer != nullptr)
 	{
 		delete gbuffer;

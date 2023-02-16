@@ -53,5 +53,9 @@ public:
 	NVGcolor get_foreground_color(bool soft = false) override;
 	NVGcolor get_button_color(ButtonState state) override;
 
+	int get_scrollbar_width() override;
+	NVGcolor get_scrollbar_color() override;
+	NVGcolor get_scrollbar_scroller_color() override;
+
 	SimpleSkin();
 };

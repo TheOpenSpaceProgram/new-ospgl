@@ -10,6 +10,8 @@ void GroupManager::create_right_panel()
 	auto move_up = std::make_shared<GUITextButton>(osp->game_database->get_string("core:gman_move_up"));
 	auto move_down = std::make_shared<GUITextButton>(osp->game_database->get_string("core:gman_move_down"));
 	auto move_to = std::make_shared<GUIDropDown>();
+	move_to->options.emplace_back("well", "Oh well");
+	move_to->update_options();
 	move_to->not_chosen_string = osp->game_database->get_string("core:gman_move_all");
 	auto remove_btn = std::make_shared<GUITextButton>(osp->game_database->get_string("core:gman_delete"));
 	if(selected_group < 0)
@@ -49,10 +51,10 @@ void GroupManager::try_show()
 	auto w = win.lock();
 	w->title = osp->game_database->get_string("core:group_manager");
 
-	w->canvas->divide_h(0.25f);
+	w->canvas->divide_h(0.35f);
 
 	// Left child: Group list and at the bottom new group button
-	w->canvas->child_0->divide_v(0.8f);
+	w->canvas->child_0->divide_v(0.5f);
 	auto list_layout = std::make_shared<GUIVerticalLayout>();
 	auto btn = std::make_shared<GUITextButton>(osp->game_database->get_string("core:default_group"));
 	btn->toggled = selected_group < 0;

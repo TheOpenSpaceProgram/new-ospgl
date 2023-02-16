@@ -21,6 +21,9 @@ private:
 	bool passthrough;
 	bool open;
 	GUIWindowManager* wman;
+
+	glm::ivec2 next_pos;
+	glm::ivec2 next_size;
 public:
 
 	GUISkin::WindowStyle style;
@@ -60,6 +63,7 @@ public:
 
 	// We need the GUISkin on prepare to adjust sizings
 	void position(GUIScreen* screen, GUISkin* skin);
+	void pre_prepare(GUIScreen* screen);
 	void prepare(GUIInput* gui_input, GUIScreen* screen);
 	void draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor);
 
