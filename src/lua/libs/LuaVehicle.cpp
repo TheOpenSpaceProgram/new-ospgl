@@ -161,6 +161,7 @@ void LuaVehicle::load_to(sol::table& table)
 		"get_id", &Machine::get_id,
 		"in_part", &Machine::in_part,
 		"draw_imgui", &Machine::draw_imgui,
+		"get_icon", [](Machine& self){ return LuaAssetHandle(self.get_icon());},
 		"load_interface", [](Machine* self, const std::string& iname, sol::this_state tst, sol::this_environment tenv)
 		{
 			sol::environment old_env = tenv;

@@ -252,6 +252,9 @@ function machine:get_wired_interfaces(int_type, include_this) end
 ---@param iname string
 function machine:get_interface(iname) end
 
+---@return assets.image_handle
+function machine:get_icon() end
+
 ---@class vehicle.part_prototype
 ---@field name string Presented ready to display, no need to localize (it's done in load time)
 local part_prototype = {}

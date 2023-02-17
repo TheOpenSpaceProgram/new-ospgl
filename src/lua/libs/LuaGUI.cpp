@@ -1,4 +1,5 @@
 #include "LuaGUI.h"
+#include "LuaAssets.h"
 #include <gui/GUISkin.h>
 #include <gui/skins/SimpleSkin.h>
 #include <gui/GUIScreen.h>
@@ -6,18 +7,22 @@
 #include <gui/layouts/GUIListLayout.h>
 #include <gui/layouts/GUISingleLayout.h>
 #include <gui/layouts/GUIVerticalLayout.h>
+#include <gui/layouts/GUIHorizontalLayout.h>
 #include <gui/widgets/GUIDropDown.h>
 #include <gui/widgets/GUIImageButton.h>
 #include <gui/widgets/GUITextButton.h>
 #include <gui/widgets/GUITextField.h>
+
+#include <renderer/Renderer.h>
+
 
 void LuaGUI::load_to(sol::table &table)
 {
 	table.new_usertype<GUISkin>("skin",
 		"get_foreground_color", &GUISkin::get_foreground_color,
 		"get_background_color", &GUISkin::get_background_color,
-		"draw_link", [](GUISkin* self, void* vg, glm::dvec2 start_pos, glm::dvec2 win_pos){
-			self->draw_link((NVGcontext*)vg, start_pos, win_pos);},
+		"draw_link", [](GUISkin* self, glm::dvec2 start_pos, glm::dvec2 win_pos){
+			self->draw_link(osp->renderer->vg, start_pos, win_pos);},
 		"get_default_skin", []()
 		{
 			return (std::shared_ptr<GUISkin>)std::make_shared<SimpleSkin>();
@@ -84,6 +89,11 @@ void LuaGUI::load_to(sol::table &table)
 		 "debug", &GUIInput::debug
 		 );
 
+#define LAYOUT_HELPER sol::overload( \
+	&GUICanvas::set_layout_lua<GUISingleLayout>,\
+    &GUICanvas::set_layout_lua<GUIHorizontalLayout> \
+    )
+
 	table.new_usertype<GUICanvas>("canvas",
 		  "new", [](){
 			return std::make_shared<GUICanvas>();
@@ -112,6 +122,7 @@ void LuaGUI::load_to(sol::table &table)
 			return ret;
 		},
 		"child_pixels", &GUICanvas::child_pixels,
+		"set_layout", LAYOUT_HELPER,
 		"pixels_for_child_1", &GUICanvas::pixels_for_child_1
 		);
 
@@ -167,6 +178,24 @@ void LuaGUI::load_to(sol::table &table)
 				LAYOUT_BASE(GUISingleLayout),
 				"new", [](){ return std::make_shared<GUISingleLayout>(); });
 
+	table.new_usertype<GUIHorizontalLayout>("horizontal_layout",
+				sol::base_classes, sol::bases<GUILayout>(),
+				LAYOUT_BASE(GUIHorizontalLayout),
+				"new", [](sol::optional<int> elem_margin){
+					return std::make_shared<GUIHorizontalLayout>(elem_margin.value_or(4)); });
+#define WIDGET_BASE(cname) \
+	"default_size", sol::property([](const cname& self){ return (glm::dvec2)self.default_size; }, \
+	                              [](cname& self, glm::dvec2 val){ self.default_size = val; }),   \
+    "is_visible", sol::readonly(&cname::is_visible)\
+
+	table.new_usertype<GUIImageButton>("image_button",
+		   sol::base_classes, sol::bases<GUIWidget>(),
+		   WIDGET_BASE(GUIImageButton),
+		   "set_image", [](GUIImageButton& self, LuaAssetHandle<Image> handle)
+		   {
+				self.set_image(osp->renderer->vg, handle.get_asset_handle());
+		   },
+		   "new", [](){return std::make_shared<GUIImageButton>(); });
 }
 
 LuaGUI::LuaGUI()

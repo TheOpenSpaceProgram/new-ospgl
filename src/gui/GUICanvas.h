@@ -51,6 +51,11 @@ public:
 
 	void draw(NVGcontext* vg, GUISkin* skin, glm::ivec4 def_scissor = glm::ivec4(0, 0, 0, 0)) const;
 
+	void set_layout(std::shared_ptr<GUILayout> layout);
+
+	template<typename T>
+	void set_layout_lua(std::shared_ptr<T> d){ set_layout(d); }
+
 	GUICanvas()
 	{
 		factor = 1.0f;

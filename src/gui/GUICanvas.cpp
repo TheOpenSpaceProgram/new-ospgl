@@ -146,4 +146,11 @@ GUICanvas::~GUICanvas()
 {
 }
 
+void GUICanvas::set_layout(std::shared_ptr<GUILayout> nlayout)
+{
+	child_0 = nullptr;
+	child_1 = nullptr;
+	layout = nlayout;
+}
+
 

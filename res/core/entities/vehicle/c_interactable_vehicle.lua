@@ -108,6 +108,10 @@ function interactable_vehicle:close(k)
 	self.context_menus[k] = nil
 end
 
+function interactable_vehicle:build_main_canvas(k)
+	
+end
+
 
 ---@param gui gui.screen
 function interactable_vehicle:new_context_menus(gui) 
@@ -156,10 +160,17 @@ function interactable_vehicle:new_context_menus(gui)
 	n_menu.window.pinable = false
 	n_menu.window.alpha = 0.5
 	n_menu.part_id = hovered_part.id
-	local machine_bar, content = n_menu.window.canvas:divide_v_pixels(16)
+	local machine_bar, content = n_menu.window.canvas:divide_v_pixels(24 + 10)
 
 	local top_layout = guilib.horizontal_layout.new()
 	machine_bar:set_layout(top_layout)
+	
+	for _, machine in pairs(hovered_part.machines) do
+		local button = guilib.image_button.new()
+		button.default_size = glm.vec2.new(24, 24)
+		button:set_image(machine:get_icon())
+		top_layout:add_widget(button)
+	end
 
 	self.context_menus[hovered_p.id] = n_menu
 	self.part_context_menus[hovered_part.id] = n_menu
@@ -207,7 +218,7 @@ function interactable_vehicle:draw_gui(gui, cu)
 		local p_pos_2d, front = glm.world_to_clip(cu.proj_view, p_pos_3d)
 		if front then
 			p_pos_2d = glm.clip_to_screen(p_pos_2d, gui.viewport)
-			gui.skin:draw_link(osp.renderer.vg, p_pos_2d, menu.window.pos)
+			gui.skin:draw_link(p_pos_2d, menu.window.pos)
 		end
 	end
 end

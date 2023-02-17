@@ -92,23 +92,27 @@ function gui.canvas:set_layout(lyout) end
 ---@param fac number How much space should the left children take? (0->1)
 ---@return gui.canvas Left children canvas
 ---@return gui.canvas Right children canvas
+--- If layout is present, it's inherited by left children
 function gui.canvas:divide_h(fac) end
 
 ---@param fac number How much space should the top children take? (0->1)
 ---@return gui.canvas Top children canvas
 ---@return gui.canvas Bottom children canvas
+--- If layout is present, it's inherited by top children
 function gui.canvas:divide_v(fac) end
 
 ---@param pixels integer How many pixels should the selected children take?
 ---@param for_bottom? boolean Defaults to false, are the given pixels for the top canvas or bottom one?
 ---@return gui.canvas Top children canvas
 ---@return gui.canvas Bottom children canvas
+--- If layout is present, it's inherited by top children
 function gui.canvas:divide_v_pixels(pixels, for_bottom) end
 
 ---@param pixels integer How many pixels should the selected children take?
 ---@param for_right? boolean Defaults to false, are the given pixels for the left canvas or right one?
 ---@return gui.canvas Left children canvas
 ---@return gui.canvas Right children canvas
+--- If layout is present, it's inherited by left children
 function gui.canvas:divide_h_pixels(pixels, for_right) end
 
 ---@class gui.layout
@@ -149,7 +153,21 @@ gui.window_style = {
 }
 
 ---@class gui.widget
+---@field default_size glm.vec2
+---@field visible boolean Readonly
 gui.widget = {}
+
+---@class gui.base_button:gui.widget
+gui.base_button = {}
+
+---@class gui.image_button:gui.base_button
+gui.image_button = {}
+
+---@param img assets.image_handle
+function gui.image_button:set_image(img) end
+
+---@return gui.image_button
+function gui.image_button.new() end
 
 ---@class gui.layout
 ---@field margins glm.vec4
@@ -169,6 +187,13 @@ gui.single_layout = {}
 
 ---@class gui.vertical_layout:gui.layout
 gui.vertical_layout = {}
+
+---@class gui.horizontal_layout:gui.layout
+gui.horizontal_layout = {}
+
+---@param elem_margin? integer
+---@return gui.horizontal_layout
+function gui.horizontal_layout.new(elem_margin) end
 
 ---@class gui.list_layout:gui.layout
 gui.list_layout = {}
