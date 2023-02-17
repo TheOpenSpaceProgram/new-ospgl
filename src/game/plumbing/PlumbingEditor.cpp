@@ -336,7 +336,7 @@ void PlumbingEditor::handle_hovering(GUIInput *gui_input, glm::vec2 mpos)
 		hovered = elem;
 		if (gui_input->mouse_down(2))
 		{
-			on_middle_click(elem->in_machine);
+			emit_event("on_middle_click", elem->in_machine->in_part->id, elem->in_machine->in_part_id);
 		}
 	}
 

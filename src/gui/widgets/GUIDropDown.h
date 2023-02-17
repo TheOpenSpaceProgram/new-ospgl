@@ -5,6 +5,12 @@ class GUICanvas;
 class GUIVerticalLayout;
 
 // This widget is slightly tricky as it needs to draw outside its canvas if choosing
+// Emits the following events:
+// on_item_choosen(item_id: string, item_text: string
+// on_item_change(item_id: string, item_text: string, old_item_id: string, old_item_text: string)
+//    Note that old_item_id and old_item_text may not be present!
+// on_item_enter_hover(item_id: string, item_text: string)
+// on_item_leave_hover(item_id: string, item_text: string)
 class GUIDropDown : public GUIBaseButton
 {
 public:
@@ -30,17 +36,6 @@ public:
 	using IDNamePair = std::pair<std::string, std::string>;
 	std::vector<IDNamePair> options;
 
-
-	// Called when an item is chosen with the item
-	Signal<void(const IDNamePair&)> on_item_chosen;
-
-	// Called when an item is chosen, which was not previously, with the item
-	// and the old item ("", "") if not present
-	Signal<void(const IDNamePair&, const IDNamePair&)> on_item_change;
-
-	Signal<void(const IDNamePair&)> on_item_enter_hover;
-
-	Signal<void(const IDNamePair&)> on_item_leave_hover;
 
 	// Call after modifying options so that the layout contains the new items
 	void update_options();

@@ -93,7 +93,13 @@ PlumbingInterface::PlumbingInterface(EditorVehicleInterface *edveh_int)
 	this->edveh = edveh_int->edveh;
 	this->edveh_int = edveh_int;
 
-	pb_editor.on_middle_click.add_handler([this](Machine* m){this->do_2d_to_3d(m);});
+	pb_editor.sign_up_for_event("on_middle_click", EventHandler([this](EventArguments& args){
+		int64_t part_id = std::get<int64_t>(args[0]);
+		std::string machine_id = std::get<std::string>(args[1]);
+		Part* p = this->edveh->veh->get_part_by_id(part_id);
+		Machine* m = p->get_machine(machine_id);
+		this->do_2d_to_3d(m);
+	}));
 
 	tiny_font = AssetHandle<BitmapFont>("core:fonts/ProggyTiny.fnt");
 }

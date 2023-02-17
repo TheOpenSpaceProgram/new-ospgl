@@ -36,18 +36,20 @@ void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg)
 		btn->set_image(vg,img.duplicate());
 		part_list->add_widget(btn);
 
-		btn->on_clicked.add_handler([p, this](int btn)
+		btn->sign_up_for_event("on_clicked", EventHandler([p, this](EventArguments& args)
 		{
+			int btn = std::get<int>(args[0]);
 			if(btn == GUI_LEFT_BUTTON)
 			{
 				create_machine(p);
 			}
-		});
+		}));
 	}
 
 	trashcan_button = std::make_shared<GUITextButton>("", "medium");
-	trashcan_button->on_clicked.add_handler([this](int btn)
+	trashcan_button->sign_up_for_event("on_clicked", EventHandler([this](EventArguments& args)
 	{
+		int btn = std::get<int>(args[0]);
 		if(btn == 0)
 		{
 			auto selected = edveh_int->plumbing_interface.pb_editor.get_selected();
@@ -60,7 +62,7 @@ void PlumbingPanel::init(EditorScene *sc, NVGcontext *vg)
 				mvec.erase(pos);
 			}
 		}
-	});
+	}));
 	trashcan->add_widget(trashcan_button);
 
 	// Find a part to assign as target, will usually be root

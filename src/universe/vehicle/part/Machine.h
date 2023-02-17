@@ -35,6 +35,8 @@ public:
 	// An unique id assigned at runtime to identify stuff like ImGui windows, etc...
 	// Not very elegant solution but useful for the debug stuff
 	int64_t runtime_uid;
+	// String to be used in part->get_machine() to obtain this machine
+	std::string in_part_id;
 
 	// Always present, but may not be used
 	PlumbingMachine plumbing;

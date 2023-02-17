@@ -3,7 +3,6 @@
 #include <gui/GUISkin.h>
 #include <nanovg/nanovg.h>
 #include <universe/vehicle/Vehicle.h>
-#include <util/Signal.h>
 
 class PlumbingPanel;
 
@@ -13,7 +12,8 @@ class PlumbingPanel;
 // To use as a view-only widget, wrap it around and give gui_input as nullptr
 // it will then ignore all inputs and just display a graphic
 // TODO: Logic and drawing is already separated, make it a GUIWindget?
-class PlumbingEditor
+// Emits the on_middle_click(in_part_id: int64, in_machine: string) event
+class PlumbingEditor : public EventEmitter
 {
 private:
 
@@ -85,8 +85,6 @@ public:
 	bool show_flow_direction;
 	// Shows detailed tooltip for ports on hovering them
 	bool allow_tooltip;
-
-	Signal<void(Machine*&)> on_middle_click;
 
 	Vehicle* veh;
 	glm::vec2 cam_center;

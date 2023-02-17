@@ -73,10 +73,10 @@ GUIDropDown::GUIDropDown()
 	may_drop_upwards = true;
 	max_dropdown_pixels = -1;
 
-	on_clicked.add_handler([this](int _)
+	sign_up_for_event("on_clicked", EventHandler([this](EventArguments& args)
 						   {
 								this->open = !this->open;
-						   });
+						   }));
 }
 
 GUIDropDown::~GUIDropDown()
@@ -90,18 +90,18 @@ void GUIDropDown::update_options()
 	{
 		auto btn = std::make_shared<GUITextButton>(options[i].second, "medium");
 		btn->default_size.y = item_size;
-		btn->on_clicked.add_handler([this, i](int _)
+		btn->sign_up_for_event("on_clicked", EventHandler([this, i](EventArguments& args)
 		{
 			this->choose(i);
-		});
-		btn->on_enter_hover.add_handler([this, i]()
+		}));
+		btn->sign_up_for_event("on_enter_hover", EventHandler([this, i](EventArguments& args)
 		{
-			this->on_item_enter_hover.call(this->options[i]);
-		});
-		btn->on_leave_hover.add_handler([this, i]()
+			this->emit_event("on_item_enter_hover", this->options[i].first, this->options[i].second);
+		}));
+		btn->sign_up_for_event("on_leave_hover", EventHandler([this, i](EventArguments& args)
 		{
-			this->on_item_leave_hover.call(this->options[i]);
-		});
+			this->emit_event("on_item_leave_hover", this->options[i].first, this->options[i].second);
+		}));
 		chooser_layout->add_widget(btn);
 	}
 
@@ -113,16 +113,16 @@ void GUIDropDown::choose(size_t i)
 	int old_item = item;
 	item = (int)i;
 	auto opt = options[i];
-	on_item_chosen.call(opt);
+	emit_event("on_item_chosen", opt.first, opt.second);
 	if(old_item != item)
 	{
 		if(old_item >= 0)
 		{
-			on_item_change.call(opt, options[old_item]);
+			emit_event("on_item_change", opt.first, opt.second, options[old_item].first, options[old_item].second);
 		}
 		else
 		{
-			on_item_change.call(opt, {"", ""});
+			emit_event("on_item_change", opt.first, opt.second);
 		}
 	}
 }

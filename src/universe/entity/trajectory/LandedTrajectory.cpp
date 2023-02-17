@@ -65,11 +65,10 @@ LandedTrajectory::~LandedTrajectory()
 
 LandedTrajectory::LandedTrajectory()
 {
-	hndl = EventHandler(EventHandlerFnc([](EventArguments& args, const void* ud)
+	hndl = EventHandler(EventHandlerFnc([this](EventArguments& args)
 	{
-		auto this_ptr = (LandedTrajectory*)ud;
-		this_ptr->update_element_idx();
-	}), this);
+		this->update_element_idx();
+	}));
 	osp->universe->sign_up_for_event("core:system_update_indices", hndl);
 }
 

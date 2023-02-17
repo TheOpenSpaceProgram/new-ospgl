@@ -109,7 +109,7 @@ void GUITextField::prepare(glm::ivec4 viewport, GUIScreen* screen, GUIInput* ipt
 				string.erase(prev, it);
 				cursor_pos--;
 
-				on_change.call(std::move(string));
+				emit_event("on_change", std::move(string));
 			}
 		}
 		else if(!in.empty())
@@ -125,14 +125,14 @@ void GUITextField::prepare(glm::ivec4 viewport, GUIScreen* screen, GUIInput* ipt
 			// if the user writes faster than the framerate!
 			cursor_pos += UTF8Util::count_codepoints(in);
 
-			on_change.call(std::move(string));
+			emit_event("on_change", string);
 		}
 
 		if(input->key_down(GLFW_KEY_ESCAPE))
 		{
 			focused = false;
 			ipt->keyboard_blocked = false;
-			on_exit.call(std::move(string));
+			emit_event("on_exit", string);
 			if(escape_clears)
 			{
 				clear();
@@ -143,7 +143,7 @@ void GUITextField::prepare(glm::ivec4 viewport, GUIScreen* screen, GUIInput* ipt
 		{
 			focused = false;
 			ipt->keyboard_blocked = false;
-			on_intro.call(std::move(string));
+			emit_event("on_intro", string);
 		}
 	}
 

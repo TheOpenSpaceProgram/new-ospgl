@@ -1,15 +1,17 @@
 #pragma once
 #include <string>
 #include "GUICanvas.h"
-#include "util/Signal.h"
 #include "glm/fwd.hpp"
+#include <universe/Events.h>
 
 class GUIWindowManager;
 
 // A window offers a wide variety of ways to hold a canvas. They must be 
 // created on a window manager to handle stacking
 // Most non-fixed GUIs are drawn through this
-class GUIWindow
+// Emits events:
+// on_close()
+class GUIWindow : public EventEmitter
 {
 
 friend class GUIWindowManager;
@@ -58,8 +60,6 @@ public:
 	bool moveable;
 
 	std::shared_ptr<GUICanvas> canvas;
-
-	Signal<void(GUIWindow&)> on_close;
 
 	// We need the GUISkin on prepare to adjust sizings
 	void position(GUIScreen* screen, GUISkin* skin);

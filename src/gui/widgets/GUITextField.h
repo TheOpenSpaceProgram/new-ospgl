@@ -1,8 +1,13 @@
 #pragma once
 #include "../GUIWidget.h"
+#include "../../universe/Events.h"
 
 // A simple one-line only text field
-class GUITextField : public GUIWidget
+// Emits the following events:
+// on_intro(text: string) - called when the enter key is clicked and the text field selected, takes text written
+// on_exit(text: string) - called when the escape key is clicked and the text field selected, takes text written
+// on_change(text: string) - called everytime the string changes, takes text written
+class GUITextField : public GUIWidget, EventEmitter
 {
 private:
 	bool focused;
@@ -10,13 +15,6 @@ private:
 public:
 
 	bool disabled;
-
-	// called when the enter key is clicked and the text field selected
-	Signal<void(std::string)> on_intro;
-	// called when the escape key is clicked and the text field selected
-	Signal<void(std::string)> on_exit;
-	// called when the string changes
-	Signal<void(std::string)> on_change;
 
 	std::string string;
 	std::string default_string;

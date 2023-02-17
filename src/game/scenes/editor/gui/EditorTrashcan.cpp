@@ -24,10 +24,11 @@ void EditorTrashcan::init(EditorScene* sc, NVGcontext* vg)
 	trash_button = std::make_shared<GUIImageButton>();
 	trash_button->set_image(vg, trash_image.duplicate());
 	trash_button->img_mode = GUIImageButton::CENTER;
-	trash_button->on_clicked.add_handler([this](int btn)
-	{
-		on_trash(btn);
-	});
+	trash_button->sign_up_for_event("on_clicked",
+		EventHandler([this](EventArguments& args)
+		{
+			this->on_trash(std::get<int>(args[0]));
+		}));
 	trash_area_layout->add_widget(trash_button);
 
 	// It looks better this way

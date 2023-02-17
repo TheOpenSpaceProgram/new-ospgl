@@ -7,14 +7,14 @@ void GUIBaseButton::set_hover(bool nhover)
 	{
 		if(!hover)
 		{
-			on_enter_hover();
+			emit_event("on_enter_hover");
 		}	
 	}
 	else
 	{
 		if(hover)
 		{
-			on_leave_hover();
+			emit_event("on_leave_hover");
 		}
 	}
 
@@ -25,7 +25,7 @@ void GUIBaseButton::set_down(int btn)
 {
 	if(!click[btn])
 	{
-		on_clicked(std::move(btn));
+		emit_event("on_clicked", btn);
 	}
 	click[btn] = true;
 }
@@ -34,7 +34,7 @@ void GUIBaseButton::set_up(int btn)
 {
 	if(click[btn])
 	{
-		on_released(std::move(btn));
+		emit_event("on_released", btn);
 	}
 	click[btn] = false;
 }
@@ -58,7 +58,7 @@ void GUIBaseButton::do_button(glm::ivec2 pos, glm::ivec2 size, glm::ivec4 viewpo
 				if(ipt->mouse_up(0)){ set_up(0); }
 				if(ipt->mouse_up(1)){ set_up(1); }
 				set_hover(true);
-				during_hover();
+				emit_event("during_hover");
 			}
 
 		}

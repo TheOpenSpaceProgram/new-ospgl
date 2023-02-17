@@ -27,8 +27,9 @@ void EditorPartList::update_part_list()
 {
 	part_list->remove_all_widgets();
 
-	for(auto& p : all_parts)
+	for(size_t i = 0; i <all_parts.size(); i++)
 	{
+		auto& p = all_parts[i];
 		PartPrototype* proto = p.proto.data;
 		auto it = std::find(proto->categories.begin(), proto->categories.end(), current_category);
 		if(it != proto->categories.end())
@@ -39,26 +40,30 @@ void EditorPartList::update_part_list()
 			btn->set_image(vg, p.icon, icon_renderer->size);
 			part_list->add_widget(btn);
 
-			btn->during_hover.add_handler([&p, this]()
-			{
-				p.angle += 0.04;
-				p.render(this->icon_renderer);
-			});
-
-			btn->on_leave_hover.add_handler([&p, this]()
-			{
-				p.angle = 0.0;
-				p.render(this->icon_renderer);
-			});
-
-			btn->on_clicked.add_handler([&p, this](int btn)
-			{
-				if(btn == GUI_LEFT_BUTTON)
+			btn->sign_up_for_event("during_hover",
+				EventHandler([this, &p](EventArguments& args)
 				{
-					create_part(p.proto);
-				}
-			});
-		}	
+					 p.angle += 0.04;
+					 p.render(this->icon_renderer);
+			 	}));
+
+			btn->sign_up_for_event("on_leave_hover",
+			   EventHandler([this, &p](EventArguments& args)
+				{
+					p.angle = 0;
+					p.render(this->icon_renderer);
+				}));
+
+			btn->sign_up_for_event("on_clicked",
+			   EventHandler([this, &p](EventArguments& args)
+			   {
+					auto btn = std::get<int>(args[0]);
+					if(btn == GUI_LEFT_BUTTON)
+					{
+						this->create_part(p.proto);
+					}
+				}));
+		}
 	}
 }
 
@@ -172,19 +177,25 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 	group_selector = std::make_shared<GUISingleLayout>();
 	group_dropdown = std::make_shared<GUIDropDown>();
 	update_groups();
-	group_dropdown->on_item_change.add_handler(
-		[this](const GUIDropDown::IDNamePair& new_opt, const GUIDropDown::IDNamePair& old_opt)
+	group_dropdown->sign_up_for_event("on_item_change", EventHandler(
+		[this](EventArguments& args)
 		{
-			if(new_opt.first == "manage")
+			std::string new_id = std::get<std::string>(args[0]);
+			std::string old_id = "";
+			if(args.size() > 3)
 			{
-				group_dropdown->select(old_opt.first);
+				old_id = std::get<std::string>(args[2]);
+			}
+			if(new_id == "manage")
+			{
+				group_dropdown->select(old_id);
 				group_manager.try_show();
 			}
 			else
 			{
 
 			}
-		});
+		}));
 	group_dropdown->item = 0;
 	group_selector->add_widget(group_dropdown);
 
@@ -229,7 +240,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 		category_list->add_widget(btn);
 		std::string id = categories[i].id;
 
-		btn->on_clicked.add_handler([id, this, btn](int _)
+		btn->sign_up_for_event("on_click", EventHandler([id, this, btn](EventArguments& args)
 		{
 			std::string old_id = this->current_category;
 			this->current_category = id;
@@ -244,7 +255,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 				this->update_part_list();
 			}
 
-		});
+		}));
 	}
 
 	current_category = "command";

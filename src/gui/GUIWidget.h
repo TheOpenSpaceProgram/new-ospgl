@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <nanovg/nanovg.h>
 #include "GUIInput.h"
-#include "util/Signal.h"
 #include "GUISkin.h"
 
 class GUIScreen;

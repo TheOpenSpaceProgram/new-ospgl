@@ -2,7 +2,6 @@
 #include "PlanetarySystem.h"
 #include "entity/Entity.h"
 #include <any>
-#include <unordered_set>
 #include "Events.h"
 #pragma warning(push, 0)
 #include <btBulletDynamicsCommon.h>
@@ -31,14 +30,9 @@
 // It's the responsability of the event receiver to remove the handler once it's deleted / not needed!
 class GameState;
 
-class Universe
+class Universe : public EventEmitter
 {
 private:
-
-	std::unordered_map<std::string, std::unordered_set<EventHandler, EventHandlerHasher>> event_receivers;
-
-	std::unordered_set<EventHandler, EventHandlerHasher>& index_event_receivers(const std::string& str);
-
 
 	btDefaultCollisionConfiguration* bt_collision_config;
 	btCollisionDispatcher* bt_dispatcher;
@@ -74,16 +68,6 @@ public:
 	void enable_debugging();
 	void disable_debugging();
 #endif
-
-	void sign_up_for_event(const std::string& event_id, EventHandler id);
-	void drop_out_of_event(const std::string& event_id, EventHandler id);
-	void emit_event(const std::string& event_id, EventArguments args = EventArguments());
-	template<typename... Args>
-	void emit_event(const std::string& event_id, Args&&... args)
-	{
-		EventArguments vc {args...};
-		emit_event(event_id, vc);	
-	}
 
 
 	btDiscreteDynamicsWorld* bt_world;

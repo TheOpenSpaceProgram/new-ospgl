@@ -17,10 +17,10 @@ void LuaUniverse::load_to(sol::table& table)
 
 			ev.event_id = event_id;
 
-			EventHandlerFnc wrapper = [](EventArguments& vec, const void* udata)
+			auto ref = new sol::reference(std::move(fnc));
+			EventHandlerFnc wrapper = [ref](EventArguments& vec)
 			{
 				// Convert to lua values
-				const sol::reference* ref = (sol::reference*)udata;
 				sol::protected_function fnc = (sol::protected_function)(*ref);
 				// Handle errors, otherwise debugging could get very confusing!
 				auto result = fnc(sol::as_args(vec));
@@ -33,9 +33,7 @@ void LuaUniverse::load_to(sol::table& table)
 
 			ev.handler = EventHandler();
 			ev.handler.fnc = wrapper;
-			auto ref = new sol::reference(std::move(fnc));
-			ev.handler.user_data = (const void*)ref;
-			ev.universe = self;
+			ev.emitter = self;
 			ev.signed_up = true;
 			ev.ref = ref;
 			self->sign_up_for_event(event_id, ev.handler);

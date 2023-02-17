@@ -8,7 +8,7 @@
 // so they are not discarded by the GC
 struct LuaEventHandler
 {
-	Universe* universe;
+	EventEmitter* emitter;
 	EventHandler handler;
 	std::string event_id;
 	sol::reference* ref;
@@ -20,7 +20,7 @@ struct LuaEventHandler
 		if(signed_up)
 		{
 			signed_up = false;
-			universe->drop_out_of_event(event_id, handler);
+			emitter->drop_out_of_event(event_id, handler);
 			delete ref;
 		}
 	}
@@ -37,7 +37,7 @@ struct LuaEventHandler
 
 	LuaEventHandler(LuaEventHandler&& other)
 	{
-		universe = other.universe;
+		emitter = other.emitter;
 		handler = other.handler;
 		event_id = other.event_id;
 		signed_up = other.signed_up;
@@ -47,7 +47,7 @@ struct LuaEventHandler
 
 	LuaEventHandler& operator=(LuaEventHandler&& other)
 	{
-		universe = other.universe;
+		emitter = other.emitter;
 		handler = other.handler;
 		event_id = other.event_id;
 		signed_up = other.signed_up;

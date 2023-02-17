@@ -148,7 +148,7 @@ void GUIWindowManager::prepare(GUIInput* gui_input, GUIScreen* screen)
 						{
 							remove = true;
 							w->open = false;
-							w->on_close(*w);
+							w->emit_event("on_close");
 						}
 					}
 					else if (w->minimizable && skin->can_minimize_window(w.get(), mouse_pos))
@@ -314,7 +314,7 @@ void GUIWindowManager::delete_window(GUIWindow* win)
 	}
 
 	win->open = false;
-	win->on_close(*win);
+	win->emit_event("on_close");
 	if(focused.get() == win)
 	{
 		focused = nullptr;

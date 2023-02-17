@@ -29,6 +29,7 @@ Part::Part(AssetHandle<PartPrototype>& part_proto, std::shared_ptr<cpptoml::tabl
 
 		Machine* n_machine = new Machine(config_toml, cur_pkg);
 		machines[id] = n_machine;
+		n_machine->in_part_id = id;
 
 	}
 
@@ -178,13 +179,11 @@ std::unordered_map<std::string, Machine*> Part::get_all_machines() const
 		out[machine_pair.first] = machine_pair.second;
 	}
 
-	size_t i = 0;
-	for(auto* machine : attached_machines)
+	for(size_t i = 0; i < attached_machines.size(); i++)
 	{
 		std::string str = "_attached_";
 		str += std::to_string(i);
-		out[str] = machine;
-		i++;
+		out[str] = attached_machines[i];
 	}
 
 	return out;

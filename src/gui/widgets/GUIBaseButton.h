@@ -1,8 +1,16 @@
 #pragma once
 #include "../GUIWidget.h"
+#include "../../universe/Events.h"
 
 // Base class for all buttons
-class GUIBaseButton : public GUIWidget
+// Emits the following events:
+// on_enter_hover
+// during_hover
+// on_leave_hover
+// on_clicked
+// during_click
+// on_released
+class GUIBaseButton : public GUIWidget, public EventEmitter
 {
 protected:
 
@@ -18,14 +26,6 @@ public:
 
 	// We only support left and right buttons for compatibility with laptops
 	bool click[2] = {false, false};
-
-	Signal<void()> on_enter_hover; 		//< Called the frame the mouse enters the button
-	Signal<void()> during_hover; 			//< Called every frame the mouse is hovering
-	Signal<void()> on_leave_hover;		//< Called the frame the mouse leaves the button
-	
-	Signal<void(int)> on_clicked;		//< Called the frame the button is clicked
-	Signal<void(int)> during_click;		//< Called every frame the button is held
-	Signal<void(int)> on_released;		//< Called the frame the button is released (or leaves)
 
 	void do_button(glm::ivec2 pos, glm::ivec2 size, glm::ivec4 viewport, GUIInput* ipt);
 	GUISkin::ButtonState get_button_state();

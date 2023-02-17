@@ -64,8 +64,9 @@ int EditorGUI::get_panel_width()
 			button->default_size = glm::ivec2(24, 24);
 			tlayout->add_widget(button);
 
-			button->on_clicked.add_handler([this, button, mode](int btn)
+			button->sign_up_for_event("on_clicked", EventHandler([this, button, mode](EventArguments& args)
 			{
+				int btn = std::get<int>(args[0]);
 				if(this->edveh_int->can_change_editor_mode())
 				{
 					this->current_editor_mode_button->toggled = false;
@@ -73,7 +74,7 @@ int EditorGUI::get_panel_width()
 					button->toggled = true;
 					this->set_editor_mode(mode);
 				}
-			});
+			}));
 
 			return button;
 		};
@@ -109,33 +110,33 @@ int EditorGUI::get_panel_width()
 
 		// Right contains the small buttons
 
-		auto create_button = [right, this](const std::string& name, std::function<void(int)> on_click)
+		auto create_button = [right, this](const std::string& name, EventHandlerFnc on_click)
 		{
 			auto button = std::make_shared<GUIImageButton>();
 			button->set_image(vg, AssetHandle<Image>("core", name));
-			button->on_clicked.add_handler(on_click);
+			button->sign_up_for_event("on_click", EventHandler(on_click));
 			button->default_size = glm::ivec2(22, 22);
 			button->img_mode = GUIImageButton::CENTER;
 			right->layout->add_widget(button);
 		};
 
-		create_button("editor/new.png", [](int but)
+		create_button("editor/new.png", [](EventArguments& args)
 		{
 
 		});
-		create_button("editor/load.png", [](int but)
+		create_button("editor/load.png", [](EventArguments& args)
 		{
 
 		});
-		create_button("editor/save.png", [](int but)
+		create_button("editor/save.png", [](EventArguments& args)
 		{
 
 		});
-		create_button("editor/launch.png", [](int but)
+		create_button("editor/launch.png", [](EventArguments& args)
 		{
 
 		});
-		create_button("editor/quit.png", [](int but)
+		create_button("editor/quit.png", [](EventArguments& args)
 		{
 
 		});

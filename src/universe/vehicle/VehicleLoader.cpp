@@ -106,6 +106,7 @@ void VehicleLoader::obtain_parts(const cpptoml::table& root)
 				auto* m = new Machine(table, "core");
 				int id = *table->get_as<int>("__attached_machine_id");
 				n_part->attached_machines[id] = m;
+				m->in_part_id = "_attached_" + std::to_string(id);
 			}
 		}
 
