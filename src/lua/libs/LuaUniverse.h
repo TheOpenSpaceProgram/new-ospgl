@@ -2,61 +2,6 @@
 #include "../LuaLib.h"
 #include <universe/Universe.h>
 
-// So that the lua user doesn't have to manage
-// the lifetime of events
-// Regardless: the lua user must make sure the event handlers are stored somewhere
-// so they are not discarded by the GC
-struct LuaEventHandler
-{
-	EventEmitter* emitter;
-	EventHandler handler;
-	std::string event_id;
-	sol::reference* ref;
-
-	bool signed_up;
-
-	void sign_out()
-	{
-		if(signed_up)
-		{
-			signed_up = false;
-			emitter->drop_out_of_event(event_id, handler);
-			delete ref;
-		}
-	}
-
-	~LuaEventHandler()
-	{
-		sign_out();
-	}
-
-	LuaEventHandler()
-	{
-
-	}
-
-	LuaEventHandler(LuaEventHandler&& other)
-	{
-		emitter = other.emitter;
-		handler = other.handler;
-		event_id = other.event_id;
-		signed_up = other.signed_up;
-		ref = other.ref;
-		other.signed_up = false;
-	}
-
-	LuaEventHandler& operator=(LuaEventHandler&& other)
-	{
-		emitter = other.emitter;
-		handler = other.handler;
-		event_id = other.event_id;
-		signed_up = other.signed_up;
-		ref = other.ref;
-		other.signed_up = false;
-		return *this;
-	}	
-};
-
 
 // 
 // Events:

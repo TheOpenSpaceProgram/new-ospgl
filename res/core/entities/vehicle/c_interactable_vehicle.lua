@@ -108,10 +108,6 @@ function interactable_vehicle:close(k)
 	self.context_menus[k] = nil
 end
 
-function interactable_vehicle:build_main_canvas(k)
-	
-end
-
 
 ---@param gui gui.screen
 function interactable_vehicle:new_context_menus(gui) 
@@ -163,17 +159,47 @@ function interactable_vehicle:new_context_menus(gui)
 	local machine_bar, content = n_menu.window.canvas:divide_v_pixels(24 + 10)
 
 	local top_layout = guilib.horizontal_layout.new()
-	machine_bar:set_layout(top_layout)
+	machine_bar:set_layout(top_layout)	
 	
-	for _, machine in pairs(hovered_part.machines) do
+	n_menu.content = content
+
+	function n_menu:build_menu(machine)
+		local layout = guilib.vertical_layout.new()
+		self.buttons[machine].toggled = true
+		if self.active_button then
+			self.active_button.toggled = false
+		end
+
+		self.active_button = self.buttons[machine]
+
+
+		self.content:set_layout(layout)
+	end
+	
+	n_menu.buttons = {}
+	n_menu.handlers = dofile("core:util/c_events.lua")
+	local first_machine = nil
+	for _, machine in pairs(hovered_part.all_machines) do
+		if not first_machine then first_machine = machine end
+		-- We may store the machine freely
 		local button = guilib.image_button.new()
 		button.default_size = glm.vec2.new(24, 24)
 		button:set_image(machine:get_icon())
+		n_menu.handlers:add(button, "on_clicked", function (btn)
+			if btn == input.btn.left then
+				n_menu:build_menu(machine)
+			end
+		end)
 		top_layout:add_widget(button)
+
+		n_menu.buttons[machine] = button
 	end
+			
+	n_menu:build_menu(first_machine)
 
 	self.context_menus[hovered_p.id] = n_menu
 	self.part_context_menus[hovered_part.id] = n_menu
+	
 
 	-- Remove all others if CTRL is not held
 	if not input.key_pressed(input.key.left_control) then

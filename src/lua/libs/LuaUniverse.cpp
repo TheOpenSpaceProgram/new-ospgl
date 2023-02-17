@@ -3,54 +3,14 @@
 #include <utility>
 #include <universe/entity/Entity.h>
 #include <game/scenes/flight/InputContext.h>
+#include "LuaEvents.h"
 
 void LuaUniverse::load_to(sol::table& table)
 {
-	table.new_usertype<LuaEventHandler>("lua_event_handler",
-		"sign_out", &LuaEventHandler::sign_out
-	);
 
 	table.new_usertype<Universe>("universe",
-		"sign_up_for_event", [](Universe* self, const std::string& event_id, sol::protected_function fnc)
-		{
-			LuaEventHandler ev = LuaEventHandler();
-
-			ev.event_id = event_id;
-
-			auto ref = new sol::reference(std::move(fnc));
-			EventHandlerFnc wrapper = [ref](EventArguments& vec)
-			{
-				// Convert to lua values
-				sol::protected_function fnc = (sol::protected_function)(*ref);
-				// Handle errors, otherwise debugging could get very confusing!
-				auto result = fnc(sol::as_args(vec));
-				if(!result.valid())
-				{
-					sol::error err = result;
-					LuaUtil::lua_error_handler(fnc.lua_state(), err);
-				}
-			};
-
-			ev.handler = EventHandler();
-			ev.handler.fnc = wrapper;
-			ev.emitter = self;
-			ev.signed_up = true;
-			ev.ref = ref;
-			self->sign_up_for_event(event_id, ev.handler);
-
-
-			return std::move(ev);
-		},
-		"emit_event", [](Universe* self, const std::string& event_id, sol::variadic_args va)
-		{
-			EventArguments any_vec = EventArguments();
-			for(auto v : va)
-			{
-				any_vec.push_back(EventArgument(v));
-			}
-
-			self->emit_event(event_id, any_vec);
-		},
+		EVENT_EMITTER_SIGN_UP(Universe),
+		EVENT_EMITTER_EMIT(Universe),
 		"update", &Universe::update,
 		"bt_world", &Universe::bt_world,
 		"save_db", &Universe::save_db,

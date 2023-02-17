@@ -203,7 +203,8 @@ function piece:get_part() end
 
 ---@class vehicle.part
 ---@field id integer Unique id of the part. Guaranteed to be unique in the vehicle
----@field machines table<string, vehicle.machine> Don't hold for long as it may go outdated / machines may die
+---@field machines table<string, vehicle.machine> Don't hold for long as it may go outdated / machines may die. Doesn't include attached machines
+---@field all_machines table<string, vehicle.machine> Don't hold for long as it may go outdated / machines may die.
 local part = {}
 ---@return vehicle.piece
 ---@param name string

@@ -1,4 +1,7 @@
 #include "LuaGUI.h"
+#include "LuaEvents.h"
+#include <util/LuaUtil.h>
+
 #include "LuaAssets.h"
 #include <gui/GUISkin.h>
 #include <gui/skins/SimpleSkin.h>
@@ -91,7 +94,8 @@ void LuaGUI::load_to(sol::table &table)
 
 #define LAYOUT_HELPER sol::overload( \
 	&GUICanvas::set_layout_lua<GUISingleLayout>,\
-    &GUICanvas::set_layout_lua<GUIHorizontalLayout> \
+    &GUICanvas::set_layout_lua<GUIHorizontalLayout>, \
+    &GUICanvas::set_layout_lua<GUIVerticalLayout> \
     )
 
 	table.new_usertype<GUICanvas>("canvas",
@@ -183,18 +187,28 @@ void LuaGUI::load_to(sol::table &table)
 				LAYOUT_BASE(GUIHorizontalLayout),
 				"new", [](sol::optional<int> elem_margin){
 					return std::make_shared<GUIHorizontalLayout>(elem_margin.value_or(4)); });
+
+	table.new_usertype<GUIVerticalLayout>("vertical_layout",
+											sol::base_classes, sol::bases<GUILayout>(),
+											LAYOUT_BASE(GUIVerticalLayout),
+											"new", [](sol::optional<int> elem_margin){
+				return std::make_shared<GUIVerticalLayout>(elem_margin.value_or(4)); });
+
 #define WIDGET_BASE(cname) \
 	"default_size", sol::property([](const cname& self){ return (glm::dvec2)self.default_size; }, \
 	                              [](cname& self, glm::dvec2 val){ self.default_size = val; }),   \
     "is_visible", sol::readonly(&cname::is_visible)\
 
 	table.new_usertype<GUIImageButton>("image_button",
-		   sol::base_classes, sol::bases<GUIWidget>(),
+		   sol::base_classes, sol::bases<GUIWidget, GUIBaseButton>(),
 		   WIDGET_BASE(GUIImageButton),
+		   EVENT_EMITTER_SIGN_UP(GUIImageButton),
 		   "set_image", [](GUIImageButton& self, LuaAssetHandle<Image> handle)
 		   {
 				self.set_image(osp->renderer->vg, handle.get_asset_handle());
 		   },
+		   "disabled", &GUIImageButton::disabled,
+		   "toggled", &GUIImageButton::toggled,
 		   "new", [](){return std::make_shared<GUIImageButton>(); });
 }
 

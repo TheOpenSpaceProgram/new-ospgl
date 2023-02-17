@@ -160,6 +160,19 @@ gui.widget = {}
 ---@class gui.base_button:gui.widget
 gui.base_button = {}
 
+---@param event_id string
+---@param fun function
+---@return lua_event_handler
+--- Remember to store the returned event, as otherwise it will be removed and not receive events!
+--- Events:
+---    on_enter_hover()
+---    during_hover()
+---    on_leave_hover()
+---	   on_clicked(btn: integer)
+---	   during_click(btn: integer)
+---    on_released(btn: integer)
+function gui.base_button:sign_up_for_event(event_id, fun) end
+
 ---@class gui.image_button:gui.base_button
 gui.image_button = {}
 

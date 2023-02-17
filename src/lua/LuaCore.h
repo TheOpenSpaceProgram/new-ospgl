@@ -55,6 +55,7 @@ public:
 		MODEL,			// LuaModel
 		INPUT,			// LuaInput
 		ORBIT,			// LuaOrbit
+		EVENTS,			// LuaEvents
 		COUNT,
 	};
 

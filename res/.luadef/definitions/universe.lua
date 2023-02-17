@@ -1,9 +1,6 @@
 ---@meta 
 
 
----@class universe.lua_event_handler
-local lua_event_handler = {}
-function lua_event_handler:sign_out() end
 
 ---@class universe
 ---@field bt_world bullet.world
@@ -14,7 +11,8 @@ local universe = {}
 
 ---@param event_id string
 ---@param fun function
----@return universe.lua_event_handler
+---@return lua_event_handler
+--- Remember to store the returned event, as otherwise it will be removed and not receive events!
 function universe:sign_up_for_event(event_id, fun) end
 
 ---@param event_id string

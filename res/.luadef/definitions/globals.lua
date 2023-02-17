@@ -9,6 +9,8 @@
 --- Present pretty much everywhere that the engine loads. Not available on required files!
 osp = {}
 
-
+---@class lua_event_handler
+local lua_event_handler = {}
+function lua_event_handler:sign_out() end
 
 

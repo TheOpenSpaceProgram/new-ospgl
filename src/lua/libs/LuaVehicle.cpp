@@ -148,6 +148,7 @@ void LuaVehicle::load_to(sol::table& table)
 			return hnd;
 		},
 		"machines", &Part::machines,
+		"all_machines", sol::property([](Part* p){ return p->get_all_machines(); }),
 		"get_part_proto", [](Part* p)
 		 {
 			auto asset = p->part_proto.duplicate();
