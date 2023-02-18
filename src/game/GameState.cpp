@@ -178,6 +178,9 @@ void GameState::load_inner(cpptoml::table &from)
 	universe.system.update(0.0, universe.bt_world, false);
 	universe.system.update(0.0, universe.bt_world, true);
 
+	universe.piece_uid = *from.get_as<int64_t>("piece_uid");
+	universe.part_uid = *from.get_as<int64_t>("part_uid");
+
 	// Load entities
 	int64_t last_uid = *from.get_as<int64_t>("uid");
 	auto entities = from.get_table_array("entity");

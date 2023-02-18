@@ -49,6 +49,9 @@ private:
 
 	Piece* load_piece(const cpptoml::table& piece);
 
+	// Makes sure IDs are unique in the universe
+	void update_ids();
+
 public:
 
 	// Doesn't sort! This is so it can be used in the editor too

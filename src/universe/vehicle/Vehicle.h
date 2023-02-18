@@ -16,6 +16,7 @@
 #include "UnpackedVehicle.h"
 #include "PackedVehicle.h"
 #include "plumbing/VehiclePlumbing.h"
+#include <universe/Events.h>
 
 
 class VehicleLoader;
@@ -52,7 +53,36 @@ class VehicleLoader;
 // Takes ownership of all pieces, parts, machines...
 // They must be allocated in the heap because we delete them
 //
-class Vehicle
+// Emits the following events:
+// on_separate_vehicle(ent_id: integer) - Note: vehicle entity must implement separate_vehicle(veh: vehicle)
+//		Called when any piece is separated AND FORMS A NEW VEHICLE
+//		This is called after the vehicle is created, so you can use the returned entity
+//
+// on_separate_piece(piece: integer)
+// 		Called when any piece is lost from the vehicle by separation
+// 		If multiple pieces are lost, it's called for each one of them
+// 		This is called while the piece is still in the current vehicle (but not attached!)
+//
+// on_lost_piece(piece: integer)
+// 		Called when any piece is lost from the vehicle, be it by separation or destruction
+// 		If multiple pieces are lost, it's called for each one of them
+// 		This is called while the piece is still in the current vehicle (but not attached!)
+//
+// on_destroyed_piece(piece: integer)
+// 		Called when a piece is lost from the vehicle by destruction
+// 		If multiple pieces are lost, it's called for each one of them
+// 		This is called while the piece is still in the current vehicle, before deletion
+//
+// on_sort()
+//		Called BEFORE the vehicle is sorted, indices will be invalidated
+//
+// after_sort()
+// 		Called AFTER the vehicle is sorted
+//
+// Note: As piece / part IDs are unique in the whole universe, you may track separated pieces / parts with the
+// same ID as before, just search for them in separated vehicles. Storing direct pointers to parts / pieces is fine
+// as long as these are not destroyed. That's what on_destroyed_piece is for
+class Vehicle : EventEmitter
 {
 private:
 

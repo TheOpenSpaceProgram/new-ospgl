@@ -19,6 +19,7 @@ public:
 
 	Vehicle* vehicle;
 
+	// IDs are unique in the whole universe
 	int64_t id;
 	// -1 means no group (default group)
 	int64_t group_id;

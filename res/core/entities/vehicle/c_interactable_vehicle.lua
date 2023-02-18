@@ -100,7 +100,10 @@ function interactable_vehicle:update_hover(cu)
 	end
 	assert(piece, "Could not resolve piece, something's broken in vehicle!")
 
-	self.hovered = piece.id
+	-- Make sure the piece is in our vehicle and not another
+	if self.veh:get_piece_by_id(piece.id) then
+		self.hovered = piece.id
+	end
 
 end
 

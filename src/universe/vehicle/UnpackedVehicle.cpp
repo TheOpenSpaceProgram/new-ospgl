@@ -446,6 +446,17 @@ void UnpackedVehicle::add_piece(Piece* piece, btTransform pos)
 
 }
 
+void UnpackedVehicle::handle_piece_separated(Piece* p)
+{
+	vehicle->emit_event("on_separate_piece", p->id);
+	vehicle->emit_event("on_lost_piece", p->id);
+	// Make sure ids are not broken
+	vehicle->id_to_piece.erase(vehicle->id_to_piece.find(p->id));
+	if(p->part)
+		vehicle->id_to_part.erase(vehicle->id_to_part.find(p->part->id));
+
+}
+
 std::vector<Vehicle*> UnpackedVehicle::handle_separation()
 {
 	std::vector<Vehicle*> n_vehicles;
@@ -502,6 +513,7 @@ std::vector<Vehicle*> UnpackedVehicle::handle_separation()
 			n_pieces.push_back(std::vector<Piece*>());
 			n_pieces[n_pieces.size() - 1].push_back(p);
 
+			handle_piece_separated(p);
 			it = vehicle->all_pieces.erase(it);
 		}
 		else
@@ -515,9 +527,10 @@ std::vector<Vehicle*> UnpackedVehicle::handle_separation()
 					if (p->attached_to == sub_p)
 					{
 						list.push_back(p);
+						handle_piece_separated(p);
 						it = vehicle->all_pieces.erase(it);
-						removed = true;
 
+						removed = true;
 						// Lord, I'm sorry, but this is the cleanest option
 						goto out;
 					}
@@ -534,7 +547,6 @@ std::vector<Vehicle*> UnpackedVehicle::handle_separation()
 	}
 	
 	// Find welded groups to transfer
-
 	for (auto& n_vessel_pieces : n_pieces)
 	{
 		for (WeldedGroup* w : welded)
@@ -572,6 +584,7 @@ std::vector<Vehicle*> UnpackedVehicle::handle_separation()
 		n_vehicle->all_pieces = n_vessel_pieces;
 		n_vehicle->root = n_vessel_pieces[0];
 
+
 		for (WeldedGroup* w : wgroups)
 		{
 			for (size_t i = 0; i < w->pieces.size(); i++)
@@ -588,7 +601,23 @@ std::vector<Vehicle*> UnpackedVehicle::handle_separation()
 				}
 
 			}
+		}
 
+		// Make sure any pieces that had root part in other vehicle lose it
+		for(Piece* p : n_vessel_pieces)
+		{
+			p->in_vehicle = n_vehicle;
+			if(p->part)
+			{
+				if(p->part->pieces["p_root"] == p)
+				{
+					p->part->vehicle = n_vehicle;
+				}
+				else
+				{
+					p->part = nullptr;
+				}
+			}
 		}
 
 		n_vehicle->packed = false;
@@ -772,3 +801,4 @@ glm::dquat UnpackedVehicle::get_orientation(bool renderer)
 		return to_dquat(vehicle->root->rigid_body->getOrientation());
 	}
 }
+

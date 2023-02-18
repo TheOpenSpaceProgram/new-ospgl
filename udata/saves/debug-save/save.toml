@@ -6,6 +6,8 @@ packages = [
 ]
 
 uid = 1
+part_uid = 0
+piece_uid = 0
 t = 0.0
 system_package = "debug_system:systems/system.toml"
 system_version = "0.1.0"

@@ -44,6 +44,9 @@ private:
 	int64_t uid;
 
 public:
+	int64_t piece_uid;
+	int64_t part_uid;
+
 
 	SaveDatabase save_db;
 

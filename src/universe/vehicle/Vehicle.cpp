@@ -219,6 +219,8 @@ void Vehicle::update_attachments()
 
 void Vehicle::sort()
 {
+	emit_event("on_sort");
+
 	std::unordered_set<Piece*> open;
 
 	open.insert(root);
@@ -232,7 +234,6 @@ void Vehicle::sort()
 
 		for (Piece* o : open)
 		{
-
 			for (Piece* p : all_pieces)
 			{
 				if (p->attached_to == o)
@@ -250,6 +251,7 @@ void Vehicle::sort()
 	logger->check(sorted.size() == all_pieces.size(), "Vehicle was sorted while some pieces were not attached!");
 
 	all_pieces = sorted;
+	emit_event("after_sort");
 }
 
 

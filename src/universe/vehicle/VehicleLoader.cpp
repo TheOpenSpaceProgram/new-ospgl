@@ -299,6 +299,8 @@ VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to)
 	obtain_wires(root);
 	obtain_pipes(root);
 
+	update_ids();
+
 	n_vehicle->id_to_part = parts_by_id;
 	n_vehicle->id_to_piece = pieces_by_id;
 
@@ -357,7 +359,7 @@ void VehicleSaver::assign_ids(cpptoml::table& target, const Vehicle& what)
 		p->id = part_id;
 	}
 
-	// Internal numbers to guarantee unique IDs
+	// Internal numbers to guarantee unique IDs (in serialized case, local to vehicle)
 	target.insert("piece_id", piece_id);
 	target.insert("part_id", part_id);
 }
@@ -595,5 +597,25 @@ void VehicleSaver::write_pipes(cpptoml::table &target, const Vehicle &what)
 	}
 
 	target.insert("pipe", pipe_array);
+}
+
+void VehicleLoader::update_ids()
+{
+	std::unordered_map<int64_t, Part*> new_parts_by_id;
+	std::unordered_map<int64_t, Piece*> new_pieces_by_id;
+	for(auto& pair : pieces_by_id)
+	{
+		pair.second->id += osp->universe->piece_uid;
+		new_pieces_by_id[pair.second->id] = pair.second;
+	}
+
+	for(auto& pair : parts_by_id)
+	{
+		pair.second->id += osp->universe->part_uid;
+		new_parts_by_id[pair.second->id] = pair.second;
+	}
+
+	pieces_by_id = new_pieces_by_id;
+	parts_by_id = new_parts_by_id;
 }
 

@@ -18,6 +18,8 @@ public:
 private:
 
 	bool breaking_enabled;
+	void handle_piece_separated(Piece* p);
+
 public:
 	struct PieceState
 	{
