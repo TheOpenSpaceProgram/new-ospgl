@@ -223,6 +223,7 @@ function part:get_prototype() end
 ---@field init_toml toml.table
 ---@field plumbing vehicle.plumbing_machine
 ---@field in_part vehicle.part
+---@field interfaces table<string, table>
 local machine = {}
 
 ---@param iname string Name of the interface

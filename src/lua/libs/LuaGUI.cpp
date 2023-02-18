@@ -15,6 +15,7 @@
 #include <gui/widgets/GUIImageButton.h>
 #include <gui/widgets/GUITextButton.h>
 #include <gui/widgets/GUITextField.h>
+#include <gui/widgets/GUILabel.h>
 
 #include <renderer/Renderer.h>
 
@@ -166,7 +167,8 @@ void LuaGUI::load_to(sol::table &table)
 	&base::fun_name<GUIDropDown>,\
     &base::fun_name<GUIImageButton>, \
 	&base::fun_name<GUITextButton>, \
-	&base::fun_name<GUITextField>	\
+	&base::fun_name<GUITextField>, \
+	&base::fun_name<GUILabel>	\
     )
 
 #define LAYOUT_BASE(cname) \
@@ -225,6 +227,16 @@ void LuaGUI::load_to(sol::table &table)
 		   "center_horizontal", &GUITextButton::center_horizontal,
 		   "center_vertical", &GUITextButton::center_vertical,
 		   "new", [](const std::string& text){return std::make_shared<GUITextButton>(text); });
+
+	table.new_usertype<GUILabel>("label",
+		  sol::base_classes, sol::bases<GUIWidget>(),
+		  WIDGET_BASE(GUILabel),
+		  "text", &GUILabel::text,
+		  "override_color", &GUILabel::override_color,
+		  "color", &GUILabel::color,
+		  "center_horizontal", &GUILabel::center_horizontal,
+		  "center_vertical", &GUILabel::center_vertical,
+		  "new", [](const std::string& text){return std::make_shared<GUILabel>(text); });
 }
 
 LuaGUI::LuaGUI()

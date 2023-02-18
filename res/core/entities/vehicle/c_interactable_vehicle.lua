@@ -3,6 +3,9 @@
 -- with via all button clicks.
 -- Highly customizable, created around a vehicle entity
 -- Add as a drawable to the renderer
+-- For an interface to support being displayed in the context menus, it must expose a
+-- do_core_context_menu(self, layout: gui.vertical_layout) function
+
 local glm = require("glm")
 local input = require("input")
 local bullet = require("bullet")
@@ -145,7 +148,7 @@ function interactable_vehicle:new_context_menus(gui)
 	local pos = input.get_mouse_pos()
 	-- TODO: Find appropiate free location to spawn context menu
 	pos = pos + glm.vec2.new(90.0, 25.0)
-	size = glm.vec2.new(200.0, 400.0)
+	size = glm.vec2.new(300.0, 300.0)
 	n_menu.window = gui.win_manager:create_window(pos, size)
 	-- By default the window is a "tooltip" like, if you cut the link it becomes proper
 	n_menu.window.style = guilib.window_style.linked
@@ -163,6 +166,7 @@ function interactable_vehicle:new_context_menus(gui)
 	
 	n_menu.content = content
 
+	---@param machine vehicle.machine
 	function n_menu:build_menu(machine)
 		local layout = guilib.vertical_layout.new()
 		if self.active_button then
@@ -171,6 +175,12 @@ function interactable_vehicle:new_context_menus(gui)
 		self.buttons[machine].toggled = true
 
 		self.active_button = self.buttons[machine]
+
+		for name, interface in pairs(machine.interfaces) do
+			if interface.do_core_context_menu then
+				interface:do_core_context_menu(layout)
+			end
+		end
 
 		self.content:set_layout(layout)
 	end

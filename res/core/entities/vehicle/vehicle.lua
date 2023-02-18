@@ -78,7 +78,7 @@ function get_orientation(physics)
 end
 
 function separate_vehicle(veh)
-    osp.universe:create_entity("core:entities/vehicle.lua", veh)
+    osp.universe:create_entity("core:entities/vehicle/vehicle.lua", veh)
 end
 
 

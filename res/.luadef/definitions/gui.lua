@@ -173,6 +173,7 @@ gui.base_button = {}
 ---	   on_clicked(btn: integer)
 ---	   during_click(btn: integer)
 ---    on_released(btn: integer)
+---@nodiscard
 function gui.base_button:sign_up_for_event(event_id, fun) end
 
 ---@class gui.image_button:gui.base_button
@@ -196,6 +197,17 @@ gui.text_button = {}
 ---@return gui.text_button
 function gui.text_button.new(text) end
 
+---@class gui.label:gui.widget
+---@field text string
+---@field override_color boolean
+---@field color nano_vg.color
+---@field center_horizontal boolean
+---@field center_vertical boolean
+gui.label = {}
+
+---@param text string
+---@return gui.label
+function gui.label.new(text) end
 
 
 ---@class gui.layout

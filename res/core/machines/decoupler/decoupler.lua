@@ -37,8 +37,10 @@ local function decouple()
 end
 
 local activable = machine:load_interface("core:interfaces/activable.lua")
+activable.activate_string = "core:decouple"
 activable.on_activate = decouple 
 activable.deactivable = false
+activable:update_button()
 
 function update(dt)
 end

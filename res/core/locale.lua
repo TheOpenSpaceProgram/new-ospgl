@@ -2,6 +2,10 @@ local locale =
 {
 {"en", "es"},
 -- Some useful core words
+{"activate", "Activate", "Activar"},
+{"activable", "Activable", "Activable"},
+{"decouple", "Decouple", "Desacoplar"},
+{"deactivate", "Deactivate", "Desactivar"},
 {"inlet", "Inlet", "Entrada"},
 {"outlet", "Outlet", "Salida"},
 {"gas_inlet", "Gas Inlet", "Entrada de gases"},
