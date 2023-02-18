@@ -10,6 +10,12 @@ local container = {}
 ---@field root vehicle.piece
 container.vehicle = {}
 
+---@param event_id string
+---@param fun function
+---@return lua_event_handler
+--- Remember to store the returned event handler, as otherwise it will be removed and not receive events!
+function container.vehicle:sign_up_for_event(event_id, fun) end
+
 ---@return vehicle
 ---@nodiscard
 function container.vehicle.new() end

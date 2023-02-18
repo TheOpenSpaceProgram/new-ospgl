@@ -42,6 +42,14 @@ interactable_vehicle.context_menus = {}
 ---@type table<integer, core.context_menu>
 interactable_vehicle.part_context_menus = {}
 
+function interactable_vehicle:on_lost_piece(id)
+	local piece = self.veh:get_piece_by_id(id)
+	assert(piece)
+	if self.context_menus[id] then
+		self:close(id)
+	end
+end
+
 ---@param veh_ent universe.entity
 function interactable_vehicle:init(veh_ent) 
 	self.veh_ent = veh_ent
@@ -49,6 +57,7 @@ function interactable_vehicle:init(veh_ent)
 	assert(self.veh, "Linked entity was not a vehicle, this is not allowed")
 	--self.veh.on_change:add_handler(self.on_dirty, self)
 	self:on_veh_dirty()
+	self.sepp_event_handler = self.veh:sign_up_for_event("on_lost_piece", function(id) self:on_lost_piece(id) end)
 
 	return self
 end

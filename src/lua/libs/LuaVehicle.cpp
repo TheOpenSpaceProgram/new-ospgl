@@ -1,4 +1,5 @@
 #include "LuaVehicle.h"
+#include "LuaEvents.h"
 #include "../../universe/vehicle/Vehicle.h"
 #include "LuaAssets.h"
 
@@ -21,6 +22,7 @@ void LuaVehicle::load_to(sol::table& table)
 	table.new_usertype<Vehicle>("vehicle",
 		 // Returns a shared pointer so it's garbage collected by lua
 		 "new", [](){return std::make_shared<Vehicle>();},
+			EVENT_EMITTER_SIGN_UP(Vehicle),
 		 	"is_packed", &Vehicle::is_packed,
 		 	"packed", &Vehicle::packed_veh,
 		 	"unpacked", &Vehicle::unpacked_veh,

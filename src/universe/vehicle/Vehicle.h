@@ -82,7 +82,7 @@ class VehicleLoader;
 // Note: As piece / part IDs are unique in the whole universe, you may track separated pieces / parts with the
 // same ID as before, just search for them in separated vehicles. Storing direct pointers to parts / pieces is fine
 // as long as these are not destroyed. That's what on_destroyed_piece is for
-class Vehicle : EventEmitter
+class Vehicle : public EventEmitter
 {
 private:
 
