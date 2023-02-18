@@ -1,13 +1,9 @@
 #pragma once
-#include "../GUILayout.h"
+#include "GUILinearLayout.h"
 
 
-class GUIVerticalLayout : public GUILayout
+class GUIVerticalLayout : public GUILinearLayout
 {
-private:
-
-	int element_margin;
-
 public:
 
 

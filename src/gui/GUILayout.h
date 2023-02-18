@@ -39,8 +39,10 @@ public:
 	// Blocks the mouse if it's over the layout
 	bool block_mouse;
 
+	// Called with the widget already added
 	virtual void on_add_widget(GUIWidget* widget) {}
 
+	// Called before the widget is removed
 	virtual void on_remove_widget(GUIWidget* widget) {}
 
 	virtual void on_move_widget(GUIWidget* widget, int new_index) {}

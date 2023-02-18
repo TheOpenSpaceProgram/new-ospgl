@@ -4,7 +4,6 @@
 void GUILayout::add_widget(std::shared_ptr<GUIWidget> widget)
 {
 	widgets.push_back(widget);
-
 	on_add_widget(widget.get());
 }
 

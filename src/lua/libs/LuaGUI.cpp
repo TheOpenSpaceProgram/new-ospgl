@@ -185,12 +185,14 @@ void LuaGUI::load_to(sol::table &table)
 	table.new_usertype<GUIHorizontalLayout>("horizontal_layout",
 				sol::base_classes, sol::bases<GUILayout>(),
 				LAYOUT_BASE(GUIHorizontalLayout),
+				"mark_same_line", &GUIHorizontalLayout::mark_same_line,
 				"new", [](sol::optional<int> elem_margin){
 					return std::make_shared<GUIHorizontalLayout>(elem_margin.value_or(4)); });
 
 	table.new_usertype<GUIVerticalLayout>("vertical_layout",
 											sol::base_classes, sol::bases<GUILayout>(),
 											LAYOUT_BASE(GUIVerticalLayout),
+											"mark_same_line", &GUIVerticalLayout::mark_same_line,
 											"new", [](sol::optional<int> elem_margin){
 				return std::make_shared<GUIVerticalLayout>(elem_margin.value_or(4)); });
 
@@ -210,6 +212,19 @@ void LuaGUI::load_to(sol::table &table)
 		   "disabled", &GUIImageButton::disabled,
 		   "toggled", &GUIImageButton::toggled,
 		   "new", [](){return std::make_shared<GUIImageButton>(); });
+
+	table.new_usertype<GUITextButton>("text_button",
+		   sol::base_classes, sol::bases<GUIWidget, GUIBaseButton>(),
+		   WIDGET_BASE(GUITextButton),
+		   EVENT_EMITTER_SIGN_UP(GUITextButton),
+		   "disabled", &GUITextButton::disabled,
+		   "toggled", &GUITextButton::toggled,
+		   "text", &GUITextButton::text,
+		   "override_color", &GUITextButton::override_color,
+		   "color", &GUITextButton::color,
+		   "center_horizontal", &GUITextButton::center_horizontal,
+		   "center_vertical", &GUITextButton::center_vertical,
+		   "new", [](const std::string& text){return std::make_shared<GUITextButton>(text); });
 }
 
 LuaGUI::LuaGUI()

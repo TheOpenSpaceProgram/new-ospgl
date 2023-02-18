@@ -5,7 +5,7 @@
 
 
 // Useful while development to make sure assets are working correctly
-#define LUA_ASSET_DEBUG_ENABLED
+// #define LUA_ASSET_DEBUG_ENABLED
 
 /*
 	Lua functions to interact with the AssetManager subsystem,

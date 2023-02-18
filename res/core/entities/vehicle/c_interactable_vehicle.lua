@@ -165,13 +165,12 @@ function interactable_vehicle:new_context_menus(gui)
 
 	function n_menu:build_menu(machine)
 		local layout = guilib.vertical_layout.new()
-		self.buttons[machine].toggled = true
 		if self.active_button then
 			self.active_button.toggled = false
 		end
+		self.buttons[machine].toggled = true
 
 		self.active_button = self.buttons[machine]
-
 
 		self.content:set_layout(layout)
 	end
@@ -191,6 +190,7 @@ function interactable_vehicle:new_context_menus(gui)
 			end
 		end)
 		top_layout:add_widget(button)
+		--top_layout:mark_same_line()
 
 		n_menu.buttons[machine] = button
 	end

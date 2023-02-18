@@ -158,6 +158,8 @@ gui.window_style = {
 gui.widget = {}
 
 ---@class gui.base_button:gui.widget
+---@field disabled boolean
+---@field toggled boolean
 gui.base_button = {}
 
 ---@param event_id string
@@ -182,6 +184,20 @@ function gui.image_button:set_image(img) end
 ---@return gui.image_button
 function gui.image_button.new() end
 
+---@class gui.text_button:gui.base_button
+---@field text string
+---@field override_color boolean
+---@field color nano_vg.color
+---@field center_horizontal boolean
+---@field center_vertical boolean
+gui.text_button = {}
+
+---@param text string
+---@return gui.text_button
+function gui.text_button.new(text) end
+
+
+
 ---@class gui.layout
 ---@field margins glm.vec4
 gui.layout = {}
@@ -201,12 +217,22 @@ gui.single_layout = {}
 ---@class gui.vertical_layout:gui.layout
 gui.vertical_layout = {}
 
+---@param elem_margin? integer
+---@return gui.vertical_layout
+function gui.vertical_layout.new(elem_margin) end
+
+--- Marks next added element to be in the same-line.
+function gui.vertical_layout:mark_same_line() end
+
 ---@class gui.horizontal_layout:gui.layout
 gui.horizontal_layout = {}
 
 ---@param elem_margin? integer
 ---@return gui.horizontal_layout
 function gui.horizontal_layout.new(elem_margin) end
+
+--- Marks next added element to be in the same-line.
+function gui.horizontal_layout:mark_same_line() end
 
 ---@class gui.list_layout:gui.layout
 gui.list_layout = {}
