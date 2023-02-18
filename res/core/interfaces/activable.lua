@@ -30,6 +30,7 @@ end
 
 ---@param layout gui.vertical_layout
 function activable:do_core_context_menu(layout)
+	self:update_button()
 	layout:add_widget(self.ctx_menu_button)	
 end
 
