@@ -67,8 +67,9 @@ public:
 
 	virtual void draw_window(NVGcontext* vg, GUIWindow* window) = 0;
 
-	virtual void draw_link(NVGcontext* vg, glm::ivec2 link_start, glm::ivec2 win_pos) = 0;
-	virtual bool can_cut_link(NVGcontext* vg, glm::ivec2 link_start, glm::ivec2 win_pos) = 0;
+	virtual void draw_link(NVGcontext* vg, glm::ivec2 link_start, glm::ivec2 win_pos, glm::ivec2 win_size,
+						   glm::ivec2 mpos, bool cutable) = 0;
+	virtual bool can_cut_link(glm::ivec2 link_start, glm::ivec2 win_pos, glm::ivec2 win_size, glm::ivec2 mpos) = 0;
 
 	// These functions are meant so stylize advanced widgest, such as the plumbing editor
 	virtual NVGcolor get_background_color(bool bright = false) = 0;

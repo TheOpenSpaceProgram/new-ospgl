@@ -6,6 +6,20 @@ local gui = {}
 ---@class gui.skin
 gui.skin = {}
 
+---@param start_pos glm.vec2
+---@param win_pos glm.vec2
+---@param win_size glm.vec2
+---@param mpos glm.vec2
+---@param cutable boolean
+function gui.skin:draw_link(start_pos, win_pos, win_size, mpos, cutable) end
+
+---@param start_pos glm.vec2
+---@param win_pos glm.vec2
+---@param win_size glm.vec2
+---@param mpos glm.vec2
+---@return boolean
+function gui.skin:can_cut_link(start_pos, win_pos, win_size, mpos) end
+
 ---@return nano_vg.color
 ---@param soft boolean
 function gui.skin:get_foreground_color(soft) end

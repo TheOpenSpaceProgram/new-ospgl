@@ -25,8 +25,12 @@ void LuaGUI::load_to(sol::table &table)
 	table.new_usertype<GUISkin>("skin",
 		"get_foreground_color", &GUISkin::get_foreground_color,
 		"get_background_color", &GUISkin::get_background_color,
-		"draw_link", [](GUISkin* self, glm::dvec2 start_pos, glm::dvec2 win_pos){
-			self->draw_link(osp->renderer->vg, start_pos, win_pos);},
+		"draw_link", [](GUISkin* self, glm::dvec2 start_pos, glm::dvec2 win_pos, glm::dvec2 win_size,
+				glm::dvec2 mpos, bool cutable){
+			self->draw_link(osp->renderer->vg, start_pos, win_pos, win_size, mpos, cutable);},
+		"can_cut_link", [](GUISkin* self, glm::dvec2 start_pos, glm::dvec2 win_pos, glm::dvec2 win_size,
+				glm::dvec2 mpos){
+				return self->can_cut_link(start_pos, win_pos, win_size, mpos);},
 		"get_default_skin", []()
 		{
 			return (std::shared_ptr<GUISkin>)std::make_shared<SimpleSkin>();

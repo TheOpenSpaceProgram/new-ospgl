@@ -328,15 +328,6 @@ void SimpleSkin::draw_window(NVGcontext* vg, GUIWindow* window)
 		}
 
 	}
-
-	if(window->style == GUISkin::WindowStyle::LINKED)
-	{
-		// Draw linkage point
-		nvgBeginPath(vg);
-		nvgRect(vg, title_tl.x - 10.0, title_tl.y, 10.0, 10.0);
-		nvgFillColor(vg, get_foreground_color());
-		nvgFill(vg);
-	}
 }
 
 
@@ -493,25 +484,92 @@ NVGcolor SimpleSkin::get_button_color(GUISkin::ButtonState state)
 	return nvgRGB(255, 0, 255);
 }
 
-void SimpleSkin::draw_link(NVGcontext *vg, glm::ivec2 link_start, glm::ivec2 win_pos)
+void SimpleSkin::draw_link(NVGcontext *vg, glm::ivec2 link_start, glm::ivec2 win_pos, glm::ivec2 win_size,
+						   glm::ivec2 mpos, bool cutable)
 {
 	float side_size = window_margins + window_edge_size;
 	glm::vec2 title_tl = glm::vec2(win_pos.x - side_size, win_pos.y - titlebar_height - side_size) + 0.5f;
+	glm::vec2 title_tr = glm::vec2(win_pos.x + win_size.x, win_pos.y - titlebar_height - side_size) + 0.5f;
+	glm::vec2 title_trb = glm::vec2(win_pos.x + win_size.x + side_size, win_pos.y - titlebar_height) + 0.5f;
+
 	nvgStrokeWidth(vg, 5.0);
 	nvgStrokeColor(vg, get_foreground_color());
 	nvgFillColor(vg, get_foreground_color());
-	nvgBeginPath(vg);
-	nvgMoveTo(vg, link_start.x, link_start.y);
-	nvgLineTo(vg, title_tl.x - 5.0, title_tl.y + 5.0);
-	nvgStroke(vg);
+
+	glm::ivec2 end_pos;
+	bool left = false;
+	if(link_start.x < title_tl.x)
+	{
+		end_pos = glm::ivec2(title_tl.x - 5, title_tl.y + 5);
+		left = true;
+	}
+	else
+	{
+		end_pos = glm::ivec2(title_tr.x + 5, title_tr.y + 5);
+	}
+
+	if(cutable && can_cut_link(link_start, win_pos, win_size, mpos))
+	{
+		// Line in two halves
+		float dist = glm::distance((glm::vec2)link_start, (glm::vec2)end_pos);
+		float fac1 = (dist - 20.0f) / dist;
+		glm::ivec2 half_way1 = (glm::vec2)link_start * (1.0f - fac1) + (glm::vec2)end_pos * fac1;
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, link_start.x, link_start.y);
+		nvgLineTo(vg, half_way1.x, half_way1.y);
+		nvgStroke(vg);
+
+		// Cut symbol
+	}
+	else
+	{
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, link_start.x, link_start.y);
+		nvgLineTo(vg, end_pos.x, end_pos.y);
+		nvgStroke(vg);
+	}
+
+
 	nvgBeginPath(vg);
 	nvgRect(vg, link_start.x - 5.0, link_start.y - 5.0, 10.0, 10.0);
 	nvgFill(vg);
+
+	// Draw linkage point
+	nvgBeginPath(vg);
+	if(left)
+	{
+		nvgRect(vg, end_pos.x - 5.0, end_pos.y - 5.0, 10.0, 10.0);
+	}
+	else
+	{
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, title_tr.x, title_tr.y);
+		nvgLineTo(vg, title_trb.x, title_tr.y);
+		nvgLineTo(vg, title_trb.x, title_trb.y);
+		nvgClosePath(vg);
+	}
+	nvgFill(vg);
 }
 
-bool SimpleSkin::can_cut_link(NVGcontext *vg, glm::ivec2 link_start, glm::ivec2 win_pos)
+bool SimpleSkin::can_cut_link(glm::ivec2 link_start, glm::ivec2 win_pos, glm::ivec2 win_size, glm::ivec2 mpos)
 {
-	return false;
+	float side_size = window_margins + window_edge_size;
+	glm::vec2 title_tl = glm::vec2(win_pos.x - side_size, win_pos.y - titlebar_height - side_size) + 0.5f;
+	glm::vec2 title_tr = glm::vec2(win_pos.x + win_size.x, win_pos.y - titlebar_height - side_size) + 0.5f;
+	glm::vec2 title_trb = glm::vec2(win_pos.x + win_size.x + side_size, win_pos.y - titlebar_height) + 0.5f;
+
+	glm::ivec2 end_pos;
+	if(link_start.x < title_tl.x)
+		end_pos = glm::ivec2(title_tl.x - 5, title_tl.y + 5);
+	else
+		end_pos = glm::ivec2(title_tr.x + 5, title_tr.y + 5);
+
+	float dist = glm::distance((glm::vec2)link_start, (glm::vec2)end_pos);
+	float fac1 = (dist - 20.0f) / dist;
+	glm::ivec2 half_way1 = (glm::vec2)link_start * (1.0f - fac1) + (glm::vec2)end_pos * fac1;
+	dist = glm::distance((glm::vec2)half_way1, (glm::vec2)mpos);
+
+	return dist < 20.0f;
 }
 
 int SimpleSkin::get_scrollbar_width()

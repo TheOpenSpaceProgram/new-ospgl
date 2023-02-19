@@ -22,6 +22,8 @@ local mat_override = model.mat_override.from_table({color = glm.vec3.new(1, 1, 1
 ---@class core.context_menu
 ---@field window gui.window
 ---@field part_id integer
+---@field last_pos_2d glm.vec2|nil
+---@field was_link_blocked boolean
 
 ---@class core.interactable_vehicle
 local interactable_vehicle = {}
@@ -130,8 +132,8 @@ function interactable_vehicle:new_context_menus(gui)
 	if self.hovered < 0 then  
 		-- A click in empty space may actually hide dialogs
 		if input.key_pressed(input.key.left_control) then return end
-		for k, _ in pairs(self.context_menus) do 
-			self:close(k)
+		for k, menu in pairs(self.context_menus) do 
+			if menu.window.style == guilib.window_style.linked then self:close(k) end
 		end
 		return
 	end
@@ -235,8 +237,8 @@ function interactable_vehicle:new_context_menus(gui)
 
 	-- Remove all others if CTRL is not held
 	if not input.key_pressed(input.key.left_control) then
-		for k, _ in pairs(self.context_menus) do 
-			if k ~= self.hovered then 
+		for k, menu in pairs(self.context_menus) do 
+			if k ~= self.hovered and menu.window.style == guilib.window_style.linked then 
 				self:close(k)
 			end
 		end
@@ -245,15 +247,33 @@ function interactable_vehicle:new_context_menus(gui)
 end
 
 ---@param menu core.context_menu
+---@param gui gui.screen
 function interactable_vehicle:update_context_menu(p_id, menu, dt, gui) 
 	if not menu.window:is_open() then
-		self.context_menus[p_id] = nil
+		self:close(p_id)
 		return
 	end
 	
 	if menu.highlight_timer > 0.0 then
 		menu.highlight_timer = menu.highlight_timer - dt * 10.0
 	else 
+
+	-- Link cutting
+	if menu.window.style == guilib.window_style.linked and menu.last_pos_2d then
+		local can_cut = gui.skin:can_cut_link(menu.last_pos_2d, menu.window.pos, 
+				menu.window.size, input.get_mouse_pos())
+		local blocked = gui.input.mouse_blocked or gui.input.ext_keyboard_blocked
+		menu.was_link_blocked = blocked
+		if can_cut and not blocked then
+			if input.mouse_down(input.btn.left) then	
+				menu.window.style = guilib.window_style.normal
+				menu.window.closeable = true
+				menu.window.pinable = true
+				menu.window.minimizable = true
+			end
+			gui.input.ext_mouse_blocked = true
+		end
+	end
 	
 	end
 
@@ -274,15 +294,20 @@ function interactable_vehicle:draw_gui(gui, cu)
 		assert(p)
 		local p_pos_3d = p:get_graphics_position() - cu.cam_pos
 		local p_pos_2d, front = glm.world_to_clip(cu.proj_view, p_pos_3d)
-		if front then
+		if front and menu.window.style == guilib.window_style.linked then
 			p_pos_2d = glm.clip_to_screen(p_pos_2d, gui.viewport)
-			gui.skin:draw_link(p_pos_2d, menu.window.pos)
+			menu.last_pos_2d = p_pos_2d
+			gui.skin:draw_link(p_pos_2d, menu.window.pos, menu.window.size, input.get_mouse_pos(), not menu.was_link_blocked)
 		end
 	end
 end
 
 ---@param gui gui.screen
 function interactable_vehicle:update(dt, gui)
+	for p_id, menu in pairs(self.context_menus) do 
+		self:update_context_menu(p_id, menu, dt, gui)
+	end
+	
 	-- Prevent hovering if mouse is blocked, this effectively blocks everything else
 	if gui.input.mouse_blocked or gui_input.ext_mouse_blocked then
 		self.hovered = -1
@@ -291,9 +316,6 @@ function interactable_vehicle:update(dt, gui)
 
 	-- Bring up context menus
 	self:new_context_menus(gui)
-	for p_id, menu in pairs(self.context_menus) do 
-		self:update_context_menu(p_id, menu, dt, gui)
-	end
 
 end
 

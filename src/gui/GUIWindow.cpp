@@ -3,13 +3,13 @@
 
 void GUIWindow::position(GUIScreen *screen, GUISkin *skin)
 {
+	pos = next_pos;
+	size = next_size;
+
 	if(is_minimized())
 	{
 		return;
 	}
-
-	pos = next_pos;
-	size = next_size;
 
 	canvas->position_widgets(pos, size, screen);
 }
