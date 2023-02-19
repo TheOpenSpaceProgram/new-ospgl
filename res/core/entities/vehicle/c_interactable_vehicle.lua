@@ -24,6 +24,7 @@ local mat_override = model.mat_override.from_table({color = glm.vec3.new(1, 1, 1
 ---@field part_id integer
 ---@field last_pos_2d glm.vec2|nil
 ---@field was_link_blocked boolean
+---@field piece_id integer
 
 ---@class core.interactable_vehicle
 local interactable_vehicle = {}
@@ -44,11 +45,24 @@ interactable_vehicle.context_menus = {}
 ---@type table<integer, core.context_menu>
 interactable_vehicle.part_context_menus = {}
 
+--- Stores active cut menus
+---@type core.context_menu[]
+interactable_vehicle.free_menus = {}
+
 function interactable_vehicle:on_lost_piece(id)
 	local piece = self.veh:get_piece_by_id(id)
 	assert(piece)
 	if self.context_menus[id] then
 		self:close(id)
+	end
+	-- It may also be a free-standing menu
+	-- We iterate in reverse to prevent skipping elements
+	for i = #self.free_menus,1,-1 do
+		local menu = self.free_menus[i]
+		if menu.piece_id == id then
+			menu.window:close()
+			table.remove(self.free_menus, i)
+		end
 	end
 end
 
@@ -133,7 +147,7 @@ function interactable_vehicle:new_context_menus(gui)
 		-- A click in empty space may actually hide dialogs
 		if input.key_pressed(input.key.left_control) then return end
 		for k, menu in pairs(self.context_menus) do 
-			if menu.window.style == guilib.window_style.linked then self:close(k) end
+			self:close(k)
 		end
 		return
 	end
@@ -172,6 +186,7 @@ function interactable_vehicle:new_context_menus(gui)
 	n_menu.window.closeable = false
 	n_menu.window.pinable = false
 	n_menu.window.alpha = 0.5
+	n_menu.piece_id = hovered_p.id
 	n_menu.part_id = hovered_part.id
 	local machine_bar, content = n_menu.window.canvas:divide_v_pixels(24 + 10)
 
@@ -238,7 +253,7 @@ function interactable_vehicle:new_context_menus(gui)
 	-- Remove all others if CTRL is not held
 	if not input.key_pressed(input.key.left_control) then
 		for k, menu in pairs(self.context_menus) do 
-			if k ~= self.hovered and menu.window.style == guilib.window_style.linked then 
+			if k ~= self.hovered then 
 				self:close(k)
 			end
 		end
@@ -259,7 +274,7 @@ function interactable_vehicle:update_context_menu(p_id, menu, dt, gui)
 	else 
 
 	-- Link cutting
-	if menu.window.style == guilib.window_style.linked and menu.last_pos_2d then
+	if menu.last_pos_2d then
 		local can_cut = gui.skin:can_cut_link(menu.last_pos_2d, menu.window.pos, 
 				menu.window.size, input.get_mouse_pos())
 		local blocked = gui.input.mouse_blocked or gui.input.ext_keyboard_blocked
@@ -270,6 +285,12 @@ function interactable_vehicle:update_context_menu(p_id, menu, dt, gui)
 				menu.window.closeable = true
 				menu.window.pinable = true
 				menu.window.minimizable = true
+				-- Move to free standing menus
+				local hovered_part = self.veh:get_piece_by_id(p_id):get_part()
+				assert(hovered_part)
+				self.part_context_menus[hovered_part.id] = nil
+				self.context_menus[p_id] = nil
+				table.insert(self.free_menus, menu)
 			end
 			gui.input.ext_mouse_blocked = true
 		end
@@ -294,7 +315,7 @@ function interactable_vehicle:draw_gui(gui, cu)
 		assert(p)
 		local p_pos_3d = p:get_graphics_position() - cu.cam_pos
 		local p_pos_2d, front = glm.world_to_clip(cu.proj_view, p_pos_3d)
-		if front and menu.window.style == guilib.window_style.linked then
+		if front then
 			p_pos_2d = glm.clip_to_screen(p_pos_2d, gui.viewport)
 			menu.last_pos_2d = p_pos_2d
 			gui.skin:draw_link(p_pos_2d, menu.window.pos, menu.window.size, input.get_mouse_pos(), not menu.was_link_blocked)
