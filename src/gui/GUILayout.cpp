@@ -143,14 +143,19 @@ void GUILayout::draw_hscrollbar(NVGcontext *vg, GUISkin* skin)
 	if(hscrollbar.positive_pos)
 		y = (float)size.y - (float)hscrollbar.get_width(skin);
 
+	float scroll_w = (float)size.x * (float)size.x / (float)hscrollbar.max_scroll;
+	float scroll_x = (float)(size.x - scroll_w) * (float)hscrollbar.scroll / ((float)hscrollbar.max_scroll - size.x);
+	if(scroll_w > size.x)
+	{
+		// No need to show scrollbar
+		return;
+		//scroll_w = size.x;
+	}
+
 	nvgBeginPath(vg);
 	nvgRect(vg, pos.x, y + pos.y, size.x, (float)hscrollbar.get_width(skin));
 	nvgFillColor(vg, hscrollbar.get_color(skin));
 	nvgFill(vg);
-	float scroll_w = (float)size.x * (float)size.x / (float)hscrollbar.max_scroll;
-	float scroll_x = (float)(size.x - scroll_w) * (float)hscrollbar.scroll / ((float)hscrollbar.max_scroll - size.x);
-	if(scroll_w > size.x)
-		scroll_w = size.x;
 
 	nvgBeginPath(vg);
 	nvgRect(vg, pos.x + scroll_x, pos.y + y, scroll_w, (float)hscrollbar.get_width(skin));
@@ -166,14 +171,19 @@ void GUILayout::draw_vscrollbar(NVGcontext* vg, GUISkin* skin)
 	if(vscrollbar.positive_pos)
 		x = (float)size.x - (float)vscrollbar.get_width(skin);
 
+	float scroll_h = (float)size.y * (float)size.y / (float)vscrollbar.max_scroll;
+	float scroll_y = (float)(size.y - scroll_h) * (float)vscrollbar.scroll / ((float)vscrollbar.max_scroll - size.y);
+	if(scroll_h > size.y)
+	{
+		// No need to show scrollbar
+		return;
+		//scroll_h = size.y;
+	}
+
 	nvgBeginPath(vg);
 	nvgRect(vg, x + pos.x, pos.y, (float)vscrollbar.get_width(skin), (float)size.y);
 	nvgFillColor(vg, vscrollbar.get_color(skin));
 	nvgFill(vg);
-	float scroll_h = (float)size.y * (float)size.y / (float)vscrollbar.max_scroll;
-	float scroll_y = (float)(size.y - scroll_h) * (float)vscrollbar.scroll / ((float)vscrollbar.max_scroll - size.y);
-	if(scroll_h > size.y)
-		scroll_h = size.y;
 
 	nvgBeginPath(vg);
 	nvgRect(vg, x + pos.x, pos.y + scroll_y, (float)vscrollbar.get_width(skin), scroll_h);

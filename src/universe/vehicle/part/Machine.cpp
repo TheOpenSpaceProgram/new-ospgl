@@ -252,3 +252,8 @@ bool Machine::draw_imgui()
 
 	return tval;
 }
+
+std::string Machine::get_display_name()
+{
+	return LuaUtil::call_function_if_present_returns<std::string>(env["get_display_name"]).value_or(get_id());
+}

@@ -197,12 +197,19 @@ gui.text_button = {}
 ---@return gui.text_button
 function gui.text_button.new(text) end
 
+---@enum gui.label_style
+gui.label_style = {
+	title = 0,
+	separator = 1
+}
+
 ---@class gui.label:gui.widget
 ---@field text string
 ---@field override_color boolean
 ---@field color nano_vg.color
 ---@field center_horizontal boolean
 ---@field center_vertical boolean
+---@field style gui.label_style
 gui.label = {}
 
 ---@param text string
@@ -211,7 +218,7 @@ function gui.label.new(text) end
 
 
 ---@class gui.layout
----@field margins glm.vec4
+---@field margins glm.vec4 Note: You may not modify it directly for implementation reasons, make a copy and then assign!
 gui.layout = {}
 
 ---@param widget gui.widget

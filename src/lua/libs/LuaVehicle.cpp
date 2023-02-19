@@ -165,6 +165,7 @@ void LuaVehicle::load_to(sol::table& table)
 		"in_part", &Machine::in_part,
 		"interfaces", &Machine::interfaces,
 		"draw_imgui", &Machine::draw_imgui,
+		"get_display_name", &Machine::get_display_name,
 		"get_icon", [](Machine& self){ return LuaAssetHandle(self.get_icon());},
 		"load_interface", [](Machine* self, const std::string& iname, sol::this_state tst, sol::this_environment tenv)
 		{

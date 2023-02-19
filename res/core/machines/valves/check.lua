@@ -7,6 +7,9 @@ local assets = require("assets")
 local icon = assets.get_image("machines/icons/valve.png")
 function get_icon() return icon end
 
+local display_name = osp.game_database:get_string("core:1_way_name")
+function get_display_name() return display_name end
+
 plumbing = {}
 
 function plumbing.fluid_update()

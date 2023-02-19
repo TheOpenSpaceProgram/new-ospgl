@@ -11,6 +11,8 @@ function get_icon() return icon end
 local force = machine.init_toml:get_number("force")
 local d_point = machine.init_toml:get_string("decoupling_point")
 
+local display_name = osp.game_database:get_string("core:decoupler")
+function get_display_name() return display_name end
 
 local function decouple()
 	local root = machine.in_part:get_piece("p_root")

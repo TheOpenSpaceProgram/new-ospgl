@@ -10,6 +10,9 @@ function get_input_context()
 	return input_ctx
 end 
 
+local display_name = osp.game_database:get_string("core:capsule")
+function get_display_name() return display_name end
+
 local t = 0.0
 
 -- pre_update is used because we manage inputs

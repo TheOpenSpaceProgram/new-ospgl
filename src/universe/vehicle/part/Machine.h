@@ -81,6 +81,9 @@ public:
 	std::string get_pkg();
 	std::string get_name();
 	std::string get_id();
+
+	std::string get_display_name();
+
 	// Don't create your own window in lua! We create a standard named one
 	// Returns wether we are still open
 	bool draw_imgui();

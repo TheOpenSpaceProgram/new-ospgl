@@ -7,6 +7,9 @@ local imgui = require("imgui")
 local icon = assets.get_image("machines/icons/fluid_tank.png")
 function get_icon() return icon end
 
+local display_name = osp.game_database:get_string("core:generic_tank")
+function get_display_name() return display_name end
+
 plumbing = dofile("machines/fuel_tank/c_plumbing.lua")
 
 local debug_pause = false

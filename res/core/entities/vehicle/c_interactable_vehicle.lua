@@ -181,12 +181,22 @@ function interactable_vehicle:new_context_menus(gui)
 	---@param machine vehicle.machine
 	function n_menu:build_menu(machine)
 		local layout = guilib.vertical_layout.new()
+		-- We achieve a more compact look by using this
+		local m = layout.margins
+		m.z = m.z - 8
+		layout.margins = m
+		
 		if self.active_button then
 			self.active_button.toggled = false
 		end
 		self.buttons[machine].toggled = true
 
 		self.active_button = self.buttons[machine]
+
+		-- Add title
+		local title = guilib.label.new(machine:get_display_name())
+		title.style = guilib.label_style.separator
+		layout:add_widget(title)
 
 		for name, interface in pairs(machine.interfaces) do
 			if interface.do_core_context_menu then

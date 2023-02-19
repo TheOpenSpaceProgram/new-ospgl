@@ -234,9 +234,14 @@ void LuaGUI::load_to(sol::table &table)
 		  "text", &GUILabel::text,
 		  "override_color", &GUILabel::override_color,
 		  "color", &GUILabel::color,
+		  "style", &GUILabel::style,
 		  "center_horizontal", &GUILabel::center_horizontal,
 		  "center_vertical", &GUILabel::center_vertical,
 		  "new", [](const std::string& text){return std::make_shared<GUILabel>(text); });
+
+	table.new_enum("label_style",
+		   "title", GUILabel::LabelStyle::TITLE,
+		   "separator", GUILabel::LabelStyle::SEPARATOR);
 }
 
 LuaGUI::LuaGUI()

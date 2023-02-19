@@ -7,12 +7,20 @@ private:
 	std::string ft_font;
 	float ft_size;
 public:
+
+	enum LabelStyle
+	{
+		TITLE,
+		SEPARATOR
+	};
+
 	bool override_color = false;
 	NVGcolor color;
 
 	std::string text;
 	bool center_vertical = true;
 	bool center_horizontal = true;
+	LabelStyle style = LabelStyle::TITLE;
 
 	void prepare(glm::ivec4 viewport, GUIScreen* screen, GUIInput* gui_input) override;
 	glm::ivec2 position(glm::ivec2 wpos, glm::ivec2 wsize, GUIScreen* screen) override;

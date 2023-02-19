@@ -9,6 +9,9 @@ local icon = assets.get_image("machines/icons/valve.png")
 local imgui = require("imgui")
 function get_icon() return icon end
 
+local display_name = osp.game_database:get_string("core:shutoff_name")
+function get_display_name() return display_name end
+
 plumbing = {}
 
 local open = false

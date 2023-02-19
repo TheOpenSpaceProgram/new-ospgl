@@ -263,6 +263,9 @@ function machine:get_interface(iname) end
 ---@return assets.image_handle
 function machine:get_icon() end
 
+---@return string
+function machine:get_display_name() end
+
 ---@class vehicle.part_prototype
 ---@field name string Presented ready to display, no need to localize (it's done in load time)
 local part_prototype = {}

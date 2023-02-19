@@ -12,6 +12,9 @@ glm::ivec2 GUILabel::position(glm::ivec2 wpos, glm::ivec2 wsize, GUIScreen* scre
 
 void GUILabel::draw(NVGcontext* vg, GUISkin* skin)
 {
+	glm::ivec2 opos = pos;
+	glm::ivec2 osize = size;
+
 	if(override_color)
 	{
 		nvgFillColor(vg, color);
@@ -27,7 +30,7 @@ void GUILabel::draw(NVGcontext* vg, GUISkin* skin)
 	float asc, desc, lh, lwidth = size.x - 10.0f;
 	nvgTextMetrics(vg, &asc, &desc, &lh);
 	float bounds[4];
-	if(center_horizontal || center_vertical)
+	if(center_horizontal || center_vertical || style == LabelStyle::SEPARATOR)
 	{
 		nvgTextBoxBounds(vg, pos.x + 6.0f, pos.y, lwidth, text.c_str(), nullptr, bounds);
 	}
@@ -44,5 +47,20 @@ void GUILabel::draw(NVGcontext* vg, GUISkin* skin)
 	pos.x = glm::round(pos.x);
 	pos.y = glm::round(pos.y);
 	nvgTextBox(vg, pos.x + 6.0f, pos.y, lwidth, text.c_str(), nullptr);
+
+	if(style == LabelStyle::SEPARATOR)
+	{
+		// Draw lines around the text
+		nvgBeginPath(vg);
+		nvgStrokeWidth(vg, 5.0f);
+		nvgStrokeColor(vg, skin->get_foreground_color());
+		float line_y = pos.y + 0.5f * (bounds[3] - bounds[1]);
+		nvgMoveTo(vg, opos.x, line_y);
+		nvgLineTo(vg, pos.x - 5.0f,  line_y);
+		nvgMoveTo(vg, opos.x + osize.x, line_y);
+		float line_x = pos.x + (bounds[2] - bounds[0]) + 12.0f + 5.0f;
+		nvgLineTo(vg, line_x, line_y);
+		nvgStroke(vg);
+	}
 
 }

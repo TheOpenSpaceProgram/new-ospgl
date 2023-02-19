@@ -516,7 +516,7 @@ bool SimpleSkin::can_cut_link(NVGcontext *vg, glm::ivec2 link_start, glm::ivec2 
 
 int SimpleSkin::get_scrollbar_width()
 {
-	return 4;
+	return 2;
 }
 
 NVGcolor SimpleSkin::get_scrollbar_color()
