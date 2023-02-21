@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.3)
+cmake_minimum_required (VERSION 3.14)
 
 # Define basic compiler and CMake configuration
 
@@ -38,12 +38,23 @@ if(OSPGL_STACKTRACES)
 	add_definitions(-DOSPGL_STACKTRACES=1)
 endif()
 
-add_definitions(-DLUAJIT_ENABLE_LUA52COMPAT)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(MACOS TRUE)
+endif() 
 
 if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	add_definitions(-D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
 	target_compile_options(OSPGL PUBLIC /bigobj)
+elseif(MACOS)
+	target_compile_options(OSPGL PUBLIC -g -Werror -O0)
+	set(EXTRA_LINK "stdc++fs")
+	if(OSPGL_STACKTRACES)
+		add_definitions(-DBACKWARD_HAS_DW=1)
+		set(STACKTRACE_LINK "dw")
+	endif()
+
+	link_libraries(${CMAKE_DL_LIBS})
 else()
 	target_compile_options(OSPGL PUBLIC -g -Werror -O0)
 	set(EXTRA_LINK "stdc++fs")
@@ -81,7 +92,22 @@ target_link_libraries(OSPGL ${CMAKE_THREAD_LIBS_INIT})
 
 # LuaJIT 
 
-add_subdirectory(dep/LuaJIT-cmake)
+include(ExternalProject)
+ExternalProject_Add(project_luajit
+  SOURCE_DIR "./dep/LuaJIT/"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND MACOSX_DEPLOYMENT_TARGET=13.00 make
+  BUILD_IN_SOURCE true
+  INSTALL_COMMAND ""
+)
+ExternalProject_Get_Property(project_luajit SOURCE_DIR)
+message("+++++" ${SOURCE_DIR})
+add_library(luajit STATIC IMPORTED)
+set_property(TARGET luajit PROPERTY IMPORTED_LOCATION ${SOURCE_DIR}/src/libluajit.a)
+add_dependencies(luajit project_luajit)
+include_directories(${SOURCE_DIR}/src)
+target_link_libraries(${PROJECT_NAME} luajit)
+target_link_libraries(${PROJECT_NAME} ${SOURCE_DIR}/src/libluajit.a)
 
 # Bullet3
 add_subdirectory(dep/bullet3)
