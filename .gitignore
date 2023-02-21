@@ -308,3 +308,5 @@ res/test_parts/**
 
 CMakeDoxyfile.in
 .DS_Store
+
+project_luajit-prefix
