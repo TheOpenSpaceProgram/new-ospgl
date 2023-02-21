@@ -93,13 +93,25 @@ target_link_libraries(OSPGL ${CMAKE_THREAD_LIBS_INIT})
 # LuaJIT 
 
 include(ExternalProject)
-ExternalProject_Add(project_luajit
-  SOURCE_DIR "./dep/LuaJIT/"
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND MACOSX_DEPLOYMENT_TARGET=13.00 make
-  BUILD_IN_SOURCE true
-  INSTALL_COMMAND ""
-)
+
+if(MACOS)
+	ExternalProject_Add(project_luajit
+		SOURCE_DIR "./dep/LuaJIT/"
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND MACOSX_DEPLOYMENT_TARGET=13.00 make
+		BUILD_IN_SOURCE true
+		INSTALL_COMMAND ""
+	)
+else()
+	ExternalProject_Add(project_luajit
+		SOURCE_DIR "./dep/LuaJIT/"
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND make
+		BUILD_IN_SOURCE true
+		INSTALL_COMMAND ""
+	)
+endif()
+
 ExternalProject_Get_Property(project_luajit SOURCE_DIR)
 message("+++++" ${SOURCE_DIR})
 add_library(luajit STATIC IMPORTED)
