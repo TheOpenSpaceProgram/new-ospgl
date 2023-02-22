@@ -101,6 +101,7 @@ if(MACOS)
 		BUILD_COMMAND MACOSX_DEPLOYMENT_TARGET=13.00 make
 		BUILD_IN_SOURCE true
 		INSTALL_COMMAND ""
+		DOWNLOAD_COMMAND ""
 	)
 else()
 	ExternalProject_Add(project_luajit
@@ -109,6 +110,7 @@ else()
 		BUILD_COMMAND make
 		BUILD_IN_SOURCE true
 		INSTALL_COMMAND ""
+		DOWNLOAD_COMMAND ""
 	)
 endif()
 
