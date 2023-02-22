@@ -161,7 +161,7 @@ LuaAssetHandle<T>::LuaAssetHandle(LuaAssetHandle<T>&& b)
 	b.pkg = "null";
 	b.name = "null";
 	b.data = nullptr;
-	b.ut = sol::nil;
+	b.ut = sol::lua_nil;
 
 #ifdef LUA_ASSET_DEBUG_ENABLED
 	logger->debug("Lua asset handle created (path={}:{}, pointer={}) by move", pkg, name, (void*)data);
