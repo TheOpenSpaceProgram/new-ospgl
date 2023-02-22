@@ -152,7 +152,7 @@ public:
 
 
 	// Objects with higher priority get drawn first
-	virtual int get_forward_priority() { return 0.0; }
+	virtual int get_forward_priority() override { return 0.0; }
 
 	~Entity();
 
