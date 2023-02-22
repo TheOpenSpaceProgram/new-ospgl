@@ -38,6 +38,8 @@ int EditorGUI::get_panel_width()
 		edveh_int->current_interface->leave();
 		switch(mode)
 		{
+			default:
+				break;
 			case ATTACHING:
 				edveh_int->current_interface = &edveh_int->attach_interface;
 				break;
