@@ -115,11 +115,11 @@ endif()
 ExternalProject_Get_Property(project_luajit SOURCE_DIR)
 message("+++++" ${SOURCE_DIR})
 add_library(luajit STATIC IMPORTED)
-set_property(TARGET luajit PROPERTY IMPORTED_LOCATION ${SOURCE_DIR}/src/libluajit.a)
+set_property(TARGET luajit PROPERTY IMPORTED_LOCATION ${SOURCE_DIR}/src/libluajit.o)
 add_dependencies(luajit project_luajit)
 include_directories(${SOURCE_DIR}/src)
 target_link_libraries(${PROJECT_NAME} luajit)
-target_link_libraries(${PROJECT_NAME} ${SOURCE_DIR}/src/libluajit.a)
+target_link_libraries(${PROJECT_NAME} ${SOURCE_DIR}/src/libluajit.o)
 
 # Bullet3
 add_subdirectory(dep/bullet3)
@@ -150,11 +150,13 @@ target_link_libraries(OSPGL fmt liblua-static BulletSoftBody BulletDynamics
 
 # Sol
 # Updating code based on https://github.com/tomlankhorst/cmake-prebuilt-library/blob/master/cmake/libhello.cmake
-set(SOL_VERSION v3.3.0)
-set(SOL_URL https://github.com/ThePhD/sol2/releases/download/${SOL_VERSION}/sol.hpp)
-set(SOL_PATH dep/sol/sol.hpp)
+if(SOL_DOWNLOAD)
+	set(SOL_VERSION v3.3.0)
+	set(SOL_URL https://github.com/ThePhD/sol2/releases/download/${SOL_VERSION}/sol.hpp)
+	set(SOL_PATH dep/sol/sol.hpp)
 
-file(DOWNLOAD ${SOL_URL} ${SOL_PATH} STATUS SOL_DOWNLOAD_STATUS)
+	file(DOWNLOAD ${SOL_URL} ${SOL_PATH} STATUS SOL_DOWNLOAD_STATUS)
+endif()
 
 # Set flag for updating the Sol config
 if(SOL_CONFIG_DOWNLOAD)
