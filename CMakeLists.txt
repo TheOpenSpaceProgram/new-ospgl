@@ -148,6 +148,22 @@ endif()
 target_link_libraries(OSPGL fmt liblua-static BulletSoftBody BulletDynamics
 		BulletCollision LinearMath ${CMAKE_DL_LIBS} ${EXTRA_LINK} ${STACKTRACE_LINK})
 
+# Sol
+# Updating code based on https://github.com/tomlankhorst/cmake-prebuilt-library/blob/master/cmake/libhello.cmake
+set(SOL_VERSION v3.3.0)
+set(SOL_URL https://github.com/ThePhD/sol2/releases/download/${SOL_VERSION}/sol.hpp)
+set(SOL_PATH dep/sol/sol.hpp)
+
+file(DOWNLOAD ${SOL_URL} ${SOL_PATH} STATUS SOL_DOWNLOAD_STATUS)
+
+# Set flag for updating the Sol config
+if(SOL_CONFIG_DOWNLOAD)
+	set(SOL_CONFIG_URL https://github.com/ThePhD/sol2/releases/download/${SOL_VERSION}/config.hpp)
+	set(SOL_CONFIG_PATH dep/sol/config.hpp)
+
+	file(DOWNLOAD ${SOL_CONFIG_URL} ${SOL_CONFIG_PATH} STATUS SOL_CONFIG_DOWNLOAD_STATUS)
+endif()
+
 ##################################################################################
 # ospm - The package manager for OSPGL (Open Space Program Manager)
 ##################################################################################
