@@ -99,28 +99,28 @@ void EditorScene::update()
 		gui_input.ext_keyboard_blocked = true;
 	}
 
+	emit_event("on_editor_update", osp->game_dt);
 	vehicle->update(osp->game_dt);
 	vehicle_int.update(osp->game_dt);
+	emit_event("post_editor_update", osp->game_dt);
 
-	glm::dvec4 viewport = get_viewport();
-	glm::dvec2 real_screen_size =
-			glm::dvec2(osp->renderer->get_width(true), osp->renderer->get_height(true));
-	int rw = (viewport.z - viewport.x) * (int)real_screen_size.x;
-	int rh = (viewport.w - viewport.y) * (int)real_screen_size.y;
-
+	emit_event("on_gui_prepare");
 	do_gui();
 	gui_screen.prepare_pass();
+	emit_event("post_gui_prepare");
 
-	float gw = (float)gui.get_panel_width();
-	glm::vec4 gui_vport = glm::vec4(gw, 0, real_screen_size.x - gw, real_screen_size.y);
-	vehicle_int.do_interface(cam.get_camera_uniforms(rw, rh),
+	auto[r, viewport, real_screen_size, gui_vport] = get_viewports();
+	vehicle_int.do_interface(cam.get_camera_uniforms(r.x, r.y),
 							 viewport, gui_vport, real_screen_size, osp->renderer->vg, &gui_input, gui_screen.skin.get());
 	cam.update(osp->game_dt, &gui_input);
 	gui_input.ext_mouse_blocked |= cam.blocked;
 	gui_input.ext_keyboard_blocked |= cam.blocked;
 
+	emit_event("on_gui_input");
 	gui_screen.input_pass();
+	emit_event("post_gui_input");
 	gui_screen.draw();
+	emit_event("post_gui_draw");
 
 	bt_world->updateAabbs();
 
@@ -180,6 +180,20 @@ glm::dvec4 EditorScene::get_viewport()
 	result.w = useful.y + sub.w * (useful.w - useful.y);
 
 	return result;
+}
+
+std::tuple<glm::ivec2, glm::vec4, glm::dvec2, glm::vec4> EditorScene::get_viewports()
+{
+	glm::dvec4 viewport = get_viewport();
+	glm::dvec2 real_screen_size =
+			glm::dvec2(osp->renderer->get_width(true), osp->renderer->get_height(true));
+	int rw = (viewport.z - viewport.x) * (int)real_screen_size.x;
+	int rh = (viewport.w - viewport.y) * (int)real_screen_size.y;
+
+	float gw = (float)gui.get_panel_width();
+	glm::vec4 gui_vport = glm::vec4(gw, 0, real_screen_size.x - gw, real_screen_size.y);
+
+	return std::make_tuple(glm::ivec2(rw, rh), viewport, real_screen_size, gui_vport);
 }
 
 

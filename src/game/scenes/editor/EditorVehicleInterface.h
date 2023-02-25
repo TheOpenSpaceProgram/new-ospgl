@@ -7,6 +7,8 @@
 #include "EditorCamera.h"
 
 // Handles user interaction with the EditorVehicle
+// Emits events:
+// - on_right_click(piece_id: int64 - Only emitted if the interface does, if id < 0 then no piece clicked
 class EditorVehicleInterface : public EventEmitter
 {
 public:

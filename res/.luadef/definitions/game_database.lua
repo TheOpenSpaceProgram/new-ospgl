@@ -34,6 +34,9 @@ function game_database:get_string(id) end
 
 ---@param path string Path to the editor script
 --- Note that editor scripts should NOT interact with the universe or similar!
+--- Furthermore, make sure your event handler is global to prevent it from being 
+--- garbage collected, as the editor will just load the scripts once, and then all locals
+--- are up for gargabe collection (unless of course used by event handlers)
 function game_database:add_editor_script(path) end
 
 -- We dont' return anything, simply define the game_database class!

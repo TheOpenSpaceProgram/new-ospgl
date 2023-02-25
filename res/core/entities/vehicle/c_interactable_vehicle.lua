@@ -162,7 +162,7 @@ end
 ---@param gui gui.screen
 ---@param cu renderer.camera_uniforms
 function interactable_vehicle:draw_gui(gui, cu)
-	self.menus:draw_gui(gui, cu, self.veh)
+	self.menus:draw_gui(gui, gui.viewport, cu, self.veh)
 end
 
 

@@ -18,6 +18,9 @@ local logger = require("logger")
 
 local menus = {}
 
+menus.has_interfaces = true
+menus.has_editor = false
+
 --- Stores all active contextual menus
 ---@type table<integer, core.context_menu>
 menus.context_menus = {}
@@ -65,13 +68,13 @@ function menus:handle_new_menu(hovered_p, gui)
 	if self.context_menus[hovered_p.id] then
 		-- Context menu is already present, highlight it
 		self.context_menus[hovered_p.id].highlight_timer = 1.0
-		return nil
+		return self.context_menus[hovered_p.id]
 	end
 
 	if self.part_context_menus[hovered_part.id] then
 		-- Context menu is present for part, hightlight it too
 		self.part_context_menus[hovered_part.id].highligh_timer = 1.0
-		return nil
+		return self.part_context_menus[hovered_part.id]
 	end
 
 	local n_menu = {}
@@ -118,9 +121,11 @@ function menus:handle_new_menu(hovered_p, gui)
 		title.style = guilib.label_style.separator
 		layout:add_widget(title)
 
-		for name, interface in pairs(machine.interfaces) do
-			if interface.do_core_context_menu then
-				interface:do_core_context_menu(layout)
+		if self.has_interfaces then
+			for name, interface in pairs(machine.interfaces) do
+				if interface.do_core_context_menu then
+					interface:do_core_context_menu(layout)
+				end
 			end
 		end
 
@@ -196,7 +201,7 @@ end
 
 ---@param gui gui.screen
 ---@param cu renderer.camera_uniforms
-function menus:draw_gui(gui, cu, veh)
+function menus:draw_gui(gui, viewport, cu, veh)
 	-- Draw links
 	for p_id, menu in pairs(self.context_menus) do 
 		local p = veh:get_piece_by_id(p_id)
@@ -204,7 +209,7 @@ function menus:draw_gui(gui, cu, veh)
 		local p_pos_3d = p:get_graphics_position() - cu.cam_pos
 		local p_pos_2d, front = glm.world_to_clip(cu.proj_view, p_pos_3d)
 		if front then
-			p_pos_2d = glm.clip_to_screen(p_pos_2d, gui.viewport)
+			p_pos_2d = glm.clip_to_screen(p_pos_2d, viewport)
 			menu.last_pos_2d = p_pos_2d
 			gui.skin:draw_link(p_pos_2d, menu.window.pos, menu.window.size, input.get_mouse_pos(), not menu.was_link_blocked)
 		end

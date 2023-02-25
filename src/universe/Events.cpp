@@ -18,7 +18,7 @@ void EventEmitter::emit_event(const std::string& event_id, EventArguments args)
 {
 	auto& rc = index_event_receivers(event_id);
 
-	for (EventHandler ev : rc)
+	for (const EventHandler& ev : rc)
 	{
 		ev.fnc(args);
 	}

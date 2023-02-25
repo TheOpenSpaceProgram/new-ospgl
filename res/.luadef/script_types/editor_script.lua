@@ -1,4 +1,4 @@
 ---@meta
 
----@type editor_scene
+---@type vehicle_editor
 editor = {}

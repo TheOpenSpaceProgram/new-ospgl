@@ -1,6 +1,7 @@
 #pragma once
 #include "../LuaCore.h"
 #include <universe/Events.h>
+#include <util/Logger.h>
 
 struct LuaEventHandler
 {
@@ -18,6 +19,7 @@ struct LuaEventHandler
 			signed_up = false;
 			emitter->drop_out_of_event(event_id, handler);
 			delete ref;
+			logger->info("Event out!");
 		}
 	}
 
