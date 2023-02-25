@@ -23,6 +23,8 @@ local camera = dofile("core:scenes/flight/flight_camera.lua"):init(universe, gui
 ---@type universe.entity
 local tracked_ent = nil
 local interactable_veh = dofile("core:entities/vehicle/c_interactable_vehicle.lua")
+---@type flight_input.context|nil
+local tracked_ctx = nil
 
 local event_handlers = {}
 
@@ -61,7 +63,6 @@ local function late_init()
 	camera.tracked_veh = veh
 
 	interactable_veh:init(veh)
-
 end
 
 function pre_update(dt)
@@ -82,6 +83,8 @@ function update(dt)
 	gui_screen:new_frame()
 	gui_screen:prepare_pass()
 
+
+	interactable_veh:update(dt, gui_screen)
 	local block = camera:update(dt)
 	gui_input.ext_mouse_blocked = gui_input.ext_mouse_blocked or block
 	local ent_blocked_kb = false
@@ -93,9 +96,6 @@ function update(dt)
 	end
 	gui_input.ext_keyboard_blocked = gui_input.ext_keyboard_blocked or ent_blocked_kb
 	
-	interactable_veh:update(dt, gui_screen)
-
-
 	gui_screen:input_pass()
 	local cu = camera:get_camera_uniforms(lwidth, lheight)
 	-- Draw the links before anything else

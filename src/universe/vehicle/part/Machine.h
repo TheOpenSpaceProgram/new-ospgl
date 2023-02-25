@@ -77,6 +77,7 @@ public:
 	sol::table get_interface(const std::string& name);
 
 	AssetHandle<Image> get_icon();
+	std::shared_ptr<InputContext> get_input_context();
 
 	std::string get_pkg();
 	std::string get_name();

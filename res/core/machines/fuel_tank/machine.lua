@@ -3,6 +3,7 @@ local vehicle = require("vehicle")
 local assets = require("assets")
 local logger = require("logger")
 local imgui = require("imgui")
+require("game_database")
 
 local icon = assets.get_image("machines/icons/fluid_tank.png")
 function get_icon() return icon end

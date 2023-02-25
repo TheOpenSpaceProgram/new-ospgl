@@ -58,7 +58,7 @@ void AttachInterface::handle_input_hovering(const CameraUniforms& cu,
 		if(input->mouse_down(GLFW_MOUSE_BUTTON_RIGHT))
 		{
 			int id = hovered ? hovered->id : -1;
-			edveh_int->emit_event("on_right_click", id);
+			edveh_int->emit_event("on_alt_click", id);
 		}
 	}
 

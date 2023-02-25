@@ -14,7 +14,7 @@ local ctx = dofile("entities/vehicle/c_veh_context_menus.lua")
 ctx.has_interfaces = false
 ctx.has_editor = true
 
-local function on_right_click(piece_id)
+local function on_alt_click(piece_id)
 	local ctrl_down = input.key_pressed(input.key.left_control)
 	if piece_id < 0 then
 		if not ctrl_down then
@@ -22,7 +22,7 @@ local function on_right_click(piece_id)
 		end
 	else
 		local hovered_p = editor.veh:get_piece_by_id(piece_id)
-		local nmenu = ctx:handle_new_menu(hovered_p, editor.gui_screen)
+		local nmenu = ctx:handle_new_menu(hovered_p, editor.gui_screen, editor.veh)
 		if not ctrl_down then
 			for k, menu in pairs(ctx.context_menus) do 
 				if menu ~= nmenu then
@@ -54,7 +54,7 @@ local function post_gui_draw()
 end
 
 events:add(editor.veh, "on_lost_piece", on_lost_piece)
-events:add(editor.int, "on_right_click", on_right_click)
+events:add(editor.int, "on_alt_click", on_alt_click)
 events:add(editor, "on_gui_input", on_gui_input)
 events:add(editor, "on_editor_update", update)
 events:add(editor, "post_gui_draw", post_gui_draw)

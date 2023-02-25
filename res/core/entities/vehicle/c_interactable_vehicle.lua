@@ -41,6 +41,10 @@ function interactable_vehicle:init(veh_ent)
 	self:on_veh_dirty()
 	self.sepp_event_handler = self.veh:sign_up_for_event("on_lost_piece", function(id) self:on_lost_piece(id) end)
 
+	self.menus.on_take_control = function(machine)
+		veh_ent.lua.take_control(machine)
+	end
+
 	return self
 end
 
@@ -122,7 +126,7 @@ function interactable_vehicle:update_new(gui)
 	local hovered_p = self.veh:get_piece_by_id(self.hovered)
 	assert(hovered_p)
 
-	local n_menu = self.menus:handle_new_menu(hovered_p, gui)
+	local n_menu = self.menus:handle_new_menu(hovered_p, gui, self.veh)
 	if n_menu == nil then return end
 
 	-- Remove all others if CTRL is not held

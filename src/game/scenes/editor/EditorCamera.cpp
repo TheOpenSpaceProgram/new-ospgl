@@ -169,6 +169,6 @@ EditorCamera::EditorCamera()
 	blocked = false;
 	main_button = GLFW_MOUSE_BUTTON_RIGHT;
 	pan_key = GLFW_KEY_LEFT_SHIFT;
-	altpan_key = GLFW_KEY_LEFT_CONTROL;
+	altpan_key = GLFW_KEY_LEFT_ALT;
 	zoom_key = GLFW_KEY_LEFT_SHIFT;
 }

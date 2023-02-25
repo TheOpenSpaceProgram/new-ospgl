@@ -229,6 +229,7 @@ function part:get_prototype() end
 ---@field init_toml toml.table
 ---@field plumbing vehicle.plumbing_machine
 ---@field in_part vehicle.part
+---@field in_part_id string
 ---@field interfaces table<string, table>
 local machine = {}
 
@@ -265,6 +266,9 @@ function machine:get_icon() end
 
 ---@return string
 function machine:get_display_name() end
+
+---@return flight_input.context|nil
+function machine:get_input_context() end
 
 ---@class vehicle.part_prototype
 ---@field name string Presented ready to display, no need to localize (it's done in load time)

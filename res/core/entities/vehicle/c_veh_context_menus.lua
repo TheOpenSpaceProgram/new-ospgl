@@ -18,8 +18,16 @@ local logger = require("logger")
 
 local menus = {}
 
+-- Interfaces to be activated manually via the context menu
 menus.has_interfaces = true
+-- On machines which offer input contexts, allows taking control of them
+menus.has_input_contexts = true
+-- Tweakables to be exposed in the editor
 menus.has_editor = false
+
+---@type function|nil
+--- Takes the machine as only argument
+menus.on_take_control = nil
 
 --- Stores all active contextual menus
 ---@type table<integer, core.context_menu>
@@ -60,7 +68,7 @@ end
 
 
 ---@param gui gui.screen
-function menus:handle_new_menu(hovered_p, gui)
+function menus:handle_new_menu(hovered_p, gui, veh)
 	local hovered_part = hovered_p:get_part()
 	-- TODO: Orphan pieces may still offer a context menu?
 	if hovered_part == nil then return nil end
@@ -100,6 +108,7 @@ function menus:handle_new_menu(hovered_p, gui)
 	machine_bar:set_layout(top_layout)	
 	
 	n_menu.content = content
+	n_menu.menus = self
 
 	---@param machine vehicle.machine
 	function n_menu:build_menu(machine)
@@ -121,7 +130,20 @@ function menus:handle_new_menu(hovered_p, gui)
 		title.style = guilib.label_style.separator
 		layout:add_widget(title)
 
-		if self.has_interfaces then
+		if self.menus.has_input_contexts then
+			local ctx = machine:get_input_context()
+			if ctx then
+				local btn = guilib.text_button.new("Take control")
+				n_menu.handlers:add(btn, "on_clicked", function(b) 
+					if b == input.btn.left and self.menus.on_take_control then
+						self.menus.on_take_control(machine)
+					end
+				end)
+				layout:add_widget(btn)
+			end
+		end
+
+		if self.menus.has_interfaces then
 			for name, interface in pairs(machine.interfaces) do
 				if interface.do_core_context_menu then
 					interface:do_core_context_menu(layout)

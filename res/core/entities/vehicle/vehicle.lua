@@ -43,7 +43,28 @@ function physics_update(bdt)
     vehicle:physics_update(bdt)
 end
 
+---@type string|nil
+local controlled_machine_name = nil
+---@type integer|nil
+local controlled_machine_part_id = nil
 function get_input_ctx()
+	if controlled_machine_part_id ~= nil then
+		assert(controlled_machine_name)
+		local part = vehicle:get_part_by_id(controlled_machine_part_id)
+		if part == nil then
+			logger.info("Lost controlled part!")
+			controlled_machine_part_id = nil
+			return nil
+		end
+		local machine = part:get_machine(controlled_machine_name)
+		assert(machine)
+		local ctx = machine:get_input_context()
+		if ctx == nil then
+			logger.info("Machine is not controllable")
+			return nil
+		end
+		return ctx
+	end
 end
 
 function enable_bullet(world)
@@ -111,4 +132,10 @@ function shadow_pass(cu, _)
         local tform = p:get_graphics_transform():to_mat4() * i
         p:get_model_node():draw_shadow(cu, tform, true)
     end
+end
+
+---@param machine vehicle.machine
+function take_control(machine)
+	controlled_machine_name = machine.in_part_id
+	controlled_machine_part_id = machine.in_part.id
 end

@@ -1,6 +1,7 @@
 #include "LuaVehicle.h"
 #include "LuaEvents.h"
 #include "../../universe/vehicle/Vehicle.h"
+#include "game/scenes/flight/InputContext.h"
 #include "LuaAssets.h"
 
 static WorldState decode_worldstate_table(sol::table table)
@@ -163,10 +164,12 @@ void LuaVehicle::load_to(sol::table& table)
 		"plumbing", &Machine::plumbing,
 		"get_id", &Machine::get_id,
 		"in_part", &Machine::in_part,
+		"in_part_id", &Machine::in_part_id,
 		"interfaces", &Machine::interfaces,
 		"draw_imgui", &Machine::draw_imgui,
 		"get_display_name", &Machine::get_display_name,
 		"get_icon", [](Machine& self){ return LuaAssetHandle(self.get_icon());},
+		"get_input_context", &Machine::get_input_context,
 		"load_interface", [](Machine* self, const std::string& iname, sol::this_state tst, sol::this_environment tenv)
 		{
 			sol::environment old_env = tenv;
