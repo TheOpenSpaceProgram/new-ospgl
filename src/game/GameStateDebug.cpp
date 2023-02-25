@@ -126,7 +126,7 @@ void GameStateDebug::do_launcher()
 	ImGui::Begin("Debug menu");
 	ImGui::Text("Toggle with Ctrl+Alt+F12 / º / `");
 	// Basic perfomance info
-	ImGui::Text("FPS: %i", (int)(1.0 / osp->game_dt));
+	ImGui::Text("FPS: %i | Game FPS: %i", (int)(1.0 / osp->game_dt), (int)(1.0 / osp->dt));
 	if(override_camera)
 	{
 		if(ImGui::Button("Free camera"))

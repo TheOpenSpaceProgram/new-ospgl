@@ -239,5 +239,4 @@ void LuaVehicle::load_to(sol::table& table)
 	table.new_usertype<PartPrototype>("part_prototype", sol::no_constructor,
 		  "name", &PartPrototype::name);
 
-
 }

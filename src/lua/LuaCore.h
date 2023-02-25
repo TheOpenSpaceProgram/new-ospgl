@@ -56,6 +56,7 @@ public:
 		INPUT,			// LuaInput
 		ORBIT,			// LuaOrbit
 		EVENTS,			// LuaEvents
+		EDITOR,			// LuaEditor
 		COUNT,
 	};
 

@@ -35,9 +35,8 @@ struct EditorVehiclePiece
 };
 
 
-// Only what's needed of a vehicle for the editor, rendering, vehicle data
-// and also the part colliders, but without building welded groups, links,
-// or anything like that (they are used for picking)
+// We use special colliders as the vehicle is not really on the universe,
+// and we also allow attaching extra meta-data such as symmetry
 class EditorVehicle : public Drawable
 {
 private:

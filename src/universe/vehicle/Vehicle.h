@@ -2,7 +2,6 @@
 #include "part/Part.h"
 #include "part/Piece.h"
 
-
 #pragma warning(push, 0)
 #include <btBulletDynamicsCommon.h>
 #pragma warning(pop)
@@ -17,6 +16,7 @@
 #include "PackedVehicle.h"
 #include "plumbing/VehiclePlumbing.h"
 #include <universe/Events.h>
+#include "VehicleMeta.h"
 
 
 class VehicleLoader;
@@ -106,15 +106,10 @@ public:
 	friend class Piece;
 	friend class Part;
 
+	VehicleMeta meta;
+
 	std::vector<Piece*> all_pieces;
 	Piece* root;
-	// The ID of the group is the index in the array, this is handled
-	// nicely by the utility functions
-	std::vector<std::string> group_names;
-	std::vector<Part*> find_parts_in_group(int64_t group);
-	void remove_group(int64_t id);
-	void create_group(std::string name);
-	std::string get_group_name(int64_t id);
 
 	// Parts whose root piece is contained in this vehicle
 	std::vector<Part*> parts;
@@ -175,7 +170,7 @@ public:
 	// Note: Bounds are calculated using colliders!
 	std::pair<glm::dvec3, glm::dvec3> get_bounds();
 
-	/// Vehicle structure functions:
+	// Vehicle structure functions:
 
 	// This one doesn't need the array to be sorted
 	// but it's slower (used in the editor)

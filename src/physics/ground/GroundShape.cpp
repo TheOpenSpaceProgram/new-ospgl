@@ -93,12 +93,6 @@ void GroundShape::processAllTriangles(btTriangleCallback* callback, const btVect
 			}
 		}
 
-		/*ImGui::Begin("Lel", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-		quad_tree.do_imgui(nullptr);
-		ImGui::End();*/
-
-
-		
 		for (QuadTreeNode* leaf : leafs)
 		{
 			btVector3* verts = server->query(leaf, 1.0);

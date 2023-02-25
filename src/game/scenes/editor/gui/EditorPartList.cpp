@@ -240,7 +240,7 @@ void EditorPartList::init(EditorScene* sc, NVGcontext* vg)
 		category_list->add_widget(btn);
 		std::string id = categories[i].id;
 
-		btn->sign_up_for_event("on_click", EventHandler([id, this, btn](EventArguments& args)
+		btn->sign_up_for_event("on_clicked", EventHandler([id, this, btn](EventArguments& args)
 		{
 			std::string old_id = this->current_category;
 			this->current_category = id;
@@ -272,9 +272,9 @@ int EditorPartList::get_panel_width()
 void EditorPartList::update_groups()
 {
 	Vehicle* veh = edveh_int->edveh->veh;
-	for(int id = -1; id < (int)veh->group_names.size(); id++)
+	for(int id = -1; id < (int)veh->meta.group_names.size(); id++)
 	{
-		group_dropdown->options.emplace_back(std::to_string(id), veh->get_group_name(id));
+		group_dropdown->options.emplace_back(std::to_string(id), veh->meta.get_group_name(id));
 	}
 	group_dropdown->options.emplace_back("manage", "Manage groups");
 	group_dropdown->update_options();

@@ -22,6 +22,7 @@
 #include "libs/LuaInput.h"
 #include "libs/LuaOrbit.h"
 #include "libs/LuaEvents.h"
+#include "libs/LuaEditor.h"
 
 // Used for setting up "osp" usertype
 #include "renderer/Renderer.h"
@@ -175,6 +176,10 @@ LuaCore::LibraryID LuaCore::name_to_id(const std::string & name)
 	{
 		return LibraryID::EVENTS;
 	}
+	else if(name == "editor")
+	{
+		return LibraryID::EDITOR;
+	}
 	else
 	{
 		return LibraryID::UNKNOWN;
@@ -300,6 +305,7 @@ LuaCore::LuaCore()
 	libraries[LibraryID::INPUT] = new LuaInput();
 	libraries[LibraryID::ORBIT] = new LuaOrbit();
 	libraries[LibraryID::EVENTS] = new LuaEvents();
+	libraries[LibraryID::EDITOR] = new LuaEditor();
 }
 
 LuaCore::~LuaCore()

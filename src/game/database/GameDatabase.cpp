@@ -133,3 +133,10 @@ void GameDatabase::finish_loading()
 
 }
 
+void GameDatabase::add_editor_script(const std::string &path, const std::string &pkg)
+{
+	std::string sane_path = sanitize_path(path, pkg);
+	logger->debug("[DB] Adding editor script with path '{}'", sane_path);
+	editor_scripts.push_back(sane_path);
+}
+

@@ -7,7 +7,7 @@
 #include "EditorCamera.h"
 
 // Handles user interaction with the EditorVehicle
-class EditorVehicleInterface
+class EditorVehicleInterface : public EventEmitter
 {
 public:
 

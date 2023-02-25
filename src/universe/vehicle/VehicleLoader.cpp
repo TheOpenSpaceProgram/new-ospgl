@@ -11,7 +11,7 @@ void VehicleLoader::load_metadata(const cpptoml::table& root)
 	{
 		for (auto gname: *gname_arr)
 		{
-			n_vehicle->group_names.push_back(gname);
+			n_vehicle->meta.group_names.push_back(gname);
 		}
 	}
 }
@@ -327,7 +327,7 @@ VehicleSaver::VehicleSaver(cpptoml::table &target, const Vehicle &what)
 
 	auto array = cpptoml::make_array();
 	// Group names
-	for(std::string n : what.group_names)
+	for(std::string n : what.meta.group_names)
 	{
 		array->push_back(n);
 	}

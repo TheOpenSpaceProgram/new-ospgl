@@ -48,12 +48,37 @@ void EditorScene::load()
 	bt_world->setDebugDrawer(debug_draw);
 
 	lua_core->load(lua_state, "__UNDEFINED__");
+	lua_state["osp"] = osp;
+
 	vehicle->init(&lua_state);
 
 	gui.vg = osp->renderer->vg;
 	gui.init(this);
 
 	osp->game_state->universe.paused = true;
+
+	// Load editor scripts
+	for(const std::string& path : osp->game_database->editor_scripts)
+	{
+		auto[pkg, name]  = osp->assets->get_package_and_name(path, "core");
+		sol::environment env;
+		env = sol::environment(lua_state, sol::create, lua_state.globals());
+		// We need to load LuaCore to it
+		lua_core->load((sol::table&)env, pkg);
+		env["osp"] = osp;
+		env["editor"] = this;
+
+		std::string full_path = osp->assets->res_path + pkg + "/" + name;
+		auto result = lua_state.safe_script_file(full_path, env);
+		if(!result.valid())
+		{
+			sol::error err = result;
+			logger->error("Lua Error loading editor script:\n{}", err.what());
+		}
+
+		envs.push_back(env);
+	}
+
 }
 
 double t = 0.0;

@@ -257,7 +257,7 @@ void OSP::finish_frame()
 
 	if(dt > max_dt)
 	{
-		logger->warn("Delta-time too high ({})/({}), slowing down", dt, max_dt);
+		//logger->warn("Delta-time too high ({})/({}), slowing down", dt, max_dt);
 		dt = max_dt;
 	}
 }

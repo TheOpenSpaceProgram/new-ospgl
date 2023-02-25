@@ -34,6 +34,7 @@ private:
 	EditorCamera cam;
 
 
+
 	// We need a world for the very simple colliders, but we have no 
 	// dynamics, links, or anything like that
 	btDefaultCollisionConfiguration* bt_collision_config;
@@ -52,7 +53,9 @@ public:
 
 	// We hold a non-universe lua_state for all machines to interact
 	sol::state lua_state;
-	
+	// It's very important for envs to be below lua_state to prevent SEGFAULT on close
+	std::vector<sol::environment> envs;
+
 	btCollisionWorld* bt_world;
 
 	virtual void load() override;

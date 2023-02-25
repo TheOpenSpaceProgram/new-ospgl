@@ -45,6 +45,12 @@ void LuaGameDatabase::load_to(sol::table& table)
 		sol::environment view = st;
 		std::string pkg = view["__pkg"];
 		return self->get_string(id, pkg);
- 	}
+ 	},
+	"add_editor_script", [](GameDatabase* self, const std::string& path, sol::this_environment st)
+	{
+		sol::environment view = st;
+		std::string pkg = view["__pkg"];
+		self->add_editor_script(path, pkg);
+	}
  	);
 }

@@ -4,7 +4,8 @@
 #include <vector>
 #include "defines.h"
 
-#define ENABLE_PROFILER
+// Kind of useless thanks to perf tool
+//#define ENABLE_PROFILER
 
 // Helper macros to generate unique* identifier
 // * Limitation: Only one PROFILER_X per line
@@ -16,7 +17,7 @@
 #ifdef ENABLE_PROFILER 
 	#define PROFILE_FUNC() auto _PROFILER_LABEL(__LINE__) = profiler->block(__func__);
 #else 
-	#define PROFILE_FUNC() block;
+	#define PROFILE_FUNC() {};
 #endif
 
 #ifdef ENABLE_PROFILER

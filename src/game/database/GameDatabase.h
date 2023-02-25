@@ -34,6 +34,8 @@ public:
 	std::vector<std::string> materials;
 	std::unordered_map<std::string, std::string> current_locale;
 
+	std::vector<std::string> editor_scripts;
+
 	void add_part(const std::string& path, const std::string& pkg);
 	void add_plumbing_machine(const std::string& path, const std::string& pkg);
 	void add_part_category(const std::string& path, const std::string& pkg);
@@ -53,6 +55,8 @@ public:
 	// This function will also automatically add the prefix, that's why you must pass pkg. Otherwise, asset
 	// manager default is used!
 	const std::string& get_string(const std::string& id, const std::string& pkg = "");
+
+	void add_editor_script(const std::string& path, const std::string& pkg);
 
 	GameDatabase();
 	~GameDatabase();

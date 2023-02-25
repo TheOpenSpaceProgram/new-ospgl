@@ -32,4 +32,8 @@ function game_database:load_locale(locale) end
 ---@return string String to display
 function game_database:get_string(id) end
 
+---@param path string Path to the editor script
+--- Note that editor scripts should NOT interact with the universe or similar!
+function game_database:add_editor_script(path) end
+
 -- We dont' return anything, simply define the game_database class!

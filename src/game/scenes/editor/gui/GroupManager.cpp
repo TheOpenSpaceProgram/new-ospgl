@@ -26,7 +26,7 @@ void GroupManager::create_right_panel()
 		move_up->disabled = true;
 	}
 
-	tfield->string = veh->get_group_name(selected_group);
+	tfield->string = veh->meta.get_group_name(selected_group);
 
 	opts_layout->add_widget(tfield);
 	opts_layout->add_widget(move_up);
@@ -59,9 +59,9 @@ void GroupManager::try_show()
 	auto btn = std::make_shared<GUITextButton>(osp->game_database->get_string("core:default_group"));
 	btn->toggled = selected_group < 0;
 	list_layout->add_widget(btn);
-	for(size_t id = 0; id < veh->group_names.size(); id++)
+	for(size_t id = 0; id < veh->meta.group_names.size(); id++)
 	{
-		btn = std::make_shared<GUITextButton>(veh->group_names[id]);
+		btn = std::make_shared<GUITextButton>(veh->meta.group_names[id]);
 		btn->toggled = selected_group == id;
 		list_layout->add_widget(btn);
 	}
