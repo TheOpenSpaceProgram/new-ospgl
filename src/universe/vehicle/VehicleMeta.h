@@ -1,8 +1,11 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <memory>
+#include "game/scenes/flight/InputContext.h"
 
 class Part;
+class Machine;
 class Vehicle;
 
 class VehicleMeta
@@ -18,6 +21,15 @@ public:
 	void create_group(std::string name);
 	std::string get_group_name(int64_t id);
 
-	VehicleMeta(Vehicle* v) : veh(v) {}
+	int64_t controlled_part;
+	std::string controlled_machine;
+
+	void set_controlled_machine(Machine* m);
+	std::shared_ptr<InputContext> get_input_ctx();
+
+	VehicleMeta(Vehicle* v) : veh(v) {
+		controlled_part = -1;
+		controlled_machine = "";
+	}
 
 };

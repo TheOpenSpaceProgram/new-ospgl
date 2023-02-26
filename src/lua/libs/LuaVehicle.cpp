@@ -24,6 +24,7 @@ void LuaVehicle::load_to(sol::table& table)
 		 // Returns a shared pointer so it's garbage collected by lua
 		 "new", [](){return std::make_shared<Vehicle>();},
 			EVENT_EMITTER_SIGN_UP(Vehicle),
+			"meta", &Vehicle::meta,
 		 	"is_packed", &Vehicle::is_packed,
 		 	"packed", &Vehicle::packed_veh,
 		 	"unpacked", &Vehicle::unpacked_veh,
@@ -169,7 +170,11 @@ void LuaVehicle::load_to(sol::table& table)
 		"draw_imgui", &Machine::draw_imgui,
 		"get_display_name", &Machine::get_display_name,
 		"get_icon", [](Machine& self){ return LuaAssetHandle(self.get_icon());},
-		"get_input_context", &Machine::get_input_context,
+		"set_input_ctx", [](Machine& self, std::shared_ptr<InputContext> ipt)
+		{
+			self.cur_ipt_ctx = ipt;
+		},
+		"get_input_ctx", &Machine::get_input_ctx,
 		"load_interface", [](Machine* self, const std::string& iname, sol::this_state tst, sol::this_environment tenv)
 		{
 			sol::environment old_env = tenv;
@@ -241,5 +246,9 @@ void LuaVehicle::load_to(sol::table& table)
 
 	table.new_usertype<PartPrototype>("part_prototype", sol::no_constructor,
 		  "name", &PartPrototype::name);
+
+	table.new_usertype<VehicleMeta>("vehicle_meta", sol::no_constructor,
+			 "set_controlled_machine", &VehicleMeta::set_controlled_machine,
+			 "get_input_ctx", &VehicleMeta::get_input_ctx);
 
 }

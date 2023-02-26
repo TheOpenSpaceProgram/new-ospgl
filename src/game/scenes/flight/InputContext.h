@@ -31,6 +31,7 @@ class InputContext
 {
 private:
 
+
 	struct JoyAxisMapping
 	{
 		std::string to_axis;
@@ -108,6 +109,8 @@ private:
 
 public:
 
+	// For comparison, guaranteed to be unique during the run of a game (runtime uid)
+	uint64_t rid;
 
 	double get_axis(const std::string& name);
 
@@ -135,7 +138,14 @@ public:
 
 	void load_from_file(const std::string& path);
 
-	InputContext() { }
+	// Used by lua, as these are stored in shared_ptr and are not very nicely handled by sol
+	bool is_same_as(const InputContext& b)
+	{
+		return b.rid == rid;
+	}
+
+	InputContext();
 	~InputContext();
 
 };
+

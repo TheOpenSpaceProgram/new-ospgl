@@ -2,6 +2,8 @@ local locale =
 {
 {"en", "es"},
 -- Some useful core words
+{"take_control", "Take Control", "Tomar Control"},
+{"controlled", "Under Control", "Controlado"},
 {"activate", "Activate", "Activar"},
 {"activable", "Activable", "Activable"},
 {"decouple", "Decouple", "Desacoplar"},

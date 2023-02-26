@@ -8,6 +8,7 @@
 #include <assets/Config.h>
 #include <filesystem>
 #include <unordered_set>
+#include "OSP.h"
 
 double InputContext::get_axis(const std::string& name)
 {
@@ -445,5 +446,10 @@ void InputContext::load_from_file(const std::string& path)
 			}
 		}
 	}
+}
+
+InputContext::InputContext()
+{
+	rid = osp->get_runtime_uid();
 }
 

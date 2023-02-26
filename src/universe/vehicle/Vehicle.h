@@ -160,7 +160,6 @@ public:
 	}
 
 	void sort();
-
 	void remove_outdated();
 
 	// Gets the bounds of the vehicle relative to the root piece (which is used for positioning)

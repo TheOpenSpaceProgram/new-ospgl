@@ -5,10 +5,7 @@ local logger = require("logger")
 local flight_input = require("flight_input")
 
 local input_ctx = flight_input.context.new("core:input/rocket.toml")
-
-function get_input_context()
-	return input_ctx
-end 
+machine:set_input_ctx(input_ctx)
 
 local display_name = osp.game_database:get_string("core:capsule")
 function get_display_name() return display_name end

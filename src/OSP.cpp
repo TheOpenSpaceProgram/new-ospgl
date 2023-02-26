@@ -289,8 +289,5 @@ void OSP::end_gamestate()
 
 void OSP::launch_gamestate(GameState* g)
 {
-	// Load packages now so they register all scripts...
-	osp->assets->load_packages(g->used_packages, lua_core, osp->game_database);
-
 	game_state->init();
 }

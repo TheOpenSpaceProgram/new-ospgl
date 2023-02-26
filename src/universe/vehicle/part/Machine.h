@@ -32,6 +32,9 @@ private:
 
 public:
 
+	// Lua may create many, but only one may be "exposed"
+	std::shared_ptr<InputContext> cur_ipt_ctx;
+
 	// An unique id assigned at runtime to identify stuff like ImGui windows, etc...
 	// Not very elegant solution but useful for the debug stuff
 	int64_t runtime_uid;
@@ -73,16 +76,18 @@ public:
 	std::vector<Machine*> get_all_wired_machines(bool include_this = true);
 	std::vector<Machine*> get_wired_machines_with(const std::vector<std::string>& interfaces, bool include_this = true);
 	std::vector<sol::table> get_wired_interfaces(const std::string& type, bool include_this = true);
+	std::shared_ptr<InputContext> get_input_ctx()
+	{
+		return cur_ipt_ctx;
+	}
 
 	sol::table get_interface(const std::string& name);
 
 	AssetHandle<Image> get_icon();
-	std::shared_ptr<InputContext> get_input_context();
 
 	std::string get_pkg();
 	std::string get_name();
 	std::string get_id();
-
 	std::string get_display_name();
 
 	// Don't create your own window in lua! We create a standard named one

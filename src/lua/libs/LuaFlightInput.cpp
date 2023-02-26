@@ -23,5 +23,6 @@ void LuaFlightInput::load_to(sol::table& table)
 		"get_action_down", &InputContext::get_action_down,
 		"get_action_up", &InputContext::get_action_up,
 		"set_axis", &InputContext::set_axis,
-		"update", &InputContext::update);
+		"update", &InputContext::update,
+		"is_same_as", &InputContext::is_same_as);
 }

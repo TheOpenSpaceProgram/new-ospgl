@@ -129,6 +129,9 @@ GameState *GameState::load(const std::string &path)
 		out->is_system_outdated = true;
 	}
 
+	// Load packages now so they register all scripts...
+	osp->assets->load_packages(out->used_packages, lua_core, osp->game_database);
+
 	out->load_inner(*root);
 
 	// Finally, we may load the scene

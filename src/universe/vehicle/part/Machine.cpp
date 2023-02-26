@@ -168,13 +168,6 @@ AssetHandle<Image> Machine::get_icon()
 	}
 }
 
-std::shared_ptr<InputContext> Machine::get_input_context()
-{
-	return LuaUtil::call_function_if_present_returns<std::shared_ptr<InputContext>>(
-			env["get_input_context"]
-			).value_or(nullptr);
-}
-
 Machine::~Machine()
 {
 	logger->info("Ending machine");

@@ -7,6 +7,7 @@ local assets = require("assets")
 local raycast = require("core:util/g_raycast.lua")
 local debug_drawer = require("debug_drawer")
 local logger = require("logger")
+require("game_database")
 
 
 ---@class core.context_menu
@@ -66,8 +67,12 @@ function menus:close(k)
 	self.context_menus[k] = nil
 end
 
+logger.info("HERE")
+local take_control_str = osp.game_database:get_string("core:take_control")
+local controlled_str = osp.game_database:get_string("core:controlled")
 
 ---@param gui gui.screen
+---@param veh_ent vehicle
 function menus:handle_new_menu(hovered_p, gui, veh)
 	local hovered_part = hovered_p:get_part()
 	-- TODO: Orphan pieces may still offer a context menu?
@@ -131,12 +136,19 @@ function menus:handle_new_menu(hovered_p, gui, veh)
 		layout:add_widget(title)
 
 		if self.menus.has_input_contexts then
-			local ctx = machine:get_input_context()
+			local ctx = machine:get_input_ctx()
 			if ctx then
-				local btn = guilib.text_button.new("Take control")
+				local btn = guilib.text_button.new(take_control_str)
+				local current = veh.meta:get_input_ctx()
+				if current and current:is_same_as(ctx) then
+					btn.text = controlled_str
+					btn.disabled = true
+				end
 				n_menu.handlers:add(btn, "on_clicked", function(b) 
 					if b == input.btn.left and self.menus.on_take_control then
 						self.menus.on_take_control(machine)
+						btn.text = controlled_str
+						btn.disabled = true
 					end
 				end)
 				layout:add_widget(btn)

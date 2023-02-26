@@ -1,5 +1,14 @@
 ---@meta 
 
+---@class vehicle_meta
+local vehicle_meta = {}
+
+---@param machine vehicle.machine
+function vehicle_meta:set_controlled_machine(machine) end
+
+---@return flight_input.context|nil
+function vehicle_meta:get_input_ctx() end
+
 local container = {}
 
 ---@class vehicle
@@ -8,6 +17,7 @@ local container = {}
 ---@field all_pieces vehicle.piece[]
 ---@field parts vehicle.part[]
 ---@field root vehicle.piece
+---@field meta vehicle_meta
 container.vehicle = {}
 
 ---@param event_id string
@@ -268,7 +278,10 @@ function machine:get_icon() end
 function machine:get_display_name() end
 
 ---@return flight_input.context|nil
-function machine:get_input_context() end
+function machine:get_input_ctx() end
+
+---@param ctx flight_input.context
+function machine:set_input_ctx(ctx) end
 
 ---@class vehicle.part_prototype
 ---@field name string Presented ready to display, no need to localize (it's done in load time)

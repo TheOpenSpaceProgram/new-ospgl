@@ -59,3 +59,23 @@ std::string VehicleMeta::get_group_name(int64_t id)
 		return group_names[id];
 	}
 }
+
+void VehicleMeta::set_controlled_machine(Machine* m)
+{
+	logger->check(m->in_part->vehicle == veh, "Tried to control a machine on another vehicle");
+	controlled_machine = m->in_part_id;
+	controlled_part = m->in_part->id;
+}
+
+std::shared_ptr<InputContext> VehicleMeta::get_input_ctx()
+{
+	Part* p = veh->get_part_by_id(controlled_part);
+	if(!p)
+		return nullptr;
+
+	Machine* m = p->get_machine(controlled_machine);
+	if(!m)
+		return nullptr;
+
+	return m->get_input_ctx();
+}
