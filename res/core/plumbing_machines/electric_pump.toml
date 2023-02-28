@@ -4,4 +4,4 @@ description = "electric_pump_desc"
 add_mass = 1.0
 
 [machine]
-    script = "core:machines/pumps/electric_pump.lua"
+    __script = "core:machines/pumps/electric_pump.lua"

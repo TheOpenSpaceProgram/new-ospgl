@@ -77,34 +77,6 @@ group_names = ["Other group"]
 	group_id = -1
 	id = 2
 	[part.capsule]
-	[[part.attached_machine]]
-		__plumbing_rot = 1
-		__attached_machine_id = 0
-		__script = "core:machines/valves/shutoff.lua"
-		[part.attached_machine.plumbing_pos]
-			y = 4
-			x = -6
-	[[part.attached_machine]]
-		__plumbing_rot = 1
-		__attached_machine_id = 1
-		__script = "core:machines/valves/shutoff.lua"
-		[part.attached_machine.__plumbing_pos]
-			y = 4
-			x = -1
-	[[part.attached_machine]]
-		__plumbing_rot = 1
-		__attached_machine_id = 2
-		__script = "core:machines/pumps/electric_pump.lua"
-		[part.attached_machine.__plumbing_pos]
-			y = 7
-			x = -6
-	[[part.attached_machine]]
-		__plumbing_rot = 1
-		__attached_machine_id = 3
-		__script = "core:machines/pumps/electric_pump.lua"
-		[part.attached_machine.__plumbing_pos]
-			y = 7
-			x = -1
 [[part]]
 	proto = "test_parts:parts/engine/part_engine.toml"
 	group_id = -1
@@ -112,59 +84,5 @@ group_names = ["Other group"]
 	[part.engine]
 		__plumbing_rot = 0
 		[part.engine.__plumbing_pos]
-			y = 11
+			y = 16
 			x = -4
-[[pipe]]
-	waypoints = []
-	from_port = "liquid_port"
-	to_attached_machine = 0
-	to_part = 2
-	to_port = "port_2"
-	from_machine = "fuel_tank"
-	from_part = 4
-	index = 0
-[[pipe]]
-	waypoints = [-6, 10]
-	from_port = "inlet_1"
-	to_attached_machine = 2
-	to_part = 2
-	to_port = "outlet"
-	from_machine = "engine"
-	from_part = 1
-	index = 1
-[[pipe]]
-	waypoints = []
-	from_port = "liquid_port"
-	to_attached_machine = 1
-	to_part = 2
-	to_port = "port_2"
-	from_machine = "oxidizer_tank"
-	from_part = 4
-	index = 2
-[[pipe]]
-	waypoints = []
-	from_port = "port_1"
-	to_attached_machine = 3
-	to_part = 2
-	from_attached_machine = 1
-	to_port = "inlet"
-	from_part = 2
-	index = 3
-[[pipe]]
-	waypoints = [-1, 10]
-	from_port = "inlet_2"
-	to_attached_machine = 3
-	to_part = 2
-	to_port = "outlet"
-	from_machine = "engine"
-	from_part = 1
-	index = 4
-[[pipe]]
-	waypoints = []
-	from_port = "port_1"
-	to_attached_machine = 2
-	to_part = 2
-	from_attached_machine = 0
-	to_port = "inlet"
-	from_part = 2
-	index = 5

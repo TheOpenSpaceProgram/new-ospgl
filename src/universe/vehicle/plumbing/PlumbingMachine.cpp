@@ -62,18 +62,18 @@ void PlumbingMachine::init(const cpptoml::table& init)
 	// std::cout << init << std::endl;
 	// Read plumbing_pos and rot from init if present
 	bool found_pos = false;
-	auto pos_table = init.get_table("plumbing_pos");
+	auto pos_table = init.get_table("__plumbing_pos");
 	if(pos_table)
 	{
 		deserialize(editor_position, *pos_table);
 		found_pos = true;
 	}
-	editor_rotation = init.get_as<int>("plumbing_rot").value_or(0);
+	editor_rotation = init.get_as<int>("__plumbing_rot").value_or(0);
 
 	if(!found_pos)
 	{
 		glm::dvec2 offset = glm::dvec2(0.0);
-		auto fluid_offset = init.get_table("fluid_offset");
+		auto fluid_offset = init.get_table("__fluid_offset");
 		if (fluid_offset)
 		{
 			SerializeUtil::read_to(*fluid_offset, offset);

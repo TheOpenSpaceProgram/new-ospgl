@@ -4,4 +4,4 @@ description = "1_way_desc"
 add_mass = 1.0
 
 [machine]
-script = "core:machines/valves/check.lua"
+    __script = "core:machines/valves/check.lua"

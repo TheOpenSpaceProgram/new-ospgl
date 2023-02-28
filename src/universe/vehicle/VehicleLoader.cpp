@@ -105,6 +105,14 @@ void VehicleLoader::obtain_parts(const cpptoml::table& root)
 			{
 				auto* m = new Machine(table, "core");
 				int id = *table->get_as<int>("__attached_machine_id");
+				m->attached_machine_proto = *table->get_as<std::string>("__attached_machine_proto");
+
+				// Check that prototype exists and can be loaded
+				logger->check(m->attached_machine_proto != "", "Attached machine doesn't have prototype!");
+				auto resolved = osp->assets->resolve_path(m->attached_machine_proto, m->get_pkg());
+				logger->check(osp->assets->file_exists(resolved),
+							  "Attached machine prototype was lost: {}", m->attached_machine_proto);
+
 				n_part->attached_machines[id] = m;
 				m->in_part_id = "_attached_" + std::to_string(id);
 			}
@@ -394,10 +402,7 @@ void VehicleSaver::write_parts(cpptoml::table &target, const Vehicle &what)
 				serialize_to_table(m_pair.second->plumbing.editor_position, *m_table, "__plumbing_pos");
 			}
 
-			if(!table->empty())
-			{
-				table->insert(m_pair.first, m_table);
-			}
+			table->insert(m_pair.first, m_table);
 		}
 
 		// Attached machine table array
@@ -407,7 +412,7 @@ void VehicleSaver::write_parts(cpptoml::table &target, const Vehicle &what)
 			Machine* m = pair.first->attached_machines[attached_id];
 
 			auto m_table = m->save();
-			m_table->insert("__attached_machine_proto", m->attached_machine_toml);
+			m_table->insert("__attached_machine_proto", m->attached_machine_proto);
 			m_table->insert("__attached_machine_id", attached_id);
 			// Plumbing metadata
 			if(m->plumbing.has_lua_plumbing())

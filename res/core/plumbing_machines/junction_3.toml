@@ -4,5 +4,5 @@ description = "3_way_desc"
 add_mass = 1.0
 
 [machine]
-    script = "core:machines/junction/machine.lua"
+    __script = "core:machines/junction/machine.lua"
     inlets = 3

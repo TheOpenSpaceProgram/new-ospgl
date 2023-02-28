@@ -56,7 +56,7 @@ public:
 	std::shared_ptr<cpptoml::table> init_toml;
 
 	// Path to attached machine (prototype) toml, empty if not an attached machine
-	std::string attached_machine_toml;
+	std::string attached_machine_proto;
 
 	std::unordered_map<std::string, sol::table> interfaces;
 	// May be "", in that case the machine is "centered" on the piece
