@@ -1,6 +1,6 @@
 #include "VehicleLoader.h"
 
-void VehicleLoader::load_metadata(const cpptoml::table& root)
+void VehicleLoader::load_basic(const cpptoml::table& root)
 {
 	// TODO: Description and package check
 	vpart_id = *root.get_qualified_as<int64_t>("part_id");
@@ -288,18 +288,22 @@ void VehicleLoader::obtain_wires(const cpptoml::table& root)
 	}
 }
 
-VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to)
+VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to, bool is_editor)
 {
 	n_vehicle = &to;
 
-	load_metadata(root);
+	load_basic(root);
 	obtain_parts(root);
 	obtain_pieces(root);
 	copy_pieces(root);
 	obtain_wires(root);
 	obtain_pipes(root);
 
-	update_ids();
+	bool is_flight_saved = root.get_as<bool>("in_flight").value_or(false);
+	if(!is_flight_saved && !is_editor)
+	{
+		update_ids();
+	}
 
 	n_vehicle->id_to_part = parts_by_id;
 	n_vehicle->id_to_piece = pieces_by_id;
@@ -333,6 +337,10 @@ VehicleSaver::VehicleSaver(cpptoml::table &target, const Vehicle &what)
 	}
 
 	target.insert("group_names", array);
+
+	// is the vehicle in flight
+	bool in_flight = what.in_universe != nullptr;
+	target.insert("in_flight", in_flight);
 
 	assign_ids(target, what);
 	write_parts(target, what);
@@ -377,14 +385,13 @@ void VehicleSaver::write_parts(cpptoml::table &target, const Vehicle &what)
 
 		for(auto m_pair : pair.first->machines)
 		{
-			auto m_table = cpptoml::make_table();
-			// TODO: Allow machines to write wathever they want to the toml from lua
+			auto m_table = m_pair.second->save();
 
 			// Plumbing metadata
 			if(m_pair.second->plumbing.has_lua_plumbing())
 			{
-				m_table->insert("plumbing_rot", m_pair.second->plumbing.editor_rotation);
-				serialize_to_table(m_pair.second->plumbing.editor_position, *m_table, "plumbing_pos");
+				m_table->insert("__plumbing_rot", m_pair.second->plumbing.editor_rotation);
+				serialize_to_table(m_pair.second->plumbing.editor_position, *m_table, "__plumbing_pos");
 			}
 
 			if(!table->empty())
@@ -398,20 +405,18 @@ void VehicleSaver::write_parts(cpptoml::table &target, const Vehicle &what)
 		for(size_t attached_id = 0; attached_id < pair.first->attached_machines.size(); attached_id++)
 		{
 			Machine* m = pair.first->attached_machines[attached_id];
-			auto m_table = m->init_toml->clone()->as_table();
 
-			// TODO: Allow machines to write wathever they want to the toml from lua
-
+			auto m_table = m->save();
+			m_table->insert("__attached_machine_proto", m->attached_machine_toml);
 			m_table->insert("__attached_machine_id", attached_id);
 			// Plumbing metadata
 			if(m->plumbing.has_lua_plumbing())
 			{
-				m_table->insert("plumbing_rot", m->plumbing.editor_rotation);
-				serialize_to_table(m->plumbing.editor_position, *m_table, "plumbing_pos");
+				m_table->insert("__plumbing_rot", m->plumbing.editor_rotation);
+				serialize_to_table(m->plumbing.editor_position, *m_table, "__plumbing_pos");
 			}
 
 			arr->push_back(m_table);
-
 		}
 		table->insert("attached_machine", arr);
 		part_array->push_back(table);
@@ -599,6 +604,12 @@ void VehicleSaver::write_pipes(cpptoml::table &target, const Vehicle &what)
 	target.insert("pipe", pipe_array);
 }
 
+void VehicleSaver::write_controlled(cpptoml::table &target, const Vehicle &what)
+{
+	target.insert("controlled_part", what.meta.controlled_part);
+	target.insert("controlled_machine", what.meta.controlled_machine);
+}
+
 void VehicleLoader::update_ids()
 {
 	std::unordered_map<int64_t, Part*> new_parts_by_id;
@@ -614,6 +625,10 @@ void VehicleLoader::update_ids()
 		pair.second->id += osp->universe->part_uid;
 		new_parts_by_id[pair.second->id] = pair.second;
 	}
+
+	// Remember to update the universe counters!
+	osp->universe->piece_uid += pieces_by_id.size();
+	osp->universe->part_uid += parts_by_id.size();
 
 	pieces_by_id = new_pieces_by_id;
 	parts_by_id = new_parts_by_id;

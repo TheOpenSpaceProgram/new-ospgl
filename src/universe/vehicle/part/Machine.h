@@ -50,7 +50,13 @@ public:
 	Part* in_part;
 	std::string assigned_piece;
 
+	// This toml is serialized when entity is saved. Same TOML is passed to the machine
+	// on load. This is what allows persistence.
+	// Do not use keys starting with "__" as these are used by the engine
 	std::shared_ptr<cpptoml::table> init_toml;
+
+	// Path to attached machine (prototype) toml, empty if not an attached machine
+	std::string attached_machine_toml;
 
 	std::unordered_map<std::string, sol::table> interfaces;
 	// May be "", in that case the machine is "centered" on the piece
@@ -70,6 +76,8 @@ public:
 	void physics_update(double dt);
 
 	void init(sol::state* lua_state, Part* in_part);
+
+	std::shared_ptr<cpptoml::table> save();
 
 	void load_interface(const std::string& name, sol::table n_table);
 

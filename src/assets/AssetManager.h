@@ -317,6 +317,8 @@ inline bool AssetManager::load(const std::string& package, const std::string& na
 	
 	logger->check(file_exists(full_path), "Asset file must exist ({})", full_path);
 
+	logger->debug("Loading asset '{}:{}'", package, name);
+
 	set_current_package(package);
 	T* ndata = fptr(full_path, name, package, *cfg);
 	set_current_package(old_pkg);
@@ -333,8 +335,6 @@ inline bool AssetManager::load(const std::string& package, const std::string& na
 	asset.dont_unload = cfg->get_qualified_as<bool>("dont_unload").value_or(false);
 	
 	it->second.second[name] = asset;
-	 
-	logger->debug("Loaded asset '{}:{}'", package, name);
 
 	return true;
 }

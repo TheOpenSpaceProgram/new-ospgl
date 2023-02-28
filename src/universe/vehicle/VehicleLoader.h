@@ -17,6 +17,7 @@ private:
 	void write_pieces(cpptoml::table& target, const Vehicle& what);
 	void write_wires(cpptoml::table& target, const Vehicle& what);
 	void write_pipes(cpptoml::table& target, const Vehicle& what);
+	void write_controlled(cpptoml::table& target, const Vehicle& what);
 
 public:
 	VehicleSaver(cpptoml::table& target, const Vehicle& what);
@@ -40,14 +41,17 @@ private:
 	Piece* root_piece;
 
 
-	void load_metadata(const cpptoml::table& root);
+	void load_basic(const cpptoml::table& root);
 	void obtain_parts(const cpptoml::table& root);
 	void obtain_pieces(const cpptoml::table& root);
 	void copy_pieces(const cpptoml::table& root);
 	void obtain_wires(const cpptoml::table& root);
 	void obtain_pipes(const cpptoml::table& root);
 
+	void obtain_controlled(const cpptoml::table& root);
+
 	Piece* load_piece(const cpptoml::table& piece);
+
 
 	// Makes sure IDs are unique in the universe
 	void update_ids();
@@ -55,5 +59,5 @@ private:
 public:
 
 	// Doesn't sort! This is so it can be used in the editor too
-	VehicleLoader(const cpptoml::table& root, Vehicle& to);
+	VehicleLoader(const cpptoml::table& root, Vehicle& to, bool is_editor);
 };

@@ -1,0 +1,6 @@
+name = "core:radial_piece_name"
+description = "core:radial_piece_description"
+icon = "scenes/editor/symmetry/radial_piece.png"
+script="scenes/editor/symmetry/radial_piece.lua"
+priority = -9999
+

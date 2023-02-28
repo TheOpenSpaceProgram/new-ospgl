@@ -1,31 +1,17 @@
 part_id = 4
 piece_id = 5
+in_flight = false
 group_names = ["Other group"]
 [[wire]]
-	to = 3
-	fmachine = "_attached_1"
+	to = 2
+	fmachine = "decoupler"
 	tmachine = "capsule"
 	from = 3
-[[wire]]
-	to = 3
-	fmachine = "capsule"
-	tmachine = "_attached_0"
-	from = 3
-[[piece]]
-	node = "p_decoupled"
-	part = 2
-	transform = [0.99999999999994693, 0.0000000000000000, -3.2584136988587576e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 3.2584136988587576e-7, 0.0000000000000000, 0.99999999999994693, 0.0000000000000000, 0.14835100625965730, 0.030963708235930310, -0.31826305274632583, 1.0000000000000000]
-	id = 5
-	[piece.link]
-		to_attachment = "m_decoupling_point"
-		editor_dettachable = false
-		welded = true
-		to = 4
 [[piece]]
 	node = "p_root"
 	part = 4
-	transform = [0.99999999999987443, 0.0000000000000000, -5.0068693724367187e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 5.0068693724367187e-7, 0.0000000000000000, 0.99999999999987443, 0.0000000000000000, 0.14834877490887710, 0.030963708235930310, -4.2292774457176616, 1.0000000000000000]
-	id = 2
+	transform = [0.99999999999978884, 0.0000000000000000, -6.5168273977172410e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 6.5168273977172410e-7, 0.0000000000000000, 0.99999999999978884, 0.0000000000000000, 0.14835030084081374, 0.030963708235930310, -1.4831779736721973, 1.0000000000000000]
+	id = 5
 	[piece.link]
 		to_attachment = "m_attach_bottom"
 		from_attachment = "m_attach_top"
@@ -33,7 +19,7 @@ group_names = ["Other group"]
 		to = 3
 [[piece]]
 	node = "p_root"
-	part = 2
+	part = 3
 	transform = [0.99999999999994693, 0.0000000000000000, -3.2584136988587576e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 3.2584136988587576e-7, 0.0000000000000000, 0.99999999999994693, 0.0000000000000000, 0.14835106733065165, 0.030963708235930310, -0.13083751384881906, 1.0000000000000000]
 	id = 4
 	[piece.link]
@@ -42,10 +28,20 @@ group_names = ["Other group"]
 		welded = true
 		to = 1
 [[piece]]
+	node = "p_decoupled"
+	part = 3
+	transform = [0.99999999999994693, 0.0000000000000000, -3.2584136988587576e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 3.2584136988587576e-7, 0.0000000000000000, 0.99999999999994693, 0.0000000000000000, 0.14835100625965730, 0.030963708235930310, -0.31826305274632583, 1.0000000000000000]
+	id = 3
+	[piece.link]
+		to_attachment = "m_decoupling_point"
+		editor_dettachable = false
+		welded = true
+		to = 4
+[[piece]]
 	node = "p_root"
 	part = 1
-	transform = [0.99999999999978884, 0.0000000000000000, -6.5168273977172410e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 6.5168273977172410e-7, 0.0000000000000000, 0.99999999999978884, 0.0000000000000000, 0.14835030084081374, 0.030963708235930310, -1.4831779736721973, 1.0000000000000000]
-	id = 3
+	transform = [0.99999999999987443, 0.0000000000000000, -5.0068693724367187e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 5.0068693724367187e-7, 0.0000000000000000, 0.99999999999987443, 0.0000000000000000, 0.14834877490887710, 0.030963708235930310, -4.2292774457176616, 1.0000000000000000]
+	id = 2
 	[piece.link]
 		to_attachment = "m_attach_bottom"
 		from_attachment = "m_attach_top"
@@ -54,121 +50,121 @@ group_names = ["Other group"]
 [[piece]]
 	node = "p_root"
 	root = true
-	part = 3
+	part = 2
 	transform = [1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.14835110050680012, 0.030963708235930310, 0.97529479114556494, 1.0000000000000000]
 	id = 1
 [[part]]
-	proto = "test_parts:parts/engine/part_engine.toml"
-	group_id = -1
-	id = 4
-	[part.engine]
-		plumbing_rot = 0
-		[part.engine.plumbing_pos]
-			y = 11
-			x = -4
-[[part]]
-	proto = "test_parts:parts/capsule/part_capsule.toml"
-	group_id = -1
-	id = 3
-	[part.capsule]
-	[[part.attached_machine]]
-		plumbing_rot = 1
-		__attached_machine_id = 0
-		script = "core:machines/valves/shutoff.lua"
-		[part.attached_machine.plumbing_pos]
-			y = 4
-			x = -6
-	[[part.attached_machine]]
-		plumbing_rot = 1
-		__attached_machine_id = 1
-		script = "core:machines/valves/shutoff.lua"
-		[part.attached_machine.plumbing_pos]
-			y = 4
-			x = -1
-	[[part.attached_machine]]
-		plumbing_rot = 1
-		__attached_machine_id = 2
-		script = "core:machines/pumps/electric_pump.lua"
-		[part.attached_machine.plumbing_pos]
-			y = 7
-			x = -6
-	[[part.attached_machine]]
-		plumbing_rot = 1
-		__attached_machine_id = 3
-		script = "core:machines/pumps/electric_pump.lua"
-		[part.attached_machine.plumbing_pos]
-			y = 7
-			x = -1
-[[part]]
-	proto = "test_parts:parts/decoupler/part_decoupler.toml"
-	group_id = -1
-	id = 2
-	[part.decoupler]
-[[part]]
 	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
 	group_id = -1
-	id = 1
+	id = 4
 	[part.oxidizer_tank]
-		plumbing_rot = 0
-		[part.oxidizer_tank.plumbing_pos]
+		__plumbing_rot = 0
+		[part.oxidizer_tank.__plumbing_pos]
 			y = -1
 			x = -2
 	[part.fuel_tank]
-		plumbing_rot = 0
-		[part.fuel_tank.plumbing_pos]
+		__plumbing_rot = 0
+		[part.fuel_tank.__plumbing_pos]
 			y = -1
 			x = -7
+[[part]]
+	proto = "test_parts:parts/decoupler/part_decoupler.toml"
+	group_id = -1
+	id = 3
+	[part.decoupler]
+[[part]]
+	proto = "test_parts:parts/capsule/part_capsule.toml"
+	group_id = -1
+	id = 2
+	[part.capsule]
+	[[part.attached_machine]]
+		__plumbing_rot = 1
+		__attached_machine_id = 0
+		__script = "core:machines/valves/shutoff.lua"
+		[part.attached_machine.plumbing_pos]
+			y = 4
+			x = -6
+	[[part.attached_machine]]
+		__plumbing_rot = 1
+		__attached_machine_id = 1
+		__script = "core:machines/valves/shutoff.lua"
+		[part.attached_machine.__plumbing_pos]
+			y = 4
+			x = -1
+	[[part.attached_machine]]
+		__plumbing_rot = 1
+		__attached_machine_id = 2
+		__script = "core:machines/pumps/electric_pump.lua"
+		[part.attached_machine.__plumbing_pos]
+			y = 7
+			x = -6
+	[[part.attached_machine]]
+		__plumbing_rot = 1
+		__attached_machine_id = 3
+		__script = "core:machines/pumps/electric_pump.lua"
+		[part.attached_machine.__plumbing_pos]
+			y = 7
+			x = -1
+[[part]]
+	proto = "test_parts:parts/engine/part_engine.toml"
+	group_id = -1
+	id = 1
+	[part.engine]
+		__plumbing_rot = 0
+		[part.engine.__plumbing_pos]
+			y = 11
+			x = -4
 [[pipe]]
 	waypoints = []
 	from_port = "liquid_port"
 	to_attached_machine = 0
-	to_part = 3
+	to_part = 2
 	to_port = "port_2"
 	from_machine = "fuel_tank"
-	from_part = 1
+	from_part = 4
 	index = 0
 [[pipe]]
 	waypoints = [-6, 10]
 	from_port = "inlet_1"
 	to_attached_machine = 2
-	to_part = 3
+	to_part = 2
 	to_port = "outlet"
 	from_machine = "engine"
-	from_part = 4
+	from_part = 1
 	index = 1
 [[pipe]]
 	waypoints = []
 	from_port = "liquid_port"
 	to_attached_machine = 1
-	to_part = 3
+	to_part = 2
 	to_port = "port_2"
 	from_machine = "oxidizer_tank"
-	from_part = 1
+	from_part = 4
 	index = 2
 [[pipe]]
 	waypoints = []
 	from_port = "port_1"
 	to_attached_machine = 3
-	to_part = 3
+	to_part = 2
 	from_attached_machine = 1
 	to_port = "inlet"
-	from_part = 3
+	from_part = 2
 	index = 3
 [[pipe]]
 	waypoints = [-1, 10]
 	from_port = "inlet_2"
 	to_attached_machine = 3
-	to_part = 3
+	to_part = 2
 	to_port = "outlet"
 	from_machine = "engine"
-	from_part = 4
+	from_part = 1
 	index = 4
 [[pipe]]
 	waypoints = []
 	from_port = "port_1"
 	to_attached_machine = 2
-	to_part = 3
+	to_part = 2
 	from_attached_machine = 0
 	to_port = "inlet"
-	from_part = 3
+	from_part = 2
 	index = 5

@@ -111,6 +111,7 @@ void PlumbingPanel::create_machine(std::string db_id)
 
 	// We attach it to currently assigned target part
 	target_part->attached_machines.push_back(pb_machine);
+	pb_machine->attached_machine_toml = pkg + ":" + name;
 	pb_machine->init(&osp->game_state->universe.lua_state, target_part);
 
 	// Place it in a reasonable position

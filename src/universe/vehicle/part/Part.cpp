@@ -9,8 +9,8 @@ Part::Part(AssetHandle<PartPrototype>& part_proto, std::shared_ptr<cpptoml::tabl
 	// Pre-load machines (everything but lua)
 	for(auto machine_toml : part_proto->machines)
 	{
-		std::string id = *machine_toml->get_as<std::string>("id");
-		std::string script = *machine_toml->get_as<std::string>("script");
+		std::string id = *machine_toml->get_as<std::string>("__id");
+		std::string script = *machine_toml->get_as<std::string>("__script");
 
 		// We must make a clone! Otherwise it modifies all instances of the machine
 		auto config_toml = machine_toml->clone()->as_table();

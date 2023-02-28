@@ -371,7 +371,7 @@ void GenericSerializer<Vehicle>::serialize(const Vehicle& what, cpptoml::table& 
 
 void GenericSerializer<Vehicle>::deserialize(Vehicle& to, const cpptoml::table& from) 
 {
-	VehicleLoader(from, to);
+	VehicleLoader(from, to, false);
 }
 
 Part* Vehicle::get_part_by_id(int64_t id)

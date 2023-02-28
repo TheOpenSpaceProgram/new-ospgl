@@ -1,0 +1,2 @@
+-- Auto-plumbing for symmetric groups
+-- Default behaviour, appropiate for most symmetry modes

@@ -149,7 +149,8 @@ void EditorVehicle::update(double dt)
 void EditorVehicle::init(sol::state* lua_state)
 {
 	veh = new Vehicle();
-	SerializeUtil::read_file_to("udata/vehicles/debug.toml", *veh);
+	auto file = SerializeUtil::load_file("udata/vehicles/debug.toml");
+	VehicleLoader(*file, *veh, true);
 
 	// Load the different models
 	std::string model_path = *osp->assets->load_toml("core:meshes/editor_attachment.toml")

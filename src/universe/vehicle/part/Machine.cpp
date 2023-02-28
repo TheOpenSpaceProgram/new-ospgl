@@ -74,7 +74,7 @@ void Machine::init(sol::state* lua_state, Part* in_part)
 	this->lua_state = lua_state;
 
 	std::string script_path;
-	SAFE_TOML_GET_FROM(init_toml_p, script_path, "script", std::string);
+	SAFE_TOML_GET_FROM(init_toml_p, script_path, "__script", std::string);
 
 	// Extract package from script path, as in_pkg is the PART's package
 	auto[pkg, name] = osp->assets->get_package_and_name(script_path, in_pkg);
@@ -256,4 +256,11 @@ bool Machine::draw_imgui()
 std::string Machine::get_display_name()
 {
 	return LuaUtil::call_function_if_present_returns<std::string>(env["get_display_name"]).value_or(get_id());
+}
+
+std::shared_ptr<cpptoml::table> Machine::save()
+{
+	// Let lua save anything it needs
+	return LuaUtil::call_function_if_present_returns<std::shared_ptr<cpptoml::table>>(env["save"]).value_or(
+			cpptoml::make_table());
 }
