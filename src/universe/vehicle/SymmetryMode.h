@@ -1,7 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "../part/Part.h"
+#include "part/Part.h"
 
 class Vehicle;
 
@@ -26,6 +26,5 @@ public:
 	// so that mirrored versions are properly deleted
 	void on_disconnect(Piece* piece);
 
-	SymmetryMode
 };
 
