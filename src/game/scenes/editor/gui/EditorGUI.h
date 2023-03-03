@@ -15,6 +15,7 @@
 #include "EditorTrashcan.h"
 #include "PlumbingPanel.h"
 #include "WiringPanel.h"
+#include "ModifyPanel.h"
 
 
 class EditorScene;
@@ -42,7 +43,7 @@ public:
 	enum EditorMode
 	{
 		ATTACHING,
-		TRANSFORMING,
+		MODIFYING,
 		WIRING,
 		PLUMBING,
 		ELECTRIC_WIRING
@@ -51,6 +52,7 @@ public:
 	enum ShowPanel
 	{
 		PART_LIST,
+		MODIFY_PANEL,
 		PLUMBING_PANEL,
 		WIRING_PANEL,
 		TRASHCAN
@@ -67,6 +69,7 @@ public:
 	EditorTrashcan trashcan;
 	WiringPanel wiring;
 	PlumbingPanel plumbing;
+	ModifyPanel modify_tools;
 
 	GUICanvas toolset_canvas;
 	GUICanvas file_canvas;

@@ -53,15 +53,6 @@ void AttachInterface::handle_input_hovering(const CameraUniforms& cu,
 		hovered = rresult.p;
 	}
 
-	if(!gui_input->mouse_blocked)
-	{
-		if(input->mouse_down(GLFW_MOUSE_BUTTON_RIGHT))
-		{
-			int id = hovered ? hovered->id : -1;
-			edveh_int->emit_event("on_alt_click", id);
-		}
-	}
-
 	if(hovered != nullptr && !gui_input->mouse_blocked)
 	{
 		if(input->mouse_down(GLFW_MOUSE_BUTTON_LEFT))

@@ -26,6 +26,7 @@ int EditorGUI::get_panel_width()
 		part_list.init(sc, vg);
 		trashcan.init(sc, vg);
 		plumbing.init(sc, vg);
+		modify_tools.init(sc, vg);
 
 		create_toolset();
 		create_file();
@@ -40,6 +41,9 @@ int EditorGUI::get_panel_width()
 		{
 			case ATTACHING:
 				edveh_int->current_interface = &edveh_int->attach_interface;
+				break;
+			case MODIFYING:
+				edveh_int->current_interface = &edveh_int->modify_interface;
 				break;
 			case WIRING:
 				edveh_int->current_interface = &edveh_int->wire_interface;
@@ -84,7 +88,7 @@ int EditorGUI::get_panel_width()
 		current_editor_mode_button->toggled = true;
 		edveh_int->current_interface = &edveh_int->attach_interface;
 
-		create_button("editor/transform.png", TRANSFORMING);
+		create_button("editor/transform.png", MODIFYING);
 		create_button("editor/wire.png", WIRING);
 		create_button("editor/duct.png", PLUMBING);
 		create_button("editor/electric.png", ELECTRIC_WIRING);
@@ -248,6 +252,10 @@ void EditorGUI::add_canvas(int width, int height)
 	{
 		show_panel = WIRING_PANEL;
 	}
+	else if(editor_mode == MODIFYING)
+	{
+		show_panel = MODIFY_PANEL;
+	}
 
 	if(show_panel == PART_LIST)
 	{
@@ -256,6 +264,10 @@ void EditorGUI::add_canvas(int width, int height)
 	else if(show_panel == TRASHCAN)
 	{
 		trashcan.add_gui(width, get_panel_width(), height, &scene->gui_screen);
+	}
+	else if(show_panel == MODIFY_PANEL)
+	{
+		modify_tools.add_gui(width, get_panel_width(), height, &scene->gui_screen);
 	}
 	else if(show_panel == PLUMBING_PANEL)
 	{

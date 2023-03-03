@@ -2,13 +2,15 @@
 #include "EditorVehicle.h"
 
 #include "interfaces/AttachInterface.h"
+#include "interfaces/ModifyInterface.h"
 #include "interfaces/WireInterface.h"
 #include "interfaces/PlumbingInterface.h"
 #include "EditorCamera.h"
 
 // Handles user interaction with the EditorVehicle
 // Emits events:
-// - on_right_click(piece_id: int64 - Only emitted if the interface does, if id < 0 then no piece clicked
+// - on_piece_click(piece_id: int64) - Only emitted if the interface does, if id < 0 then no piece clicked
+// - close_context_menus() - Emmited when interface changes must close all non-cut context menus
 class EditorVehicleInterface : public EventEmitter
 {
 public:
@@ -37,6 +39,7 @@ public:
 
 	// Note: This must be below these two for initializing order!
 	AttachInterface attach_interface;
+	ModifyInterface modify_interface;
 	WireInterface wire_interface;
 	PlumbingInterface plumbing_interface;
 
