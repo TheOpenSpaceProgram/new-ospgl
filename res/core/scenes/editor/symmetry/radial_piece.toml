@@ -1,6 +1,6 @@
-name = "core:radial_piece_name"
-description = "core:radial_piece_description"
-icon = "scenes/editor/symmetry/radial_piece.png"
-script="scenes/editor/symmetry/radial_piece.lua"
-priority = -9999
+__name = "core:radial_piece_name"
+__description = "core:radial_piece_description"
+__icon = "scenes/editor/symmetry/radial_piece.png"
+__script="scenes/editor/symmetry/radial_piece.lua"
+__priority = -9999
 

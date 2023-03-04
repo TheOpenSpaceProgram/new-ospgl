@@ -140,3 +140,10 @@ void GameDatabase::add_editor_script(const std::string &path, const std::string 
 	editor_scripts.push_back(sane_path);
 }
 
+void GameDatabase::add_symmetry_mode(const std::string &path, const std::string &pkg)
+{
+	std::string sane_path = sanitize_path(path, pkg);
+	logger->debug("[DB] Adding symmetry mode with path '{}'", sane_path);
+	symmetry_modes.push_back(sane_path);
+}
+

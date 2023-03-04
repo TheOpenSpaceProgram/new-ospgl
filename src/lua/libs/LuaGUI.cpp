@@ -115,6 +115,7 @@ void LuaGUI::load_to(sol::table &table)
 		{
 			return self->divide_v(fac);
 	  	},
+	    "clear", &GUICanvas::clear,
 	    // Utility functions
 	    "divide_v_pixels", [](GUICanvas* self, int pixels, sol::optional<bool> for_bottom)
 	    {

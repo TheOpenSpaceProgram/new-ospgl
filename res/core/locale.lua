@@ -45,6 +45,8 @@ local locale =
 {"gman_move_up", "Move Group Up", "Subir Grupo"},
 {"gman_move_down", "Move Group Down", "Bajar Grupo"},
 {"gman_move_all", "Move all parts to...", "Mover las partes a..."},
+-- Symmetry
+{"radial_piece_name", "Radial Symmetry - Piece", "Simetria Radial - Pieza"}
 
 }
 

@@ -9,7 +9,25 @@ private:
 	EditorVehicleInterface* edveh_int;
 	EditorVehicle* edveh;
 
+	bool do_interface_idle(Piece* hovered, GUIInput* ipt);
 public:
+	enum State
+	{
+		// The editor is waiting for the user to initiate an action, highlighting and
+		// context menu creation is possible
+		IDLE,
+		// The editor is waiting for the user to click a piece to create symmetry
+		CREATING_SYMMETRY,
+		// The editor is waiting for the user to click a piece to re-root
+		RE_ROOTING,
+		// The editor is waiting for the user to click a piece for lua reasons
+		// (select_piece event)
+		SELECTING_PIECE,
+
+	};
+	State cur_state;
+
+	void change_state(State st);
 
 
 	void update(double dt) override;

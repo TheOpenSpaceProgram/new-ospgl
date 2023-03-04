@@ -9,7 +9,7 @@
 
 // Handles user interaction with the EditorVehicle
 // Emits events:
-// - on_piece_click(piece_id: int64) - Only emitted if the interface does, if id < 0 then no piece clicked
+// - on_piece_click(piece_id: int64) - Only emitted if the interface does, if id < 0 then empty space clicked
 // - close_context_menus() - Emmited when interface changes must close all non-cut context menus
 class EditorVehicleInterface : public EventEmitter
 {

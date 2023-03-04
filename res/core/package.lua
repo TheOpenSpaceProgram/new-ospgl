@@ -25,5 +25,7 @@ function load(database)
 
 	database:add_editor_script("scenes/editor/editor.lua")
 
+	database:add_symmetry_mode("scenes/editor/symmetry/radial_piece.toml")
+
 end
 

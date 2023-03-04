@@ -56,6 +56,13 @@ public:
 	template<typename T>
 	void set_layout_lua(std::shared_ptr<T> d){ set_layout(d); }
 
+	void clear()
+	{
+		child_0 = nullptr;
+		child_1 = nullptr;
+		layout = nullptr;
+	}
+
 	GUICanvas()
 	{
 		factor = 1.0f;

@@ -53,9 +53,5 @@ void GUITextButton::prepare(glm::ivec4 viewport, GUIScreen *screen, GUIInput *gu
 
 glm::ivec2 GUITextButton::position(glm::ivec2 wpos, glm::ivec2 wsize, GUIScreen* screen)
 {
-	if(wsize.x > 10000)
-	{
-		logger->info("wpos = ({}, {}), wsize = ({}, {})", wpos.x, wpos.y, wsize.x, wsize.y);
-	}
 	return default_position(wpos, wsize);
 }
