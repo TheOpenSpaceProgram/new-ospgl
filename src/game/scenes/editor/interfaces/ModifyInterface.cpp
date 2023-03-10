@@ -23,6 +23,14 @@ ModifyInterface::do_interface(const CameraUniforms &cu, glm::dvec3 ray_start, gl
 	{
 		return do_interface_idle(hovered, gui_input);
 	}
+	else if(cur_state == SELECTING_SYMMETRY)
+	{
+		return do_interface_select_symmetry(hovered, gui_input);
+	}
+	else if(cur_state == CREATING_SYMMETRY)
+	{
+		return do_interface_create_symmetry(hovered, gui_input);
+	}
 
 	return false;
 }
@@ -63,20 +71,16 @@ void ModifyInterface::change_state(ModifyInterface::State st)
 
 	}
 
-	edveh_int->scene->gui.modify_tools.change_state(st);
+	edveh_int->scene->gui.modify_tools.change_state(st, nullptr);
 
 	cur_state = st;
 }
 
 bool ModifyInterface::do_interface_idle(Piece* hovered, GUIInput* ipt)
 {
-	// Highlighting affects only hovered piece
-	for(auto& mp : edveh->piece_meta)
+	if(hovered)
 	{
-		if(mp.first == hovered)
-		{
-			mp.second.highlight = glm::vec3(1.0f);
-		}
+		edveh->piece_meta[hovered].highlight = glm::vec3(1.0f);
 	}
 
 	if(!ipt->mouse_blocked)
@@ -90,4 +94,88 @@ bool ModifyInterface::do_interface_idle(Piece* hovered, GUIInput* ipt)
 
 	return false;
 
+}
+
+bool ModifyInterface::do_interface_select_symmetry(Piece *hovered, GUIInput *ipt)
+{
+	if(selected_piece == nullptr)
+	{
+		// Highlight all symmetry roots (and child pieces)
+	}
+	else
+	{
+		// Highlight selected symmetry group
+	}
+
+	return false;
+}
+
+bool ModifyInterface::do_interface_create_symmetry(Piece *hovered, GUIInput *ipt)
+{
+	if(selected_piece == nullptr)
+	{
+		if (hovered)
+		{
+			// Make sure the piece can be disconnected
+			if (hovered->editor_dettachable)
+			{
+				highlight_symmetry(hovered);
+				if (!ipt->mouse_blocked)
+				{
+					if (input->mouse_down(GLFW_MOUSE_BUTTON_LEFT))
+					{
+						selected_piece = hovered;
+						// Tell the panel that piece was selected
+						edveh_int->scene->gui.modify_tools.change_state(CREATING_SYMMETRY, selected_piece);
+					}
+				}
+			}
+			else
+			{
+				edveh->piece_meta[hovered].highlight = glm::vec3(1.0f, 0.0f, 0.0f);
+			}
+		}
+	}
+	else
+	{
+		auto children = highlight_symmetry(selected_piece);
+		if(pick_another_piece && hovered)
+		{
+			bool is_in_symmetry = false;
+			for(Piece* p : children)
+			{
+				if(p == hovered)
+				{
+					is_in_symmetry = true;
+					break;
+				}
+			}
+			if(!is_in_symmetry && hovered != selected_piece)
+			{
+				edveh->piece_meta[hovered].highlight = glm::vec3(1.0f);
+
+				if (!ipt->mouse_blocked)
+				{
+					if (input->mouse_down(GLFW_MOUSE_BUTTON_LEFT))
+					{
+						edveh_int->emit_event("on_select_piece", hovered->id);
+					}
+				}
+			}
+		}
+	}
+
+
+	return false;
+}
+
+std::vector<Piece*> ModifyInterface::highlight_symmetry(Piece* root)
+{
+	edveh->piece_meta[root].highlight = glm::vec3(0.5f, 0.5f, 1.0f);
+	auto children = edveh->veh->get_children_of(root);
+	for (Piece *p: children)
+	{
+		edveh->piece_meta[p].highlight = glm::vec3(0.0f, 0.0f, 1.0f);
+	}
+	return children;
 }

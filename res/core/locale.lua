@@ -39,6 +39,9 @@ local locale =
 {"editor_search_parts", "Search parts", "Buscar partes"},
 {"editor_auto_wire", "Auto-wire", "Cableado"},
 {"default_group", "Default", "Por Defecto"},
+{"create_symmetry", "Select a piece to create a symmetry group", "Seleccione una pieza para crear un grupo de simetría"},
+{"select_symmetry", "Select a symmetry group to modify it", "Seleccione un grupo de simetría para modificarlo"},
+{"cancel", "Cancel", "Cancelar"},
 -- Group Manager
 {"group_manager", "Group Manager", "Administrador de Grupos"},
 {"gman_delete", "Delete Group (must be empty)", "Eliminar Grupo (vacío)"},

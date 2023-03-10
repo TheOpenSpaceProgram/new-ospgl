@@ -12,6 +12,9 @@ class ModifyPanel : public EditorPanel
 private:
 	EditorScene* sc;
 	EditorGUI* edgui;
+	ModifyInterface* mod_int;
+	EditorVehicleInterface* edveh_int;
+
 	GUIInput* gui_input;
 	NVGcontext* vg;
 
@@ -20,11 +23,16 @@ private:
 	std::shared_ptr<GUICanvas> child_0;
 
 	void make_symmetry_canvas_default();
+	void make_symmetry_canvas_info();
 	std::shared_ptr<GUICanvas> symmetry_canvas_default;
+	std::shared_ptr<GUICanvas> symmetry_canvas_info_select;
+	std::shared_ptr<GUICanvas> symmetry_canvas_info_create;
+
+	std::string creating_symmetry_name;
 
 public:
 
-	void change_state(ModifyInterface::State state);
+	void change_state(ModifyInterface::State state, Piece* selected_piece);
 	void init(EditorScene* sc, NVGcontext* vg) override;
 	void add_gui(int width, int panel_width, int height, GUIScreen* screen) override;
 

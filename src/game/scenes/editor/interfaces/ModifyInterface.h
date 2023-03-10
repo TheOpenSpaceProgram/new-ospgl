@@ -10,6 +10,12 @@ private:
 	EditorVehicle* edveh;
 
 	bool do_interface_idle(Piece* hovered, GUIInput* ipt);
+	bool do_interface_select_symmetry(Piece* hovered, GUIInput* ipt);
+	bool do_interface_create_symmetry(Piece* hovered, GUIInput* ipt);
+
+	// returns highlighted pieces, not including root
+	std::vector<Piece*> highlight_symmetry(Piece* root);
+
 public:
 	enum State
 	{
@@ -17,14 +23,24 @@ public:
 		// context menu creation is possible
 		IDLE,
 		// The editor is waiting for the user to click a piece to create symmetry
+		// or is creating a symmetry if selected_piece != nullptr
 		CREATING_SYMMETRY,
-		// The editor is waiting for the user to click a piece to re-root
+		// The editor is waiting for the user to click on a piece with symmetry to modify it
+		// or the symmetry has been selected and is being modified if selected_piece != nullptr
+		SELECTING_SYMMETRY,
+		// The editor is waiting for the user to click a piece to remove symmetry (instant action)
+		ERASING_SYMMETRY,
+		// The editor is waiting for the user to click a piece to re-root (instant action)
 		RE_ROOTING,
 		// The editor is waiting for the user to click a piece for lua reasons
-		// (select_piece event)
+		// (uses select_piece event)
 		SELECTING_PIECE,
 
 	};
+	Piece* selected_piece;
+	// If true and we are creating symmetry, more pieces may be picked and returned
+	// using the select_piece event (used by lua)
+	bool pick_another_piece;
 	State cur_state;
 
 	void change_state(State st);

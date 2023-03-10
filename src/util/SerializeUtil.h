@@ -197,7 +197,7 @@ public:
 	}
 
 	// Overrides target with source, overwriting any entry when needed
-	static void override(cpptoml::table& target, cpptoml::table& source)
+	static void override(cpptoml::table& target, const cpptoml::table& source)
 	{
 		for(auto children : source)
 		{
