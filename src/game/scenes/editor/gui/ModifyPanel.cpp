@@ -4,7 +4,6 @@
 #include "gui/widgets/GUITextButton.h"
 #include "gui/widgets/GUIIconTextButton.h"
 #include "gui/widgets/GUILabel.h"
-#include "universe/vehicle/SymmetryMode.h"
 #include "../EditorScene.h"
 #include "../interfaces/ModifyInterface.h"
 
@@ -29,6 +28,7 @@ void ModifyPanel::init(EditorScene *nsc, NVGcontext *nvg)
 	auto[part_list_canvas, _] = child_0->divide_v(0.7);
 	make_symmetry_canvas_default();
 	make_symmetry_canvas_info();
+	make_symmetry_canvas_creating();
 	child_0->child_1 = symmetry_canvas_default;
 
 	auto part_lists_layout = std::make_shared<GUISingleLayout>();
@@ -71,15 +71,17 @@ void ModifyPanel::change_state(ModifyInterface::State st, Piece* selected_piece)
 		}
 		else
 		{
-			// Let lua create the GUI
-			SymmetryMode smod;
+			// Create the symmetry mode proper in the vehicle
+			modifying_symmetry = new SymmetryMode();
 			auto config = AssetHandle<Config>(creating_symmetry_name);
-			config->read_to(smod);
+			config->read_to(*modifying_symmetry);
 			// We initialize the symmetry mode without any config, as it's being created
-			smod.init(&sc->lua_state, config.pkg);
+			modifying_symmetry->init(&sc->lua_state, config.pkg);
 
-			child_0->child_1 = std::make_shared<GUICanvas>();
-			smod.do_gui(child_0->child_1, mod_int);
+			// empty canvas by default
+			symmetry_canvas_creating->child_0 = std::make_shared<GUICanvas>();
+			child_0->child_1 = symmetry_canvas_creating;
+			modifying_symmetry->take_gui_control(this, mod_int, edveh_int);
 		}
 	}
 
@@ -146,9 +148,9 @@ void ModifyPanel::make_symmetry_canvas_info()
 	auto str2 = osp->game_database->get_string("core:cancel");
 	auto text1 = std::make_shared<GUILabel>(str);
 	text1->style = GUILabel::SEPARATOR;
-	auto cancel = std::make_shared<GUITextButton>(str2);
+	auto btn2 = std::make_shared<GUITextButton>(str2);
 	layout->add_widget(text1);
-	layout->add_widget(cancel);
+	layout->add_widget(btn2);
 	symmetry_canvas_info_select->set_layout(layout);
 
 	symmetry_canvas_info_create = std::make_shared<GUICanvas>();
@@ -157,6 +159,53 @@ void ModifyPanel::make_symmetry_canvas_info()
 	auto text2 = std::make_shared<GUILabel>(str3);
 	text2->style = GUILabel::SEPARATOR;
 	layout2->add_widget(text2);
-	layout2->add_widget(cancel);
+	layout2->add_widget(btn2);
 	symmetry_canvas_info_create->set_layout(layout2);
 }
+
+void ModifyPanel::make_symmetry_canvas_creating()
+{
+	symmetry_canvas_creating = std::make_shared<GUICanvas>();
+	auto[_, bottom] = symmetry_canvas_creating->divide_v(0.5);
+	symmetry_canvas_creating->child_pixels = 40;
+	symmetry_canvas_creating->pixels_for_child_1 = true;
+	auto layout = std::make_shared<GUIVerticalLayout>();
+	auto str = osp->game_database->get_string("core:cancel");
+	cancel_button = std::make_shared<GUITextButton>(str);
+	layout->add_widget(cancel_button);
+	auto str2 = osp->game_database->get_string("core:finish");
+	finish_button  = std::make_shared<GUITextButton>(str2);
+	layout->mark_same_line();
+	layout->add_widget(finish_button);
+	bottom->set_layout(layout);
+}
+
+void ModifyPanel::set_symmetry_canvas(std::shared_ptr<GUICanvas> canvas, bool can_finish, bool can_go_back)
+{
+	child_0->child_1->child_0 = canvas;
+	finish_button->disabled = !can_finish;
+
+	std::string back;
+	if(can_go_back)
+		back = osp->game_database->get_string("core:back");
+	else
+	{
+		if(mod_int->cur_state == ModifyInterface::SELECTING_SYMMETRY)
+		{
+			back = osp->game_database->get_string("core:undo");
+		}
+		else
+		{
+			back = osp->game_database->get_string("core:cancel");
+		}
+	}
+
+	cancel_button->text = back;
+
+}
+
+ModifyPanel::~ModifyPanel()
+{
+
+}
+

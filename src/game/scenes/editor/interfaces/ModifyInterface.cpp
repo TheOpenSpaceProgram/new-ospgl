@@ -43,7 +43,14 @@ void ModifyInterface::leave()
 
 bool ModifyInterface::can_leave()
 {
-	return true;
+	if(cur_state == IDLE)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 ModifyInterface::ModifyInterface(EditorVehicleInterface* eint)
@@ -104,7 +111,7 @@ bool ModifyInterface::do_interface_select_symmetry(Piece *hovered, GUIInput *ipt
 	}
 	else
 	{
-		// Highlight selected symmetry group
+		return do_interface_modify_symmetry(hovered, ipt);
 	}
 
 	return false;
@@ -138,33 +145,8 @@ bool ModifyInterface::do_interface_create_symmetry(Piece *hovered, GUIInput *ipt
 	}
 	else
 	{
-		auto children = highlight_symmetry(selected_piece);
-		if(pick_another_piece && hovered)
-		{
-			bool is_in_symmetry = false;
-			for(Piece* p : children)
-			{
-				if(p == hovered)
-				{
-					is_in_symmetry = true;
-					break;
-				}
-			}
-			if(!is_in_symmetry && hovered != selected_piece)
-			{
-				edveh->piece_meta[hovered].highlight = glm::vec3(1.0f);
-
-				if (!ipt->mouse_blocked)
-				{
-					if (input->mouse_down(GLFW_MOUSE_BUTTON_LEFT))
-					{
-						edveh_int->emit_event("on_select_piece", hovered->id);
-					}
-				}
-			}
-		}
+		return do_interface_modify_symmetry(hovered, ipt);
 	}
-
 
 	return false;
 }
@@ -178,4 +160,47 @@ std::vector<Piece*> ModifyInterface::highlight_symmetry(Piece* root)
 		edveh->piece_meta[p].highlight = glm::vec3(0.0f, 0.0f, 1.0f);
 	}
 	return children;
+}
+
+void ModifyInterface::start_picking_piece()
+{
+	if(cur_state == CREATING_SYMMETRY)
+	{
+		pick_another_piece = true;
+	}
+	else
+	{
+		change_state(SELECTING_PIECE);
+	}
+}
+
+bool ModifyInterface::do_interface_modify_symmetry(Piece *hovered, GUIInput *ipt)
+{
+	auto children = highlight_symmetry(selected_piece);
+	if(pick_another_piece && hovered)
+	{
+		bool is_in_symmetry = false;
+		for(Piece* p : children)
+		{
+			if(p == hovered)
+			{
+				is_in_symmetry = true;
+				break;
+			}
+		}
+		if(!is_in_symmetry && hovered != selected_piece)
+		{
+			edveh->piece_meta[hovered].highlight = glm::vec3(1.0f);
+
+			if (!ipt->mouse_blocked)
+			{
+				if (input->mouse_down(GLFW_MOUSE_BUTTON_LEFT))
+				{
+					edveh_int->emit_event("on_select_piece", hovered->id);
+				}
+			}
+		}
+	}
+
+	return false;
 }

@@ -25,4 +25,10 @@ void LuaEditor::load_to(sol::table& table)
 	table.new_usertype<EditorVehicleInterface>("editor_vehicle_interface", sol::no_constructor,
 	EVENT_EMITTER_SIGN_UP(EditorVehicleInterface));
 
+	table.new_usertype<ModifyPanel>("modify_panel", sol::no_constructor,
+			"set_canvas", &ModifyPanel::set_symmetry_canvas);
+
+	table.new_usertype<ModifyInterface>("modify_interface", sol::no_constructor,
+				"start_picking_piece", &ModifyInterface::start_picking_piece);
+
 }

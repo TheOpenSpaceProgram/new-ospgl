@@ -5,11 +5,15 @@
 #include "gui/GUICanvas.h"
 
 class ModifyInterface;
+class ModifyPanel;
+class EditorVehicleInterface;
 class Vehicle;
 
 // A symmetric distribution handles all symmetric parts in a group
 // Behaviour is handled in lua, but this lua code runs in the editor only as during
 // flight symmetry modes exist only as metadata to know which parts are symmetric!
+// Cloning of the pieces is done in C++, with lua having the responsability of cloning
+// the root pieces to correct positions, and also handling wiring and plumbing!
 class SymmetryMode
 {
 private:
@@ -39,11 +43,19 @@ public:
 	// ONLY CALLED IN THE EDITOR
 	void on_disconnect(Piece* piece);
 
+	void add_root_clone(glm::dvec3 pos, glm::dquat orient);
+
 	// ONLY CALLED IN THE EDITOR
 	void init(sol::state* in_state, const std::string& pkg);
 
-	// ONLY CALLED IN THE EDITOR
-	void do_gui(std::shared_ptr<GUICanvas> to_canvas, ModifyInterface* mod_int);
+	// Once this function is called, you are free to set the symmetry panel to anything,
+	// take piece select events, etc, as the symmetry is being modified
+	void take_gui_control(ModifyPanel* panel, ModifyInterface* interface, EditorVehicleInterface* edveh_int);
+
+	// Once this function is called, you must no longer modify the symmetry panel,
+	// nor handle any piece select events or similar, as the symmetry is not being modified
+	// NOTE: symmetry_panel and modify_interface will be null!
+	void leave_gui_control();
 
 };
 

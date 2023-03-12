@@ -1,6 +1,8 @@
 #pragma once
 #include "EditorPanel.h"
 #include "../interfaces/ModifyInterface.h"
+#include "universe/vehicle/SymmetryMode.h"
+#include "gui/widgets/GUITextButton.h"
 
 
 class EditorGUI;
@@ -24,13 +26,25 @@ private:
 
 	void make_symmetry_canvas_default();
 	void make_symmetry_canvas_info();
+	void make_symmetry_canvas_creating();
+
 	std::shared_ptr<GUICanvas> symmetry_canvas_default;
 	std::shared_ptr<GUICanvas> symmetry_canvas_info_select;
 	std::shared_ptr<GUICanvas> symmetry_canvas_info_create;
+	// child_0 is set by the lua script, child_1 contains cancel/finish button
+	std::shared_ptr<GUICanvas> symmetry_canvas_creating;
+
+	std::shared_ptr<GUITextButton> finish_button;
+	std::shared_ptr<GUITextButton> cancel_button;
 
 	std::string creating_symmetry_name;
 
 public:
+
+	// nullptr if no symmetry is being modified
+	SymmetryMode* modifying_symmetry;
+
+	void set_symmetry_canvas(std::shared_ptr<GUICanvas> canvas, bool can_finish, bool can_go_back);
 
 	void change_state(ModifyInterface::State state, Piece* selected_piece);
 	void init(EditorScene* sc, NVGcontext* vg) override;
@@ -38,5 +52,6 @@ public:
 
 
 	ModifyPanel();
+	~ModifyPanel();
 
 };

@@ -12,6 +12,7 @@ private:
 	bool do_interface_idle(Piece* hovered, GUIInput* ipt);
 	bool do_interface_select_symmetry(Piece* hovered, GUIInput* ipt);
 	bool do_interface_create_symmetry(Piece* hovered, GUIInput* ipt);
+	bool do_interface_modify_symmetry(Piece* hovered, GUIInput* ipt);
 
 	// returns highlighted pieces, not including root
 	std::vector<Piece*> highlight_symmetry(Piece* root);
@@ -23,10 +24,11 @@ public:
 		// context menu creation is possible
 		IDLE,
 		// The editor is waiting for the user to click a piece to create symmetry
-		// or is creating a symmetry if selected_piece != nullptr
+		// or is modifying a symmetry if selected_piece != nullptr
 		CREATING_SYMMETRY,
 		// The editor is waiting for the user to click on a piece with symmetry to modify it
 		// or the symmetry has been selected and is being modified if selected_piece != nullptr
+		// Slight difference: In creating cancel means the symmetry is deleted, here changes undone!
 		SELECTING_SYMMETRY,
 		// The editor is waiting for the user to click a piece to remove symmetry (instant action)
 		ERASING_SYMMETRY,
@@ -55,6 +57,8 @@ public:
 	void leave() override;
 
 	bool can_leave() override;
+
+	void start_picking_piece();
 
 	ModifyInterface(EditorVehicleInterface* edveh_int);
 };

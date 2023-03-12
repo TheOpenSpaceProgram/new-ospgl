@@ -27,3 +27,10 @@ function editor:sign_up_for_event(event_id, fun) end
 ---@return glm.vec4 gui viewport
 function editor:get_viewports() end
 
+---@class vehicle_editor.symmetry_panel
+local symmetry_panel = {}
+
+---@param canvas gui.canvas
+---@param can_exit boolean Is the symmetry done being created (show done button)
+---@param can_go_back boolean Can the current action be "cancelled" (show back instead of cancel)
+function symmetry_panel:set_canvas(canvas, can_exit, can_go_back) end
