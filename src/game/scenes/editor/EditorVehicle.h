@@ -62,6 +62,11 @@ public:
 
 	bool draw_attachments;
 
+	void draw_attachment(std::pair<PieceAttachment, bool>& pair, Piece* p, CameraUniforms& cu,
+						 bool is_particular = false);
+
+	std::vector<std::pair<Piece*, int>> draw_attachment_for;
+
 	virtual void deferred_pass(CameraUniforms& cu, bool is_env_map = false) override;
 	virtual void forward_pass(CameraUniforms& cu, bool is_env_map = false) override;
 	virtual void shadow_pass(ShadowCamera& cu) override;

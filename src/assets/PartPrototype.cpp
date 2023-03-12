@@ -31,6 +31,16 @@ void PartPrototype::load_piece(const cpptoml::table& toml, GPUModelNodePointer&&
 	
 	auto node_toml = toml.get_table(n->name);
 
+	if(node_toml)
+	{
+		auto meta_table = node_toml->get_table("__meta");
+		if (meta_table)
+			proto.metadata = meta_table;
+	}
+
+	if(!proto.metadata)
+		proto.metadata = cpptoml::make_table();
+
 	proto.piece_offset = n->sub_transform;
 	proto.name = n->name;
 

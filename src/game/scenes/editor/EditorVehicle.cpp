@@ -72,49 +72,7 @@ void EditorVehicle::forward_pass(CameraUniforms& cu, bool is_env_map)
 		{
 			for(std::pair<PieceAttachment, bool>& pair : p->attachments)
 			{
-				PieceAttachment& attch = pair.first;
-				if(attch.hidden){ continue; }
-
-				glm::dvec3 pos = p->get_marker_position(attch.marker);
-				glm::dquat quat = p->get_marker_rotation(attch.marker);
-
-				glm::dmat4 model = glm::translate(glm::dmat4(1.0), pos);
-				model = glm::scale(model, glm::dvec3(attch.size * 0.15));
-				model = model * glm::toMat4(quat); 
-
-				model = p->get_graphics_matrix() * model;
-
-				glm::vec4 color = glm::vec4(1.0f);
-				auto it = piece_meta[p].attachment_color.find(pair.first.marker);
-				if(it != piece_meta[p].attachment_color.end())
-				{
-					color = it->second;
-				}
-				
-				MaterialOverride mat_over;
-				mat_over.uniforms["color"] = glm::vec3(color);
-				mat_over.uniforms["transparency"] = 1.0f - color.a;
-
-				if(!pair.second && piece_meta[p].draw_in_attachments && attch.stack == true)
-				{
-					receive_model->draw_override(cu, nullptr, model, drawable_uid, &mat_over, true);
-				}
-				
-				if(!pair.second && piece_meta[p].draw_out_attachments)
-				{
-					if(attch.stack && !attch.radial)
-					{
-						stack_model->draw_override(cu, nullptr, model, drawable_uid, &mat_over, true);
-					}
-					else if(attch.radial && !attch.stack)
-					{
-						radial_model->draw_override(cu, nullptr, model, drawable_uid, &mat_over, true);
-					}
-					else if(attch.radial && attch.stack)
-					{	
-						stack_radial_model->draw_override(cu, nullptr, model, drawable_uid, &mat_over, true);
-					}
-				}
+				draw_attachment(pair, p, cu);
 			}
 		}
 
@@ -123,6 +81,13 @@ void EditorVehicle::forward_pass(CameraUniforms& cu, bool is_env_map)
 			draw_highlight(p, piece_meta[p].highlight, cu);
 		}
 	}
+
+	for(auto& pair : draw_attachment_for)
+	{
+		draw_attachment(pair.first->attachments[pair.second], pair.first, cu, true);
+	}
+
+	draw_attachment_for.clear();
 }
 
 void EditorVehicle::shadow_pass(ShadowCamera& cu)
@@ -192,8 +157,57 @@ void EditorVehicle::draw_highlight(Piece* p, glm::vec3 color, CameraUniforms& cu
 	p->model_node->draw_override(cu, &(*mat_hover), p->get_graphics_matrix(), drawable_uid, &over, true);
 }
 
+void EditorVehicle::draw_attachment(std::pair<PieceAttachment, bool>& pair, Piece* p, CameraUniforms& cu,
+									bool is_particular)
+{
+	PieceAttachment& attch = pair.first;
+	if(attch.hidden){ return; }
 
-void GenericSerializer<EditorVehicle>::serialize(const EditorVehicle& what, cpptoml::table& target) 
+	glm::dvec3 pos = p->get_marker_position(attch.marker);
+	glm::dquat quat = p->get_marker_rotation(attch.marker);
+
+	glm::dmat4 model = glm::translate(glm::dmat4(1.0), pos);
+	model = glm::scale(model, glm::dvec3(attch.size * 0.15));
+	model = model * glm::toMat4(quat);
+
+	model = p->get_graphics_matrix() * model;
+
+	glm::vec4 color = glm::vec4(1.0f);
+	auto it = piece_meta[p].attachment_color.find(pair.first.marker);
+	if(it != piece_meta[p].attachment_color.end())
+	{
+		color = it->second;
+	}
+
+	MaterialOverride mat_over;
+	mat_over.uniforms["color"] = glm::vec3(color);
+	mat_over.uniforms["transparency"] = 1.0f - color.a;
+
+	if(!pair.second && piece_meta[p].draw_in_attachments && attch.stack == true && !is_particular)
+	{
+		receive_model->draw_override(cu, nullptr, model, drawable_uid, &mat_over, true);
+	}
+
+	if((!pair.second && piece_meta[p].draw_out_attachments) || is_particular)
+	{
+		if(attch.stack && !attch.radial)
+		{
+			stack_model->draw_override(cu, nullptr, model, drawable_uid, &mat_over, true);
+		}
+		else if(attch.radial && !attch.stack)
+		{
+			radial_model->draw_override(cu, nullptr, model, drawable_uid, &mat_over, true);
+		}
+		else if(attch.radial && attch.stack)
+		{
+			stack_radial_model->draw_override(cu, nullptr, model, drawable_uid, &mat_over, true);
+		}
+	}
+
+}
+
+
+void GenericSerializer<EditorVehicle>::serialize(const EditorVehicle& what, cpptoml::table& target)
 {
 	// Code is very different for in flight vehicle serialization as the editor creates a big
 	// bunch of meta-data, but the basic stuff provided by the vehicle serialization works

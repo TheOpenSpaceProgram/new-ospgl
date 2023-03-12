@@ -12,8 +12,8 @@ class Vehicle;
 // A symmetric distribution handles all symmetric parts in a group
 // Behaviour is handled in lua, but this lua code runs in the editor only as during
 // flight symmetry modes exist only as metadata to know which parts are symmetric!
-// Cloning of the pieces is done in C++, with lua having the responsability of cloning
-// the root pieces to correct positions, and also handling wiring and plumbing!
+// Cloning of the CHILD pieces is done in C++, with lua having the responsability of giving
+// the root pieces the correct attachment positions, and also handling wiring and plumbing!
 class SymmetryMode
 {
 private:
@@ -27,14 +27,14 @@ public:
 	std::string ui_name;
 	std::string ui_desc;
 	std::string script_path;
+	bool can_use_stack_attachments;
+	bool can_use_radial_attachments;
 	AssetHandle<Image> icon;
 
-	// Only root pieces are included here. Set on creation.
-	// To obtain children, use vehicle functions
-	// TODO: If this causes lags, store child pieces too and update the array appropiately!
-	std::vector<Piece*> symmetry_roots;
+	Piece* root;
+	int attachment_used;
 
-	// Called when any of the mirrored pieces is modified
+	// Called when any of the mirrored pieces is modified in any way, including disconnection
 	// ONLY CALLED IN THE EDITOR
 	void on_dirty(Piece* piece);
 
@@ -42,8 +42,6 @@ public:
 	// so that mirrored versions are properly deleted
 	// ONLY CALLED IN THE EDITOR
 	void on_disconnect(Piece* piece);
-
-	void add_root_clone(glm::dvec3 pos, glm::dquat orient);
 
 	// ONLY CALLED IN THE EDITOR
 	void init(sol::state* in_state, const std::string& pkg);
@@ -78,6 +76,8 @@ public:
 		SAFE_TOML_GET(desc, "__description", std::string);
 		SAFE_TOML_GET(icon, "__icon", std::string);
 		SAFE_TOML_GET(script, "__script", std::string);
+		SAFE_TOML_GET(to.can_use_stack_attachments, "__can_use_stack_attachments", bool);
+		SAFE_TOML_GET(to.can_use_radial_attachments, "__can_use_radial_attachments", bool);
 
 		auto pkg = osp->assets->get_current_package();
 		to.script_path = osp->assets->get_package_and_name(script, pkg).second;

@@ -68,9 +68,7 @@ void ModifyPanel::change_state(ModifyInterface::State st, Piece* selected_piece)
 		if(selected_piece == nullptr)
 		{
 			child_0->child_1 = symmetry_canvas_info_create;
-		}
-		else
-		{
+
 			// Create the symmetry mode proper in the vehicle
 			modifying_symmetry = new SymmetryMode();
 			auto config = AssetHandle<Config>(creating_symmetry_name);
@@ -81,6 +79,10 @@ void ModifyPanel::change_state(ModifyInterface::State st, Piece* selected_piece)
 			// empty canvas by default
 			symmetry_canvas_creating->child_0 = std::make_shared<GUICanvas>();
 			child_0->child_1 = symmetry_canvas_creating;
+		}
+		else
+		{
+			// Finally, a piece is selected and the symmetry takes control
 			modifying_symmetry->take_gui_control(this, mod_int, edveh_int);
 		}
 	}

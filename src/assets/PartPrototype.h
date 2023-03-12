@@ -32,6 +32,9 @@ struct PiecePrototype
 {
 	std::string name;
 
+	// NOTE: Do not modify contents, readonly. Always present but may be empty
+	std::shared_ptr<cpptoml::table> metadata;
+
 	GPUModelNodePointer model_node;
 
 	btCollisionShape* collider;

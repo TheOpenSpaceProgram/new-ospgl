@@ -121,6 +121,7 @@ function welded_group:get_piece(id) end
 ---@field welded boolean
 ---@field attached_to vehicle.piece
 ---@field collider_offset glm.mat4
+---@field prototype vehicle.piece_prototype
 ---@field id integer Unique id of the piece, guaranteed to be unique in the vehicle
 local piece = {}
 
@@ -286,5 +287,9 @@ function machine:set_input_ctx(ctx) end
 ---@class vehicle.part_prototype
 ---@field name string Presented ready to display, no need to localize (it's done in load time)
 local part_prototype = {}
+
+---@class vehicle.piece_prototype
+---@field metadata toml.table
+local piece_prototype = {}
 
 return container

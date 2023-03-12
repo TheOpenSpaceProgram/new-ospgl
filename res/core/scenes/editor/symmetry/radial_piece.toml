@@ -3,4 +3,6 @@ __description = "core:radial_piece_description"
 __icon = "scenes/editor/symmetry/radial_piece.png"
 __script="scenes/editor/symmetry/radial_piece.lua"
 __priority = -9999
+__can_use_stack_attachments = false
+__can_use_radial_attachments = true
 

@@ -10,8 +10,10 @@
 // Handles user interaction with the EditorVehicle
 // Emits events:
 // - on_piece_click(piece_id: int64) - Only emitted if the interface does, if id < 0 then empty space clicked
-// - on_select_piece(piece_id: int64) - Emmited by the modify interface, used while creating symmetries or otherwise
-//           interacting with the vehicle in modify mode (but not creating context menus)
+// - on_select_piece(piece_id: int64, attachment?: int64) - Emmited by the modify interface,
+// 		used while creating symmetries or otherwise interacting with the vehicle in modify mode
+// 		(but not creating context menus).
+// 		WARNING: attachment is only present for C++ code during symmetry root part selection!
 // - close_context_menus() - Emmited when interface changes must close all non-cut context menus
 class EditorVehicleInterface : public EventEmitter
 {

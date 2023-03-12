@@ -67,6 +67,7 @@ void ModifyInterface::change_state(ModifyInterface::State st)
 	}
 	else if(st == CREATING_SYMMETRY)
 	{
+		cur_attachment_point = -1;
 
 	}
 	else if(st == RE_ROOTING)
@@ -121,26 +122,82 @@ bool ModifyInterface::do_interface_create_symmetry(Piece *hovered, GUIInput *ipt
 {
 	if(selected_piece == nullptr)
 	{
+		if(hovered != prev_hover)
+		{
+			cur_attachment_point = -1;
+		}
+
 		if (hovered)
 		{
 			// Make sure the piece can be disconnected
-			if (hovered->editor_dettachable)
+			bool could_create = false;
+			if (hovered->attachments.size() > 0)
 			{
-				highlight_symmetry(hovered);
-				if (!ipt->mouse_blocked)
+
+				if(cur_attachment_point == -1)
 				{
-					if (input->mouse_down(GLFW_MOUSE_BUTTON_LEFT))
+					// Find a free attachment point
+					for(int i = 0; i < hovered->attachments.size(); i++)
 					{
-						selected_piece = hovered;
-						// Tell the panel that piece was selected
-						edveh_int->scene->gui.modify_tools.change_state(CREATING_SYMMETRY, selected_piece);
+						if(is_attachment_compatible(i, hovered))
+						{
+							cur_attachment_point = i;
+							could_create = true;
+							break;
+						}
 					}
 				}
+				else
+				{
+					could_create = true;
+				}
+
+				if(could_create)
+				{
+					highlight_symmetry(hovered);
+					if (!ipt->mouse_blocked)
+					{
+						if (input->mouse_down(GLFW_MOUSE_BUTTON_LEFT))
+						{
+							selected_piece = hovered;
+							// Tell the panel that piece was selected
+							edveh_int->scene->gui.modify_tools.change_state(CREATING_SYMMETRY, selected_piece);
+						}
+					}
+					if(!ipt->keyboard_blocked)
+					{
+						if(input->key_down(GLFW_KEY_PAGE_UP))
+						{
+							// Go to next free attachment
+							for(int i = cur_attachment_point + 1; i < hovered->attachments.size(); i++)
+								if(is_attachment_compatible(i, hovered))
+								{
+									cur_attachment_point = i;
+									break;
+								}
+						}
+						if(input->key_down(GLFW_KEY_PAGE_DOWN))
+						{
+							for(int i = cur_attachment_point - 1; i >= 0; i--)
+								if(is_attachment_compatible(i, hovered))
+								{
+									cur_attachment_point = i;
+									break;
+								}
+						}
+					}
+					edveh->draw_attachment_for.emplace_back(hovered, cur_attachment_point);
+				}
 			}
-			else
+
+			if(!could_create)
 			{
 				edveh->piece_meta[hovered].highlight = glm::vec3(1.0f, 0.0f, 0.0f);
 			}
+		}
+		else
+		{
+			cur_attachment_point = -1;
 		}
 	}
 	else
@@ -148,6 +205,7 @@ bool ModifyInterface::do_interface_create_symmetry(Piece *hovered, GUIInput *ipt
 		return do_interface_modify_symmetry(hovered, ipt);
 	}
 
+	prev_hover = hovered;
 	return false;
 }
 
@@ -199,6 +257,22 @@ bool ModifyInterface::do_interface_modify_symmetry(Piece *hovered, GUIInput *ipt
 					edveh_int->emit_event("on_select_piece", hovered->id);
 				}
 			}
+		}
+	}
+
+	return false;
+}
+
+bool ModifyInterface::is_attachment_compatible(int i, Piece* p)
+{
+	SymmetryMode* sm = edveh_int->scene->gui.modify_tools.modifying_symmetry;
+	if (!p->attachments[i].second)
+	{
+		auto attach = p->attachments[i].first;
+		if ((attach.radial && sm->can_use_radial_attachments) ||
+			(attach.stack && sm->can_use_stack_attachments))
+		{
+			return true;
 		}
 	}
 

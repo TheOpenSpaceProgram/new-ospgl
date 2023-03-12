@@ -1,10 +1,12 @@
 ---@module "symmetry_script"
 -- Radial around a piece symmetry, uses the center (origin of the piece) 
--- and its orientation (axis configurable) as the central axis
+-- and its orientation as the central axis
+-- and a constant radius, which defaults to a sane value, but may be changed
 
 local gui = require("gui")
 local input = require("input")
 local logger = require("logger")
+local glm = require("glm")
 require("editor")
 
 local events = dofile("core:util/c_events.lua")
@@ -13,6 +15,7 @@ local events = dofile("core:util/c_events.lua")
 
 local center_piece_id = symmetry_mode.saved_toml:get_number_or("center_piece", -1)
 local copies = symmetry_mode.saved_toml:get_number_or("copies", 3)
+local radius = symmetry_mode.saved_toml:get_number_or("radius", 1.0)
 
 
 ---@param p vehicle.piece
@@ -28,21 +31,50 @@ end
 local main_canvas = nil
 local select_piece_canvas = nil
 
+---@param piece vehicle.piece
+local function get_piece_radius(piece)
+	-- We try to use radius metadata for given axis, if not available then we are forced to use AABBs
+	-- which may not always be accurate
+	local has_meta = piece.prototype.metadata:contains("radial_symmetry_radius")
+	if has_meta then
+		return piece.prototype.metadata:get_number("radial_symmetry_radius")
+	else 
+		-- TODO: AABB check
+		return 1.0
+	end
+
+end
+
 local function get_radius()
+	local center = vehicle:get_piece_by_id(center_piece_id)
+	assert(center)
+	return get_piece_radius(center)
 end
 
 local function rebuild()
+	local clones = symmetry_mode:make_clones(8)
 	local angle_step = 2.0 * math.pi / copies
-	for angle = 0,(2.0 * math.pi),angle_step do
+	
+	for i, clone in ipairs(clones) do
+		local angle = i * angle_step
+		local offset = glm.vec3.new()
+		offset.x = math.cos(angle)
+		offset.y = math.sin(angle)
+		offset.z = 0.0
+
+		-- Attach a root piece clone at given position
 	end
+
+	return true
 end
 
-local function select_piece(piece_id)
+local function select_piece(piece_id, attachment)
 	-- return to main canvas
 	symmetry_panel:set_canvas(main_canvas, true, false)	
 	if piece_id ~= center_piece_id then
 		center_piece_id = piece_id
 		axis_offset = 0.0
+		radius = get_radius()
 		rebuild()
 	end
 	events:remove("select_center")

@@ -70,7 +70,8 @@ void LuaVehicle::load_to(sol::table& table)
 		"welded", &Piece::welded,
 		"attached_to", &Piece::attached_to,
 		"id", sol::readonly(&Piece::id),
-		"set_dirty", &Piece::set_dirty, 
+		"set_dirty", &Piece::set_dirty,
+		"prototype", sol::property([](Piece* p){ return p->piece_prototype;  }),
 		"get_global_transform", [](Piece& self)
 		{
 			return BulletTransform(self.get_global_transform());
@@ -246,6 +247,9 @@ void LuaVehicle::load_to(sol::table& table)
 
 	table.new_usertype<PartPrototype>("part_prototype", sol::no_constructor,
 		  "name", &PartPrototype::name);
+
+	table.new_usertype<PiecePrototype>("piece_prototype", sol::no_constructor,
+			   "metadata", &PiecePrototype::metadata);
 
 	table.new_usertype<VehicleMeta>("vehicle_meta", sol::no_constructor,
 			 "set_controlled_machine", &VehicleMeta::set_controlled_machine,

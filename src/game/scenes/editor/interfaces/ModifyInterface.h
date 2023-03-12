@@ -2,6 +2,7 @@
 #include "BaseInterface.h"
 
 class EditorVehicleInterface;
+class SymmetryMode;
 
 class ModifyInterface : public BaseInterface
 {
@@ -16,6 +17,10 @@ private:
 
 	// returns highlighted pieces, not including root
 	std::vector<Piece*> highlight_symmetry(Piece* root);
+
+	int cur_attachment_point;
+	Piece* prev_hover;
+	bool is_attachment_compatible(int id, Piece* p);
 
 public:
 	enum State
