@@ -7,6 +7,7 @@ local gui = require("gui")
 local input = require("input")
 local logger = require("logger")
 local glm = require("glm")
+require("vehicle")
 require("editor")
 
 local events = dofile("core:util/c_events.lua")
@@ -35,7 +36,7 @@ local select_piece_canvas = nil
 local function get_piece_radius(piece)
 	-- We try to use radius metadata for given axis, if not available then we are forced to use AABBs
 	-- which may not always be accurate
-	local has_meta = piece.prototype.metadata:contains("radial_symmetry_radius")
+	--local has_meta = piece.prototype.metadata:contains("radial_symmetry_radius")
 	if has_meta then
 		return piece.prototype.metadata:get_number("radial_symmetry_radius")
 	else 
@@ -82,7 +83,7 @@ end
 
 local function pick_piece()
 	symmetry_panel:set_canvas(select_piece_canvas, false, true)
-	modify_interface:start_picking_piece()
+	modify_interface:start_picking_piece(false)
 	events:add_named(edveh_interface, "on_select_piece", "select_center", select_piece)
 
 end

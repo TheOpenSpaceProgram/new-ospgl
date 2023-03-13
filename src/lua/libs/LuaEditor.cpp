@@ -32,6 +32,7 @@ void LuaEditor::load_to(sol::table& table)
 				"start_picking_piece", &ModifyInterface::start_picking_piece);
 
 	table.new_usertype<SymmetryMode>("symmetry_mode", sol::no_constructor,
-				 "saved_toml", &SymmetryMode::save_toml);
+				 "saved_toml", &SymmetryMode::save_toml,
+				 "make_clones", &SymmetryMode::make_clones);
 
 }

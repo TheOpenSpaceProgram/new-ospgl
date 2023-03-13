@@ -74,7 +74,7 @@ void ModifyPanel::change_state(ModifyInterface::State st, Piece* selected_piece)
 			auto config = AssetHandle<Config>(creating_symmetry_name);
 			config->read_to(*modifying_symmetry);
 			// We initialize the symmetry mode without any config, as it's being created
-			modifying_symmetry->init(&sc->lua_state, config.pkg);
+			modifying_symmetry->init(&sc->lua_state, edveh_int->edveh, config.pkg);
 
 			// empty canvas by default
 			symmetry_canvas_creating->child_0 = std::make_shared<GUICanvas>();
@@ -82,7 +82,10 @@ void ModifyPanel::change_state(ModifyInterface::State st, Piece* selected_piece)
 		}
 		else
 		{
-			// Finally, a piece is selected and the symmetry takes control
+			// Finally, a piece is selected and the symmetry takes control, pass it to the
+			// symmetry
+			modifying_symmetry->root = selected_piece;
+			//modifying_symmetry->root_attachment = mod_int->cur_attachment_point;
 			modifying_symmetry->take_gui_control(this, mod_int, edveh_int);
 		}
 	}

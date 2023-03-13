@@ -7,6 +7,7 @@
 class ModifyInterface;
 class ModifyPanel;
 class EditorVehicleInterface;
+class EditorVehicle;
 class Vehicle;
 
 // A symmetric distribution handles all symmetric parts in a group
@@ -18,6 +19,8 @@ class SymmetryMode
 {
 private:
 	sol::environment env;
+	sol::state* st;
+	EditorVehicle* edveh;
 
 public:
 	// Do not use keys starting with "__" as these are used by the engine
@@ -31,7 +34,11 @@ public:
 	bool can_use_radial_attachments;
 	AssetHandle<Image> icon;
 
+	// Guaranteed to have associated part, as we don't allow making simetries with
+	// orphaned pieces
 	Piece* root;
+	// Includes the original piece as first vector element (root)
+	std::vector<Piece*> clones;
 	int attachment_used;
 
 	// Called when any of the mirrored pieces is modified in any way, including disconnection
@@ -43,8 +50,12 @@ public:
 	// ONLY CALLED IN THE EDITOR
 	void on_disconnect(Piece* piece);
 
+	// Returns all root pieces, including the one that the symmetry
+	// was created from, BUT NOT CHILDREN!
+	std::vector<Piece*> make_clones(int count);
+
 	// ONLY CALLED IN THE EDITOR
-	void init(sol::state* in_state, const std::string& pkg);
+	void init(sol::state* in_state, EditorVehicle* in_vehicle, const std::string& pkg);
 
 	// Once this function is called, you are free to set the symmetry panel to anything,
 	// take piece select events, etc, as the symmetry is being modified
@@ -59,6 +70,8 @@ public:
 
 // This is used only for the prototype and metadata, it, the stuff that's needed for
 // the vehicle in flight. Lua stuff is loaded in init(), but ONLY IN THE EDITOR
+// If loading the symmetry mode from a saved vehicle, remember to override with the
+// prototype toml!
 template<>
 class GenericSerializer<SymmetryMode>
 {

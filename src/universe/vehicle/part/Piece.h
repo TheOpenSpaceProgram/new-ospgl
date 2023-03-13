@@ -66,6 +66,7 @@ public:
 	// parent subpart. Always has value on
 	// root subparts
 	Part* part;
+	std::string name_in_part;
 
 	double mass;
 
@@ -181,7 +182,8 @@ public:
 	// Useful for applying forces
 	glm::dvec3 transform_point_to_rigidbody(glm::dvec3 p);
 
-	Piece(Part* in_part, std::string piece_name);
+	Piece(Part* in_part, const std::string& piece_name);
+	Piece(AssetHandle<PartPrototype>& proto, const std::string& piece_name);
 	~Piece();
 
 	// Pieces cannot be copied, nor moved

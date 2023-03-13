@@ -91,6 +91,10 @@ private:
 	std::unordered_map<int64_t, Piece*> id_to_piece;
 	std::unordered_map<int64_t, Part*> id_to_part;
 
+	// Clones a piece, creating a part for it if neccesary (or returning already created)
+	// but doesn't clone attachments, wiring or anything similar
+	Piece* clone_piece(Piece* p, std::vector<Part*>& seen_parts, std::vector<Part*>& created_parts);
+
 public:
 
 	Universe* in_universe;
@@ -182,6 +186,10 @@ public:
 	std::vector<Piece*> get_connected_to(Piece* p);
 	// This potentially includes p if it's attached through said marker!
 	Piece* get_connected_with(Piece* p, const std::string& attachment_marker);
+
+	// Duplicates a piece, and all its children, doing a deep copy of values, wiring
+	// and plumbing, but only of data within the given piece and children
+	Piece* duplicate(Piece* p);
 
 	Vehicle();
 	~Vehicle();

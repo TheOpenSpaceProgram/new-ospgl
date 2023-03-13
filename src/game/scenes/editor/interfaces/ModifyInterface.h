@@ -18,8 +18,8 @@ private:
 	// returns highlighted pieces, not including root
 	std::vector<Piece*> highlight_symmetry(Piece* root);
 
-	int cur_attachment_point;
 	Piece* prev_hover;
+	bool only_radial_allowed;
 	bool is_attachment_compatible(int id, Piece* p);
 
 public:
@@ -45,6 +45,7 @@ public:
 
 	};
 	Piece* selected_piece;
+	int cur_attachment_point;
 	// If true and we are creating symmetry, more pieces may be picked and returned
 	// using the select_piece event (used by lua)
 	bool pick_another_piece;
@@ -63,7 +64,7 @@ public:
 
 	bool can_leave() override;
 
-	void start_picking_piece();
+	void start_picking_piece(bool only_radial_allowed);
 
 	ModifyInterface(EditorVehicleInterface* edveh_int);
 };

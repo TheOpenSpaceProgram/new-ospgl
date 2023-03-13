@@ -238,8 +238,13 @@ glm::dvec3 Piece::transform_point_to_rigidbody(glm::dvec3 p)
 	return f;
 }
 
-Piece::Piece(Part* in_part, std::string piece_name)
-	: model_node(in_part->part_proto->pieces.at(piece_name).model_node.duplicate())
+Piece::Piece(Part* in_part, const std::string& piece_name) : Piece(in_part->part_proto, piece_name)
+{
+	part = in_part;
+}
+
+Piece::Piece(AssetHandle<PartPrototype>& proto, const std::string &piece_name)
+	: model_node(proto->pieces.at(piece_name).model_node.duplicate())
 {
 	attached_to = nullptr;
 	part = nullptr;
@@ -249,9 +254,11 @@ Piece::Piece(Part* in_part, std::string piece_name)
 	in_group = nullptr;
 	welded = false;
 
-	part = in_part;
+	part = nullptr;
+	name_in_part = piece_name;
 
-	piece_prototype = &in_part->part_proto.get_noconst()->pieces[piece_name];
+	part_prototype = proto.duplicate();
+	piece_prototype = &proto.get_noconst()->pieces[piece_name];
 
 	mass = piece_prototype->mass;
 	friction = piece_prototype->friction;
@@ -267,6 +274,7 @@ Piece::Piece(Part* in_part, std::string piece_name)
 	}
 
 	editor_dettachable = piece_prototype->editor_dettachable;
+
 
 }
 

@@ -415,3 +415,56 @@ std::pair<glm::dvec3, glm::dvec3> Vehicle::get_bounds()
 
 	return std::make_pair(min, max);
 }
+
+Piece* Vehicle::duplicate(Piece *p)
+{
+	logger->check(p->in_vehicle == this);
+
+	std::vector<Piece*> all = get_children_of(p);
+	all.insert(all.begin(), p);
+
+	// Basic clone of all pieces
+	std::vector<Piece*> new_all;
+	std::vector<Part*> new_parts;
+	std::vector<Part*> seen_parts;
+	for(Piece* a : all)
+	{
+		Piece* new_a = clone_piece(a, seen_parts, new_parts);
+		new_all.push_back(new_a);
+	}
+
+	// Add all to the vehicle
+	all_pieces.insert(all_pieces.end(), new_all.begin(), new_all.end());
+	parts.insert(parts.end(), new_parts.begin(), new_parts.end());
+
+	return new_all[0];
+}
+
+Piece* Vehicle::clone_piece(Piece *p, std::vector<Part *> &seen_parts, std::vector<Part*> &created_parts)
+{
+	Piece* piece = new Piece(p->part_prototype, p->name_in_part);
+
+	Part* part = nullptr;
+	if(p->part != nullptr)
+	{
+		for (size_t i = 0; i < seen_parts.size(); i++)
+		{
+			if (seen_parts[i] == p->part)
+			{
+				part = created_parts[i];
+			}
+		}
+
+		// If we havent already, clone the part
+		if(part == nullptr)
+		{
+			// TODO: Pass the table too?
+			part = new Part(p->part_prototype, nullptr);
+			seen_parts.push_back(p->part);
+			created_parts.push_back(part);
+		}
+	}
+	p->part = part;
+
+	return piece;
+}

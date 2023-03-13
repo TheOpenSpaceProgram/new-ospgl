@@ -129,7 +129,7 @@ bool ModifyInterface::do_interface_create_symmetry(Piece *hovered, GUIInput *ipt
 
 		if (hovered)
 		{
-			// Make sure the piece can be disconnected
+			// Make sure the piece has free attachment points
 			bool could_create = false;
 			if (hovered->attachments.size() > 0)
 			{
@@ -220,8 +220,9 @@ std::vector<Piece*> ModifyInterface::highlight_symmetry(Piece* root)
 	return children;
 }
 
-void ModifyInterface::start_picking_piece()
+void ModifyInterface::start_picking_piece(bool allow_only_radial)
 {
+	only_radial_allowed = allow_only_radial;
 	if(cur_state == CREATING_SYMMETRY)
 	{
 		pick_another_piece = true;
@@ -246,7 +247,7 @@ bool ModifyInterface::do_interface_modify_symmetry(Piece *hovered, GUIInput *ipt
 				break;
 			}
 		}
-		if(!is_in_symmetry && hovered != selected_piece)
+		if((hovered->piece_prototype->allows_radial || !only_radial_allowed) && !is_in_symmetry && hovered != selected_piece)
 		{
 			edveh->piece_meta[hovered].highlight = glm::vec3(1.0f);
 
@@ -257,6 +258,10 @@ bool ModifyInterface::do_interface_modify_symmetry(Piece *hovered, GUIInput *ipt
 					edveh_int->emit_event("on_select_piece", hovered->id);
 				}
 			}
+		}
+		else
+		{
+			edveh->piece_meta[hovered].highlight = glm::vec3(1.0f, 0.0f, 0.0f);
 		}
 	}
 
