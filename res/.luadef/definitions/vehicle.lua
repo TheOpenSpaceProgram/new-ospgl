@@ -78,6 +78,12 @@ function container.vehicle:get_part_by_id(id) end
 ---@return glm.vec3 maximum bound (z is higher, ceiling of the vehicle)
 function container.vehicle:get_bounds() end
 
+---@param piece vehicle.piece
+---@param pos glm.vec3
+---@param rot glm.quat
+---@param marker string Marker to use as origin, set to "" for none 
+function container.vehicle:move_piece(piece, pos, rot, marker) end
+
 ---@class vehicle.packed
 ---@field vehicle vehicle
  packed_vehicle = {}
@@ -116,6 +122,15 @@ local welded_group = {}
 ---@return vehicle.piece|nil
 function welded_group:get_piece(id) end
 
+---@class vehicle.attachment
+---@field hidden boolean
+---@field marker string
+---@field name string (you must use game_database to get display string)
+---@field radial boolean 
+---@field stack boolean 
+---@field size number 
+local attachment = {}
+
 ---@class vehicle.piece
 ---@field rigid_body bullet.rigidbody
 ---@field welded boolean
@@ -124,6 +139,12 @@ function welded_group:get_piece(id) end
 ---@field prototype vehicle.piece_prototype
 ---@field id integer Unique id of the piece, guaranteed to be unique in the vehicle
 local piece = {}
+
+---@param name string Name for the attachment
+---@return vehicle.attachment the attachment itself
+---@return boolean is the attachment used?
+--- Note: Returns a non-modificable copy of the attachment!
+function piece:get_attachment(name) end
 
 ---@param update_now boolean
 function piece:set_dirty(update_now) end
@@ -217,6 +238,17 @@ function piece:get_model_node() end
 --- then it returns nil
 --- Don't store the returned pointer for long!
 function piece:get_part() end
+
+---@param target vehicle.piece
+---@param attachment_marker string Name of the attachment point to use
+---@param target_marker string Name of attachment point to use in target part, or "" if none
+--- Note: You must create links if such are needed, or set welded to true!
+--- IMPORTANT: After all attachments are done, call vehicle:update_attachments()
+function piece:attach_to(target, attachment_marker, target_marker) end
+
+--- Dettaches the piece from wathever it's attached to, correctly updating attachments and links
+--- IMPORTANT: After all detachments are done, call vehicle:update_attachments()
+function piece:detach() end
 
 ---@class vehicle.part
 ---@field id integer Unique id of the part. Guaranteed to be unique in the vehicle

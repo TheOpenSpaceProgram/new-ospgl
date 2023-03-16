@@ -2,6 +2,8 @@
 #include <game/scenes/editor/interfaces/ModifyInterface.h>
 #include <game/scenes/editor/gui/ModifyPanel.h>
 #include <game/scenes/editor/EditorVehicleInterface.h>
+#include <game/scenes/editor/EditorScene.h>
+
 
 void SymmetryMode::take_gui_control(ModifyPanel* panel, ModifyInterface* mod_int, EditorVehicleInterface* edveh_int)
 {
@@ -21,6 +23,8 @@ void SymmetryMode::leave_gui_control()
 void SymmetryMode::init(sol::state *in_state, EditorVehicle* in_vehicle, const std::string &in_pkg)
 {
 	this->edveh = in_vehicle;
+	this->sc = in_vehicle->scene;
+
 	auto[pkg, name] = osp->assets->get_package_and_name(script_path, in_pkg);
 
 	env = sol::environment(*in_state, sol::create, in_state->globals());
@@ -58,7 +62,7 @@ std::vector<Piece*> SymmetryMode::make_clones(int count)
 	out.push_back(root);
 	for(int i = 1; i < count; i++)
 	{
-		Piece* new_root = veh->duplicate(root);
+		Piece* new_root = veh->duplicate(root, &sc->lua_state, &sc->piece_id, &sc->part_id);
 		out.push_back(new_root);
 		all_new_pieces.push_back(new_root);
 		std::vector<Piece*> new_child = veh->get_children_of(new_root);

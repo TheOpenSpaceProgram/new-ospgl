@@ -53,18 +53,36 @@ local function get_radius()
 end
 
 local function rebuild()
-	local clones = symmetry_mode:make_clones(8)
+	local clones = symmetry_mode:make_clones(copies)
 	local angle_step = 2.0 * math.pi / copies
-	
+
+	local center = vehicle:get_piece_by_id(center_piece_id)
+	assert(center)
+
 	for i, clone in ipairs(clones) do
+		logger.info(clone.id)
 		local angle = i * angle_step
 		local offset = glm.vec3.new()
-		offset.x = math.cos(angle)
-		offset.y = math.sin(angle)
+		offset.x = math.cos(angle) * radius
+		offset.y = math.sin(angle) * radius
 		offset.z = 0.0
 
+		local rotoffset = glm.rotate(glm.mat4.new(), angle, glm.vec3.new(0, 0, 1))
+
+		local tform = center:get_graphics_transform()
+		local pos = tform.pos
+		local rot = glm.quat.new(rotoffset)
+
+		local root = symmetry_mode:get_root()
+		local attach = root:get_attachment(symmetry_mode:get_attachment()).marker
+
 		-- Attach a root piece clone at given position
+		vehicle:move_piece(clone, pos + offset, rot, attach)
+		-- clone:attach_to(center, symmetry_mode:get_attachment(), "")
+	
 	end
+
+	vehicle:update_attachments()
 
 	return true
 end

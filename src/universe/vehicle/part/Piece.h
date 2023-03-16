@@ -168,6 +168,9 @@ public:
 	// Can the piece be dettached in the editor? Useful for multi-piece parts
 	bool editor_dettachable;
 
+	void attach_to(Piece* target, const std::string& attachment_idx, const std::string& target_attachment_idx);
+	void detach();
+
 	// Don't hold the pointer for very long!
 	std::pair<PieceAttachment, bool>* find_attachment(std::string marker_name);
 

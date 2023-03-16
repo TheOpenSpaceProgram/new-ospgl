@@ -84,9 +84,18 @@ void EditorPartList::create_part(AssetHandle<PartPrototype>& proto)
 	EditorVehicle* edveh = edveh_int->edveh;
 	
 	Part* n_part = new Part(proto, nullptr);
+
+	scene->part_id++;
+	n_part->id = scene->part_id;
+
 	n_part->vehicle = veh;
 	std::vector<Piece*> n_pieces = n_part->create_pieces();
 	n_part->init(&scene->lua_state, veh);
+	for(Piece* p : n_pieces)
+	{
+		scene->piece_id++;
+		p->id = scene->piece_id;
+	}
 
 	// Find a space for plumbing and put it there IF IT HAS PLUMBING
 	// All machines are added at once following the toml offsets

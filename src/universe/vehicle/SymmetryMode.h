@@ -9,6 +9,7 @@ class ModifyPanel;
 class EditorVehicleInterface;
 class EditorVehicle;
 class Vehicle;
+class EditorScene;
 
 // A symmetric distribution handles all symmetric parts in a group
 // Behaviour is handled in lua, but this lua code runs in the editor only as during
@@ -21,6 +22,7 @@ private:
 	sol::environment env;
 	sol::state* st;
 	EditorVehicle* edveh;
+	EditorScene* sc;
 
 public:
 	// Do not use keys starting with "__" as these are used by the engine
@@ -39,7 +41,7 @@ public:
 	Piece* root;
 	// Includes the original piece as first vector element (root)
 	std::vector<Piece*> clones;
-	int attachment_used;
+	std::string attachment_used;
 
 	// Called when any of the mirrored pieces is modified in any way, including disconnection
 	// ONLY CALLED IN THE EDITOR

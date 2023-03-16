@@ -30,9 +30,6 @@ class VehicleLoader
 {
 private:
 
-	int64_t vpart_id;
-	int64_t vpiece_id;
-
 	Vehicle* n_vehicle;
 	std::unordered_map<int64_t, Part*> parts_by_id;
 	std::unordered_map<int64_t, Piece*> pieces_by_id;
@@ -57,6 +54,9 @@ private:
 	void update_ids();
 
 public:
+
+	int64_t vpart_id;
+	int64_t vpiece_id;
 
 	// Doesn't sort! This is so it can be used in the editor too
 	VehicleLoader(const cpptoml::table& root, Vehicle& to, bool is_editor);

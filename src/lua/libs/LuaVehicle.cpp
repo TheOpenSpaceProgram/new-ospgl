@@ -26,6 +26,7 @@ void LuaVehicle::load_to(sol::table& table)
 			EVENT_EMITTER_SIGN_UP(Vehicle),
 			"meta", &Vehicle::meta,
 		 	"is_packed", &Vehicle::is_packed,
+			 "move_piece", &Vehicle::move_piece,
 		 	"packed", &Vehicle::packed_veh,
 		 	"unpacked", &Vehicle::unpacked_veh,
 		    "get_bounds", &Vehicle::get_bounds,
@@ -68,6 +69,14 @@ void LuaVehicle::load_to(sol::table& table)
 	table.new_usertype<Piece>("piece",
 		"rigid_body", &Piece::rigid_body,
 		"welded", &Piece::welded,
+		"get_attachment", [](Piece* p, const std::string& name)
+		{
+			auto atch = p->find_attachment(name);
+			logger->check(atch, "Could not find attachment named: {}", name);
+			return std::make_pair(atch->first, atch->second);
+	  	},
+		"attach_to", &Piece::attach_to,
+		"detach", &Piece::detach,
 		"attached_to", &Piece::attached_to,
 		"id", sol::readonly(&Piece::id),
 		"set_dirty", &Piece::set_dirty,
@@ -254,5 +263,13 @@ void LuaVehicle::load_to(sol::table& table)
 	table.new_usertype<VehicleMeta>("vehicle_meta", sol::no_constructor,
 			 "set_controlled_machine", &VehicleMeta::set_controlled_machine,
 			 "get_input_ctx", &VehicleMeta::get_input_ctx);
+
+	table.new_usertype<PieceAttachment>("piece_attachment", sol::no_constructor,
+			"stack", &PieceAttachment::stack,
+			"marker", &PieceAttachment::marker,
+			"radial", &PieceAttachment::radial,
+			"hidden", &PieceAttachment::hidden,
+			"name", &PieceAttachment::name,
+			"size", &PieceAttachment::size);
 
 }

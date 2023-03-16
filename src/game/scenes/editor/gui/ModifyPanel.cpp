@@ -85,6 +85,8 @@ void ModifyPanel::change_state(ModifyInterface::State st, Piece* selected_piece)
 			// Finally, a piece is selected and the symmetry takes control, pass it to the
 			// symmetry
 			modifying_symmetry->root = selected_piece;
+			std::string mname = selected_piece->attachments[mod_int->cur_attachment_point].first.marker;
+			modifying_symmetry->attachment_used = mname;
 			//modifying_symmetry->root_attachment = mod_int->cur_attachment_point;
 			modifying_symmetry->take_gui_control(this, mod_int, edveh_int);
 		}

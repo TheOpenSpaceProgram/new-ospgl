@@ -65,6 +65,9 @@ public:
 	std::vector<sol::environment> envs;
 
 	btCollisionWorld* bt_world;
+	// Separate from global part and piece IDs! Only applicable to current edited vehicle
+	int64_t part_id;
+	int64_t piece_id;
 
 	virtual void load() override;
 	virtual void pre_update() override;

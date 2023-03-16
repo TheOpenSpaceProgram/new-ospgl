@@ -303,6 +303,20 @@ glm::dmat4 Piece::get_in_vehicle_matrix()
 	}
 }
 
+void Piece::attach_to(Piece *target, const std::string& attachment_idx, const std::string& target_attachment_idx)
+{
+	attached_to = target;
+	from_attachment = attachment_idx;
+	to_attachment = target_attachment_idx;
+}
+
+void Piece::detach()
+{
+	attached_to = nullptr;
+	from_attachment = "";
+	to_attachment = "";
+}
+
 Piece* WeldedGroup::get_piece(int id)
 {
 	if(id < 0 || id >= pieces.size())

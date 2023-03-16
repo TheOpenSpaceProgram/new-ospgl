@@ -93,7 +93,8 @@ private:
 
 	// Clones a piece, creating a part for it if neccesary (or returning already created)
 	// but doesn't clone attachments, wiring or anything similar
-	Piece* clone_piece(Piece* p, std::vector<Part*>& seen_parts, std::vector<Part*>& created_parts);
+	Piece* clone_piece(Piece* p, std::vector<Part*>& seen_parts, std::vector<Part*>& created_parts,
+					   int64_t* opiece_id, int64_t* opart_id);
 
 public:
 
@@ -189,7 +190,13 @@ public:
 
 	// Duplicates a piece, and all its children, doing a deep copy of values, wiring
 	// and plumbing, but only of data within the given piece and children
-	Piece* duplicate(Piece* p);
+	// If a state is given, it's used instead of universal one.
+	// If piece and part IDs are given, they are used instead of global OSP ones
+	Piece* duplicate(Piece* p, sol::state* state = nullptr, int64_t* opiece_id = nullptr, int64_t* opart_id = nullptr);
+
+	// Moves a piece, correctly adjusting all children so relative positioning is respected
+	// If marker is not empty, then the piece is positioned using the marker as origin!
+	void move_piece(Piece* p, glm::dvec3 new_pos, glm::dquat new_rot, const std::string& marker);
 
 	Vehicle();
 	~Vehicle();

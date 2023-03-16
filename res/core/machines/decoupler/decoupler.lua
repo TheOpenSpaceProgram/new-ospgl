@@ -22,7 +22,8 @@ local function decouple()
 	-- We cannot assume attached will be different from root as the link may be "inverted"
 	if attached == root then separated = attached.attached_to end
 
-	root:get_attached_to_marker(d_point).attached_to = nil
+	root:get_attached_to_marker(d_point):detach()
+	vehicle:update_attachments()
 
 	-- We update the vehicle to separate the pieces so we can apply forces even if they 
 	-- are welded

@@ -33,6 +33,14 @@ void LuaEditor::load_to(sol::table& table)
 
 	table.new_usertype<SymmetryMode>("symmetry_mode", sol::no_constructor,
 				 "saved_toml", &SymmetryMode::save_toml,
-				 "make_clones", &SymmetryMode::make_clones);
+				 "make_clones", &SymmetryMode::make_clones,
+				 "get_root", [](SymmetryMode* mod)
+				 {
+					return mod->root;
+				 },
+				 "get_attachment", [](SymmetryMode* mod)
+				 {
+					return mod->attachment_used;
+				 });
 
 }

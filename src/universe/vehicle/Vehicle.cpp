@@ -416,12 +416,24 @@ std::pair<glm::dvec3, glm::dvec3> Vehicle::get_bounds()
 	return std::make_pair(min, max);
 }
 
-Piece* Vehicle::duplicate(Piece *p)
+Piece* Vehicle::duplicate(Piece *p, sol::state* st, int64_t* opiece_id, int64_t* opart_id)
 {
+	if(st == nullptr)
+	{
+		st = &osp->universe->lua_state;
+	}
+
 	logger->check(p->in_vehicle == this);
+
+	std::unordered_map<Piece*, int> piece_to_index;
 
 	std::vector<Piece*> all = get_children_of(p);
 	all.insert(all.begin(), p);
+
+	for(int i = 0; i < all.size(); i++)
+	{
+		piece_to_index[all[i]] = i;
+	}
 
 	// Basic clone of all pieces
 	std::vector<Piece*> new_all;
@@ -429,20 +441,66 @@ Piece* Vehicle::duplicate(Piece *p)
 	std::vector<Part*> seen_parts;
 	for(Piece* a : all)
 	{
-		Piece* new_a = clone_piece(a, seen_parts, new_parts);
+		Piece* new_a = clone_piece(a, seen_parts, new_parts, opiece_id, opart_id);
 		new_all.push_back(new_a);
+	}
+
+	// Assign links, we exploit the fact that all and new_all vectors share
+	// the same indices
+	// Skip the start piece because it's attached to an external piece (or not)
+	for(int i = 1; i < all.size(); i++)
+	{
+		int target = piece_to_index[all[i]->attached_to];
+		new_all[i]->attached_to = new_all[target];
+		new_all[i]->from_attachment = all[i]->from_attachment;
+		new_all[i]->to_attachment = all[i]->to_attachment;
+		if(all[i]->welded)
+		{
+			new_all[i]->welded = true;
+		}
+		else
+		{
+			// Copy the link fully
+			new_all[i]->link_from = all[i]->link_from;
+			new_all[i]->link_to = all[i]->link_to;
+			new_all[i]->link_rot = all[i]->link_rot;
+			logger->check(false, "NOT IMPLEMENTED");
+		}
 	}
 
 	// Add all to the vehicle
 	all_pieces.insert(all_pieces.end(), new_all.begin(), new_all.end());
 	parts.insert(parts.end(), new_parts.begin(), new_parts.end());
 
+	// Assign IDs
+	for(Part* pa : new_parts)
+	{
+		id_to_part[pa->id] = pa;
+	}
+	for(Piece* pi : new_all)
+	{
+		id_to_piece[pi->id] = pi;
+	}
+	// Initialize the parts
+	for(Part* pa : new_parts)
+	{
+		pa->init(st, this);
+	}
+
 	return new_all[0];
 }
 
-Piece* Vehicle::clone_piece(Piece *p, std::vector<Part *> &seen_parts, std::vector<Part*> &created_parts)
+Piece* Vehicle::clone_piece(Piece *p, std::vector<Part *> &seen_parts, std::vector<Part*> &created_parts,
+							int64_t* opiece_id, int64_t* opart_id)
 {
+	if(opiece_id == nullptr)
+	{
+		opiece_id = &osp->universe->piece_uid;
+		opart_id = &osp->universe->part_uid;
+	}
+
 	Piece* piece = new Piece(p->part_prototype, p->name_in_part);
+	piece->packed_tform = p->packed_tform;
 
 	Part* part = nullptr;
 	if(p->part != nullptr)
@@ -460,11 +518,47 @@ Piece* Vehicle::clone_piece(Piece *p, std::vector<Part *> &seen_parts, std::vect
 		{
 			// TODO: Pass the table too?
 			part = new Part(p->part_prototype, nullptr);
+			(*opart_id)++;
+			part->id = *opart_id;
 			seen_parts.push_back(p->part);
 			created_parts.push_back(part);
 		}
 	}
-	p->part = part;
+	piece->part = part;
+	piece->in_vehicle = this;
+	(*opiece_id)++;
+	piece->id = *opiece_id;
+	if(part)
+	{
+		part->pieces[p->name_in_part] = piece;
+	}
 
 	return piece;
+}
+
+void Vehicle::move_piece(Piece *p, glm::dvec3 new_pos, glm::dquat new_rot, const std::string& marker)
+{
+	// TODO: Make this work in unpacked? May rarely be used tho
+	logger->check(is_packed(), "Unable to move pieces while unpacked");
+
+	std::vector<Piece*> children = get_children_of(p);
+	glm::dmat4 tform_0 = p->get_graphics_matrix();
+
+	glm::dmat4 tform_marker;
+	if(!marker.empty())
+	{
+		tform_marker = p->get_marker_transform(marker);
+	}
+
+	glm::dmat4 tform_new = glm::translate(glm::dmat4(1.0), new_pos);
+	tform_new = tform_new * glm::toMat4(new_rot) * glm::inverse(tform_marker);
+	p->packed_tform = to_btTransform(tform_new);
+
+	for(Piece* child : children)
+	{
+		glm::dmat4 relative = glm::inverse(tform_0) * child->get_graphics_matrix() * child->collider_offset;
+		glm::dmat4 final = tform_new * relative;
+		child->packed_tform = to_btTransform(final);
+	}
+
 }
