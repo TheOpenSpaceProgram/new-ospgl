@@ -18,7 +18,9 @@ void LuaEditor::load_to(sol::table& table)
 		},
 		EVENT_EMITTER_SIGN_UP(EditorScene));
 
-	table.new_usertype<EditorVehicle>("editor_vehicle", sol::no_constructor);
+	table.new_usertype<EditorVehicle>("editor_vehicle", sol::no_constructor,
+		  "update_collider", &EditorVehicle::update_collider,
+		  "update_collider_hierarchy", &EditorVehicle::update_collider_hierarchy);
 	table.new_usertype<EditorCamera>("editor_camera", sol::no_constructor,
 		 "get_camera_uniforms", &EditorCamera::get_camera_uniforms);
 
@@ -34,6 +36,7 @@ void LuaEditor::load_to(sol::table& table)
 	table.new_usertype<SymmetryMode>("symmetry_mode", sol::no_constructor,
 				 "saved_toml", &SymmetryMode::save_toml,
 				 "make_clones", &SymmetryMode::make_clones,
+				 "get_all_pieces", [](SymmetryMode* s){ return s->all_in_symmetry; },
 				 "get_root", [](SymmetryMode* mod)
 				 {
 					return mod->root;

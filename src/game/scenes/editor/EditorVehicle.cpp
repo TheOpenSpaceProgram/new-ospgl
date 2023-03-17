@@ -209,6 +209,16 @@ void EditorVehicle::draw_attachment(std::pair<PieceAttachment, bool>& pair, Piec
 
 }
 
+void EditorVehicle::update_collider_hierarchy(Piece *p)
+{
+	std::vector<Piece*> children = veh->get_children_of(p);
+	update_collider(p);
+	for(Piece* child : children)
+	{
+		update_collider(child);
+	}
+}
+
 
 void GenericSerializer<EditorVehicle>::serialize(const EditorVehicle& what, cpptoml::table& target)
 {

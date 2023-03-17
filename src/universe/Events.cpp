@@ -1,4 +1,5 @@
 #include "Events.h"
+#include <util/Logger.h>
 
 std::unordered_set<EventHandler, EventHandlerHasher>& EventEmitter::index_event_receivers(const std::string& str)
 {
@@ -16,9 +17,12 @@ std::unordered_set<EventHandler, EventHandlerHasher>& EventEmitter::index_event_
 
 void EventEmitter::emit_event(const std::string& event_id, EventArguments args)
 {
-	auto& rc = index_event_receivers(event_id);
+	// We make a copy for safe iteration, as elements may be removed during iteration
+	// Note that this means that removing an event handler during event call
+	// will only have effect on next event!
+	auto rc = index_event_receivers(event_id);
 
-	for (const EventHandler& ev : rc)
+	for (auto& ev : rc)
 	{
 		ev.fnc(args);
 	}

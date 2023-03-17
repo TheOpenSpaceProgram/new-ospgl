@@ -88,15 +88,14 @@ private:
 
 	bool packed;
 
-	std::unordered_map<int64_t, Piece*> id_to_piece;
-	std::unordered_map<int64_t, Part*> id_to_part;
-
 	// Clones a piece, creating a part for it if neccesary (or returning already created)
 	// but doesn't clone attachments, wiring or anything similar
 	Piece* clone_piece(Piece* p, std::vector<Part*>& seen_parts, std::vector<Part*>& created_parts,
 					   int64_t* opiece_id, int64_t* opart_id);
 
 public:
+	std::unordered_map<int64_t, Piece*> id_to_piece;
+	std::unordered_map<int64_t, Part*> id_to_part;
 
 	Universe* in_universe;
 	Entity* in_entity;

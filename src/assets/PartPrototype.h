@@ -80,6 +80,7 @@ struct PiecePrototype
 		this->to_attachment = b.to_attachment;
 		this->aabb_min = b.aabb_min;
 		this->aabb_max = b.aabb_max;
+		this->metadata = b.metadata;
 	}
 
 	PiecePrototype(GPUModelNodePointer&& n) : model_node(std::move(n))

@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include "game/scenes/flight/InputContext.h"
+#include "SymmetryMode.h"
 
 class Part;
 class Machine;
@@ -51,8 +52,7 @@ public:
 	std::shared_ptr<InputContext> get_input_ctx();
 
 	// Symmetry
-
-
+	std::vector<SymmetryMode*> symmetry_modes;
 
 	// Auto-wiring
 

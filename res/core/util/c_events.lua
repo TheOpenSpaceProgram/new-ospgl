@@ -1,4 +1,5 @@
 -- A more comfortable method to handle events, extremely simple
+require("events")
 local events = {}
 
 events.handlers = {}
@@ -19,11 +20,17 @@ function events:add(emitter, event, func)
 end
 
 function events:remove_all()
+	for _, handler in pairs(self.handlers) do
+		handler:sign_out()
+	end
 	self.handlers = {}
 end
 
 ---@param id string Name of the event id to remove
 function events:remove(id)
+	if self.handlers[id] then
+		self.handlers[id]:sign_out()
+	end
 	self.handlers[id] = nil
 end
 

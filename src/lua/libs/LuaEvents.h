@@ -14,6 +14,7 @@ struct LuaEventHandler
 
 	void sign_out()
 	{
+		logger->info("Signing out");
 		if(signed_up)
 		{
 			signed_up = false;

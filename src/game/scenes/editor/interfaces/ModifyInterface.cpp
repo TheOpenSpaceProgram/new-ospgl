@@ -220,8 +220,9 @@ std::vector<Piece*> ModifyInterface::highlight_symmetry(Piece* root)
 	return children;
 }
 
-void ModifyInterface::start_picking_piece(bool allow_only_radial)
+void ModifyInterface::start_picking_piece(bool allow_only_radial, std::vector<Piece*> forbidden)
 {
+	forbidden_pieces = forbidden;
 	only_radial_allowed = allow_only_radial;
 	if(cur_state == CREATING_SYMMETRY)
 	{
@@ -238,16 +239,11 @@ bool ModifyInterface::do_interface_modify_symmetry(Piece *hovered, GUIInput *ipt
 	auto children = highlight_symmetry(selected_piece);
 	if(pick_another_piece && hovered)
 	{
-		bool is_in_symmetry = false;
-		for(Piece* p : children)
-		{
-			if(p == hovered)
-			{
-				is_in_symmetry = true;
-				break;
-			}
-		}
-		if((hovered->piece_prototype->allows_radial || !only_radial_allowed) && !is_in_symmetry && hovered != selected_piece)
+		bool is_forbidden = vector_contains(forbidden_pieces, hovered);
+		is_forbidden |= vector_contains(children, hovered);
+		is_forbidden |= selected_piece == hovered;
+
+		if((hovered->piece_prototype->allows_radial || !only_radial_allowed) && !is_forbidden && hovered != selected_piece)
 		{
 			edveh->piece_meta[hovered].highlight = glm::vec3(1.0f);
 

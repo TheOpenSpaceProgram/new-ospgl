@@ -38,6 +38,7 @@ private:
 	std::shared_ptr<GUITextButton> cancel_button;
 
 	std::string creating_symmetry_name;
+	bool cancel_goes_back;
 
 public:
 

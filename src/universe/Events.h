@@ -40,6 +40,7 @@ class EventEmitter
 private:
 	std::unordered_map<std::string, std::unordered_set<EventHandler, EventHandlerHasher>> event_receivers;
 	std::unordered_set<EventHandler, EventHandlerHasher>& index_event_receivers(const std::string& str);
+
 public:
 
 	void sign_up_for_event(const std::string& event_id, EventHandler id);

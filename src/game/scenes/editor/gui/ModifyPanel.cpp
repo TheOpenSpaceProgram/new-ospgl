@@ -71,6 +71,8 @@ void ModifyPanel::change_state(ModifyInterface::State st, Piece* selected_piece)
 
 			// Create the symmetry mode proper in the vehicle
 			modifying_symmetry = new SymmetryMode();
+			sc->vehicle->veh->meta.symmetry_modes.push_back(modifying_symmetry);
+
 			auto config = AssetHandle<Config>(creating_symmetry_name);
 			config->read_to(*modifying_symmetry);
 			// We initialize the symmetry mode without any config, as it's being created
@@ -179,9 +181,42 @@ void ModifyPanel::make_symmetry_canvas_creating()
 	auto layout = std::make_shared<GUIVerticalLayout>();
 	auto str = osp->game_database->get_string("core:cancel");
 	cancel_button = std::make_shared<GUITextButton>(str);
+	cancel_button->sign_up_for_event("on_clicked", EventHandler([this](EventArguments& args)
+	{
+		if(cancel_goes_back)
+		{
+			modifying_symmetry->gui_go_back();
+		}
+		else
+		{
+			// Remove the symmetry mode which has not been created
+			std::vector<SymmetryMode*>& array = sc->vehicle->veh->meta.symmetry_modes;
+			int i = -1;
+			for(i = 0; i < array.size(); i++)
+			{
+				if(array[i] == modifying_symmetry)
+				{
+					break;
+				}
+			}
+			logger->check(i >= 0);
+			array.erase(array.begin() + i);
+			modifying_symmetry->leave_gui_control();
+			delete modifying_symmetry;
+			modifying_symmetry = nullptr;
+			mod_int->change_state(ModifyInterface::IDLE);
+		}
+	}));
 	layout->add_widget(cancel_button);
 	auto str2 = osp->game_database->get_string("core:finish");
 	finish_button  = std::make_shared<GUITextButton>(str2);
+	finish_button->sign_up_for_event("on_clicked", EventHandler([this](EventArguments& args)
+	{
+		// Exit, the symmetry mode is saved in the vehicle
+		mod_int->change_state(ModifyInterface::IDLE);
+		modifying_symmetry->leave_gui_control();
+		modifying_symmetry = nullptr;
+	}));
 	layout->mark_same_line();
 	layout->add_widget(finish_button);
 	bottom->set_layout(layout);
@@ -194,9 +229,14 @@ void ModifyPanel::set_symmetry_canvas(std::shared_ptr<GUICanvas> canvas, bool ca
 
 	std::string back;
 	if(can_go_back)
+	{
 		back = osp->game_database->get_string("core:back");
+		cancel_goes_back = true;
+	}
 	else
 	{
+		cancel_goes_back = false;
+
 		if(mod_int->cur_state == ModifyInterface::SELECTING_SYMMETRY)
 		{
 			back = osp->game_database->get_string("core:undo");

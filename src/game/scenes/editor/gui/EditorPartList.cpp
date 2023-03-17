@@ -87,6 +87,7 @@ void EditorPartList::create_part(AssetHandle<PartPrototype>& proto)
 
 	scene->part_id++;
 	n_part->id = scene->part_id;
+	veh->id_to_part[n_part->id] = n_part;
 
 	n_part->vehicle = veh;
 	std::vector<Piece*> n_pieces = n_part->create_pieces();
@@ -95,6 +96,7 @@ void EditorPartList::create_part(AssetHandle<PartPrototype>& proto)
 	{
 		scene->piece_id++;
 		p->id = scene->piece_id;
+		veh->id_to_piece[p->id] = p;
 	}
 
 	// Find a space for plumbing and put it there IF IT HAS PLUMBING

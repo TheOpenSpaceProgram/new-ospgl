@@ -46,6 +46,9 @@ public:
 	};
 	Piece* selected_piece;
 	int cur_attachment_point;
+	// Never allows children of selected_piece either!
+	std::vector<Piece*> forbidden_pieces;
+
 	// If true and we are creating symmetry, more pieces may be picked and returned
 	// using the select_piece event (used by lua)
 	bool pick_another_piece;
@@ -64,7 +67,7 @@ public:
 
 	bool can_leave() override;
 
-	void start_picking_piece(bool only_radial_allowed);
+	void start_picking_piece(bool only_radial_allowed, std::vector<Piece*> forbidden);
 
 	ModifyInterface(EditorVehicleInterface* edveh_int);
 };

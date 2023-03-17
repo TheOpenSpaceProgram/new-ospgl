@@ -13,6 +13,12 @@ void SymmetryMode::take_gui_control(ModifyPanel* panel, ModifyInterface* mod_int
 	LuaUtil::call_function_if_present(env["take_gui_control"]);
 }
 
+
+void SymmetryMode::gui_go_back()
+{
+	LuaUtil::call_function_if_present(env["gui_go_back"]);
+}
+
 void SymmetryMode::leave_gui_control()
 {
 	LuaUtil::call_function_if_present(env["leave_gui_control"]);
@@ -31,6 +37,7 @@ void SymmetryMode::init(sol::state *in_state, EditorVehicle* in_vehicle, const s
 	lua_core->load((sol::table&)env, pkg);
 	env["symmetry_mode"] = this;
 	env["vehicle"] = in_vehicle->veh;
+	env["editor_vehicle"] = in_vehicle;
 	env["osp"] = osp;
 
 	std::string full_path = osp->assets->res_path + pkg + "/" + name;
@@ -52,8 +59,14 @@ std::vector<Piece*> SymmetryMode::make_clones(int count)
 		for(Piece* p : child)
 		{
 			veh->remove_piece(p);
+			edveh->remove_collider(p);
+			edveh->piece_meta.erase(p);
+			delete p;
 		}
 		veh->remove_piece(clones[i]);
+		edveh->remove_collider(clones[i]);
+		edveh->piece_meta.erase(clones[i]);
+		delete clones[i];
 	}
 
 	std::vector<Piece*> out;
@@ -70,11 +83,18 @@ std::vector<Piece*> SymmetryMode::make_clones(int count)
 	}
 	clones = out;
 
-	for(Piece* p : all_new_pieces)
-	{
-		edveh->update_collider(p);
-	}
+	// update all_in_symmetry array
+	auto root_children = veh->get_children_of(root);
+	all_in_symmetry.clear();
+	all_in_symmetry.push_back(root);
+	all_in_symmetry.insert(all_in_symmetry.begin(), root_children.begin(), root_children.end());
+	all_in_symmetry.insert(all_in_symmetry.begin(), all_new_pieces.begin(), all_new_pieces.end());
 
 	return out;
+}
+
+bool SymmetryMode::is_piece_in_symmetry(Piece *p)
+{
+	return vector_contains(all_in_symmetry, p);
 }
 

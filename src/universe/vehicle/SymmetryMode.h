@@ -25,6 +25,8 @@ private:
 	EditorScene* sc;
 
 public:
+	std::vector<Piece*> all_in_symmetry;
+
 	// Do not use keys starting with "__" as these are used by the engine
 	std::shared_ptr<cpptoml::table> save_toml;
 
@@ -56,8 +58,13 @@ public:
 	// was created from, BUT NOT CHILDREN!
 	std::vector<Piece*> make_clones(int count);
 
+	bool is_piece_in_symmetry(Piece* p);
+
 	// ONLY CALLED IN THE EDITOR
 	void init(sol::state* in_state, EditorVehicle* in_vehicle, const std::string& pkg);
+
+	// Called if the back button is clicked in the editor and the can_go_back option is set
+	void gui_go_back();
 
 	// Once this function is called, you are free to set the symmetry panel to anything,
 	// take piece select events, etc, as the symmetry is being modified

@@ -36,7 +36,7 @@ local select_piece_canvas = nil
 local function get_piece_radius(piece)
 	-- We try to use radius metadata for given axis, if not available then we are forced to use AABBs
 	-- which may not always be accurate
-	--local has_meta = piece.prototype.metadata:contains("radial_symmetry_radius")
+	local has_meta = piece.prototype.metadata:contains("radial_symmetry_radius")
 	if has_meta then
 		return piece.prototype.metadata:get_number("radial_symmetry_radius")
 	else 
@@ -67,19 +67,25 @@ local function rebuild()
 		offset.y = math.sin(angle) * radius
 		offset.z = 0.0
 
-		local rotoffset = glm.rotate(glm.mat4.new(), angle, glm.vec3.new(0, 0, 1))
+		local axis = glm.rotate_from_to(glm.vec3.new(0, 0, 1), center:get_forward())
+		logger.info(center:get_up())
+		local axis_quat = glm.quat.new(axis)
+		-- We set the piece looking at the rotation, with Z up
+		-- (same behaviour as radial attachment)
+		local rot = glm.quat_look_at(glm.vec3.new(0, 0, 0), offset, glm.vec3.new(0, 0, 1), glm.vec3.new(0, 1, 0))
+
 
 		local tform = center:get_graphics_transform()
-		local pos = tform.pos
-		local rot = glm.quat.new(rotoffset)
-
+		local pos = axis_quat * offset + tform.pos 
 		local root = symmetry_mode:get_root()
 		local attach = root:get_attachment(symmetry_mode:get_attachment()).marker
 
 		-- Attach a root piece clone at given position
-		vehicle:move_piece(clone, pos + offset, rot, attach)
-		-- clone:attach_to(center, symmetry_mode:get_attachment(), "")
+		vehicle:move_piece(clone, pos, axis_quat * rot, attach)
+		clone:attach_to(center, symmetry_mode:get_attachment(), "")
+		editor_vehicle:update_collider_hierarchy(clone)
 	
+		
 	end
 
 	vehicle:update_attachments()
@@ -100,10 +106,14 @@ local function select_piece(piece_id, attachment)
 end
 
 local function pick_piece()
-	symmetry_panel:set_canvas(select_piece_canvas, false, true)
-	modify_interface:start_picking_piece(false)
+	symmetry_panel:set_canvas(select_piece_canvas, false, center_piece_id > 0)
+	modify_interface:start_picking_piece(false, symmetry_mode:get_all_pieces())
 	events:add_named(edveh_interface, "on_select_piece", "select_center", select_piece)
+end
 
+function gui_go_back()
+	symmetry_panel:set_canvas(main_canvas, true, false)	
+	events:remove("select_center")
 end
 
 local function make_main_canvas()
