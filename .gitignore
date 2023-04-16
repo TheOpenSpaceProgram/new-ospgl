@@ -305,3 +305,8 @@ res/test_parts/**
 /cmake-build-debug/
 /cmake-build-release/
 .cache/
+
+CMakeDoxyfile.in
+.DS_Store
+
+project_luajit-prefix

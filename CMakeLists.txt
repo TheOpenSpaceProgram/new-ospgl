@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.3)
+cmake_minimum_required (VERSION 3.14)
 
 # Define basic compiler and CMake configuration
 
@@ -38,12 +38,23 @@ if(OSPGL_STACKTRACES)
 	add_definitions(-DOSPGL_STACKTRACES=1)
 endif()
 
-add_definitions(-DLUAJIT_ENABLE_LUA52COMPAT)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(MACOS TRUE)
+endif() 
 
 if(MSVC)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	add_definitions(-D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
 	target_compile_options(OSPGL PUBLIC /bigobj)
+elseif(MACOS)
+	target_compile_options(OSPGL PUBLIC -g -Werror -O0)
+	set(EXTRA_LINK "stdc++fs")
+	if(OSPGL_STACKTRACES)
+		add_definitions(-DBACKWARD_HAS_DW=1)
+		set(STACKTRACE_LINK "dw")
+	endif()
+
+	link_libraries(${CMAKE_DL_LIBS})
 else()
 	target_compile_options(OSPGL PUBLIC -g -Werror -O0)
 	set(EXTRA_LINK "stdc++fs")
@@ -81,7 +92,36 @@ target_link_libraries(OSPGL ${CMAKE_THREAD_LIBS_INIT})
 
 # LuaJIT 
 
-add_subdirectory(dep/LuaJIT-cmake)
+include(ExternalProject)
+
+if(MACOS)
+	ExternalProject_Add(project_luajit
+		SOURCE_DIR "./dep/LuaJIT/"
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND MACOSX_DEPLOYMENT_TARGET=13.00 make
+		BUILD_IN_SOURCE true
+		INSTALL_COMMAND ""
+		DOWNLOAD_COMMAND ""
+	)
+else()
+	ExternalProject_Add(project_luajit
+		SOURCE_DIR "./dep/LuaJIT/"
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND make
+		BUILD_IN_SOURCE true
+		INSTALL_COMMAND ""
+		DOWNLOAD_COMMAND ""
+	)
+endif()
+
+ExternalProject_Get_Property(project_luajit SOURCE_DIR)
+message("+++++" ${SOURCE_DIR})
+add_library(luajit STATIC IMPORTED)
+set_property(TARGET luajit PROPERTY IMPORTED_LOCATION ${SOURCE_DIR}/src/libluajit.o)
+add_dependencies(luajit project_luajit)
+include_directories(${SOURCE_DIR}/src)
+target_link_libraries(${PROJECT_NAME} luajit)
+target_link_libraries(${PROJECT_NAME} ${SOURCE_DIR}/src/libluajit.o)
 
 # Bullet3
 add_subdirectory(dep/bullet3)
@@ -109,6 +149,24 @@ endif()
 
 target_link_libraries(OSPGL fmt liblua-static BulletSoftBody BulletDynamics
 		BulletCollision LinearMath ${CMAKE_DL_LIBS} ${EXTRA_LINK} ${STACKTRACE_LINK})
+
+# Sol
+# Updating code based on https://github.com/tomlankhorst/cmake-prebuilt-library/blob/master/cmake/libhello.cmake
+if(SOL_DOWNLOAD)
+	set(SOL_VERSION v3.3.0)
+	set(SOL_URL https://github.com/ThePhD/sol2/releases/download/${SOL_VERSION}/sol.hpp)
+	set(SOL_PATH dep/sol/sol.hpp)
+
+	file(DOWNLOAD ${SOL_URL} ${SOL_PATH} STATUS SOL_DOWNLOAD_STATUS)
+endif()
+
+# Set flag for updating the Sol config
+if(SOL_CONFIG_DOWNLOAD)
+	set(SOL_CONFIG_URL https://github.com/ThePhD/sol2/releases/download/${SOL_VERSION}/config.hpp)
+	set(SOL_CONFIG_PATH dep/sol/config.hpp)
+
+	file(DOWNLOAD ${SOL_CONFIG_URL} ${SOL_CONFIG_PATH} STATUS SOL_CONFIG_DOWNLOAD_STATUS)
+endif()
 
 ##################################################################################
 # ospm - The package manager for OSPGL (Open Space Program Manager)

@@ -1,15 +1,24 @@
 [submodule "dep/bullet3"]
 	path = dep/bullet3
 	url = https://github.com/TheOpenSpaceProgram/ospgl-bullet.git
+	ignore = dirty
 [submodule "dep/fmt"]
 	path = dep/fmt
 	url = https://github.com/fmtlib/fmt.git
-[submodule "dep/LuaJIT-cmake"]
-	path = dep/LuaJIT-cmake
-	url = https://github.com/Titaniumtown/LuaJIT-cmake.git
+	ignore = dirty
 [submodule "dep/osp"]
 	path = dep/osp
 	url = https://github.com/TheOpenSpaceProgram/osp.git
+	ignore = dirty
 [submodule "dep/glfw"]
 	path = dep/glfw
 	url = https://github.com/glfw/glfw.git
+	ignore = dirty
+[submodule "dep/luajit"]
+	path = dep/luajit
+	url = https://github.com/LuaJIT/LuaJIT
+	ignore = dirty
+[submodule "dep/LuaJIT"]
+	path = dep/LuaJIT
+	url = https://github.com/LuaJIT/LuaJIT
+	ignore = dirty
