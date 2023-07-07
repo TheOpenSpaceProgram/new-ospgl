@@ -68,8 +68,9 @@ public:
 	std::vector<Piece*> clones;
 	std::string attachment_used;
 
-	// Called when a piece is attached to one of the symmetries
-	void on_attach(Piece* piece);
+	// Call when a piece is attached to one belonging to the symmetry
+	// (attached_to and transforms must be set!)
+	void on_attach(EditorVehicle* edveh, Piece* piece);
 
 	// Called when any of the mirrored pieces is modified in any way
 	// ONLY CALLED IN THE EDITOR

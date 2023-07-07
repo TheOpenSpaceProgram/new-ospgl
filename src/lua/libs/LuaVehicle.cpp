@@ -27,6 +27,7 @@ void LuaVehicle::load_to(sol::table& table)
 			"meta", &Vehicle::meta,
 		 	"is_packed", &Vehicle::is_packed,
 			 "move_piece", &Vehicle::move_piece,
+			 "move_piece_mat", &Vehicle::move_piece_mat,
 		 	"packed", &Vehicle::packed_veh,
 		 	"unpacked", &Vehicle::unpacked_veh,
 		    "get_bounds", &Vehicle::get_bounds,

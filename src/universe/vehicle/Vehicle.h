@@ -197,6 +197,8 @@ public:
 	// If marker is not empty, then the piece is positioned using the marker as origin!
 	void move_piece(Piece* p, glm::dvec3 new_pos, glm::dquat new_rot, const std::string& marker);
 
+	void move_piece_mat(Piece* p, glm::dmat4 new_tform);
+
 	Vehicle();
 	~Vehicle();
 };

@@ -40,7 +40,7 @@ void AttachInterface::attach(Piece* target, std::string port)
 	auto sym_group = edveh->veh->meta.find_symmetry_group(target);
 	if(sym_group.has_value())
 	{
-		edveh->veh->meta.symmetry_modes[sym_group.value()]->on_attach(selected);
+		edveh->veh->meta.symmetry_modes[sym_group.value()]->on_attach(edveh, selected);
 	}
 
 	selected = nullptr;

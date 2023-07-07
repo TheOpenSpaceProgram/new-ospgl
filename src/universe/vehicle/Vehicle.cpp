@@ -447,26 +447,34 @@ Piece* Vehicle::duplicate(Piece *p, sol::state* st, int64_t* opiece_id, int64_t*
 
 	// Assign links, we exploit the fact that all and new_all vectors share
 	// the same indices
-	// Skip the start piece because it's attached to an external piece (or not)
-	for(int i = 1; i < all.size(); i++)
+	for(int i = 0; i < all.size(); i++)
 	{
-		int target = piece_to_index[all[i]->attached_to];
-		new_all[i]->attached_to = new_all[target];
-		new_all[i]->from_attachment = all[i]->from_attachment;
-		new_all[i]->to_attachment = all[i]->to_attachment;
-		if(all[i]->welded)
+		// Skip the start piece because it's attached to an external piece (or not)
+		if(i > 0)
 		{
-			new_all[i]->welded = true;
+			int target = piece_to_index[all[i]->attached_to];
+			new_all[i]->attached_to = new_all[target];
+			new_all[i]->from_attachment = all[i]->from_attachment;
+			new_all[i]->to_attachment = all[i]->to_attachment;
 		}
-		else
+		// We do copy link type of start piece if it was attached
+		if(all[i]->attached_to != nullptr)
 		{
-			// Copy the link fully
-			new_all[i]->link_from = all[i]->link_from;
-			new_all[i]->link_to = all[i]->link_to;
-			new_all[i]->link_rot = all[i]->link_rot;
-			logger->check(false, "NOT IMPLEMENTED");
+			if (all[i]->welded)
+			{
+				new_all[i]->welded = true;
+			}
+			else
+			{
+				// Copy the link fully
+				new_all[i]->link_from = all[i]->link_from;
+				new_all[i]->link_to = all[i]->link_to;
+				new_all[i]->link_rot = all[i]->link_rot;
+				logger->check(false, "NOT IMPLEMENTED");
+			}
 		}
 	}
+
 
 	// Add all to the vehicle
 	all_pieces.insert(all_pieces.end(), new_all.begin(), new_all.end());
@@ -558,6 +566,25 @@ void Vehicle::move_piece(Piece *p, glm::dvec3 new_pos, glm::dquat new_rot, const
 	{
 		glm::dmat4 relative = glm::inverse(tform_0) * child->get_graphics_matrix() * child->collider_offset;
 		glm::dmat4 final = tform_new * relative;
+		child->packed_tform = to_btTransform(final);
+	}
+
+}
+
+void Vehicle::move_piece_mat(Piece *p, glm::dmat4 new_tform)
+{
+	// TODO: Make this work in unpacked? May rarely be used tho
+	logger->check(is_packed(), "Unable to move pieces while unpacked");
+
+	std::vector<Piece*> children = get_children_of(p);
+	glm::dmat4 tform_0 = p->get_graphics_matrix();
+
+	p->packed_tform = to_btTransform(new_tform * p->collider_offset);
+
+	for(Piece* child : children)
+	{
+		glm::dmat4 relative = glm::inverse(tform_0) * child->get_graphics_matrix() * child->collider_offset;
+		glm::dmat4 final = new_tform * relative;
 		child->packed_tform = to_btTransform(final);
 	}
 

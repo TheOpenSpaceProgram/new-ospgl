@@ -140,9 +140,51 @@ void SymmetryMode::remove_all_but(EditorVehicle* edveh, Piece* exp)
 
 }
 
-void SymmetryMode::on_attach(Piece *piece)
+void SymmetryMode::on_attach(EditorVehicle* edveh, Piece *piece)
 {
+	Vehicle* veh = piece->in_vehicle;
 	Piece* child = piece->attached_to;
+	auto index = get_piece_sub_index(child);
+	int offset = 1;
+
+	glm::dmat4 original_relative = glm::inverse(child->get_graphics_matrix()) * piece->get_graphics_matrix();
+
+	for(int i = 0; i < clones.size(); i++)
+	{
+		Piece* new_root;
+		if(i != index.first)
+		{
+			// Clone the piece
+			new_root = veh->duplicate(piece, &sc->lua_state,
+											 &sc->piece_id, &sc->part_id);
+		}
+		else
+		{
+			new_root = piece;
+		}
+
+		std::vector<Piece *> new_child = veh->get_children_of(new_root);
+
+		Piece *sub_child = all_in_symmetry[i * clone_depth + index.second + offset - 1];
+		all_in_symmetry.insert(all_in_symmetry.begin() + (i * clone_depth + index.second + offset), new_root);
+		offset++;
+		all_in_symmetry.insert(all_in_symmetry.begin() + (i * clone_depth + index.second + offset),
+							   new_child.begin(), new_child.end());
+		offset += new_child.size();
+
+		// The user-positioned piece is already correct!
+		if(new_root != piece)
+		{
+			new_root->attached_to = sub_child;
+			// Position the root piece (children follow automatically)
+			glm::dmat4 tform_new = sub_child->get_graphics_matrix() * original_relative;
+			veh->move_piece_mat(new_root, tform_new);
+			edveh->update_collider_hierarchy(new_root);
+		}
+	}
+
+	update_clone_depth();
+	veh->update_attachments();
 
 }
 
