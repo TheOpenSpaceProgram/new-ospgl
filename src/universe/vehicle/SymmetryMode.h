@@ -21,10 +21,29 @@ class SymmetryMode
 private:
 	sol::environment env;
 	sol::state* st;
-	EditorVehicle* edveh;
 	EditorScene* sc;
 
+	// If you point to all_in_symmetry[0] = clones[0], clones[clone_depth] = clones[1]
+	size_t clone_depth;
+
+	void remove_non_root(EditorVehicle* edveh);
+
+	// Warning: these don't update all_in_symmetry! They leave nullptr marker
+	// that must be removed with cleanup()
+	void remove_piece(EditorVehicle* edveh, Piece* p);
+	void remove_piece_from_symmetry(EditorVehicle* edveh, Piece* p);
+	void remove_piece_and_children(EditorVehicle* edveh, Piece* p);
+	void remove_piece_and_children_from_symmetry(EditorVehicle* edveh, Piece* p);
+	// Removes nullptrs in all_in_symmetry
+	void cleanup();
+	void update_clone_depth();
+
+	// <-1, -1> = not present in symmetry, otherwise:
+	// all_in_symmetry[first * clone_depth + second] = p
+	std::pair<int, int> get_piece_sub_index(Piece* p);
+
 public:
+	// This is sorted in the same way as the vehicle!
 	std::vector<Piece*> all_in_symmetry;
 
 	// Do not use keys starting with "__" as these are used by the engine
@@ -37,26 +56,33 @@ public:
 	bool can_use_stack_attachments;
 	bool can_use_radial_attachments;
 	AssetHandle<Image> icon;
+	// So that pieces have a place to go on removal of symmetry group
+	// attachments are not restored!
+	glm::dvec3 original_root_pos;
+	glm::dquat original_root_rot;
 
 	// Guaranteed to have associated part, as we don't allow making simetries with
 	// orphaned pieces
 	Piece* root;
-	// Includes the original piece as first vector element (root)
+	// Includes the original piece as first vector element. Only includes roots!
 	std::vector<Piece*> clones;
 	std::string attachment_used;
 
-	// Called when any of the mirrored pieces is modified in any way, including disconnection
+	// Called when a piece is attached to one of the symmetries
+	void on_attach(Piece* piece);
+
+	// Called when any of the mirrored pieces is modified in any way
 	// ONLY CALLED IN THE EDITOR
 	void on_dirty(Piece* piece);
 
-	// Calld when any of the mirrored, child pieces, is disconnected,
-	// so that mirrored versions are properly deleted
+	// Call to remove given piece from the symmetry. Returns true if it was a root, and then
+	// the whole symmetry must be removed. Piece and children will never be removed!
 	// ONLY CALLED IN THE EDITOR
-	void on_disconnect(Piece* piece);
+	bool disconnect(EditorVehicle* edveh, Piece* piece);
 
 	// Returns all root pieces, including the one that the symmetry
 	// was created from, BUT NOT CHILDREN!
-	std::vector<Piece*> make_clones(int count);
+	std::vector<Piece*> make_clones(EditorVehicle* edveh, int count);
 
 	bool is_piece_in_symmetry(Piece* p);
 
@@ -74,6 +100,15 @@ public:
 	// nor handle any piece select events or similar, as the symmetry is not being modified
 	// NOTE: symmetry_panel and modify_interface will be null!
 	void leave_gui_control();
+
+	void remove(EditorVehicle* edveh);
+	// Used while dettaching in the editor, removes all pieces belonging to the symmetry
+	// except given and children
+	// Make sure to destroy symmetry (remove it from array) afterwards as it's no longer symmetry
+	void remove_all_but(EditorVehicle* edveh, Piece* p);
+	// Finds the cloned father of a given piece, or returns nullptr if not found
+	Piece* find_father_clone(Piece* p);
+
 
 };
 

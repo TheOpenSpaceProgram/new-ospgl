@@ -28,7 +28,6 @@ void SymmetryMode::leave_gui_control()
 
 void SymmetryMode::init(sol::state *in_state, EditorVehicle* in_vehicle, const std::string &in_pkg)
 {
-	this->edveh = in_vehicle;
 	this->sc = in_vehicle->scene;
 
 	auto[pkg, name] = osp->assets->get_package_and_name(script_path, in_pkg);
@@ -49,26 +48,11 @@ void SymmetryMode::init(sol::state *in_state, EditorVehicle* in_vehicle, const s
 	}
 }
 
-std::vector<Piece*> SymmetryMode::make_clones(int count)
+std::vector<Piece*> SymmetryMode::make_clones(EditorVehicle* edveh, int count)
 {
 	Vehicle* veh = root->in_vehicle;
-	// Remove all old clones, except first one (root)
-	for(int i = 1; i < clones.size(); i++)
-	{
-		std::vector<Piece*> child = veh->get_children_of(clones[i]);
-		for(Piece* p : child)
-		{
-			veh->remove_piece(p);
-			edveh->remove_collider(p);
-			edveh->piece_meta.erase(p);
-			delete p;
-		}
-		veh->remove_piece(clones[i]);
-		edveh->remove_collider(clones[i]);
-		edveh->piece_meta.erase(clones[i]);
-		delete clones[i];
-	}
 
+	remove_non_root(edveh);
 	std::vector<Piece*> out;
 	std::vector<Piece*> all_new_pieces;
 
@@ -80,6 +64,7 @@ std::vector<Piece*> SymmetryMode::make_clones(int count)
 		all_new_pieces.push_back(new_root);
 		std::vector<Piece*> new_child = veh->get_children_of(new_root);
 		all_new_pieces.insert(all_new_pieces.end(), new_child.begin(), new_child.end());
+		clone_depth = new_child.size() + 1;
 	}
 	clones = out;
 
@@ -87,8 +72,8 @@ std::vector<Piece*> SymmetryMode::make_clones(int count)
 	auto root_children = veh->get_children_of(root);
 	all_in_symmetry.clear();
 	all_in_symmetry.push_back(root);
-	all_in_symmetry.insert(all_in_symmetry.begin(), root_children.begin(), root_children.end());
-	all_in_symmetry.insert(all_in_symmetry.begin(), all_new_pieces.begin(), all_new_pieces.end());
+	all_in_symmetry.insert(all_in_symmetry.end(), root_children.begin(), root_children.end());
+	all_in_symmetry.insert(all_in_symmetry.end(), all_new_pieces.begin(), all_new_pieces.end());
 
 	return out;
 }
@@ -97,4 +82,205 @@ bool SymmetryMode::is_piece_in_symmetry(Piece *p)
 {
 	return vector_contains(all_in_symmetry, p);
 }
+
+void SymmetryMode::remove(EditorVehicle* edveh)
+{
+	remove_non_root(edveh);
+
+	// Return root to original position
+	root->detach();
+	root->in_vehicle->move_piece(root, original_root_pos, original_root_rot, "");
+	root->in_vehicle->update_attachments();
+	edveh->update_collider_hierarchy(root);
+}
+
+void SymmetryMode::remove_non_root(EditorVehicle* edveh)
+{
+	Vehicle* veh = root->in_vehicle;
+	// Remove all old clones, except first one (root)
+	for(int i = 1; i < clones.size(); i++)
+	{
+		remove_piece_and_children(edveh, clones[i]);
+	}
+
+}
+
+Piece* SymmetryMode::find_father_clone(Piece *p)
+{
+	Piece* ptr = p;
+	while(ptr)
+	{
+		if(vector_contains(clones, ptr))
+		{
+			return ptr;
+		}
+		ptr = ptr->attached_to;
+	}
+
+	return nullptr;
+}
+
+void SymmetryMode::remove_all_but(EditorVehicle* edveh, Piece* exp)
+{
+	Vehicle* veh = root->in_vehicle;
+	auto children = veh->get_children_of(exp);
+
+	for(Piece* p : all_in_symmetry)
+	{
+		if(!vector_contains(children, p) && p != exp)
+		{
+			veh->remove_piece(p);
+			edveh->remove_collider(p);
+			edveh->piece_meta.erase(p);
+			delete p;
+		}
+	}
+
+	all_in_symmetry.clear();
+
+}
+
+void SymmetryMode::on_attach(Piece *piece)
+{
+	Piece* child = piece->attached_to;
+
+}
+
+bool SymmetryMode::disconnect(EditorVehicle* edveh, Piece *piece)
+{
+	// If we pick up a root piece, remove it and the symmetry group
+	if(vector_contains(clones, piece))
+	{
+		remove_all_but(edveh, piece);
+		return true;
+	}
+	else
+	{
+		// Remove the single piece and update
+		auto index = get_piece_sub_index(piece);
+		for(int i = 0; i < clones.size(); i++)
+		{
+			if(i != index.first)
+			{
+				Piece* sub_root = all_in_symmetry[i * clone_depth + index.second];
+				remove_piece_and_children(edveh, sub_root);
+			}
+		}
+		remove_piece_and_children_from_symmetry(edveh, piece);
+		cleanup();
+		update_clone_depth();
+
+		return false;
+	}
+}
+
+std::pair<int, int> SymmetryMode::get_piece_sub_index(Piece *p)
+{
+	Piece* subroot = find_father_clone(p);
+	if(subroot == nullptr)
+	{
+		return std::make_pair(-1, -1);
+	}
+	int clone;
+	for(clone = 0; clone < clones.size(); clone++)
+	{
+		if(subroot == clones[clone])
+			break;
+	}
+	// Travel down from subroot
+	int i = 0;
+	bool found = false;
+	for(i = 0; i < clone_depth; i++)
+	{
+		if(all_in_symmetry[clone * clone_depth + i] == p)
+		{
+			found = true;
+			break;
+		}
+	}
+
+	logger->check(found, "Symmetry group malformed");
+
+	return std::make_pair(clone, i);
+}
+
+
+void SymmetryMode::remove_piece(EditorVehicle* edveh, Piece *p)
+{
+	Vehicle* veh = p->in_vehicle;
+	veh->remove_piece(p);
+	edveh->remove_collider(p);
+	edveh->piece_meta.erase(p);
+	remove_piece_from_symmetry(edveh, p);
+	delete p;
+
+}
+
+void SymmetryMode::remove_piece_and_children(EditorVehicle* edveh, Piece *p)
+{
+	std::vector<Piece*> child = p->in_vehicle->get_children_of(p);
+	for(Piece* sp : child)
+	{
+		remove_piece(edveh, sp);
+	}
+	remove_piece(edveh, p);
+}
+
+void SymmetryMode::cleanup()
+{
+	for(auto it = all_in_symmetry.begin(); it != all_in_symmetry.end(); )
+	{
+		if(*it == nullptr)
+			it = all_in_symmetry.erase(it);
+		else
+			it++;
+
+	}
+}
+
+void SymmetryMode::update_clone_depth()
+{
+	// This very simple algorithm counts how long does it take to reach clones[1]
+	if(clones.size() == 1)
+	{
+		clone_depth = all_in_symmetry.size();
+		return;
+	}
+
+	for(int i = 0; i < all_in_symmetry.size(); i++)
+	{
+		if(all_in_symmetry[i] == clones[1])
+		{
+			clone_depth = i;
+			return;
+		}
+	}
+	// Should never be reached, unless something's very wrong
+	logger->check(false, "Symmetry malformed");
+}
+
+void SymmetryMode::remove_piece_and_children_from_symmetry(EditorVehicle *edveh, Piece *p)
+{
+	std::vector<Piece*> child = p->in_vehicle->get_children_of(p);
+	for(Piece* sp : child)
+	{
+		remove_piece_from_symmetry(edveh, sp);
+	}
+	remove_piece_from_symmetry(edveh, p);
+
+}
+
+void SymmetryMode::remove_piece_from_symmetry(EditorVehicle *edveh, Piece *p)
+{
+	// TODO: This could be optimized thanks to how the array is structured
+	for(size_t i = 0; i < all_in_symmetry.size(); i++)
+	{
+		if(all_in_symmetry[i] == p)
+		{
+			all_in_symmetry[i] = nullptr;
+			break;
+		}
+	}
+}
+
 

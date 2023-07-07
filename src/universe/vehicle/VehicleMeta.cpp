@@ -79,3 +79,16 @@ std::shared_ptr<InputContext> VehicleMeta::get_input_ctx()
 
 	return m->get_input_ctx();
 }
+
+std::optional<size_t> VehicleMeta::find_symmetry_group(Piece *p)
+{
+	for(size_t i = 0; i < symmetry_modes.size(); i++)
+	{
+		if(vector_contains(symmetry_modes[i]->all_in_symmetry, p))
+		{
+			return i;
+		}
+	}
+
+	return {};
+}

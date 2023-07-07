@@ -53,7 +53,7 @@ local function get_radius()
 end
 
 local function rebuild()
-	local clones = symmetry_mode:make_clones(copies)
+	local clones = symmetry_mode:make_clones(editor_vehicle, copies)
 	local angle_step = 2.0 * math.pi / copies
 
 	local center = vehicle:get_piece_by_id(center_piece_id)

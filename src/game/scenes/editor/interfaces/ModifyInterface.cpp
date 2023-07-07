@@ -2,6 +2,8 @@
 #include "../EditorVehicleInterface.h"
 #include "../EditorScene.h"
 
+#include <glm/gtx/color_space.hpp>
+
 void ModifyInterface::update(double dt)
 {
 	edveh->clear_meta();
@@ -64,6 +66,8 @@ void ModifyInterface::change_state(ModifyInterface::State st)
 {
 	if(st == IDLE)
 	{
+		selected_piece = nullptr;
+		pick_another_piece = false;
 	}
 	else if(st == CREATING_SYMMETRY)
 	{
@@ -109,6 +113,21 @@ bool ModifyInterface::do_interface_select_symmetry(Piece *hovered, GUIInput *ipt
 	if(selected_piece == nullptr)
 	{
 		// Highlight all symmetry roots (and child pieces)
+		// We use a different color for each, which we obtain by rotating
+		// around in the HSV cone
+		float hue = 0.0f;
+		for(SymmetryMode* mode : edveh->veh->meta.symmetry_modes)
+		{
+			std::vector<Piece*> pieces = mode->all_in_symmetry;
+			bool sim_hovered = vector_contains(pieces, hovered);
+			glm::vec3 color = glm::rgbColor(glm::vec3(hue, 1.0f, sim_hovered ? 1.0f : 0.35f));
+			for(Piece* p : pieces)
+			{
+				edveh->piece_meta[p].highlight = color;
+			}
+			// Avoids perfect division of the circle so we get more total colors (find good value for this)
+			hue += 47.5f;
+		}
 	}
 	else
 	{

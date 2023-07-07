@@ -87,6 +87,9 @@ void ModifyPanel::change_state(ModifyInterface::State st, Piece* selected_piece)
 			// Finally, a piece is selected and the symmetry takes control, pass it to the
 			// symmetry
 			modifying_symmetry->root = selected_piece;
+			modifying_symmetry->original_root_pos = to_dvec3(selected_piece->packed_tform.getOrigin());
+			modifying_symmetry->original_root_rot = to_dquat(selected_piece->packed_tform.getRotation());
+
 			std::string mname = selected_piece->attachments[mod_int->cur_attachment_point].first.marker;
 			modifying_symmetry->attachment_used = mname;
 			//modifying_symmetry->root_attachment = mod_int->cur_attachment_point;
@@ -202,6 +205,7 @@ void ModifyPanel::make_symmetry_canvas_creating()
 			logger->check(i >= 0);
 			array.erase(array.begin() + i);
 			modifying_symmetry->leave_gui_control();
+			modifying_symmetry->remove(edveh_int->edveh);
 			delete modifying_symmetry;
 			modifying_symmetry = nullptr;
 			mod_int->change_state(ModifyInterface::IDLE);

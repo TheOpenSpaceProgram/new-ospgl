@@ -61,5 +61,8 @@ public:
 		controlled_machine = "";
 	}
 
+	// Returns index in the array
+	std::optional<size_t> find_symmetry_group(Piece* p);
+
 
 };
