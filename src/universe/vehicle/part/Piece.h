@@ -168,6 +168,7 @@ public:
 	// Can the piece be dettached in the editor? Useful for multi-piece parts
 	bool editor_dettachable;
 
+	// Use only in flight, as it will ignore symmetry! Use editor functions in the editor
 	void attach_to(Piece* target, const std::string& attachment_idx, const std::string& target_attachment_idx);
 	void detach();
 

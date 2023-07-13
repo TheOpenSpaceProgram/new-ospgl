@@ -84,6 +84,11 @@ public:
 
 	void deserialize(cpptoml::table& from);
 
+	// Attachment but respects symmetry
+	void attach(Piece* piece, Piece* to, const std::string& attch, const std::string& target_attch, int sym_depth);
+	// Dettachment but respects symmetry
+	void detach(Piece* piece);
+
 
 	EditorVehicle(EditorScene* scene);
 

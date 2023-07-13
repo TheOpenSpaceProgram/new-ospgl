@@ -219,6 +219,27 @@ void EditorVehicle::update_collider_hierarchy(Piece *p)
 	}
 }
 
+void EditorVehicle::attach(Piece *piece, Piece *to, const std::string &attachment_id,
+						   const std::string &target_attachment_id, int sym_depth)
+{
+	piece->attached_to = to;
+	piece->from_attachment = attachment_id;
+	piece->to_attachment = target_attachment_id;
+
+	// Update symmetry
+	auto sym_group = veh->meta.find_symmetry_group(to);
+	for(int i = sym_depth; i < sym_group.size(); i++)
+	{
+		veh->meta.symmetry_modes[sym_group[i].first]->on_attach(this, piece, sym_depth);
+	};
+
+}
+
+void EditorVehicle::detach(Piece *piece)
+{
+
+}
+
 
 void GenericSerializer<EditorVehicle>::serialize(const EditorVehicle& what, cpptoml::table& target)
 {

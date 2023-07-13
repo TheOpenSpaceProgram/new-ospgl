@@ -140,7 +140,7 @@ void SymmetryMode::remove_all_but(EditorVehicle* edveh, Piece* exp)
 
 }
 
-void SymmetryMode::on_attach(EditorVehicle* edveh, Piece *piece)
+void SymmetryMode::on_attach(EditorVehicle* edveh, Piece *piece, int sym_depth)
 {
 	Vehicle* veh = piece->in_vehicle;
 	Piece* child = piece->attached_to;
@@ -176,6 +176,8 @@ void SymmetryMode::on_attach(EditorVehicle* edveh, Piece *piece)
 		if(new_root != piece)
 		{
 			new_root->attached_to = sub_child;
+			edveh->attach(new_root, sub_child,
+						  piece->from_attachment, piece->to_attachment, sym_depth + 1);
 			// Position the root piece (children follow automatically)
 			glm::dmat4 tform_new = sub_child->get_graphics_matrix() * original_relative;
 			veh->move_piece_mat(new_root, tform_new);
@@ -315,14 +317,39 @@ void SymmetryMode::remove_piece_and_children_from_symmetry(EditorVehicle *edveh,
 void SymmetryMode::remove_piece_from_symmetry(EditorVehicle *edveh, Piece *p)
 {
 	// TODO: This could be optimized thanks to how the array is structured
-	for(size_t i = 0; i < all_in_symmetry.size(); i++)
+	for(auto & i : all_in_symmetry)
 	{
-		if(all_in_symmetry[i] == p)
+		if(i == p)
 		{
-			all_in_symmetry[i] = nullptr;
-			break;
+			i = nullptr;
+			return;
 		}
 	}
 }
+
+std::vector<SymmetryInstance> SymmetryMode::find_clones(Piece *p, bool include_p)
+{
+	std::vector<SymmetryInstance> out;
+
+	auto idx = get_piece_sub_index(p);
+	if(idx.first == -1)
+	{
+		// It was not in array
+		return out;
+	}
+
+	for(size_t i = 0; i < clones.size(); i++)
+	{
+		if(i != idx.first || include_p)
+		{
+			SymmetryInstance clone;
+			clone.p = all_in_symmetry[i * clone_depth + idx.second];
+			out.push_back(clone);
+		}
+	}
+
+	return out;
+}
+
 
 

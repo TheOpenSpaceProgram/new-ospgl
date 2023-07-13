@@ -9,24 +9,6 @@ class Part;
 class Machine;
 class Vehicle;
 
-// Not neccesarily symmetric, may include non symmetric arrangements
-class SymmetryCenter
-{
-	enum Type
-	{
-		// Self-explanatory, polygonal radial distribution
-		RADIAL_AROUND_PIECE,
-		RADIAL_AROUND_AXIS,
-		// Self-explanatory,
-		PLANAR_AROUND_PIECE,
-		PLANAR_AROUND_AXIS,
-		// Pieces placed in a series of attachment points
-		ATTACHMENT_LIST,
-		// Pieces placed in a series of points with a given orientation
-		MANY_AXES,
-	};
-};
-
 class VehicleMeta
 {
 private:
@@ -61,8 +43,12 @@ public:
 		controlled_machine = "";
 	}
 
-	// Returns index in the array
-	std::optional<size_t> find_symmetry_group(Piece* p);
+	// Obtains all symmetric copies of the piece, including nested symmetry groups
+	// Optionally includes the piece p as the first vector element
+	// If p is in no symmetry group, it's not included!
+	std::vector<SymmetryInstance> find_symmetry_instances(Piece* p, bool include_p);
+	// Returns array of indices into the array
+	std::vector<size_t> find_symmetry_groups_containing(Piece* p);
 
 
 };

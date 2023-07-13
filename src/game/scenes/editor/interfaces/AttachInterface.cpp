@@ -22,26 +22,9 @@ void AttachInterface::use_attachment_port(Piece* target, std::string port)
 
 void AttachInterface::attach(Piece* target, std::string port)
 {
-	selected->attached_to = target;
-	selected->from_attachment = selected_attachment->marker;
-	selected->to_attachment = port;
-
+	edveh->attach(selected, target, selected_attachment->marker, port, 0);
 	// TODO: Links
 	selected->welded = true;
-
-	//use_attachment_port(selected, selected_attachment->marker);
-	if(port != "")
-	{
-		logger->info("Using port: {}", port);
-		//use_attachment_port(target, port);
-	}
-
-	// Update symmetry
-	auto sym_group = edveh->veh->meta.find_symmetry_group(target);
-	if(sym_group.has_value())
-	{
-		edveh->veh->meta.symmetry_modes[sym_group.value()]->on_attach(edveh, selected);
-	}
 
 	selected = nullptr;
 	selected_attachment = nullptr;
@@ -147,16 +130,16 @@ Piece* AttachInterface::try_attach_radial(glm::dvec3 ray_start, glm::dvec3 ray_e
 void AttachInterface::on_selection_change(double dist) 
 {
 	// if selected is part of a symmetry group, remove it
-	auto in_sym = edveh->veh->meta.find_symmetry_group(selected);
-	if(in_sym.has_value())
+	/*auto in_sym = edveh->veh->meta.find_symmetry_group(selected);
+	if(in_sym.size() > 0)
 	{
 		auto& meta = edveh->veh->meta;
-		auto sym_mode = meta.symmetry_modes[in_sym.value()];
+		auto sym_mode = meta.symmetry_modes[in_sym[0]];
 		if(sym_mode->disconnect(edveh, selected))
 		{
-			meta.symmetry_modes.erase(meta.symmetry_modes.begin() + in_sym.value());
+			meta.symmetry_modes.erase(meta.symmetry_modes.begin() + in_sym[0]);
 		}
-	}
+	}*/
 	selected->attached_to = nullptr;
 
 	// Fix for instant re-attaching

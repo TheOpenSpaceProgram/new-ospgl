@@ -11,6 +11,14 @@ class EditorVehicle;
 class Vehicle;
 class EditorScene;
 
+class SymmetryMode;
+
+struct SymmetryInstance
+{
+	Piece* p;
+	SymmetryMode* mode;
+};
+
 // A symmetric distribution handles all symmetric parts in a group
 // Behaviour is handled in lua, but this lua code runs in the editor only as during
 // flight symmetry modes exist only as metadata to know which parts are symmetric!
@@ -70,7 +78,7 @@ public:
 
 	// Call when a piece is attached to one belonging to the symmetry
 	// (attached_to and transforms must be set!)
-	void on_attach(EditorVehicle* edveh, Piece* piece);
+	void on_attach(EditorVehicle* edveh, Piece* piece, int sym_depth);
 
 	// Called when any of the mirrored pieces is modified in any way
 	// ONLY CALLED IN THE EDITOR
@@ -109,6 +117,9 @@ public:
 	void remove_all_but(EditorVehicle* edveh, Piece* p);
 	// Finds the cloned father of a given piece, or returns nullptr if not found
 	Piece* find_father_clone(Piece* p);
+	// Returns all clones, optionally includes p as the first array element
+	// If p is not in the symmetry group, the empty vector is returned
+	std::vector<SymmetryInstance> find_clones(Piece* p, bool include_p);
 
 
 };

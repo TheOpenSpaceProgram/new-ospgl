@@ -80,15 +80,50 @@ std::shared_ptr<InputContext> VehicleMeta::get_input_ctx()
 	return m->get_input_ctx();
 }
 
-std::optional<size_t> VehicleMeta::find_symmetry_group(Piece *p)
+static void find_symmetric_recurse(VehicleMeta* m, Piece* expand, std::vector<SymmetryInstance>& out, std::vector<Piece*>& seen,
+								   Piece* exclude_p)
 {
+	seen.push_back(expand);
+
+	auto groups = m->find_symmetry_groups_containing(expand);
+	for(size_t g : groups)
+	{
+		std::vector<SymmetryInstance> duplicates = m->symmetry_modes[g]->find_clones(expand, false);
+		for(const auto& instance : duplicates)
+		{
+			if(vector_contains(seen, instance.p))
+				continue;
+
+			if(instance.p == exclude_p)
+				continue;
+
+			out.push_back(instance);
+
+			find_symmetric_recurse(m, instance.p, out, seen, exclude_p);
+		}
+
+	}
+
+}
+
+std::vector<SymmetryInstance> VehicleMeta::find_symmetry_instances(Piece *p, bool include_p)
+{
+	std::vector<SymmetryInstance> out;
+	std::vector<Piece*> seen;
+
+	Piece* exclude_p = include_p ? nullptr : p;
+	find_symmetric_recurse(this, p, out, seen, exclude_p);
+
+	return out;
+}
+
+std::vector<size_t> VehicleMeta::find_symmetry_groups_containing(Piece *p)
+{
+	std::vector<size_t> out;
 	for(size_t i = 0; i < symmetry_modes.size(); i++)
 	{
 		if(vector_contains(symmetry_modes[i]->all_in_symmetry, p))
-		{
-			return i;
-		}
+			out.push_back(i);
 	}
-
-	return {};
+	return out;
 }
