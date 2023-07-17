@@ -79,11 +79,7 @@ public:
 	{
 		return "editor";
 	}
-	void do_imgui_debug() override
-	{
-
-	}
-
+	void do_imgui_debug() override;
 	// (rw, rh), viewport, real_screen_size, gui_vport
 	std::tuple<glm::ivec2, glm::vec4, glm::dvec2, glm::vec4> get_viewports();
 

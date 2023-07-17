@@ -71,7 +71,7 @@ void ModifyPanel::change_state(ModifyInterface::State st, Piece* selected_piece)
 
 			// Create the symmetry mode proper in the vehicle
 			modifying_symmetry = new SymmetryMode();
-			sc->vehicle->veh->meta.symmetry_modes.push_back(modifying_symmetry);
+			sc->vehicle->veh->meta.symmetry_groups.push_back(modifying_symmetry);
 
 			auto config = AssetHandle<Config>(creating_symmetry_name);
 			config->read_to(*modifying_symmetry);
@@ -193,7 +193,7 @@ void ModifyPanel::make_symmetry_canvas_creating()
 		else
 		{
 			// Remove the symmetry mode which has not been created
-			std::vector<SymmetryMode*>& array = sc->vehicle->veh->meta.symmetry_modes;
+			std::vector<SymmetryMode*>& array = sc->vehicle->veh->meta.symmetry_groups;
 			int i = -1;
 			for(i = 0; i < array.size(); i++)
 			{

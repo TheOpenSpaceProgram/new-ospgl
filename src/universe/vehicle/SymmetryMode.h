@@ -16,7 +16,7 @@ class SymmetryMode;
 struct SymmetryInstance
 {
 	Piece* p;
-	SymmetryMode* mode;
+	std::vector<SymmetryMode*> modes;
 };
 
 // A symmetric distribution handles all symmetric parts in a group
@@ -42,15 +42,20 @@ private:
 	void remove_piece_from_symmetry(EditorVehicle* edveh, Piece* p);
 	void remove_piece_and_children(EditorVehicle* edveh, Piece* p);
 	void remove_piece_and_children_from_symmetry(EditorVehicle* edveh, Piece* p);
+
+
+protected:
+	friend class EditorVehicle;
+
 	// Removes nullptrs in all_in_symmetry
 	void cleanup();
 	void update_clone_depth();
-
 	// <-1, -1> = not present in symmetry, otherwise:
 	// all_in_symmetry[first * clone_depth + second] = p
 	std::pair<int, int> get_piece_sub_index(Piece* p);
 
 public:
+
 	// This is sorted in the same way as the vehicle!
 	std::vector<Piece*> all_in_symmetry;
 
@@ -75,10 +80,6 @@ public:
 	// Includes the original piece as first vector element. Only includes roots!
 	std::vector<Piece*> clones;
 	std::string attachment_used;
-
-	// Call when a piece is attached to one belonging to the symmetry
-	// (attached_to and transforms must be set!)
-	void on_attach(EditorVehicle* edveh, Piece* piece, int sym_depth);
 
 	// Called when any of the mirrored pieces is modified in any way
 	// ONLY CALLED IN THE EDITOR
@@ -121,6 +122,8 @@ public:
 	// If p is not in the symmetry group, the empty vector is returned
 	std::vector<SymmetryInstance> find_clones(Piece* p, bool include_p);
 
+	// Uses editor highlighting to show symmetry group (not debug, used for proper visualization!)
+	void show_symmetry(EditorVehicle* veh);
 
 };
 

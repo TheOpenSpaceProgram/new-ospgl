@@ -22,9 +22,9 @@ void AttachInterface::use_attachment_port(Piece* target, std::string port)
 
 void AttachInterface::attach(Piece* target, std::string port)
 {
-	edveh->attach(selected, target, selected_attachment->marker, port, 0);
 	// TODO: Links
 	selected->welded = true;
+	edveh->attach(selected, target, selected_attachment->marker, port);
 
 	selected = nullptr;
 	selected_attachment = nullptr;

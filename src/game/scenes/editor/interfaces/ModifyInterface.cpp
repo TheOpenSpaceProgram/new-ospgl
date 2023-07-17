@@ -116,7 +116,7 @@ bool ModifyInterface::do_interface_select_symmetry(Piece *hovered, GUIInput *ipt
 		// We use a different color for each, which we obtain by rotating
 		// around in the HSV cone
 		float hue = 0.0f;
-		for(SymmetryMode* mode : edveh->veh->meta.symmetry_modes)
+		for(SymmetryMode* mode : edveh->veh->meta.symmetry_groups)
 		{
 			std::vector<Piece*> pieces = mode->all_in_symmetry;
 			bool sim_hovered = vector_contains(pieces, hovered);

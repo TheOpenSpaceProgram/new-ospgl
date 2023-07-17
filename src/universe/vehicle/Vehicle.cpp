@@ -470,7 +470,7 @@ Piece* Vehicle::duplicate(Piece *p, sol::state* st, int64_t* opiece_id, int64_t*
 				new_all[i]->link_from = all[i]->link_from;
 				new_all[i]->link_to = all[i]->link_to;
 				new_all[i]->link_rot = all[i]->link_rot;
-				logger->check(false, "NOT IMPLEMENTED");
+				logger->check(false, "NOT IMPLEMENTED - Did you check link before attach?");
 			}
 		}
 	}

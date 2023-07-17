@@ -220,18 +220,116 @@ void EditorVehicle::update_collider_hierarchy(Piece *p)
 }
 
 void EditorVehicle::attach(Piece *piece, Piece *to, const std::string &attachment_id,
-						   const std::string &target_attachment_id, int sym_depth)
+						   const std::string &target_attachment_id)
 {
 	piece->attached_to = to;
 	piece->from_attachment = attachment_id;
 	piece->to_attachment = target_attachment_id;
 
-	// Update symmetry
-	auto sym_group = veh->meta.find_symmetry_group(to);
-	for(int i = sym_depth; i < sym_group.size(); i++)
+	auto clones = veh->meta.find_symmetry_instances(to, true);
+
+	// Attach to first and find relative transform
+	glm::dmat4 original_relative = glm::inverse(to->get_graphics_matrix()) * piece->get_graphics_matrix();
+
+	struct PiecesToMode
 	{
-		veh->meta.symmetry_modes[sym_group[i].first]->on_attach(this, piece, sym_depth);
+		// Offset in any of the roots
+		int to_idx;
+		std::vector<Piece*> from;
+		// Root for each of the "from" pieces
+		std::vector<int> sub_root;
 	};
+
+	std::unordered_map<SymmetryMode*, std::vector<PiecesToMode>> ptm;
+
+	// Make clones for all subsymmetries
+	for(size_t i = 0; i < clones.size(); i++)
+	{
+		Piece* new_root;
+		if(clones[i].p == to)
+		{
+			new_root = piece;
+		}
+		else
+		{
+			new_root = veh->duplicate(piece, &scene->lua_state,
+									  &scene->piece_id, &scene->part_id);
+		}
+
+		new_root->attached_to = to;
+
+		// Add pieces to all symmetry groups clones[i] belongs to (to guarantee further duplication)
+		for(SymmetryMode* g : clones[i].modes)
+		{
+			auto idx = g->get_piece_sub_index(clones[i].p);
+
+			auto it = ptm.find(g);
+			if(it == ptm.end())
+			{
+				ptm[g] = std::vector<PiecesToMode>();
+				it = ptm.find(g);
+			}
+
+			bool found = false;
+			for(auto& p : it->second)
+			{
+				if(p.to_idx == idx.second)
+				{
+					// This is where we want to be
+					p.from.push_back(new_root);
+					p.sub_root.push_back(idx.first);
+					found = true;
+					break;
+				}
+			}
+
+			if(!found)
+			{
+				PiecesToMode n;
+				n.to_idx = idx.second;
+				n.from.push_back(new_root);
+				n.sub_root.push_back(idx.first);
+				it->second.push_back(n);
+			}
+		}
+
+		// The user-positioned piece is already correct!
+		if(new_root != piece)
+		{
+			new_root->attached_to = clones[i].p;
+			// Position the root piece (children follow automatically)
+			glm::dmat4 tform_new = clones[i].p->get_graphics_matrix() * original_relative;
+			veh->move_piece_mat(new_root, tform_new);
+			update_collider_hierarchy(new_root);
+		}
+
+	}
+
+	// Add new pieces to symmetry modes, this also serves as a "safety check"
+	for(const auto& pair : ptm)
+	{
+		SymmetryMode* g = pair.first;
+
+		for(const PiecesToMode& p : pair.second)
+		{
+			logger->check(p.from.size() == pair.first->clones.size(), "Mismatched number of new elements for symmetry");
+
+			int offset = 1;
+
+			for(int i = 0; i < p.from.size(); i++)
+			{
+				std::vector<Piece *> new_child = veh->get_children_of(p.from[i]);
+				g->all_in_symmetry.insert(g->all_in_symmetry.begin() + (i * g->clone_depth + p.to_idx + offset), p.from[i]);
+				offset++;
+				g->all_in_symmetry.insert(g->all_in_symmetry.begin() + (i * g->clone_depth + p.to_idx + offset),
+									   new_child.begin(), new_child.end());
+				offset += new_child.size();
+			}
+
+			g->update_clone_depth();
+		}
+
+	}
 
 }
 

@@ -34,7 +34,7 @@ public:
 	std::shared_ptr<InputContext> get_input_ctx();
 
 	// Symmetry
-	std::vector<SymmetryMode*> symmetry_modes;
+	std::vector<SymmetryMode*> symmetry_groups;
 
 	// Auto-wiring
 
@@ -49,6 +49,7 @@ public:
 	std::vector<SymmetryInstance> find_symmetry_instances(Piece* p, bool include_p);
 	// Returns array of indices into the array
 	std::vector<size_t> find_symmetry_groups_containing(Piece* p);
+
 
 
 };

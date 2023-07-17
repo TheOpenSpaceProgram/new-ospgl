@@ -20,7 +20,8 @@ void LuaEditor::load_to(sol::table& table)
 
 	table.new_usertype<EditorVehicle>("editor_vehicle", sol::no_constructor,
 		  "update_collider", &EditorVehicle::update_collider,
-		  "update_collider_hierarchy", &EditorVehicle::update_collider_hierarchy);
+		  "update_collider_hierarchy", &EditorVehicle::update_collider_hierarchy,
+		  "attach", &EditorVehicle::attach);
 	table.new_usertype<EditorCamera>("editor_camera", sol::no_constructor,
 		 "get_camera_uniforms", &EditorCamera::get_camera_uniforms);
 
@@ -33,17 +34,5 @@ void LuaEditor::load_to(sol::table& table)
 	table.new_usertype<ModifyInterface>("modify_interface", sol::no_constructor,
 				"start_picking_piece", &ModifyInterface::start_picking_piece);
 
-	table.new_usertype<SymmetryMode>("symmetry_mode", sol::no_constructor,
-				 "saved_toml", &SymmetryMode::save_toml,
-				 "make_clones", &SymmetryMode::make_clones,
-				 "get_all_pieces", [](SymmetryMode* s){ return s->all_in_symmetry; },
-				 "get_root", [](SymmetryMode* mod)
-				 {
-					return mod->root;
-				 },
-				 "get_attachment", [](SymmetryMode* mod)
-				 {
-					return mod->attachment_used;
-				 });
 
 }

@@ -82,8 +82,8 @@ local function rebuild()
 
 		-- Attach a root piece clone at given position
 		vehicle:move_piece(clone, pos, axis_quat * rot, attach)
-		editor_vehicle:attach(clone, center, symmetry_mode:get_attachment(), "")
 		clone.welded = true
+		editor_vehicle:attach(clone, center, symmetry_mode:get_attachment(), "")
 		editor_vehicle:update_collider_hierarchy(clone)
 	
 		

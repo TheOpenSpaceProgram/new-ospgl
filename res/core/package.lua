@@ -24,6 +24,7 @@ function load(database)
 	database:load_locale(dofile("locale.lua"))
 
 	database:add_editor_script("scenes/editor/editor.lua")
+	database:add_editor_script("scenes/editor/symmetry_debug.lua")
 
 	database:add_symmetry_mode("scenes/editor/symmetry/radial_piece.toml")
 

@@ -5,6 +5,7 @@
 #include <renderer/Renderer.h>
 #include <renderer/lighting/EnvMap.h>
 #include <game/GameState.h>
+#include <imgui/imgui.h>
 
 void EditorScene::load()
 {
@@ -67,6 +68,7 @@ void EditorScene::load()
 		lua_core->load((sol::table&)env, pkg);
 		env["osp"] = osp;
 		env["editor"] = this;
+		env["__editor_script_name"] = path;
 
 		std::string full_path = osp->assets->res_path + pkg + "/" + name;
 		auto result = lua_state.safe_script_file(full_path, env);
@@ -74,6 +76,8 @@ void EditorScene::load()
 		{
 			sol::error err = result;
 			logger->error("Lua Error loading editor script:\n{}", err.what());
+			// Do not add the env!
+			continue;
 		}
 
 		envs.push_back(env);
@@ -194,6 +198,18 @@ std::tuple<glm::ivec2, glm::vec4, glm::dvec2, glm::vec4> EditorScene::get_viewpo
 	glm::vec4 gui_vport = glm::vec4(gw, 0, real_screen_size.x - gw, real_screen_size.y);
 
 	return std::make_tuple(glm::ivec2(rw, rh), viewport, real_screen_size, gui_vport);
+}
+
+void EditorScene::do_imgui_debug()
+{
+	for(auto env : envs)
+	{
+		auto name = env["__editor_script_name"].get<std::string>();
+		ImGui::Text("%s:", name.c_str());
+		ImGui::Separator();
+		LuaUtil::call_function_if_present(env["do_imgui_debug"]);
+	}
+
 }
 
 

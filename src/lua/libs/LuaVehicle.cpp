@@ -263,7 +263,8 @@ void LuaVehicle::load_to(sol::table& table)
 
 	table.new_usertype<VehicleMeta>("vehicle_meta", sol::no_constructor,
 			 "set_controlled_machine", &VehicleMeta::set_controlled_machine,
-			 "get_input_ctx", &VehicleMeta::get_input_ctx);
+			 "get_input_ctx", &VehicleMeta::get_input_ctx,
+			 "symmetry_groups", &VehicleMeta::symmetry_groups);
 
 	table.new_usertype<PieceAttachment>("piece_attachment", sol::no_constructor,
 			"stack", &PieceAttachment::stack,
@@ -272,5 +273,18 @@ void LuaVehicle::load_to(sol::table& table)
 			"hidden", &PieceAttachment::hidden,
 			"name", &PieceAttachment::name,
 			"size", &PieceAttachment::size);
+
+	table.new_usertype<SymmetryMode>("symmetry_mode", sol::no_constructor,
+									 "saved_toml", &SymmetryMode::save_toml,
+									 "make_clones", &SymmetryMode::make_clones,
+									 "get_all_pieces", [](SymmetryMode* s){ return s->all_in_symmetry; },
+									 "get_root", [](SymmetryMode* mod)
+									 {
+										 return mod->root;
+									 },
+									 "get_attachment", [](SymmetryMode* mod)
+									 {
+										 return mod->attachment_used;
+									 });
 
 }

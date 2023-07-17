@@ -1,6 +1,26 @@
 ---@meta 
 
+---@class symmetry_mode
+---@field saved_toml toml.table Modify this table to save data, at start it contains serialized data
+local symmetry_mode_type = {}
+---@param count integer Number of clones to make, including the already existing piece
+---@return vehicle.piece[] Clones including the already existing piece
+--- Remember to call editor_vehicle:update_collider_hierarchy(clone) after you have positioned the clones!
+function symmetry_mode_type:make_clones(count) end
+
+---@return vehicle.piece
+function symmetry_mode_type:get_root() end
+
+---@return string Name of the attachment marker
+function symmetry_mode_type:get_attachment() end
+
+---@return vehicle.piece[]
+function symmetry_mode_type:get_all_pieces() end
+
+
+
 ---@class vehicle_meta
+---@field symmetry_groups symmetry_mode[]
 local vehicle_meta = {}
 
 ---@param machine vehicle.machine
