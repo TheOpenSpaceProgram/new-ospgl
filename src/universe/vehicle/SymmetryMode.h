@@ -125,9 +125,9 @@ public:
 	// Uses editor highlighting to show symmetry group (not debug, used for proper visualization!)
 	void show_symmetry(EditorVehicle* veh);
 
-	// Moves the symmetry mode to have p as new root.
+	// Moves the symmetry mode to have p as new root clones.
 	// TARGET MUST BE PERFECTLY SYMMETRICAL!
-	void new_root(Piece* p);
+	void new_root_clones(EditorVehicle* edveh, std::vector<Piece*> p);
 
 };
 

@@ -49,6 +49,8 @@ public:
 	std::vector<SymmetryInstance> find_symmetry_instances(Piece* p, bool include_p);
 	// Returns array of indices into the array
 	std::vector<size_t> find_symmetry_groups_containing(Piece* p);
+	// Removes empty symmetry groups. Make sure all are cleanup() before!
+	void cleanup_symmetry_groups();
 
 
 

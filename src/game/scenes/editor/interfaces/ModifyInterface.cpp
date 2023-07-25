@@ -171,6 +171,8 @@ bool ModifyInterface::do_interface_create_symmetry(Piece *hovered, GUIInput *ipt
 					could_create = true;
 				}
 
+				could_create &= hovered->attached_to == nullptr;
+
 				if(could_create)
 				{
 					highlight_symmetry(hovered);

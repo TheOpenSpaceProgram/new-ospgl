@@ -158,3 +158,17 @@ std::vector<size_t> VehicleMeta::find_symmetry_groups_containing(Piece *p)
 	return out;
 }
 
+void VehicleMeta::cleanup_symmetry_groups()
+{
+	for(auto it = symmetry_groups.begin(); it != symmetry_groups.end(); )
+	{
+		if((*it)->all_in_symmetry.empty())
+		{
+			it = symmetry_groups.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
+}

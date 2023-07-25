@@ -345,14 +345,15 @@ void EditorVehicle::detach(Piece *piece)
 {
 	// TODO: This may be surprisingly expensive with many nested symmetry groups!
 
-	// Step 1: Move symmetry groups that are in piece, its children or
-	// its clone or cloned children into the one we are dettaching
-	// (This prevents removal of symmetry groups!)
+	// If children of our clones fully contain all roots of a symmetry group,
+	// move them so that the symmetry group is not lost
+	// (when this is not possible, sadly the groups are lost!)
 	auto clones = veh->meta.find_symmetry_instances(piece, true);
 	std::vector<SymmetryMode*> to_move;
-	// indices in piece_children.push_back(piece)!
-	std::vector<size_t> new_root_indices;
+	// indices in piece_children.push_back(piece) for each clone!
+	std::vector<std::vector<size_t>> new_root_indices;
 
+	// Many nested loops, but they should exit fairly quickly most of the time!
 	for(const auto& clone : clones)
 	{
 		if(clone.p == piece)
@@ -363,14 +364,32 @@ void EditorVehicle::detach(Piece *piece)
 
 		for(SymmetryMode* m : veh->meta.symmetry_groups)
 		{
-			for(size_t i = 0; i < all_p.size(); i++)
+			bool all_found = true;
+			std::vector<size_t> new_indices;
+			for(size_t j = 0; j < m->clones.size(); j++)
 			{
-				if(all_p[i] == m->root)
+				bool found = false;
+				for(size_t k = 0; k < all_p.size(); k++)
 				{
-					to_move.push_back(m);
-					new_root_indices.push_back(i);
+					if(all_p[k] == m->clones[j])
+					{
+						new_indices.push_back(k);
+						found = true;
+						break;
+					}
+				}
+
+				if(!found)
+				{
+					all_found = false;
 					break;
 				}
+			}
+
+			if(all_found)
+			{
+				to_move.push_back(m);
+				new_root_indices.push_back(new_indices);
 			}
 		}
 	}
@@ -380,19 +399,24 @@ void EditorVehicle::detach(Piece *piece)
 
 	for(size_t i = 0; i < to_move.size(); i++)
 	{
-		to_move[i]->new_root(all_p[new_root_indices[i]]);
+		std::vector<Piece*> vec;
+		for(size_t idx : new_root_indices[i])
+		{
+			vec.push_back(all_p[idx]);
+		}
+		to_move[i]->new_root_clones(this, vec);
 	}
 
 	// Step 2: Dettach the piece, destroy all clones and remove them from the
 	// symmetry groups they belong to
 	piece->attached_to = nullptr;
+	std::set<SymmetryMode*> all_modes;
 	for(const auto& clone : clones)
 	{
 		for(SymmetryMode* m : clone.modes)
 		{
+			all_modes.insert(m);
 			m->remove_piece_and_children_from_symmetry(this, clone.p);
-			m->cleanup();
-			m->update_clone_depth();
 		}
 
 		if(clone.p != piece)
@@ -413,6 +437,14 @@ void EditorVehicle::detach(Piece *piece)
 			}
 		}
 	}
+
+	for(SymmetryMode* m : all_modes)
+	{
+		m->cleanup();
+		m->update_clone_depth();
+	}
+
+	veh->meta.cleanup_symmetry_groups();
 
 }
 

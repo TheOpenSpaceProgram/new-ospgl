@@ -220,6 +220,7 @@ void ModifyPanel::make_symmetry_canvas_creating()
 		mod_int->change_state(ModifyInterface::IDLE);
 		modifying_symmetry->leave_gui_control();
 		modifying_symmetry = nullptr;
+		edveh_int->edveh->veh->meta.cleanup_symmetry_groups();
 	}));
 	layout->mark_same_line();
 	layout->add_widget(finish_button);

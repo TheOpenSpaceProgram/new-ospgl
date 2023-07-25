@@ -85,6 +85,9 @@ bool SymmetryMode::is_piece_in_symmetry(Piece *p)
 
 void SymmetryMode::remove(EditorVehicle* edveh)
 {
+	if(root == nullptr)
+		return;
+
 	remove_non_root(edveh);
 
 	// Return root to original position
@@ -229,7 +232,6 @@ void SymmetryMode::cleanup()
 			it = all_in_symmetry.erase(it);
 		else
 			it++;
-
 	}
 }
 
@@ -250,8 +252,7 @@ void SymmetryMode::update_clone_depth()
 			return;
 		}
 	}
-	// Should never be reached, unless something's very wrong
-	logger->check(false, "Symmetry malformed");
+	logger->check(all_in_symmetry.size() == 0, "Symmetry malformed");
 }
 
 void SymmetryMode::remove_piece_and_children_from_symmetry(EditorVehicle *edveh, Piece *p)
@@ -276,6 +277,7 @@ void SymmetryMode::remove_piece_from_symmetry(EditorVehicle *edveh, Piece *p)
 			return;
 		}
 	}
+
 }
 
 std::vector<SymmetryInstance> SymmetryMode::find_clones(Piece *p, bool include_p)
@@ -324,9 +326,27 @@ void SymmetryMode::show_symmetry(EditorVehicle* veh)
 
 }
 
-void SymmetryMode::new_root(Piece *p)
+void SymmetryMode::new_root_clones(EditorVehicle* edveh, std::vector<Piece*> p)
 {
+	logger->check(p.size() == clones.size(), "Invalid number of clones given");
 
+	// quick safety check
+	int old_size = all_in_symmetry.size();
+	all_in_symmetry.clear();
+
+	// We now build the all_pieces_in_symmetry
+	for(Piece* new_root : p)
+	{
+		// TODO: This assumes good ordering of get_children_of?
+		// May break on some VERY WEIRD cases (manual vehicle modification?)
+		std::vector<Piece*> children = edveh->veh->get_children_of(new_root);
+		all_in_symmetry.push_back(new_root);
+		all_in_symmetry.insert(all_in_symmetry.end(), children.begin(), children.end());
+	}
+
+	clones = p;
+	root = clones[0];
+	logger->check(all_in_symmetry.size() == old_size, "Malformed new root pieces");
 }
 
 
