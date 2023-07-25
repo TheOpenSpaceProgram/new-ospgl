@@ -80,8 +80,7 @@ std::shared_ptr<InputContext> VehicleMeta::get_input_ctx()
 	return m->get_input_ctx();
 }
 
-static void find_symmetric_recurse(VehicleMeta* m, Piece* expand, std::vector<SymmetryInstance>& out, std::vector<Piece*>& seen,
-								   Piece* exclude_p)
+static void find_symmetric_recurse(VehicleMeta* m, Piece* expand, std::vector<SymmetryInstance>& out, std::vector<Piece*>& seen)
 {
 
 	seen.push_back(expand);
@@ -113,10 +112,7 @@ static void find_symmetric_recurse(VehicleMeta* m, Piece* expand, std::vector<Sy
 			if(vector_contains(seen, instance.p))
 				continue;
 
-			if(instance.p == exclude_p)
-				continue;
-
-			find_symmetric_recurse(m, instance.p, out, seen, nullptr);
+			find_symmetric_recurse(m, instance.p, out, seen);
 		}
 
 	}
@@ -128,8 +124,25 @@ std::vector<SymmetryInstance> VehicleMeta::find_symmetry_instances(Piece *p, boo
 	std::vector<SymmetryInstance> out;
 	std::vector<Piece*> seen;
 
-	Piece* exclude_p = include_p ? nullptr : p;
-	find_symmetric_recurse(this, p, out, seen, exclude_p);
+	find_symmetric_recurse(this, p, out, seen);
+	// TODO: This could be done directly in find_symmetry_recurse
+	if(!include_p)
+	{
+		int f = -1;
+		for(int i = 0; i < out.size(); i++)
+		{
+			if(out[i].p == p)
+			{
+				f = i;
+				break;
+			}
+		}
+
+		if(f >= 0)
+		{
+			out.erase(out.begin() + f);
+		}
+	}
 
 	return out;
 }

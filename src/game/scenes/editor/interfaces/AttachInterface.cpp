@@ -129,18 +129,7 @@ Piece* AttachInterface::try_attach_radial(glm::dvec3 ray_start, glm::dvec3 ray_e
 
 void AttachInterface::on_selection_change(double dist) 
 {
-	// if selected is part of a symmetry group, remove it
-	/*auto in_sym = edveh->veh->meta.find_symmetry_group(selected);
-	if(in_sym.size() > 0)
-	{
-		auto& meta = edveh->veh->meta;
-		auto sym_mode = meta.symmetry_modes[in_sym[0]];
-		if(sym_mode->disconnect(edveh, selected))
-		{
-			meta.symmetry_modes.erase(meta.symmetry_modes.begin() + in_sym[0]);
-		}
-	}*/
-	selected->attached_to = nullptr;
+	edveh->detach(selected);
 
 	// Fix for instant re-attaching
 	ignore_attachment = selected->to_attachment;

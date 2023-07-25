@@ -125,6 +125,10 @@ public:
 	// Uses editor highlighting to show symmetry group (not debug, used for proper visualization!)
 	void show_symmetry(EditorVehicle* veh);
 
+	// Moves the symmetry mode to have p as new root.
+	// TARGET MUST BE PERFECTLY SYMMETRICAL!
+	void new_root(Piece* p);
+
 };
 
 // This is used only for the prototype and metadata, it, the stuff that's needed for

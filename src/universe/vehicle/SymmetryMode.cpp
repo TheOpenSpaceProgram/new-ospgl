@@ -324,4 +324,9 @@ void SymmetryMode::show_symmetry(EditorVehicle* veh)
 
 }
 
+void SymmetryMode::new_root(Piece *p)
+{
+
+}
+
 
