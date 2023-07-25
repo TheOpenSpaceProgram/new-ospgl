@@ -316,10 +316,18 @@ void EditorVehicle::attach(Piece *piece, Piece *to, const std::string &attachmen
 
 			int offset = 1;
 
+			// Sort p.from in the same order as roots
+			std::vector<Piece*> cp; cp.resize(p.from.size());
 			for(int i = 0; i < p.from.size(); i++)
 			{
-				std::vector<Piece *> new_child = veh->get_children_of(p.from[i]);
-				g->all_in_symmetry.insert(g->all_in_symmetry.begin() + (i * g->clone_depth + p.to_idx + offset), p.from[i]);
+				auto idx = pair.first->get_piece_sub_index(p.from[i]->attached_to);
+				cp[idx.first] = p.from[i];
+			}
+
+			for(int i = 0; i < cp.size(); i++)
+			{
+				std::vector<Piece *> new_child = veh->get_children_of(cp[i]);
+				g->all_in_symmetry.insert(g->all_in_symmetry.begin() + (i * g->clone_depth + p.to_idx + offset), cp[i]);
 				offset++;
 				g->all_in_symmetry.insert(g->all_in_symmetry.begin() + (i * g->clone_depth + p.to_idx + offset),
 									   new_child.begin(), new_child.end());

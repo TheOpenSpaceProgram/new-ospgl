@@ -175,12 +175,13 @@ std::pair<int, int> SymmetryMode::get_piece_sub_index(Piece *p)
 	{
 		return std::make_pair(-1, -1);
 	}
-	int clone;
+	int clone = -1;
 	for(clone = 0; clone < clones.size(); clone++)
 	{
 		if(subroot == clones[clone])
 			break;
 	}
+	logger->check(clone != -1, "Symmetry group malformed");
 	// Travel down from subroot
 	int i = 0;
 	bool found = false;
