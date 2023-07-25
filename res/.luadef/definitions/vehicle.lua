@@ -17,6 +17,11 @@ function symmetry_mode_type:get_attachment() end
 ---@return vehicle.piece[]
 function symmetry_mode_type:get_all_pieces() end
 
+---@return vehicle.piece[]
+--- Includes root!
+function symmetry_mode_type:get_root_clones() end
+
+
 
 
 ---@class vehicle_meta

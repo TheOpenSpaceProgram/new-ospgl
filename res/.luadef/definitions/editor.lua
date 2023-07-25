@@ -10,6 +10,7 @@ function camera:get_camera_uniforms(w, h) end
 
 ---@class vehicle_editor
 ---@field veh vehicle
+---@field edveh vehicle_editor.vehicle
 ---@field int vehicle_editor_interface
 ---@field gui_screen gui.screen
 ---@field cam vehicle_editor.camera
@@ -42,3 +43,17 @@ local editor_vehicle = {}
 --- Call this function after moving pieces or similar so their colliders are correctly placed
 --- Updates all children pieces too!
 function editor_vehicle:update_collider_hierarchy(p) end
+
+---@param p vehicle.piece
+function editor_vehicle:update_collider(p) end
+
+---@param piece vehicle.piece
+---@param to vehicle.piece
+---@param attach_from string
+---@param attach_to string
+function editor_vehicle:attach(piece, to, attach_from, attach_to) end
+
+---@param piece vehicle.piece
+---@param highlight glm.vec3
+function editor_vehicle:set_piece_highlight(piece, highlight) end
+

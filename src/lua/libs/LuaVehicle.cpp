@@ -282,6 +282,10 @@ void LuaVehicle::load_to(sol::table& table)
 									 {
 										 return mod->root;
 									 },
+									 "get_root_clones", [](SymmetryMode* mod)
+									 {
+										return mod->clones;
+									 },
 									 "get_attachment", [](SymmetryMode* mod)
 									 {
 										 return mod->attachment_used;

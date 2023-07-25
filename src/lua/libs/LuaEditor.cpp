@@ -21,7 +21,11 @@ void LuaEditor::load_to(sol::table& table)
 	table.new_usertype<EditorVehicle>("editor_vehicle", sol::no_constructor,
 		  "update_collider", &EditorVehicle::update_collider,
 		  "update_collider_hierarchy", &EditorVehicle::update_collider_hierarchy,
-		  "attach", &EditorVehicle::attach);
+		  "attach", &EditorVehicle::attach,
+		  "set_piece_highlight", [](EditorVehicle* edveh, Piece* p, glm::dvec3 h)
+		  {
+			edveh->piece_meta[p].highlight = h;
+		  });
 	table.new_usertype<EditorCamera>("editor_camera", sol::no_constructor,
 		 "get_camera_uniforms", &EditorCamera::get_camera_uniforms);
 
