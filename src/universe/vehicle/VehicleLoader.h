@@ -18,6 +18,7 @@ private:
 	void write_wires(cpptoml::table& target, const Vehicle& what);
 	void write_pipes(cpptoml::table& target, const Vehicle& what);
 	void write_controlled(cpptoml::table& target, const Vehicle& what);
+	void write_symmetry(cpptoml::table& target, const Vehicle& what);
 
 public:
 	VehicleSaver(cpptoml::table& target, const Vehicle& what);
@@ -46,6 +47,7 @@ private:
 	void obtain_pipes(const cpptoml::table& root);
 
 	void obtain_controlled(const cpptoml::table& root);
+	void obtain_symmetry(const cpptoml::table& tb);
 
 	Piece* load_piece(const cpptoml::table& piece);
 

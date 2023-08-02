@@ -172,3 +172,13 @@ void VehicleMeta::cleanup_symmetry_groups()
 		}
 	}
 }
+
+VehicleMeta::~VehicleMeta()
+{
+	logger->check(false, "TODO");
+	for(auto* s : symmetry_groups)
+	{
+		delete s;
+	}
+
+}

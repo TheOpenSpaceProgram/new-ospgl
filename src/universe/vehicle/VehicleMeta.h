@@ -43,6 +43,8 @@ public:
 		controlled_machine = "";
 	}
 
+	~VehicleMeta();
+
 	// Obtains all symmetric copies of the piece, including nested symmetry groups
 	// Optionally includes the piece p as the first vector element
 	// If p is in no symmetry group, it's not included!

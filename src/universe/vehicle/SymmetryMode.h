@@ -131,18 +131,16 @@ public:
 
 };
 
-// This is used only for the prototype and metadata, it, the stuff that's needed for
-// the vehicle in flight. Lua stuff is loaded in init(), but ONLY IN THE EDITOR
-// If loading the symmetry mode from a saved vehicle, remember to override with the
-// prototype toml!
+// This only loads the "meta-data", piecess are assigned in VehicleLoader
 template<>
 class GenericSerializer<SymmetryMode>
 {
 public:
 	static void serialize(const SymmetryMode& what, cpptoml::table& target)
 	{
-		// We use the prototype and override with save_toml, if prototype is not
-		// available, then the symmetry mode will be saved "headless"
+		// We can write save_toml directly
+		// TODO: A bit unorthodox? Maybe write the fields manually, so / but lua scripts won't be able to modify them?
+		SerializeUtil::override(target, *what.save_toml);
 	}
 
 	static void deserialize(SymmetryMode& to, const cpptoml::table& from)
@@ -162,7 +160,8 @@ public:
 		icon = osp->assets->get_package_and_name(icon, pkg).second;
 		to.icon = AssetHandle<Image>(icon);
 
-		// Read everything into save_toml (TODO: override kind of useless overhead?)
+		// Read everything into save_toml
+		// so that the lua script can use it (once initialized, if it is!)
 		to.save_toml = cpptoml::make_table();
 		SerializeUtil::override(*to.save_toml, from);
 	}

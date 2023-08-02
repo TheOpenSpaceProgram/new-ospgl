@@ -615,6 +615,20 @@ void VehicleSaver::write_controlled(cpptoml::table &target, const Vehicle &what)
 	target.insert("controlled_machine", what.meta.controlled_machine);
 }
 
+void VehicleSaver::write_symmetry(cpptoml::table &target, const Vehicle &what)
+{
+	auto array = cpptoml::make_table_array();
+
+	for(SymmetryMode* m : what.meta.symmetry_groups)
+	{
+		auto table = cpptoml::make_table();
+		serialize(m, *table);
+		array->push_back(table);
+	}
+
+	target.insert("symmetry_group", array);
+}
+
 void VehicleLoader::update_ids()
 {
 	std::unordered_map<int64_t, Part*> new_parts_by_id;
@@ -637,5 +651,22 @@ void VehicleLoader::update_ids()
 
 	pieces_by_id = new_pieces_by_id;
 	parts_by_id = new_parts_by_id;
+}
+
+void VehicleLoader::obtain_symmetry(const cpptoml::table& tb)
+{
+	auto array = tb.get_table_array("symmetry_group");
+
+	if(!array)
+		return;
+
+	for(auto& t : *array)
+	{
+		SymmetryMode* mode = new SymmetryMode();
+
+
+		n_vehicle->meta.symmetry_groups.push_back(mode);
+	}
+
 }
 
