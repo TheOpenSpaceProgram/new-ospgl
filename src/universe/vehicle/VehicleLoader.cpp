@@ -306,6 +306,7 @@ VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to, bool is_ed
 	copy_pieces(root);
 	obtain_wires(root);
 	obtain_pipes(root);
+	obtain_symmetry(root);
 
 	bool is_flight_saved = root.get_as<bool>("in_flight").value_or(false);
 	if(!is_flight_saved && !is_editor)
@@ -355,6 +356,7 @@ VehicleSaver::VehicleSaver(cpptoml::table &target, const Vehicle &what)
 	write_pieces(target, what);
 	write_wires(target, what);
 	write_pipes(target, what);
+	write_symmetry(target, what);
 }
 
 void VehicleSaver::assign_ids(cpptoml::table& target, const Vehicle& what)
@@ -622,7 +624,17 @@ void VehicleSaver::write_symmetry(cpptoml::table &target, const Vehicle &what)
 	for(SymmetryMode* m : what.meta.symmetry_groups)
 	{
 		auto table = cpptoml::make_table();
-		serialize(m, *table);
+		serialize(*m, *table);
+
+		auto arr = cpptoml::make_array();
+		// Add the symmetry pieces, clones, and clone_depth (this is all that's needed to reconstruct!)
+		for(Piece* p : m->all_in_symmetry)
+		{
+			arr->push_back(piece_to_id[p]);
+		}
+		table->insert("__clone_depth", m->clone_depth);
+		table->insert("__all_in_symmetry", arr);
+
 		array->push_back(table);
 	}
 
@@ -663,7 +675,28 @@ void VehicleLoader::obtain_symmetry(const cpptoml::table& tb)
 	for(auto& t : *array)
 	{
 		SymmetryMode* mode = new SymmetryMode();
+		// Read the "preset"
+		deserialize(*mode, *t);
 
+		// Read the pieces themselves
+		auto arr = *t->get_array_of<int64_t>("__all_in_symmetry");
+		mode->clone_depth = *t->get_qualified_as<int64_t>("__clone_depth");
+
+		mode->all_in_symmetry.reserve(arr.size());
+		for(int64_t id : arr)
+		{
+			mode->all_in_symmetry.push_back(pieces_by_id[id]);
+		}
+
+		// We can easily obtain the rest of the arrays from the clone depth
+		mode->root = mode->all_in_symmetry[0];
+		int clones = mode->all_in_symmetry.size() / mode->clone_depth;
+
+		mode->clones.reserve(clones);
+		for(int i = 0; i < clones; i++)
+		{
+			mode->clones.push_back(mode->all_in_symmetry[i * mode->clone_depth]);
+		}
 
 		n_vehicle->meta.symmetry_groups.push_back(mode);
 	}

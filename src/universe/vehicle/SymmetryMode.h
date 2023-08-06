@@ -46,6 +46,8 @@ private:
 
 protected:
 	friend class EditorVehicle;
+	friend class VehicleSaver;
+	friend class VehicleLoader;
 
 	// Removes nullptrs in all_in_symmetry
 	void cleanup();
