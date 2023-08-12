@@ -1,4 +1,5 @@
 #include "VehicleLoader.h"
+#include <util/fmt/glm.h>
 
 void VehicleLoader::load_basic(const cpptoml::table& root)
 {
@@ -125,6 +126,11 @@ void VehicleLoader::obtain_parts(const cpptoml::table& root)
 
 }
 
+// TODO: This is needed as otherwise gcc optimizes the whole thing away (WTF!)
+#ifdef __GNUC__
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+#endif
 Piece* VehicleLoader::load_piece(const cpptoml::table& piece)
 {
 	int64_t part_id = *piece.get_qualified_as<int64_t>("part");
@@ -147,8 +153,7 @@ Piece* VehicleLoader::load_piece(const cpptoml::table& piece)
 	auto transform = piece.get_array("transform");
 	glm::dmat4 tform = deserialize_matrix(*transform);
 	n_piece->packed_tform = to_btTransform(tform);
-
-	// Pre-load links (We cannot load them just yet)	
+	// Pre-load links (We cannot load them just yet)
 	auto link = piece.get_table_qualified("link");
 	links_toml[n_piece] = link;
 	
@@ -156,6 +161,9 @@ Piece* VehicleLoader::load_piece(const cpptoml::table& piece)
 
 	return n_piece;
 }
+#ifdef __GNUC__
+#pragma GCC pop_options
+#endif
 
 void VehicleLoader::obtain_pieces(const cpptoml::table& root)
 {
