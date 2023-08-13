@@ -65,7 +65,7 @@ void main()
 
     vec3 sun_dir = normalize(sun_pos - FragPos);
     // TODO: Environment map sampling
-    vec3 emit = Emissive * Albedo;
+    vec3 emit = abs(Emissive) * Albedo;
 
     vec3 lo = get_pbr(sun_dir, FragPos, Normal, Albedo, Roughness, Metallic);
 

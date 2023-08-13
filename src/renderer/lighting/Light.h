@@ -21,7 +21,8 @@ public:
 		POINT,
 		ENV_MAP,
 		SUN, 
-		PART_ICON
+		PART_ICON,
+		DEBUG_GBUFFER
 	};
 
 

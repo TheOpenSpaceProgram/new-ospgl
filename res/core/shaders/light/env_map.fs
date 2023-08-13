@@ -28,7 +28,7 @@ void main()
     float Metallic = Pbr.b;
 
     vec3 specular; //< set by get_ambient
-    vec3 ambient = get_ambient(FragPos, Normal, Albedo, Roughness, Metallic, irradiance_map, specular_map, brdf_map, specular);
+    vec3 ambient = get_ambient(FragPos, Normal, Albedo, Roughness, Metallic, Emissive, irradiance_map, specular_map, brdf_map, specular);
 
     FragColor = vec4((ambient + specular) * Occlussion, 1.0);
 }

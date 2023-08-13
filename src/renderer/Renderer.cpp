@@ -142,23 +142,32 @@ void Renderer::forward_bind(CameraUniforms& cu, GBuffer* g_buffer, GLuint f_buff
 	glDepthFunc(GL_ALWAYS);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-	// Do a pass for every light
-	for (auto l : lights)
+	if(debug_gbuffer.mode != DebugGBuffer::NONE)
 	{
-		if(l->needs_fullscreen_viewport())
+		// Draw using g-buffer debug shader
+		glViewport(vport.x, vport.y, vport.z, vport.w);
+		debug_gbuffer.do_pass(cu, g_buffer);
+	}
+	else
+	{
+		// Do a pass for every light
+		for (auto l: lights)
 		{
-			if(is_env_pass)
+			if (l->needs_fullscreen_viewport())
 			{
-				glViewport(vport.x, vport.y, vport.z, vport.w);
+				if (is_env_pass)
+				{
+					glViewport(vport.x, vport.y, vport.z, vport.w);
+				}
+				else
+				{
+					glViewport(0, 0, swidth, sheight);
+				}
 			}
-			else
-			{
-				glViewport(0, 0, swidth, sheight);
-			}
+
+			l->do_pass(cu, g_buffer);
+
 		}
-
-		l->do_pass(cu, g_buffer);
-
 	}
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

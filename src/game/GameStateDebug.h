@@ -23,11 +23,13 @@ private:
 	void do_launcher();
 	void do_assets();
 	void do_scene();
+	void do_renderer();
 
 	bool terminal_undocked;
 	bool entities_undocked;
 	bool assets_undocked;
 	bool scene_undocked;
+	bool renderer_undocked;
 
 	static void do_docking_button(bool* val);
 

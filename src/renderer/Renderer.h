@@ -18,6 +18,7 @@
 #include <nanovg/nanovg.h>
 
 #include <assets/Cubemap.h>
+#include "lighting/DebugGBuffer.h"
 
 #include "RendererQuality.h"
 
@@ -110,6 +111,10 @@ private:
 	bool env_enabled;
 
 public:
+
+	// This is a light but used only internally for debug
+	DebugGBuffer debug_gbuffer;
+
 	glm::dvec3 env_sample_pos;
 
 	// Only if using a cubemap as ibl source, to prevent unloading

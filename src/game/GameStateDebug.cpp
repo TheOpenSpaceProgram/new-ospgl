@@ -3,6 +3,7 @@
 #include "GameState.h"
 #include <algorithm>
 #include <util/InputUtil.h>
+#include <renderer/Renderer.h>
 
 void GameStateDebug::update()
 {
@@ -39,6 +40,12 @@ void GameStateDebug::update()
 			do_scene();
 			ImGui::End();
 		}
+		if(renderer_undocked)
+		{
+			ImGui::Begin("Renderer");
+			do_renderer();
+			ImGui::End();
+		}
 
 		for(Entity* e : osp->universe->entities)
 		{
@@ -67,6 +74,8 @@ GameStateDebug::GameStateDebug(GameState* gamestate)
 	assets_undocked = false;
 	entities_undocked = false;
 	scene_undocked = false;
+	renderer_undocked = false;
+
 	override_camera = false;
 	centered_camera = nullptr;
 }
@@ -155,6 +164,11 @@ void GameStateDebug::do_launcher()
 		do_scene();
 		ImGui::EndTabItem();
 	}
+	if(!renderer_undocked && ImGui::BeginTabItem("Renderer"))
+	{
+		do_renderer();
+		ImGui::EndTabItem();
+	}
 	ImGui::EndTabBar();
 
 
@@ -203,6 +217,22 @@ void GameStateDebug::update_cam(double dt)
 		cam.center = centered_camera->get_position(false);
 	}
 
+}
+
+void GameStateDebug::do_renderer()
+{
+
+	if(ImGui::BeginCombo("View G-Buffer: ", DebugGBuffer::get_mode_str(osp->renderer->debug_gbuffer.mode)))
+	{
+		for(int v = DebugGBuffer::NONE; v != DebugGBuffer::END_MARKER; v++)
+		{
+			if(ImGui::Selectable(DebugGBuffer::get_mode_str((DebugGBuffer::View)v)))
+			{
+				osp->renderer->debug_gbuffer.mode = (DebugGBuffer::View)v;
+			}
+		}
+		ImGui::EndCombo();
+	}
 }
 
 

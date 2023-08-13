@@ -55,8 +55,9 @@ void main()
 
     gAlbedo = (col + atmoc) * 0.77;
     gNormal = vNormal;
-    gPbr = vec3(0.0, 0.8, 0.04); // Occlusion, rougness, metallic
-    gPositionEmit = vec4(vPos, length(atmoc) + spec);
+    gPbr = vec3(1.0, 0.0, 1.0); // Occlusion, rougness, metallic
+    vec3 vPosFixed = vec3(-vPos.x, vPos.y, vPos.z);
+    gPositionEmit = vec4(vPosFixed, length(atmoc) + spec);
 
     // Could be removed for that sweet optimization, but some
     // clipping can happen on weird planets

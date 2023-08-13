@@ -52,7 +52,7 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 }
 vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 {
-	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(max(1.0 - cosTheta, 0.0), 5.0);
+	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 vec3 FresnelSphericalGaussian(float cosTheta, vec3 F0)
 {
@@ -60,11 +60,16 @@ vec3 FresnelSphericalGaussian(float cosTheta, vec3 F0)
 }
 
 
-vec3 get_ambient(vec3 FragPos, vec3 Normal, vec3 Albedo, float Roughness, float Metallic,
+vec3 get_ambient(vec3 FragPos, vec3 Normal, vec3 Albedo, float Roughness, float Metallic, float Emissive,
     samplerCube irradiance_map, samplerCube specular_map, sampler2D brdf_map, out vec3 spec)
 {
 
     vec3 cam_dir = normalize(-FragPos);
+
+    // If Emissive is negative, we "disable" fresnel. Used for terrain which shows some artifacts otherwise
+    float FresnelDisable = min(-clamp(Emissive, -1.0, 0.0) * 5000.0, 1.0);
+    cam_dir = FresnelDisable * vec3(1, 0, 0) + (1.0 - FresnelDisable) * cam_dir;
+
     Roughness = clamp(Roughness, 0.0, 1.0);
     Metallic = clamp(Metallic, 0.0, 1.0);
 
@@ -117,6 +122,7 @@ vec3 get_pbr(vec3 sun_dir, vec3 FragPos, vec3 Normal, vec3 Albedo, float Roughne
     vec3 specular = nominator / max(denominator, 0.001);
 
     float NdotL = max(dot(Normal, sun_dir), 0.0);
+
 
     vec3 l0 = (kD * Albedo / PI + specular) * NdotL;
 
