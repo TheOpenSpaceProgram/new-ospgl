@@ -106,41 +106,6 @@ void Machine::init(sol::state* lua_state, Part* in_part)
 	plumbing.init(*init_toml);
 }
 
-std::vector<Machine*> Machine::get_all_wired_machines(bool include_this)
-{
-	// TODO: We could cache this? Could be a small perfomance gain
-	return get_connected_if([](Machine* m){ return true; }, include_this);
-}
-
-std::vector<Machine*> Machine::get_wired_machines_with(const std::vector<std::string>& interfaces, bool include_this)
-{
-	return get_connected_if([interfaces](Machine* m)
-	{
-		for(const std::string& a : interfaces)
-		{
-			if(m->interfaces.find(a) != m->interfaces.end())
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}, include_this);
-}
-
-std::vector<sol::table> Machine::get_wired_interfaces(const std::string& type, bool include_this) 
-{
-	std::vector<Machine*> machines = get_wired_machines_with({type}, include_this);
-	std::vector<sol::table> out;
-	out.reserve(machines.size());
-
-	for(Machine* m : machines)
-	{
-		out.push_back(m->interfaces[type]);
-	}
-
-	return out;
-}
 
 sol::table Machine::get_interface(const std::string& name) 
 {
@@ -174,26 +139,6 @@ Machine::~Machine()
 	//env.clear();
 }
 
-std::vector<Machine*> Machine::get_connected_if(std::function<bool(Machine*)> fnc, bool include_this) 
-{
-	std::vector<Machine*> out;
-
-	auto range = in_part->vehicle->wires.equal_range(this);
-	for(auto it = range.first; it != range.second; it++)
-	{
-		if(fnc(it->second))
-		{
-			out.push_back(it->second);
-		}
-	}
-
-	if(include_this && fnc(this))
-	{
-		out.push_back(this);
-	}
-
-	return out;
-}
 
 bool Machine::is_enabled()
 {

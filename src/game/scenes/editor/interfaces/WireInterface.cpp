@@ -318,7 +318,7 @@ bool WireInterface::do_machine(NVGcontext* vg, GUIInput* gui_input, Machine* m, 
 			if((gui_input->mouse_down(GUI_LEFT_BUTTON) && is_hovered) || selected == m)
 			{
 				selected = m;
-				selected_wired = m->get_all_wired_machines(false);
+				selected_wired = editing->get_all_connected(m, false);
 				nvgFillColor(vg, nvgRGB(255, 255, 255));
 			}
 			else
@@ -335,13 +335,13 @@ bool WireInterface::do_machine(NVGcontext* vg, GUIInput* gui_input, Machine* m, 
 					if(gui_input->mouse_down(GUI_RIGHT_BUTTON))
 					{
 						// We have to do two iterations
-						auto sel_to_m = edveh->veh->wires.equal_range(selected);
-						auto m_to_sel = edveh->veh->wires.equal_range(m);
+						auto sel_to_m = editing->connections.equal_range(selected);
+						auto m_to_sel = editing->connections.equal_range(m);
 						for(auto i = sel_to_m.first; i != sel_to_m.second; i++)
 						{
 							if(i->second == m)
 							{
-								edveh->veh->wires.erase(i);
+								editing->connections.erase(i);
 								break;
 							}
 						}
@@ -349,7 +349,7 @@ bool WireInterface::do_machine(NVGcontext* vg, GUIInput* gui_input, Machine* m, 
 						{
 							if(i->second == selected)
 							{
-								edveh->veh->wires.erase(i);
+								editing->connections.erase(i);
 								break;
 							}
 						}
@@ -362,8 +362,8 @@ bool WireInterface::do_machine(NVGcontext* vg, GUIInput* gui_input, Machine* m, 
 					nvgStrokeColor(vg, nvgRGB(0, 255, 0));
 					if(gui_input->mouse_down(GUI_RIGHT_BUTTON))
 					{
-						edveh->veh->wires.insert(std::make_pair(selected, m));
-						edveh->veh->wires.insert(std::make_pair(m, selected));
+						editing->connections.insert(std::make_pair(selected, m));
+						editing->connections.insert(std::make_pair(m, selected));
 					}
 					else
 					{

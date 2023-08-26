@@ -22,11 +22,6 @@ group_names = ["Other group"]
 	__clone_depth = 1
 	__icon = "scenes/editor/symmetry/radial_piece.png"
 	__name = "core:radial_piece_name"
-[[wire]]
-	to = 3
-	fmachine = "decoupler"
-	tmachine = "capsule"
-	from = 4
 [[piece]]
 	node = "p_root"
 	part = 19

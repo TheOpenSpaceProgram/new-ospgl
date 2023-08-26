@@ -161,16 +161,20 @@ void Vehicle::remove_outdated()
 		}
 	}
 
-	// Some machines may have gone missing
-	for(auto it = wires.begin(); it != wires.end();)
+	// Some logical connections my have been cut
+	for(auto& pair : logical_groups)
 	{
-		if(!find_machine(it->first, this) || !find_machine(it->second, this))
+		LogicalGroup* g = pair.second;
+		for (auto it = g->connections.begin(); it != g->connections.end();)
 		{
-			it = wires.erase(it);
-		}
-		else
-		{
-			it++;
+			if (!find_machine(it->first, this) || !find_machine(it->second, this))
+			{
+				it = g->connections.erase(it);
+			}
+			else
+			{
+				it++;
+			}
 		}
 	}
 

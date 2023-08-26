@@ -19,8 +19,6 @@ friend class Vehicle;
 private:
 
 
-	std::vector<Machine*> get_connected_if(std::function<bool(Machine*)> fnc, bool include_this);
-
 	std::string in_pkg, name;
 	AssetHandle<Image> default_icon;
 
@@ -81,9 +79,6 @@ public:
 
 	void load_interface(const std::string& name, sol::table n_table);
 
-	std::vector<Machine*> get_all_wired_machines(bool include_this = true);
-	std::vector<Machine*> get_wired_machines_with(const std::vector<std::string>& interfaces, bool include_this = true);
-	std::vector<sol::table> get_wired_interfaces(const std::string& type, bool include_this = true);
 	std::shared_ptr<InputContext> get_input_ctx()
 	{
 		return cur_ipt_ctx;

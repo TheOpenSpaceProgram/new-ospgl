@@ -242,65 +242,83 @@ void VehicleLoader::copy_pieces(const cpptoml::table& root)
 	}
 }
 
-void VehicleLoader::obtain_wires(const cpptoml::table& root)
+void VehicleLoader::obtain_logical_groups(const cpptoml::table& root)
 {
-	auto wires = root.get_table_array_qualified("wire");
-	if(!wires)
+	auto groups = root.get_table_array_qualified("logical_group");
+	if(!groups)
 	{
 		return;
 	}
 
-	for(auto wire_toml : *wires)
+	for(auto& g : *groups)
 	{
-		int from = *wire_toml->get_as<int>("from");
-		int to = *wire_toml->get_as<int>("to");
-		std::string fmachine = *wire_toml->get_as<std::string>("fmachine");
-		std::string tmachine = *wire_toml->get_as<std::string>("tmachine");
-
-		Part* fromp = parts_by_id[from];
-		Part* top = parts_by_id[to];
-		Machine* fromm = fromp->get_machine(fmachine);
-		Machine* tom = top->get_machine(tmachine);
-
-		// Check if it already exists bidirectionally to emit a warning
-		// TODO: Move this code to a function as it may be reused
-		auto from_it = n_vehicle->wires.equal_range(fromm);
-		bool found_from_to = false;
-		for(auto from_subit = from_it.first; from_subit != from_it.second; from_subit++)
+		auto connections = root.get_table_array_qualified("connection");
+		if (!connections)
 		{
-			if(from_subit->second == tom)
+			return;
+		}
+
+		LogicalGroup* gr = new LogicalGroup();
+		auto id = g->get_qualified_as<std::string>("id");
+		logger->check(!id->empty(), "Logical group has no ID!");
+
+		auto existing = n_vehicle->logical_groups.find(*id);
+		logger->check(existing == n_vehicle->logical_groups.end(), "Duplicated ID for logical group");
+
+		for (auto conn_toml : *connections)
+		{
+			int from = *conn_toml->get_as<int>("from");
+			int to = *conn_toml->get_as<int>("to");
+			std::string fmachine = *conn_toml->get_as<std::string>("fmachine");
+			std::string tmachine = *conn_toml->get_as<std::string>("tmachine");
+
+			Part *fromp = parts_by_id[from];
+			Part *top = parts_by_id[to];
+			Machine *fromm = fromp->get_machine(fmachine);
+			Machine *tom = top->get_machine(tmachine);
+
+			// Check if it already exists bidirectionally to emit a warning
+			// TODO: Move this code to a function as it may be reused
+			auto from_it = gr->connections.equal_range(fromm);
+			bool found_from_to = false;
+			for (auto from_subit = from_it.first; from_subit != from_it.second; from_subit++)
 			{
-				found_from_to = true;
-				break;
+				if (from_subit->second == tom)
+				{
+					found_from_to = true;
+					break;
+				}
+			}
+
+			auto to_it = gr->connections.equal_range(tom);
+			bool found_to_from = false;
+			for (auto to_subit = to_it.first; to_subit != to_it.second; to_subit++)
+			{
+				if (to_subit->second == fromm)
+				{
+					found_to_from = true;
+					break;
+				}
+			}
+
+			if (!found_from_to)
+			{
+				gr->connections.insert(std::make_pair(fromm, tom));
+			}
+
+			if (!found_to_from)
+			{
+				gr->connections.insert(std::make_pair(tom, fromm));
+			}
+
+			if (found_from_to || found_to_from)
+			{
+				logger->warn("Found a duplicate wire (from: {} fmachine: {} -> to: {} tmachine: {}), it was ignored",
+							 from, fmachine, to, tmachine);
 			}
 		}
-
-		auto to_it = n_vehicle->wires.equal_range(tom);
-		bool found_to_from = false;
-		for(auto to_subit = to_it.first; to_subit != to_it.second; to_subit++)
-		{
-			if(to_subit->second == fromm)
-			{
-				found_to_from = true;
-				break;
-			}
-		}
-
-		if(!found_from_to)
-		{
-			n_vehicle->wires.insert(std::make_pair(fromm, tom));
-		}
-
-		if(!found_to_from)
-		{
-			n_vehicle->wires.insert(std::make_pair(tom, fromm));
-		}
-
-		if(found_from_to || found_to_from)
-		{
-			logger->warn("Found a duplicate wire (from: {} fmachine: {} -> to: {} tmachine: {}), it was ignored",
-				from, fmachine, to,  tmachine);
-		}
+		// Insert the logical group
+		n_vehicle->logical_groups[*id] = gr;
 	}
 }
 
@@ -312,7 +330,7 @@ VehicleLoader::VehicleLoader(const cpptoml::table& root, Vehicle& to, bool is_ed
 	obtain_parts(root);
 	obtain_pieces(root);
 	copy_pieces(root);
-	obtain_wires(root);
+	obtain_logical_groups(root);
 	obtain_pipes(root);
 	obtain_symmetry(root);
 
@@ -362,7 +380,7 @@ VehicleSaver::VehicleSaver(cpptoml::table &target, const Vehicle &what)
 	assign_ids(target, what);
 	write_parts(target, what);
 	write_pieces(target, what);
-	write_wires(target, what);
+	write_logical_groups(target, what);
 	write_pipes(target, what);
 	write_symmetry(target, what);
 }
@@ -504,52 +522,63 @@ void VehicleSaver::write_pieces(cpptoml::table &target, const Vehicle &what)
 	target.insert("piece", piece_array);
 }
 
-void VehicleSaver::write_wires(cpptoml::table &target, const Vehicle &what)
+void VehicleSaver::write_logical_groups(cpptoml::table &target, const Vehicle &what)
 {
-	auto wire_array = cpptoml::make_table_array();
+	auto lg_array = cpptoml::make_table_array();
 
-	std::set<std::pair<Machine*, Machine*>> seen_pairs;
-
-	for(auto pair : what.wires)
+	for(auto lg : what.logical_groups)
 	{
-		auto rpair = std::make_pair(pair.second, pair.first);
-		if(seen_pairs.find(pair) == seen_pairs.end() &&
-		   seen_pairs.find(rpair) == seen_pairs.end())
+		auto tb = cpptoml::make_table();
+
+		auto conn_array = cpptoml::make_table_array();
+
+		std::set<std::pair<Machine *, Machine *>> seen_pairs;
+
+		for (auto pair : lg.second->connections)
 		{
-			seen_pairs.insert(pair);
-
-			auto wire = cpptoml::make_table();
-
-			std::string fmachine = "";
-			std::string tmachine = "";
-			for(auto m : pair.first->in_part->get_all_machines())
+			auto rpair = std::make_pair(pair.second, pair.first);
+			if (seen_pairs.find(pair) == seen_pairs.end() &&
+				seen_pairs.find(rpair) == seen_pairs.end())
 			{
-				if(m.second == pair.first)
+				seen_pairs.insert(pair);
+
+				auto wire = cpptoml::make_table();
+
+				std::string fmachine = "";
+				std::string tmachine = "";
+				for (auto m: pair.first->in_part->get_all_machines())
 				{
-					fmachine = m.first;
-					break;
+					if (m.second == pair.first)
+					{
+						fmachine = m.first;
+						break;
+					}
 				}
-			}
-			for(auto m : pair.second->in_part->get_all_machines())
-			{
-				if(m.second == pair.second)
+				for (auto m: pair.second->in_part->get_all_machines())
 				{
-					tmachine = m.first;
-					break;
+					if (m.second == pair.second)
+					{
+						tmachine = m.first;
+						break;
+					}
 				}
+
+				logger->check(fmachine != "" && tmachine != "", "Invalid machines");
+
+				wire->insert("from", part_to_id[pair.first->in_part]);
+				wire->insert("fmachine", fmachine);
+				wire->insert("to", part_to_id[pair.second->in_part]);
+				wire->insert("tmachine", tmachine);
+
+				conn_array->push_back(wire);
 			}
-
-			logger->check(fmachine != "" && tmachine != "", "Invalid machines");
-
-			wire->insert("from", part_to_id[pair.first->in_part]);
-			wire->insert("fmachine", fmachine);
-			wire->insert("to", part_to_id[pair.second->in_part]);
-			wire->insert("tmachine", tmachine);
-
-			wire_array->push_back(wire);
 		}
+		tb->insert("connection", conn_array);
+		tb->insert("id", lg.first);
+		lg_array->push_back(tb);
 	}
-	target.insert("wire", wire_array);
+
+	target.insert("logical_group", lg_array);
 }
 
 void VehicleSaver::write_pipes(cpptoml::table &target, const Vehicle &what)

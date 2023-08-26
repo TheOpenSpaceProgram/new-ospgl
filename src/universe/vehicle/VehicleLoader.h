@@ -15,7 +15,7 @@ private:
 	void assign_ids(cpptoml::table& target, const Vehicle& what);
 	void write_parts(cpptoml::table& target, const Vehicle& what);
 	void write_pieces(cpptoml::table& target, const Vehicle& what);
-	void write_wires(cpptoml::table& target, const Vehicle& what);
+	void write_logical_groups(cpptoml::table& target, const Vehicle& what);
 	void write_pipes(cpptoml::table& target, const Vehicle& what);
 	void write_controlled(cpptoml::table& target, const Vehicle& what);
 	void write_symmetry(cpptoml::table& target, const Vehicle& what);
@@ -43,7 +43,7 @@ private:
 	void obtain_parts(const cpptoml::table& root);
 	void obtain_pieces(const cpptoml::table& root);
 	void copy_pieces(const cpptoml::table& root);
-	void obtain_wires(const cpptoml::table& root);
+	void obtain_logical_groups(const cpptoml::table& root);
 	void obtain_pipes(const cpptoml::table& root);
 
 	void obtain_controlled(const cpptoml::table& root);

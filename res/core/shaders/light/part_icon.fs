@@ -43,7 +43,7 @@ void main()
 
         // Env mapping
         vec3 specular; //< set by get_ambient
-        vec3 ambient = get_ambient(FragPos, Normal, Albedo, Roughness, Metallic, irradiance_map, specular_map, brdf_map, specular);
+        vec3 ambient = get_ambient(FragPos, Normal, Albedo, Roughness, Metallic, Emissive, irradiance_map, specular_map, brdf_map, specular);
 
         vec3 fcolor = lo * color + emit + (specular + ambient) * Occlussion;
 

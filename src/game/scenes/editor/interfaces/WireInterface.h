@@ -8,6 +8,9 @@ class EditorVehicleInterface;
 class WireInterface : public BaseInterface
 {
 private:
+
+	LogicalGroup* editing;
+
 	EditorVehicle* edveh;
 	EditorScene* scene;
 	EditorVehicleInterface* edveh_int;
