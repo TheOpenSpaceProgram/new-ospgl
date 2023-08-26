@@ -2,9 +2,10 @@
 #include "EditorPanel.h"
 #include <gui/GUICanvas.h>
 #include <gui/layouts/GUISingleLayout.h>
-#include <gui/widgets/GUIImageButton.h>
+#include <gui/widgets/GUIDropDown.h>
 #include <assets/AssetManager.h>
 #include <assets/Image.h>
+
 
 class EditorVehicleInterface;
 class EditorGUI;
@@ -16,11 +17,14 @@ class WiringPanel : EditorPanel
 
 	AssetHandle<Image> trash_image;
 
+
 	GUICanvas panel;
-	GUISingleLayout* trash_area_layout;
-	GUIImageButton trash_button;
+	std::shared_ptr<GUIDropDown> group_dropdown;
+
 
 	EditorGUI* edgui;
+
+	void update_logical_groups();
 
 public:
 	void init(EditorScene* sc, NVGcontext* vg) override;

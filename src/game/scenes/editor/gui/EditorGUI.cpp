@@ -26,6 +26,7 @@ int EditorGUI::get_panel_width()
 		part_list.init(sc, vg);
 		trashcan.init(sc, vg);
 		plumbing.init(sc, vg);
+		wiring.init(sc, vg);
 		modify_tools.init(sc, vg);
 
 		create_toolset();

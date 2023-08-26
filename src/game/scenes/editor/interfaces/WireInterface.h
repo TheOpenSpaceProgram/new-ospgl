@@ -9,7 +9,6 @@ class WireInterface : public BaseInterface
 {
 private:
 
-	LogicalGroup* editing;
 
 	EditorVehicle* edveh;
 	EditorScene* scene;
@@ -34,6 +33,8 @@ private:
 
 
 public:
+
+	LogicalGroup* editing;
 
 	bool show_hidden;
 

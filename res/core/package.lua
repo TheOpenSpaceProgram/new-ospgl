@@ -3,6 +3,9 @@ local logger = require("logger")
 local glm = require("glm")
 
 function load(database)
+	-- The first locale is the default if selected one is not available
+	database:load_locale(dofile("locale.lua"))
+
 	database:add_part_category("categories/command.toml")
 	database:add_part_category("categories/engines.toml")
 	database:add_part_category("categories/all.toml")
@@ -20,13 +23,12 @@ function load(database)
 	database:add_reaction("materials/reactions/hydrogen_combustion.toml")
 	database:add_reaction("materials/reactions/methane_combustion.toml")
 
-	-- The first locale is the default if selected one is not available
-	database:load_locale(dofile("locale.lua"))
-
 	database:add_editor_script("scenes/editor/editor.lua")
 	database:add_editor_script("scenes/editor/symmetry_debug.lua")
 
 	database:add_symmetry_mode("scenes/editor/symmetry/radial_piece.toml")
+
+	database:add_logical_group("control", database:get_string("core:lg_control"))
 
 end
 

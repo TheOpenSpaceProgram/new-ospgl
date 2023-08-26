@@ -33,6 +33,10 @@ public:
 	std::vector<std::string> symmetry_modes;
 	std::vector<std::string> reactions;
 	std::vector<std::string> materials;
+
+	// id and localized name (ready to display to user)
+	std::vector<std::pair<std::string, std::string>> logical_groups;
+
 	std::unordered_map<std::string, std::string> current_locale;
 
 	std::vector<std::string> editor_scripts;
@@ -43,6 +47,7 @@ public:
 	void add_symmetry_mode(const std::string& path, const std::string& pkg);
 	void add_material(const std::string& path, const std::string& pkg);
 	void add_reaction(const std::string& path, const std::string& pkg);
+	void add_logical_group(const std::string& id, const std::string& display_string);
 
 	void finish_loading();
 

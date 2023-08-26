@@ -25,6 +25,10 @@ function game_database:add_plumbing_machine(path) end
 ---@param path string Path to the reaction .toml
 function game_database:add_reaction(path) end
 
+---@param local_id string ID to use for the group, not including the package, as it's automatically added
+---@param display_str string String to display to the user. Displayed directly! It's not a locale string ID
+function game_database:add_logical_group(local_id, display_str) end
+
 ---@param locale table Table containing the locale
 function game_database:load_locale(locale) end
 

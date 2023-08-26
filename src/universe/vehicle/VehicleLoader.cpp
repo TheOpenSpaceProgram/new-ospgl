@@ -245,80 +245,108 @@ void VehicleLoader::copy_pieces(const cpptoml::table& root)
 void VehicleLoader::obtain_logical_groups(const cpptoml::table& root)
 {
 	auto groups = root.get_table_array_qualified("logical_group");
-	if(!groups)
+	if(groups)
 	{
-		return;
+		for(auto& g : *groups)
+		{
+			auto connections = g->get_table_array_qualified("connection");
+			if (!connections)
+			{
+				continue;
+			}
+
+			LogicalGroup* gr = new LogicalGroup();
+			auto id = g->get_qualified_as<std::string>("id");
+			logger->check(!id->empty(), "Logical group has no ID!");
+
+			auto existing = n_vehicle->logical_groups.find(*id);
+			logger->check(existing == n_vehicle->logical_groups.end(), "Duplicated ID for logical group");
+
+			for (auto conn_toml : *connections)
+			{
+				int from = *conn_toml->get_as<int>("from");
+				int to = *conn_toml->get_as<int>("to");
+				std::string fmachine = *conn_toml->get_as<std::string>("fmachine");
+				std::string tmachine = *conn_toml->get_as<std::string>("tmachine");
+
+				Part *fromp = parts_by_id[from];
+				Part *top = parts_by_id[to];
+				Machine *fromm = fromp->get_machine(fmachine);
+				Machine *tom = top->get_machine(tmachine);
+
+				// Check if it already exists bidirectionally to emit a warning
+				// TODO: Move this code to a function as it may be reused
+				auto from_it = gr->connections.equal_range(fromm);
+				bool found_from_to = false;
+				for (auto from_subit = from_it.first; from_subit != from_it.second; from_subit++)
+				{
+					if (from_subit->second == tom)
+					{
+						found_from_to = true;
+						break;
+					}
+				}
+
+				auto to_it = gr->connections.equal_range(tom);
+				bool found_to_from = false;
+				for (auto to_subit = to_it.first; to_subit != to_it.second; to_subit++)
+				{
+					if (to_subit->second == fromm)
+					{
+						found_to_from = true;
+						break;
+					}
+				}
+
+				if (!found_from_to)
+				{
+					gr->connections.insert(std::make_pair(fromm, tom));
+				}
+
+				if (!found_to_from)
+				{
+					gr->connections.insert(std::make_pair(tom, fromm));
+				}
+
+				if (found_from_to || found_to_from)
+				{
+					logger->warn("Found a duplicate wire (from: {} fmachine: {} -> to: {} tmachine: {}), it was ignored",
+								 from, fmachine, to, tmachine);
+				}
+			}
+			// Search for the logical group display string in the game database, if not present use ID directly
+			gr->display_str = *id;
+			for(const auto& p : osp->game_database->logical_groups)
+			{
+				if(p.first == *id)
+				{
+					gr->display_str = p.second;
+					break;
+				}
+			}
+			// Insert the logical group
+			n_vehicle->logical_groups[*id] = gr;
+		}
 	}
 
-	for(auto& g : *groups)
+	// Load empty logical groups from game database
+	for(const auto& p : osp->game_database->logical_groups)
 	{
-		auto connections = root.get_table_array_qualified("connection");
-		if (!connections)
+		bool found = false;
+		for(const auto& lg : n_vehicle->logical_groups)
 		{
-			return;
-		}
-
-		LogicalGroup* gr = new LogicalGroup();
-		auto id = g->get_qualified_as<std::string>("id");
-		logger->check(!id->empty(), "Logical group has no ID!");
-
-		auto existing = n_vehicle->logical_groups.find(*id);
-		logger->check(existing == n_vehicle->logical_groups.end(), "Duplicated ID for logical group");
-
-		for (auto conn_toml : *connections)
-		{
-			int from = *conn_toml->get_as<int>("from");
-			int to = *conn_toml->get_as<int>("to");
-			std::string fmachine = *conn_toml->get_as<std::string>("fmachine");
-			std::string tmachine = *conn_toml->get_as<std::string>("tmachine");
-
-			Part *fromp = parts_by_id[from];
-			Part *top = parts_by_id[to];
-			Machine *fromm = fromp->get_machine(fmachine);
-			Machine *tom = top->get_machine(tmachine);
-
-			// Check if it already exists bidirectionally to emit a warning
-			// TODO: Move this code to a function as it may be reused
-			auto from_it = gr->connections.equal_range(fromm);
-			bool found_from_to = false;
-			for (auto from_subit = from_it.first; from_subit != from_it.second; from_subit++)
+			if(lg.first == p.first)
 			{
-				if (from_subit->second == tom)
-				{
-					found_from_to = true;
-					break;
-				}
-			}
-
-			auto to_it = gr->connections.equal_range(tom);
-			bool found_to_from = false;
-			for (auto to_subit = to_it.first; to_subit != to_it.second; to_subit++)
-			{
-				if (to_subit->second == fromm)
-				{
-					found_to_from = true;
-					break;
-				}
-			}
-
-			if (!found_from_to)
-			{
-				gr->connections.insert(std::make_pair(fromm, tom));
-			}
-
-			if (!found_to_from)
-			{
-				gr->connections.insert(std::make_pair(tom, fromm));
-			}
-
-			if (found_from_to || found_to_from)
-			{
-				logger->warn("Found a duplicate wire (from: {} fmachine: {} -> to: {} tmachine: {}), it was ignored",
-							 from, fmachine, to, tmachine);
+				found = true;
+				break;
 			}
 		}
-		// Insert the logical group
-		n_vehicle->logical_groups[*id] = gr;
+		if(!found)
+		{
+			LogicalGroup* gr = new LogicalGroup();
+			gr->display_str = p.second;
+			n_vehicle->logical_groups[p.first] = gr;
+		}
 	}
 }
 
@@ -528,6 +556,11 @@ void VehicleSaver::write_logical_groups(cpptoml::table &target, const Vehicle &w
 
 	for(auto lg : what.logical_groups)
 	{
+		if(lg.second->connections.empty())
+		{
+			continue;
+		}
+
 		auto tb = cpptoml::make_table();
 
 		auto conn_array = cpptoml::make_table_array();

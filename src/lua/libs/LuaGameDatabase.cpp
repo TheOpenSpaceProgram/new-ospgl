@@ -34,6 +34,13 @@ void LuaGameDatabase::load_to(sol::table& table)
 		 std::string pkg = view["__pkg"];
 		 self->add_reaction(path, pkg);
 	 },
+	 "add_logical_group", [](GameDatabase* self, const std::string& local_id, const std::string& display, sol::this_environment st)
+	 {
+		 sol::environment view = st;
+		 std::string pkg = view["__pkg"];
+		 std::string id = pkg + ":" + local_id;
+		 self->add_logical_group(id, display);
+	 },
 	"load_locale", [](GameDatabase* self, const sol::table& table, sol::this_environment st)
 	{
 		sol::environment view = st;

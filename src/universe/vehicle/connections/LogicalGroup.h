@@ -9,6 +9,7 @@ class Machine;
 class LogicalGroup
 {
 public:
+	std::string display_str;
 
 	// Bidirectional wires, so if A is connected to B then B is connected to A
 	std::unordered_multimap<Machine*, Machine*> connections;

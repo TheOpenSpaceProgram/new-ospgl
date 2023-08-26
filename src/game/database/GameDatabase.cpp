@@ -147,3 +147,8 @@ void GameDatabase::add_symmetry_mode(const std::string &path, const std::string 
 	symmetry_modes.push_back(sane_path);
 }
 
+void GameDatabase::add_logical_group(const std::string &id, const std::string &display_string)
+{
+	logical_groups.emplace_back(id, display_string);
+}
+

@@ -3,133 +3,58 @@ piece_id = 20
 in_flight = false
 group_names = ["Other group"]
 [[symmetry_group]]
-	__can_use_radial_attachments = true
-	__can_use_stack_attachments = false
-	__priority = -9999
-	__all_in_symmetry = [2, 9, 14, 13, 12, 7, 10, 19, 17, 15, 8, 11, 20, 18, 16]
-	__script = "scenes/editor/symmetry/radial_piece.lua"
-	__description = "core:radial_piece_description"
+	__name = "core:radial_piece_name"
+	__icon = "scenes/editor/symmetry/radial_piece.png"
 	__clone_depth = 5
-	__icon = "scenes/editor/symmetry/radial_piece.png"
-	__name = "core:radial_piece_name"
-[[symmetry_group]]
-	__can_use_radial_attachments = true
-	__can_use_stack_attachments = false
-	__priority = -9999
-	__all_in_symmetry = [12, 13, 14]
-	__script = "scenes/editor/symmetry/radial_piece.lua"
 	__description = "core:radial_piece_description"
-	__clone_depth = 1
-	__icon = "scenes/editor/symmetry/radial_piece.png"
+	__script = "scenes/editor/symmetry/radial_piece.lua"
+	__all_in_symmetry = [17, 18, 8, 13, 10, 19, 9, 6, 4, 7, 15, 20, 2, 3, 5]
+	__priority = -9999
+	__can_use_stack_attachments = false
+	__can_use_radial_attachments = true
+[[symmetry_group]]
 	__name = "core:radial_piece_name"
-[[piece]]
-	node = "p_root"
-	part = 19
-	transform = [7.5497882227658423e-8, 0.49999986923378753, -0.86602547928233009, 0.0000000000000000, -0.99999999999998856, 1.5099580280564235e-7, -6.6613379801119463e-16, 0.0000000000000000, 1.3076621232040609e-7, 0.86602547928232032, 0.49999986923379292, 0.0000000000000000, 4.1483500393083768, -1.7010874013245130, -2.4831777121397831, 1.0000000000000000]
-	id = 20
-	[piece.link]
-		welded = true
-		to = 11
-[[piece]]
-	node = "p_root"
-	part = 17
-	transform = [7.5497920689004320e-8, 0.50000013076618877, 0.86602532828652734, 0.0000000000000000, -0.99999999999998823, 1.5099580258359769e-7, -4.7184476870179243e-16, 0.0000000000000000, -1.3076618999451114e-7, -0.86602532828651757, 0.50000013076619498, 0.0000000000000000, 4.1483505623731816, 1.7630142138131633, -2.4831782352045870, 1.0000000000000000]
-	id = 18
-	[piece.link]
-		welded = true
-		to = 11
-[[piece]]
-	node = "p_root"
-	part = 16
-	transform = [0.43301277739010058, -0.25000013076621158, 0.86602532828652712, 0.0000000000000000, 0.50000013076619532, 0.86602532828652679, -4.7184477708374317e-16, 0.0000000000000000, -0.74999986923378714, 0.43301277739010169, 0.50000013076619498, 0.0000000000000000, -0.35165009145780779, -4.2991633861841150, -2.4831782352045870, 1.0000000000000000]
-	id = 17
-	[piece.link]
-		welded = true
-		to = 10
-[[piece]]
-	node = "p_root"
-	part = 15
-	transform = [-1.5099580308319635e-7, -0.99999999999997735, 1.5099580269817147e-7, 0.0000000000000000, -0.99999999999998890, 1.5099580308319815e-7, -6.7847786723188247e-16, 0.0000000000000000, -2.2202528598811800e-14, -1.5099580247612530e-7, -0.99999999999998868, 0.0000000000000000, 4.1483503008408453, 0.030963859231732598, 0.51682202632777963, 1.0000000000000000]
-	id = 16
-	[piece.link]
-		welded = true
-		to = 11
-[[piece]]
-	node = "p_root"
-	part = 18
-	transform = [0.43301255089641588, -0.24999999999997802, -0.86602547928232998, 0.0000000000000000, 0.50000013076619565, 0.86602532828652690, -6.6613380639314546e-16, 0.0000000000000000, 0.74999999999997724, -0.43301285288802210, 0.49999986923379280, 0.0000000000000000, -3.3516498299253370, -2.5671121256278671, -2.4831777121397831, 1.0000000000000000]
-	id = 19
-	[piece.link]
-		welded = true
-		to = 10
-[[piece]]
-	node = "p_root"
-	part = 14
-	transform = [-0.86602532828651724, 0.50000013076619032, 1.5099580275368259e-7, 0.0000000000000000, 0.50000013076619609, 0.86602532828652701, -6.7847787561383330e-16, 0.0000000000000000, -1.3076619001119600e-7, 7.5497920258846049e-8, -0.99999999999998856, 0.0000000000000000, -1.8516495683930023, -3.4331379823997517, 0.51682202632777940, 1.0000000000000000]
-	id = 15
-	[piece.link]
-		welded = true
-		to = 10
-[[piece]]
-	node = "p_root"
-	part = 13
-	transform = [-0.43301262639429838, -0.24999986923380943, -0.86602547928233031, 0.0000000000000000, 0.49999986923379303, -0.86602547928233031, -8.8817841970012523e-16, 0.0000000000000000, -0.75000013076618965, -0.43301262639429849, 0.49999986923379292, 0.0000000000000000, -0.35164930686059970, 4.3610906516601737, -2.4831777121397827, 1.0000000000000000]
-	id = 14
-	[piece.link]
-		from_attachment = "m_attach_top"
-		welded = true
-		to = 9
+	__icon = "scenes/editor/symmetry/radial_piece.png"
+	__clone_depth = 1
+	__description = "core:radial_piece_description"
+	__script = "scenes/editor/symmetry/radial_piece.lua"
+	__all_in_symmetry = [10, 13, 8]
+	__priority = -9999
+	__can_use_stack_attachments = false
+	__can_use_radial_attachments = true
 [[piece]]
 	node = "p_root"
 	part = 9
-	transform = [4.5497785665130798e-16, -4.4010368850797069e-16, -0.99999999999999967, 0.0000000000000000, -0.86602532828652745, 0.50000013076619576, -2.7755572262848513e-16, 0.0000000000000000, 0.50000013076619565, 0.86602532828652734, 8.3819482841127460e-24, 0.0000000000000000, -1.8516498299253830, -3.4331378314039114, -1.4831779736721973, 1.0000000000000000]
-	id = 10
-	[piece.link]
-		welded = true
-		to = 7
-[[piece]]
-	node = "p_root"
-	part = 11
-	transform = [0.86602547928232054, 0.49999986923378731, 1.5099580280919377e-7, 0.0000000000000000, 0.49999986923379297, -0.86602547928233076, -9.0052248892081327e-16, 0.0000000000000000, 1.3076621204719117e-7, 7.5497882439323883e-8, -0.99999999999998890, 0.0000000000000000, -1.8516498299254032, 3.4950652478758117, 0.51682202632778085, 1.0000000000000000]
-	id = 12
+	transform = [-0.86602540378443837, 0.50000000000000044, -5.5511151231257827e-17, 0.0000000000000000, 5.5511151231257827e-17, 2.2204460492503131e-16, 0.99999999999999989, 0.0000000000000000, 0.50000000000000044, 0.86602540378443826, 0.0000000000000000, 0.0000000000000000, -0.85164969915918709, -1.7010870993329463, -1.4831779736721973, 1.0000000000000000]
+	id = 19
 	[piece.link]
 		from_attachment = "m_attach_top"
 		welded = true
-		to = 9
+		to = 16
 [[piece]]
 	node = "p_root"
-	part = 2
-	transform = [0.99999999999987443, 0.0000000000000000, -5.0068693724367187e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 5.0068693724367187e-7, 0.0000000000000000, 0.99999999999987443, 0.0000000000000000, 0.14834877490887710, 0.030963708235930310, -4.2292774457176616, 1.0000000000000000]
-	id = 3
+	part = 12
+	transform = [0.86602540378443882, 0.49999999999999983, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, -2.2204460492503131e-16, 1.0000000000000002, 0.0000000000000000, 0.49999999999999983, -0.86602540378443893, -2.2204460492503131e-16, 0.0000000000000000, -0.85164969915918587, 1.7630145158048078, -1.4831779736721971, 1.0000000000000000]
+	id = 17
+	[piece.link]
+		from_attachment = "m_attach_top"
+		welded = true
+		to = 16
+[[piece]]
+	node = "p_root"
+	part = 6
+	transform = [0.99999999999978884, 0.0000000000000000, -6.5168273977172410e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 6.5168273977172410e-7, 0.0000000000000000, 0.99999999999978884, 0.0000000000000000, 0.14835030084081374, 0.030963708235930310, -1.4831779736721973, 1.0000000000000000]
+	id = 16
 	[piece.link]
 		to_attachment = "m_attach_bottom"
 		from_attachment = "m_attach_top"
 		welded = true
-		to = 6
-[[piece]]
-	node = "p_decoupled"
-	part = 4
-	transform = [0.99999999999994693, 0.0000000000000000, -3.2584136988587576e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 3.2584136988587576e-7, 0.0000000000000000, 0.99999999999994693, 0.0000000000000000, 0.14835100625965730, 0.030963708235930310, -0.31826305274632583, 1.0000000000000000]
-	id = 4
-	[piece.link]
-		to_attachment = "m_decoupling_point"
-		editor_dettachable = false
-		welded = true
-		to = 5
+		to = 12
 [[piece]]
 	node = "p_root"
-	part = 12
-	transform = [-0.43301285288802127, -0.24999999999997749, 0.86602532828652745, 0.0000000000000000, 0.49999986923379303, -0.86602547928232987, -6.9388939039072284e-16, 0.0000000000000000, 0.74999999999997746, 0.43301255089641610, 0.50000013076619521, 0.0000000000000000, -3.3516495683929342, 2.6290402970787445, -2.4831782352045870, 1.0000000000000000]
-	id = 13
-	[piece.link]
-		from_attachment = "m_attach_top"
-		welded = true
-		to = 9
-[[piece]]
-	node = "p_root"
-	part = 4
+	part = 5
 	transform = [0.99999999999994693, 0.0000000000000000, -3.2584136988587576e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 3.2584136988587576e-7, 0.0000000000000000, 0.99999999999994693, 0.0000000000000000, 0.14835106733065165, 0.030963708235930310, -0.13083751384881906, 1.0000000000000000]
-	id = 5
+	id = 14
 	[piece.link]
 		to_attachment = "m_attach_bottom"
 		from_attachment = "m_attach_top"
@@ -137,68 +62,143 @@ group_names = ["Other group"]
 		to = 1
 [[piece]]
 	node = "p_root"
-	part = 7
-	transform = [-2.2204460492503131e-16, -1.0000000000000000, -1.1102230246251565e-16, 0.0000000000000000, 1.1102230246251565e-16, -2.2204460492503131e-16, 1.0000000000000000, 0.0000000000000000, -1.0000000000000000, 1.1102230246251565e-16, 0.0000000000000000, 0.0000000000000000, 2.1483503008408138, 0.030963708235929952, -1.4831779736721973, 1.0000000000000000]
-	id = 8
-	[piece.link]
-		from_attachment = "m_attach_top"
-		welded = true
-		to = 6
-[[piece]]
-	node = "p_root"
-	part = 5
-	transform = [0.99999999999978884, 0.0000000000000000, -6.5168273977172410e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 6.5168273977172410e-7, 0.0000000000000000, 0.99999999999978884, 0.0000000000000000, 0.14835030084081374, 0.030963708235930310, -1.4831779736721973, 1.0000000000000000]
-	id = 6
-	[piece.link]
-		to_attachment = "m_attach_bottom"
-		from_attachment = "m_attach_top"
-		welded = true
-		to = 4
-[[piece]]
-	node = "p_root"
-	part = 1
-	transform = [0.86602540378443882, 0.49999999999999983, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, -2.2204460492503131e-16, 1.0000000000000002, 0.0000000000000000, 0.49999999999999983, -0.86602540378443893, -2.2204460492503131e-16, 0.0000000000000000, -0.85164969915918587, 1.7630145158048078, -1.4831779736721971, 1.0000000000000000]
-	id = 2
-	[piece.link]
-		from_attachment = "m_attach_top"
-		welded = true
-		to = 6
-[[piece]]
-	node = "p_root"
-	part = 8
-	transform = [-4.4408920985006262e-16, -1.1102230246251565e-16, -1.0000000000000000, 0.0000000000000000, 0.86602547928233042, 0.49999986923379336, -2.2204460492503131e-16, 0.0000000000000000, 0.49999986923379347, -0.86602547928233042, -2.2204460492503136e-16, 0.0000000000000000, -1.8516495683929790, 3.4950653988715770, -1.4831779736721966, 1.0000000000000000]
-	id = 9
-	[piece.link]
-		to_attachment = "m_attach_bottom"
-		from_attachment = "m_attach_top"
-		welded = true
-		to = 2
-[[piece]]
-	node = "p_root"
 	root = true
-	part = 3
+	part = 10
 	transform = [1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.14835110050680012, 0.030963708235930310, 0.97529479114556494, 1.0000000000000000]
 	id = 1
 [[piece]]
 	node = "p_root"
-	part = 6
-	transform = [-0.86602540378443837, 0.50000000000000044, -5.5511151231257827e-17, 0.0000000000000000, 5.5511151231257827e-17, 2.2204460492503131e-16, 0.99999999999999989, 0.0000000000000000, 0.50000000000000044, 0.86602540378443826, 0.0000000000000000, 0.0000000000000000, -0.85164969915918709, -1.7010870993329463, -1.4831779736721973, 1.0000000000000000]
-	id = 7
+	part = 1
+	transform = [7.5497882227658423e-8, 0.49999986923378753, -0.86602547928233009, 0.0000000000000000, -0.99999999999998856, 1.5099580280564235e-7, -6.6613379801119463e-16, 0.0000000000000000, 1.3076621232040609e-7, 0.86602547928232032, 0.49999986923379292, 0.0000000000000000, 4.1483500393083768, -1.7010874013245130, -2.4831777121397831, 1.0000000000000000]
+	id = 2
+	[piece.link]
+		welded = true
+		to = 20
+[[piece]]
+	node = "p_root"
+	part = 4
+	transform = [0.99999999999987443, 0.0000000000000000, -5.0068693724367187e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 5.0068693724367187e-7, 0.0000000000000000, 0.99999999999987443, 0.0000000000000000, 0.14834877490887710, 0.030963708235930310, -4.2292774457176616, 1.0000000000000000]
+	id = 11
+	[piece.link]
+		to_attachment = "m_attach_bottom"
+		from_attachment = "m_attach_top"
+		welded = true
+		to = 16
+[[piece]]
+	node = "p_root"
+	part = 15
+	transform = [7.5497920689004320e-8, 0.50000013076618877, 0.86602532828652734, 0.0000000000000000, -0.99999999999998823, 1.5099580258359769e-7, -4.7184476870179243e-16, 0.0000000000000000, -1.3076618999451114e-7, -0.86602532828651757, 0.50000013076619498, 0.0000000000000000, 4.1483505623731816, 1.7630142138131633, -2.4831782352045870, 1.0000000000000000]
+	id = 3
+	[piece.link]
+		welded = true
+		to = 20
+[[piece]]
+	node = "p_root"
+	part = 3
+	transform = [0.43301277739010058, -0.25000013076621158, 0.86602532828652712, 0.0000000000000000, 0.50000013076619532, 0.86602532828652679, -4.7184477708374317e-16, 0.0000000000000000, -0.74999986923378714, 0.43301277739010169, 0.50000013076619498, 0.0000000000000000, -0.35165009145780779, -4.2991633861841150, -2.4831782352045870, 1.0000000000000000]
+	id = 4
+	[piece.link]
+		welded = true
+		to = 9
+[[piece]]
+	node = "p_decoupled"
+	part = 5
+	transform = [0.99999999999994693, 0.0000000000000000, -3.2584136988587576e-7, 0.0000000000000000, 0.0000000000000000, 1.0000000000000000, 0.0000000000000000, 0.0000000000000000, 3.2584136988587576e-7, 0.0000000000000000, 0.99999999999994693, 0.0000000000000000, 0.14835100625965730, 0.030963708235930310, -0.31826305274632583, 1.0000000000000000]
+	id = 12
+	[piece.link]
+		to_attachment = "m_decoupling_point"
+		editor_dettachable = false
+		welded = true
+		to = 14
+[[piece]]
+	node = "p_root"
+	part = 2
+	transform = [0.43301255089641588, -0.24999999999997802, -0.86602547928232998, 0.0000000000000000, 0.50000013076619565, 0.86602532828652690, -6.6613380639314546e-16, 0.0000000000000000, 0.74999999999997724, -0.43301285288802210, 0.49999986923379280, 0.0000000000000000, -3.3516498299253370, -2.5671121256278671, -2.4831777121397831, 1.0000000000000000]
+	id = 6
+	[piece.link]
+		welded = true
+		to = 9
+[[piece]]
+	node = "p_root"
+	part = 19
+	transform = [-0.43301262639429838, -0.24999986923380943, -0.86602547928233031, 0.0000000000000000, 0.49999986923379303, -0.86602547928233031, -8.8817841970012523e-16, 0.0000000000000000, -0.75000013076618965, -0.43301262639429849, 0.49999986923379292, 0.0000000000000000, -0.35164930686059970, 4.3610906516601737, -2.4831777121397827, 1.0000000000000000]
+	id = 8
 	[piece.link]
 		from_attachment = "m_attach_top"
 		welded = true
-		to = 6
+		to = 18
 [[piece]]
 	node = "p_root"
-	part = 10
-	transform = [-1.7742210049501887e-16, 7.7317059589551745e-16, -0.99999999999999978, 0.0000000000000000, -1.5099580275013125e-7, -0.99999999999998890, -3.3306687385974236e-16, 0.0000000000000000, -0.99999999999998890, 1.5099580252808664e-7, 1.6763899107371531e-23, 0.0000000000000000, 4.1483503008408018, 0.030963557240127396, -1.4831779736721973, 1.0000000000000000]
-	id = 11
+	part = 13
+	transform = [-4.4408920985006262e-16, -1.1102230246251565e-16, -1.0000000000000000, 0.0000000000000000, 0.86602547928233042, 0.49999986923379336, -2.2204460492503131e-16, 0.0000000000000000, 0.49999986923379347, -0.86602547928233042, -2.2204460492503136e-16, 0.0000000000000000, -1.8516495683929790, 3.4950653988715770, -1.4831779736721966, 1.0000000000000000]
+	id = 18
+	[piece.link]
+		to_attachment = "m_attach_bottom"
+		from_attachment = "m_attach_top"
+		welded = true
+		to = 17
+[[piece]]
+	node = "p_root"
+	part = 11
+	transform = [-2.2204460492503131e-16, -1.0000000000000000, -1.1102230246251565e-16, 0.0000000000000000, 1.1102230246251565e-16, -2.2204460492503131e-16, 1.0000000000000000, 0.0000000000000000, -1.0000000000000000, 1.1102230246251565e-16, 0.0000000000000000, 0.0000000000000000, 2.1483503008408138, 0.030963708235929952, -1.4831779736721973, 1.0000000000000000]
+	id = 15
+	[piece.link]
+		from_attachment = "m_attach_top"
+		welded = true
+		to = 16
+[[piece]]
+	node = "p_root"
+	part = 7
+	transform = [-1.5099580308319635e-7, -0.99999999999997735, 1.5099580269817147e-7, 0.0000000000000000, -0.99999999999998890, 1.5099580308319815e-7, -6.7847786723188247e-16, 0.0000000000000000, -2.2202528598811800e-14, -1.5099580247612530e-7, -0.99999999999998868, 0.0000000000000000, 4.1483503008408453, 0.030963859231732598, 0.51682202632777963, 1.0000000000000000]
+	id = 5
 	[piece.link]
 		welded = true
-		to = 8
+		to = 20
+[[piece]]
+	node = "p_root"
+	part = 8
+	transform = [-0.86602532828651724, 0.50000013076619032, 1.5099580275368259e-7, 0.0000000000000000, 0.50000013076619609, 0.86602532828652701, -6.7847787561383330e-16, 0.0000000000000000, -1.3076619001119600e-7, 7.5497920258846049e-8, -0.99999999999998856, 0.0000000000000000, -1.8516495683930023, -3.4331379823997517, 0.51682202632777940, 1.0000000000000000]
+	id = 7
+	[piece.link]
+		welded = true
+		to = 9
+[[piece]]
+	node = "p_root"
+	part = 14
+	transform = [4.5497785665130798e-16, -4.4010368850797069e-16, -0.99999999999999967, 0.0000000000000000, -0.86602532828652745, 0.50000013076619576, -2.7755572262848513e-16, 0.0000000000000000, 0.50000013076619565, 0.86602532828652734, 8.3819482841127460e-24, 0.0000000000000000, -1.8516498299253830, -3.4331378314039114, -1.4831779736721973, 1.0000000000000000]
+	id = 9
+	[piece.link]
+		welded = true
+		to = 19
+[[piece]]
+	node = "p_root"
+	part = 16
+	transform = [-1.7742210049501887e-16, 7.7317059589551745e-16, -0.99999999999999978, 0.0000000000000000, -1.5099580275013125e-7, -0.99999999999998890, -3.3306687385974236e-16, 0.0000000000000000, -0.99999999999998890, 1.5099580252808664e-7, 1.6763899107371531e-23, 0.0000000000000000, 4.1483503008408018, 0.030963557240127396, -1.4831779736721973, 1.0000000000000000]
+	id = 20
+	[piece.link]
+		welded = true
+		to = 15
+[[piece]]
+	node = "p_root"
+	part = 18
+	transform = [-0.43301285288802127, -0.24999999999997749, 0.86602532828652745, 0.0000000000000000, 0.49999986923379303, -0.86602547928232987, -6.9388939039072284e-16, 0.0000000000000000, 0.74999999999997746, 0.43301255089641610, 0.50000013076619521, 0.0000000000000000, -3.3516495683929342, 2.6290402970787445, -2.4831782352045870, 1.0000000000000000]
+	id = 13
+	[piece.link]
+		from_attachment = "m_attach_top"
+		welded = true
+		to = 18
+[[piece]]
+	node = "p_root"
+	part = 17
+	transform = [0.86602547928232054, 0.49999986923378731, 1.5099580280919377e-7, 0.0000000000000000, 0.49999986923379297, -0.86602547928233076, -9.0052248892081327e-16, 0.0000000000000000, 1.3076621204719117e-7, 7.5497882439323883e-8, -0.99999999999998890, 0.0000000000000000, -1.8516498299254032, 3.4950652478758117, 0.51682202632778085, 1.0000000000000000]
+	id = 10
+	[piece.link]
+		from_attachment = "m_attach_top"
+		welded = true
+		to = 18
 [[part]]
 	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
-	group_id = 94147221203544
+	group_id = 3342912776466489188
 	id = 19
 	[part.oxidizer_tank]
 		__plumbing_rot = 0
@@ -212,153 +212,22 @@ group_names = ["Other group"]
 			x = 0
 [[part]]
 	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
-	group_id = 0
-	id = 18
+	group_id = 281500746579969
+	id = 17
 	[part.oxidizer_tank]
 		__plumbing_rot = 0
 		[part.oxidizer_tank.__plumbing_pos]
-			y = 0
-			x = 6
+			y = 31
+			x = -1
 	[part.fuel_tank]
 		__plumbing_rot = 0
 		[part.fuel_tank.__plumbing_pos]
-			y = 0
-			x = 0
+			y = 31
+			x = -7
 [[part]]
 	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
-	group_id = 0
+	group_id = 4633861554207442788
 	id = 16
-	[part.oxidizer_tank]
-		__plumbing_rot = 0
-		[part.oxidizer_tank.__plumbing_pos]
-			y = 0
-			x = 6
-	[part.fuel_tank]
-		__plumbing_rot = 0
-		[part.fuel_tank.__plumbing_pos]
-			y = 0
-			x = 0
-[[part]]
-	proto = "test_parts:parts/engine/part_engine.toml"
-	group_id = -1
-	id = 2
-	[part.engine]
-		__plumbing_rot = 0
-		[part.engine.__plumbing_pos]
-			y = 16
-			x = -4
-[[part]]
-	proto = "test_parts:parts/decoupler/part_decoupler.toml"
-	group_id = -1
-	id = 4
-	[part.decoupler]
-[[part]]
-	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
-	group_id = -1
-	id = 5
-	[part.oxidizer_tank]
-		__plumbing_rot = 0
-		[part.oxidizer_tank.__plumbing_pos]
-			y = -1
-			x = -2
-	[part.fuel_tank]
-		__plumbing_rot = 0
-		[part.fuel_tank.__plumbing_pos]
-			y = -1
-			x = -7
-[[part]]
-	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
-	group_id = -4508103223694336000
-	id = 15
-	[part.oxidizer_tank]
-		__plumbing_rot = 0
-		[part.oxidizer_tank.__plumbing_pos]
-			y = 0
-			x = 6
-	[part.fuel_tank]
-		__plumbing_rot = 0
-		[part.fuel_tank.__plumbing_pos]
-			y = 0
-			x = 0
-[[part]]
-	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
-	group_id = 0
-	id = 14
-	[part.oxidizer_tank]
-		__plumbing_rot = 0
-		[part.oxidizer_tank.__plumbing_pos]
-			y = 0
-			x = 6
-	[part.fuel_tank]
-		__plumbing_rot = 0
-		[part.fuel_tank.__plumbing_pos]
-			y = 0
-			x = 0
-[[part]]
-	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
-	group_id = 2533330625822732
-	id = 6
-	[part.oxidizer_tank]
-		__plumbing_rot = 0
-		[part.oxidizer_tank.__plumbing_pos]
-			y = 0
-			x = 6
-	[part.fuel_tank]
-		__plumbing_rot = 0
-		[part.fuel_tank.__plumbing_pos]
-			y = 0
-			x = 0
-[[part]]
-	proto = "test_parts:parts/capsule/part_capsule.toml"
-	group_id = -1
-	id = 3
-	[part.capsule]
-[[part]]
-	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
-	group_id = 281500746579969
-	id = 7
-	[part.oxidizer_tank]
-		__plumbing_rot = 0
-		[part.oxidizer_tank.__plumbing_pos]
-			y = 0
-			x = 6
-	[part.fuel_tank]
-		__plumbing_rot = 0
-		[part.fuel_tank.__plumbing_pos]
-			y = 0
-			x = 0
-[[part]]
-	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
-	group_id = 281500746579969
-	id = 1
-	[part.oxidizer_tank]
-		__plumbing_rot = 0
-		[part.oxidizer_tank.__plumbing_pos]
-			y = 21
-			x = -1
-	[part.fuel_tank]
-		__plumbing_rot = 0
-		[part.fuel_tank.__plumbing_pos]
-			y = 21
-			x = -7
-[[part]]
-	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
-	group_id = 5188
-	id = 8
-	[part.oxidizer_tank]
-		__plumbing_rot = 0
-		[part.oxidizer_tank.__plumbing_pos]
-			y = 26
-			x = -1
-	[part.fuel_tank]
-		__plumbing_rot = 0
-		[part.fuel_tank.__plumbing_pos]
-			y = 26
-			x = -7
-[[part]]
-	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
-	group_id = 281500746579969
-	id = 9
 	[part.oxidizer_tank]
 		__plumbing_rot = 0
 		[part.oxidizer_tank.__plumbing_pos]
@@ -372,7 +241,7 @@ group_names = ["Other group"]
 [[part]]
 	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
 	group_id = 94147221103392
-	id = 17
+	id = 15
 	[part.oxidizer_tank]
 		__plumbing_rot = 0
 		[part.oxidizer_tank.__plumbing_pos]
@@ -385,8 +254,8 @@ group_names = ["Other group"]
 			x = 0
 [[part]]
 	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
-	group_id = 4633861554207442788
-	id = 10
+	group_id = 281500746579969
+	id = 14
 	[part.oxidizer_tank]
 		__plumbing_rot = 0
 		[part.oxidizer_tank.__plumbing_pos]
@@ -404,31 +273,143 @@ group_names = ["Other group"]
 	[part.oxidizer_tank]
 		__plumbing_rot = 0
 		[part.oxidizer_tank.__plumbing_pos]
-			y = 31
-			x = -1
+			y = 0
+			x = 6
 	[part.fuel_tank]
 		__plumbing_rot = 0
 		[part.fuel_tank.__plumbing_pos]
-			y = 31
-			x = -7
+			y = 0
+			x = 0
 [[part]]
 	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
 	group_id = -9223372035789422592
+	id = 18
+	[part.oxidizer_tank]
+		__plumbing_rot = 0
+		[part.oxidizer_tank.__plumbing_pos]
+			y = 0
+			x = 6
+	[part.fuel_tank]
+		__plumbing_rot = 0
+		[part.fuel_tank.__plumbing_pos]
+			y = 0
+			x = 0
+[[part]]
+	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
+	group_id = 0
+	id = 2
+	[part.oxidizer_tank]
+		__plumbing_rot = 0
+		[part.oxidizer_tank.__plumbing_pos]
+			y = 0
+			x = 6
+	[part.fuel_tank]
+		__plumbing_rot = 0
+		[part.fuel_tank.__plumbing_pos]
+			y = 0
+			x = 0
+[[part]]
+	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
+	group_id = 0
+	id = 3
+	[part.oxidizer_tank]
+		__plumbing_rot = 0
+		[part.oxidizer_tank.__plumbing_pos]
+			y = 0
+			x = 6
+	[part.fuel_tank]
+		__plumbing_rot = 0
+		[part.fuel_tank.__plumbing_pos]
+			y = 0
+			x = 0
+[[part]]
+	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
+	group_id = -4508103223694336000
+	id = 7
+	[part.oxidizer_tank]
+		__plumbing_rot = 0
+		[part.oxidizer_tank.__plumbing_pos]
+			y = 0
+			x = 6
+	[part.fuel_tank]
+		__plumbing_rot = 0
+		[part.fuel_tank.__plumbing_pos]
+			y = 0
+			x = 0
+[[part]]
+	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
+	group_id = 94147221203544
+	id = 1
+	[part.oxidizer_tank]
+		__plumbing_rot = 0
+		[part.oxidizer_tank.__plumbing_pos]
+			y = 0
+			x = 6
+	[part.fuel_tank]
+		__plumbing_rot = 0
+		[part.fuel_tank.__plumbing_pos]
+			y = 0
+			x = 0
+[[part]]
+	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
+	group_id = 2533330625822732
+	id = 9
+	[part.oxidizer_tank]
+		__plumbing_rot = 0
+		[part.oxidizer_tank.__plumbing_pos]
+			y = 0
+			x = 6
+	[part.fuel_tank]
+		__plumbing_rot = 0
+		[part.fuel_tank.__plumbing_pos]
+			y = 0
+			x = 0
+[[part]]
+	proto = "test_parts:parts/engine/part_engine.toml"
+	group_id = -1
+	id = 4
+	[part.engine]
+		__plumbing_rot = 0
+		[part.engine.__plumbing_pos]
+			y = 16
+			x = -4
+[[part]]
+	proto = "test_parts:parts/decoupler/part_decoupler.toml"
+	group_id = -1
+	id = 5
+	[part.decoupler]
+[[part]]
+	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
+	group_id = 281500746579969
 	id = 12
 	[part.oxidizer_tank]
 		__plumbing_rot = 0
 		[part.oxidizer_tank.__plumbing_pos]
-			y = 0
-			x = 6
+			y = 21
+			x = -1
 	[part.fuel_tank]
 		__plumbing_rot = 0
 		[part.fuel_tank.__plumbing_pos]
-			y = 0
-			x = 0
+			y = 21
+			x = -7
 [[part]]
 	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
-	group_id = 3342912776466489188
-	id = 13
+	group_id = -1
+	id = 6
+	[part.oxidizer_tank]
+		__plumbing_rot = 0
+		[part.oxidizer_tank.__plumbing_pos]
+			y = -1
+			x = -2
+	[part.fuel_tank]
+		__plumbing_rot = 0
+		[part.fuel_tank.__plumbing_pos]
+			y = -1
+			x = -7
+[[part]]
+	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
+	group_id = 0
+	id = 8
 	[part.oxidizer_tank]
 		__plumbing_rot = 0
 		[part.oxidizer_tank.__plumbing_pos]
@@ -439,3 +420,34 @@ group_names = ["Other group"]
 		[part.fuel_tank.__plumbing_pos]
 			y = 0
 			x = 0
+[[part]]
+	proto = "test_parts:parts/fuel_tank/part_fuel_tank.toml"
+	group_id = 5188
+	id = 13
+	[part.oxidizer_tank]
+		__plumbing_rot = 0
+		[part.oxidizer_tank.__plumbing_pos]
+			y = 26
+			x = -1
+	[part.fuel_tank]
+		__plumbing_rot = 0
+		[part.fuel_tank.__plumbing_pos]
+			y = 26
+			x = -7
+[[part]]
+	proto = "test_parts:parts/capsule/part_capsule.toml"
+	group_id = -1
+	id = 10
+	[part.capsule]
+[[logical_group]]
+	id = "core:control"
+	[[logical_group.connection]]
+		to = 10
+		fmachine = "engine"
+		tmachine = "capsule"
+		from = 4
+	[[logical_group.connection]]
+		to = 10
+		fmachine = "decoupler"
+		tmachine = "capsule"
+		from = 5
