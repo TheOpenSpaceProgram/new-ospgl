@@ -109,6 +109,10 @@ function container.vehicle:get_bounds() end
 ---@param marker string Marker to use as origin, set to "" for none 
 function container.vehicle:move_piece(piece, pos, rot, marker) end
 
+---@param id string
+---@return vehicle.logical_group|nil
+function container.vehicle:get_logical_group(id) end
+
 ---@class vehicle.packed
 ---@field vehicle vehicle
  packed_vehicle = {}
@@ -348,5 +352,25 @@ local part_prototype = {}
 ---@class vehicle.piece_prototype
 ---@field metadata toml.table
 local piece_prototype = {}
+
+---@class vehicle.logical_group
+local logical_group = {}
+
+---@return vehicle.machine[]
+---@param to vehicle.machine Machine whose connections we are interested in querying
+---@param include_this boolean? Include this machine in list? Defaults to true
+function logical_group:get_all_connected(to, include_this) end
+
+---@return vehicle.machine[]
+---@param to vehicle.machine Machine whose connections we are interested in querying
+--- Furthermore, pass a list of interface names, and true / false for include_this (optional, default to true)
+function logical_group:get_connected_with(to, ...) end
+
+---@return table[]
+--- TODO: Make a lua language server plugin so this returns the correct interface prototype file!
+---@param to vehicle.machine Machine whose connections we are interested in querying
+---@param int_type string Interface type
+---@param include_this boolean? Include this machine in list? Defaults to true
+function logical_group:get_connected_interfaces(to, int_type, include_this) end
 
 return container

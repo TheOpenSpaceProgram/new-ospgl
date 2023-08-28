@@ -44,6 +44,12 @@ void LuaVehicle::load_to(sol::table& table)
 		 	"set_world", sol::resolve<void(btDiscreteDynamicsWorld*)>(&Vehicle::set_world),
 		 	"sort", &Vehicle::sort,
 		 	"remove_outdated", &Vehicle::remove_outdated,
+			 "get_logical_group", [](const Vehicle& self, const std::string& id)
+								{
+									auto it = self.logical_groups.find(id);
+									return it != self.logical_groups.end() ?
+										std::optional<LogicalGroup*>{it->second} : std::nullopt;
+								},
 		 	"get_children_of", &Vehicle::get_children_of,
 		 	"get_attached_to", &Vehicle::get_attached_to,
 		 	"get_connected_to", &Vehicle::get_connected_to,
