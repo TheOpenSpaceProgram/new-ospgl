@@ -8,8 +8,8 @@ class AtomicWrapper
 {
 private:
 
-	T* data;
-	std::mutex* mtx;
+	mutable T* data;
+	mutable std::mutex* mtx;
 public:
 
 	T& operator*()
